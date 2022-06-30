@@ -1489,6 +1489,7 @@ typedef struct {
     s32 nodeListMax; // if -1, dynamically compute max nodes
 } BgCheckSceneSubdivisionEntry;
 
+static const u16 LIST_MAX_NUM = 4096;
 /**
  * Allocate CollisionContext
  */
@@ -1522,9 +1523,9 @@ void BgCheck_Allocate(CollisionContext* colCtx, GlobalContext* globalCtx, Collis
             osSyncPrintf("/* BGCheck ミニサイズ %dbyte */\n", 0x4E20);
             colCtx->memSize = 0x4E20;
         }
-        colCtx->dyna.polyNodesMax = 500;
-        colCtx->dyna.polyListMax = 256;
-        colCtx->dyna.vtxListMax = 256;
+        colCtx->dyna.polyNodesMax = LIST_MAX_NUM;
+        colCtx->dyna.polyListMax = LIST_MAX_NUM;
+        colCtx->dyna.vtxListMax = LIST_MAX_NUM;
         colCtx->subdivAmount.x = 2;
         colCtx->subdivAmount.y = 2;
         colCtx->subdivAmount.z = 2;
@@ -1532,9 +1533,9 @@ void BgCheck_Allocate(CollisionContext* colCtx, GlobalContext* globalCtx, Collis
         colCtx->memSize = 0xF000;
         // "/* BGCheck Spot Size %dbyte */\n"
         osSyncPrintf("/* BGCheck Spot用サイズ %dbyte */\n", 0xF000);
-        colCtx->dyna.polyNodesMax = 1000;
-        colCtx->dyna.polyListMax = 512;
-        colCtx->dyna.vtxListMax = 512;
+        colCtx->dyna.polyNodesMax = LIST_MAX_NUM;
+        colCtx->dyna.polyListMax = LIST_MAX_NUM;
+        colCtx->dyna.vtxListMax = LIST_MAX_NUM;
         colCtx->subdivAmount.x = 16;
         colCtx->subdivAmount.y = 4;
         colCtx->subdivAmount.z = 16;
@@ -1546,9 +1547,9 @@ void BgCheck_Allocate(CollisionContext* colCtx, GlobalContext* globalCtx, Collis
         }
         // "/* BGCheck Normal Size %dbyte  */\n"
         osSyncPrintf("/* BGCheck ノーマルサイズ %dbyte  */\n", colCtx->memSize);
-        colCtx->dyna.polyNodesMax = 1000;
-        colCtx->dyna.polyListMax = 512;
-        colCtx->dyna.vtxListMax = 512;
+        colCtx->dyna.polyNodesMax = LIST_MAX_NUM;
+        colCtx->dyna.polyListMax = LIST_MAX_NUM;
+        colCtx->dyna.vtxListMax = LIST_MAX_NUM;
         useCustomSubdivisions = false;
 
         for (i = 0; i < ARRAY_COUNT(sceneSubdivisionList); i++) {
@@ -1572,6 +1573,8 @@ void BgCheck_Allocate(CollisionContext* colCtx, GlobalContext* globalCtx, Collis
     if (colCtx->lookupTbl == NULL) {
         LogUtils_HungupThread("../z_bgcheck.c", 4176);
     }
+    colCtx->memSize = 0x80000;
+    
     colCtx->minBounds.x = colCtx->colHeader->minBounds.x;
     colCtx->minBounds.y = colCtx->colHeader->minBounds.y;
     colCtx->minBounds.z = colCtx->colHeader->minBounds.z;
