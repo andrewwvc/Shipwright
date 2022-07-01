@@ -56,6 +56,7 @@ INC_DIRS := $(addprefix -I, \
 LDDIRS := $(addprefix -L, \
 	../external \
 	../libultraship/ \
+	./build \
 )
 
 LDLIBS := \
@@ -73,6 +74,7 @@ LDLIBS := \
 	storm \
 	pulse\
 	ultraship \
+	z_en_okuta \
 ) \
 
 ASSET_BIN_DIRS := $(shell find assets/* -type d -not -path "assets/xml*")
@@ -106,6 +108,8 @@ C_FILES := \
 	src/libultra/gu/sins.c \
 	src/libultra/gu/sintable.c \
 	src/libultra/libc/sprintf.c
+
+C_FILES := $(filter-out src/overlays/actors/ovl_En_Okuta/z_en_okuta.c, $(C_FILES))
 
 O_FILES := \
 	$(C_FILES:%.c=build/%.o) \
@@ -149,10 +153,18 @@ build/%.o: %.cpp
 build/%.o: %.c
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) $(OPTFLAGS) $(INC_DIRS) $< -o $@
 
+$(TARGET): build/libz_en_okuta.so
+
+build/libz_en_okuta.so: build/z_en_okuta.o
+	$(CXX) $^ -o $@ $(LDFLAGS) -shared -fuse-ld=$(LD) $(LDDIRS)
+
+build/z_en_okuta.o: src/overlays/actors/ovl_En_Okuta/z_en_okuta.c
+	$(CC) -c -fpic $(CFLAGS) $(CPPFLAGS) $(OPTFLAGS) $(INC_DIRS) $< -o $@
+
 # make soh depend on libultraship
 $(TARGET): $(LIBULTRASHIP)
 
 $(TARGET): $(O_FILES)
-	$(CXX) $^ -o $@ $(LDFLAGS) -fuse-ld=$(LD) $(LDDIRS) $(LDLIBS)
+	$(CXX) $^ -o $@ $(LDFLAGS) -fuse-ld=$(LD) $(LDDIRS) $(LDLIBS) -Wl,-RUNPATH="./build" -Wl,-export-dynamic
 
 -include $(D_FILES)
