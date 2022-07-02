@@ -56,7 +56,7 @@ INC_DIRS := $(addprefix -I, \
 LDDIRS := $(addprefix -L, \
 	../external \
 	../libultraship/ \
-	./build \
+	./plugins \
 )
 
 LDLIBS := \
@@ -74,7 +74,7 @@ LDLIBS := \
 	storm \
 	pulse\
 	ultraship \
-	z_en_okuta \
+	actors \
 ) \
 
 ASSET_BIN_DIRS := $(shell find assets/* -type d -not -path "assets/xml*")
@@ -108,17 +108,23 @@ C_FILES := \
 	src/libultra/gu/sins.c \
 	src/libultra/gu/sintable.c \
 	src/libultra/libc/sprintf.c
+	
+ACTOR_FILES := $(shell find src/overlays/actors -type f -name *.c)
 
-C_FILES := $(filter-out src/overlays/actors/ovl_En_Okuta/z_en_okuta.c, $(C_FILES))
+C_FILES := $(filter-out $(ACTOR_FILES), $(C_FILES))
 
 O_FILES := \
 	$(C_FILES:%.c=build/%.o) \
 	$(CXX_FILES:%.cpp=build/%.o)
-D_FILES := $(O_FILES:%.o=%.d)
+ACTOR_OBJECTS := $(ACTOR_FILES:src/overlays/actors/%.c=plugins/%.o)
+D_FILES := $(O_FILES:%.o=%.d) \
+	$(ACTOR_OBJECTS:%.o=%.d)
 
 # create build directory
 SRC_DIRS := $(shell find . -type d -a -not -path "*build*")
 $(shell mkdir -p $(SRC_DIRS:%=build/%))
+SRC_DIRS := $(shell find src/overlays/actors -type d)
+$(shell mkdir -p $(SRC_DIRS:src/overlays/actors/%=plugins/%))
 
 all:
 	$(MAKE) -C ../libultraship
@@ -143,7 +149,7 @@ distclean: clean
 	$(MAKE) clean -C ../ZAPDTR
 
 clean:
-	rm -rf build $(TARGET)
+	rm -rf build plugins $(TARGET)
 
 .PHONY: all clean distclean setup mpq
 
@@ -153,18 +159,18 @@ build/%.o: %.cpp
 build/%.o: %.c
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) $(OPTFLAGS) $(INC_DIRS) $< -o $@
 
-$(TARGET): build/libz_en_okuta.so
+$(TARGET): plugins/libactors.so
 
-build/libz_en_okuta.so: build/z_en_okuta.o
+plugins/libactors.so: $(ACTOR_OBJECTS)
 	$(CXX) $^ -o $@ $(LDFLAGS) -shared -fuse-ld=$(LD) $(LDDIRS)
 
-build/z_en_okuta.o: src/overlays/actors/ovl_En_Okuta/z_en_okuta.c
-	$(CC) -c -fpic $(CFLAGS) $(CPPFLAGS) $(OPTFLAGS) $(INC_DIRS) $< -o $@
+plugins/%.o: src/overlays/actors/%.c
+	$(CC) -c -fPIC $(CFLAGS) $(CPPFLAGS) $(OPTFLAGS) $(INC_DIRS) $< -o $@
 
 # make soh depend on libultraship
 $(TARGET): $(LIBULTRASHIP)
 
 $(TARGET): $(O_FILES)
-	$(CXX) $^ -o $@ $(LDFLAGS) -fuse-ld=$(LD) $(LDDIRS) $(LDLIBS) -Wl,-RUNPATH="./build" -Wl,-export-dynamic
+	$(CXX) $^ -o $@ $(LDFLAGS) -fuse-ld=$(LD) $(LDDIRS) $(LDLIBS) -Wl,-RUNPATH="./plugins" -Wl,-export-dynamic
 
 -include $(D_FILES)
