@@ -74,7 +74,7 @@ LDLIBS := \
 	storm \
 	pulse\
 	ultraship \
-	actors \
+	$(ACTOR_TITLES) \
 ) \
 
 ASSET_BIN_DIRS := $(shell find assets/* -type d -not -path "assets/xml*")
@@ -117,6 +117,8 @@ O_FILES := \
 	$(C_FILES:%.c=build/%.o) \
 	$(CXX_FILES:%.cpp=build/%.o)
 ACTOR_OBJECTS := $(ACTOR_FILES:src/overlays/actors/%.c=plugins/%.o)
+ACTOR_TITLES := $(basename $(notdir $(ACTOR_OBJECTS)))
+ACTOR_LIBS := $(ACTOR_TITLES:%=plugins/lib%.so)
 D_FILES := $(O_FILES:%.o=%.d) \
 	$(ACTOR_OBJECTS:%.o=%.d)
 
@@ -159,12 +161,12 @@ build/%.o: %.cpp
 build/%.o: %.c
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) $(OPTFLAGS) $(INC_DIRS) $< -o $@
 
-$(TARGET): plugins/libactors.so
+$(TARGET): $(ACTOR_LIBS)
 
-plugins/libactors.so: $(ACTOR_OBJECTS)
+$(ACTOR_TITLES:%=plugins/lib%.so): plugins/lib%.so : plugins/%.o
 	$(CXX) $^ -o $@ $(LDFLAGS) -shared -fuse-ld=$(LD) $(LDDIRS)
 
-plugins/%.o: src/overlays/actors/%.c
+plugins/%.o : src/overlays/actors/*/%.c
 	$(CC) -c -fPIC $(CFLAGS) $(CPPFLAGS) $(OPTFLAGS) $(INC_DIRS) $< -o $@
 
 # make soh depend on libultraship
