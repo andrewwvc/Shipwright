@@ -134,6 +134,7 @@ LDLIBS := \
 
 all:
 	$(MAKE) -C ../libultraship
+	$(MAKE) actors
 	$(MAKE) $(TARGET)
 
 setup:
@@ -148,16 +149,21 @@ mpq:
 	cd ../OTRExporter && python3 extract_assets.py
 	cp ../OTRExporter/oot.otr .
 
+actors: $(ACTOR_PLUGINS)
+
 distclean: clean
 	$(RM) -r baserom/
 	$(MAKE) clean -C ../libultraship
 	$(MAKE) clean -C ../OTRExporter/OTRExporter
 	$(MAKE) clean -C ../ZAPDTR
+	
+actorsclean:
+	rm -rf plugins
 
 clean:
 	rm -rf build plugins $(TARGET)
 
-.PHONY: all clean distclean setup mpq
+.PHONY: all clean distclean setup mpq actors
 
 build/%.o: %.cpp
 	$(CXX) -c $(CXXFLAGS) $(CPPFLAGS) $(OPTFLAGS) $(INC_DIRS) $< -o $@
@@ -165,14 +171,12 @@ build/%.o: %.cpp
 build/%.o: %.c
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) $(OPTFLAGS) $(INC_DIRS) $< -o $@
 
-$(TARGET): $(ACTOR_PLUGINS)
-
 include $(patsubst %,plugins/%/cfiles.mk,$(PLUGIN_TITLES))
 
 # make soh depend on libultraship
 $(TARGET): $(LIBULTRASHIP)
 
 $(TARGET): $(O_FILES)
-	$(CXX) $^ -o $@ $(LDFLAGS) -fuse-ld=$(LD) $(LDDIRS) $(LDLIBS) -Wl,-RUNPATH="./plugins" -Wl,-export-dynamic
+	$(CXX) $^ -o $@ $(LDFLAGS) -fuse-ld=$(LD) $(LDDIRS) $(LDLIBS) -Wl,-rpath="./mods",-rpath="./plugins" -Wl,-export-dynamic
 
 -include $(D_FILES)
