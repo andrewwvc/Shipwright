@@ -38,6 +38,13 @@ ifneq ($(LTO),0)
 	LDFLAGS += -flto
 endif
 
+# create build directory
+SRC_DIRS := $(shell find . -type d -a -not -path "*build*" -a -not -path "*plugins*")
+$(shell mkdir -p $(SRC_DIRS:%=build/%))
+SRC_ACTOR_DIRS := $(shell find src/overlays/actors -type d)
+$(shell mkdir -p $(SRC_ACTOR_DIRS:src/overlays/actors/%=plugins/%))
+$(shell ./export_actors.sh)
+
 TARGET := soh.elf
 
 INC_DIRS := $(addprefix -I, \
@@ -58,24 +65,6 @@ LDDIRS := $(addprefix -L, \
 	../libultraship/ \
 	./plugins \
 )
-
-LDLIBS := \
-	$(ZAPDUTILS) \
-	$(addprefix -l, \
-	X11 \
-	dl \
-	bz2 \
-	z \
-	pthread \
-	atomic \
-	SDL2 \
-	GL \
-	GLEW \
-	storm \
-	pulse\
-	ultraship \
-	$(ACTOR_TITLES) \
-) \
 
 ASSET_BIN_DIRS := $(shell find assets/* -type d -not -path "assets/xml*")
 ASSET_FILES_XML := $(foreach dir,$(ASSET_BIN_DIRS),$(wildcard $(dir)/*.xml))
@@ -110,6 +99,7 @@ C_FILES := \
 	src/libultra/libc/sprintf.c
 	
 ACTOR_FILES := $(shell find src/overlays/actors -type f -name *.c)
+ACTOR_FOLDERS := $(filter-out src/overlays/actors, $(shell find src/overlays/actors -type d))
 
 C_FILES := $(filter-out $(ACTOR_FILES), $(C_FILES))
 
@@ -119,14 +109,28 @@ O_FILES := \
 ACTOR_OBJECTS := $(ACTOR_FILES:src/overlays/actors/%.c=plugins/%.o)
 ACTOR_TITLES := $(basename $(notdir $(ACTOR_OBJECTS)))
 ACTOR_LIBS := $(ACTOR_TITLES:%=plugins/lib%.so)
+PLUGIN_TITLES := $(ACTOR_FOLDERS:src/overlays/actors/%=%)
+ACTOR_PLUGINS := $(PLUGIN_TITLES:%=plugins/lib%.so)
 D_FILES := $(O_FILES:%.o=%.d) \
 	$(ACTOR_OBJECTS:%.o=%.d)
 
-# create build directory
-SRC_DIRS := $(shell find . -type d -a -not -path "*build*")
-$(shell mkdir -p $(SRC_DIRS:%=build/%))
-SRC_DIRS := $(shell find src/overlays/actors -type d)
-$(shell mkdir -p $(SRC_DIRS:src/overlays/actors/%=plugins/%))
+LDLIBS := \
+	$(ZAPDUTILS) \
+	$(addprefix -l, \
+	X11 \
+	dl \
+	bz2 \
+	z \
+	pthread \
+	atomic \
+	SDL2 \
+	GL \
+	GLEW \
+	storm \
+	pulse\
+	ultraship \
+	$(PLUGIN_TITLES) \
+) \
 
 all:
 	$(MAKE) -C ../libultraship
@@ -161,13 +165,9 @@ build/%.o: %.cpp
 build/%.o: %.c
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) $(OPTFLAGS) $(INC_DIRS) $< -o $@
 
-$(TARGET): $(ACTOR_LIBS)
+$(TARGET): $(ACTOR_PLUGINS)
 
-$(ACTOR_TITLES:%=plugins/lib%.so): plugins/lib%.so : plugins/%.o
-	$(CXX) $^ -o $@ $(LDFLAGS) -shared -fuse-ld=$(LD) $(LDDIRS)
-
-plugins/%.o : src/overlays/actors/*/%.c
-	$(CC) -c -fPIC $(CFLAGS) $(CPPFLAGS) $(OPTFLAGS) $(INC_DIRS) $< -o $@
+include $(patsubst %,plugins/%/cfiles.mk,$(PLUGIN_TITLES))
 
 # make soh depend on libultraship
 $(TARGET): $(LIBULTRASHIP)
