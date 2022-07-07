@@ -1,4 +1,6 @@
 #include "global.h"
+#include <dlfcn.h>
+#include <string.h>
 
 // Linker symbol declarations (used in the table below)
 #define DEFINE_ACTOR(name, _1, _2) DECLARE_OVERLAY_SEGMENT(name)
@@ -12,7 +14,7 @@
 #undef DEFINE_ACTOR_UNSET
 
 // Init Vars declarations (also used in the table below)
-#define DEFINE_ACTOR(name, _1, _2) extern ActorInit name##_InitVars;
+#define DEFINE_ACTOR(name, _1, _2) ActorInit name##_InitVars;
 #define DEFINE_ACTOR_INTERNAL(name, _1, _2) extern ActorInit name##_InitVars;
 #define DEFINE_ACTOR_UNSET(_0)
 
@@ -48,7 +50,21 @@ ActorOverlay gActorOverlayTable[] = {
 #undef DEFINE_ACTOR_INTERNAL
 #undef DEFINE_ACTOR_UNSET
 
+#define DEFINE_ACTOR_INTERNAL(name, _1, allocType) 0,
+#define DEFINE_ACTOR_UNSET(_0) 0,
+#define DEFINE_ACTOR(name, _1, allocType) 1,
+
+u8 gActorExternallyDefined[] = {
+#include "tables/actor_table.h"
+};
+
+#undef DEFINE_ACTOR
+#undef DEFINE_ACTOR_INTERNAL
+#undef DEFINE_ACTOR_UNSET
+
 s32 gMaxActorId = 0;
+
+void *gActorHandles[ACTOR_ID_MAX];
 
 static FaultClient sFaultClient;
 
@@ -89,9 +105,62 @@ void ActorOverlayTable_FaultPrint(void* arg0, void* arg1) {
 void ActorOverlayTable_Init(void) {
     gMaxActorId = ACTOR_ID_MAX;
     Fault_AddClient(&sFaultClient, ActorOverlayTable_FaultPrint, NULL, NULL);
+
+    void *handle;
+    char *error;
+
+    for (s32 ii = 0; ii < ACTOR_ID_MAX; ii++) {
+        if (gActorExternallyDefined[ii]) {
+            s32 len = strlen(gActorOverlayTable[ii].name);
+            char* fullName = malloc(sizeof(char)*(len+(3+4+3+1)));//Reduce this once it is deemed safe
+            strcpy(fullName,"libovl_");
+            strcat(fullName,gActorOverlayTable[ii].name);
+            strcat(fullName,".so");
+            //fullName now contains the name of the plugin to be loaded
+            char* initName = malloc(sizeof(char)*(len+(9+1)));//Reduce this once it is deemed safe
+            strcpy(initName,gActorOverlayTable[ii].name);
+            strcat(initName,"_InitVars");
+            //initName now contains the name of the initialization symbol to be loaded
+
+            handle = dlopen(fullName, RTLD_NOW);
+            if (!handle) {
+                FaultDrawer_Printf("Plugin - %s could not load: %s\n",fullName,dlerror());
+                continue;
+            }
+
+            void *oldHandle = gActorHandles[ii];
+
+            gActorHandles[ii] = handle;
+
+            gActorOverlayTable[ii].initInfo = dlsym(handle,initName);
+            if ((error = dlerror()) != NULL)  {
+                FaultDrawer_Printf("Plugin Symbol - %s could not load: %s\n",initName,dlerror());
+                if (gActorHandles[ii])
+                    dlclose(gActorHandles[ii]);
+                gActorHandles[ii] = oldHandle;
+                continue;
+            }
+
+            if (oldHandle)
+                dlclose(oldHandle);
+            free(fullName);
+            free(initName);
+        }
+        else {
+            gActorHandles[ii] = NULL;
+        }
+    }
 }
 
 void ActorOverlayTable_Cleanup(void) {
+    //Clean up external allocations here!
+    for (s32 ii = 0; ii < ACTOR_ID_MAX; ii++) {
+        if (gActorHandles[ii]) {
+            dlclose(gActorHandles[ii]);
+            gActorHandles[ii] = NULL;
+        }
+    }
+
     Fault_RemoveClient(&sFaultClient);
     gMaxActorId = 0;
 }
