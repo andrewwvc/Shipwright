@@ -50,11 +50,17 @@ ActorOverlay gActorOverlayTable[] = {
 #undef DEFINE_ACTOR_INTERNAL
 #undef DEFINE_ACTOR_UNSET
 
-#define DEFINE_ACTOR_INTERNAL(name, _1, allocType) 0,
-#define DEFINE_ACTOR_UNSET(_0) 0,
-#define DEFINE_ACTOR(name, _1, allocType) 1,
+typedef struct {
+    u8 external;
+    const char *initName;
+    const char *pluginName;
+} ExternalActorInfo;
 
-u8 gActorExternallyDefined[] = {
+#define DEFINE_ACTOR_INTERNAL(name, _1, allocType) { 0, NULL, NULL },
+#define DEFINE_ACTOR_UNSET(_0) { 0, NULL, NULL },
+#define DEFINE_ACTOR(name, _1, allocType) { 1, (#name "_InitVars"), ("libovl_" #name ".so") },
+
+ExternalActorInfo gActorExternallyDefined[] = {
 #include "tables/actor_table.h"
 };
 
@@ -110,21 +116,10 @@ void ActorOverlayTable_Init(void) {
     char *error;
 
     for (s32 ii = 0; ii < ACTOR_ID_MAX; ii++) {
-        if (gActorExternallyDefined[ii]) {
-            s32 len = strlen(gActorOverlayTable[ii].name);
-            char* fullName = malloc(sizeof(char)*(len+(3+4+3+1)));//Reduce this once it is deemed safe
-            strcpy(fullName,"libovl_");
-            strcat(fullName,gActorOverlayTable[ii].name);
-            strcat(fullName,".so");
-            //fullName now contains the name of the plugin to be loaded
-            char* initName = malloc(sizeof(char)*(len+(9+1)));//Reduce this once it is deemed safe
-            strcpy(initName,gActorOverlayTable[ii].name);
-            strcat(initName,"_InitVars");
-            //initName now contains the name of the initialization symbol to be loaded
-
-            handle = dlopen(fullName, RTLD_NOW);
+        if (gActorExternallyDefined[ii].external) {
+            handle = dlopen(gActorExternallyDefined[ii].pluginName, RTLD_NOW);
             if (!handle) {
-                FaultDrawer_Printf("Plugin - %s could not load: %s\n",fullName,dlerror());
+                FaultDrawer_Printf("Plugin - %s could not load: %s\n",gActorExternallyDefined[ii].pluginName,dlerror());
                 continue;
             }
 
@@ -132,9 +127,9 @@ void ActorOverlayTable_Init(void) {
 
             gActorHandles[ii] = handle;
 
-            gActorOverlayTable[ii].initInfo = dlsym(handle,initName);
+            gActorOverlayTable[ii].initInfo = dlsym(handle,gActorExternallyDefined[ii].initName);
             if ((error = dlerror()) != NULL)  {
-                FaultDrawer_Printf("Plugin Symbol - %s could not load: %s\n",initName,dlerror());
+                FaultDrawer_Printf("Plugin Symbol - %s could not load: %s\n",gActorExternallyDefined[ii].initName,error);
                 if (gActorHandles[ii])
                     dlclose(gActorHandles[ii]);
                 gActorHandles[ii] = oldHandle;
@@ -143,8 +138,6 @@ void ActorOverlayTable_Init(void) {
 
             if (oldHandle)
                 dlclose(oldHandle);
-            free(fullName);
-            free(initName);
         }
         else {
             gActorHandles[ii] = NULL;
