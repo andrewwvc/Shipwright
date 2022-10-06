@@ -993,7 +993,7 @@ void func_80A9877C(EnKo* this, GlobalContext* globalCtx) {
         ENKO_TYPE == ENKO_TYPE_CHILD_FADO && globalCtx->sceneNum == SCENE_SPOT10) {
         this->actor.textId = INV_CONTENT(ITEM_TRADE_ADULT) > ITEM_ODD_POTION ? 0x10B9 : 0x10DF;
 
-        if (func_8002F368(globalCtx) == ENKO_TYPE_CHILD_9) {
+        if (func_8002F368(globalCtx) == EXCH_ITEM_ODD_POTION) {
             this->actor.textId = (gSaveContext.infTable[11] & 0x1000) ? 0x10B8 : 0x10B7;
             this->unk_210 = 0;
         }
