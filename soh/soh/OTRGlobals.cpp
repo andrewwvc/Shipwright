@@ -1980,6 +1980,8 @@ extern "C" int CustomMessage_RetrieveIfExists(GlobalContext* globalCtx) {
                    (textId == TEXT_BUY_BOMBCHU_10_DESC || textId == TEXT_BUY_BOMBCHU_10_PROMPT)) {
             messageEntry = CustomMessageManager::Instance->RetrieveMessage(customMessageTableID, textId);
         }
+    } else {
+        messageEntry = CustomMessageManager::Instance->RetrieveMessage(questMessageTableID, textId);
     }
     if (textId == TEXT_GS_NO_FREEZE || textId == TEXT_GS_FREEZE) {
         if (CVar_GetS32("gInjectSkulltulaCount", 0) != 0) {
