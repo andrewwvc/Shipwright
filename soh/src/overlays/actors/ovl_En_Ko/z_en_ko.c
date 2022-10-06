@@ -166,20 +166,20 @@ static AnimationInfo sAnimationInfo[] = {
     { &gObjOsAnim_7830, 1.0f, 0.0f, -1.0f, ANIMMODE_LOOP, -8.0f },
 };
 
-static u8 sOsAnimeLookup[13][5] = {
-    /* ENKO_TYPE_CHILD_0    */ { ENKO_ANIM_8, ENKO_ANIM_9, ENKO_ANIM_9, ENKO_ANIM_14, ENKO_ANIM_11 },
-    /* ENKO_TYPE_CHILD_1    */ { ENKO_ANIM_2, ENKO_ANIM_12, ENKO_ANIM_2, ENKO_ANIM_13, ENKO_ANIM_13 },
-    /* ENKO_TYPE_CHILD_2    */ { ENKO_ANIM_11, ENKO_ANIM_11, ENKO_ANIM_11, ENKO_ANIM_15, ENKO_ANIM_9 },
-    /* ENKO_TYPE_CHILD_3    */ { ENKO_ANIM_0, ENKO_ANIM_16, ENKO_ANIM_16, ENKO_ANIM_17, ENKO_ANIM_18 },
-    /* ENKO_TYPE_CHILD_4    */ { ENKO_ANIM_19, ENKO_ANIM_19, ENKO_ANIM_20, ENKO_ANIM_10, ENKO_ANIM_9 },
-    /* ENKO_TYPE_CHILD_5    */ { ENKO_ANIM_3, ENKO_ANIM_3, ENKO_ANIM_3, ENKO_ANIM_3, ENKO_ANIM_3 },
-    /* ENKO_TYPE_CHILD_6    */ { ENKO_ANIM_4, ENKO_ANIM_22, ENKO_ANIM_22, ENKO_ANIM_4, ENKO_ANIM_23 },
-    /* ENKO_TYPE_CHILD_7    */ { ENKO_ANIM_24, ENKO_ANIM_16, ENKO_ANIM_16, ENKO_ANIM_25, ENKO_ANIM_16 },
-    /* ENKO_TYPE_CHILD_8    */ { ENKO_ANIM_26, ENKO_ANIM_15, ENKO_ANIM_15, ENKO_ANIM_26, ENKO_ANIM_15 },
-    /* ENKO_TYPE_CHILD_9    */ { ENKO_ANIM_3, ENKO_ANIM_3, ENKO_ANIM_3, ENKO_ANIM_27, ENKO_ANIM_27 },
-    /* ENKO_TYPE_CHILD_10   */ { ENKO_ANIM_2, ENKO_ANIM_2, ENKO_ANIM_2, ENKO_ANIM_2, ENKO_ANIM_22 },
-    /* ENKO_TYPE_CHILD_11   */ { ENKO_ANIM_14, ENKO_ANIM_14, ENKO_ANIM_14, ENKO_ANIM_14, ENKO_ANIM_14 },
-    /* ENKO_TYPE_CHILD_FADO */ { ENKO_ANIM_5, ENKO_ANIM_5, ENKO_ANIM_5, ENKO_ANIM_5, ENKO_ANIM_5 },
+static u8 sOsAnimeLookup[13][6] = {
+    /* ENKO_TYPE_CHILD_0    */ { ENKO_ANIM_8, ENKO_ANIM_9, ENKO_ANIM_9, ENKO_ANIM_14, ENKO_ANIM_11, ENKO_ANIM_9 },
+    /* ENKO_TYPE_CHILD_1    */ { ENKO_ANIM_2, ENKO_ANIM_12, ENKO_ANIM_2, ENKO_ANIM_13, ENKO_ANIM_13, ENKO_ANIM_2 },
+    /* ENKO_TYPE_CHILD_2    */ { ENKO_ANIM_11, ENKO_ANIM_11, ENKO_ANIM_11, ENKO_ANIM_15, ENKO_ANIM_9, ENKO_ANIM_11 },
+    /* ENKO_TYPE_CHILD_3    */ { ENKO_ANIM_0, ENKO_ANIM_16, ENKO_ANIM_16, ENKO_ANIM_17, ENKO_ANIM_18, ENKO_ANIM_16 },
+    /* ENKO_TYPE_CHILD_4    */ { ENKO_ANIM_19, ENKO_ANIM_19, ENKO_ANIM_20, ENKO_ANIM_10, ENKO_ANIM_9, ENKO_ANIM_20 },
+    /* ENKO_TYPE_CHILD_5    */ { ENKO_ANIM_3, ENKO_ANIM_3, ENKO_ANIM_3, ENKO_ANIM_3, ENKO_ANIM_3, ENKO_ANIM_3 },
+    /* ENKO_TYPE_CHILD_6    */ { ENKO_ANIM_4, ENKO_ANIM_22, ENKO_ANIM_22, ENKO_ANIM_4, ENKO_ANIM_23, ENKO_ANIM_22 },
+    /* ENKO_TYPE_CHILD_7    */ { ENKO_ANIM_24, ENKO_ANIM_16, ENKO_ANIM_16, ENKO_ANIM_25, ENKO_ANIM_16, ENKO_ANIM_16 },
+    /* ENKO_TYPE_CHILD_8    */ { ENKO_ANIM_26, ENKO_ANIM_15, ENKO_ANIM_15, ENKO_ANIM_26, ENKO_ANIM_15, ENKO_ANIM_15 },
+    /* ENKO_TYPE_CHILD_9    */ { ENKO_ANIM_3, ENKO_ANIM_3, ENKO_ANIM_3, ENKO_ANIM_27, ENKO_ANIM_27, ENKO_ANIM_3 },
+    /* ENKO_TYPE_CHILD_10   */ { ENKO_ANIM_2, ENKO_ANIM_2, ENKO_ANIM_2, ENKO_ANIM_2, ENKO_ANIM_22, ENKO_ANIM_2 },
+    /* ENKO_TYPE_CHILD_11   */ { ENKO_ANIM_14, ENKO_ANIM_14, ENKO_ANIM_14, ENKO_ANIM_14, ENKO_ANIM_14, ENKO_ANIM_14 },
+    /* ENKO_TYPE_CHILD_FADO */ { ENKO_ANIM_5, ENKO_ANIM_5, ENKO_ANIM_5, ENKO_ANIM_5, ENKO_ANIM_5, ENKO_ANIM_5 },
 };
 
 typedef struct {
@@ -288,6 +288,9 @@ u16 func_80A96FD0(GlobalContext* globalCtx, Actor* thisx) {
     EnKo* this = (EnKo*)thisx;
     switch (ENKO_TYPE) {
         case ENKO_TYPE_CHILD_FADO:
+            if (CHECK_QUEST_ITEM(QUEST_SONG_SARIA)) {
+                return 0x8000;
+            }
             if (gSaveContext.eventChkInf[4] & 1) {
                 return 0x10DA;
             }
@@ -304,6 +307,9 @@ u16 func_80A96FD0(GlobalContext* globalCtx, Actor* thisx) {
             }
             return 0x1004;
         case ENKO_TYPE_CHILD_1:
+            if (CHECK_QUEST_ITEM(QUEST_SONG_SARIA)) {
+                return 0x8886;
+            }
             if (gSaveContext.eventChkInf[4] & 1) {
                 return 0x1023;
             }
@@ -588,7 +594,10 @@ s32 EnKo_GetForestQuestState(EnKo* this) {
     if (!LINK_IS_ADULT) {
         // Obtained Zelda's Letter
         if (gSaveContext.eventChkInf[4] & 1) {
-            return ENKO_FQS_CHILD_SARIA;
+            if (CHECK_QUEST_ITEM(QUEST_SONG_SARIA))
+                return ENKO_FQS_CHILD_POST;
+            else
+                return ENKO_FQS_CHILD_SARIA;
         }
         if (CHECK_QUEST_ITEM(QUEST_KOKIRI_EMERALD)) {
             return ENKO_FQS_CHILD_STONE;
@@ -605,20 +614,20 @@ s32 EnKo_GetForestQuestState(EnKo* this) {
 }
 
 f32 func_80A97BC0(EnKo* this) {
-    f32 D_80A9A62C[13][5] = {
-        /* ENKO_TYPE_CHILD_0    */ { 0.0f, 0.0f, 0.0f, -30.0f, -20.0f },
-        /* ENKO_TYPE_CHILD_1    */ { 0.0f, 0.0f, 0.0f, -20.0f, -10.0f },
-        /* ENKO_TYPE_CHILD_2    */ { 0.0f, 0.0f, 0.0f, -30.0f, -20.0f },
-        /* ENKO_TYPE_CHILD_3    */ { -10.0f, 10.0f, 10.0f, -10.0f, -30.0f },
-        /* ENKO_TYPE_CHILD_4    */ { 0.0f, 0.0f, 0.0f, -10.0f, -20.0f },
-        /* ENKO_TYPE_CHILD_5    */ { 0.0f, 0.0f, 0.0f, -20.0f, -20.0f },
-        /* ENKO_TYPE_CHILD_6    */ { 0.0f, 0.0f, 0.0f, -10.0f, -20.0f },
-        /* ENKO_TYPE_CHILD_7    */ { 10.0f, 10.0f, 10.0f, -60.0f, -20.0f },
-        /* ENKO_TYPE_CHILD_8    */ { -10.0f, -10.0f, -20.0f, -30.0f, -30.0f },
-        /* ENKO_TYPE_CHILD_9    */ { -10.0f, -10.0f, -10.0f, -40.0f, -40.0f },
-        /* ENKO_TYPE_CHILD_10   */ { 0.0f, 0.0f, 0.0f, -10.0f, -20.0f },
-        /* ENKO_TYPE_CHILD_11   */ { -10.0f, -10.0f, -20.0f, -30.0f, -30.0f },
-        /* ENKO_TYPE_CHILD_FADO */ { 0.0f, 0.0f, 0.0f, -20.0f, -20.0f },
+    f32 D_80A9A62C[13][6] = {
+        /* ENKO_TYPE_CHILD_0    */ { 0.0f, 0.0f, 0.0f, -30.0f, -20.0f, 0.0f } ,
+        /* ENKO_TYPE_CHILD_1    */ { 0.0f, 0.0f, 0.0f, -20.0f, -10.0f, 0.0f },
+        /* ENKO_TYPE_CHILD_2    */ { 0.0f, 0.0f, 0.0f, -30.0f, -20.0f, 0.0f },
+        /* ENKO_TYPE_CHILD_3    */ { -10.0f, 10.0f, 10.0f, -10.0f, -30.0f, 10.0f },
+        /* ENKO_TYPE_CHILD_4    */ { 0.0f, 0.0f, 0.0f, -10.0f, -20.0f, 0.0f },
+        /* ENKO_TYPE_CHILD_5    */ { 0.0f, 0.0f, 0.0f, -20.0f, -20.0f, 0.0f },
+        /* ENKO_TYPE_CHILD_6    */ { 0.0f, 0.0f, 0.0f, -10.0f, -20.0f, 0.0f },
+        /* ENKO_TYPE_CHILD_7    */ { 10.0f, 10.0f, 10.0f, -60.0f, -20.0f, 10.0f },
+        /* ENKO_TYPE_CHILD_8    */ { -10.0f, -10.0f, -20.0f, -30.0f, -30.0f, -20.0f },
+        /* ENKO_TYPE_CHILD_9    */ { -10.0f, -10.0f, -10.0f, -40.0f, -40.0f, -10.0f },
+        /* ENKO_TYPE_CHILD_10   */ { 0.0f, 0.0f, 0.0f, -10.0f, -20.0f, 0.0f },
+        /* ENKO_TYPE_CHILD_11   */ { -10.0f, -10.0f, -20.0f, -30.0f, -30.0f, -20.0f },
+        /* ENKO_TYPE_CHILD_FADO */ { 0.0f, 0.0f, 0.0f, -20.0f, -20.0f, 0.0f },
     };
 
     if (LINK_IS_ADULT && ENKO_TYPE == ENKO_TYPE_CHILD_FADO) {
@@ -628,20 +637,20 @@ f32 func_80A97BC0(EnKo* this) {
 }
 
 u8 func_80A97C7C(EnKo* this) {
-    u8 D_80A9A730[13][5] = {
-        /* ENKO_TYPE_CHILD_0    */ { 1, 1, 1, 0, 1 },
-        /* ENKO_TYPE_CHILD_1    */ { 1, 1, 1, 1, 1 },
-        /* ENKO_TYPE_CHILD_2    */ { 1, 1, 1, 0, 1 },
-        /* ENKO_TYPE_CHILD_3    */ { 1, 1, 1, 0, 1 },
-        /* ENKO_TYPE_CHILD_4    */ { 1, 1, 1, 0, 1 },
-        /* ENKO_TYPE_CHILD_5    */ { 0, 0, 0, 0, 0 },
-        /* ENKO_TYPE_CHILD_6    */ { 1, 1, 1, 1, 1 },
-        /* ENKO_TYPE_CHILD_7    */ { 1, 1, 1, 0, 1 },
-        /* ENKO_TYPE_CHILD_8    */ { 0, 0, 0, 0, 0 },
-        /* ENKO_TYPE_CHILD_9    */ { 0, 0, 0, 0, 0 },
-        /* ENKO_TYPE_CHILD_10   */ { 1, 1, 1, 1, 1 },
-        /* ENKO_TYPE_CHILD_11   */ { 0, 0, 0, 0, 0 },
-        /* ENKO_TYPE_CHILD_FADO */ { 1, 1, 1, 1, 1 },
+    u8 D_80A9A730[13][6] = {
+        /* ENKO_TYPE_CHILD_0    */ { 1, 1, 1, 0, 1, 1 },
+        /* ENKO_TYPE_CHILD_1    */ { 1, 1, 1, 1, 1, 1 },
+        /* ENKO_TYPE_CHILD_2    */ { 1, 1, 1, 0, 1, 1 },
+        /* ENKO_TYPE_CHILD_3    */ { 1, 1, 1, 0, 1, 1 },
+        /* ENKO_TYPE_CHILD_4    */ { 1, 1, 1, 0, 1, 1 },
+        /* ENKO_TYPE_CHILD_5    */ { 0, 0, 0, 0, 0, 0 },
+        /* ENKO_TYPE_CHILD_6    */ { 1, 1, 1, 1, 1, 1 },
+        /* ENKO_TYPE_CHILD_7    */ { 1, 1, 1, 0, 1, 1 },
+        /* ENKO_TYPE_CHILD_8    */ { 0, 0, 0, 0, 0, 0 },
+        /* ENKO_TYPE_CHILD_9    */ { 0, 0, 0, 0, 0, 0 },
+        /* ENKO_TYPE_CHILD_10   */ { 1, 1, 1, 1, 1, 1 },
+        /* ENKO_TYPE_CHILD_11   */ { 0, 0, 0, 0, 0, 0 },
+        /* ENKO_TYPE_CHILD_FADO */ { 1, 1, 1, 1, 1, 1 },
     };
 
     return D_80A9A730[ENKO_TYPE][EnKo_GetForestQuestState(this)];
@@ -842,6 +851,37 @@ s32 EnKo_ChildStone(EnKo* this, GlobalContext* globalCtx) {
 }
 
 s32 EnKo_ChildSaria(EnKo* this, GlobalContext* globalCtx) {
+    switch (ENKO_TYPE) {
+        case ENKO_TYPE_CHILD_0:
+            return func_80A98124(this, globalCtx);
+        case ENKO_TYPE_CHILD_1:
+            return func_80A98124(this, globalCtx);
+        case ENKO_TYPE_CHILD_2:
+            return func_80A98034(this, globalCtx);
+        case ENKO_TYPE_CHILD_3:
+            return func_80A97EB0(this, globalCtx);
+        case ENKO_TYPE_CHILD_4:
+            return func_80A98174(this, globalCtx);
+        case ENKO_TYPE_CHILD_5:
+            return func_80A97EB0(this, globalCtx);
+        case ENKO_TYPE_CHILD_6:
+            return func_80A97F20(this, globalCtx);
+        case ENKO_TYPE_CHILD_7:
+            return func_80A97EB0(this, globalCtx);
+        case ENKO_TYPE_CHILD_8:
+            return func_80A97EB0(this, globalCtx);
+        case ENKO_TYPE_CHILD_9:
+            return func_80A97EB0(this, globalCtx);
+        case ENKO_TYPE_CHILD_10:
+            return func_80A97E18(this, globalCtx);
+        case ENKO_TYPE_CHILD_11:
+            return func_80A97EB0(this, globalCtx);
+        case ENKO_TYPE_CHILD_FADO:
+            return func_80A97E18(this, globalCtx);
+    }
+}
+
+s32 EnKo_ChildPost(EnKo* this, GlobalContext* globalCtx) {
     switch (ENKO_TYPE) {
         case ENKO_TYPE_CHILD_0:
             return func_80A98124(this, globalCtx);
@@ -1076,7 +1116,7 @@ s32 EnKo_GetForestQuestState2(EnKo* this) {
         return CHECK_QUEST_ITEM(QUEST_MEDALLION_FOREST) ? ENKO_FQS_ADULT_SAVED : ENKO_FQS_ADULT_ENEMY;
     }
     if (CHECK_QUEST_ITEM(QUEST_KOKIRI_EMERALD)) {
-        return (gSaveContext.eventChkInf[4] & 1) ? ENKO_FQS_CHILD_SARIA : ENKO_FQS_CHILD_STONE;
+        return (gSaveContext.eventChkInf[4] & 1) ? (CHECK_QUEST_ITEM(QUEST_SONG_SARIA) ? ENKO_FQS_CHILD_POST : ENKO_FQS_CHILD_SARIA) : ENKO_FQS_CHILD_STONE;
     }
     return ENKO_FQS_CHILD_START;
 }
@@ -1125,6 +1165,8 @@ s32 func_80A98ECC(EnKo* this, GlobalContext* globalCtx) {
             return EnKo_AdultEnemy(this, globalCtx);
         case ENKO_FQS_ADULT_SAVED:
             return EnKo_AdultSaved(this, globalCtx);
+        case ENKO_FQS_CHILD_POST:
+            return EnKo_ChildPost(this, globalCtx);
     }
 }
 
@@ -1201,6 +1243,17 @@ void func_80A99048(EnKo* this, GlobalContext* globalCtx) {
         this->actionFunc = func_80A99384;
     }
 }
+
+void heart_give(EnKo* this, GlobalContext* globalCtx) {
+    if (Actor_HasParent(&this->actor, globalCtx)) {
+        this->actor.parent = NULL;
+        this->actionFunc = func_80A99384;
+        gSaveContext.itemGetInf[1] |= 0x10;
+    } else {
+        func_8002F434(this, globalCtx, GI_HEART_PIECE, 100.0f, 100.0f);
+    }
+}
+
 
 void func_80A99384(EnKo* this, GlobalContext* globalCtx) {
     if (ENKO_TYPE == ENKO_TYPE_CHILD_FADO && this->unk_1E8.unk_00 != 0 && this->actor.textId == 0x10B9) {
@@ -1302,6 +1355,19 @@ void EnKo_Update(Actor* thisx, GlobalContext* globalCtx) {
     }
 
     this->actionFunc(this, globalCtx);
+    
+    if ((Message_GetState(&globalCtx->msgCtx) == TEXT_STATE_DONE) && Message_ShouldAdvance(globalCtx) &&
+                ENKO_TYPE == ENKO_TYPE_CHILD_1 && globalCtx->msgCtx.textId == 0x8887 &&
+                !(gSaveContext.itemGetInf[1] & 0x10)) {
+        Message_ContinueTextbox(globalCtx, 0x8888);
+    }
+
+    if ((Message_GetState(&globalCtx->msgCtx) == TEXT_STATE_DONE) && Message_ShouldAdvance(globalCtx) &&
+                ENKO_TYPE == ENKO_TYPE_CHILD_1 && globalCtx->msgCtx.textId == 0x8888 &&
+                !(gSaveContext.itemGetInf[1] & 0x10)) {
+        func_8002F434(this, globalCtx, GI_HEART_PIECE, 100.0f, 100.0f);
+        this->actionFunc = heart_give;
+    }
 
     func_80A9877C(this, globalCtx);
     collider = &this->collider;
