@@ -3226,7 +3226,7 @@ Actor* Actor_Spawn(ActorContext* actorCtx, GlobalContext* globalCtx, s16 actorId
 
     objBankIndex = Object_GetIndex(&globalCtx->objectCtx, actorInit->objectId);
 
-    if (objBankIndex < 0 && !gMapLoading)
+    if (objBankIndex < 0)
         objBankIndex = 0;
 
     if ((objBankIndex < 0) ||
