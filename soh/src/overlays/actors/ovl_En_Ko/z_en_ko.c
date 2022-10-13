@@ -24,6 +24,7 @@ void EnKo_Draw(Actor* thisx, GlobalContext* globalCtx);
 
 void func_80A99048(EnKo* this, GlobalContext* globalCtx);
 void func_80A995CC(EnKo* this, GlobalContext* globalCtx);
+void heart_give(EnKo* this, GlobalContext* globalCtx);
 void func_80A99384(EnKo* this, GlobalContext* globalCtx);
 void func_80A99438(EnKo* this, GlobalContext* globalCtx);
 void func_80A99504(EnKo* this, GlobalContext* globalCtx);
@@ -602,6 +603,36 @@ s16 func_80A97738(GlobalContext* globalCtx, Actor* thisx) {
             break;
         case TEXT_STATE_DONE:
             if (Message_ShouldAdvance(globalCtx)) {
+                if ((ENKO_TYPE == ENKO_TYPE_CHILD_1 && globalCtx->msgCtx.textId == 0x8888 && !(gSaveContext.itemGetInf[1] & 0x10))
+                                || (ENKO_TYPE == ENKO_TYPE_CHILD_2 && globalCtx->msgCtx.textId == 0x8007)) {
+                    func_8002F434(this, globalCtx, GI_HEART_PIECE, 100.0f, 100.0f);
+                    this->actionFunc = heart_give;
+                }
+                return 3;
+                
+                if (ENKO_TYPE == ENKO_TYPE_CHILD_1 && globalCtx->msgCtx.textId == 0x8887 &&
+                    !(gSaveContext.itemGetInf[1] & 0x10)) {
+                    Message_ContinueTextbox(globalCtx, 0x8888);
+                } else if ((ENKO_TYPE == ENKO_TYPE_CHILD_2)) {
+                    u8 growth[NUM_TREES];
+                    u8 someGrowth = 0;
+                    u8 allGrowth = 1;
+                    for (u32 ii = 0; ii<NUM_TREES; ii++) {
+                        growth[ii] = Flags_GetCollectible(globalCtx,ii+1);
+                        someGrowth  = someGrowth || growth[ii];
+                        allGrowth  = allGrowth && growth[ii];
+                    }
+                    
+                    if (globalCtx->msgCtx.textId == 0x1074) {
+                        if (someGrowth)
+                            Message_ContinueTextbox(globalCtx, 0x8005);
+                        else
+                            Message_ContinueTextbox(globalCtx, 0x8004);
+                    } else if ((globalCtx->msgCtx.textId == 0x8006) &&
+                            allGrowth && !(gSaveContext.itemGetInf[2] & 0x01)) {
+                        Message_ContinueTextbox(globalCtx, 0x8007);
+                    }
+                }
                 return 3;
             }
     }
@@ -1378,50 +1409,6 @@ void EnKo_Update(Actor* thisx, GlobalContext* globalCtx) {
     }
 
     this->actionFunc(this, globalCtx);
-    
-    if ((Message_GetState(&globalCtx->msgCtx) == TEXT_STATE_DONE) && Message_ShouldAdvance(globalCtx) &&
-                ENKO_TYPE == ENKO_TYPE_CHILD_1 && globalCtx->msgCtx.textId == 0x8887 &&
-                !(gSaveContext.itemGetInf[1] & 0x10)) {
-        Message_ContinueTextbox(globalCtx, 0x8888);
-    }
-
-    u8 growth[NUM_TREES];
-    u8 someGrowth = 0;
-    u8 allGrowth = 1;
-    for (u32 ii = 0; ii<NUM_TREES; ii++) {
-        growth[ii] = Flags_GetCollectible(globalCtx,ii+1);
-        someGrowth  = someGrowth || growth[ii];
-        allGrowth  = allGrowth && growth[ii];
-    }
-
-    if ((Message_GetState(&globalCtx->msgCtx) == TEXT_STATE_DONE) && Message_ShouldAdvance(globalCtx) &&
-               (ENKO_TYPE == ENKO_TYPE_CHILD_2) && (globalCtx->msgCtx.textId == 0x1074)) {
-        if (someGrowth)
-            Message_ContinueTextbox(globalCtx, 0x8005);
-        else
-            Message_ContinueTextbox(globalCtx, 0x8004);
-    }
-
-    if ((Message_GetState(&globalCtx->msgCtx) == TEXT_STATE_DONE) && Message_ShouldAdvance(globalCtx) &&
-               (ENKO_TYPE == ENKO_TYPE_CHILD_2) && (globalCtx->msgCtx.textId == 0x1074)) {
-        if (someGrowth)
-            Message_ContinueTextbox(globalCtx, 0x8005);
-        else
-            Message_ContinueTextbox(globalCtx, 0x8004);
-    }
-
-    if ((Message_GetState(&globalCtx->msgCtx) == TEXT_STATE_DONE) && Message_ShouldAdvance(globalCtx) &&
-               (ENKO_TYPE == ENKO_TYPE_CHILD_2) && (globalCtx->msgCtx.textId == 0x8006) &&
-               allGrowth && !(gSaveContext.itemGetInf[2] & 0x01)) {
-        Message_ContinueTextbox(globalCtx, 0x8007);
-    }
-
-    if ((Message_GetState(&globalCtx->msgCtx) == TEXT_STATE_DONE) && Message_ShouldAdvance(globalCtx) &&
-                ((ENKO_TYPE == ENKO_TYPE_CHILD_1 && globalCtx->msgCtx.textId == 0x8888 && !(gSaveContext.itemGetInf[1] & 0x10)) ||
-                (ENKO_TYPE == ENKO_TYPE_CHILD_2 && globalCtx->msgCtx.textId == 0x8007))) {
-        func_8002F434(this, globalCtx, GI_HEART_PIECE, 100.0f, 100.0f);
-        this->actionFunc = heart_give;
-    }
 
     func_80A9877C(this, globalCtx);
     collider = &this->collider;
