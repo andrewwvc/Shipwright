@@ -398,6 +398,9 @@ s32 func_80AF5DFC(EnSa* this, GlobalContext* globalCtx) {
         }
         return 4;
     }
+    if (globalCtx->sceneNum == SCENE_LINK_HOME) {
+            return 1;
+    }
     return 0;
 }
 
