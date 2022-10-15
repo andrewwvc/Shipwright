@@ -75,6 +75,7 @@ CrowdControl* CrowdControl::Instance;
 OTRGlobals* OTRGlobals::Instance;
 SaveManager* SaveManager::Instance;
 CustomMessageManager* CustomMessageManager::Instance;
+TextIDAllocator* TextIDAllocator::Instance;
 ItemTableManager* ItemTableManager::Instance;
 
 OTRGlobals::OTRGlobals() {
@@ -423,6 +424,7 @@ extern "C" void InitOTR() {
     OTRGlobals::Instance = new OTRGlobals();
     SaveManager::Instance = new SaveManager();
     CustomMessageManager::Instance = new CustomMessageManager();
+    TextIDAllocator::Instance = new TextIDAllocator();
     ItemTableManager::Instance = new ItemTableManager();
     auto t = OTRGlobals::Instance->context->GetResourceManager()->LoadFile("version");
 
@@ -451,6 +453,10 @@ extern "C" void InitOTR() {
     CrowdControl::Instance = new CrowdControl();
     CrowdControl::Instance->InitCrowdControl();
 #endif
+}
+
+extern "C" uint16_t GetTextID(const char* name) {
+    return TextIDAllocator::Instance->getId(name);
 }
 
 extern "C" void DeinitOTR() {
