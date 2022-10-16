@@ -395,9 +395,17 @@ u16 EnMd_GetTextKokiriForest(GlobalContext* globalCtx, EnMd* this) {
 u16 EnMd_GetTextKokiriHome(GlobalContext* globalCtx, EnMd* this) {
     this->unk_208 = 0;
     this->unk_209 = TEXT_STATE_NONE;
+    u16 MidoMsg = GetTextID("mido");
 
     if (gSaveContext.eventChkInf[4] & 1) {
-        return 0x1028;
+        if (gSaveContext.infTable[3] & 1) {
+            if (Actor_FindNearby(globalCtx, &this->actor, ACTOR_EN_INSECT, ACTORCAT_ITEMACTION, 10000.0f) != NULL)
+                return MidoMsg;
+            else
+                return MidoMsg+1;
+        }
+        else
+            return 0x1028;
     }
 
     return 0x1046;
@@ -678,6 +686,13 @@ void EnMd_Init(Actor* thisx, GlobalContext* globalCtx) {
 
     if (globalCtx->sceneNum != SCENE_KOKIRI_HOME4) {
         EnMd_SetMovedPos(this, globalCtx);
+    } else {
+        if (gSaveContext.infTable[3] & 1) {
+            gSaveContext.infTable[3] |= 1 << 1;
+            Actor_Spawn(&globalCtx->actorCtx, globalCtx, ACTOR_EN_INSECT, 0,0,0,      0,0,0,        0x10);
+            Actor_Spawn(&globalCtx->actorCtx, globalCtx, ACTOR_EN_INSECT, 30,0,30,    0,0x4000,0,   0x10);
+            Actor_Spawn(&globalCtx->actorCtx, globalCtx, ACTOR_EN_INSECT, -30,0,-30,  0,-0x4000,0,  0x10);
+        }
     }
 
     this->actionFunc = func_80AAB874;

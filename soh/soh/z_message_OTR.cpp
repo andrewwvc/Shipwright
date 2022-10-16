@@ -133,6 +133,7 @@ extern "C" void OTRMessage_Init()
           "\x08Missiles  10 unités   99 Rubis\x09&&\x1B%gAcheter&Ne pas acheter%w",
         }
     );
+
     u16 SariaMsg = TextIDAllocator::Instance->allocateRange("saria", 20);
     CustomMessageManager::Instance->CreateMessage(
         questMessageTableID, SariaMsg,
@@ -174,7 +175,7 @@ extern "C" void OTRMessage_Init()
         questMessageTableID, SariaMsg+4,
         {
           TEXTBOX_TYPE_BLUE, TEXTBOX_POS_BOTTOM,
-          "You probably shouldn't let&Mido know I'm talking to you like this...\x0B\x02",
+          "You probably shouldn't let Mido&know I'm talking to you like this...\x0B\x02",
           "",
           "",
         }
@@ -269,6 +270,7 @@ extern "C" void OTRMessage_Init()
           "",
         }
     );
+
     u16 KokiriMsg = TextIDAllocator::Instance->allocateRange("kokiri", 20);
     CustomMessageManager::Instance->CreateMessage(
         questMessageTableID, KokiriMsg,
@@ -378,6 +380,26 @@ extern "C" void OTRMessage_Init()
         {
           TEXTBOX_TYPE_BLACK, TEXTBOX_POS_BOTTOM,
           "Things are mostly growing&nicely, but I still can't help&but think that maybe just one&spot ought to have grown better...",
+          "",
+          "",
+        }
+    );
+
+    u16 MidoMsg = TextIDAllocator::Instance->allocateRange("mido", 10);
+    CustomMessageManager::Instance->CreateMessage(
+        questMessageTableID, MidoMsg,
+        {
+          TEXTBOX_TYPE_BLACK, TEXTBOX_POS_BOTTOM,
+          "Ahhhhhhhhrrrrrrgh!^Why are there so many bugs!?^Help me! I can't stop them&from crawling everywhere!",
+          "",
+          "",
+        }
+    );
+    CustomMessageManager::Instance->CreateMessage(
+        questMessageTableID, MidoMsg+1,
+        {
+          TEXTBOX_TYPE_BLACK, TEXTBOX_POS_BOTTOM,
+          "Oh, phew.&Hmph, I'm glad you helped out there&as you'd expect from any Kokiri.",
           "",
           "",
         }
