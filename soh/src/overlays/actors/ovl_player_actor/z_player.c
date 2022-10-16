@@ -13180,8 +13180,15 @@ void func_8084EFC0(Player* this, GlobalContext* globalCtx) {
 
     if (LinkAnimation_OnFrame(&this->skelAnime, 76.0f)) {
         BottleDropInfo* dropInfo = &D_80854A28[this->itemActionParam - PLAYER_AP_BOTTLE_FISH];
+        s16 parameters = dropInfo->actorParams;
 
-        Actor_Spawn(&globalCtx->actorCtx, globalCtx, dropInfo->actorId,
+        //Changes the insect spawn to a special drop if you're in Mido's place and it's full of bugs
+        if (dropInfo->actorId == ACTOR_EN_INSECT && globalCtx->sceneNum == SCENE_KOKIRI_HOME4 && gSaveContext.infTable[3] & 1)
+            Actor_Spawn(&globalCtx->actorCtx, globalCtx, dropInfo->actorId,
+                    this->actor.world.pos.x, this->actor.world.pos.y, this->actor.world.pos.z, 0x0, this->actor.shape.rot.y,
+                    0, 0x10);
+        else
+            Actor_Spawn(&globalCtx->actorCtx, globalCtx, dropInfo->actorId,
                     (Math_SinS(this->actor.shape.rot.y) * 5.0f) + this->leftHandPos.x, this->leftHandPos.y,
                     (Math_CosS(this->actor.shape.rot.y) * 5.0f) + this->leftHandPos.z, 0x4000, this->actor.shape.rot.y,
                     0, dropInfo->actorParams);
