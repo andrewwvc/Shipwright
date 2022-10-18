@@ -547,6 +547,7 @@ void Actor_Noop(Actor* actor, GlobalContext* globalCtx);
 void Gfx_DrawDListOpa(GlobalContext* globalCtx, Gfx* dlist);
 void Gfx_DrawDListXlu(GlobalContext* globalCtx, Gfx* dlist);
 Actor* Actor_FindNearby(GlobalContext* globalCtx, Actor* refActor, s16 actorId, u8 actorCategory, f32 range);
+s32 Actor_FindNumberOf(GlobalContext* globalCtx, Actor* refActor, s16 actorId, u8 actorCategory, f32 range, Actor** closest, u8(*predicate)(Actor*, GlobalContext*));
 s32 func_800354B4(GlobalContext* globalCtx, Actor* actor, f32 range, s16 arg3, s16 arg4, s16 arg5);
 void func_8003555C(GlobalContext* globalCtx, Vec3f* pos, Vec3f* velocity, Vec3f* accel);
 void func_800355B8(GlobalContext* globalCtx, Vec3f* pos);
