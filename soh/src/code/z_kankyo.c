@@ -1294,6 +1294,21 @@ void Environment_Update(GlobalContext* globalCtx, EnvironmentContext* envCtx, Li
     }
 }
 
+#define DAYS_IN_CYCLE 6
+
+u8 Moon_Colors[][2][3] = {
+    {{245,255,225}, {100,90,50}},
+    {{140,160,220}, {30,30,80}},
+    {{40,45,140},   {10,20,50}},
+    {{30,35,30},    {10,10,10}},
+    {{180,100,50},  {40,10,10}},
+    {{220,180,120}, {65,60,20}},
+};
+
+s32 getDayOfCycle(GlobalContext* globalCtx) {
+    return gSaveContext.totalDays%DAYS_IN_CYCLE;
+}
+
 void Environment_DrawSunAndMoon(GlobalContext* globalCtx) {
     f32 alpha;
     f32 color;
@@ -1386,12 +1401,16 @@ void Environment_DrawSunAndMoon(GlobalContext* globalCtx) {
 
         alpha = temp * 255.0f;
 
+        s32 day = getDayOfCycle(globalCtx);
+
         if (alpha > 0.0f) {
             gSPMatrix(POLY_OPA_DISP++, MATRIX_NEWMTX(globalCtx->state.gfxCtx), G_MTX_LOAD);
             func_8009398C(globalCtx->state.gfxCtx);
             gDPPipeSync(POLY_OPA_DISP++);
-            gDPSetPrimColor(POLY_OPA_DISP++, 0, 0, 240, 255, 180, alpha);
-            gDPSetEnvColor(POLY_OPA_DISP++, 80, 70, 20, alpha);
+            //gDPSetPrimColor(POLY_OPA_DISP++, 0, 0, 240, 255, 180, alpha);
+            gDPSetPrimColor(POLY_OPA_DISP++, 0, 0, Moon_Colors[day][0][0], Moon_Colors[day][0][1], Moon_Colors[day][0][2], alpha);
+            //gDPSetEnvColor(POLY_OPA_DISP++, 80, 70, 20, alpha);
+            gDPSetEnvColor(POLY_OPA_DISP++, Moon_Colors[day][1][0], Moon_Colors[day][1][1], Moon_Colors[day][1][2], alpha);
             gSPDisplayList(POLY_OPA_DISP++, gMoonDL);
         }
     }
