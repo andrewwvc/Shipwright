@@ -235,6 +235,10 @@ void EnEncount1_SpawnStalchildOrWolfos(EnEncount1* this, GlobalContext* globalCt
         return;
     }
 
+    if (this->spawnType == SPAWNER_WOLFOS && getDayOfCycle() != 0) {
+        return;
+    }
+
     this->outOfRangeTimer = 0;
     spawnPos = this->actor.world.pos;
     if ((this->curNumSpawn < this->maxCurSpawns) && (this->totalNumSpawn < this->maxTotalSpawns)) {
