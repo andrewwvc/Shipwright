@@ -916,6 +916,7 @@ void Environment_DisableUnderwaterLights(GlobalContext* globalCtx);
 void Environment_Update(GlobalContext* globalCtx, EnvironmentContext* envCtx, LightContext* lightCtx,
                         PauseContext* pauseCtx, MessageContext* msgCtx, GameOverContext* gameOverCtx,
                         GraphicsContext* gfxCtx);
+s32 getDayOfCycle(void);
 void Environment_DrawSunAndMoon(GlobalContext* globalCtx);
 void Environment_DrawSunLensFlare(GlobalContext* globalCtx, EnvironmentContext* envCtx, View* view,
                                   GraphicsContext* gfxCtx, Vec3f pos, s32 unused);
