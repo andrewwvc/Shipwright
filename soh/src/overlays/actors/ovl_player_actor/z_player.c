@@ -5061,9 +5061,9 @@ s32 func_8083B040(Player* this, GlobalContext* globalCtx) {
                         func_808322D0(globalCtx, this, &gPlayerAnim_link_bottle_bug_out);
                         func_80835EA4(globalCtx, 3);
                     } else if ((sp2C > 0) && (sp2C < 4)) {
-                        if (globalCtx->sceneNum == SCENE_KOKIRI_HOME4 && !(gSaveContext.infTable[3] & 1)) {
+                        Actor* mido = Actor_FindNearby(globalCtx, &this->actor, ACTOR_EN_MD, ACTORCAT_NPC, 10000.0f);
+                        if (globalCtx->sceneNum == SCENE_KOKIRI_HOME4 && !(gSaveContext.infTable[3] & 1) && mido != NULL) {
                             this->unk_6AD = 0;
-                            //Actor* mido = Actor_FindNearby(globalCtx, &this->actor, ACTOR_EN_MD, ACTORCAT_NPC, 10000.0f);
                             //if (mido)
                             //    func_80853148(globalCtx,mido);
                             sp2C = this->itemActionParam - PLAYER_AP_LETTER_ZELDA;
