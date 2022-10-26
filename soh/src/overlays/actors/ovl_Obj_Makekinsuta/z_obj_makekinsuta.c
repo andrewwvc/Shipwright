@@ -75,6 +75,7 @@ void ObjMakekinsuta_WaitForInsectSpecial(ObjMakekinsuta* this, GlobalContext* gl
         if (!func_8002DEEC(GET_PLAYER(globalCtx))) {
             if (!(gSaveContext.infTable[3] & (1 << this->actor.params))){
                 gSaveContext.infTable[3] |= (1 << this->actor.params);
+                gSaveContext.infTable[1] &= ~0x200;//Change this later so that the variable is reset on returning to the child era
                 this->actionFunc = ObjMakekinsuta_DoNothing;
             }
         }
