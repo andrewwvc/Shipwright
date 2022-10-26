@@ -21,6 +21,8 @@ void func_80AAB948(EnMd* this, GlobalContext* globalCtx);
 void func_80AABC10(EnMd* this, GlobalContext* globalCtx);
 void func_80AABD0C(EnMd* this, GlobalContext* globalCtx);
 void give_gratitude(EnMd* this, GlobalContext* globalCtx);
+void waitForFinalMessage(EnMd* this, GlobalContext* globalCtx);
+void receiveFinalMessage(EnMd* this, GlobalContext* globalCtx);
 
 const ActorInit En_Md_InitVars = {
     ACTOR_EN_MD,
@@ -462,6 +464,19 @@ u16 EnMd_GetText(GlobalContext* globalCtx, Actor* thisx) {
 s16 func_80AAAF04(GlobalContext* globalCtx, Actor* thisx) {
     EnMd* this = (EnMd*)thisx;
     u16 MidoMsg = GetTextID("mido");
+
+    if (this->actor.textId == 0x1070 || this->actor.textId == 0x1071 || this->actor.textId == 0x10D6 || this->actor.textId == MidoMsg+4 || this->actor.textId == MidoMsg+5) {
+        //Audio_SetGameVolume(0,0.0f);
+        if (this->musicState == 0 || this->musicState == 1)
+            gAudioContext.seqPlayers[0].fadeTimer = 100;
+        if (this->musicState == 0) {
+            this->storedVolume = gAudioContext.seqPlayers[0].fadeVolume;
+            this->musicState = 1;
+            gAudioContext.seqPlayers[0].fadeVolume = 0.1f;
+            Audio_SequencePlayerProcessSound(&gAudioContext.seqPlayers[0]);
+        }
+    }
+
     switch (func_80AAAC78(this, globalCtx)) {
         case TEXT_STATE_NONE:
         case TEXT_STATE_DONE_HAS_NEXT:
@@ -489,7 +504,10 @@ s16 func_80AAAF04(GlobalContext* globalCtx, Actor* thisx) {
                             Message_ContinueTextbox(globalCtx,this->actor.textId);
                         }
                 }
-
+                if (this->actor.textId == MidoMsg+15) {
+                    this->actor.textId = MidoMsg+16;
+                    Message_ContinueTextbox(globalCtx,this->actor.textId);
+                }
                 if (this->actor.textId == MidoMsg+4) {
                     func_8002F434(this, globalCtx, GI_HEART_PIECE, 100.0f, 100.0f);
                     this->actionFunc = give_gratitude;
@@ -500,6 +518,15 @@ s16 func_80AAAF04(GlobalContext* globalCtx, Actor* thisx) {
         case TEXT_STATE_9:
             return 1;
         case TEXT_STATE_CLOSING:
+            //Audio_SetGameVolume(0,CVar_GetFloat("gMainMusicVolume", 1));
+            if (this->musicState == 1) {
+                this->musicState = 2;
+                //gAudioContext.seqPlayers[0].fadeTimer = 0;
+            //if (this->storedVolume != 0.0f)
+                gAudioContext.seqPlayers[0].fadeVolume = this->storedVolume; //this->storedVolume;
+                //this->storedVolume = 0.0f;
+                Audio_SequencePlayerProcessSound(&gAudioContext.seqPlayers[0]);
+            }
             switch (this->actor.textId) {
                 case 0x1028:
                     gSaveContext.eventChkInf[0] |= 0x8000;
@@ -513,6 +540,10 @@ s16 func_80AAAF04(GlobalContext* globalCtx, Actor* thisx) {
                     break;
                 case 0x1070:
                     gSaveContext.infTable[1] |= 0x200;
+                case 0x1071:
+                case 0x10D6:
+                    gSaveContext.infTable[3] |= 0x8;
+                    this->actionFunc = waitForFinalMessage;
                     break;
                 case 0x1033:
                 case 0x1067:
@@ -699,6 +730,8 @@ void func_80AAB5A4(EnMd* this, GlobalContext* globalCtx) {
 void EnMd_Init(Actor* thisx, GlobalContext* globalCtx) {
     EnMd* this = (EnMd*)thisx;
     s32 pad;
+    this->storedVolume = 0.0f;
+    this->musicState = 0;
 
     ActorShape_Init(&this->actor.shape, 0.0f, ActorShadow_DrawCircle, 24.0f);
     SkelAnime_InitFlex(globalCtx, &this->skelAnime, &gMidoSkel, NULL, this->jointTable, this->morphTable, 17);
@@ -857,6 +890,44 @@ void func_80AABC10(EnMd* this, GlobalContext* globalCtx) {
     }
 }
 
+void waitForFinalMessage(EnMd* this, GlobalContext* globalCtx) {
+    Player* player = GET_PLAYER(globalCtx);
+    func_80AAAA24(this);
+
+    if (gSaveContext.infTable[3] & 0x8 && (globalCtx->sceneNum == SCENE_SPOT10)) {
+        if (player->stateFlags2 & 0x1000000) {
+            player->stateFlags2 |= 0x2000000;
+            player->unk_6A8 = &this->actor;
+            func_8010BD58(globalCtx, OCARINA_ACTION_CHECK_SARIA);
+            this->actionFunc = receiveFinalMessage;
+            return;
+        }
+
+        if (this->actor.xzDistToPlayer < (30.0f + this->collider.dim.radius)) {
+            player->stateFlags2 |= 0x800000;
+        }
+    }
+}
+
+void receiveFinalMessage(EnMd* this, GlobalContext* globalCtx) {
+    Player* player = GET_PLAYER(globalCtx);
+    u16 MidoMsg = GetTextID("mido");
+
+    if (globalCtx->msgCtx.ocarinaMode >= OCARINA_MODE_04) {
+        this->actionFunc = waitForFinalMessage;
+        globalCtx->msgCtx.ocarinaMode = OCARINA_MODE_04;
+    } else if (globalCtx->msgCtx.ocarinaMode == OCARINA_MODE_03) {
+        Audio_PlaySoundGeneral(NA_SE_SY_CORRECT_CHIME, &D_801333D4, 4, &D_801333E0, &D_801333E0, &D_801333E8);
+        this->actor.textId = MidoMsg+15;
+        func_8002F2CC(&this->actor, globalCtx, this->collider.dim.radius + 30.0f);
+
+        this->actionFunc = func_80AAB874;
+        globalCtx->msgCtx.ocarinaMode = OCARINA_MODE_04;
+    } else {
+        player->stateFlags2 |= 0x800000;
+    }
+}
+
 void func_80AABD0C(EnMd* this, GlobalContext* globalCtx) {
     func_80034F54(globalCtx, this->unk_214, this->unk_236, 17);
     func_80AAA93C(this);
@@ -895,6 +966,11 @@ void EnMd_Update(Actor* thisx, GlobalContext* globalCtx) {
     func_80AAB158(this, globalCtx);
     Actor_UpdateBgCheckInfo(globalCtx, &this->actor, 0.0f, 0.0f, 0.0f, 4);
     this->actionFunc(this, globalCtx);
+
+    if (this->musicState == 2) {
+        this->musicState = 0;
+        gAudioContext.seqPlayers[0].fadeTimer = 0;
+    }
 }
 
 s32 EnMd_OverrideLimbDraw(GlobalContext* globalCtx, s32 limbIndex, Gfx** dList, Vec3f* pos, Vec3s* rot, void* thisx,
