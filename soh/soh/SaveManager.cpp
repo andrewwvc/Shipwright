@@ -485,6 +485,9 @@ void SaveManager::InitFileNormal() {
 
     gSaveContext.isMasterQuest = CVar_GetS32("gMasterQuest", 0) && !CVar_GetS32("gRandomizer", 0);
 
+    gSaveContext.goronTimeStatus = 0;
+    gSaveContext.goronTimeDay = gSaveContext.totalDays;
+
     //RANDOTODO (ADD ITEMLOCATIONS TO GSAVECONTEXT)
 }
 
@@ -1040,6 +1043,9 @@ void SaveManager::LoadBaseVersion2() {
         SaveManager::Instance->LoadData("", gSaveContext.randomizerInf[i]);
     });
     SaveManager::Instance->LoadData("isMasterQuest", gSaveContext.isMasterQuest);
+
+    SaveManager::Instance->LoadData("goronTimeStatus", gSaveContext.goronTimeStatus);
+    SaveManager::Instance->LoadData("goronTimeDay", gSaveContext.goronTimeDay);
 }
 
 void SaveManager::SaveBase() {
@@ -1194,6 +1200,9 @@ void SaveManager::SaveBase() {
         SaveManager::Instance->SaveData("", gSaveContext.randomizerInf[i]);
     });
     SaveManager::Instance->SaveData("isMasterQuest", gSaveContext.isMasterQuest);
+
+    SaveManager::Instance->SaveData("goronTimeStatus", gSaveContext.goronTimeStatus);
+    SaveManager::Instance->SaveData("goronTimeDay", gSaveContext.goronTimeDay);
 }
 
 void SaveManager::SaveArray(const std::string& name, const size_t size, SaveArrayFunc func) {

@@ -504,7 +504,11 @@ void EnOssan_TalkBazaarShopkeeper(GlobalContext* globalCtx) {
     if (globalCtx->curSpawn == 0) {
         Message_ContinueTextbox(globalCtx, 0x9D);
     } else {
-        Message_ContinueTextbox(globalCtx, 0x9C);
+        u16 HylianMsg = GetTextID("hylian");
+        if (IS_DAY)
+            Message_ContinueTextbox(globalCtx, 0x9C);
+        else
+            Message_ContinueTextbox(globalCtx, HylianMsg+1);
     }
 }
 
