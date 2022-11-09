@@ -5,6 +5,7 @@
  */
 
 #include "z_en_arrow.h"
+#include "overlays/actors/ovl_Bg_Spot08_Iceblock/z_bg_spot08_iceblock.h"
 #include "objects/gameplay_keep/gameplay_keep.h"
 #include "objects/object_gi_nuts/object_gi_nuts.h"
 
@@ -377,6 +378,7 @@ void EnArrow_Fly(EnArrow* this, GlobalContext* globalCtx) {
                     0x0000,this->actor.world.rot.y,0x0000,0x20);
                 this->actor.world.pos = finalPos;
                 EnArrow_SetupAction(this, func_809B45E0);
+                Audio_PlayActorSound2(&this->actor, NA_SE_IT_ARROW_STICK_OBJ);
                 this->timer = 20;
                 this->hitFlags |= 1;
             }
@@ -388,6 +390,26 @@ void EnArrow_Fly(EnArrow* this, GlobalContext* globalCtx) {
             func_8002F9EC(globalCtx, &this->actor, this->actor.wallPoly, bgId, &hitPoint);
             Math_Vec3f_Copy(&posCopy, &this->actor.world.pos);
             Math_Vec3f_Copy(&this->actor.world.pos, &hitPoint);
+
+            if ((this->actor.params == ARROW_FIRE) && DynaPoly_IsBgIdBgActor(bgId)) {
+                DynaPolyActor* dyna1 = DynaPoly_GetActor(&globalCtx->colCtx,bgId);
+                Actor* actor1 = globalCtx->actorCtx.actorLists[ACTORCAT_BG].head;
+
+                while (actor1 != NULL) {
+                    if (ACTOR_BG_SPOT08_ICEBLOCK == actor1->id) {
+                        //BgSpot08Iceblock* iceblock = (BgSpot08Iceblock*)actor1;
+                        if (dyna1 == &((BgSpot08Iceblock*)actor1)->dyna) {
+                            if (actor1->parent && (((BgSpot08Iceblock*)(actor1->parent))->dyna.actor.params & 0xF) == 0x3) {
+                                ((BgSpot08Iceblock*)(actor1->parent))->dyna.actor.params |= 0x100;
+                                //((BgSpot08Iceblock*)(actor1->child))->dyna.actor.world.rot.y += 0x8000;
+                            }
+                            Actor_Kill(actor1);
+                            Actor_Kill(&this->actor);
+                        }
+                    }
+                    actor1 = actor1->next;
+                }
+            }
         }
 
         if (this->actor.params <= ARROW_0E) {
