@@ -858,6 +858,11 @@ void EnPeehat_SetStateExplode(EnPeehat* this) {
     EnPeehat_SetupAction(this, EnPeehat_StateExplode);
 }
 
+//u8(*predicate)(Actor*, GlobalContext*)
+u8 isLargePeahat(Actor* this, GlobalContext* globalCtx) {
+    return this->params < PEAHAT_TYPE_LARVA;
+}
+
 void EnPeehat_StateExplode(EnPeehat* this, GlobalContext* globalCtx) {
     EnBom* bomb;
     s32 pad[2];
@@ -871,9 +876,14 @@ void EnPeehat_StateExplode(EnPeehat* this, GlobalContext* globalCtx) {
     }
     this->animTimer--;
     if (this->animTimer == 0) {
-        Item_DropCollectibleRandom(globalCtx, &this->actor, &this->actor.world.pos, 0x40);
-        Item_DropCollectibleRandom(globalCtx, &this->actor, &this->actor.world.pos, 0x40);
-        Item_DropCollectibleRandom(globalCtx, &this->actor, &this->actor.world.pos, 0x40);
+        if (!Flags_GetCollectible(globalCtx, 1) && !Actor_FindNumberOf(globalCtx, &this->actor, ACTOR_EN_PEEHAT, ACTORCAT_ENEMY, 100000.0f, NULL, isLargePeahat)) {
+            Item_DropCollectible(globalCtx, &this->actor.world.pos, 0x100+ITEM00_HEART_PIECE);
+        } else {
+            Item_DropCollectibleRandom(globalCtx, &this->actor, &this->actor.world.pos, 0x40);
+            Item_DropCollectibleRandom(globalCtx, &this->actor, &this->actor.world.pos, 0x40);
+            Item_DropCollectibleRandom(globalCtx, &this->actor, &this->actor.world.pos, 0x40);
+        }
+
         Actor_Kill(&this->actor);
     }
 }
