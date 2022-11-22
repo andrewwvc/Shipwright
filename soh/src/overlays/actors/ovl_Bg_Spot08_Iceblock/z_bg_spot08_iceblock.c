@@ -287,6 +287,7 @@ f32 scaleTargets[] = {0.0f,0.05f,0.1f,0.2f};
 void BgSpot08Iceblock_Init(Actor* thisx, GlobalContext* globalCtx) {
     BgSpot08Iceblock* this = (BgSpot08Iceblock*)thisx;
     CollisionHeader* colHeader;
+    this->water = NULL;
     this->isThawing = 0;
 
     // "spot08 ice floe"
@@ -509,6 +510,17 @@ void BgSpot08Iceblock_Update(Actor* thisx, GlobalContext* globalCtx) {
     if (this->targetSize < 0) {
         this->targetSize = 1;
     } else {
+        if (this->water && this->water->ySurface != this->dyna.actor.home.pos.y) {
+            this->dyna.actor.home.pos.y = this->water->ySurface;
+            CollisionPoly* colPol;
+            s32 backgroundID;
+            Vec3f centerPoint;
+            BgActor* bgActor = &(globalCtx->colCtx).dyna.bgActors[this->dyna.bgId];
+            VEC_SET(centerPoint,bgActor->boundingSphere.center.x,bgActor->boundingSphere.center.y,bgActor->boundingSphere.center.z);
+            if (BgCheck_SphVsFirstPolyImpl(&globalCtx->colCtx,0,&colPol,&backgroundID,&centerPoint,bgActor->boundingSphere.radius*(1.0f/1.1f),thisx,0)) {
+                DECR(this->targetSize);
+            }
+        }
         if (thisx->scale.z < scaleTargets[this->targetSize]) {
             Actor_SetScale(thisx, thisx->scale.z+MIN_SIZE_INC);
             if (thisx->scale.z >= scaleTargets[this->targetSize])
