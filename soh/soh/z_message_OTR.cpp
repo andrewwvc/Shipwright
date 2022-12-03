@@ -216,6 +216,16 @@ extern "C" void OTRMessage_Init()
         }
     );
 
+    CustomMessageManager::Instance->CreateMessage(
+        questMessageTableID, WonderMsg+0x3E,
+        {
+          TEXTBOX_TYPE_BLUE, TEXTBOX_POS_MIDDLE,
+          "Wow, you sure have grown!&You're still not quite&used to seeing yourself&as an adult, are you?",
+          "",
+          "",
+        }
+    );
+
     u16 SariaMsg = TextIDAllocator::Instance->allocateRange("saria", 30);
     CustomMessageManager::Instance->CreateMessage(
         questMessageTableID, SariaMsg,
@@ -618,7 +628,7 @@ extern "C" void OTRMessage_Init()
         questMessageTableID, KokiriMsg+16,
         {
           TEXTBOX_TYPE_BLACK, TEXTBOX_POS_BOTTOM,
-          "I'm probably going to go&to collect firewood from the&lost woods later on.^But you know, lately I've been&getting to thinking about&how strange that is.^This village used to have&enough trees that we seldom&had to do this before.",
+          "I'm probably going to go&to collect firewood from the&lost woods later on.^But you know, lately I've been&getting to think about&how strange that is.^This village used to have&enough trees that we seldom&had to do this before.",
           "",
           "",
         }
