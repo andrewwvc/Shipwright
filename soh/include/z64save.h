@@ -191,6 +191,8 @@ typedef struct {
     u8 mqDungeonCount;
     u16 goronTimeStatus;
     s32 goronTimeDay;
+    s32 SariaDateDay;
+    s32 RutoDateDay;
 } SaveContext; // size = 0x1428
 
 typedef enum {
