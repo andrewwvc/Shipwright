@@ -66,9 +66,13 @@ void EnRu1_DateStart(EnRu1* this, GlobalContext* globalCtx);
 void EnRu1_DateInitialTalk(EnRu1* this, GlobalContext* globalCtx);
 void EnRu1_DateDuringTalk(EnRu1* this, GlobalContext* globalCtx);
 void EnRu1_GiveItem(EnRu1* this, GlobalContext* globalCtx);
+void EnRu1_DateFinalTalk(EnRu1* this, GlobalContext* globalCtx);
+void EnRu1_DateDuringFinalTalk(EnRu1* this, GlobalContext* globalCtx);
+void EnRu1_DateEnd(EnRu1* this, GlobalContext* globalCtx);
 
 void func_80AF0278(EnRu1* this, GlobalContext* globalCtx, s32 limbIndex, Vec3s* rot);
 s32 EnRu1_DateConditionsMet();
+s32 IsAfterRutosDate();
 
 void EnRu1_DrawNothing(EnRu1* this, GlobalContext* globalCtx);
 void EnRu1_DrawOpa(EnRu1* this, GlobalContext* globalCtx);
@@ -123,7 +127,7 @@ static EnRu1ActionFunc sActionFuncs[] = {
     EnRu1_Action28, EnRu1_Action29, EnRu1_Action30, EnRu1_Action31, EnRu1_Action32, EnRu1_Action33, EnRu1_Action34,
     EnRu1_Action35, EnRu1_Action36, EnRu1_Action37, EnRu1_Action38, EnRu1_Action39, EnRu1_Action40, EnRu1_Action41,
     EnRu1_Action42, EnRu1_Action43, EnRu1_Action44, EnRu1_Action45, EnRu1_NotAppearing, EnRu1_DateStart, EnRu1_DateInitialTalk,
-    EnRu1_DateDuringTalk, EnRu1_GiveItem,
+    EnRu1_DateDuringTalk, EnRu1_GiveItem, EnRu1_DateFinalTalk, EnRu1_DateDuringFinalTalk, EnRu1_DateEnd,
 };
 
 static EnRu1PreLimbDrawFunc sPreLimbDrawFuncs[] = {
@@ -1712,6 +1716,7 @@ s32 func_80AEEAC8(EnRu1* this, GlobalContext* globalCtx) {
 void func_80AEEB24(EnRu1* this, GlobalContext* globalCtx) {
     if ((func_80AEEAC8(this, globalCtx) == 0) && (this->unk_350 == 3)) {
         this->action = 30;
+        this->timer = 0;
         func_80AEE02C(this);
         this->actor.gravity = -0.1f;
         this->actor.minVelocityY = -((kREG(18) * 0.1f) + 0.7f);
@@ -1775,6 +1780,19 @@ void EnRu1_Action27(EnRu1* this, GlobalContext* globalCtx) {
     func_80AEE488(this, globalCtx);
     func_80AED624(this, globalCtx);
     func_80AEDAE0(this, globalCtx);
+    if (gSaveContext.infTable[20] & 0x800) {
+        if (this->timer == 0) {
+            this->timer = 8;
+            func_80AEB264(this, &gRutoChildWait2Anim, 0, -8, 0);
+        }
+        this->timer--;
+        if (this->timer == 0) {
+            this->actor.flags |= ACTOR_FLAG_0 | ACTOR_FLAG_3;
+            this->action = 51;
+        }
+    } else {
+        this->timer = 0;
+    }
 }
 
 void EnRu1_Action28(EnRu1* this, GlobalContext* globalCtx) {
@@ -1806,7 +1824,24 @@ void EnRu1_Action30(EnRu1* this, GlobalContext* globalCtx) {
     Actor_MoveForward(&this->actor);
     EnRu1_UpdateSkelAnime(this);
     EnRu1_UpdateEyes(this);
-    func_80AEEAC8(this, globalCtx);
+    if (IsAfterRutosDate()) {
+        if ((gSaveContext.infTable[20] & 0x100) && this->timer == 0) {
+            this->timer = 32;
+            gSaveContext.infTable[21] |= 0x8;
+        }
+        if (this->timer > 0) {
+            this->timer--;
+            this->drawConfig = 2;
+            Math_ApproachS(&this->alpha, 0, 1, 10);
+            if (this->timer == 0) {
+                Actor_Kill(&this->actor);
+            }
+        } else {
+            func_80AEEAC8(this, globalCtx);
+        }
+    } else {
+        func_80AEEAC8(this, globalCtx);
+    }
     func_80AED624(this, globalCtx);
     func_80AEDAE0(this, globalCtx);
 }
@@ -2298,20 +2333,25 @@ s32 EnRu1_DateConversation(EnRu1* this, GlobalContext* globalCtx) {
     if (!Actor_ProcessTalkRequest(&this->actor, globalCtx)) {
         u16 RutoMsg = GetTextID("ruto");
         this->actor.flags |= ACTOR_FLAG_0 | ACTOR_FLAG_3;
-        if (!(gSaveContext.infTable[21] & 0x0004)) {
-            if (gSaveContext.infTable[20] & 0x8000)
-                this->actor.textId = RutoMsg+16;
-            else if ((gSaveContext.infTable[20] & 0x3000) == 0x1000)
-                this->actor.textId = RutoMsg+0;
-            else if ((gSaveContext.infTable[20] & 0x3000) == 0x2000)
-                this->actor.textId = RutoMsg+13;
-            else if ((this->dateProgress & 0x8) || ((gSaveContext.infTable[20] & 0x3000) == 0x0000))
-                this->actor.textId = RutoMsg+15;
-            else
-                this->actor.textId = RutoMsg+14;
-            func_8002F2F4(&this->actor, globalCtx);
+        if (!(gSaveContext.infTable[21] & 0x800)) {
+            if (!(gSaveContext.infTable[21] & 0x0004)) {
+                if (gSaveContext.infTable[20] & 0x8000)
+                    this->actor.textId = RutoMsg+16;
+                else if ((gSaveContext.infTable[20] & 0x3000) == 0x1000)
+                    this->actor.textId = RutoMsg+0;
+                else if ((gSaveContext.infTable[20] & 0x3000) == 0x2000)
+                    this->actor.textId = RutoMsg+13;
+                else if ((this->dateProgress & 0x8) || ((gSaveContext.infTable[20] & 0x3000) == 0x0000))
+                    this->actor.textId = RutoMsg+15;
+                else
+                    this->actor.textId = RutoMsg+14;
+                func_8002F2F4(&this->actor, globalCtx);
+            } else {
+                this->actor.textId = RutoMsg+1;
+                func_8002F2F4(&this->actor, globalCtx);
+            }
         } else {
-            this->actor.textId = RutoMsg+1;
+            this->actor.textId = RutoMsg+25;
             func_8002F2F4(&this->actor, globalCtx);
         }
         return false;
@@ -2338,16 +2378,23 @@ s32 func_80AEFDC0(EnRu1* this, GlobalContext* globalCtx) {
         this->actor.textId = Text_GetFaceReaction(globalCtx, 0x1F);
         if (this->actor.textId == 0) {
             if (IsAfterRutosDate()) {
-                if (!(gSaveContext.infTable[21] & 0x0004) && !(gSaveContext.infTable[20] & 0x7000))//You failed to show up
+                if ((!(gSaveContext.infTable[21] & 0x0004) && !(gSaveContext.infTable[20] & 0x7000)) || (gSaveContext.infTable[21] & 0x800))//You failed to show up or talk to her before sunrise
                     this->actor.textId = RutoMsg+20;
                 else if (EnRu1_DetermineDateScore() == 1000) {
-                    if (gSaveContext.infTable[19] & 0x1) {
-                        this->actor.textId = RutoMsg+21;
+                    if (!(gSaveContext.infTable[21] & 0x8)) {//If you failed to give her a final talk
+                        this->actor.textId = RutoMsg+24;
                     } else {
-                        this->actor.textId = RutoMsg+18;
+                        if (gSaveContext.infTable[19] & 0x1) {
+                            this->actor.textId = RutoMsg+21;
+                        } else {
+                            this->actor.textId = RutoMsg+18;
+                        }
                     }
                 } else if (EnRu1_DetermineDatePreScore() == 1000) {
-                    this->actor.textId = RutoMsg+17;
+                    if (!(gSaveContext.infTable[21] & 0x8))
+                        this->actor.textId = RutoMsg+24;
+                    else
+                        this->actor.textId = RutoMsg+17;
                 } else {
                     this->actor.textId = RutoMsg+22;
                 }
@@ -2400,6 +2447,7 @@ s32 func_80AEFE38(EnRu1* this, GlobalContext* globalCtx) {
     return false;
 }
 
+//Action50
 void EnRu1_GiveItem(EnRu1* this, GlobalContext* globalCtx) {
     if (Actor_HasParent(&this->actor, globalCtx)) {
         this->actor.parent = NULL;
@@ -2578,7 +2626,7 @@ void EnRu1_DateInitialTalk(EnRu1* this, GlobalContext* globalCtx) {
 s32 EnRu1_IsWillingToSit(EnRu1* this, GlobalContext* globalCtx) {
     s32 frameCount;
 
-    if (1/*gSaveContext.infTable[21] & 4*/) {
+    if (!(gSaveContext.infTable[21] & 0x800)) {
         frameCount = Animation_GetLastFrame(&gRutoChildSitAnim);
         Animation_Change(&this->skelAnime, &gRutoChildSitAnim, 1.0f, 0, frameCount, ANIMMODE_ONCE, -8.0f);
         globalCtx->msgCtx.msgMode = MSGMODE_PAUSED;
@@ -2592,10 +2640,107 @@ s32 EnRu1_IsWillingToSit(EnRu1* this, GlobalContext* globalCtx) {
 
 //Action49
 void EnRu1_DateDuringTalk(EnRu1* this, GlobalContext* globalCtx) {
+    EnRu1_UpdateSkelAnime(this);
+    EnRu1_UpdateEyes(this);
     if (func_80AEB174(globalCtx) && !EnRu1_IsWillingToSit(this, globalCtx)) {
         Message_CloseTextbox(globalCtx);
+        this->drawConfig = 1;
+        this->actor.flags |= ACTOR_FLAG_0 | ACTOR_FLAG_3;
         this->action = 48;
     }
+}
+
+s32 EnRu1_DateEndConversation(EnRu1* this, GlobalContext* globalCtx) {
+    if (!Actor_ProcessTalkRequest(&this->actor, globalCtx)) {
+        u16 RutoMsg = GetTextID("ruto");
+        this->actor.flags |= ACTOR_FLAG_0 | ACTOR_FLAG_3;
+        if (EnRu1_DetermineDatePreScore() == 1000)
+            this->actor.textId = RutoMsg+12;
+        else
+            this->actor.textId = RutoMsg+23;
+        func_8002F2F4(&this->actor, globalCtx);
+        return false;
+    }
+    return true;
+}
+
+//Action51
+void EnRu1_DateFinalTalk(EnRu1* this, GlobalContext* globalCtx) {
+    s32 cond;
+    func_80AEEF68(this, globalCtx);
+    EnRu1_UpdateSkelAnime(this);
+    EnRu1_UpdateEyes(this);
+    func_80AEAC10(this, globalCtx);
+    func_80AEAECC(this, globalCtx);
+    cond = EnRu1_DateEndConversation(this, globalCtx);
+    func_80AED624(this, globalCtx);
+    if (cond) {
+        this->action = 52;
+    }
+}
+
+//Action52
+void EnRu1_DateDuringFinalTalk(EnRu1* this, GlobalContext* globalCtx) {
+    if (func_80AEB1B4(globalCtx)) {
+        Message_CloseTextbox(globalCtx);
+        this->timer = 0;
+        Animation_Change(&this->skelAnime, &gRutoChildWalkAnim, 1.0f, 0, Animation_GetLastFrame(&gRutoChildWalkAnim),
+                         ANIMMODE_LOOP, -8.0f);
+        this->actor.shape.rot.y = this->actor.world.rot.y + 0x8000;
+        this->action = 53;
+        gSaveContext.infTable[21] |= 0x8;//Records that you've seen her off
+        this->actor.flags &= ~(ACTOR_FLAG_0 | ACTOR_FLAG_3);
+    }
+}
+
+//Action53
+void EnRu1_DateEnd(EnRu1* this, GlobalContext* globalCtx) {
+    s32 cond;
+
+    this->actor.speedXZ = 1.0f;
+    Math_ApproachS(&this->actor.world.rot.y, 0x8000, 1, 0x200);
+    func_80AEEF68(this, globalCtx);
+    EnRu1_UpdateSkelAnime(this);
+    EnRu1_UpdateEyes(this);
+    func_80AEAC10(this, globalCtx);
+    if (this->actor.world.pos.y <= -1336){
+        this->actor.minVelocityY = 0.0f;
+        this->actor.gravity = 0.0f;
+        if (this->timer == 0) {
+            func_80AEB264(this, &gRutoChildTreadWaterAnim, 0, -8, 0);
+            this->actor.world.pos.y = -1336;
+            this->timer = 8;
+        }
+        if (this->timer > 0) {
+            Math_ApproachS(&this->actor.shape.rot.y, this->actor.world.rot.y, 1, 0x1000);
+            this->timer--;
+            if (this->timer == 0) {
+                Audio_PlayActorSound2(&this->actor, NA_SE_EV_OUT_OF_WATER);
+                EnRu1_SpawnSplash(this,globalCtx);
+                this->timer = -32;
+            }
+        } else if (this->timer < 0) {
+            this->timer++;
+            if (this->dateProgress & 0x10) {
+                Math_ApproachS(&this->alpha, 0, 1, 10);
+                if (this->timer == 0) {
+                    Actor_Kill(&this->actor);
+                }
+            } else {
+                if (this->timer == 0) {
+                    this->timer = -30;
+                    this->dateProgress |= 0x10;
+                    this->drawConfig = 2;
+                }
+            }
+        }
+    } else {
+        Math_ApproachS(&this->actor.shape.rot.y, this->actor.world.rot.y+0x8000, 1, 0x1000);
+        this->actor.minVelocityY = -((kREG(24) * 0.01f) + 6.8f);
+        this->actor.gravity = -((kREG(23) * 0.01f) + 1.3f);
+        func_80AEAECC(this, globalCtx);
+    }
+    Actor_MoveForward(&this->actor);
 }
 
 void EnRu1_LakeDateSpawn(EnRu1* this, GlobalContext* globalCtx) {
@@ -2648,7 +2793,7 @@ void func_80AF0050(EnRu1* this, GlobalContext* globalCtx) {
 }
 
 s32 EnRu1_IsOnIsland(Vec3f cPos) {
-    return -1311 < cPos.x && cPos.x < -420 && 6860 < cPos.z && cPos.z < 7700;
+    return -1311 < cPos.x && cPos.x < -420 && 6860 < cPos.z && cPos.z < 7300;
 }
 
 void EnRu1_Update(Actor* thisx, GlobalContext* globalCtx) {
@@ -2686,27 +2831,33 @@ void EnRu1_Update(Actor* thisx, GlobalContext* globalCtx) {
                 Message_StartTextbox(globalCtx, RutoMsg+8, NULL);
             }
         } else {
-            if (IS_DAY && gSaveContext.RutoDateDay == (gSaveContext.totalDays-1) && EnRu1_HadDateStarted() && !EnRu1_HadDateEnded()) {
+            if (IS_DAY && gSaveContext.RutoDateDay == (gSaveContext.totalDays-1)) {
                 Player* player = GET_PLAYER(globalCtx);
-                if ((this->dateProgress & 0x4) &&
-                    (gSaveContext.infTable[21] & 0x0004) &&
-                    EnRu1_IsOnIsland(cPos) &&
-                    EnRu1_IsOnIsland(player->actor.world.pos) &&
-                    this->action == 27) {
+                if (EnRu1_HadDateStarted() && !EnRu1_HadDateEnded()) {
+                    if ((this->dateProgress & 0x4) &&
+                        (gSaveContext.infTable[21] & 0x0004) &&
+                        EnRu1_IsOnIsland(cPos) &&
+                        EnRu1_IsOnIsland(player->actor.world.pos) &&
+                        this->action == 27) {
 
-                    gSaveContext.infTable[20] |= 0x800;
-                    if (this->actor.xzDistToPlayer < 100.0f){
-                        gSaveContext.infTable[21] |= 0x80;
-                        if (EnRu1_DetermineDatePreScore() < 1000)
-                            Message_StartTextbox(globalCtx, RutoMsg+10, NULL);
-                        else
-                            Message_StartTextbox(globalCtx, RutoMsg+11, NULL);
+                        gSaveContext.infTable[20] |= 0x800;
+                        if (this->actor.xzDistToPlayer < 100.0f){
+                            gSaveContext.infTable[21] |= 0x80;
+                            if (EnRu1_DetermineDatePreScore() < 1000)
+                                Message_StartTextbox(globalCtx, RutoMsg+10, NULL);
+                            else
+                                Message_StartTextbox(globalCtx, RutoMsg+11, NULL);
+                        } else {
+                            Message_StartTextbox(globalCtx, RutoMsg+19, NULL);
+                        }
+
+
                     } else {
-                        Message_StartTextbox(globalCtx, RutoMsg+19, NULL);
+                        gSaveContext.infTable[20] |= 0x100;
+                        Message_StartTextbox(globalCtx, RutoMsg+9, NULL);
                     }
-                } else {
-                    gSaveContext.infTable[20] |= 0x100;
-                    Message_StartTextbox(globalCtx, RutoMsg+9, NULL);
+                } else if ((gSaveContext.infTable[20] & 0x7000) && !(gSaveContext.infTable[21] & 0x0004)) {//Ruto had spotted you, but not talked
+                    gSaveContext.infTable[21] |= 0x800;
                 }
             }
         }
