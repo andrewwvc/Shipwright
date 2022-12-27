@@ -1988,7 +1988,35 @@ extern "C" int CustomMessage_RetrieveIfExists(GlobalContext* globalCtx) {
             messageEntry = CustomMessageManager::Instance->RetrieveMessage(customMessageTableID, textId);
         }
     } else {
-        messageEntry = CustomMessageManager::Instance->RetrieveMessage(questMessageTableID, textId);
+        if (Player_GetMask(globalCtx) == PLAYER_MASK_TRUTH) {
+            s16 actorParams;
+
+            // if we're in a generic grotto
+            if (globalCtx->sceneNum == 62 && textId == 0x418 && msgCtx->talkActor->params == 14360) {
+                // look for the chest in the actorlist to determine
+                // which grotto we're in
+                int numOfActorLists =
+                    sizeof(globalCtx->actorCtx.actorLists) / sizeof(globalCtx->actorCtx.actorLists[0]);
+                for (int i = 0; i < numOfActorLists; i++) {
+                    if (globalCtx->actorCtx.actorLists[i].length) {
+                        if (globalCtx->actorCtx.actorLists[i].head->id == 10) {
+                            // set the params for the hint check to be negative chest params
+                            actorParams = globalCtx->actorCtx.actorLists[i].head->params & 0x1F;
+                        }
+                    }
+                }
+
+                uint16_t newTextId = GetTextID("stone")+actorParams;
+                messageEntry = CustomMessageManager::Instance->RetrieveMessage(questMessageTableID, newTextId);
+                if (messageEntry.textBoxType == -1) {
+                    messageEntry = CustomMessageManager::Instance->RetrieveMessage(questMessageTableID, textId);
+                }
+            } else {
+                messageEntry = CustomMessageManager::Instance->RetrieveMessage(questMessageTableID, textId);
+            }
+        } else {
+            messageEntry = CustomMessageManager::Instance->RetrieveMessage(questMessageTableID, textId);
+        }
     }
     if (textId == TEXT_GS_NO_FREEZE || textId == TEXT_GS_FREEZE) {
         if (CVar_GetS32("gInjectSkulltulaCount", 0) != 0) {
