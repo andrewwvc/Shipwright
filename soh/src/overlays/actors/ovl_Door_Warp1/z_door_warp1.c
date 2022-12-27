@@ -579,6 +579,12 @@ void DoorWarp1_ChildWarpOut(DoorWarp1* this, GlobalContext* globalCtx) {
         } else if (globalCtx->sceneNum == SCENE_BDAN_BOSS) {
             globalCtx->nextEntranceIndex = 0x10E;
             gSaveContext.nextCutsceneIndex = 0;
+        } else if (globalCtx->sceneNum == SCENE_SYOTES2) {
+            //if (LINK_IS_CHILD)
+                globalCtx->nextEntranceIndex = 252;
+            //else
+            //     globalCtx->nextEntranceIndex = 0x600;
+            gSaveContext.nextCutsceneIndex = 0;
         }
         osSyncPrintf("\n\n\nおわりおわり");
         globalCtx->sceneLoadFlag = 0x14;

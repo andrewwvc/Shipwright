@@ -9602,6 +9602,7 @@ void Player_Init(Actor* thisx, GlobalContext* globalCtx2) {
     this->ageProperties = &sAgeProperties[gSaveContext.linkAge];
     this->itemActionParam = this->heldItemActionParam = -1;
     this->heldItemId = ITEM_NONE;
+    this->sCurrentSecretIndex = 0;
 
     func_80835F44(globalCtx, this, ITEM_NONE);
     Player_SetEquipmentData(globalCtx, this);
