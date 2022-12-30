@@ -10,6 +10,7 @@
 #include "objects/object_km1/object_km1.h"
 #include "objects/object_kw1/object_kw1.h"
 #include "vt.h"
+#include "overlays/actors/ovl_En_Fish/z_en_fish.h"
 #include "soh/Enhancements/randomizer/adult_trade_shuffle.h"
 
 #define FLAGS (ACTOR_FLAG_0 | ACTOR_FLAG_3 | ACTOR_FLAG_4)
@@ -24,6 +25,7 @@ void EnKo_Draw(Actor* thisx, PlayState* play);
 
 void func_80A99048(EnKo* this, PlayState* play);
 void func_80A995CC(EnKo* this, PlayState* play);
+void heart_give(EnKo* this, PlayState* play);
 void func_80A99384(EnKo* this, PlayState* play);
 void func_80A99438(EnKo* this, PlayState* play);
 void func_80A99504(EnKo* this, PlayState* play);
@@ -91,6 +93,8 @@ static EnKoSkeleton sSkeleton[2] = {
     { OBJECT_KM1, gKm1Skel, /* 0x060000F0 */ },
     { OBJECT_KW1, gKw1Skel, /* 0x060000F0 */ },
 };
+
+#define NUM_TREES 7
 
 typedef enum {
     /*  0 */ ENKO_ANIM_0,
@@ -166,20 +170,20 @@ static AnimationInfo sAnimationInfo[] = {
     { &gObjOsAnim_7830, 1.0f, 0.0f, -1.0f, ANIMMODE_LOOP, -8.0f },
 };
 
-static u8 sOsAnimeLookup[13][5] = {
-    /* ENKO_TYPE_CHILD_0    */ { ENKO_ANIM_8, ENKO_ANIM_9, ENKO_ANIM_9, ENKO_ANIM_14, ENKO_ANIM_11 },
-    /* ENKO_TYPE_CHILD_1    */ { ENKO_ANIM_2, ENKO_ANIM_12, ENKO_ANIM_2, ENKO_ANIM_13, ENKO_ANIM_13 },
-    /* ENKO_TYPE_CHILD_2    */ { ENKO_ANIM_11, ENKO_ANIM_11, ENKO_ANIM_11, ENKO_ANIM_15, ENKO_ANIM_9 },
-    /* ENKO_TYPE_CHILD_3    */ { ENKO_ANIM_0, ENKO_ANIM_16, ENKO_ANIM_16, ENKO_ANIM_17, ENKO_ANIM_18 },
-    /* ENKO_TYPE_CHILD_4    */ { ENKO_ANIM_19, ENKO_ANIM_19, ENKO_ANIM_20, ENKO_ANIM_10, ENKO_ANIM_9 },
-    /* ENKO_TYPE_CHILD_5    */ { ENKO_ANIM_3, ENKO_ANIM_3, ENKO_ANIM_3, ENKO_ANIM_3, ENKO_ANIM_3 },
-    /* ENKO_TYPE_CHILD_6    */ { ENKO_ANIM_4, ENKO_ANIM_22, ENKO_ANIM_22, ENKO_ANIM_4, ENKO_ANIM_23 },
-    /* ENKO_TYPE_CHILD_7    */ { ENKO_ANIM_24, ENKO_ANIM_16, ENKO_ANIM_16, ENKO_ANIM_25, ENKO_ANIM_16 },
-    /* ENKO_TYPE_CHILD_8    */ { ENKO_ANIM_26, ENKO_ANIM_15, ENKO_ANIM_15, ENKO_ANIM_26, ENKO_ANIM_15 },
-    /* ENKO_TYPE_CHILD_9    */ { ENKO_ANIM_3, ENKO_ANIM_3, ENKO_ANIM_3, ENKO_ANIM_27, ENKO_ANIM_27 },
-    /* ENKO_TYPE_CHILD_10   */ { ENKO_ANIM_2, ENKO_ANIM_2, ENKO_ANIM_2, ENKO_ANIM_2, ENKO_ANIM_22 },
-    /* ENKO_TYPE_CHILD_11   */ { ENKO_ANIM_14, ENKO_ANIM_14, ENKO_ANIM_14, ENKO_ANIM_14, ENKO_ANIM_14 },
-    /* ENKO_TYPE_CHILD_FADO */ { ENKO_ANIM_5, ENKO_ANIM_5, ENKO_ANIM_5, ENKO_ANIM_5, ENKO_ANIM_5 },
+static u8 sOsAnimeLookup[13][6] = {
+    /* ENKO_TYPE_CHILD_0    */ { ENKO_ANIM_8, ENKO_ANIM_9, ENKO_ANIM_9, ENKO_ANIM_14, ENKO_ANIM_11, ENKO_ANIM_9 },
+    /* ENKO_TYPE_CHILD_1    */ { ENKO_ANIM_2, ENKO_ANIM_12, ENKO_ANIM_2, ENKO_ANIM_13, ENKO_ANIM_13, ENKO_ANIM_2 },
+    /* ENKO_TYPE_CHILD_2    */ { ENKO_ANIM_11, ENKO_ANIM_11, ENKO_ANIM_11, ENKO_ANIM_15, ENKO_ANIM_9, ENKO_ANIM_11 },
+    /* ENKO_TYPE_CHILD_3    */ { ENKO_ANIM_0, ENKO_ANIM_16, ENKO_ANIM_16, ENKO_ANIM_17, ENKO_ANIM_18, ENKO_ANIM_16 },
+    /* ENKO_TYPE_CHILD_4    */ { ENKO_ANIM_19, ENKO_ANIM_19, ENKO_ANIM_20, ENKO_ANIM_10, ENKO_ANIM_9, ENKO_ANIM_20 },
+    /* ENKO_TYPE_CHILD_5    */ { ENKO_ANIM_3, ENKO_ANIM_3, ENKO_ANIM_3, ENKO_ANIM_3, ENKO_ANIM_3, ENKO_ANIM_3 },
+    /* ENKO_TYPE_CHILD_6    */ { ENKO_ANIM_4, ENKO_ANIM_22, ENKO_ANIM_22, ENKO_ANIM_4, ENKO_ANIM_23, ENKO_ANIM_22 },
+    /* ENKO_TYPE_CHILD_7    */ { ENKO_ANIM_24, ENKO_ANIM_16, ENKO_ANIM_16, ENKO_ANIM_25, ENKO_ANIM_16, ENKO_ANIM_16 },
+    /* ENKO_TYPE_CHILD_8    */ { ENKO_ANIM_26, ENKO_ANIM_15, ENKO_ANIM_15, ENKO_ANIM_26, ENKO_ANIM_15, ENKO_ANIM_15 },
+    /* ENKO_TYPE_CHILD_9    */ { ENKO_ANIM_3, ENKO_ANIM_3, ENKO_ANIM_3, ENKO_ANIM_27, ENKO_ANIM_27, ENKO_ANIM_3 },
+    /* ENKO_TYPE_CHILD_10   */ { ENKO_ANIM_2, ENKO_ANIM_2, ENKO_ANIM_2, ENKO_ANIM_2, ENKO_ANIM_22, ENKO_ANIM_2 },
+    /* ENKO_TYPE_CHILD_11   */ { ENKO_ANIM_14, ENKO_ANIM_14, ENKO_ANIM_14, ENKO_ANIM_14, ENKO_ANIM_14, ENKO_ANIM_14 },
+    /* ENKO_TYPE_CHILD_FADO */ { ENKO_ANIM_5, ENKO_ANIM_5, ENKO_ANIM_5, ENKO_ANIM_5, ENKO_ANIM_5, ENKO_ANIM_5 },
 };
 
 typedef struct {
@@ -241,17 +245,26 @@ s32 EnKo_AreObjectsAvailable(EnKo* this, PlayState* play) {
 
     this->legsObjectBankIdx = Object_GetIndex(&play->objectCtx, sSkeleton[legsId].objectId);
     if (this->legsObjectBankIdx < 0) {
-        return false;
+        Object_Spawn(&play->objectCtx, sSkeleton[legsId].objectId);
+        this->legsObjectBankIdx = Object_GetIndex(&play->objectCtx, sSkeleton[legsId].objectId);
+        if (this->legsObjectBankIdx < 0)
+            return false;
     }
 
-    this->bodyObjectBankIdx = Object_GetIndex(&play->objectCtx, sSkeleton[bodyId].objectId);
-    if (this->bodyObjectBankIdx < 0) {
-        return false;
+    this->legsObjectBankIdx = Object_GetIndex(&play->objectCtx, sSkeleton[bodyId].objectId);
+    if (this->legsObjectBankIdx < 0) {
+        Object_Spawn(&play->objectCtx, sSkeleton[bodyId].objectId);
+        this->legsObjectBankIdx = Object_GetIndex(&play->objectCtx, sSkeleton[bodyId].objectId);
+        if (this->legsObjectBankIdx < 0)
+            return false;
     }
 
-    this->headObjectBankIdx = Object_GetIndex(&play->objectCtx, sHead[headId].objectId);
-    if (this->headObjectBankIdx < 0) {
-        return false;
+    this->legsObjectBankIdx = Object_GetIndex(&play->objectCtx, sHead[headId].objectId);
+    if (this->legsObjectBankIdx < 0) {
+        Object_Spawn(&play->objectCtx, sHead[headId].objectId);
+        this->legsObjectBankIdx = Object_GetIndex(&play->objectCtx, sHead[headId].objectId);
+        if (this->legsObjectBankIdx < 0)
+            return false;
     }
     return true;
 }
@@ -272,7 +285,11 @@ s32 EnKo_AreObjectsLoaded(EnKo* this, PlayState* play) {
 s32 EnKo_IsOsAnimeAvailable(EnKo* this, PlayState* play) {
     this->osAnimeBankIndex = Object_GetIndex(&play->objectCtx, OBJECT_OS_ANIME);
     if (this->osAnimeBankIndex < 0) {
-        return false;
+        Object_Spawn(&play->objectCtx, OBJECT_OS_ANIME);
+        this->osAnimeBankIndex = Object_GetIndex(&play->objectCtx, OBJECT_OS_ANIME);
+        if (this->osAnimeBankIndex < 0) {
+            return false;
+        }
     }
     return true;
 }
@@ -284,10 +301,21 @@ s32 EnKo_IsOsAnimeLoaded(EnKo* this, PlayState* play) {
     return true;
 }
 
+u8 is0Chopping() {
+    return IS_DAY && (getDayOfCycle() % 3 == 2) && gSaveContext.infTable[3] & (1 << 14);
+}
+
 u16 func_80A96FD0(PlayState* play, Actor* thisx) {
     EnKo* this = (EnKo*)thisx;
+    u16 KokiriMsg = GetTextID("kokiri");
     switch (ENKO_TYPE) {
         case ENKO_TYPE_CHILD_FADO:
+            if (CHECK_QUEST_ITEM(QUEST_SONG_SARIA)) {
+                if (gSaveContext.infTable[3] & 1)
+                    return KokiriMsg+17;
+                else
+                    return KokiriMsg;
+            }
             if (gSaveContext.eventChkInf[4] & 1) {
                 return 0x10DA;
             }
@@ -296,6 +324,12 @@ u16 func_80A96FD0(PlayState* play, Actor* thisx) {
             }
             return (gSaveContext.infTable[11] & 0x80) ? 0x10D8 : 0x10D7;
         case ENKO_TYPE_CHILD_0:
+            if (CHECK_QUEST_ITEM(QUEST_SONG_SARIA)) {
+                if (!IS_DAY)
+                    return KokiriMsg+16;
+                else if (is0Chopping())
+                    return KokiriMsg+28;
+            }
             if (gSaveContext.eventChkInf[4] & 1) {
                 return 0x1025;
             }
@@ -304,6 +338,20 @@ u16 func_80A96FD0(PlayState* play, Actor* thisx) {
             }
             return 0x1004;
         case ENKO_TYPE_CHILD_1:
+            if (CHECK_QUEST_ITEM(QUEST_SONG_SARIA)) {
+                //EnFish* fish = (EnFish*)Actor_FindNearby(play, &this->actor, ACTOR_EN_FISH, ACTORCAT_ITEMACTION, 2000.0f);
+                s32 numF = Actor_FindNumberOf(play, &this->actor, ACTOR_EN_FISH, ACTORCAT_ITEMACTION, 2000.0f,NULL,EnFish_isFishInWater);
+                if (numF) {
+                    if (numF > 1) {
+                        createFishString(numF);
+                        return KokiriMsg+24;
+                    }
+                    else
+                        return KokiriMsg+23;
+                }
+                else
+                    return KokiriMsg+22;
+            }
             if (gSaveContext.eventChkInf[4] & 1) {
                 return 0x1023;
             }
@@ -331,6 +379,12 @@ u16 func_80A96FD0(PlayState* play, Actor* thisx) {
             }
             return 0x1008;
         case ENKO_TYPE_CHILD_4:
+            if (CHECK_QUEST_ITEM(QUEST_SONG_SARIA)) {
+                if (IS_DAY)
+                    return 0x1097;
+                else
+                    return KokiriMsg+12;
+            }
             if (gSaveContext.eventChkInf[4] & 1) {
                 return 0x1097;
             }
@@ -353,6 +407,26 @@ u16 func_80A96FD0(PlayState* play, Actor* thisx) {
             }
             return 0x100C;
         case ENKO_TYPE_CHILD_6:
+            if (CHECK_QUEST_ITEM(QUEST_SONG_SARIA)) {
+                if ((gSaveContext.infTable[3] & (1<<1)) && !(gSaveContext.infTable[3] & 1)) {
+                    if (gSaveContext.infTable[3] & (1<<15))
+                        return KokiriMsg+21;
+                    else
+                        return KokiriMsg+20;
+                }
+                if ((gSaveContext.infTable[3] & 1)) {
+                    if (gSaveContext.infTable[3] & (1<<15))
+                        return KokiriMsg+19;
+                    else
+                        return KokiriMsg+18;
+                }
+                if (IS_DAY) {
+                    return KokiriMsg+1;
+                }
+                else {
+                    return KokiriMsg+2;
+                }
+            }
             if (gSaveContext.eventChkInf[4] & 1) {
                 return 0x10B5;
             }
@@ -368,6 +442,12 @@ u16 func_80A96FD0(PlayState* play, Actor* thisx) {
         case ENKO_TYPE_CHILD_8:
             return 0x1038;
         case ENKO_TYPE_CHILD_9:
+            if (CHECK_QUEST_ITEM(QUEST_SONG_SARIA)) {
+                if (IS_DAY)
+                    return KokiriMsg+32;
+                else
+                    return KokiriMsg+8;
+            }
             if (CHECK_QUEST_ITEM(QUEST_KOKIRI_EMERALD)) {
                 return 0x104B;
             }
@@ -386,14 +466,34 @@ u16 func_80A96FD0(PlayState* play, Actor* thisx) {
 u16 func_80A97338(PlayState* play, Actor* thisx) {
     Player* player = GET_PLAYER(play);
     EnKo* this = (EnKo*)thisx;
+    u16 KokiriMsg = GetTextID("kokiri");
+
+    u8 growth[NUM_TREES];
+    u8 someGrowth = 0;
+    u8 numGrowth = 0;
+    u8 allGrowth = 1;
+    for (u32 ii = 0; ii<NUM_TREES; ii++) {
+        growth[ii] = Flags_GetCollectible(play,ii+1);
+        someGrowth  = someGrowth || growth[ii];
+        if (growth[ii])
+            numGrowth++;
+        allGrowth  = allGrowth && growth[ii];
+    }
 
     switch (ENKO_TYPE) {
         case ENKO_TYPE_CHILD_FADO:
             player->exchangeItemId = EXCH_ITEM_ODD_POTION;
             return 0x10B9;
         case ENKO_TYPE_CHILD_0:
+            if (allGrowth) {
+                return KokiriMsg+31;
+            }
             if (CHECK_QUEST_ITEM(QUEST_MEDALLION_FOREST)) {
-                return 0x1072;
+                //return 0x1072;
+                if (someGrowth)
+                    return KokiriMsg+30;
+                else
+                    return KokiriMsg+29;
             }
             if (gSaveContext.infTable[4] & 2) {
                 return 0x1056;
@@ -401,12 +501,19 @@ u16 func_80A97338(PlayState* play, Actor* thisx) {
             return 0x1055;
         case ENKO_TYPE_CHILD_1:
             if (CHECK_QUEST_ITEM(QUEST_MEDALLION_FOREST)) {
-                return 0x1073;
+                if (IS_DAY)
+                    return KokiriMsg+15; //0x1073;
+                else
+                    return KokiriMsg+14;
             }
             return 0x105A;
         case ENKO_TYPE_CHILD_2:
+            if (allGrowth) {
+                return KokiriMsg+6;
+            }
             if (CHECK_QUEST_ITEM(QUEST_MEDALLION_FOREST)) {
-                return 0x1074;
+                //return 0x1074;
+                return KokiriMsg+3;
             }
             if (gSaveContext.infTable[4] & 0x80) {
                 return 0x105E;
@@ -418,32 +525,37 @@ u16 func_80A97338(PlayState* play, Actor* thisx) {
             }
             return 0x105B;
         case ENKO_TYPE_CHILD_4:
-            if (CHECK_QUEST_ITEM(QUEST_MEDALLION_FOREST)) {
+            if (CHECK_QUEST_ITEM(QUEST_MEDALLION_FOREST) && IS_DAY) {
                 return 0x1076;
             }
             return 0x105F;
         case ENKO_TYPE_CHILD_5:
-            return 0x1057;
+            return KokiriMsg+13;
+            //return 0x1057;
         case ENKO_TYPE_CHILD_6:
-            if (CHECK_QUEST_ITEM(QUEST_MEDALLION_FOREST)) {
+            if (CHECK_QUEST_ITEM(QUEST_MEDALLION_FOREST) && IS_DAY) {
                 return 0x1077;
             }
-            if (gSaveContext.infTable[5] & 2) {
-                return 0x1059;
-            }
+            //if (gSaveContext.infTable[5] & 2) {
+            //return 0x1059;
+            //}
             return 0x1058;
         case ENKO_TYPE_CHILD_7:
             if (CHECK_QUEST_ITEM(QUEST_MEDALLION_FOREST)) {
-                return 0x1079;
+                //return 0x1079;
+                if (gSaveContext.infTable[3] & (1<<1) && !(gSaveContext.infTable[3] & (1<<0)))
+                    return KokiriMsg+34;
+                else
+                    return KokiriMsg+33;
             }
             return 0x104E;
         case ENKO_TYPE_CHILD_8:
             if (CHECK_QUEST_ITEM(QUEST_MEDALLION_FOREST)) {
                 return 0x107A;
             }
-            if (gSaveContext.infTable[5] & 0x200) {
-                return 0x1050;
-            }
+            //if (gSaveContext.infTable[5] & 0x200) {
+            //    return 0x1050;
+            //}
             return 0x104F;
         case ENKO_TYPE_CHILD_9:
             if (CHECK_QUEST_ITEM(QUEST_MEDALLION_FOREST)) {
@@ -452,21 +564,25 @@ u16 func_80A97338(PlayState* play, Actor* thisx) {
             return 0x1051;
         case ENKO_TYPE_CHILD_10:
             if (CHECK_QUEST_ITEM(QUEST_MEDALLION_FOREST)) {
-                return 0x107C;
+                return 0x1057;
             }
             return 0x1052;
         case ENKO_TYPE_CHILD_11:
             if (CHECK_QUEST_ITEM(QUEST_MEDALLION_FOREST)) {
                 return 0x107C;
             }
-            if (gSaveContext.infTable[6] & 2) {
-                return 0x1054;
-            }
+            //if (gSaveContext.infTable[6] & 2) {
+            //    return 0x1054;
+            //}
             return 0x1053;
         default:
             return 0;
     }
 }
+
+#define MSG_CONT(_id) \
+    this->actor.textId=_id;\
+    Message_ContinueTextbox(play,this->actor.textId);
 
 u16 func_80A97610(PlayState* play, Actor* thisx) {
     u16 faceReaction;
@@ -495,6 +611,7 @@ u16 func_80A97610(PlayState* play, Actor* thisx) {
 
 s16 func_80A97738(PlayState* play, Actor* thisx) {
     EnKo* this = (EnKo*)thisx;
+    u16 KokiriMsg = GetTextID("kokiri");
 
     switch (Message_GetState(&play->msgCtx)) {
         case TEXT_STATE_CLOSING:
@@ -534,6 +651,13 @@ s16 func_80A97738(PlayState* play, Actor* thisx) {
                     break;
                 case 0x10BA:
                     return 1;
+            }
+            if (this->actor.textId == (KokiriMsg+2)){
+                gSaveContext.infTable[3] |= 1 << 15;
+            } else if (this->actor.textId == KokiriMsg+16) {
+                gSaveContext.infTable[3] |= 1 << 14;
+            } else if (this->actor.textId == KokiriMsg+32) {
+                gSaveContext.infTable[27] |= 1 << 1;
             }
             return 0;
         case TEXT_STATE_DONE_FADING:
@@ -576,6 +700,43 @@ s16 func_80A97738(PlayState* play, Actor* thisx) {
             break;
         case TEXT_STATE_DONE:
             if (Message_ShouldAdvance(play)) {
+                if (/*(ENKO_TYPE == ENKO_TYPE_CHILD_1 && this->actor.textId == KokiriMsg+10 && !(gSaveContext.itemGetInf[1] & 0x10))
+                                ||*/ (ENKO_TYPE == ENKO_TYPE_CHILD_2 && this->actor.textId == KokiriMsg+7)) {
+                    func_8002F434(this, play, GI_HEART_PIECE, 100.0f, 100.0f);
+                    this->actionFunc = heart_give;
+                    return 3;
+                }
+
+                if (ENKO_TYPE == ENKO_TYPE_CHILD_1 && this->actor.textId == KokiriMsg+8 &&
+                    !(gSaveContext.itemGetInf[1] & 0x10)) {
+                    //MSG_CONT(KokiriMsg+10);
+                } else if ((ENKO_TYPE == ENKO_TYPE_CHILD_2)) {
+                    u8 growth[NUM_TREES];
+                    u8 numGrowth = 0;
+                    u8 someGrowth = 0;
+                    u8 allGrowth = 1;
+
+                    for (u32 ii = 0; ii<NUM_TREES; ii++) {
+                        growth[ii] = Flags_GetCollectible(play,ii+1);
+                        someGrowth  = someGrowth || growth[ii];
+                        if (growth[ii])
+                            numGrowth++;
+                        allGrowth  = allGrowth && growth[ii];
+                    }
+
+                    if (this->actor.textId == KokiriMsg+3) {
+                        if (numGrowth == NUM_TREES-1) {
+                            MSG_CONT(KokiriMsg+11);
+                        } else if (someGrowth) {
+                            MSG_CONT(KokiriMsg+5);
+                        } else {
+                            MSG_CONT(KokiriMsg+4);
+                        }
+                    } else if ((this->actor.textId == KokiriMsg+6) &&
+                            allGrowth && !(gSaveContext.itemGetInf[2] & 0x01)) {
+                        MSG_CONT(KokiriMsg+7);
+                    }
+                }
                 return 3;
             }
     }
@@ -588,7 +749,10 @@ s32 EnKo_GetForestQuestState(EnKo* this) {
     if (!LINK_IS_ADULT) {
         // Obtained Zelda's Letter
         if (gSaveContext.eventChkInf[4] & 1) {
-            return ENKO_FQS_CHILD_SARIA;
+            if (CHECK_QUEST_ITEM(QUEST_SONG_SARIA))
+                return ENKO_FQS_CHILD_POST;
+            else
+                return ENKO_FQS_CHILD_SARIA;
         }
         if (CHECK_QUEST_ITEM(QUEST_KOKIRI_EMERALD)) {
             return ENKO_FQS_CHILD_STONE;
@@ -605,20 +769,20 @@ s32 EnKo_GetForestQuestState(EnKo* this) {
 }
 
 f32 func_80A97BC0(EnKo* this) {
-    f32 D_80A9A62C[13][5] = {
-        /* ENKO_TYPE_CHILD_0    */ { 0.0f, 0.0f, 0.0f, -30.0f, -20.0f },
-        /* ENKO_TYPE_CHILD_1    */ { 0.0f, 0.0f, 0.0f, -20.0f, -10.0f },
-        /* ENKO_TYPE_CHILD_2    */ { 0.0f, 0.0f, 0.0f, -30.0f, -20.0f },
-        /* ENKO_TYPE_CHILD_3    */ { -10.0f, 10.0f, 10.0f, -10.0f, -30.0f },
-        /* ENKO_TYPE_CHILD_4    */ { 0.0f, 0.0f, 0.0f, -10.0f, -20.0f },
-        /* ENKO_TYPE_CHILD_5    */ { 0.0f, 0.0f, 0.0f, -20.0f, -20.0f },
-        /* ENKO_TYPE_CHILD_6    */ { 0.0f, 0.0f, 0.0f, -10.0f, -20.0f },
-        /* ENKO_TYPE_CHILD_7    */ { 10.0f, 10.0f, 10.0f, -60.0f, -20.0f },
-        /* ENKO_TYPE_CHILD_8    */ { -10.0f, -10.0f, -20.0f, -30.0f, -30.0f },
-        /* ENKO_TYPE_CHILD_9    */ { -10.0f, -10.0f, -10.0f, -40.0f, -40.0f },
-        /* ENKO_TYPE_CHILD_10   */ { 0.0f, 0.0f, 0.0f, -10.0f, -20.0f },
-        /* ENKO_TYPE_CHILD_11   */ { -10.0f, -10.0f, -20.0f, -30.0f, -30.0f },
-        /* ENKO_TYPE_CHILD_FADO */ { 0.0f, 0.0f, 0.0f, -20.0f, -20.0f },
+    f32 D_80A9A62C[13][6] = {
+        /* ENKO_TYPE_CHILD_0    */ { 0.0f, 0.0f, 0.0f, -30.0f, -20.0f, 0.0f } ,
+        /* ENKO_TYPE_CHILD_1    */ { 0.0f, 0.0f, 0.0f, -20.0f, -10.0f, 0.0f },
+        /* ENKO_TYPE_CHILD_2    */ { 0.0f, 0.0f, 0.0f, -30.0f, -20.0f, 0.0f },
+        /* ENKO_TYPE_CHILD_3    */ { -10.0f, 10.0f, 10.0f, -10.0f, -30.0f, 10.0f },
+        /* ENKO_TYPE_CHILD_4    */ { 0.0f, 0.0f, 0.0f, -10.0f, -20.0f, 0.0f },
+        /* ENKO_TYPE_CHILD_5    */ { 0.0f, 0.0f, 0.0f, -20.0f, -20.0f, 0.0f },
+        /* ENKO_TYPE_CHILD_6    */ { 0.0f, 0.0f, 0.0f, -10.0f, -20.0f, 0.0f },
+        /* ENKO_TYPE_CHILD_7    */ { 10.0f, 10.0f, 10.0f, -60.0f, -20.0f, 10.0f },
+        /* ENKO_TYPE_CHILD_8    */ { -10.0f, -10.0f, -20.0f, -30.0f, -30.0f, -20.0f },
+        /* ENKO_TYPE_CHILD_9    */ { -10.0f, -10.0f, -10.0f, -40.0f, -40.0f, -10.0f },
+        /* ENKO_TYPE_CHILD_10   */ { 0.0f, 0.0f, 0.0f, -10.0f, -20.0f, 0.0f },
+        /* ENKO_TYPE_CHILD_11   */ { -10.0f, -10.0f, -20.0f, -30.0f, -30.0f, -20.0f },
+        /* ENKO_TYPE_CHILD_FADO */ { 0.0f, 0.0f, 0.0f, -20.0f, -20.0f, 0.0f },
     };
 
     if (LINK_IS_ADULT && ENKO_TYPE == ENKO_TYPE_CHILD_FADO) {
@@ -628,20 +792,20 @@ f32 func_80A97BC0(EnKo* this) {
 }
 
 u8 func_80A97C7C(EnKo* this) {
-    u8 D_80A9A730[13][5] = {
-        /* ENKO_TYPE_CHILD_0    */ { 1, 1, 1, 0, 1 },
-        /* ENKO_TYPE_CHILD_1    */ { 1, 1, 1, 1, 1 },
-        /* ENKO_TYPE_CHILD_2    */ { 1, 1, 1, 0, 1 },
-        /* ENKO_TYPE_CHILD_3    */ { 1, 1, 1, 0, 1 },
-        /* ENKO_TYPE_CHILD_4    */ { 1, 1, 1, 0, 1 },
-        /* ENKO_TYPE_CHILD_5    */ { 0, 0, 0, 0, 0 },
-        /* ENKO_TYPE_CHILD_6    */ { 1, 1, 1, 1, 1 },
-        /* ENKO_TYPE_CHILD_7    */ { 1, 1, 1, 0, 1 },
-        /* ENKO_TYPE_CHILD_8    */ { 0, 0, 0, 0, 0 },
-        /* ENKO_TYPE_CHILD_9    */ { 0, 0, 0, 0, 0 },
-        /* ENKO_TYPE_CHILD_10   */ { 1, 1, 1, 1, 1 },
-        /* ENKO_TYPE_CHILD_11   */ { 0, 0, 0, 0, 0 },
-        /* ENKO_TYPE_CHILD_FADO */ { 1, 1, 1, 1, 1 },
+    u8 D_80A9A730[13][6] = {
+        /* ENKO_TYPE_CHILD_0    */ { 1, 1, 1, 0, 1, 1 },
+        /* ENKO_TYPE_CHILD_1    */ { 1, 1, 1, 1, 1, 1 },
+        /* ENKO_TYPE_CHILD_2    */ { 1, 1, 1, 0, 1, 1 },
+        /* ENKO_TYPE_CHILD_3    */ { 1, 1, 1, 0, 1, 1 },
+        /* ENKO_TYPE_CHILD_4    */ { 1, 1, 1, 0, 1, 1 },
+        /* ENKO_TYPE_CHILD_5    */ { 0, 0, 0, 0, 0, 0 },
+        /* ENKO_TYPE_CHILD_6    */ { 1, 1, 1, 1, 1, 1 },
+        /* ENKO_TYPE_CHILD_7    */ { 1, 1, 1, 0, 1, 1 },
+        /* ENKO_TYPE_CHILD_8    */ { 0, 0, 0, 0, 0, 0 },
+        /* ENKO_TYPE_CHILD_9    */ { 0, 0, 0, 0, 0, 0 },
+        /* ENKO_TYPE_CHILD_10   */ { 1, 1, 1, 1, 1, 1 },
+        /* ENKO_TYPE_CHILD_11   */ { 0, 0, 0, 0, 0, 0 },
+        /* ENKO_TYPE_CHILD_FADO */ { 1, 1, 1, 1, 1, 1 },
     };
 
     return D_80A9A730[ENKO_TYPE][EnKo_GetForestQuestState(this)];
@@ -764,6 +928,20 @@ s32 func_80A98124(EnKo* this, PlayState* play) {
     return 1;
 }
 
+s32 woodcutterAnimDrive(EnKo* this, PlayState* play) {
+    if (is0Chopping())
+        return func_80A98034(this,play);
+    else
+        return func_80A98124(this,play);
+}
+
+s32 backflipperAnimDrive(EnKo* this, PlayState* play) {
+    if (IS_DAY)
+        return func_80A98174(this,play);
+    else
+        return func_80A97F70(this,play);
+}
+
 s32 func_80A98174(EnKo* this, PlayState* play) {
     if (this->unk_1E8.unk_00 != 0) {
         if (Animation_OnFrame(&this->skelAnime, 18.0f)) {
@@ -872,6 +1050,37 @@ s32 EnKo_ChildSaria(EnKo* this, PlayState* play) {
     }
 }
 
+s32 EnKo_ChildPost(EnKo* this, PlayState* play) {
+    switch (ENKO_TYPE) {
+        case ENKO_TYPE_CHILD_0:
+            return woodcutterAnimDrive(this, play);
+        case ENKO_TYPE_CHILD_1:
+            return func_80A98124(this, play);
+        case ENKO_TYPE_CHILD_2:
+            return func_80A98034(this, play);
+        case ENKO_TYPE_CHILD_3:
+            return func_80A97EB0(this, play);
+        case ENKO_TYPE_CHILD_4:
+            return backflipperAnimDrive(this, play);
+        case ENKO_TYPE_CHILD_5:
+            return func_80A97EB0(this, play);
+        case ENKO_TYPE_CHILD_6:
+            return func_80A97F20(this, play);
+        case ENKO_TYPE_CHILD_7:
+            return func_80A97EB0(this, play);
+        case ENKO_TYPE_CHILD_8:
+            return func_80A97EB0(this, play);
+        case ENKO_TYPE_CHILD_9:
+            return func_80A97EB0(this, play);
+        case ENKO_TYPE_CHILD_10:
+            return func_80A97E18(this, play);
+        case ENKO_TYPE_CHILD_11:
+            return func_80A97EB0(this, play);
+        case ENKO_TYPE_CHILD_FADO:
+            return func_80A97E18(this, play);
+    }
+}
+
 s32 EnKo_AdultEnemy(EnKo* this, PlayState* play) {
     switch (ENKO_TYPE) {
         case ENKO_TYPE_CHILD_0:
@@ -933,6 +1142,7 @@ s32 EnKo_AdultSaved(EnKo* this, PlayState* play) {
             return func_80A97E18(this, play);
     }
 }
+
 void func_80A9877C(EnKo* this, PlayState* play) {
     Player* player = GET_PLAYER(play);
 
@@ -953,7 +1163,7 @@ void func_80A9877C(EnKo* this, PlayState* play) {
         ENKO_TYPE == ENKO_TYPE_CHILD_FADO && play->sceneNum == SCENE_SPOT10) {
         this->actor.textId = INV_CONTENT(ITEM_TRADE_ADULT) > ITEM_ODD_POTION ? 0x10B9 : 0x10DF;
 
-        if (func_8002F368(play) == ENKO_TYPE_CHILD_9) {
+        if (func_8002F368(play) == EXCH_ITEM_ODD_POTION) {
             this->actor.textId = (gSaveContext.infTable[11] & 0x1000) ? 0x10B8 : 0x10B7;
             this->unk_210 = 0;
         }
@@ -966,6 +1176,9 @@ s32 EnKo_CanSpawn(EnKo* this, PlayState* play) {
     switch (play->sceneNum) {
         case SCENE_SPOT04:
             if (ENKO_TYPE >= ENKO_TYPE_CHILD_7 && ENKO_TYPE != ENKO_TYPE_CHILD_FADO) {
+                return false;
+            }
+            if (ENKO_TYPE == ENKO_TYPE_CHILD_0 && !LINK_IS_ADULT && is0Chopping()) {
                 return false;
             }
             if (!CHECK_QUEST_ITEM(QUEST_MEDALLION_FOREST) && LINK_IS_ADULT) {
@@ -1026,19 +1239,26 @@ s32 EnKo_CanSpawn(EnKo* this, PlayState* play) {
             }
 
         case SCENE_SPOT10:
-            if (gSaveContext.n64ddFlag && Randomizer_GetSettingValue(RSK_SHUFFLE_ADULT_TRADE)) {
-                // To explain the logic because Fado and Grog are linked:
-                // - If you have Cojiro, then spawn Grog and not Fado.
-                // - If you don't have Cojiro but do have Odd Potion, spawn Fado and not Grog.
-                // - If you don't have either, spawn Grog if you haven't traded the Odd Mushroom.
-                // - If you don't have either but have traded the mushroom, don't spawn either.
-                if (PLAYER_HAS_SHUFFLED_ADULT_TRADE_ITEM(ITEM_COJIRO)) {
-                    return false;
+            if (ENKO_TYPE == ENKO_TYPE_CHILD_FADO) {
+                if (gSaveContext.n64ddFlag && Randomizer_GetSettingValue(RSK_SHUFFLE_ADULT_TRADE)) {
+                    // To explain the logic because Fado and Grog are linked:
+                    // - If you have Cojiro, then spawn Grog and not Fado.
+                    // - If you don't have Cojiro but do have Odd Potion, spawn Fado and not Grog.
+                    // - If you don't have either, spawn Grog if you haven't traded the Odd Mushroom.
+                    // - If you don't have either but have traded the mushroom, don't spawn either.
+                    if (PLAYER_HAS_SHUFFLED_ADULT_TRADE_ITEM(ITEM_COJIRO)) {
+                        return false;
+                    } else {
+                        return PLAYER_HAS_SHUFFLED_ADULT_TRADE_ITEM(ITEM_ODD_POTION);
+                    }
                 } else {
-                    return PLAYER_HAS_SHUFFLED_ADULT_TRADE_ITEM(ITEM_ODD_POTION);
+                    return (INV_CONTENT(ITEM_TRADE_ADULT) == ITEM_ODD_POTION) ? true : false;
                 }
-            } else {
-                return (INV_CONTENT(ITEM_TRADE_ADULT) == ITEM_ODD_POTION) ? true : false;
+            } else if (ENKO_TYPE == ENKO_TYPE_CHILD_0) {
+                if (is0Chopping())
+                    return true;
+                else
+                    return false;
             }
         default:
             return false;
@@ -1076,7 +1296,7 @@ s32 EnKo_GetForestQuestState2(EnKo* this) {
         return CHECK_QUEST_ITEM(QUEST_MEDALLION_FOREST) ? ENKO_FQS_ADULT_SAVED : ENKO_FQS_ADULT_ENEMY;
     }
     if (CHECK_QUEST_ITEM(QUEST_KOKIRI_EMERALD)) {
-        return (gSaveContext.eventChkInf[4] & 1) ? ENKO_FQS_CHILD_SARIA : ENKO_FQS_CHILD_STONE;
+        return (gSaveContext.eventChkInf[4] & 1) ? (CHECK_QUEST_ITEM(QUEST_SONG_SARIA) ? ENKO_FQS_CHILD_POST : ENKO_FQS_CHILD_SARIA) : ENKO_FQS_CHILD_STONE;
     }
     return ENKO_FQS_CHILD_START;
 }
@@ -1125,6 +1345,8 @@ s32 func_80A98ECC(EnKo* this, PlayState* play) {
             return EnKo_AdultEnemy(this, play);
         case ENKO_FQS_ADULT_SAVED:
             return EnKo_AdultSaved(this, play);
+        case ENKO_FQS_CHILD_POST:
+            return EnKo_ChildPost(this, play);
     }
 }
 
@@ -1201,6 +1423,20 @@ void func_80A99048(EnKo* this, PlayState* play) {
         this->actionFunc = func_80A99384;
     }
 }
+
+void heart_give(EnKo* this, PlayState* play) {
+    if (Actor_HasParent(&this->actor, play)) {
+        this->actor.parent = NULL;
+        this->actionFunc = func_80A99384;
+        if (ENKO_TYPE == ENKO_TYPE_CHILD_1)
+            gSaveContext.itemGetInf[1] |= 0x10;
+        else if (ENKO_TYPE == ENKO_TYPE_CHILD_2)
+            gSaveContext.itemGetInf[2] |= 0x01;
+    } else {
+        func_8002F434(this, play, GI_HEART_PIECE, 100.0f, 100.0f);
+    }
+}
+
 
 void func_80A99384(EnKo* this, PlayState* play) {
     if (ENKO_TYPE == ENKO_TYPE_CHILD_FADO && this->unk_1E8.unk_00 != 0 && this->actor.textId == 0x10B9) {

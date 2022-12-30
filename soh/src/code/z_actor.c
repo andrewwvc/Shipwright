@@ -3252,7 +3252,7 @@ Actor* Actor_Spawn(ActorContext* actorCtx, PlayState* play, s16 actorId, f32 pos
 
     objBankIndex = Object_GetIndex(&play->objectCtx, actorInit->objectId);
 
-    if (objBankIndex < 0 && (!gMapLoading || CVar_GetS32("gRandomizedEnemies", 0))) {
+    if (objBankIndex < 0 && CVar_GetS32("gRandomizedEnemies", 0)) {
         objBankIndex = 0;
     }
 
@@ -4515,6 +4515,36 @@ Actor* Actor_FindNearby(PlayState* play, Actor* refActor, s16 actorId, u8 actorC
     }
 
     return NULL;
+}
+
+s32 Actor_FindNumberOf(PlayState* play, Actor* refActor, s16 actorId, u8 actorCategory, f32 range,
+                        Actor** closest, u8(*predicate)(Actor*, PlayState*)) {
+    Actor* actor = play->actorCtx.actorLists[actorCategory].head;
+    f32 minDist = range*2.0f;
+    s32 total = 0;
+    if (closest)
+        *closest = NULL;
+
+    while (actor != NULL) {
+        if (actor == refActor || ((actorId != -1) && (actorId != actor->id))) {
+            actor = actor->next;
+        } else {
+            f32 currentDist = Actor_WorldDistXYZToActor(refActor, actor);
+            if (currentDist <= range && (predicate ? predicate(actor,play) : true)) {
+                total++;
+                if (currentDist <= minDist) {
+                    minDist = currentDist;
+                    if (closest)
+                        *closest = actor;
+                }
+                actor = actor->next;
+            } else {
+                actor = actor->next;
+            }
+        }
+    }
+
+    return total;
 }
 
 s32 func_800354B4(PlayState* play, Actor* actor, f32 range, s16 arg3, s16 arg4, s16 arg5) {

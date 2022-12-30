@@ -46,6 +46,7 @@ class CustomMessageManager {
     void ReplaceSpecialCharacters(std::string &string);
     void ReplaceColors(std::string& string);
     bool InsertCustomMessage(std::string tableID, uint16_t textID, CustomMessageEntry messages);
+    bool ReplaceCustomMessage(std::string tableID, uint16_t textID, CustomMessageEntry messages);
 
     std::string MESSAGE_END();
     std::string ITEM_OBTAINED(uint8_t x);
@@ -78,6 +79,10 @@ class CustomMessageManager {
     with the provided textID as its key.
     */
     bool CreateMessage(std::string tableID, uint16_t textID, CustomMessageEntry messages);
+
+    /*Formats the provided Custom Message Entry and replaces an existing entry with the same textID,
+    given that already exists*/
+    bool ReplaceMessage(std::string tableID, uint16_t textID, CustomMessageEntry messageEntry);
 
     /*
     Retrieves a message from the table with id tableID with the provided textID.
@@ -112,4 +117,21 @@ class CustomMessageManager {
     as well as %<letter> for colors (i.e. %r for red and %w for white).
     */
     void FormatCustomMessage(std::string& message);
+};
+
+class TextIDAllocator {
+  protected:
+    uint16_t start;
+    uint16_t max_range;
+    uint16_t end;
+    std::unordered_map<std::string, uint16_t> labels;
+
+  public:
+    static TextIDAllocator* Instance;
+
+    TextIDAllocator();
+    ~TextIDAllocator();
+
+    uint16_t allocateRange(std::string name, uint16_t num_ids);
+    uint16_t getId(std::string name);
 };

@@ -4,6 +4,7 @@
  * Description: Link
  */
 
+//#define INCLUDE_GAME_PRINTF
 #include "ultra64.h"
 #include "global.h"
 
@@ -5103,6 +5104,46 @@ s32 func_8083B040(Player* this, PlayState* play) {
                         func_808322D0(play, this, &gPlayerAnim_link_bottle_bug_out);
                         func_80835EA4(play, 3);
                     } else if ((sp2C > 0) && (sp2C < 4)) {
+                        Actor* mido = Actor_FindNearby(play, &this->actor, ACTOR_EN_MD, ACTORCAT_NPC, 10000.0f);
+                        if (play->sceneNum == SCENE_KOKIRI_HOME4 && !(gSaveContext.infTable[3] & 1) && mido != NULL) {
+                            this->unk_6AD = 0;
+                            //if (mido)
+                            //    func_80853148(play,mido);
+                            sp2C = this->itemAction - PLAYER_IA_LETTER_ZELDA;
+                            func_80835DE4(play, this, func_8084F104, 0);
+
+                            if (sp2C >= 0) {
+                                if (this->getItemEntry.objectId == OBJECT_INVALID) {
+                                    giEntry = ItemTable_Retrieve(D_80854528[sp2C]);
+                                } else {
+                                    giEntry = this->getItemEntry;
+                                }
+                                func_8083AE40(this, giEntry.objectId);
+                            }
+
+                            this->stateFlags1 |= PLAYER_STATE1_6 | PLAYER_STATE1_28 | PLAYER_STATE1_29;
+
+                            if (sp2C >= 0) {
+                                sp2C = sp2C + 1;
+                            } else {
+                                sp2C = sp28 + 0x18;
+                            }
+                            this->unk_84F = 1;
+                            u16 MidoMsg = GetTextID("mido");
+                            this->actor.textId = MidoMsg+2;
+                            func_80835EA4(play, 1);
+                            this->actor.flags |= ACTOR_FLAG_8;
+                            this->exchangeItemId = sp2C;
+
+                            if (this->unk_84F < 0) {
+                                func_80832B0C(play, this, D_80853914[PLAYER_ANIMGROUP_32][this->modelAnimType]);
+                            } else {
+                                func_80832264(play, this, D_80854548[this->unk_84F]);
+                            }
+
+                            func_80832224(this);
+                            return 1;
+                        }
                         func_80835DE4(play, this, func_8084EFC0, 0);
                         func_808322D0(play, this, &gPlayerAnim_link_bottle_fish_out);
                         func_80835EA4(play, (sp2C == 1) ? 1 : 5);
@@ -9619,6 +9660,7 @@ void Player_Init(Actor* thisx, PlayState* play2) {
     this->ageProperties = &sAgeProperties[gSaveContext.linkAge];
     this->itemAction = this->heldItemAction = -1;
     this->heldItemId = ITEM_NONE;
+    this->sCurrentSecretIndex = 0;
 
     func_80835F44(play, this, ITEM_NONE);
     Player_SetEquipmentData(play, this);
@@ -10939,6 +10981,8 @@ void Player_Update(Actor* thisx, PlayState* play) {
     s32 pad;
     Input sp44;
     Actor* dog;
+
+    osSyncPrintf("LinkPos: {%d,%d,%d},",(s16)this->actor.world.pos.x,(s16)this->actor.world.pos.y,(s16)this->actor.world.pos.z);
 
     if (func_8084FCAC(this, play)) {
         if (gSaveContext.dogParams < 0) {
@@ -13180,8 +13224,15 @@ void func_8084EFC0(Player* this, PlayState* play) {
 
     if (LinkAnimation_OnFrame(&this->skelAnime, 76.0f)) {
         BottleDropInfo* dropInfo = &D_80854A28[this->itemAction - PLAYER_IA_BOTTLE_FISH];
+        s16 parameters = dropInfo->actorParams;
 
-        Actor_Spawn(&play->actorCtx, play, dropInfo->actorId,
+        //Changes the insect spawn to a special drop if you're in Mido's place and it's full of bugs
+        if (dropInfo->actorId == ACTOR_EN_INSECT && play->sceneNum == SCENE_KOKIRI_HOME4 && gSaveContext.infTable[3] & 1)
+            Actor_Spawn(&play->actorCtx, play, dropInfo->actorId,
+                    this->actor.world.pos.x, this->actor.world.pos.y, this->actor.world.pos.z, 0x0, this->actor.shape.rot.y,
+                    0, 0x10, false);
+        else
+            Actor_Spawn(&play->actorCtx, play, dropInfo->actorId,
                     (Math_SinS(this->actor.shape.rot.y) * 5.0f) + this->leftHandPos.x, this->leftHandPos.y,
                     (Math_CosS(this->actor.shape.rot.y) * 5.0f) + this->leftHandPos.z, 0x4000, this->actor.shape.rot.y,
                     0, dropInfo->actorParams, true);

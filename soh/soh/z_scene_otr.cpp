@@ -1,3 +1,5 @@
+#define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_INFO
+
 #include "OTRGlobals.h"
 #include <ResourceMgr.h>
 #include <Scene.h>
@@ -55,6 +57,8 @@ bool Scene_CommandSpawnList(PlayState* play, Ship::SceneCommand* cmd)
             entries[i].rot.x = cmdStartPos->entries[i].rotX;
             entries[i].rot.y = cmdStartPos->entries[i].rotY;
             entries[i].rot.z = cmdStartPos->entries[i].rotZ;
+
+            SPDLOG_INFO("Spawn {0:d} - ID: {1:x}, Parameters: {2:x}", i, (uint16_t)entries[i].id, (uint16_t)entries[i].params);
         }
 
         linkSpawnEntry = &entries[play->setupEntranceList[play->curSpawn].spawn];
@@ -75,6 +79,163 @@ bool Scene_CommandSpawnList(PlayState* play, Ship::SceneCommand* cmd)
     return false;
 }
 
+const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, Ship::ActorSpawnEntry>>>> sceneActorOverrides = {
+    { 0x01, { // Dodongo's Cavern
+        { 0x03, {
+            { -1, 4, { ACTOR_EN_ITEM00, 4266,100,-1575, 0, -21299, 0, 0x100+(uint16_t)ITEM00_HEART_PIECE  }},
+        } },
+    } },
+    { 0x02, { // Jabu Jabu's Belly
+        { 0x0d, {
+            //{ -1, 3, { ACTOR_EN_ITEM00, -1150, -1113, -2248, 0, 0, 0, 0x106 }},
+        } },
+    } },
+    { 0x04, { // Fire Temple
+        { 0x08, {
+            { -1, 2, { 0xA, 1944,4681,-393, 0,24394,0, 0x07CD }},
+        } },
+    } },
+    { 0x3e, { // Grotto
+        { 0x05, { // Octorok Grotto
+            //{ -1, 8, { ACTOR_EN_ITEM00, 32, -129, 852, 0, 0, 0, 0x406 }},
+        } },
+    } },
+    { 0x55, { // Kokiri Forest
+        { 0x00, {//Village
+            //{ -1, -1, { ACTOR_EN_ITEM00, 1297, 240, -553, 0, 0, 0, 0x0800+(uint16_t)ITEM00_HEART_PIECE }},
+            //{ -1, -1, { ACTOR_EN_TEST, 70, -80, 675, 0, 0, 0, 0xFFFF }},
+            //{ -1, -1, { ACTOR_EN_WOOD02, 0, -80, 870, 0, 0, 0, 0x0011 }},
+            //{ -1, 72, { ACTOR_EN_ITEM00, 0, -80, 870, 0, 0, 0, 0x100+(uint16_t)ITEM00_HEART_PIECE }},
+            //{ -1, -1, { ACTOR_EN_SA, -110, -80, 950, 0, 0, 0, 0x0}},
+            { 0, -1, { 0x01CF, -367,53,-770, 0, 0, 1, 0x0 }}, { 1, -1, { 0x01CF, -367,53,-770, 0, 0, 1, 0x0 }},
+            { 0, -1, { 0x01CF, -459,55,-818, 0, 0, 1, 0x0 }}, { 1, -1, { 0x01CF, -459,55,-818, 0, 0, 1, 0x0 }},
+            { 0, -1, { 0x01CF, -521,56,-773, 0, 0, 1, 0x0 }}, { 1, -1, { 0x01CF, -521,56,-773, 0, 0, 1, 0x0 }},
+            { -1, -1, { 0x77, 355,0,1095, 1, 0, 0, 0x20 }},
+            { -1, -1, { 0x77, 860,185,-475, 2, 0, 0, 0x20 }},
+            { -1, -1, { 0x77, -565,120,880, 3, 0, 0, 0x20 }},
+            { -1, -1, { 0x77, 500,120,105, 4, 0, 0, 0x20 }},
+            { -1, -1, { 0x77, -916,60,-935, 7, 0, 0, 0x20 }},
+            //{ -1, -1, { ACTOR_EN_ITEM00, 0, -80, 870, 0, 0, 0, 0x100+(uint16_t)ITEM00_HEART_PIECE }},
+        } },
+        { 0x01, {//Deku Tree
+            { -1, -1, { 0x77, 4365,-155,-2365, 5, 0, 0, 0x20 }},
+            { -1, -1, { 0x77, 3900,-180,-190, 6, 0, 0, 0x20 }},
+        } },
+    } },
+    { SCENE_LINK_HOME, {
+        { 0x00, {
+            //{ -1, -1, { ACTOR_EN_ITEM00, 0, 0, 0, 0, 0, 0, 0x100+(uint16_t)ITEM00_HEART_PIECE}},
+            { -1, -1, { ACTOR_EN_SA, 100,0,1, 0,-12350,0, 0x0}},
+            { 0, -1, { ACTOR_EN_WONDER_TALK2, -92,25,-8, 0,15350,0, 0x8000|(0x3D<<6)|0x3f /*0x8abf*/}},
+            { 1, -1, { ACTOR_EN_WONDER_TALK2, -92,25,-8, 0,15350,0, 0x8000|(0x3D<<6)|0x3f /*0x8abf*/}},
+            { 2, -1, { ACTOR_EN_WONDER_TALK2, -92,25,-8, 0,15350,0, 0x8000|(0x3E<<6)|0x3f /*0x8abf*/}},
+            { 3, -1, { ACTOR_EN_WONDER_TALK2, -92,25,-8, 0,15350,0, 0x8000|(0x3E<<6)|0x3f /*0x8abf*/}},
+        } },
+    } },
+    { 0x29, {//Saria's
+        { 0x00, {
+            //{ -1, -1, { ACTOR_EN_ITEM00, 0, 0, 0, 0, 0, 0, 0x100+(uint16_t)ITEM00_HEART_PIECE}},
+            { -1, -1, { ACTOR_EN_WONDER_ITEM, -79,0,-151, 0,0,1, 0x1241}},
+        } },
+    } },
+    { SCENE_SPOT10, { // Lost Woods
+        { 0x5, {//Bridge
+            { -1, -1, { ACTOR_EN_KO, -1150,-360,1152, 0,1200,0, 0xff00 }},
+        } },
+    } },
+    { 0x09, { // Ice Cavern
+        { 0x09, {
+            //{ -1, 9, { ACTOR_EN_ITEM00, 366, 213, -2036, 0, 0, 0, 0x406 }},
+        } },
+    } },
+    { SCENE_SPOT00, { // Hyrule Field
+        { 0x00, {
+            //{ 2, -1, { 0x77, 4870, -160, 8506, 0, 0, 0, 0x11 }}, //{ 3, -1, { 0x77, 4870, -160, 8506, 0, 0, 0, 0x11 }},
+            { 2, -1, { 0x00A7, 116,192,6206, 0, 0, 0, 0x18a4 }}, { 3, -1, { 0x00A7, 116,192,6206, 0, 0, 0, 0x18a4 }},
+        } },
+    } },
+    { SCENE_MARKET_DAY, { // Castle Town Square - Day
+        { 0x00, {
+            { -1, -1, { ACTOR_EN_GO2, -288,0,188, 0,0x4000,0, 0x03ed | 0x10 | (0x0<<10)}},
+        } },
+    } },
+    { SCENE_MARKET_NIGHT, { // Castle Town Square - Night
+        { 0x00, {
+            { -1, -1, { ACTOR_EN_GO2, 298,0,234, 0,-0x4000,0, 0x03ed | 0x10 | (0x1<<10)}},
+        } },
+    } },
+    { SCENE_MARKET_RUINS, { // Castle Town Square - Ruined
+        { 0x00, {
+            { -1, -1, { ACTOR_EN_GO2, -288,0,188, 0,0x4000,0, 0x03ed | 0x10 | (0x0<<10)}},
+        } },
+    } },
+    { 0x52, { // Kakariko
+        { 0x00, {
+            //{ -1, 18, { 0x95, -18,800,1800, 0,-32768,0, 0xb140 }},
+        } },
+    } },
+    { SCENE_SPOT18, {//Goron City
+        { 0x00, {
+            { -1, -1, { ACTOR_EN_GO2, -1232,520,-1190, 0,0,0, 0x03eb | 0x10 | (0x0<<10)}},
+        } },
+        { 0x03, {
+            { -1, -1, { ACTOR_EN_GO2, 1030,480,-380, 0,0,0, 0x03eb | 0x10 | (0x1<<10)}},
+            { 2, -1, { ACTOR_EN_GO2, /*-20,-3,330,*/ 520,399,565,  0,-17295,0, /*0xffe0*/ 0x03e0 | (0x0<<10)}},
+            { 3, -1, { ACTOR_EN_GO2, /*-20,-3,330,*/ 520,399,565,  0,-17295,0, /*0xffe0*/ 0x03e0 | (0x0<<10)}},
+        } },
+    } },
+    { 0x60, {//Goron Trail
+        { 0x00, {
+            { 0, -1, { ACTOR_EN_GO2, /*-20,-3,330,*/ -8,3230,-4129,  0,0,0, /*0xffe0*/ 0x03e0 | (11<<10)}},
+            { 1, -1, { ACTOR_EN_GO2, /*-20,-3,330,*/ -8,3230,-4129,  0,0,0, /*0xffe0*/ 0x03e0 | (11<<10)}},
+            { 2, -1, { ACTOR_EN_GO2, -282,1258,-1585, 0,-4915,0, 0x03e5 | (0x1<<10)}},
+            { 3, -1, { ACTOR_EN_GO2, -282,1258,-1585, 0,-4915,0, 0x03e5 | (0x1<<10)}},
+            { 2, -1, { ACTOR_EN_GO2, -522,1264,-1560, 0,-4915,0, 0x03e5 | (0x2<<10)}},
+            { 3, -1, { ACTOR_EN_GO2, -522,1264,-1560, 0,-4915,0, 0x03e5 | (0x2<<10)}},
+            //{ 2, -1, { ACTOR_EN_GO2, /*-20,-3,330,*/ 520,399,565,  0,-17295,0, /*0xffe0*/ 0x03e0 | (0x3<<10)}},
+            //{ 3, -1, { ACTOR_EN_GO2, /*-20,-3,330,*/ 520,399,565,  0,-17295,0, /*0xffe0*/ 0x03e0 | (0x3<<10)}},
+        } },
+    } },
+    { 0x57, { // Lake Hylia
+        { 0x00, {
+            { -1, -1, { ACTOR_EN_RU1, -918,-1336,3560, 0,0x7FFF,0, 0xB }},
+        } },
+    } },
+    { 0x59, { // Zora's Fountain
+        { 0x00, {
+            { 2, -1, { ACTOR_EN_GOROIWA, 1243,322,100, 0,-20771,1, 0x1D00 }},
+            { 3, -1, { ACTOR_EN_GOROIWA, 1243,322,100, 0,-20771,1, 0x1D00 }},
+        } },
+    } },
+    { SCENE_SYOTES2, {
+        { 0x00, {
+            //{ -1, 0, { 0x5D, 0,0, 100, 0,0,0,  0 }},
+            { -1, -1, { ACTOR_EN_ITEM00, 0,20,380, 0,0,0, 0x100+(uint16_t)ITEM00_HEART_PIECE  }},
+        } },
+    } },
+};
+
+//Dynamic plant locations
+/*
+-250,-80,1130
+1297,240,-553
+-565,120,880
+10,180,-10
+5330,-190,-1720
+
+Roling Goron locations
+Scene: 0x62, Room: 0x3, Setup: 0x0
+Entity 17	 ID: 0x1ae, 	Params: 0xfc00, 	pos: 520,399,565, 	0,-12925,0
+
+Scene: 0x60, Room: 0x0, Setup: 0x0
+Entity 40	 ID: 0x1ae, 	Params: 0xfc25, 	pos: -311,1500,-393, 	0,-4915,0
+
+-154,1369,-1073
+-273,1500,-403
+-441,1460,-61
+-673,1192,747
+*/
+
 bool Scene_CommandActorList(PlayState* play, Ship::SceneCommand* cmd) {
     Ship::SetActorList* cmdActor = (Ship::SetActorList*)cmd;
 
@@ -84,6 +245,23 @@ bool Scene_CommandActorList(PlayState* play, Ship::SceneCommand* cmd) {
         play->setupActorList = (ActorEntry*)cmdActor->cachedGameData;
     else
     {
+        if (sceneActorOverrides.find(play->sceneNum) != sceneActorOverrides.end() &&
+                        sceneActorOverrides.at(play->sceneNum).find(play->roomCtx.curRoom.num) != sceneActorOverrides.at(play->sceneNum).end()) {
+            auto& roomOverrides = sceneActorOverrides.at(play->sceneNum).at(play->roomCtx.curRoom.num);
+            for (auto& [setup, index, entry] : roomOverrides) {
+                if (setup == -1 || setup == gSaveContext.sceneSetupIndex) {
+                    if (index == -1) {
+                        cmdActor->entries.push_back(entry);
+                    } else {
+                        cmdActor->entries[index] = entry;
+                    }
+                }
+            }
+            play->numSetupActors = cmdActor->entries.size();
+        }
+
+        SPDLOG_INFO("Scene: 0x{0:x}, Room: 0x{1:x}, Setup: 0x{2:x}", (uint16_t)play->sceneNum, (uint16_t)play->roomCtx.curRoom.num, (uint32_t)gSaveContext.sceneSetupIndex);
+
         ActorEntry* entries = (ActorEntry*)malloc(cmdActor->entries.size() * sizeof(ActorEntry));
 
         for (int i = 0; i < cmdActor->entries.size(); i++)
@@ -96,6 +274,10 @@ bool Scene_CommandActorList(PlayState* play, Ship::SceneCommand* cmd) {
             entries[i].rot.y = cmdActor->entries[i].rotY;
             entries[i].rot.z = cmdActor->entries[i].rotZ;
             entries[i].params = cmdActor->entries[i].initVar;
+
+            SPDLOG_INFO("Entity {0:d}\t ID: 0x{1:x}, \tParams: 0x{2:x}, \tpos: {3:d},{4:d},{5:d}, \t{6:d},{7:d},{8:d}",
+            i, (uint16_t)entries[i].id, (uint16_t)entries[i].params,
+            entries[i].pos.x, entries[i].pos.y, entries[i].pos.z, entries[i].rot.x, entries[i].rot.y, entries[i].rot.z);
         }
 
         cmdActor->cachedGameData = entries;
@@ -245,11 +427,14 @@ bool Scene_CommandEntranceList(PlayState* play, Ship::SceneCommand* cmd)
     else
     {
         play->setupEntranceList = (EntranceEntry*)malloc(otrEntrance->entrances.size() * sizeof(EntranceEntry));
+        SPDLOG_INFO("Scene: 0x{0:x}", (uint16_t)play->sceneNum);
 
         for (int i = 0; i < otrEntrance->entrances.size(); i++)
         {
             play->setupEntranceList[i].room = otrEntrance->entrances[i].roomToLoad;
             play->setupEntranceList[i].spawn = otrEntrance->entrances[i].startPositionIndex;
+            SPDLOG_INFO("Entry {0:d}\t Spawn: 0x{1:x}, \tRoom: 0x{2:x}",
+            i, play->setupEntranceList[i].spawn, play->setupEntranceList[i].room);
         }
 
         otrEntrance->cachedGameData = play->setupEntranceList;
@@ -551,8 +736,45 @@ bool Scene_CommandPathList(PlayState* play, Ship::SceneCommand* cmd)
     return false;
 }
 
+const std::map<u16,  std::vector<std::tuple<int, int, Ship::TransitionActorEntry>>> sceneTransitionActorOverrides = {
+    { 0x5B, { // Lost Woods
+        { -1, 9, { 1,255, 0,255,   ACTOR_EN_HOLL, 0,0,-400,  0, 0x3F }},
+        { -1, 10, { 1,255, 0,255,   ACTOR_EN_HOLL, 0,0, 400,  -32768, 0x3F }},
+        { -1, 11, { 0,255, 1,255,   ACTOR_EN_HOLL, 800,0, 400,  -32768, 0x3F }},
+        { -1, 12, { 1,255, 2,255,   ACTOR_EN_HOLL, 400,0, -800,  16384, 0x3F }},
+        { -1, 13, { 2,255, 3,255,   ACTOR_EN_HOLL, 1600,0, -400,  -32768, 0x3F }},
+        { -1, 14, { 7,255, 4,255,   ACTOR_EN_HOLL, 2000,0, -1600,  -16384, 0x3F }},
+        { -1, 15, { 7,255, 8,255,   ACTOR_EN_HOLL, 2000,0, -2400,  16384, 0x3F | (0x7 << 6) }},
+        { -1, 16, { 8,255, 7,255,   ACTOR_EN_HOLL, 1600,0, -2800,  0, 0x3F }},
+        { -1, 17, { 8,255, 7,255,   ACTOR_EN_HOLL, 400,0, -2400,  -16384, 0x3F | (0x7 << 6) }},
+        { -1, 18, { 7,255, 8,255,   ACTOR_EN_HOLL, 800,0, -2800,  0, 0x3F }},
+        { -1, 19, { 7,255, 8,255,   ACTOR_EN_HOLL, 800,0, -2000,  -32768, 0x3F }},
+    } },
+};
+
+//Keeps track of if extra transition actors have been loaded already, avoids multi loading them if this is the case
+//std::map<u16, bool> sceneTransitionLoadFlags = {
+//};
+
 bool Scene_CommandTransitionActorList(PlayState* play, Ship::SceneCommand* cmd) {
     Ship::SetTransitionActorList* cmdActor = (Ship::SetTransitionActorList*)cmd;
+
+    if (sceneTransitionActorOverrides.find(play->sceneNum) != sceneTransitionActorOverrides.end()/* && sceneTransitionLoadFlags.find(play->sceneNum) == sceneTransitionLoadFlags.end()*/) {
+        //sceneTransitionLoadFlags.insert(std::make_pair(play->sceneNum,true));
+        auto& roomOverrides = sceneTransitionActorOverrides.at(play->sceneNum);
+        for (auto& [setup, index, entry] : roomOverrides) {
+            if (setup == -1 || setup == gSaveContext.sceneSetupIndex) {
+                if (index == -1) {
+                    cmdActor->entries.push_back(entry);
+                } else {
+                    if (index < cmdActor->entries.size())
+                        cmdActor->entries[index] = entry;
+                    else
+                        cmdActor->entries.emplace(cmdActor->entries.begin()+index,entry);
+                }
+            }
+        }
+    }
 
     play->transiActorCtx.numActors = cmdActor->entries.size();
     play->transiActorCtx.list = (TransitionActorEntry*)malloc(cmdActor->entries.size() * sizeof(TransitionActorEntry));
@@ -569,6 +791,11 @@ bool Scene_CommandTransitionActorList(PlayState* play, Ship::SceneCommand* cmd) 
         play->transiActorCtx.list[i].pos.z = cmdActor->entries[i].posZ;
         play->transiActorCtx.list[i].rotY = cmdActor->entries[i].rotY;
         play->transiActorCtx.list[i].params = cmdActor->entries[i].initVar;
+
+        SPDLOG_INFO("Transition {0:d}\t ID: 0x{1:x}, \tParams: 0x{2:x}, \tpos: {3:d},{4:d},{5:d}, \trot: {6:d},\nroomF: {7:d},{8:d}\troomB: {9:d},{10:d}",
+            i, (uint16_t)cmdActor->entries[i].actorNum, cmdActor->entries[i].initVar,
+            cmdActor->entries[i].posX, cmdActor->entries[i].posY, cmdActor->entries[i].posZ, cmdActor->entries[i].rotY,
+            cmdActor->entries[i].frontObjectRoom, cmdActor->entries[i].frontTransitionReaction, cmdActor->entries[i].backObjectRoom, cmdActor->entries[i].backTransitionReaction);
     }
 
     return false;

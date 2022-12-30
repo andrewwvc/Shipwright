@@ -547,6 +547,7 @@ void Actor_Noop(Actor* actor, PlayState* play);
 void Gfx_DrawDListOpa(PlayState* play, Gfx* dlist);
 void Gfx_DrawDListXlu(PlayState* play, Gfx* dlist);
 Actor* Actor_FindNearby(PlayState* play, Actor* refActor, s16 actorId, u8 actorCategory, f32 range);
+s32 Actor_FindNumberOf(PlayState* play, Actor* refActor, s16 actorId, u8 actorCategory, f32 range, Actor** closest, u8(*predicate)(Actor*, PlayState*));
 s32 func_800354B4(PlayState* play, Actor* actor, f32 range, s16 arg3, s16 arg4, s16 arg5);
 void func_8003555C(PlayState* play, Vec3f* pos, Vec3f* velocity, Vec3f* accel);
 void func_800355B8(PlayState* play, Vec3f* pos);
@@ -638,6 +639,8 @@ s32 BgCheck_AnyLineTest2(CollisionContext* colCtx, Vec3f* posA, Vec3f* posB, Vec
 s32 BgCheck_AnyLineTest3(CollisionContext* colCtx, Vec3f* posA, Vec3f* posB, Vec3f* posResult, CollisionPoly** outPoly,
                          s32 chkWall, s32 chkFloor, s32 chkCeil, s32 chkOneFace, s32* bgId);
 s32 BgCheck_SphVsFirstPoly(CollisionContext* colCtx, Vec3f* center, f32 radius);
+s32 BgCheck_SphVsFirstPolyImpl(CollisionContext* colCtx, u16 xpFlags, CollisionPoly** outPoly, s32* outBgId,
+                               Vec3f* center, f32 radius, Actor* actor, u16 bciFlags);
 void SSNodeList_Initialize(SSNodeList*);
 void SSNodeList_Alloc(PlayState* play, SSNodeList* this, s32 tblMax, s32 numPolys);
 u16 SSNodeList_GetNextNodeIdx(SSNodeList* this);
@@ -915,6 +918,7 @@ void Environment_DisableUnderwaterLights(PlayState* play);
 void Environment_Update(PlayState* play, EnvironmentContext* envCtx, LightContext* lightCtx,
                         PauseContext* pauseCtx, MessageContext* msgCtx, GameOverContext* gameOverCtx,
                         GraphicsContext* gfxCtx);
+s32 getDayOfCycle(void);
 void Environment_DrawSunAndMoon(PlayState* play);
 void Environment_DrawSunLensFlare(PlayState* play, EnvironmentContext* envCtx, View* view,
                                   GraphicsContext* gfxCtx, Vec3f pos, s32 unused);
@@ -937,6 +941,7 @@ void Environment_AdjustLights(PlayState* play, f32 arg1, f32 arg2, f32 arg3, f32
 s32 Environment_GetBgsDayCount(void);
 void Environment_ClearBgsDayCount(void);
 s32 Environment_GetTotalDays(void);
+s32 IsAfterRutosDate(void);
 void Environment_ForcePlaySequence(u16 seqId);
 s32 Environment_IsForcedSequenceDisabled(void);
 void Environment_PlayStormNatureAmbience(PlayState* play);

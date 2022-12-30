@@ -346,10 +346,10 @@ enum SceneID {
     /* 0x23 */ SCENE_SHRINE,
     /* 0x24 */ SCENE_SHRINE_N,
     /* 0x25 */ SCENE_SHRINE_R,
-    /* 0x26 */ SCENE_KOKIRI_HOME,
-    /* 0x27 */ SCENE_KOKIRI_HOME3,
-    /* 0x28 */ SCENE_KOKIRI_HOME4,
-    /* 0x29 */ SCENE_KOKIRI_HOME5,
+    /* 0x26 */ SCENE_KOKIRI_HOME,//Know-It-All Brothers' House
+    /* 0x27 */ SCENE_KOKIRI_HOME3,//Twins' House
+    /* 0x28 */ SCENE_KOKIRI_HOME4,//Mido's House
+    /* 0x29 */ SCENE_KOKIRI_HOME5,//Saria's House
     /* 0x2A */ SCENE_KAKARIKO,
     /* 0x2B */ SCENE_KAKARIKO3,
     /* 0x2C */ SCENE_SHOP1,
@@ -360,7 +360,7 @@ enum SceneID {
     /* 0x31 */ SCENE_ALLEY_SHOP,
     /* 0x32 */ SCENE_NIGHT_SHOP,
     /* 0x33 */ SCENE_FACE_SHOP,
-    /* 0x34 */ SCENE_LINK_HOME,
+    /* 0x34 */ SCENE_LINK_HOME,//Link's House
     /* 0x35 */ SCENE_IMPA,
     /* 0x36 */ SCENE_MALON_STABLE,
     /* 0x37 */ SCENE_LABO,
@@ -384,30 +384,30 @@ enum SceneID {
     /* 0x49 */ SCENE_TURIBORI,
     /* 0x4A */ SCENE_NAKANIWA,
     /* 0x4B */ SCENE_BOWLING,
-    /* 0x4C */ SCENE_SOUKO,
+    /* 0x4C */ SCENE_SOUKO,//Ranch House and Silo
     /* 0x4D */ SCENE_MIHARIGOYA,
     /* 0x4E */ SCENE_MAHOUYA,
     /* 0x4F */ SCENE_GANON_DEMO,
     /* 0x50 */ SCENE_KINSUTA,
     /* 0x51 */ SCENE_SPOT00,
     /* 0x52 */ SCENE_SPOT01,
-    /* 0x53 */ SCENE_SPOT02,
+    /* 0x53 */ SCENE_SPOT02,//Graveyard
     /* 0x54 */ SCENE_SPOT03,
-    /* 0x55 */ SCENE_SPOT04,
-    /* 0x56 */ SCENE_SPOT05,
-    /* 0x57 */ SCENE_SPOT06,
-    /* 0x58 */ SCENE_SPOT07,
+    /* 0x55 */ SCENE_SPOT04,//Kokiri Forest
+    /* 0x56 */ SCENE_SPOT05,//Sacred Forest Meadow
+    /* 0x57 */ SCENE_SPOT06,//Lake Hylia
+    /* 0x58 */ SCENE_SPOT07,//Zora's Domain
     /* 0x59 */ SCENE_SPOT08,
     /* 0x5A */ SCENE_SPOT09,
     /* 0x5B */ SCENE_SPOT10,
     /* 0x5C */ SCENE_SPOT11,
     /* 0x5D */ SCENE_SPOT12,
     /* 0x5E */ SCENE_SPOT13,
-    /* 0x5F */ SCENE_SPOT15,
+    /* 0x5F */ SCENE_SPOT15,//Hyrule Castle
     /* 0x60 */ SCENE_SPOT16,
     /* 0x61 */ SCENE_SPOT17,
     /* 0x62 */ SCENE_SPOT18,
-    /* 0x63 */ SCENE_SPOT20,
+    /* 0x63 */ SCENE_SPOT20,//Ranch
     /* 0x64 */ SCENE_GANON_TOU,
     // Debug only scenes
     /* 0x65 */ SCENE_TEST01,

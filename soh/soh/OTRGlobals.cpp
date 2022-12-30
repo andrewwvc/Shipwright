@@ -81,6 +81,7 @@ CrowdControl* CrowdControl::Instance;
 OTRGlobals* OTRGlobals::Instance;
 SaveManager* SaveManager::Instance;
 CustomMessageManager* CustomMessageManager::Instance;
+TextIDAllocator* TextIDAllocator::Instance;
 ItemTableManager* ItemTableManager::Instance;
 
 OTRGlobals::OTRGlobals() {
@@ -190,6 +191,7 @@ struct ExtensionEntry {
 extern uintptr_t clearMtx;
 extern "C" Mtx gMtxClear;
 extern "C" MtxF gMtxFClear;
+extern "C" void createFishString(int num);
 extern "C" void OTRMessage_Init();
 extern "C" void AudioMgr_CreateNextAudioBuffer(s16* samples, u32 num_samples);
 extern "C" void AudioPlayer_Play(const uint8_t* buf, uint32_t len);
@@ -421,6 +423,10 @@ extern "C" void OTRExtScanner() {
     }
 }
 
+extern "C" uint16_t GetTextID(const char* name) {
+    return TextIDAllocator::Instance->getId(name);
+}
+
 extern "C" void InitOTR() {
 #ifdef __SWITCH__
     Ship::Switch::Init(Ship::PreInitPhase);
@@ -433,6 +439,7 @@ extern "C" void InitOTR() {
     OTRGlobals::Instance = new OTRGlobals();
     SaveManager::Instance = new SaveManager();
     CustomMessageManager::Instance = new CustomMessageManager();
+    TextIDAllocator::Instance = new TextIDAllocator();
     ItemTableManager::Instance = new ItemTableManager();
 
     clearMtx = (uintptr_t)&gMtxClear;
@@ -2021,6 +2028,36 @@ extern "C" int CustomMessage_RetrieveIfExists(PlayState* play) {
             messageEntry = OTRGlobals::Instance->gRandomizer->GetWarpSongMessage(textId, false);
         } else if (textId == TEXT_LAKE_HYLIA_WATER_SWITCH_NAVI || textId == TEXT_LAKE_HYLIA_WATER_SWITCH_SIGN) {
             messageEntry = CustomMessageManager::Instance->RetrieveMessage(Randomizer::hintMessageTableID, textId);
+        }
+    } else {
+        if (Player_GetMask(play) == PLAYER_MASK_TRUTH) {
+            s16 actorParams;
+
+            // if we're in a generic grotto
+            if (play->sceneNum == 62 && textId == 0x418 && msgCtx->talkActor->params == 14360) {
+                // look for the chest in the actorlist to determine
+                // which grotto we're in
+                int numOfActorLists =
+                    sizeof(play->actorCtx.actorLists) / sizeof(play->actorCtx.actorLists[0]);
+                for (int i = 0; i < numOfActorLists; i++) {
+                    if (play->actorCtx.actorLists[i].length) {
+                        if (play->actorCtx.actorLists[i].head->id == 10) {
+                            // set the params for the hint check to be negative chest params
+                            actorParams = play->actorCtx.actorLists[i].head->params & 0x1F;
+                        }
+                    }
+                }
+
+                uint16_t newTextId = GetTextID("stone")+actorParams;
+                messageEntry = CustomMessageManager::Instance->RetrieveMessage(questMessageTableID, newTextId);
+                if (messageEntry.textBoxType == -1) {
+                    messageEntry = CustomMessageManager::Instance->RetrieveMessage(questMessageTableID, textId);
+                }
+            } else {
+                messageEntry = CustomMessageManager::Instance->RetrieveMessage(questMessageTableID, textId);
+            }
+        } else {
+            messageEntry = CustomMessageManager::Instance->RetrieveMessage(questMessageTableID, textId);
         }
     }
     if (textId == TEXT_GS_NO_FREEZE || textId == TEXT_GS_FREEZE) {

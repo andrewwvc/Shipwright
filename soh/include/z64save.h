@@ -274,6 +274,12 @@ typedef struct {
     /*        */ u16 randomizerInf[9];
     /*        */ u16 adultTradeItems;
     // #endregion
+    // #region SOH [NPC Mod]
+    /*        */ u16 goronTimeStatus;
+    /*        */ s32 goronTimeDay;
+    /*        */ s32 SariaDateDay;
+    /*        */ s32 RutoDateDay;
+    // #endregion
 } SaveContext; // size = 0x1428
 
 typedef enum {
