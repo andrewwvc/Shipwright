@@ -190,6 +190,8 @@ typedef struct Actor {
     /* 0x138 */ ActorResetFunc reset;
     /* 0x138 */ ActorOverlay* overlayEntry; // Pointer to the overlay table entry for this actor
     /* 0x13C */ char dbgPad[0x10]; // Padding that only exists in the debug rom
+    /*       */ u8 isTeleported;
+    /*       */ Vec3f teleportVec;
 } Actor; // size = 0x14C
 
 typedef enum {

@@ -1212,6 +1212,9 @@ void Actor_Init(Actor* actor, PlayState* play) {
     actor->uncullZoneForward = 1000.0f;
     actor->uncullZoneScale = 350.0f;
     actor->uncullZoneDownward = 700.0f;
+    actor->isTeleported = 0;
+    Vec3f zeroVec = {0.0f,0.0f,0.0f};
+    actor->teleportVec = zeroVec;
     if (CVar_GetS32("gDisableDrawDistance", 0) != 0 && actor->id != ACTOR_EN_TORCH2 && actor->id != ACTOR_EN_BLKOBJ // Extra check for Dark Link and his room 
         && actor->id != ACTOR_EN_HORSE // Check for Epona, else if we call her she will spawn at the other side of the  map + we can hear her during the title screen sequence
         && actor->id != ACTOR_EN_HORSE_GANON && actor->id != ACTOR_EN_HORSE_ZELDA  // check for Zelda's and Ganondorf's horses that will always be scene during cinematic whith camera paning
@@ -2666,14 +2669,26 @@ void Actor_Draw(PlayState* play, Actor* actor) {
     Lights_Draw(lights, play->state.gfxCtx);
 
     FrameInterpolation_RecordActorPosRotMatrix();
-    if (actor->flags & ACTOR_FLAG_12) {
-        Matrix_SetTranslateRotateYXZ(
-            actor->world.pos.x + play->mainCamera.skyboxOffset.x,
-            actor->world.pos.y + (f32)((actor->shape.yOffset * actor->scale.y) + play->mainCamera.skyboxOffset.y),
-            actor->world.pos.z + play->mainCamera.skyboxOffset.z, &actor->shape.rot);
+    if (!actor->isTeleported) {
+        if (actor->flags & ACTOR_FLAG_12) {
+            Matrix_SetTranslateRotateYXZ(
+                actor->world.pos.x + play->mainCamera.skyboxOffset.x,
+                actor->world.pos.y + (f32)((actor->shape.yOffset * actor->scale.y) + play->mainCamera.skyboxOffset.y),
+                actor->world.pos.z + play->mainCamera.skyboxOffset.z, &actor->shape.rot);
+        } else {
+            Matrix_SetTranslateRotateYXZ(actor->world.pos.x, actor->world.pos.y + (actor->shape.yOffset * actor->scale.y),
+                                        actor->world.pos.z, &actor->shape.rot);
+        }
     } else {
-        Matrix_SetTranslateRotateYXZ(actor->world.pos.x, actor->world.pos.y + (actor->shape.yOffset * actor->scale.y),
-                                     actor->world.pos.z, &actor->shape.rot);
+        if (actor->flags & ACTOR_FLAG_12) {
+            Matrix_SetFalsifiedTranslateRotateYXZ(
+                actor->world.pos.x + play->mainCamera.skyboxOffset.x,
+                actor->world.pos.y + (f32)((actor->shape.yOffset * actor->scale.y) + play->mainCamera.skyboxOffset.y),
+                actor->world.pos.z + play->mainCamera.skyboxOffset.z, &actor->shape.rot, &actor->teleportVec);
+        } else {
+            Matrix_SetFalsifiedTranslateRotateYXZ(actor->world.pos.x, actor->world.pos.y + (actor->shape.yOffset * actor->scale.y),
+                                        actor->world.pos.z, &actor->shape.rot, &actor->teleportVec);
+        }
     }
 
     Matrix_Scale(actor->scale.x, actor->scale.y, actor->scale.z, MTXMODE_APPLY);
@@ -2716,6 +2731,7 @@ void Actor_Draw(PlayState* play, Actor* actor) {
 
     CLOSE_DISPS(play->state.gfxCtx);
     FrameInterpolation_RecordCloseChild();
+    actor->isTeleported = 0;
 
     Fault_RemoveClient(&faultClient);
 }

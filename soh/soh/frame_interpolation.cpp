@@ -187,6 +187,7 @@ namespace {
 
     bool is_recording;
     vector<Path*> current_path;
+    vector<Path*> parallel_path;
     uint32_t camera_epoch;
     uint32_t previous_camera_epoch;
     Recording current_recording;
@@ -201,6 +202,27 @@ namespace {
         auto& m = current_path.back()->ops[op];
         current_path.back()->items.emplace_back(op, m.size());
         return m.emplace_back();
+    }
+
+    Data& obtainParallel(Op op, u8* isValid) {
+        auto& m = current_path.back()->ops[op];
+        parallel_path.clear();
+        parallel_path.push_back(&previous_recording.root_path);
+
+        for (auto iter = current_path.begin(); *iter != current_path.back(); iter++) {
+            Data* existingChild = &(*iter)->ops[Op::OpenChild].back();
+            label l = existingChild->open_child.key;
+            auto foundChild = parallel_path.back()->children.find(l);
+            if (foundChild != parallel_path.back()->children.end()) {
+                parallel_path.push_back(&foundChild->second[existingChild->open_child.idx]);
+            } else {
+                *isValid = false;
+                return current_path.back()->ops[op].back();
+            }
+        }
+
+        auto& n = parallel_path.back()->ops[op];
+        return n[m.size()-1];
     }
 
     struct InterpolateCtx {
@@ -451,6 +473,8 @@ void FrameInterpolation_StartRecord(void) {
     current_recording = {};
     current_path.clear();
     current_path.push_back(&current_recording.root_path);
+    parallel_path.clear();
+    parallel_path.push_back(&previous_recording.root_path);
     if (CVar_GetS32("gInterpolationFPS", 20) != 20) {
         is_recording = true;
     }
@@ -553,6 +577,29 @@ void FrameInterpolation_RecordMatrixSetTranslateRotateYXZ(f32 translateX, f32 tr
         return;
     auto& d = append(Op::MatrixSetTranslateRotateYXZ).matrix_set_translate_rotate_yxz = { translateX, translateY, translateZ,
                                                                                           *rot };
+    if (next_is_actor_pos_rot_matrix) {
+        d.has_mtx = true;
+        //d.mtx = *Matrix_GetCurrent();
+        invert_matrix((const float *)Matrix_GetCurrent()->mf, (float *)inv_actor_mtx.mf);
+        next_is_actor_pos_rot_matrix = false;
+        has_inv_actor_mtx = true;
+        inv_actor_mtx_path_index = current_path.size();
+    }
+}
+
+void FrameInterpolation_RecordMatrixSetFalsifiedTranslateRotateYXZ(f32 translateX, f32 translateY, f32 translateZ, Vec3s* rot, Vec3f* posDelta) {
+    if (!is_recording)
+        return;
+    auto& d = append(Op::MatrixSetTranslateRotateYXZ).matrix_set_translate_rotate_yxz = { translateX, translateY, translateZ,
+                                                                                          *rot };
+    u8 isValid;
+    auto& p = obtainParallel(Op::MatrixSetTranslateRotateYXZ, &isValid);
+    if (isValid) {
+        p.matrix_set_translate_rotate_yxz.translateX += posDelta->x;
+        p.matrix_set_translate_rotate_yxz.translateY += posDelta->y;
+        p.matrix_set_translate_rotate_yxz.translateZ += posDelta->z;
+    }
+
     if (next_is_actor_pos_rot_matrix) {
         d.has_mtx = true;
         //d.mtx = *Matrix_GetCurrent();

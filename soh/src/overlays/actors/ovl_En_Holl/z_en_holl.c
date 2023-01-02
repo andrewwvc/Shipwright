@@ -210,8 +210,12 @@ void EnHoll_TeleportBack(EnHoll* this, PlayState* play) {
                 else
                     moveDist = -800.0f;
                 if (player->sCurrentSecretIndex < SecretTransitionLength) {
+                    Vec3f modVec = {0.0f,0.0f,0.0f};
                     player->actor.world.pos.x += moveDist;
-                    Vec3f modVec = GET_ACTIVE_CAM(play)->at;
+                    player->actor.isTeleported = 1;
+                    modVec.x += moveDist;
+                    player->actor.teleportVec = modVec;
+                    modVec = GET_ACTIVE_CAM(play)->at;
                     modVec.x += moveDist;
                     Camera_SetParam(GET_ACTIVE_CAM(play),1,&modVec);
                     modVec = GET_ACTIVE_CAM(play)->eye;

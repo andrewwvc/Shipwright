@@ -546,6 +546,65 @@ void Matrix_SetTranslateRotateYXZ(f32 translateX, f32 translateY, f32 translateZ
     FrameInterpolation_RecordMatrixSetTranslateRotateYXZ(translateX, translateY, translateZ, rot);
 }
 
+void Matrix_SetFalsifiedTranslateRotateYXZ(f32 translateX, f32 translateY, f32 translateZ, Vec3s* rot, Vec3f* posDelta) {
+    MtxF* cmf = sCurrentMatrix;
+    f32 temp1 = Math_SinS(rot->y);
+    f32 temp2 = Math_CosS(rot->y);
+    f32 cos;
+    f32 sin;
+
+    cmf->xx = temp2;
+    cmf->zx = -temp1;
+    cmf->xw = translateX;
+    cmf->yw = translateY;
+    cmf->zw = translateZ;
+    cmf->wx = 0.0f;
+    cmf->wy = 0.0f;
+    cmf->wz = 0.0f;
+    cmf->ww = 1.0f;
+
+    if (rot->x != 0) {
+        sin = Math_SinS(rot->x);
+        cos = Math_CosS(rot->x);
+
+        cmf->zz = temp2 * cos;
+        cmf->zy = temp2 * sin;
+        cmf->xz = temp1 * cos;
+        cmf->xy = temp1 * sin;
+        cmf->yz = -sin;
+        cmf->yy = cos;
+    } else {
+        cmf->zz = temp2;
+        cmf->xz = temp1;
+        cmf->yz = 0.0f;
+        cmf->zy = 0.0f;
+        cmf->xy = 0.0f;
+        cmf->yy = 1.0f;
+    }
+
+    if (rot->z != 0) {
+        sin = Math_SinS(rot->z);
+        cos = Math_CosS(rot->z);
+
+        temp1 = cmf->xx;
+        temp2 = cmf->xy;
+        cmf->xx = temp1 * cos + temp2 * sin;
+        cmf->xy = temp2 * cos - temp1 * sin;
+
+        temp1 = cmf->zx;
+        temp2 = cmf->zy;
+        cmf->zx = temp1 * cos + temp2 * sin;
+        cmf->zy = temp2 * cos - temp1 * sin;
+
+        temp2 = cmf->yy;
+        cmf->yx = temp2 * sin;
+        cmf->yy = temp2 * cos;
+    } else {
+        cmf->yx = 0.0f;
+    }
+    FrameInterpolation_RecordMatrixSetFalsifiedTranslateRotateYXZ(translateX, translateY, translateZ, rot, posDelta);
+}
+
 Mtx* Matrix_MtxFToMtx(MtxF* src, Mtx* dest) {
     FrameInterpolation_RecordMatrixMtxFToMtx(src, dest);
     guMtxF2L(src, dest);
