@@ -1803,6 +1803,7 @@ void Matrix_TranslateRotateZYX(Vec3f* translation, Vec3s* rotation);
 void Matrix_SetTranslateRotateYXZ(f32 translateX, f32 translateY, f32 translateZ, Vec3s* rot);
 void Matrix_SetFalsifiedTranslateRotateYXZ(f32 translateX, f32 translateY, f32 translateZ, Vec3s* rot, Vec3f* posDelta);
 Mtx* Matrix_MtxFToMtx(MtxF* src, Mtx* dest);
+Mtx* Matrix_FalsifiedMtxFToMtx(MtxF* src, Mtx* dest, MtxF* mtxReplace);
 Mtx* Matrix_ToMtx(Mtx* dest, char* file, s32 line);
 Mtx* Matrix_NewMtx(GraphicsContext* gfxCtx, char* file, s32 line);
 Mtx* Matrix_MtxFToNewMtx(MtxF* src, GraphicsContext* gfxCtx);

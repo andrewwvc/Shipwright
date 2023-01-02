@@ -22,6 +22,14 @@ void FrameInterpolation_RecordCloseChild(void);
 
 void FrameInterpolation_DontInterpolateCamera(void);
 
+void FrameInterpolation_ForceViewChange(Vec3f* delta);
+
+u8 FrameInterpolation_ShouldViewChange();
+
+Vec3f FrameInterpolation_GetViewDelta();
+
+void FrameInterpolation_ResetViewChange();
+
 int FrameInterpolation_GetCameraEpoch(void);
 
 void FrameInterpolation_RecordActorPosRotMatrix(void);
@@ -49,6 +57,8 @@ void FrameInterpolation_RecordMatrixSetTranslateRotateYXZ(f32 translateX, f32 tr
 void FrameInterpolation_RecordMatrixSetFalsifiedTranslateRotateYXZ(f32 translateX, f32 translateY, f32 translateZ, Vec3s* rot, Vec3f* posDelta);
 
 void FrameInterpolation_RecordMatrixMtxFToMtx(MtxF* src, Mtx* dest);
+
+void FrameInterpolation_FalsifiedRecordMatrixMtxFToMtx(MtxF* src, Mtx* dest, MtxF* mtxReplace);
 
 void FrameInterpolation_RecordMatrixToMtx(Mtx* dest, char* file, s32 line);
 

@@ -611,6 +611,12 @@ Mtx* Matrix_MtxFToMtx(MtxF* src, Mtx* dest) {
     return dest;
 }
 
+Mtx* Matrix_FalsifiedMtxFToMtx(MtxF* src, Mtx* dest, MtxF* mtxReplace) {
+    FrameInterpolation_FalsifiedRecordMatrixMtxFToMtx(src, dest, mtxReplace);
+    guMtxF2L(src, dest);
+    return dest;
+}
+
 Mtx* Matrix_ToMtx(Mtx* dest, char* file, s32 line) {
     FrameInterpolation_RecordMatrixToMtx(dest, file, line);
     guMtxF2L(Matrix_CheckFloats(sCurrentMatrix, file, line), dest);

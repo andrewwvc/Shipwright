@@ -1,5 +1,6 @@
 #include "z_en_holl.h"
 #include "overlays/actors/ovl_Object_Kankyo/z_object_kankyo.h"
+#include "soh/frame_interpolation.h"
 
 #define FLAGS ACTOR_FLAG_4
 
@@ -211,16 +212,20 @@ void EnHoll_TeleportBack(EnHoll* this, PlayState* play) {
                     moveDist = -800.0f;
                 if (player->sCurrentSecretIndex < SecretTransitionLength) {
                     Vec3f modVec = {0.0f,0.0f,0.0f};
+                    Camera* currentCam = GET_ACTIVE_CAM(play);
                     player->actor.world.pos.x += moveDist;
                     player->actor.isTeleported = 1;
                     modVec.x += moveDist;
                     player->actor.teleportVec = modVec;
-                    modVec = GET_ACTIVE_CAM(play)->at;
+                    FrameInterpolation_ForceViewChange(&modVec);
+                    modVec = currentCam->at;
                     modVec.x += moveDist;
-                    Camera_SetParam(GET_ACTIVE_CAM(play),1,&modVec);
-                    modVec = GET_ACTIVE_CAM(play)->eye;
-                    modVec.x += moveDist;
-                    Camera_SetParam(GET_ACTIVE_CAM(play),2,&modVec);
+                    Camera_SetParam(currentCam,1,&modVec);
+                    currentCam->eye.x += moveDist;
+                    currentCam->eyeNext.x += moveDist;
+                    currentCam->playerPosRot.pos.x += moveDist;
+                    // modVec.x += moveDist;
+                    // Camera_SetParam(GET_ACTIVE_CAM(play),2,&modVec);
                     ObjectKankyo* dust = (ObjectKankyo*)Actor_Find(&play->actorCtx,ACTOR_OBJECT_KANKYO,ACTORCAT_ITEMACTION);
                     if (dust && dust->actor.params == 0) {
                         modVec.x = moveDist;

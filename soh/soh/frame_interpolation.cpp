@@ -190,6 +190,8 @@ namespace {
     vector<Path*> parallel_path;
     uint32_t camera_epoch;
     uint32_t previous_camera_epoch;
+    uint8_t forceViewBool = 0;
+    Vec3f forceViewDelta = {0.0f,0.0f,0.0f};
     Recording current_recording;
     Recording previous_recording;
 
@@ -221,6 +223,7 @@ namespace {
             }
         }
 
+        *isValid = true;
         auto& n = parallel_path.back()->ops[op];
         return n[m.size()-1];
     }
@@ -508,6 +511,23 @@ void FrameInterpolation_DontInterpolateCamera(void) {
     camera_epoch = previous_camera_epoch + 1;
 }
 
+void FrameInterpolation_ForceViewChange(Vec3f* delta) {
+    forceViewBool = 1;
+    forceViewDelta = *delta;
+}
+
+u8 FrameInterpolation_ShouldViewChange() {
+    return forceViewBool;
+}
+
+Vec3f FrameInterpolation_GetViewDelta() {
+    return forceViewDelta;
+}
+
+void FrameInterpolation_ResetViewChange() {
+    forceViewBool = 0;
+}
+
 int FrameInterpolation_GetCameraEpoch(void) {
     return (int)camera_epoch;
 }
@@ -614,6 +634,24 @@ void FrameInterpolation_RecordMatrixMtxFToMtx(MtxF* src, Mtx* dest) {
     if (!is_recording)
         return;
     append(Op::MatrixMtxFToMtx).matrix_mtxf_to_mtx = { *src, dest };
+}
+
+void FrameInterpolation_FalsifiedRecordMatrixMtxFToMtx(MtxF* src, Mtx* dest, MtxF* mtxReplace) {
+    if (!is_recording)
+        return;
+    append(Op::MatrixMtxFToMtx).matrix_mtxf_to_mtx = { *src, dest };
+
+    u8 isValid;
+    auto& p = obtainParallel(Op::MatrixMtxFToMtx, &isValid);
+    if (isValid) {
+        Matrix_MtxFCopy(&p.matrix_mtxf_to_mtx.src,mtxReplace);
+        // p.matrix_mtxf_to_mtx.src.mf[3][0] += posDelta->z;
+        // p.matrix_mtxf_to_mtx.src.mf[3][1] += posDelta->y;
+        // p.matrix_mtxf_to_mtx.src.mf[3][2] += posDelta->x;
+        // p.matrix_mtxf_to_mtx.dest->m[3][0] += round(posDelta->z);
+        // p.matrix_mtxf_to_mtx.dest->m[3][1] += round(posDelta->y);
+        // p.matrix_mtxf_to_mtx.dest->m[3][2] += round(posDelta->x);
+    }
 }
 
 void FrameInterpolation_RecordMatrixToMtx(Mtx* dest, char* file, s32 line) {
