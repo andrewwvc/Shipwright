@@ -1218,7 +1218,8 @@ void Actor_Init(Actor* actor, PlayState* play) {
     if (CVar_GetS32("gDisableDrawDistance", 0) != 0 && actor->id != ACTOR_EN_TORCH2 && actor->id != ACTOR_EN_BLKOBJ // Extra check for Dark Link and his room 
         && actor->id != ACTOR_EN_HORSE // Check for Epona, else if we call her she will spawn at the other side of the  map + we can hear her during the title screen sequence
         && actor->id != ACTOR_EN_HORSE_GANON && actor->id != ACTOR_EN_HORSE_ZELDA  // check for Zelda's and Ganondorf's horses that will always be scene during cinematic whith camera paning
-        && (play->sceneNum != SCENE_DDAN && actor->id != ACTOR_EN_ZF)) { // Check for DC and Lizalfos for the case where the miniboss music would still play under certains conditions and changing room
+        && (play->sceneNum != SCENE_DDAN && actor->id != ACTOR_EN_ZF) // Check for DC and Lizalfos for the case where the miniboss music would still play under certains conditions and changing room
+        && (play->sceneNum != 0x5b || (play->roomCtx.curRoom.num != 0x7 && play->roomCtx.curRoom.num != 0x8 && play->roomCtx.curRoom.num != 0x4))) {
         actor->uncullZoneForward = 32767.0f;
         actor->uncullZoneScale = 32767.0f;
         actor->uncullZoneDownward = 32767.0f;
@@ -2874,7 +2875,8 @@ s32 func_800314D4(PlayState* play, Actor* actor, Vec3f* arg2, f32 arg3) {
     if (CVar_GetS32("gDisableDrawDistance", 0) != 0 && actor->id != ACTOR_EN_TORCH2 && actor->id != ACTOR_EN_BLKOBJ // Extra check for Dark Link and his room 
         && actor->id != ACTOR_EN_HORSE // Check for Epona, else if we call her she will spawn at the other side of the  map + we can hear her during the title screen sequence
         && actor->id != ACTOR_EN_HORSE_GANON && actor->id != ACTOR_EN_HORSE_ZELDA  // check for Zelda's and Ganondorf's horses that will always be scene during cinematic whith camera paning
-        && (play->sceneNum != SCENE_DDAN && actor->id != ACTOR_EN_ZF)) { // Check for DC and Lizalfos for the case where the miniboss music would still play under certains conditions and changing room
+        && (play->sceneNum != SCENE_DDAN && actor->id != ACTOR_EN_ZF) // Check for DC and Lizalfos for the case where the miniboss music would still play under certains conditions and changing room
+        && (play->sceneNum != 0x5b || (play->roomCtx.curRoom.num != 0x7 && play->roomCtx.curRoom.num != 0x8 && play->roomCtx.curRoom.num != 0x4))) {
         return true;
     }
 

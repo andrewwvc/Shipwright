@@ -95,7 +95,7 @@ s32 EnHoll_IsKokiriSetup8() {
 void EnHoll_ChooseAction(EnHoll* this) {
     s32 action;
 
-    action = (this->actor.params >> 6) & 0xF;
+    action = (this->actor.params >> 6) & 0x7;
     EnHoll_SetupAction(this, sActionFuncs[action]);
     if (action != 0 && action != 7) {
         this->actor.draw = NULL;
@@ -155,6 +155,9 @@ void func_80A58DD4(EnHoll* this, PlayState* play) {
                             sSecretTransitionOrder[player->sCurrentSecretIndex][0] == transitionActorIdx &&
                             sSecretTransitionOrder[player->sCurrentSecretIndex][1] == this->side) {
                     player->sCurrentSecretIndex++;
+                    if (player->sCurrentSecretIndex == SecretTransitionLength) {
+                        func_8002F7DC(&this->actor,NA_SE_SY_CORRECT_CHIME);
+                    }
                 }
 
                 EnHoll_SwapRooms(play);
@@ -165,6 +168,12 @@ void func_80A58DD4(EnHoll* this, PlayState* play) {
             if (play->roomCtx.prevRoom.num < 0) {
                 func_8009728C(play, &play->roomCtx, this->actor.room);
             } else {
+                if (player->sCurrentSecretIndex == SecretTransitionLength && ((this->actor.params >> 9) & 0x1) == 1) {
+                    play->nextEntranceIndex = 32;//148;//1312;
+                    play->fadeTransition = 0x26;
+                    play->sceneLoadFlag = 0x14;
+                }
+
                 this->planeAlpha = (255.0f / (sHorizTriggerDists[phi_t0][2] - sHorizTriggerDists[phi_t0][3])) *
                                    (absZ - sHorizTriggerDists[phi_t0][3]);
                 this->planeAlpha = CLAMP(this->planeAlpha, 0, 255);
@@ -210,7 +219,7 @@ void EnHoll_TeleportBack(EnHoll* this, PlayState* play) {
                     moveDist = 800.0f;
                 else
                     moveDist = -800.0f;
-                if (player->sCurrentSecretIndex < SecretTransitionLength) {
+                //if (player->sCurrentSecretIndex < SecretTransitionLength) {
                     Vec3f modVec = {0.0f,0.0f,0.0f};
                     Camera* currentCam = GET_ACTIVE_CAM(play);
                     player->actor.world.pos.x += moveDist;
@@ -234,11 +243,11 @@ void EnHoll_TeleportBack(EnHoll* this, PlayState* play) {
                         ObjectKankyo_Warp(dust, play, modVec);
                     }
                     EnHoll_SwapRooms(play);
-                } else {
-                    play->nextEntranceIndex = 32;//148;//1312;
-                    play->fadeTransition = 0x26;
-                    play->sceneLoadFlag = 0x14;
-                }
+                //} else {
+                    // play->nextEntranceIndex = 32;//148;//1312;
+                    // play->fadeTransition = 0x26;
+                    // play->sceneLoadFlag = 0x14;
+                //}
             }
         }
     }

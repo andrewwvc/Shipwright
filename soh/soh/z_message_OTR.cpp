@@ -281,10 +281,17 @@ extern "C" void OTRMessage_Init()
     u16 StoneMsg = TextIDAllocator::Instance->allocateRange("stone", 64);
 
     MakeBlueMsgEng(0x405, "They say that one part of&the secret directions&to a lost place is:^West&East&South&West");//Medigoron Crater Text
-    //MakeNormalMsgEng(0x417, );
+    MakeBlueMsgEng(0x408, "They say that one part of&the secret directions&to a lost place is:^East&North&North&East");//Ruto
+    MakeBlueMsgEng(0x411, "They say that one part of&the secret directions&to a lost place is:^West&East&South&West");//Gerudo Valley
     MakeBlueMsgEng(StoneMsg+0,"There may be something special&behind falls that are not water...");
-    MakeBlueMsgEng(StoneMsg+8, "They say that one part of&the secret directions&to a lost place is:^South&North&West, West, West");
-    MakeBlueMsgEng(StoneMsg+26, "They say that one part of&the secret directions&to a lost place is:^East&North&North&East");
+    MakeBlueMsgEng(StoneMsg+8, "They say that one part of&the secret directions&to a lost place is:^South&North&WestWest");
+    //MakeBlueMsgEng(StoneMsg+26, );//Mountain Crater Grotto
+    //"They say that the Gerudo Mask,&owned by a certian salesman,&could be useful to gain entry.^But not necessarily in the way&you might think.
+    //"They say that Dampe,&the gravekeeper, has a reward reserved&for those with very impresive speed."
+
+    //Deku Scrubs
+    MakeNormalMsgEng(0x10E0,"\x12\x38\x82""All right! You win! In return,&I'll tell you a secret&if you pay me %r50 rupees%w!\x07\x10\xA3");
+    MakeNormalMsgEng(0x10E1,"\x12\x38\x80""OK, there is path to a place&hidden in the woods that is&revealed in %bthree%w parts,&of %bfour%w directions each!^The order of the parts is&something you will have&to work out yourself!^But I can say that there&is a final hidden direction,&and that is %gSouth%w!\x0B\x02");
 
     u16 SariaMsg = TextIDAllocator::Instance->allocateRange("saria", 30);
     CustomMessageManager::Instance->CreateMessage(
@@ -609,7 +616,7 @@ extern "C" void OTRMessage_Init()
         }
     );
     static u16 msg8 = KokiriMsg+9;
-    static std::string msg8Str = "You know, I think there are places&in the lost woods that no Kokiri&now remembers how to get to...&\x0D\x14\x03...except one...^Oops, I shouldn't have said that...\x07";
+    static std::string msg8Str = "You know, I think there are places&in the lost woods that no Kokiri&now remembers how to get to...\x07";
     msg8Str.push_back((char)((msg8>>8)&0xFF));
     msg8Str.push_back((char)((msg8)&0xFF));
     CustomMessageManager::Instance->CreateMessage(
@@ -625,7 +632,7 @@ extern "C" void OTRMessage_Init()
         questMessageTableID, KokiriMsg+9,
         {
           TEXTBOX_TYPE_BLACK, TEXTBOX_POS_BOTTOM,
-          "This is no longer a secret&to everyone anymore!",
+          "Perhaps there are forest creatures&who do remember though...",
           "",
           "",
         }

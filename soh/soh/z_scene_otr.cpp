@@ -196,6 +196,12 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, Ship::ActorSp
             //{ 3, -1, { ACTOR_EN_GO2, /*-20,-3,330,*/ 520,399,565,  0,-17295,0, /*0xffe0*/ 0x03e0 | (0x3<<10)}},
         } },
     } },
+    { 0x61, {//Mountian Crater
+        { 0x01, {
+            { 0, 34, { ACTOR_EN_SHOPNUTS, -853,769,1196, 0,0,0, 0xB}},
+            { 1, 34, { ACTOR_EN_SHOPNUTS, -853,769,1196, 0,0,0, 0xB}},
+        } },
+    } },
     { 0x57, { // Lake Hylia
         { 0x00, {
             { -1, -1, { ACTOR_EN_RU1, -918,-1336,3560, 0,0x7FFF,0, 0xB }},
@@ -748,7 +754,7 @@ const std::map<u16,  std::vector<std::tuple<int, int, Ship::TransitionActorEntry
         { -1, 16, { 8,255, 7,255,   ACTOR_EN_HOLL, 1600,0, -2800,  0, 0x3F }},
         { -1, 17, { 8,255, 7,255,   ACTOR_EN_HOLL, 400,0, -2400,  -16384, 0x3F | (0x7 << 6) }},
         { -1, 18, { 7,255, 8,255,   ACTOR_EN_HOLL, 800,0, -2800,  0, 0x3F }},
-        { -1, 19, { 7,255, 8,255,   ACTOR_EN_HOLL, 800,0, -2000,  -32768, 0x3F }},
+        { -1, 19, { 7,255, 8,255,   ACTOR_EN_HOLL, 800,0, -2000,  -32768, 0x3F | (0x1 << 9)}},
     } },
 };
 
