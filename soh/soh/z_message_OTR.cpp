@@ -288,6 +288,7 @@ extern "C" void OTRMessage_Init()
     //MakeBlueMsgEng(StoneMsg+26, );//Mountain Crater Grotto
     //"They say that the Gerudo Mask,&owned by a certian salesman,&could be useful to gain entry.^But not necessarily in the way&you might think.
     //"They say that Dampe,&the gravekeeper, has a reward reserved&for those with very impresive speed."
+    //"They say that the Gerudo&currently keep something special above&their highest prison cell."
 
     //Deku Scrubs
     MakeNormalMsgEng(0x10E0,"\x12\x38\x82""All right! You win! In return,&I'll tell you a secret&if you pay me %r50 rupees%w!\x07\x10\xA3");

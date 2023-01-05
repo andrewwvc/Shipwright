@@ -227,6 +227,17 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, Ship::ActorSp
             { 3, -1, { ACTOR_EN_GOROIWA, 1243,322,100, 0,-20771,1, 0x1D00 }},
         } },
     } },
+    { SCENE_SPOT13, { //Desert Wasteland
+        { 0x00, {
+            { -1, 4, { ACTOR_EN_SW, 637,-393,-2536, 16384,0,0, 0xB602 }},
+        } },
+        { 0x01, {
+            { -1, -1, { ACTOR_EN_HATA, 3315,-261, 2244, 0,0,0, 0xFFFF }},
+            { -1, -1, { ACTOR_OBJ_KIBAKO2, 3460,-435,2484, 0,7100,0, 0xFFFF }},
+            { -1, -1, { ACTOR_OBJ_KIBAKO2, 3621,-392,2847, 0,7100,0, 0xFFFF }},
+            { -1, -1, { ACTOR_EN_NIW, 3125,-268,2459, 0,7100,0, 0xFFFF }},
+        } },
+    } },
     { SCENE_SYOTES2, {
         { 0x00, {
             //{ -1, 0, { 0x5D, 0,0, 100, 0,0,0,  0 }},

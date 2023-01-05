@@ -402,7 +402,7 @@ enum SceneID {
     /* 0x5B */ SCENE_SPOT10,
     /* 0x5C */ SCENE_SPOT11,
     /* 0x5D */ SCENE_SPOT12,
-    /* 0x5E */ SCENE_SPOT13,
+    /* 0x5E */ SCENE_SPOT13,//Desert Wasteland
     /* 0x5F */ SCENE_SPOT15,//Hyrule Castle
     /* 0x60 */ SCENE_SPOT16,
     /* 0x61 */ SCENE_SPOT17,
