@@ -392,7 +392,7 @@ enum SceneID {
     /* 0x51 */ SCENE_SPOT00,
     /* 0x52 */ SCENE_SPOT01,
     /* 0x53 */ SCENE_SPOT02,//Graveyard
-    /* 0x54 */ SCENE_SPOT03,
+    /* 0x54 */ SCENE_SPOT03,//Zora's River
     /* 0x55 */ SCENE_SPOT04,//Kokiri Forest
     /* 0x56 */ SCENE_SPOT05,//Sacred Forest Meadow
     /* 0x57 */ SCENE_SPOT06,//Lake Hylia

@@ -207,6 +207,20 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, Ship::ActorSp
             { -1, -1, { ACTOR_EN_RU1, -918,-1336,3560, 0,0x7FFF,0, 0xB }},
         } },
     } },
+    { SCENE_SPOT03, { // Zora's River
+        { 0x00, {
+            { 0, 57, { ACTOR_EN_MS, -582,375,-438, 0,16384,0, 0xFFFF }},
+            { 0, 60, { ACTOR_OBJ_BOMBIWA, 838,210,-194, 0,-20771,1, 0x0002 }},
+            { 0, 62, { ACTOR_OBJ_BOMBIWA, -464,375,-558, 0,-25850,1, 0x0008 }},
+            { 0, 63, { ACTOR_OBJ_BOMBIWA, -533,375,-594, 0,16384,1, 0x0009 }},
+            { 0, 64, { ACTOR_OBJ_BOMBIWA, -594,375,-617, 0,0,1, 0x000A }},
+            { 1, 57, { ACTOR_EN_MS, 204,570,146, 0,16384,0, 0xFFFF }},
+            { 1, 60, { ACTOR_OBJ_BOMBIWA, -582,375,-438, 0,-20771,1, 0x0002 }},
+            { 1, 62, { ACTOR_OBJ_BOMBIWA, -464,375,-558, 0,-25850,1, 0x0008 }},
+            { 1, 63, { ACTOR_OBJ_BOMBIWA, -533,375,-594, 0,16384,1, 0x0009 }},
+            { 1, 64, { ACTOR_OBJ_BOMBIWA, -594,375,-617, 0,0,1, 0x000A }},
+        } },
+    } },
     { 0x59, { // Zora's Fountain
         { 0x00, {
             { 2, -1, { ACTOR_EN_GOROIWA, 1243,322,100, 0,-20771,1, 0x1D00 }},
