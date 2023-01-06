@@ -1643,6 +1643,7 @@ void Message_OpenText(PlayState* play, u16 textId) {
         Message_FindMessage(play, textId);
         msgCtx->msgLength = font->msgLength = GetEquipNowMessage(font->msgBuf, font->msgOffset, sizeof(font->msgBuf));
     } else {
+        textId = msgCtx->textId;//Allows text substitution from CustomMessage_RetrieveIfExists to propagate
         Message_FindMessage(play, textId);
         msgCtx->msgLength = font->msgLength;
         char* src = (uintptr_t)font->msgOffset;

@@ -13,6 +13,7 @@ extern "C" MessageTableEntry* sNesMessageEntryTablePtr;
 extern "C" MessageTableEntry* sGerMessageEntryTablePtr;
 extern "C" MessageTableEntry* sFraMessageEntryTablePtr;
 extern "C" MessageTableEntry* sStaffMessageEntryTablePtr;
+extern std::unordered_map<uint16_t, uint16_t>* textIDSubstitutionTable;
 //extern "C" MessageTableEntry* _message_0xFFFC_nes;	
 
 MessageTableEntry* OTRMessage_LoadTable(const char* filePath, bool isNES) {
@@ -285,6 +286,7 @@ extern "C" void OTRMessage_Init()
     MakeBlueMsgEng(0x411, "They say that one part of&the secret directions&to a lost place is:^West&East&South&West");//Gerudo Valley
     MakeBlueMsgEng(StoneMsg+0,"There may be something special&behind falls that are not water...");
     MakeBlueMsgEng(StoneMsg+8, "They say that one part of&the secret directions&to a lost place is:^South&North&WestWest");
+    (*textIDSubstitutionTable)[StoneMsg+26] = 0x405;
     //MakeBlueMsgEng(StoneMsg+26, );//Mountain Crater Grotto
     //"They say that the Gerudo Mask,&owned by a certian salesman,&could be useful to gain entry.^But not necessarily in the way&you might think.
     //"They say that Dampe,&the gravekeeper, has a reward reserved&for those with very impresive speed."
