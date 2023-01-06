@@ -2369,6 +2369,9 @@ void func_80AEFD38(EnRu1* this, PlayState* play) {
         this->actor.flags &= ~ACTOR_FLAG_4;
         this->action = 44;
         this->drawConfig = 1;
+        if (getDayOfCycle() == DAYS_IN_CYCLE-1) {
+            this->actor.home.pos.x =  this->actor.world.pos.x = this->actor.prevPos.x = 740;
+        }
     } else {
         Actor_Kill(&this->actor);
     }
