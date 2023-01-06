@@ -172,6 +172,7 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, Ship::ActorSp
     { 0x52, { // Kakariko
         { 0x00, {
             //{ -1, 18, { 0x95, -18,800,1800, 0,-32768,0, 0xb140 }},
+            { 1, 24, { ACTOR_EN_SW, 5,755,-100, 0,0,0, 0xB104 }},
         } },
     } },
     { SCENE_SPOT18, {//Goron City
