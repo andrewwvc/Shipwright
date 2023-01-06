@@ -283,12 +283,17 @@ extern "C" void OTRMessage_Init()
 
     MakeBlueMsgEng(0x405, "They say that one part of&the secret directions&to a lost place is:^West&East&South&West");//Medigoron Crater Text
     MakeBlueMsgEng(0x408, "They say that one part of&the secret directions&to a lost place is:^East&North&North&East");//Ruto
+    MakeBlueMsgEng(0x408, "They say that Princess Ruto's emotions&are at their highest on the&day before the full moon.");//Chicken Lady
+    MakeBlueMsgEng(0x408, "They say that certain items, when&they are used together,may be&able to combine their abilities.^So it may pay to experiemnt&with means of pairing things!");//Hold Targeting
+    MakeBlueMsgEng(0x40D, "They say that the Gerudo&currently keep something special above&their highest prison cell.");//Running Man
     MakeBlueMsgEng(0x411, "They say that one part of&the secret directions&to a lost place is:^West&East&South&West");//Gerudo Valley
+    MakeBlueMsgEng(0x41A, "It may be that the Gerudo Mask,&owned by a certian salesman,&could be useful to pass the&entrance to the Gerudo Fortress.^But not necessarily in the way&you might think.");//Gerudo Colossus
+    MakeBlueMsgEng(0x420, "They say that Dampe,&the gravekeeper, has a reward reserved&for those with very impresive speed.");//Deku Tree
     MakeBlueMsgEng(StoneMsg+0,"There may be something special&behind falls that are not water...");
     MakeBlueMsgEng(StoneMsg+8, "They say that one part of&the secret directions&to a lost place is:^South&North&WestWest");
     (*textIDSubstitutionTable)[StoneMsg+26] = 0x405;
     //MakeBlueMsgEng(StoneMsg+26, );//Mountain Crater Grotto
-    //"They say that the Gerudo Mask,&owned by a certian salesman,&could be useful to gain entry.^But not necessarily in the way&you might think.
+    //"They say that the Gerudo Mask,&owned by a certian salesman,&could be useful to enter the gate.^But not necessarily in the way&you might think."
     //"They say that Dampe,&the gravekeeper, has a reward reserved&for those with very impresive speed."
     //"They say that the Gerudo&currently keep something special above&their highest prison cell."
 
