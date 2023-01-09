@@ -5634,9 +5634,13 @@ s32 func_8083C2B0(Player* this, PlayState* play) {
 
         func_80832318(this);
         func_808323B4(play, this);
+        this->crouchCharge++;
+        if (this->crouchCharge >= 20)
+            this->crouchCharge = 20;
 
         if (func_80835C58(play, this, func_80843188, 0)) {
             this->stateFlags1 |= PLAYER_STATE1_22;
+            this->crouchCharge = 0;
 
             if (!Player_IsChildWithHylianShield(this)) {
                 Player_SetModelsForHoldingShield(this);
@@ -8082,7 +8086,7 @@ s32 func_8084285C(Player* this, f32 arg1, f32 arg2, f32 arg3) {
 }
 
 s32 func_808428D8(Player* this, PlayState* play) {
-    if (Player_IsChildWithHylianShield(this) || !Player_GetSwordHeld(this) || !D_80853614) {
+    if (Player_IsChildWithHylianShield(this) || !Player_GetSwordHeld(this) || !D_80853614 || (this->crouchCharge <= 5)) {
         return 0;
     }
 
@@ -8090,6 +8094,7 @@ s32 func_808428D8(Player* this, PlayState* play) {
     this->unk_84F = 1;
     this->meleeWeaponAnimation = 0xC;
     this->currentYaw = this->actor.shape.rot.y + this->unk_6BE;
+    this->crouchCharge = 0;
 
     if (!CVar_GetS32("gCrouchStabHammerFix", 0)) {
         return 1;
@@ -9824,6 +9829,7 @@ void Player_InitCommon(Player* this, PlayState* play, FlexSkeletonHeader* skelHe
     this->shieldUpTimer = 0;
     this->shieldEntry = 0;
     this->crossoverState = 0;
+    this->crouchCharge = 0;
     this->entryDiff.x = 0.0f;
     this->entryDiff.y = 0.0f;
     this->entryDiff.z = 0.0f;
@@ -11210,7 +11216,7 @@ void Player_UpdateCommon(Player* this, PlayState* play, Input* input) {
     } else {
         this->actor.colChkInfo.mass = 50;
     }
-
+    osSyncPrintf("\nLink Anim1: %s,\nLink Anim2: %s", this->skelAnime.animation, this->skelAnime2.animation);
     this->stateFlags3 &= ~PLAYER_STATE3_2;
 
     Collider_ResetCylinderAC(play, &this->cylinder.base);
