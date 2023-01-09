@@ -3079,9 +3079,15 @@ s32 Health_ChangeBy(PlayState* play, s16 healthChange) {
     // clang-format off
     if (healthChange > 0) { Audio_PlaySoundGeneral(NA_SE_SY_HP_RECOVER, &D_801333D4, 4,
                                                    &D_801333E0, &D_801333E0, &D_801333E8);
-    } else if ((gSaveContext.isDoubleDefenseAcquired != 0) && (gSaveContext.health <= gSaveContext.inventory.defenseHearts*0x10) && (healthChange < 0)) {
-        healthChange >>= 1;
-        osSyncPrintf("ハート減少半分！！＝%d\n", healthChange); // "Heart decrease halved!!＝%d"
+    } else if (healthChange < 0) {
+        if ((gSaveContext.isDoubleDefenseAcquired != 0) && (gSaveContext.health <= gSaveContext.inventory.defenseHearts*0x10)) {
+            healthChange >>= 1;
+            osSyncPrintf("ハート減少半分！！＝%d\n", healthChange); // "Heart decrease halved!!＝%d"
+        }
+        if (gSaveContext.nayrusLoveTimer != 0) {
+            healthChange >>= 1;
+            osSyncPrintf("ハート減少半分！！＝%d\n", healthChange); // "Heart decrease halved!!＝%d"
+        }
     }
     // clang-format on
 
