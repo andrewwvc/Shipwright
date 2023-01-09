@@ -28,6 +28,7 @@ void func_80A74EBC(EnIk* this, PlayState* play);
 void func_80A7506C(EnIk* this);
 void func_80A7510C(EnIk* this, PlayState* play);
 void func_80A751C8(EnIk* this);
+void EnIk_SetupLowSweep(EnIk* this);
 void func_80A75260(EnIk* this, PlayState* play);
 void func_80A753D0(EnIk* this);
 void func_80A7545C(EnIk* this, PlayState* play);
@@ -317,6 +318,7 @@ void func_80A74714(EnIk* this) {
 
     Animation_Change(&this->skelAnime, &object_ik_Anim_00CD70, 0.0f, frame, frames, ANIMMODE_ONCE, 0.0f);
     this->unk_2F8 = 3;
+    this->actionState = 0;
     this->actor.speedXZ = 0.0f;
     EnIk_SetupAction(this, func_80A747C0);
 }
@@ -364,7 +366,7 @@ void func_80A7492C(EnIk* this, PlayState* play) {
         if ((Rand_ZeroOne() < 0.5f)) {
             func_80A74E2C(this);
         } else {
-            func_80A751C8(this);
+            EnIk_SetupLowSweep(this);
         }
     } else if ((ABS(yawDiff) <= 0x4000) && (ABS(this->actor.yDistToPlayer) < 150.0f)) {
         func_80A74AAC(this);
@@ -424,7 +426,7 @@ void func_80A74BA4(EnIk* this, PlayState* play) {
             if ((Rand_ZeroOne() < 0.5f)) {
                 func_80A74E2C(this);
             } else {
-                func_80A751C8(this);
+                EnIk_SetupLowSweep(this);
             }
         }
     }
@@ -433,13 +435,13 @@ void func_80A74BA4(EnIk* this, PlayState* play) {
         this->unk_2FC = 1;
     } else {
         temp_t0 = this->actor.yawTowardsPlayer - this->actor.shape.rot.y;
-        if (ABS(temp_t0) > 0x4000) {
+        if (ABS(temp_t0) > 0x2000) {
             this->unk_300--;
             if (this->unk_300 == 0) {
                 func_80A754A0(this);
             }
         } else {
-            this->unk_300 = 0x28;
+            this->unk_300 = 0x10;
         }
     }
     func_80A745E4(this, play);
@@ -463,9 +465,10 @@ void func_80A74EBC(EnIk* this, PlayState* play) {
     Vec3f sp2C;
     
     this->actor.speedXZ = 0.0f;
-    if (this->skelAnime.curFrame < 15.0f)
-        this->actor.speedXZ = 6.0f;
-    else if (this->skelAnime.curFrame == 15.0f) {
+    if (this->skelAnime.curFrame < 15.0f){
+        if (this->actor.xzDistToPlayer > 60.0f)
+            this->actor.speedXZ = 6.0f;
+    } else if (this->skelAnime.curFrame == 15.0f) {
         Audio_PlayActorSound2(&this->actor, NA_SE_EN_IRONNACK_SWING_AXE);
     } else if (this->skelAnime.curFrame == 21.0f) {
         sp2C.x = this->actor.world.pos.x + Math_SinS(this->actor.shape.rot.y + 0x6A4) * 70.0f;
@@ -480,8 +483,11 @@ void func_80A74EBC(EnIk* this, PlayState* play) {
     if ((this->skelAnime.curFrame > 17.0f) && (this->skelAnime.curFrame < 23.0f)) {
         this->unk_2FE = 1;
     } else {
-        Math_SmoothStepToS(&this->actor.world.rot.y, this->actor.yawTowardsPlayer, 1, 0xDAC, 0);
-        this->actor.shape.rot.y = this->actor.world.rot.y;
+        if (this->skelAnime.curFrame < 17.0f) {
+            f32 invDist = 1.5;///(0.1f+this->actor.xzDistToPlayer*0.01);
+            Math_SmoothStepToS(&this->actor.world.rot.y, this->actor.yawTowardsPlayer, 1, invDist*0xDAC, 0);
+            this->actor.shape.rot.y = this->actor.world.rot.y;
+        }
         this->unk_2FE = 0;
     }
 
@@ -522,8 +528,22 @@ void func_80A751C8(EnIk* this) {
     this->unk_2FF = 2;
     this->unk_300 = 0;
     this->unk_2F8 = 6;
+    this->actionState = 0;
     this->actor.speedXZ = 0.0f;
     Animation_Change(&this->skelAnime, &object_ik_Anim_0033C4, 0.0f, 0.0f, frames, ANIMMODE_ONCE_INTERP, -6.0f);
+    this->unk_2FC = 0;
+    EnIk_SetupAction(this, func_80A75260);
+}
+
+void EnIk_SetupLowSweep(EnIk* this) {
+    f32 frames = Animation_GetLastFrame(&object_ik_Anim_0033C4);
+
+    this->unk_2FF = 2;
+    this->unk_300 = 0x400;
+    this->unk_2F8 = 6;
+    this->actionState = 1;
+    this->actor.speedXZ = 0.0f;
+    Animation_Change(&this->skelAnime, &object_ik_Anim_0033C4, 0.0f, 13.0f, frames, ANIMMODE_ONCE_INTERP, -6.0f);
     this->unk_2FC = 0;
     EnIk_SetupAction(this, func_80A75260);
 }
@@ -536,9 +556,10 @@ void func_80A75260(EnIk* this, PlayState* play) {
     this->skelAnime.playSpeed = ABS(temp_f0);
     
     this->actor.speedXZ = 0.0f;
-    if (this->skelAnime.curFrame < 11.0f)
-        this->actor.speedXZ = 4.0f;
-    else if (this->skelAnime.curFrame > 11.0f) {
+    if (this->skelAnime.curFrame < 11.0f || (this->actionState == 1 && this->skelAnime.curFrame < 18.0f)) {
+        if (this->actor.xzDistToPlayer > 60.0f)
+            this->actor.speedXZ = 4.0f;
+    } else if (this->skelAnime.curFrame > 11.0f) {
         this->unk_2FF = 3;
     }
     if (((this->skelAnime.curFrame > 1.0f) && (this->skelAnime.curFrame < 9.0f)) ||
@@ -620,7 +641,7 @@ void func_80A7567C(EnIk* this, PlayState* play) {
             if ((Rand_ZeroOne() < 0.5f)) {
                 func_80A74E2C(this);
             } else {
-                func_80A751C8(this);
+                EnIk_SetupLowSweep(this);
             }
         } else {
             func_80A7489C(this);
@@ -654,7 +675,7 @@ void func_80A758B0(EnIk* this, PlayState* play) {
         this->bodyBreak.val = BODYBREAK_STATUS_FINISHED;
     }
     if (SkelAnime_Update(&this->skelAnime)) {
-        if (ABS((s16)(this->actor.yawTowardsPlayer - this->actor.shape.rot.y)) <= 0x4000) {
+        if (ABS((s16)(this->actor.yawTowardsPlayer - this->actor.shape.rot.y)) <= 0x2000) {
             func_80A7489C(this);
             func_80A745E4(this, play);
         } else {
@@ -769,7 +790,7 @@ void func_80A75C38(EnIk* this, PlayState* play) {
     }
     Math_SmoothStepToS(&this->actor.world.rot.y, this->actor.yawTowardsPlayer, 1, 0x7D0, 0);
     if ((this->actor.params == 0) && (Rand_ZeroOne() < 0.5f)) {
-        if (ABS((s16)(this->actor.yawTowardsPlayer - this->actor.shape.rot.y)) > 0x4000) {
+        if (ABS((s16)(this->actor.yawTowardsPlayer - this->actor.shape.rot.y)) > 0x2000) {
             func_80A754A0(this);
         }
     }
@@ -780,7 +801,7 @@ void func_80A75C38(EnIk* this, PlayState* play) {
             Audio_PlayActorSound2(&this->actor, NA_SE_EN_IRONNACK_DAMAGE);
             Audio_PlayActorSound2(&this->actor, NA_SE_EN_NUTS_CUTBODY);
         }
-        func_80A75790(this);
+        //func_80A75790(this);
         return;
     }
     Audio_PlayActorSound2(&this->actor, NA_SE_EN_IRONNACK_ARMOR_HIT);
@@ -858,6 +879,14 @@ Gfx* func_80A761B0(GraphicsContext* gfxCtx, u8 primR, u8 primG, u8 primB, u8 env
 s32 EnIk_OverrideLimbDraw3(PlayState* play, s32 limbIndex, Gfx** dList, Vec3f* pos, Vec3s* rot, void* thisx) {
     EnIk* this = (EnIk*)thisx;
 
+    if (limbIndex == ENIK_LIMB_TORSO) {
+        if ((this->actionFunc == func_80A75260) && (this->skelAnime.curFrame >= 15.0f)) {
+            rot->z += 0x600;
+            //rot->y += CVar_GetS32("gLimbY",0);
+            //rot->z += CVar_GetS32("gLimbZ",0);
+        }
+    }
+
     if (limbIndex == 12) {
         if (this->actor.params != 0) {
             *dList = object_ik_DL_018E78;
@@ -881,11 +910,35 @@ s32 EnIk_OverrideLimbDraw3(PlayState* play, s32 limbIndex, Gfx** dList, Vec3f* p
 // unused
 static Vec3f D_80A78470 = { 300.0f, 0.0f, 0.0f };
 
+//x+ = blade (forward)
+//y+ = flat (right)
+//z- = tip
 static Vec3f D_80A7847C[] = {
+    // // { 800.0f, -200.0f, 0.0f },
+    // { 800.0f, -200.0f, -5200.0f },
+    // { 0.0f, 0.0f, 0.0f },
+    // { -200.0f, -2200.0f, -5200.0f },
+    // { -6000.0f, 2000.0f, 0000.0f },
+    // // { 000.0f, 2000.0f, -10000.0f },
+
+    { -1000.0f, 1000.0f, 1000.0f },
+    { -6000.0f, 1000.0f, -7000.0f },
+    { 1000.0f, 1000.0f, 1000.0f },
+    { 3000.0f, 1000.0f, -6000.0f },
+};
+
+static Vec3f originalQuad[] = {
     { 800.0f, -200.0f, -5200.0f },
     { 0.0f, 0.0f, 0.0f },
-    { -200.0f, -2200.0f, -200.0f },
-    { -6000.0f, 2000.0f, -3000.0f },
+    { -200.0f, -2200.0f, -5200.0f },
+    { -6000.0f, 2000.0f, 0000.0f },
+};
+
+static Vec3f augmentedQuad[] = {
+    { -1000.0f, -00.0f, 1000.0f },
+    { -6000.0f, -00.0f, -8000.0f },
+    { 1000.0f, -00.0f, 1000.0f },
+    { 3000.0f, -00.0f, -7000.0f },
 };
 
 static Vec3f D_80A784AC[] = {
@@ -923,14 +976,18 @@ void EnIk_PostLimbDraw3(PlayState* play, s32 limbIndex, Gfx** dList, Vec3s* rot,
         Vec3f sp9C[3];
         Vec3f sp78[3];
 
-        Matrix_MultVec3f(&D_80A7847C[0], &this->axeCollider.dim.quad[1]);
-        Matrix_MultVec3f(&D_80A7847C[1], &this->axeCollider.dim.quad[0]);
-        Matrix_MultVec3f(&D_80A7847C[2], &this->axeCollider.dim.quad[3]);
-        Matrix_MultVec3f(&D_80A7847C[3], &this->axeCollider.dim.quad[2]);
+        Vec3f* quadRef = D_80A7847C;
+        if (this->actionFunc == func_80A74EBC)
+            quadRef = augmentedQuad;
+
+        Matrix_MultVec3f(&quadRef[0], &this->axeCollider.dim.quad[1]);
+        Matrix_MultVec3f(&quadRef[1], &this->axeCollider.dim.quad[0]);
+        Matrix_MultVec3f(&quadRef[2], &this->axeCollider.dim.quad[3]);
+        Matrix_MultVec3f(&quadRef[3], &this->axeCollider.dim.quad[2]);
         Collider_SetQuadVertices(&this->axeCollider, &this->axeCollider.dim.quad[0], &this->axeCollider.dim.quad[1],
                                  &this->axeCollider.dim.quad[2], &this->axeCollider.dim.quad[3]);
-        Matrix_MultVec3f(&D_80A7847C[0], &spF4);
-        Matrix_MultVec3f(&D_80A7847C[1], &spE8);
+        Matrix_MultVec3f(&quadRef[0], &spF4);
+        Matrix_MultVec3f(&quadRef[1], &spE8);
         if (this->unk_2FE > 0) {
             EffectBlure_AddVertex(Effect_GetByIndex(this->blureIdx), &spF4, &spE8);
         } else if (this->unk_2FE == 0) {
