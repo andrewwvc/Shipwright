@@ -999,8 +999,11 @@ extern "C" void OTRMessage_Init()
     MakeNormalMsgEng(RutoMsg+25, "Why wouldn't you talk to me?\x0B\x02");
     MakeNormalMsgEng(RutoMsg+26, "\x08Oh, the tree is in the way,&how disappointing.\016<\x02");
 
-    u16 CursedFamilyMsg = TextIDAllocator::Instance->allocateRange("cursedfamily", 20);
+    u16 CursedFamilyMsg = TextIDAllocator::Instance->allocateRange("cursedfamily", 10);
     MakeNormalMsgEng(CursedFamilyMsg+0, "Our father may be telling you&that he has no need for&any help, but please^ignore his politeness.&I may have more rewards&for you yet!");
     MakeNormalMsgEng(CursedFamilyMsg+1, "I'm happy to have given&what I can, please keep&destroying the curse!");
     MakeNormalMsgEng(CursedFamilyMsg+2, "You've done such good work!&Please accept this reward!\x0B\x02");
+
+    u16 MiscMsg = TextIDAllocator::Instance->allocateRange("misc", 20);
+    MakeNormalMsgEng(MiscMsg+0, "Mooooo! I feel really great&like I'm about to produce&something amazing!&Hang on!\x0B\x02");
 }

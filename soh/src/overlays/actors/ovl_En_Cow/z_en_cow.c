@@ -296,6 +296,37 @@ void EnCow_GivePlayerRandomizedItem(EnCow* this, PlayState* play) {
     }
 }
 
+void EnCow_GiveHeart(EnCow* this, PlayState* play) {
+    if (Actor_HasParent(&this->actor, play)) {
+        this->actor.parent = NULL;
+        this->actionFunc = func_809DF730;
+    } else {
+        func_8002F434(&this->actor, play, GI_HEART_PIECE, 10000.0f, 100.0f);
+    }
+}
+
+void EnCow_GivePlayerHeartPiece(EnCow* this, PlayState* play) {
+    if ((Message_GetState(&play->msgCtx) == TEXT_STATE_EVENT) && Message_ShouldAdvance(play)) {
+        this->actor.flags &= ~ACTOR_FLAG_16;
+        Message_CloseTextbox(play);
+        this->actionFunc = EnCow_GiveHeart;
+        func_8002F434(&this->actor, play, GI_HEART_PIECE, 10000.0f, 100.0f);
+    }
+}
+
+void EnCow_StartGivePlayerHeartPiece(EnCow* this, PlayState* play) {
+    if (Actor_ProcessTalkRequest(&this->actor, play)) {
+        this->actionFunc = EnCow_GivePlayerHeartPiece;
+        gSaveContext.eventChkInf[1] |= 0x8000;
+    } else {
+        u16 MiscMsg = GetTextID("misc");
+        this->actor.flags |= ACTOR_FLAG_16;
+        func_8002F2CC(&this->actor, play, 170.0f);
+        this->actor.textId = MiscMsg;
+    }
+    func_809DF494(this, play);
+}
+
 void func_809DF96C(EnCow* this, PlayState* play) {
     if ((play->msgCtx.ocarinaMode == OCARINA_MODE_00) || (play->msgCtx.ocarinaMode == OCARINA_MODE_04)) {
         if (DREG(53) != 0) {
@@ -317,6 +348,10 @@ void func_809DF96C(EnCow* this, PlayState* play) {
                         // with the item get not triggering until walking away
                         play->msgCtx.ocarinaMode = OCARINA_MODE_00;
                         this->actionFunc = EnCow_GivePlayerRandomizedItem;
+                        return;
+                    }
+                    if (play->sceneNum == SCENE_LINK_HOME && !(gSaveContext.eventChkInf[1] & 0x8000)) {
+                        this->actionFunc = EnCow_StartGivePlayerHeartPiece;
                         return;
                     }
                     this->actionFunc = func_809DF8FC;
