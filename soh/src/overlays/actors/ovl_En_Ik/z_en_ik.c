@@ -319,6 +319,7 @@ void func_80A74714(EnIk* this) {
     Animation_Change(&this->skelAnime, &object_ik_Anim_00CD70, 0.0f, frame, frames, ANIMMODE_ONCE, 0.0f);
     this->unk_2F8 = 3;
     this->actionState = 0;
+    this->pauseFrame = 0;
     this->actor.speedXZ = 0.0f;
     EnIk_SetupAction(this, func_80A747C0);
 }
@@ -347,6 +348,17 @@ void func_80A747C0(EnIk* this, PlayState* play) {
     }
 }
 
+void EnIk_SelectAttack(EnIk* this) {
+    //EnIk_SetupLowSweep(this); return;
+    if ((Rand_ZeroOne() < 0.33f)) {
+        func_80A74E2C(this);
+    } else if (Rand_ZeroOne() < 0.5f) {
+        func_80A751C8(this);
+    } else {
+        EnIk_SetupLowSweep(this);
+    }
+}
+
 void func_80A7489C(EnIk* this) {
     f32 frames = Animation_GetLastFrame(&object_ik_Anim_00DD50);
 
@@ -363,11 +375,7 @@ void func_80A7492C(EnIk* this, PlayState* play) {
 
     if ((ABS(yawDiff) <= phi_a0) && (this->actor.xzDistToPlayer < 100.0f) &&
         (ABS(this->actor.yDistToPlayer) < 150.0f)) {
-        if ((Rand_ZeroOne() < 0.5f)) {
-            func_80A74E2C(this);
-        } else {
-            EnIk_SetupLowSweep(this);
-        }
+            EnIk_SelectAttack(this);
     } else if ((ABS(yawDiff) <= 0x4000) && (ABS(this->actor.yDistToPlayer) < 150.0f)) {
         func_80A74AAC(this);
     } else {
@@ -423,11 +431,7 @@ void func_80A74BA4(EnIk* this, PlayState* play) {
     yawDiff = this->actor.yawTowardsPlayer - this->actor.shape.rot.y;
     if ((ABS(yawDiff) <= temp_t0) && (this->actor.xzDistToPlayer < 100.0f)) {
         if (ABS(this->actor.yDistToPlayer) < 150.0f) {
-            if ((Rand_ZeroOne() < 0.5f)) {
-                func_80A74E2C(this);
-            } else {
-                EnIk_SetupLowSweep(this);
-            }
+            EnIk_SelectAttack(this);
         }
     }
     if (func_80A74674(play, &this->actor) != NULL) {
@@ -457,6 +461,7 @@ void func_80A74E2C(EnIk* this) {
     this->unk_2FF = 1;
     this->unk_2F8 = 6;
     this->actor.speedXZ = 0.0f;
+    this->pauseFrame = 5;
     Animation_Change(&this->skelAnime, &object_ik_Anim_001C28, 1.5f, 0.0f, frames, ANIMMODE_ONCE, -4.0f);
     EnIk_SetupAction(this, func_80A74EBC);
 }
@@ -466,7 +471,7 @@ void func_80A74EBC(EnIk* this, PlayState* play) {
     
     this->actor.speedXZ = 0.0f;
     if (this->skelAnime.curFrame < 15.0f){
-        if (this->actor.xzDistToPlayer > 60.0f)
+        if (this->actor.xzDistToPlayer > 70.0f)
             this->actor.speedXZ = 6.0f;
     } else if (this->skelAnime.curFrame == 15.0f) {
         Audio_PlayActorSound2(&this->actor, NA_SE_EN_IRONNACK_SWING_AXE);
@@ -529,6 +534,7 @@ void func_80A751C8(EnIk* this) {
     this->unk_300 = 0;
     this->unk_2F8 = 6;
     this->actionState = 0;
+    this->pauseFrame = 3;
     this->actor.speedXZ = 0.0f;
     Animation_Change(&this->skelAnime, &object_ik_Anim_0033C4, 0.0f, 0.0f, frames, ANIMMODE_ONCE_INTERP, -6.0f);
     this->unk_2FC = 0;
@@ -539,9 +545,10 @@ void EnIk_SetupLowSweep(EnIk* this) {
     f32 frames = Animation_GetLastFrame(&object_ik_Anim_0033C4);
 
     this->unk_2FF = 2;
-    this->unk_300 = 0x400;
+    this->unk_300 = 0x200;
     this->unk_2F8 = 6;
     this->actionState = 1;
+    this->pauseFrame = 3;
     this->actor.speedXZ = 0.0f;
     Animation_Change(&this->skelAnime, &object_ik_Anim_0033C4, 0.0f, 13.0f, frames, ANIMMODE_ONCE_INTERP, -6.0f);
     this->unk_2FC = 0;
@@ -550,14 +557,25 @@ void EnIk_SetupLowSweep(EnIk* this) {
 
 void func_80A75260(EnIk* this, PlayState* play) {
     f32 temp_f0;
-
-    this->unk_300 += 0x1C2;
-    temp_f0 = Math_SinS(this->unk_300);
+    u8 isPaused = (this->pauseFrame > 0 && (((!this->actionState) && this->skelAnime.curFrame > 0.0f ) || ((this->actionState) && this->skelAnime.curFrame > 13.0f)));
+    if (!isPaused) {
+        if (this->actionState) {
+            this->unk_300 += 0x180;
+        } else {
+            this->unk_300 += 0x1C2;
+        }
+    }
+    if (this->pauseFrame > 0 && (((!this->actionState) && this->skelAnime.curFrame > 0.0f ) || ((this->actionState) && this->skelAnime.curFrame > 13.0f))) {
+        this->pauseFrame--;
+        temp_f0 = 0.0f;
+    } else {
+        temp_f0 = Math_SinS(this->unk_300);
+    }
     this->skelAnime.playSpeed = ABS(temp_f0);
     
     this->actor.speedXZ = 0.0f;
     if (this->skelAnime.curFrame < 11.0f || (this->actionState == 1 && this->skelAnime.curFrame < 18.0f)) {
-        if (this->actor.xzDistToPlayer > 60.0f)
+        if (this->actor.xzDistToPlayer > 70.0f)
             this->actor.speedXZ = 4.0f;
     } else if (this->skelAnime.curFrame > 11.0f) {
         this->unk_2FF = 3;
@@ -638,11 +656,7 @@ void func_80A7567C(EnIk* this, PlayState* play) {
     if (SkelAnime_Update(&this->skelAnime)) {
         if ((ABS((s16)(this->actor.yawTowardsPlayer - this->actor.shape.rot.y)) <= 0x4000) &&
             (this->actor.xzDistToPlayer < 100.0f) && (ABS(this->actor.yDistToPlayer) < 150.0f)) {
-            if ((Rand_ZeroOne() < 0.5f)) {
-                func_80A74E2C(this);
-            } else {
-                EnIk_SetupLowSweep(this);
-            }
+            EnIk_SelectAttack(this);
         } else {
             func_80A7489C(this);
         }
@@ -880,8 +894,11 @@ s32 EnIk_OverrideLimbDraw3(PlayState* play, s32 limbIndex, Gfx** dList, Vec3f* p
     EnIk* this = (EnIk*)thisx;
 
     if (limbIndex == ENIK_LIMB_TORSO) {
-        if ((this->actionFunc == func_80A75260) && (this->skelAnime.curFrame >= 15.0f)) {
-            rot->z += 0x600;
+        if ((this->actionFunc == func_80A75260)) {
+            if (this->skelAnime.curFrame >= 13.0f)
+                rot->z += 0x100;
+            else if (this->skelAnime.curFrame < 9.0f)
+                rot->z -= 0x100;
             //rot->y += CVar_GetS32("gLimbY",0);
             //rot->z += CVar_GetS32("gLimbZ",0);
         }
@@ -941,6 +958,13 @@ static Vec3f augmentedQuad[] = {
     { 3000.0f, -00.0f, -7000.0f },
 };
 
+static Vec3f lowQuad[] = {
+    { -1000.0f, 2000.0f, 1000.0f },
+    { -6000.0f, 2000.0f, -8000.0f },
+    { 1000.0f, 2000.0f, 1000.0f },
+    { 6000.0f, 2000.0f, -7000.0f },
+};
+
 static Vec3f D_80A784AC[] = {
     { -3000.0, -700.0, -5000.0 },
     { -3000.0, -700.0, 2000.0 },
@@ -979,6 +1003,8 @@ void EnIk_PostLimbDraw3(PlayState* play, s32 limbIndex, Gfx** dList, Vec3s* rot,
         Vec3f* quadRef = D_80A7847C;
         if (this->actionFunc == func_80A74EBC)
             quadRef = augmentedQuad;
+        else if (this->actionFunc == func_80A75260 && (this->skelAnime.curFrame >= 13.0f))
+            quadRef = lowQuad;
 
         Matrix_MultVec3f(&quadRef[0], &this->axeCollider.dim.quad[1]);
         Matrix_MultVec3f(&quadRef[1], &this->axeCollider.dim.quad[0]);
