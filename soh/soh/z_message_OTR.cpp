@@ -1006,4 +1006,7 @@ extern "C" void OTRMessage_Init()
 
     u16 MiscMsg = TextIDAllocator::Instance->allocateRange("misc", 20);
     MakeNormalMsgEng(MiscMsg+0, "Mooooo! I feel really great&like I'm about to produce&something amazing!&Hang on!\x0B\x02");
+
+    u16 GerudoMsg = TextIDAllocator::Instance->allocateRange("gerudo", 10);
+    MakeNormalMsgEng(GerudoMsg+0, "Heh, since you're clearly a master,&try for a perfect score of %r2000%w,&if you can!\x0B\x02");
 }

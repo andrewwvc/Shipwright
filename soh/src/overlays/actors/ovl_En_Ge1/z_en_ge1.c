@@ -543,7 +543,10 @@ void EnGe1_WaitTillItemGiven_Archery(EnGe1* this, PlayState* play) {
         if (this->stateFlags & GE1_STATE_GIVE_QUIVER) {
             gSaveContext.itemGetInf[0] |= 0x8000;
         } else {
-            gSaveContext.infTable[25] |= 1;
+            if (!(gSaveContext.infTable[25] & 1))
+                gSaveContext.infTable[25] |= 1;
+            else
+                gSaveContext.infTable[24] |= 1;
         }
     } else {
         if (this->stateFlags & GE1_STATE_GIVE_QUIVER) {
@@ -717,13 +720,20 @@ void EnGe1_TalkAfterGame_Archery(EnGe1* this, PlayState* play) {
     } else if (gSaveContext.minigameScore < 1500) {
         this->actor.textId = 0x6047;
         this->actionFunc = EnGe1_TalkNoPrize_Archery;
-    } else if (gSaveContext.itemGetInf[0] & 0x8000) {
-        this->actor.textId = 0x6047;
-        this->actionFunc = EnGe1_TalkNoPrize_Archery;
-    } else {
+    } else if (!(gSaveContext.itemGetInf[0] & 0x8000)) {
         this->actor.textId = 0x6044;
         this->actionFunc = EnGe1_TalkWinPrize_Archery;
         this->stateFlags |= GE1_STATE_GIVE_QUIVER;
+    } else if (gSaveContext.minigameScore < 2000) {
+        this->actor.textId = 0x6047;
+        this->actionFunc = EnGe1_TalkNoPrize_Archery;
+    } else if (!(gSaveContext.infTable[24] & 1)) {
+        this->actor.textId = 0x6046;
+        this->actionFunc = EnGe1_TalkWinPrize_Archery;
+        this->stateFlags &= ~GE1_STATE_GIVE_QUIVER;
+    } else {
+        this->actor.textId = 0x6047;
+        this->actionFunc = EnGe1_TalkNoPrize_Archery;
     }
 }
 
@@ -744,7 +754,11 @@ void EnGe1_Wait_Archery(EnGe1* this, PlayState* play) {
     } else {
         if (gSaveContext.eventChkInf[6] & 0x100) {
             if (gSaveContext.infTable[25] & 1) {
-                textId = 0x6042;
+                u16 Gerudo = GetTextID("gerudo");
+                if (gSaveContext.itemGetInf[0] & 0x8000)
+                    textId = Gerudo;
+                else
+                    textId = 0x6042;
             } else {
                 textId = 0x6043;
             }
