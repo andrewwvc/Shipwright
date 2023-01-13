@@ -13,6 +13,7 @@ void ObjMakekinsuta_Init(Actor* thisx, PlayState* play);
 void ObjMakekinsuta_Update(Actor* thisx, PlayState* play);
 
 void ObjMakekinsuta_WaitForBomb(ObjMakekinsuta* this, PlayState* play);
+void ObjMakekinsuta_WaitForHammer(ObjMakekinsuta* this, PlayState* play);
 void ObjMakekinsuta_WaitForInsectSpecial(ObjMakekinsuta* this, PlayState* play);
 void func_80B98320(ObjMakekinsuta* this, PlayState* play);
 void ObjMakekinsuta_DoNothing(ObjMakekinsuta* this, PlayState* play);
@@ -44,13 +45,20 @@ void ObjMakekinsuta_Init(Actor* thisx, PlayState* play) {
         osSyncPrintf("引数不正 (arg_data %x)(%s %d)\n", this->actor.params, __FILE__, __LINE__);
         osSyncPrintf(VT_RST);
     }
-
+    this->unk_152 = 0;
     if (!this->actor.home.rot.z) {
         this->actionFunc = func_80B98320;
-    } else {
+    } else if (this->actor.home.rot.z == 1) {
         this->actionFunc = ObjMakekinsuta_WaitForInsectSpecial;
+    } else if (this->actor.home.rot.z == 2) {
+        this->actionFunc = ObjMakekinsuta_WaitForHammer;
+    } else {
+        this->actionFunc = ObjMakekinsuta_DoNothing;
     }
 
+}
+s32 ObjMakekinsuta_CanReceiveInsect(Actor* this) {
+    return this->home.rot.z < 2;
 }
 
 void ObjMakekinsuta_WaitForBomb(ObjMakekinsuta* this, PlayState* play) {
@@ -67,6 +75,17 @@ void ObjMakekinsuta_WaitForBomb(ObjMakekinsuta* this, PlayState* play) {
         }
     } else {
         this->timer = 0;
+    }
+}
+u8 isHeartPiece(Actor* this, PlayState* play) {
+    return this->params == ITEM00_HEART_PIECE;
+}
+
+void ObjMakekinsuta_WaitForHammer(ObjMakekinsuta* this, PlayState* play) {
+    if (play->actorCtx.unk_02 != 0 && this->actor.xzDistToPlayer < 100.0f &&
+               ABS(this->actor.yDistToPlayer) < 60.0f && (Actor_FindNumberOf(play,&this->actor, ACTOR_EN_ITEM00, ACTORCAT_MISC,3000.0f,NULL,isHeartPiece) == 0)) {
+        Item_DropCollectible(play, &this->actor.world.pos, 0x100+ITEM00_HEART_PIECE);
+        func_8002F7DC(&this->actor,NA_SE_SY_CORRECT_CHIME);
     }
 }
 

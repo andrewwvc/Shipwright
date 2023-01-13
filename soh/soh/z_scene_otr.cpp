@@ -107,9 +107,9 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, Ship::ActorSp
             //{ -1, -1, { ACTOR_EN_WOOD02, 0, -80, 870, 0, 0, 0, 0x0011 }},
             //{ -1, 72, { ACTOR_EN_ITEM00, 0, -80, 870, 0, 0, 0, 0x100+(uint16_t)ITEM00_HEART_PIECE }},
             //{ -1, -1, { ACTOR_EN_SA, -110, -80, 950, 0, 0, 0, 0x0}},
-            { 0, -1, { 0x01CF, -367,53,-770, 0, 0, 1, 0x0 }}, { 1, -1, { 0x01CF, -367,53,-770, 0, 0, 1, 0x0 }},
-            { 0, -1, { 0x01CF, -459,55,-818, 0, 0, 1, 0x0 }}, { 1, -1, { 0x01CF, -459,55,-818, 0, 0, 1, 0x0 }},
-            { 0, -1, { 0x01CF, -521,56,-773, 0, 0, 1, 0x0 }}, { 1, -1, { 0x01CF, -521,56,-773, 0, 0, 1, 0x0 }},
+            { 0, -1, { ACTOR_OBJ_MAKEKINSUTA, -367,53,-770, 0, 0, 1, 0x0 }}, { 1, -1, { ACTOR_OBJ_MAKEKINSUTA, -367,53,-770, 0, 0, 1, 0x0 }},
+            { 0, -1, { ACTOR_OBJ_MAKEKINSUTA, -459,55,-818, 0, 0, 1, 0x0 }}, { 1, -1, { ACTOR_OBJ_MAKEKINSUTA, -459,55,-818, 0, 0, 1, 0x0 }},
+            { 0, -1, { ACTOR_OBJ_MAKEKINSUTA, -521,56,-773, 0, 0, 1, 0x0 }}, { 1, -1, { ACTOR_OBJ_MAKEKINSUTA, -521,56,-773, 0, 0, 1, 0x0 }},
             { -1, -1, { 0x77, 355,0,1095, 1, 0, 0, 0x20 }},
             { -1, -1, { 0x77, 860,185,-475, 2, 0, 0, 0x20 }},
             { -1, -1, { 0x77, -565,120,880, 3, 0, 0, 0x20 }},
@@ -141,6 +141,7 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, Ship::ActorSp
     { SCENE_SPOT10, { // Lost Woods
         { 0x5, {//Bridge
             { -1, -1, { ACTOR_EN_KO, -1150,-360,1152, 0,1200,0, 0xff00 }},
+            { -1, -1, { ACTOR_OBJ_MAKEKINSUTA, -1140,-10,1208, 0, 0, 2, 0x0 }},
         } },
     } },
     { 0x09, { // Ice Cavern

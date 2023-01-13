@@ -588,6 +588,11 @@ u16 func_80A97610(PlayState* play, Actor* thisx) {
     u16 faceReaction;
     EnKo* this = (EnKo*)thisx;
 
+    if (Player_GetMask(play) == PLAYER_MASK_GORON && ENKO_TYPE == ENKO_TYPE_CHILD_0) {
+        u16 KokiriMsg = GetTextID("kokiri");
+        return KokiriMsg+35;
+    }
+
     if (ENKO_TYPE == ENKO_TYPE_CHILD_0 || ENKO_TYPE == ENKO_TYPE_CHILD_2 || ENKO_TYPE == ENKO_TYPE_CHILD_3 ||
         ENKO_TYPE == ENKO_TYPE_CHILD_4 || ENKO_TYPE == ENKO_TYPE_CHILD_7 || ENKO_TYPE == ENKO_TYPE_CHILD_8 ||
         ENKO_TYPE == ENKO_TYPE_CHILD_11) {

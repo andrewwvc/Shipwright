@@ -470,7 +470,7 @@ extern "C" void OTRMessage_Init()
         questMessageTableID, SariaMsg+18,
         {
           TEXTBOX_TYPE_BLACK, TEXTBOX_POS_BOTTOM,
-          "Ohh, the ocarina I gave you&is a specialty of mine.^I'm able to make something&with enough power that its sound&can travel to wherever it&needs to be, even far away.",
+          "Ohh, the ocarina I gave you&is a specialty of mine.^I'm able to make instruments&with enough power that their sound&can travel to wherever it&needs to be, even far away.",
           "",
           "",
         }
@@ -549,7 +549,7 @@ extern "C" void OTRMessage_Init()
     );
 
 
-    u16 KokiriMsg = TextIDAllocator::Instance->allocateRange("kokiri", 40);
+    u16 KokiriMsg = TextIDAllocator::Instance->allocateRange("kokiri", 50);
     /*CustomMessageManager::Instance->CreateMessage(
         questMessageTableID, KokiriMsg,
         {
@@ -826,6 +826,8 @@ extern "C" void OTRMessage_Init()
 
     MakeNormalMsgEng(KokiriMsg+33, "Hey, I know you went through&the Lost Woods, and you probably&encountered Mido there,&looking out for Saria.^Mido had always given&\x0F a hard time and&I think he somewhat regretted&that once he realised \x0F^wouldn't be returning,&and especialy now that we&know he did not cause the&Great Deku Tree to wither.^But at the same time,&there seems to be&some reason why he continued&to hold a grudge against \x0F^that he has never let go of,&and I can only speculate&on why.");
     MakeNormalMsgEng(KokiriMsg+34, "Hey, I know you went through&the Lost Woods, and you probably&encountered Mido there,&looking out for Saria.^Mido had always given&\x0F a hard time and&I think he somewhat regretted&that once he realised \x0F^wouldn't be returning,&and especialy now that we&know he did not cause the&Great Deku Tree to wither.^Mido seems to have always been&jealous of \x0F for some reason,&but now I have no doubt^that he would put&aside those old feelings,&were he to meet \x0F again.");
+
+    MakeNormalMsgEng(KokiriMsg+35, "Hey, you look like someone&strong enough to wack down&a whole tree!^If you were so big you&could give a big wack to the&top of one, it might&just fall over.");
 
 
     u16 MidoMsg = TextIDAllocator::Instance->allocateRange("mido", 30);
