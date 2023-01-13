@@ -232,7 +232,7 @@ s32 EnGe2_CheckCarpentersFreed(void) {
         }
     } 
 
-    if ((u8)(gSaveContext.eventChkInf[9] & 0xF) == 0xF) {
+    if ((u8)(gSaveContext.eventChkInf[9] & 0xF) == 0xF && LINK_IS_ADULT) {
         return 1;
     }
     return 0;
@@ -246,7 +246,7 @@ void EnGe2_CaptureClose(EnGe2* this, PlayState* play) {
     } else {
         func_8006D074(play);
 
-        if ((INV_CONTENT(ITEM_HOOKSHOT) == ITEM_NONE) || (INV_CONTENT(ITEM_LONGSHOT) == ITEM_NONE)) {
+        if ((INV_CONTENT(ITEM_HOOKSHOT) == ITEM_NONE) || (INV_CONTENT(ITEM_LONGSHOT) == ITEM_NONE) || LINK_IS_CHILD) {
             play->nextEntranceIndex = 0x1A5;
         } else if (gSaveContext.eventChkInf[12] & 0x80) {
             play->nextEntranceIndex = 0x5F8;
@@ -276,7 +276,7 @@ void EnGe2_CaptureCharge(EnGe2* this, PlayState* play) {
     } else {
         func_8006D074(play);
 
-        if ((INV_CONTENT(ITEM_HOOKSHOT) == ITEM_NONE) || (INV_CONTENT(ITEM_LONGSHOT) == ITEM_NONE)) {
+        if ((INV_CONTENT(ITEM_HOOKSHOT) == ITEM_NONE) || (INV_CONTENT(ITEM_LONGSHOT) == ITEM_NONE || LINK_IS_CHILD)) {
             play->nextEntranceIndex = 0x1A5;
         } else if (gSaveContext.eventChkInf[12] & 0x80) {
             play->nextEntranceIndex = 0x5F8;

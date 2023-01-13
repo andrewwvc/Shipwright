@@ -229,6 +229,24 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, Ship::ActorSp
             { 3, -1, { ACTOR_EN_GOROIWA, 1243,322,100, 0,-20771,1, 0x1D00 }},
         } },
     } },
+    { 0xC, { // Gerudo Rooms
+        { 0x00, {
+            { 0, -1, { ACTOR_OBJ_KIBAKO2, 529,0,-3556, 0,0,0, 0xFFFF }},
+            { 1, -1, { ACTOR_OBJ_KIBAKO2, 529,0,-3556, 0,0,0, 0xFFFF }},
+        } },
+    } },
+    { 0x5D, { // Gerudo Fortress
+        { 0x00, {
+            { 0, -1, { ACTOR_EN_NIW, 1525,834,-2020, 0,16384,0, 0xFFFF }},
+            { 1, -1, { ACTOR_EN_NIW, 1525,834,-2020, 0,16384,0, 0xFFFF }},
+            { 0, -1, { ACTOR_BG_UMAJUMP, 190,1103,-2915, 0x4000,880,0, 0xFFFF }},
+            { 0, -1, { ACTOR_BG_UMAJUMP, 190,1103,-2915, 0x4000,880+0x8000,0, 0xFFFF }},
+            { 1, -1, { ACTOR_BG_UMAJUMP, 190,1103,-2915, 0x4000,880,0, 0xFFFF }},
+            { 1, -1, { ACTOR_BG_UMAJUMP, 190,1103,-2915, 0x4000,880+0x8000,0, 0xFFFF }},
+            { 0, 21, { 0xA, 926,1042,-2512, 0,-16384,0, 0x7c1 }},
+            { 1, 21, { 0xA, 926,1042,-2512, 0,-16384,0, 0x7c1 }},
+        } },
+    } },
     { SCENE_SPOT13, { //Desert Wasteland
         { 0x00, {
             { -1, 4, { ACTOR_EN_SW, 637,-393,-2536, 16384,0,0, 0xB602 }},
