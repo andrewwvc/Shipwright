@@ -376,7 +376,7 @@ void EnArrow_Fly(EnArrow* this, PlayState* play) {
 	    WaterBox* outWaterBox;
 	    f32 ySurface = this->actor.world.pos.y;
 
-	    if (WaterBox_GetSurfaceImpl(globalCtx, &globalCtx->colCtx, this->actor.world.pos.x,
+	    if (WaterBox_GetSurfaceImpl(play, &play->colCtx, this->actor.world.pos.x,
                                  this->actor.world.pos.z, &ySurface, &outWaterBox) &&
                                  (this->actor.world.pos.y <= ySurface && ySurface < this->actor.prevPos.y)) {
                 Vec3f diff;
@@ -386,9 +386,9 @@ void EnArrow_Fly(EnArrow* this, PlayState* play) {
                 f32 yRatio = (ydiff2 > 0.0f) ? ydiff1/ydiff2 : 0.0f;
                 Vec3f finalPos = {yRatio*diff.x+this->actor.world.pos.x,ySurface,yRatio*diff.z+this->actor.world.pos.z};
 
-                Actor_Spawn(&globalCtx->actorCtx, globalCtx,ACTOR_BG_SPOT08_ICEBLOCK,
+                Actor_Spawn(&play->actorCtx, play,ACTOR_BG_SPOT08_ICEBLOCK,
                     finalPos.x,finalPos.y,finalPos.z,
-                    0x0000,this->actor.world.rot.y,0x0000,0x20);
+                    0x0000,this->actor.world.rot.y,0x0000,0x20,false);
                 this->actor.world.pos = finalPos;
                 EnArrow_SetupAction(this, func_809B45E0);
                 this->timer = 20;
