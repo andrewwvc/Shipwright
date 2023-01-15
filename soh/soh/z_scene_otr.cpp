@@ -153,6 +153,7 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, Ship::ActorSp
         { 0x00, {
             //{ 2, -1, { 0x77, 4870, -160, 8506, 0, 0, 0, 0x11 }}, //{ 3, -1, { 0x77, 4870, -160, 8506, 0, 0, 0, 0x11 }},
             { 2, -1, { 0x00A7, 116,192,6206, 0, 0, 0, 0x18a4 }}, { 3, -1, { 0x00A7, 116,192,6206, 0, 0, 0, 0x18a4 }},
+            { 0, -1, { ACTOR_EN_GO2,  3173,-20,880,  0,-20000,0,  0x03e0 | (13<<10)}}, { 1, -1, { ACTOR_EN_GO2,  3173,-20,880,  0,-20000,0,  0x03e0 | (13<<10)}},
         } },
     } },
     { SCENE_MARKET_DAY, { // Castle Town Square - Day
@@ -227,6 +228,14 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, Ship::ActorSp
         { 0x00, {
             { 2, -1, { ACTOR_EN_GOROIWA, 1243,322,100, 0,-20771,1, 0x1D00 }},
             { 3, -1, { ACTOR_EN_GOROIWA, 1243,322,100, 0,-20771,1, 0x1D00 }},
+        } },
+    } },
+    { 0x5A, {//Gerudo Valley
+        { 0x00, {
+            { 0, 32, { ACTOR_BG_UMAJUMP, -391,-70,-98, 	-0x000,16384,0, 0x2}},
+            { 1, 32, { ACTOR_BG_UMAJUMP, -391,-70,-98, 	-0x000,16384,0, 0x2}},
+            { 0, -1, { ACTOR_EN_GO2,  2626,-240,447,  0,-22910,0,  0x03e0 | (12<<10)}},
+            { 1, -1, { ACTOR_EN_GO2,  2626,-240,447,  0,-22910,0,  0x03e0 | (12<<10)}},
         } },
     } },
     { 0xC, { // Gerudo Rooms

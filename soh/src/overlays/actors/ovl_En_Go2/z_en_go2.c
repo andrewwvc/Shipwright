@@ -52,7 +52,7 @@ Gorons only move when this->unk_194.unk_00 == 0
 #define HIGH_PATH ((this->actor.params & 0xFC00) >> 0xA)
 
 #define IS_RACING LINK_IS_ADULT
-#define IS_REFINED_ROLLING ((GORON_IDENTITY == GORON_CITY_ROLLING_BIG) && LINK_IS_ADULT)
+#define IS_REFINED_ROLLING ((GORON_IDENTITY == GORON_CITY_ROLLING_BIG) && (LINK_IS_ADULT || play->sceneNum == SCENE_SPOT00 || play->sceneNum == 0x5A))
 
 void EnGo2_Init(Actor* thisx, PlayState* play);
 void EnGo2_Destroy(Actor* thisx, PlayState* play);
@@ -436,8 +436,19 @@ u16 EnGo2_GetTextIdGoronCityRollingBig(PlayState* play, EnGo2* this) {
     u16 GoronMsg = GetTextID("goron");
     if (LINK_IS_ADULT)
         return GoronMsg+20;
-    if (play->sceneNum == 0x60)
-        return GoronMsg+25;
+    if (play->sceneNum == 0x60)//DMT
+        if (Player_GetMask(play) == PLAYER_MASK_GERUDO)
+            return GoronMsg+29;
+        else
+            return GoronMsg+25;
+    if (play->sceneNum == 0x5A)//Gerudo Valley
+        if (Player_GetMask(play) == PLAYER_MASK_GERUDO)
+            return GoronMsg+31;
+        else
+            if ((gSaveContext.infTable[28] & 0x0001) == 0x0001)
+                return GoronMsg+32;
+            else
+                return GoronMsg+30;
     if (gSaveContext.infTable[17] & 0x4000) {
         return 0x3013;
     } else if ((CUR_CAPACITY(UPG_BOMB_BAG) >= 20 || gSaveContext.n64ddFlag) && this->waypoint > 7 && this->waypoint < 12) {
@@ -448,8 +459,25 @@ u16 EnGo2_GetTextIdGoronCityRollingBig(PlayState* play, EnGo2* this) {
 }
 
 s16 EnGo2_GetStateGoronCityRollingBig(PlayState* play, EnGo2* this) {
+    u16 GoronMsg = GetTextID("goron");
+    if (this->actor.textId == GoronMsg+29) {
+        gAudioContext.seqPlayers[0].fadeTimer = 100;
+        gAudioContext.seqPlayers[0].fadeVolume = 0.0f;
+        Audio_SequencePlayerProcessSound(&gAudioContext.seqPlayers[0]);
+    }
+
     switch (Message_GetState(&play->msgCtx)) {
         case TEXT_STATE_CLOSING:
+            if (this->actor.textId == GoronMsg+29) {
+                Audio_PlayActorSound2(&this->actor, NA_SE_EN_GOLON_CRY);
+                gSaveContext.goronTimeStatus |= (1<<9);
+            } else if (this->actor.textId == GoronMsg+33) {
+                this->actionFunc = func_80A46B40;
+                this->unk_194.unk_00 = 0;
+                this->unk_211 = true;
+                //Message_CloseTextbox(play);
+                return 0;
+            }
             return 2;
         case TEXT_STATE_EVENT:
             if (Message_ShouldAdvance(play)) {
@@ -463,10 +491,27 @@ s16 EnGo2_GetStateGoronCityRollingBig(PlayState* play, EnGo2* this) {
                     Message_CloseTextbox(play);
                     gSaveContext.infTable[17] |= 0x4000;
                     return 2;
-                } else {
+                } else if (this->actor.textId == GoronMsg+30) {
+                    this->actionFunc = EnGo2_SetupGetItem;
+                    EnGo2_GetItem(this, play, GI_HEART_PIECE);
+                    Message_CloseTextbox(play);
+                    gSaveContext.infTable[28] |= 0x0001;
                     return 2;
                 }
             }
+        case TEXT_STATE_CHOICE:
+            if (Message_ShouldAdvance(play)) {
+                if (this->actor.textId == GoronMsg+32) {
+                        if (play->msgCtx.choiceIndex == 0) {
+                            this->actor.textId = GoronMsg+33;
+                        } else {
+                            this->actor.textId = GoronMsg+34;
+                            gSaveContext.goronTimeStatus &= ~(1<<9);
+                        }
+                    }
+                    Message_ContinueTextbox(play, this->actor.textId);
+                }
+            return 1;
         default:
             return 1;
     }
@@ -1041,8 +1086,17 @@ s16 EnGo2_GetStateGoronDmtFairyHint(PlayState* play, EnGo2* this) {
 u16 EnGo2_GetTextId(PlayState* play, Actor* thisx) {
     EnGo2* this = (EnGo2*)thisx;
     u16 faceReaction = Text_GetFaceReaction(play, 0x20);
+    u16 GoronMsg = GetTextID("goron");
 
     if (faceReaction) {
+        if ((this->actor.params & GORON_IDENTITY_PARAM) == GORON_CITY_ROLLING_BIG && Player_GetMask(play) == PLAYER_MASK_GERUDO) {
+            if (play->sceneNum == 0x60)
+                return GoronMsg+29;
+            else if (play->sceneNum == 0x5A) {
+                return GoronMsg+31;
+            }
+        }
+
         return faceReaction;
     } else {
         switch (this->actor.params & GORON_IDENTITY_PARAM) {
@@ -1225,8 +1279,11 @@ Vec3s EnGo2_Special_Points9[] = {{5,-3,291},{-74,-3,590},{-122,71,747},{-219,76,
 Vec3s EnGo2_Special_Points10[] = {{-674,353,56}};//From 0:16 to 5:5
 
 Vec3s EnGo2_Special_Points11[] = {{-8,3230,-4030},{-73,2224,-3524},{-267,1873,-2588},{-332,1592,-1757},{-318,1779,-1288},{-558,1947,-204},{-582,1216,691},{-582,100,4000},{-582,0,8000}};
+Vec3s EnGo2_Special_Points12[] = {{2178,-144,233},{1660,-31,-4},{1242,34,-195},{862,32,-178},{590,35,-122}, {220,-50,-123},{-364,-69,-120},{-587,36,-123},{-1050,21,-106},{-1071,24,15},{-787,31,105},{-93,-228,347},{156,-3265,2840},{1400,-3210,3917},{1400,-3210,3917}};
+Vec3s EnGo2_Special_Points13[] = {{2598,-12,567},{2061,-14,713},{1621,-6,1245},{1866,4,2450},{2962,180,3282},{3597,293,4724},{3732,57,6115},{2690,-164,7078},{1566,-220,7750},{757,-100,8929},{-703,-500,11088},{-4149,-473,12371},{-5157,-401,11436},{-6079,-500,9233},{-6711,-500,8776},{-7970,-434,8535},{-8694,-300,7905},{-9417,-250,7326},{-9800,-37,6539},{-10433,22,6894},{-10433,22,6894}};
 //{450,398,554}
-Path EnGo2_Special_Path[] = {{24, &EnGo2_Special_Points0},{6, &EnGo2_Special_Points1},{7, &EnGo2_Special_Points2},{11, &EnGo2_Special_Points3},{5, &EnGo2_Special_Points4},{11, &EnGo2_Special_Points5},{6, &EnGo2_Special_Points6},{4, &EnGo2_Special_Points7},{6, &EnGo2_Special_Points8},{8, &EnGo2_Special_Points9},{1, &EnGo2_Special_Points10},{9,EnGo2_Special_Points11}};
+Path EnGo2_Special_Path[] = {{24, &EnGo2_Special_Points0},{6, &EnGo2_Special_Points1},{7, &EnGo2_Special_Points2},{11, &EnGo2_Special_Points3},{5, &EnGo2_Special_Points4},{11, &EnGo2_Special_Points5},{6, &EnGo2_Special_Points6},{4, &EnGo2_Special_Points7},{6, &EnGo2_Special_Points8},{8, &EnGo2_Special_Points9},{1, &EnGo2_Special_Points10},{9,EnGo2_Special_Points11},{15,EnGo2_Special_Points12},{21,EnGo2_Special_Points13}};
+
 
 SlantCylinder scForward0 = {{512,398,15},{399,396,-291},100.0f};
 SlantCylinder scAlts0[] = {{{575,399,96},{796,400,105},100.0f},{{796,400,105},{959,480,102},100.0f},{{959,480,102},{1100,480,100},100.0f}};
@@ -1668,6 +1725,10 @@ f32 EnGo2_GetTargetXZSpeed(EnGo2* this, PlayState* play) {
                 return 6.0f;
             else if (play->sceneNum == 0x60)
                 return 8.0f;
+            else if (play->sceneNum == 0x5a)
+                return 5.5f;
+            else if (play->sceneNum == SCENE_SPOT00)
+                return 7.0f;
             else
                 return 3.6000001f;
         }
@@ -2193,7 +2254,8 @@ void EnGo2_Init(Actor* thisx, PlayState* play) {
             break;
         case GORON_CITY_ROLLING_BIG:
             if ((LINK_IS_ADULT && ((!LINK_IS_ADULT ^ !!(gSaveContext.goronTimeStatus & (1<<8))) || ((play->sceneNum == SCENE_SPOT18) && IS_NIGHT))) ||
-                        (!LINK_IS_ADULT && (play->sceneNum == 0x60) && !(gSaveContext.goronTimeStatus & (1<<8)))) {
+                        (!LINK_IS_ADULT && (((play->sceneNum == 0x60) && (!(gSaveContext.goronTimeStatus & (1<<8)) || (gSaveContext.goronTimeStatus & (1<<9)))) ||
+                                            (((play->sceneNum == SCENE_SPOT00) || (play->sceneNum == 0x5A)) && !(gSaveContext.goronTimeStatus & (1<<9)))))) {
                 Actor_Kill(&this->actor);
             }
         //FALLTHROUGH
@@ -2360,10 +2422,21 @@ void EnGo2_SlowRolling(EnGo2* this, PlayState* play) {
                 this->waypoint = 3;
                 return;
             }
+            if ((index == GORON_CITY_ROLLING_BIG) && (orientation == 1) && ((this->path == &EnGo2_Special_Path[12]) && (this->waypoint == 9) || (this->path == &EnGo2_Special_Path[13]) && (this->waypoint == 0))) {
+                EnGo2_StopRolling(this, play);
+                return;
+            }
         } else if ((orientation == 2) && (this->waypoint == 1)) {
             EnGo2_StopRolling(this, play);
             return;
         }
+        if ((index == GORON_CITY_ROLLING_BIG)) {
+            Actor* box = Actor_FindNearby(play,&this->actor,ACTOR_OBJ_KIBAKO2,ACTORCAT_BG,100.0f);
+            if (box) {
+                box->home.rot.z = 1;//This breaks the box
+            }
+        }
+
         Math_ApproachF(&this->actor.speedXZ, EnGo2_GetTargetXZSpeed(this,play), 0.4f, 0.6f);
         this->actor.shape.rot = this->actor.world.rot;
     }

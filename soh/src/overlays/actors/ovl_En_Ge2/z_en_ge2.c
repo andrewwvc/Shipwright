@@ -578,7 +578,7 @@ void EnGe2_Update(Actor* thisx, PlayState* play) {
 
     if ((this->stateFlags & GE2_STATE_KO) || (this->stateFlags & GE2_STATE_CAPTURING)) {
         this->actionFunc(this, play);
-    } else if (this->collider.base.acFlags & 2) {
+    } else if ((this->collider.base.acFlags & 2) || Actor_FindNearby(play,&this->actor,ACTOR_EN_GO2,ACTORCAT_NPC,100.0f)) {
         if ((this->collider.info.acHitInfo != NULL) && (this->collider.info.acHitInfo->toucher.dmgFlags & 0x80)) {
             Actor_SetColorFilter(&this->actor, 0, 120, 0, 400);
             this->actor.update = EnGe2_UpdateStunned;

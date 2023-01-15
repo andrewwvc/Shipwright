@@ -912,7 +912,7 @@ extern "C" void OTRMessage_Init()
     MakeNormalMsgEng(MidoMsg+20, "...^Thank you...for everything.");
 
 
-    u16 GoronMsg = TextIDAllocator::Instance->allocateRange("goron", 30);
+    u16 GoronMsg = TextIDAllocator::Instance->allocateRange("goron", 40);
 
     MakeNormalMsgEng(GoronMsg+0, "Ahhh, this is the best&spot to take a nice bath.&So warm and relaxing...");
     MakeNormalMsgEng(GoronMsg+1, "Oh, this stone at least&is warm enough to rest on.&So I'll just keep napping...");
@@ -939,10 +939,16 @@ extern "C" void OTRMessage_Init()
     MakeNormalMsgEng(GoronMsg+22, "Big brother is both courteous and&tough. He tries to avoid hitting&anyone if he can help it,^and is barely phased by the&explosions of our special crop anymore.^I hear he still dislikes being&hit by them though.");
     MakeNormalMsgEng(GoronMsg+23, "Oh, I give up,&I might as well ask you&to pawn this off for me.^I'll take %g200 rupees%w for it.&\x1B&%gYes&No%w\x02");
     MakeNormalMsgEng(GoronMsg+24, "Ah, I like it here.&It's so peaceful and quiet.^You know, I think it's&about time I went shopping again.^I remember the last time I went,&and hope it goes better this time.^Should I try again?&\x1B&%gYes&No%w\x02");
-    MakeNormalMsgEng(GoronMsg+25, "Oh, you expected this to&lead to something didn't you?^Well sorry, that's what&you get for playing&the beta of this mod!");
+    MakeNormalMsgEng(GoronMsg+25, "Oh, I can't believe they&kicked me out!^There was someone else there&rolling around my usual spot.^Reminded me of myself&when I was younger too.^Anyway, since nobody wants&me there now, I guess&I'll be heading off.");
     MakeNormalMsgEng(GoronMsg+26, "Aww, too bad.");
     MakeNormalMsgEng(GoronMsg+27, "What, you don't have enough either?");
     MakeNormalMsgEng(GoronMsg+28, "We have a deal then.\x0B\x02");
+    MakeNormalMsgEng(GoronMsg+29, "No, oh no!^You will never take me,&or my brothers again!&I will make sure of it!");
+    MakeNormalMsgEng(GoronMsg+30, "I'm not that good at sneaking&into tight spaces! But if&you are here to sabotage&the Gerudo, then great!^Please take this for good luck!\x0B\x02");
+    MakeNormalMsgEng(GoronMsg+31, "You think you're going&to capture me again?^NEVER!");
+    MakeNormalMsgEng(GoronMsg+32, "I'll be standing by if you need me.&\x1B&%gDo that&You are free to leave%w\x02");
+    MakeNormalMsgEng(GoronMsg+33, "Alright.");
+    MakeNormalMsgEng(GoronMsg+34, "Ok, see ya back&at the mountain.");
 
     u16 HylianMsg = TextIDAllocator::Instance->allocateRange("hylian", 30);
 
@@ -1010,6 +1016,7 @@ extern "C" void OTRMessage_Init()
 
     u16 MiscMsg = TextIDAllocator::Instance->allocateRange("misc", 20);
     MakeNormalMsgEng(MiscMsg+0, "Mooooo! I feel really great&like I'm about to produce&something amazing!&Hang on!\x0B\x02");
+    MakeNormalMsgEng(MiscMsg+1, "Hey did you see the large&Goron that just zoomed past?&Anyway, I still must say.&The current time is \x1F.");
 
     u16 GerudoMsg = TextIDAllocator::Instance->allocateRange("gerudo", 10);
     MakeNormalMsgEng(GerudoMsg+0, "Heh, since you're clearly a master,&try for a perfect score of %r2000%w,&if you can!\x0B\x02");
