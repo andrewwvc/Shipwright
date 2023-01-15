@@ -406,8 +406,8 @@ void EnArrow_Fly(EnArrow* this, PlayState* play) {
             Math_Vec3f_Copy(&this->actor.world.pos, &hitPoint);
 
             if ((this->actor.params == ARROW_FIRE) && DynaPoly_IsBgIdBgActor(bgId)) {
-                DynaPolyActor* dyna1 = DynaPoly_GetActor(&globalCtx->colCtx,bgId);
-                Actor* actor1 = globalCtx->actorCtx.actorLists[ACTORCAT_BG].head;
+                DynaPolyActor* dyna1 = DynaPoly_GetActor(&play->colCtx,bgId);
+                Actor* actor1 = play->actorCtx.actorLists[ACTORCAT_BG].head;
 
                 while (actor1 != NULL) {
                     if (ACTOR_BG_SPOT08_ICEBLOCK == actor1->id) {
