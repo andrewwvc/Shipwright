@@ -5573,7 +5573,7 @@ void Interface_Draw(PlayState* play) {
                             CarrotsPosX = -9999;
                         }
                     }
-                    for (svar1 = 1, svar5 = CarrotsPosX; svar1 < 7; svar1++, svar5 += 16) {
+                    for (svar1 = 1, svar5 = CarrotsPosX; svar1 < gSaveContext.maxBoosts+1; svar1++, svar5 += 16) {
                         // Carrot Color (based on availability)
                         if ((interfaceCtx->numHorseBoosts == 0) || (interfaceCtx->numHorseBoosts < svar1)) {
                             gDPSetPrimColor(OVERLAY_DISP++, 0, 0, 0, 150, 255, interfaceCtx->aAlpha);

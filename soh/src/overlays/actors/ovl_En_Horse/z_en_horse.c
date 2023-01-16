@@ -855,7 +855,7 @@ void EnHorse_Init(Actor* thisx, PlayState* play2) {
     Skin_Init(play, &this->skin, sSkeletonHeaders[this->type], sAnimationHeaders[this->type][ENHORSE_ANIM_IDLE]);
     this->animationIdx = ENHORSE_ANIM_IDLE;
     Animation_PlayOnce(&this->skin.skelAnime, sAnimationHeaders[this->type][this->animationIdx]);
-    this->numBoosts = 6;
+    this->numBoosts = gSaveContext.maxBoosts;
     this->blinkTimer = this->postDrawFunc = this->boostRegenTime = 0;
     EnHorse_ResetCutscene(this, play);
     EnHorse_ResetRace(this, play);
@@ -3343,7 +3343,7 @@ void EnHorse_CheckBoost(EnHorse* thisx, PlayState* play2) {
 }
 
 void EnHorse_RegenBoost(EnHorse* this, PlayState* play) {
-    if (this->numBoosts < 6 && this->numBoosts > 0) {
+    if (this->numBoosts < gSaveContext.maxBoosts && this->numBoosts > 0) {
         this->boostRegenTime--;
         this->boostTimer++;
 
@@ -3354,7 +3354,7 @@ void EnHorse_RegenBoost(EnHorse* this, PlayState* play) {
                 Audio_PlaySoundGeneral(NA_SE_SY_CARROT_RECOVER, &D_801333D4, 4, &D_801333E0, &D_801333E0, &D_801333E8);
             }
 
-            if (this->numBoosts < 6) {
+            if (this->numBoosts < gSaveContext.maxBoosts) {
                 this->boostRegenTime = 11;
             }
         }
@@ -3364,7 +3364,7 @@ void EnHorse_RegenBoost(EnHorse* this, PlayState* play) {
 
         if (this->boostRegenTime <= 0) {
             this->boostRegenTime = 0;
-            this->numBoosts = 6;
+            this->numBoosts = gSaveContext.maxBoosts;
 
             if (!EN_HORSE_CHECK_4(this)) {
                 Audio_PlaySoundGeneral(NA_SE_SY_CARROT_RECOVER, &D_801333D4, 4, &D_801333E0, &D_801333E0, &D_801333E8);

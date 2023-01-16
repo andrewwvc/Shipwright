@@ -279,6 +279,7 @@ typedef struct {
     /*        */ s32 goronTimeDay;
     /*        */ s32 SariaDateDay;
     /*        */ s32 RutoDateDay;
+    /*        */ u8 maxBoosts;
     // #endregion
 } SaveContext; // size = 0x1428
 
