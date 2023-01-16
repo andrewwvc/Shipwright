@@ -302,7 +302,7 @@ s32 EnKo_IsOsAnimeLoaded(EnKo* this, PlayState* play) {
 }
 
 u8 is0Chopping() {
-    return IS_DAY && (getDayOfCycle() % 3 == 2) && gSaveContext.infTable[3] & (1 << 14);
+    return IS_DAY && isSariasDayHome() && gSaveContext.infTable[3] & (1 << 14);
 }
 
 u16 func_80A96FD0(PlayState* play, Actor* thisx) {

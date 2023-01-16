@@ -481,7 +481,7 @@ extern "C" void OTRMessage_Init()
         questMessageTableID, SariaMsg+19,
         {
           TEXTBOX_TYPE_BLACK, TEXTBOX_POS_BOTTOM,
-          "Oh, Mido can be a pain sometimes.&But don't worry to much about&him if you can help it.^Having said that, you might&want to know something&surprising about him, tee hee.^Mido is actually %yterrified%w of bugs.&He absolutely %r\x14\x05hates \x14\x01%wthem!",
+          "Oh, Mido can be a pain sometimes.&But don't worry to much about&him if you can help it.^Having said that, you might&want to know something&surprising about him, tee hee.^Mido is actually %yterrified%w of bugs.&He absolutely %r\x14\x05hates \x14\x01%wthem!\x0B\x02",
           "",
           "",
         }
@@ -499,7 +499,7 @@ extern "C" void OTRMessage_Init()
         questMessageTableID, SariaMsg+21,
         {
           TEXTBOX_TYPE_BLACK, TEXTBOX_POS_BOTTOM,
-          "Having said that, did you hear what happened?&Mido's house is absolutely crawling with bugs!&I hear he can hardly sleep at all.",
+          "Having said that, did you hear&what happened? Mido's house is&absolutely crawling with bugs! I hear&he can hardly sleep at all!",
           "",
           "",
         }
@@ -545,6 +545,24 @@ extern "C" void OTRMessage_Init()
         {
           TEXTBOX_TYPE_BLUE, TEXTBOX_POS_BOTTOM,
           "Oh, hey \x0F, I'll just be&dropping over if that's&OK with you.^Looking forward to seeing you.\x0B\x02",
+          "",
+          "",
+        }
+    );
+    CustomMessageManager::Instance->CreateMessage(
+        questMessageTableID, SariaMsg+27,
+        {
+          TEXTBOX_TYPE_BLACK, TEXTBOX_POS_BOTTOM,
+          "Nice to see you here! I'd love&to hear all about your travels,&so try playing my song&when you're out and about.^I often can't help but&wish I could come along,&but still, at least I'm thankful&that this place is nice&and confortable and I'm&protected by the forrest.",
+          "",
+          "",
+        }
+    );
+    CustomMessageManager::Instance->CreateMessage(
+        questMessageTableID, SariaMsg+28,
+        {
+          TEXTBOX_TYPE_BLACK, TEXTBOX_POS_BOTTOM,
+          "Hey, nice to see you!^Hmm...anyway, you'll never&guesswhat a bird told me...^I heard that you were at&the lake, and the the water&princess was there with you!^I'm so jealous tee hee!",
           "",
           "",
         }

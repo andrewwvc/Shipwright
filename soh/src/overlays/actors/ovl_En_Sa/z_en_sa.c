@@ -126,6 +126,15 @@ static AnimationInfo sAnimationInfo2[] = {
     { &gSariaWaitArmsToSideAnim, 1.0f, 0.0f, -1.0f, ANIMMODE_LOOP, -8.0f },
 };
 
+//Saris isn't necessarily home of this day if she is at Link's house
+s16 isSariasDayHome() {
+    return (getDayOfCycle() % 3 == 2);
+}
+
+s16 isSariaAtLinksHouse() {
+    return (gSaveContext.infTable[27]&1) && (gSaveContext.SariaDateDay <= gSaveContext.totalDays);
+}
+
 s16 func_80AF5560(EnSa* this, PlayState* play) {
     s16 textState = Message_GetState(&play->msgCtx);
 
@@ -156,6 +165,11 @@ u16 func_80AF55E0(PlayState* play, Actor* thisx) {
             } else {
                 return SariaMsg+15;
             }
+        } else if (play->sceneNum == SCENE_KOKIRI_HOME5) {
+            if (gSaveContext.infTable[21] & 0x40)
+                return SariaMsg+28;
+            else
+                return SariaMsg+27;
         } else {
             return 0x10AD;
         }
@@ -229,6 +243,7 @@ s16 func_80AF56F4(PlayState* play, Actor* thisx) {
             break;
         case TEXT_STATE_CHOICE:
             if (Message_ShouldAdvance(play)) {
+                ret = 0;
                 switch (msgCtx->choiceIndex) {
                     case 0:
                     this->actor.textId = SariaMsg+17;
@@ -238,13 +253,26 @@ s16 func_80AF56F4(PlayState* play, Actor* thisx) {
                     break;
                     case 2:
                     this->actor.textId = SariaMsg+19;
+                    ret = 1;
                     break;
                 }
-                ret = 0;
                 Message_ContinueTextbox(play, this->actor.textId);
             }
             break;
         case TEXT_STATE_EVENT:
+            if (Message_ShouldAdvance(play)) {
+                if (this->actor.textId == SariaMsg+19) {
+                    if (gSaveContext.infTable[3] & (1<<0)) {
+                        this->actor.textId = SariaMsg+21;
+                        Message_ContinueTextbox(play, this->actor.textId);
+                    } else {
+                        Message_CloseTextbox(play);
+                    }
+                } else {
+                    Message_CloseTextbox(play);
+                }
+                ret = 0;
+            }
         case TEXT_STATE_SONG_DEMO_DONE:
         case TEXT_STATE_8:
         case TEXT_STATE_9:
@@ -420,10 +448,10 @@ s32 func_80AF5DFC(EnSa* this, PlayState* play) {
     }
     if (play->sceneNum == SCENE_KOKIRI_HOME5 && !LINK_IS_ADULT &&
                 ((INV_CONTENT(ITEM_OCARINA_FAIRY) == ITEM_OCARINA_FAIRY && !(gSaveContext.eventChkInf[4] & 1)) ||
-                 (getDayOfCycle() % 3 == 2 && CHECK_QUEST_ITEM(QUEST_SONG_SARIA) && !(gSaveContext.infTable[27]&1)))) {
+                 (isSariasDayHome() && CHECK_QUEST_ITEM(QUEST_SONG_SARIA) && !isSariaAtLinksHouse()))) {
         return 1;
     }
-    if (play->sceneNum == SCENE_SPOT05 && (gSaveContext.eventChkInf[4] & 1) && (!CHECK_QUEST_ITEM(QUEST_SONG_SARIA) || (!(getDayOfCycle() % 3 == 2) && !(gSaveContext.infTable[27]&1)))) {
+    if (play->sceneNum == SCENE_SPOT05 && (gSaveContext.eventChkInf[4] & 1) && (!CHECK_QUEST_ITEM(QUEST_SONG_SARIA) || (!isSariasDayHome() && !isSariaAtLinksHouse()))) {
         if (gSaveContext.n64ddFlag) {
             return 5;
         }
@@ -435,7 +463,7 @@ s32 func_80AF5DFC(EnSa* this, PlayState* play) {
         }
         return 4;
     }
-    if (play->sceneNum == SCENE_LINK_HOME && !LINK_IS_ADULT && (gSaveContext.infTable[27]&1)) {
+    if (play->sceneNum == SCENE_LINK_HOME && !LINK_IS_ADULT && isSariaAtLinksHouse()) {
             return 1;
     }
     return 0;
