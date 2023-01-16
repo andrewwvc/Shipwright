@@ -251,6 +251,8 @@ void EnGoroiwa_TeleportToWaypoint(EnGoroiwa* this, PlayState* play, s32 waypoint
     this->actor.world.pos.x = pointPos->x;
     this->actor.world.pos.y = pointPos->y;
     this->actor.world.pos.z = pointPos->z;
+    this->actor.isTeleported = 1;
+    this->actor.teleportVec = this->actor.world.pos;
 }
 
 void EnGoroiwa_InitRotation(EnGoroiwa* this) {

@@ -645,12 +645,6 @@ void FrameInterpolation_FalsifiedRecordMatrixMtxFToMtx(MtxF* src, Mtx* dest, Mtx
     auto& p = obtainParallel(Op::MatrixMtxFToMtx, &isValid);
     if (isValid) {
         Matrix_MtxFCopy(&p.matrix_mtxf_to_mtx.src,mtxReplace);
-        // p.matrix_mtxf_to_mtx.src.mf[3][0] += posDelta->z;
-        // p.matrix_mtxf_to_mtx.src.mf[3][1] += posDelta->y;
-        // p.matrix_mtxf_to_mtx.src.mf[3][2] += posDelta->x;
-        // p.matrix_mtxf_to_mtx.dest->m[3][0] += round(posDelta->z);
-        // p.matrix_mtxf_to_mtx.dest->m[3][1] += round(posDelta->y);
-        // p.matrix_mtxf_to_mtx.dest->m[3][2] += round(posDelta->x);
     }
 }
 
