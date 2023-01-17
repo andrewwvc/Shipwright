@@ -2069,10 +2069,18 @@ extern "C" int CustomMessage_RetrieveIfExists(PlayState* play) {
                     messageEntry = CustomMessageManager::Instance->RetrieveMessage(questMessageTableID, textId);
                 }
             } else {
-                messageEntry = CustomMessageManager::Instance->RetrieveMessage(questMessageTableID, textId);
+                uint16_t substituteID = RetrieveTextSubstitution(textId);
+                if (substituteID == textId)
+                    messageEntry = CustomMessageManager::Instance->RetrieveMessage(questMessageTableID, substituteID);
+                else
+                    textId = msgCtx->textId = substituteID;
             }
         } else {
-            messageEntry = CustomMessageManager::Instance->RetrieveMessage(questMessageTableID, textId);
+            uint16_t substituteID = RetrieveTextSubstitution(textId);
+            if (substituteID == textId)
+                messageEntry = CustomMessageManager::Instance->RetrieveMessage(questMessageTableID, substituteID);
+            else
+                textId = msgCtx->textId = substituteID;
         }
     }
     if (textId == TEXT_GS_NO_FREEZE || textId == TEXT_GS_FREEZE) {

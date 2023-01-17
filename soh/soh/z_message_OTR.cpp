@@ -284,20 +284,23 @@ extern "C" void OTRMessage_Init()
     MakeBlueMsgEng(0x405, "They say that one part of&the secret directions&to a lost place is:^West&East&South&West");//Medigoron Crater Text
     MakeBlueMsgEng(0x408, "They say that one part of&the secret directions&to a lost place is:^East&North&North&East");//Ruto
     MakeBlueMsgEng(0x408, "They say that Princess Ruto's emotions&are at their highest on the&day before the full moon.");//Chicken Lady
-    MakeBlueMsgEng(0x408, "They say that certain items, when&they are used together,may be&able to combine their abilities.^So it may pay to experiemnt&with means of pairing things!");//Hold Targeting
-    MakeBlueMsgEng(0x40D, "They say that the Gerudo&currently keep something special above&their highest prison cell.");//Running Man
+    MakeBlueMsgEng(0x409, "Some think that the Gerudo Mask,&owned by a certian salesman,&might be useful to gain&entry to the Gerudo Fortress.^But the naive and obvious&way of using it&will likely not work.");//Hold Targeting
+    MakeBlueMsgEng(0x40D, "They say that the Gerudo&currently keep something special&above their highest prison cell.");//Running Man
     MakeBlueMsgEng(0x411, "They say that one part of&the secret directions&to a lost place is:^West&East&South&West");//Gerudo Valley
-    MakeBlueMsgEng(0x41A, "It may be that the Gerudo Mask,&owned by a certian salesman,&could be useful to pass the&entrance to the Gerudo Fortress.^But not necessarily in the way&you might think.");//Gerudo Colossus
-    MakeBlueMsgEng(0x420, "They say that Dampe,&the gravekeeper, has a reward reserved&for those with very impresive speed.");//Deku Tree
+    MakeBlueMsgEng(0x41A, "They say that the reward&for completing the Gerudo&Training Grounds has many uses.^And experimenting, in order to&discover what kinds of things it&works on, could pay off well.");//Gerudo Colossus
+    MakeBlueMsgEng(0x420, "They say that Dampe, the gravekeeper,&has a reward reserved for those&with very impresive speed.^However, he unlikely&to relinquish anything until&he gives up the ghost.");//Deku Tree
     MakeBlueMsgEng(StoneMsg+0,"There may be something special&behind falls that are not water...");
+    MakeBlueMsgEng(StoneMsg+2,"They say that many people&would like Hyrule Field to&be cleared of Peahats.");
     MakeBlueMsgEng(StoneMsg+8, "They say that one part of&the secret directions&to a lost place is:^South&North&WestWest");
+    MakeBlueMsgEng(StoneMsg+12, "They say that certain items, when&they are used together, may be&able to combine their abilities.^So it may pay to experiemnt&with methods of pairing things!");
+    MakeBlueMsgEng(StoneMsg+20, "They say that certain shops&may be doing business&at hours that they&advertise as being closed.");
     (*textIDSubstitutionTable)[StoneMsg+26] = 0x405;
+    (*textIDSubstitutionTable)[0x041F] = 0x420;
     //MakeBlueMsgEng(StoneMsg+26, );//Mountain Crater Grotto
     //"They say that the Gerudo Mask,&owned by a certian salesman,&could be useful to enter the gate.^But not necessarily in the way&you might think."
     //"They say that Dampe,&the gravekeeper, has a reward reserved&for those with very impresive speed."
     //"They say that the Gerudo&currently keep something special above&their highest prison cell."
     //"They say that certain shops&may be doing business&at hours that they&advertise as being closed."
-    //"They say that many people&would like Hyrule Field to&be cleared of Peahats."
 
     //Deku Scrubs
     MakeNormalMsgEng(0x10E0,"\x12\x38\x82""All right! You win! In return,&I'll tell you a secret&if you pay me %r50 rupees%w!\x07\x10\xA3");
@@ -847,7 +850,8 @@ extern "C" void OTRMessage_Init()
     MakeNormalMsgEng(KokiriMsg+33, "Hey, I know you went through&the Lost Woods, and you probably&encountered Mido there,&looking out for Saria.^Mido had always given&\x0F a hard time and&I think he somewhat regretted&that once he realised \x0F^wouldn't be returning,&and especialy now that we&know he did not cause the&Great Deku Tree to wither.^But at the same time,&there seems to be&some reason why he continued&to hold a grudge against \x0F^that he has never let go of,&and I can only speculate&on why.");
     MakeNormalMsgEng(KokiriMsg+34, "Hey, I know you went through&the Lost Woods, and you probably&encountered Mido there,&looking out for Saria.^Mido had always given&\x0F a hard time and&I think he somewhat regretted&that once he realised \x0F^wouldn't be returning,&and especialy now that we&know he did not cause the&Great Deku Tree to wither.^Mido seems to have always been&jealous of \x0F for some reason,&but now I have no doubt^that he would put&aside those old feelings,&were he to meet \x0F again.");
 
-    MakeNormalMsgEng(KokiriMsg+35, "Hey, you look like someone&strong enough to wack down&a whole tree!^If you were so big you&could give a big wack to the&top of one, it might&just fall over.");
+    MakeNormalMsgEng(KokiriMsg+35, "Hey, you look like a fella&strong enough to wack down&a whole tree!^If you were so big you&could give a big wack to the&top of one, it might&just fall over.");
+    MakeNormalMsgEng(KokiriMsg+36, "Ohh, I think you might look like&one of those cave people&someone was talking about.^I think he saw one of them&in the Lost Woods once.");
 
 
     u16 MidoMsg = TextIDAllocator::Instance->allocateRange("mido", 30);
@@ -978,6 +982,7 @@ extern "C" void OTRMessage_Init()
 
     u16 ZoraMsg = TextIDAllocator::Instance->allocateRange("zora", 30);
 
+    MakeNormalMsgEng(0x402D, "Hey you know, ever since Ruto&returned, all she ever talks about&is the new boy she likes.");
     MakeNormalMsgEng(ZoraMsg+0, "Wow! I never suspected that&anyone who was not a&Zora could dive like that!^You cannot refuse this token&of my awe!\x0B\x02");
     MakeNormalMsgEng(ZoraMsg+1, "Oh, you do know a boy was&seen hanging around this domain&on the day Ruto snuck away again.^Surely you understand why people&are...suspecting things?");
     MakeNormalMsgEng(ZoraMsg+2, "Oh, you do know a boy was&seen hanging around the&shores of Lake Hylia&on the day Ruto snuck away again.^Surely you understand why people&are...suspecting things?");
@@ -996,6 +1001,7 @@ extern "C" void OTRMessage_Init()
     MakeNormalMsgEng(ZoraMsg+15, "Those who do not think about&their partner at all&deserve absolutely no respect.");
     MakeNormalMsgEng(ZoraMsg+16, "Well...she is very pretty&isn't she?^You wouldn't have&any pictures of her,&now would you?^I'd promise to not show&them to anyone else.");
     MakeNormalMsgEng(ZoraMsg+17, "I heard the boy Ruto met&was acting very strange&when she showed up.^Like he wouldn't even talk&to her even after she'd&greeted him.^Creepy.");
+    MakeNormalMsgEng(ZoraMsg+18, "Ruto sure is a strange&and wild girl.^And some days she's even stranger&and wilder than usual.^It's unfitting for a princess,&but I guess girls her&age will be that way.");
 
     u16 RutoMsg = TextIDAllocator::Instance->allocateRange("ruto", 30);
 

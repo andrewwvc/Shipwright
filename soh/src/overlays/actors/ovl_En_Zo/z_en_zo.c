@@ -500,7 +500,7 @@ u16 func_80B61024(PlayState* play, Actor* thisx) {
                 }
             }
             if (CHECK_QUEST_ITEM(QUEST_ZORA_SAPPHIRE)) {
-                return 0x402E;
+                return ZoraMsg+18;
             }
             if (gSaveContext.eventChkInf[3] & 1) {
                 return 0x4011;
