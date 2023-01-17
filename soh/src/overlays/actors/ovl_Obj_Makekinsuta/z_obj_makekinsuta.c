@@ -82,8 +82,8 @@ u8 isHeartPiece(Actor* this, PlayState* play) {
 }
 
 void ObjMakekinsuta_WaitForHammer(ObjMakekinsuta* this, PlayState* play) {
-    if (play->actorCtx.unk_02 != 0 && this->actor.xzDistToPlayer < 100.0f &&
-               ABS(this->actor.yDistToPlayer) < 60.0f && (Actor_FindNumberOf(play,&this->actor, ACTOR_EN_ITEM00, ACTORCAT_MISC,3000.0f,NULL,isHeartPiece) == 0)) {
+    if (play->actorCtx.unk_02 != 0 && this->actor.xzDistToPlayer < 60.0f &&
+               ABS(this->actor.yDistToPlayer) < 20.0f && (Actor_FindNumberOf(play,&this->actor, ACTOR_EN_ITEM00, ACTORCAT_MISC,3000.0f,NULL,isHeartPiece) == 0)) {
         Item_DropCollectible(play, &this->actor.world.pos, 0x100+ITEM00_HEART_PIECE);
         func_8002F7DC(&this->actor,NA_SE_SY_CORRECT_CHIME);
     }
