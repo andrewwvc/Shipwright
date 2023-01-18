@@ -73,6 +73,7 @@ void BgSpot08Iceblock_CheckParams(BgSpot08Iceblock* this) {
         case 0x10:
         case 0x11:
         case 0x12:
+        case 0x1A:
         case 0x14:
         case 0x20:
         case 0x23:
@@ -303,7 +304,7 @@ void BgSpot08Iceblock_Init(Actor* thisx, PlayState* play) {
             break;
     }
 
-    switch (this->dyna.actor.params & 0xF) {
+    switch (this->dyna.actor.params & 0x7) {
         case 2:
         case 3:
             BgSpot08Iceblock_InitDynaPoly(this, play, colHeader, DPM_UNK3);
@@ -345,7 +346,7 @@ void BgSpot08Iceblock_Init(Actor* thisx, PlayState* play) {
     this->surfaceNormal.y = 1.0f;
     this->rotationAxis.x = 1.0f;
 
-    switch (this->dyna.actor.params & 0xF) {
+    switch (this->dyna.actor.params & 0x7) {
         case 0:
         case 1:
             BgSpot08Iceblock_SetupFloatNonrotating(this);
@@ -365,7 +366,7 @@ void BgSpot08Iceblock_Init(Actor* thisx, PlayState* play) {
 void BgSpot08Iceblock_Destroy(Actor* thisx, PlayState* play) {
     BgSpot08Iceblock* this = (BgSpot08Iceblock*)thisx;
 
-    if (thisx->parent && (((BgSpot08Iceblock*)(thisx->parent))->dyna.actor.params & 0xF) == 0x3) {
+    if (thisx->parent && (((BgSpot08Iceblock*)(thisx->parent))->dyna.actor.params & 0x7) == 0x3) {
         ((BgSpot08Iceblock*)(thisx->parent))->dyna.actor.params |= 0x100;
         //((BgSpot08Iceblock*)(actor1->child))->dyna.actor.world.rot.y += 0x8000;
     }
@@ -399,7 +400,7 @@ void BgSpot08Iceblock_FloatRotating(BgSpot08Iceblock* this, PlayState* play) {
     BgSpot08Iceblock_Bobbing(this);
     BgSpot08Iceblock_SinkUnderPlayer(this);
     BgSpot08Iceblock_SetWaterline(this);
-    this->dyna.actor.world.rot.y = this->dyna.actor.world.rot.y + 0x190;
+    this->dyna.actor.world.rot.y = this->dyna.actor.world.rot.y + 0x190*((this->dyna.actor.params & 0x8) ? -1 : 1);
     this->dyna.actor.shape.rot.y = this->dyna.actor.world.rot.y;
     BgSpot08Iceblock_Roll(this, play);
 }
