@@ -30,9 +30,11 @@ typedef void (*EnGoroiwaUnkFunc2)(EnGoroiwa* this);
 #define CUSTOM_PATH_NO 1
 
 //Vec3s EnGoroiwa__Special_Points0[] = {{1243,322,100},{1243,22,100},{976,36,87},{653,36,-68},{284,36,-259},{130,36,-615},{-14,-1445,4}};
-Vec3s EnGoroiwa__Special_Points0[] = {{1243,322,100},{1243,22,100},{976,36,87},{653,36,-68},{372,36,-259},{231,36,-191},{130,36,-615},{-14,-1445,4}};
+Vec3s EnGoroiwa__Special_Points0[] = {{1243,322,100},{1243,22,100},{976,36,87},{653,36,-68},{372,36,-259}};//{130,36,-615},{-14,-1445,4}};
 Vec3s EnGoroiwa__Special_PointsCustomEnd[] = {{0.0f,0.0f,0.0f},{-14,-1445,4}};
-Path EnGoroiwa_Special_Path[] = {{8, &EnGoroiwa__Special_Points0},{2,&EnGoroiwa__Special_PointsCustomEnd}};
+Vec3s EnGoroiwa__Special_Points2[] = {{372,36,-259},{231,36,-191},{130,36,-615},{-275,36,-1588}};
+Vec3s EnGoroiwa__Special_Points3[] = {{372,36,-259},{-1202,36,-1160}};
+Path EnGoroiwa_Special_Path[] = {{5, &EnGoroiwa__Special_Points0},{2,&EnGoroiwa__Special_PointsCustomEnd},{4,EnGoroiwa__Special_Points2},{2,EnGoroiwa__Special_Points3}};
 
 void EnGoroiwa_Init(Actor* thisx, PlayState* play);
 void EnGoroiwa_Destroy(Actor* thisx, PlayState* play);
@@ -515,10 +517,22 @@ void EnGoroiwa_NextWaypoint(EnGoroiwa* this, PlayState* play) {
     if (loopMode == ENGOROIWA_LOOPMODE_ONEWAY || loopMode == ENGOROIWA_LOOPMODE_ONEWAY_BREAK) {
         if (this->currentWaypoint == 0 || this->currentWaypoint == this->endWaypoint) {
             if (!EnGoroiwa_isNormal(this)) {
-                EnGoroiwa_SetPath(this,0);
-                EnGoroiwa_InitPath(this,play);
+                if (EnGoroiwa_GetPathNo(this) == 0) {
+                    if (this->platformSet && (this->platformParams & 0xF) == 0xA) {
+                        EnGoroiwa_SetPath(this,2);
+                        EnGoroiwa_InitPath(this,play);
+                    } else {
+                        EnGoroiwa_SetPath(this,3);
+                        EnGoroiwa_InitPath(this,play);
+                    }
+                } else {
+                    EnGoroiwa_SetPath(this,0);
+                    EnGoroiwa_InitPath(this,play);
+                    EnGoroiwa_TeleportToWaypoint(this, play, this->currentWaypoint);
+                }
+            } else {
+                EnGoroiwa_TeleportToWaypoint(this, play, this->currentWaypoint);
             }
-            EnGoroiwa_TeleportToWaypoint(this, play, this->currentWaypoint);
         }
     }
 
@@ -656,7 +670,8 @@ void EnGoroiwa_Roll(EnGoroiwa* this, PlayState* play) {
     } else if (moveFuncs[(this->actor.params >> 10) & 1](this, play)) {
         loopMode = (this->actor.params >> 8) & 3;
         if (loopMode == ENGOROIWA_LOOPMODE_ONEWAY_BREAK &&
-            (this->nextWaypoint == 0 || this->nextWaypoint == this->endWaypoint)) {
+            (this->nextWaypoint == 0 || this->nextWaypoint == this->endWaypoint) &&
+            (EnGoroiwa_isNormal(this) || EnGoroiwa_GetPathNo(this) > 0)) {
             EnGoroiwa_SpawnFragments(this, play);
         }
         EnGoroiwa_NextWaypoint(this, play);
@@ -768,6 +783,20 @@ void EnGoroiwa_MoveDown(EnGoroiwa* this, PlayState* play) {
     }
 }
 
+void EnGoroiwa_AlterPath(EnGoroiwa* this, PlayState* play, u8 pathNo) {
+    if (EnGoroiwa_GetPathNo(this) != pathNo) {
+        EnGoroiwa_SetPath(this,pathNo);
+        EnGoroiwa_InitPath(this,play);
+        EnGoroiwa_FaceNextWaypoint(this, play);
+        EnGoroiwa_SetupRoll(this);
+    }
+}
+
+void EnGoroiwa_Annihilate(EnGoroiwa* this, PlayState* play) {
+    EnGoroiwa_SpawnFragments(this,play);
+    Actor_Kill(&this->actor);
+}
+
 void EnGoroiwa_AlterPathOnDrop(EnGoroiwa* this, PlayState* play) {
     if (EnGoroiwa_GetPathNo(this) != CUSTOM_PATH_NO) {
         EnGoroiwa_SpawnFragments(this, play);
@@ -792,6 +821,7 @@ void EnGoroiwa_Update(Actor* thisx, PlayState* play) {
             this->collisionDisabledTimer--;
         }
         this->actionFunc(this, play);
+        this->platformSet = false;
         switch ((this->actor.params >> 10) & 1) {
             case 1:
                 Actor_UpdateBgCheckInfo(play, &this->actor, 0.0f, 0.0f, 0.0f, 0x1C);
@@ -818,10 +848,14 @@ void EnGoroiwa_Update(Actor* thisx, PlayState* play) {
             if (DynaPoly_IsBgIdBgActor(this->actor.floorBgId)) {
                 DynaPolyActor* dyna1 = DynaPoly_GetActor(&play->colCtx,this->actor.floorBgId);
                 Actor* actor1 = &dyna1->actor;
-                if (ACTOR_BG_SPOT08_ICEBLOCK != actor1->id) {
-                    EnGoroiwa_AlterPathOnDrop(this,play);
+                if (ACTOR_BG_SPOT08_ICEBLOCK == actor1->id) {
+                    this->platformSet = true;
+                    this->platformParams = actor1->params;
+                } else {
+                    if (this->actor.world.pos.y < -5)
+                        EnGoroiwa_AlterPathOnDrop(this,play);
                 }
-            } else {
+            } else if (this->actor.world.pos.y < -5) {
                 EnGoroiwa_AlterPathOnDrop(this,play);
             }
         }

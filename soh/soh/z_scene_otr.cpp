@@ -228,6 +228,7 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, Ship::ActorSp
         { 0x00, {
             { 2, -1, { ACTOR_EN_GOROIWA, 1243,322,100, 0,-20771,1, 0x1D00 }},{ 3, -1, { ACTOR_EN_GOROIWA, 1243,322,100, 0,-20771,1, 0x1D00 }},
             { 2, 34, { ACTOR_BG_SPOT08_ICEBLOCK, 255,20,-285, 	0,16384,0, 0x1A }}, { 3, 34, { ACTOR_BG_SPOT08_ICEBLOCK, 255,20,-285, 	0,16384,0, 0x1A }},
+            { 2, -1, { ACTOR_OBJ_MAKEKINSUTA, -230,32,-850, 0, 0, 3, 0x3 }}, { 2, -1, { ACTOR_OBJ_MAKEKINSUTA, 230,32,-850, 0, 0, 3, 0x3 }},
         } },
     } },
     { 0x5A, {//Gerudo Valley
