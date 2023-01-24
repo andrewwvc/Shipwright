@@ -109,10 +109,10 @@ typedef struct {
 #define ACTOR_FLAG_4 (1 << 4)
 #define ACTOR_FLAG_5 (1 << 5)
 #define ACTOR_FLAG_6 (1 << 6)
-#define ACTOR_FLAG_7 (1 << 7)
+#define ACTOR_FLAG_7 (1 << 7) //Determines if the actor will be invisible without the lens of truth
 #define ACTOR_FLAG_8 (1 << 8)
 #define ACTOR_FLAG_9 (1 << 9)
-#define ACTOR_FLAG_10 (1 << 10)
+#define ACTOR_FLAG_10 (1 << 10) //Determines if the hookshot can pull Link towards the actor
 #define ACTOR_FLAG_ENKUSA_CUT (1 << 11)
 #define ACTOR_FLAG_12 (1 << 12)
 #define ACTOR_FLAG_13 (1 << 13)
