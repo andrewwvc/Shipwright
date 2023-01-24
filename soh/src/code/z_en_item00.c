@@ -378,6 +378,9 @@ void EnItem00_Init(Actor* thisx, PlayState* play) {
             break;
         case ITEM00_HEART_PIECE:
             this->unk_158 = 0;
+            if (play->sceneNum == 0x3E && play->roomCtx.curRoom.num == 0x07) {
+                this->actor.flags |= ACTOR_FLAG_7;
+            }
             break;
         case ITEM00_HEART:
             break;

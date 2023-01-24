@@ -95,11 +95,6 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, Ship::ActorSp
             { -1, 2, { 0xA, 1944,4681,-393, 0,24394,0, 0x07CD }},
         } },
     } },
-    { 0x3e, { // Grotto
-        { 0x05, { // Octorok Grotto
-            //{ -1, 8, { ACTOR_EN_ITEM00, 32, -129, 852, 0, 0, 0, 0x406 }},
-        } },
-    } },
     { 0x55, { // Kokiri Forest
         { 0x00, {//Village
             //{ -1, -1, { ACTOR_EN_ITEM00, 1297, 240, -553, 0, 0, 0, 0x0800+(uint16_t)ITEM00_HEART_PIECE }},
@@ -169,6 +164,14 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, Ship::ActorSp
     { SCENE_MARKET_RUINS, { // Castle Town Square - Ruined
         { 0x00, {
             { -1, -1, { ACTOR_EN_GO2, -288,0,188, 0,0x4000,0, 0x03ed | 0x10 | (0x0<<10)}},
+        } },
+    } },
+    { 0x3E, { // Grotto
+        { 0x05, { // Octorok Grotto
+            //{ -1, 8, { ACTOR_EN_ITEM00, 32, -129, 852, 0, 0, 0, 0x406 }},
+        } },
+        { 0x07, {
+            { -1, -1, { ACTOR_EN_ITEM00, 1180,100,800, 0,0,0, 0x100+(uint16_t)ITEM00_HEART_PIECE  }},
         } },
     } },
     { 0x52, { // Kakariko

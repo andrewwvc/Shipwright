@@ -291,9 +291,11 @@ extern "C" void OTRMessage_Init()
     MakeBlueMsgEng(0x420, "They say that Dampe, the gravekeeper,&has a reward reserved for those&with very impresive speed.^However, he unlikely&to relinquish anything until&he gives up the ghost.");//Deku Tree
     MakeBlueMsgEng(StoneMsg+0,"There may be something special&behind falls that are not water...");
     MakeBlueMsgEng(StoneMsg+2,"They say that many people&would like Hyrule Field to&be cleared of Peahats.");
-    MakeBlueMsgEng(StoneMsg+8, "They say that one part of&the secret directions&to a lost place is:^South&North&WestWest");
+    //MakeBlueMsgEng(StoneMsg+8, "They say that one part of&the secret directions&to a lost place is:^South&North&West&West");
     MakeBlueMsgEng(StoneMsg+12, "They say that certain items, when&they are used together, may be&able to combine their abilities.^So it may pay to experiemnt&with methods of pairing things!");
     MakeBlueMsgEng(StoneMsg+20, "They say that certain shops&may be doing business&at hours that they&advertise as being closed.");
+    MakeBlueMsgEng(StoneMsg+23, "They say there is a secret&that most cannot see,&in a place where&fairies no longer live.");
+    (*textIDSubstitutionTable)[StoneMsg+8] = 0x413;//Previous dungeons
     (*textIDSubstitutionTable)[StoneMsg+26] = 0x405;
     (*textIDSubstitutionTable)[0x041F] = 0x420;
     //MakeBlueMsgEng(StoneMsg+26, );//Mountain Crater Grotto
