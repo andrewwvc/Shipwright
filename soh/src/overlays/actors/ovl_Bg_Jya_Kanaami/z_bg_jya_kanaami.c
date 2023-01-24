@@ -7,7 +7,7 @@
 #include "z_bg_jya_kanaami.h"
 #include "objects/object_jya_obj/object_jya_obj.h"
 
-#define FLAGS 0
+#define FLAGS ACTOR_FLAG_10
 
 void BgJyaKanaami_Init(Actor* thisx, PlayState* play);
 void BgJyaKanaami_Destroy(Actor* thisx, PlayState* play);
@@ -40,6 +40,25 @@ static InitChainEntry sInitChain[] = {
     ICHAIN_F32(uncullZoneDownward, 1000, ICHAIN_STOP),
 };
 
+static ColliderQuadInitType1 sQuadInit1 = {
+    {
+        COLTYPE_NONE,
+        AT_NONE,
+        AC_ON | AC_TYPE_PLAYER,
+        OC1_NONE,
+        COLSHAPE_QUAD,
+    },
+    {
+        ELEMTYPE_UNK0,
+        { 0xFFCFFFFF, 0x00, 0x00 },
+        { 0xFFCFFFFF, 0x00, 0x00 },
+        TOUCH_NONE,
+        BUMP_ON | BUMP_HOOKABLE,
+        OCELEM_NONE,
+    },
+    { { { 0.0f, 0.0f, 00.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f } } },
+};
+
 void BgJyaKanaami_InitDynaPoly(BgJyaKanaami* this, PlayState* play, CollisionHeader* collision, s32 flag) {
     s32 pad;
     CollisionHeader* colHeader = NULL;
@@ -64,6 +83,8 @@ void BgJyaKanaami_Init(Actor* thisx, PlayState* play) {
     } else {
         func_80899880(this);
     }
+    Collider_InitCylinder(play, &this->collider1);
+    Collider_SetQuadType1(play,&this->collider1,thisx,&sQuadInit1);
     osSyncPrintf("(jya 金網)(arg_data 0x%04x)\n", this->dyna.actor.params);
 }
 
@@ -71,6 +92,7 @@ void BgJyaKanaami_Destroy(Actor* thisx, PlayState* play) {
     BgJyaKanaami* this = (BgJyaKanaami*)thisx;
 
     DynaPoly_DeleteBgActor(play, &play->colCtx.dyna, this->dyna.bgId);
+    Collider_DestroyQuad(play,&this->collider1);
 }
 
 void func_80899880(BgJyaKanaami* this) {
@@ -122,8 +144,20 @@ void BgJyaKanaami_Update(Actor* thisx, PlayState* play) {
         this->actionFunc(this, play);
     }
     this->dyna.actor.shape.rot.x = this->dyna.actor.world.rot.x;
+    if (this->collider1.base.acFlags & AC_HIT) {
+            this->collider1.base.acFlags &= ~AC_HIT;
+    }
+    //Collider_UpdateQ(thisx, &this->collider1);
+    CollisionCheck_SetAC(play, &play->colChkCtx, &this->collider1.base);
 }
 
 void BgJyaKanaami_Draw(Actor* thisx, PlayState* play) {
+    BgJyaKanaami* this = (BgJyaKanaami*)thisx;
+    static Vec3f HookTarget[] = { { -40.0f*10, 0.0f, -20.0f*10 }, { 40.0f*10, 0.0f, -20.0f*10 }, { -40.0f*10, 240.0f*10, -20.0f*10 }, { 40.0f*10, 240.0f*10, -20.0f*10 } };
+    Matrix_MultVec3f(&HookTarget[0], &this->collider1.dim.quad[0]);
+    Matrix_MultVec3f(&HookTarget[1], &this->collider1.dim.quad[1]);
+    Matrix_MultVec3f(&HookTarget[2], &this->collider1.dim.quad[2]);
+    Matrix_MultVec3f(&HookTarget[3], &this->collider1.dim.quad[3]);
+    Collider_SetQuadVertices(&this->collider1,&this->collider1.dim.quad[0],&this->collider1.dim.quad[1],&this->collider1.dim.quad[2],&this->collider1.dim.quad[3]);
     Gfx_DrawDListOpa(play, gKanaamiDL);
 }
