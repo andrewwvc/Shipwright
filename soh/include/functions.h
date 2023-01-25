@@ -1092,6 +1092,8 @@ void Health_RemoveHearts(s16 hearts);
 void Rupees_ChangeBy(s16 rupeeChange);
 void Inventory_ChangeAmmo(s16 item, s16 ammoChange);
 void Magic_Fill(PlayState* play);
+s32 Inferface_CalculateMaxMagic();
+s32 Inferface_CalculateMagicToSet();
 void func_800876C8(PlayState* play);
 s32 func_80087708(PlayState* play, s16 arg1, s16 arg2);
 void func_80088AA0(s16 seconds);

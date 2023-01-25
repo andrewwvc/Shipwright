@@ -279,6 +279,13 @@ extern "C" void OTRMessage_Init()
         }
     );
 
+    //Get Item Text
+    MakeBlueMsgEng(0x810, "You recieved an icon of magic power!&This will increase your magic capacity.&It looks awfully like an ordinary&magic jar though.");
+    MakeBlueMsgEng(0x811, "You recieved a packet of horse food!&This will add a boost&to Epona's stamina.&Carrots and oats are delicious!");
+
+    //Great Fairy Text
+    MakeNormalMsgEng(0xE8, "Your magic power has been&enhanced! Now you can gain even&more Magic Capacity!^Collecting %gIcons of Magic%w&will allow for greater enhancement!");
+
     u16 StoneMsg = TextIDAllocator::Instance->allocateRange("stone", 64);
 
     MakeBlueMsgEng(0x405, "They say that one part of&the secret directions&to a lost place is:^West&East&South&West");//Medigoron Crater Text

@@ -2226,6 +2226,17 @@ u8 Item_Give(PlayState* play, u8 item) {
         gSaveContext.sohStats.heartContainers++;
         PerformAutosave(play, item);
         return ITEM_NONE;
+    } else if (item == ITEM_EXTRA_MAGIC) {
+        gSaveContext.extraMagicPower += 1;
+        gSaveContext.magicFillTarget = Inferface_CalculateMaxMagic(play);
+        gSaveContext.magicLevel = 0;
+        Magic_Fill(play);
+        PerformAutosave(play, item);
+        return ITEM_NONE;
+    } else if (item == ITEM_EPONA_BOOST) {
+        gSaveContext.maxBoosts += 1;
+        PerformAutosave(play, item);
+        return ITEM_NONE;
     } else if (item == ITEM_HEART) {
         osSyncPrintf("回復ハート回復ハート回復ハート\n"); // "Recovery Heart"
         if (play != NULL) {
@@ -2378,7 +2389,7 @@ u16 Randomizer_Item_Give(PlayState* play, GetItemEntry giEntry) {
     slot = SLOT(item);
     if (item == RG_MAGIC_SINGLE) {
         gSaveContext.isMagicAcquired = true;
-        gSaveContext.magicFillTarget = 0x30;
+        gSaveContext.magicFillTarget = Inferface_CalculateMaxMagic(play);
         Magic_Fill(play);
         return RG_NONE;
     } else if (item == RG_MAGIC_DOUBLE) {
@@ -2386,7 +2397,7 @@ u16 Randomizer_Item_Give(PlayState* play, GetItemEntry giEntry) {
             gSaveContext.isMagicAcquired = true;
         }
         gSaveContext.isDoubleMagicAcquired = true;
-        gSaveContext.magicFillTarget = 0x60;
+        gSaveContext.magicFillTarget = Inferface_CalculateMaxMagic(play);
         gSaveContext.magicLevel = 0;
         Magic_Fill(play);
         return RG_NONE;
@@ -2672,6 +2683,10 @@ u8 Item_CheckObtainability(u8 item) {
     } else if ((item == ITEM_HEART_PIECE_2) || (item == ITEM_HEART_PIECE)) {
         return ITEM_NONE;
     } else if (item == ITEM_HEART_CONTAINER) {
+        return ITEM_NONE;
+    } else if (item == ITEM_EXTRA_MAGIC) {
+        return ITEM_NONE;
+    } else if (item == ITEM_EPONA_BOOST) {
         return ITEM_NONE;
     } else if (item == ITEM_HEART) {
         return ITEM_HEART;
@@ -3238,7 +3253,7 @@ void Inventory_ChangeAmmo(s16 item, s16 ammoChange) {
 void Magic_Fill(PlayState* play) {
     if (gSaveContext.isMagicAcquired) {
         gSaveContext.prevMagicState = gSaveContext.magicState;
-        gSaveContext.magicFillTarget = (gSaveContext.isDoubleMagicAcquired + 1) * 0x30;
+        gSaveContext.magicFillTarget = Inferface_CalculateMaxMagic(play);
         gSaveContext.magicState = 9;
     }
 }
@@ -3335,6 +3350,14 @@ s32 func_80087708(PlayState* play, s16 arg1, s16 arg2) {
     return 0;
 }
 
+s32 Inferface_CalculateMaxMagic() {
+    return gSaveContext.isMagicAcquired ? (0x30 + (gSaveContext.isDoubleMagicAcquired ? 0x10*(gSaveContext.extraMagicPower+1) : 0x0)) : 0x0;
+}
+
+s32 Inferface_CalculateMagicToSet() {
+    return gSaveContext.magicLevel ? Inferface_CalculateMaxMagic() : 0;
+}
+
 void Interface_UpdateMagicBar(PlayState* play) {
     static s16 sMagicBorderColors[][3] = {
         { 255, 255, 255 },
@@ -3377,7 +3400,7 @@ void Interface_UpdateMagicBar(PlayState* play) {
 
     switch (gSaveContext.magicState) {
         case 8:
-            temp = gSaveContext.magicLevel * 0x30;
+            temp = Inferface_CalculateMaxMagic(play);
             if (gSaveContext.magicCapacity != temp) {
                 if (gSaveContext.magicCapacity < temp) {
                     gSaveContext.magicCapacity += 8;

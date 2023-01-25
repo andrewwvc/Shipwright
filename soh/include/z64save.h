@@ -280,6 +280,7 @@ typedef struct {
     /*        */ s32 SariaDateDay;
     /*        */ s32 RutoDateDay;
     /*        */ u8 maxBoosts;
+    /*        */ u8 extraMagicPower;
     // #endregion
 } SaveContext; // size = 0x1428
 

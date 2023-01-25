@@ -13017,7 +13017,7 @@ void func_8084EAC0(Player* this, PlayState* play) {
                         }
 
                         func_80087708(play,
-                                      (gSaveContext.magicLevel * 48 * CVar_GetS32("gBluePotionMana", 100) / 100 + 15) /
+                                      (Inferface_CalculateMaxMagic() * CVar_GetS32("gBluePotionMana", 100) / 100 + 15) /
                                           16 * 16,
                                       5);
                     } else {
@@ -13036,7 +13036,7 @@ void func_8084EAC0(Player* this, PlayState* play) {
                         }
 
                         func_80087708(play,
-                                      (gSaveContext.magicLevel * 48 * CVar_GetS32("gGreenPotionMana", 100) / 100 + 15) /
+                                      (Inferface_CalculateMaxMagic() * CVar_GetS32("gGreenPotionMana", 100) / 100 + 15) /
                                           16 * 16,
                                       5);
                     } else {

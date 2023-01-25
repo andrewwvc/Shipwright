@@ -398,6 +398,8 @@ extern "C" void VanillaItemTable_Init() {
         GET_ITEM(ITEM_BULLET_BAG_50,    OBJECT_GI_DEKUPOUCH,     GID_BULLET_BAG_50,    0x6C, 0x80, CHEST_ANIM_LONG,  ITEM_CATEGORY_LESSER,          MOD_NONE, GI_BULLET_BAG_50),
         GET_ITEM_NONE,
         GET_ITEM_NONE,
+        GET_ITEM(ITEM_EXTRA_MAGIC,  OBJECT_GI_MAGICPOT,      GID_MAGIC_LARGE,      0x810, 0x80, CHEST_ANIM_LONG, ITEM_CATEGORY_LESSER,          MOD_NONE, GI_EXTRA_MAGIC),
+        GET_ITEM(ITEM_EPONA_BOOST,  OBJECT_GI_BUTTERFLY,     GID_BUTTERFLY,        0x811, 0x80, CHEST_ANIM_LONG, ITEM_CATEGORY_LESSER,          MOD_NONE, GI_EPONA_BOOST),
         GET_ITEM_NONE // GI_MAX - if you need to add to this table insert it before this entry.
     };
     ItemTableManager::Instance->AddItemTable(MOD_NONE);

@@ -351,34 +351,71 @@ void DrawInfoTab() {
 
     std::string magicName;
     if (gSaveContext.magicLevel == 2) {
-        magicName = "Double";
+        if (gSaveContext.extraMagicPower == 2)
+            magicName = "Double+2";
+        else if (gSaveContext.extraMagicPower == 1)
+            magicName = "Double+1";
+        else
+            magicName = "Double+0";
     } else if (gSaveContext.magicLevel == 1) {
-        magicName = "Single";
+        if (gSaveContext.extraMagicPower == 2)
+            magicName = "Single+2";
+        else if (gSaveContext.extraMagicPower == 1)
+            magicName = "Single+1";
+        else
+            magicName = "Single+0";
     } else {
         magicName = "None";
     }
     ImGui::SetNextItemWidth(ImGui::GetFontSize() * 6);
     if (ImGui::BeginCombo("Magic Level", magicName.c_str())) {
-        if (ImGui::Selectable("Double")) {
+        if (ImGui::Selectable("Double+2")) {
             gSaveContext.magicLevel = 2;
             gSaveContext.isMagicAcquired = true;
             gSaveContext.isDoubleMagicAcquired = true;
+            gSaveContext.extraMagicPower = 2;
         }
-        if (ImGui::Selectable("Single")) {
+        if (ImGui::Selectable("Double+1")) {
+            gSaveContext.magicLevel = 2;
+            gSaveContext.isMagicAcquired = true;
+            gSaveContext.isDoubleMagicAcquired = true;
+            gSaveContext.extraMagicPower = 1;
+        }
+        if (ImGui::Selectable("Double+0")) {
+            gSaveContext.magicLevel = 2;
+            gSaveContext.isMagicAcquired = true;
+            gSaveContext.isDoubleMagicAcquired = true;
+            gSaveContext.extraMagicPower = 0;
+        }
+        if (ImGui::Selectable("Single+2")) {
             gSaveContext.magicLevel = 1;
             gSaveContext.isMagicAcquired = true;
             gSaveContext.isDoubleMagicAcquired = false;
+            gSaveContext.extraMagicPower = 2;
+        }
+        if (ImGui::Selectable("Single+1")) {
+            gSaveContext.magicLevel = 1;
+            gSaveContext.isMagicAcquired = true;
+            gSaveContext.isDoubleMagicAcquired = false;
+            gSaveContext.extraMagicPower = 1;
+        }
+        if (ImGui::Selectable("Single+0")) {
+            gSaveContext.magicLevel = 1;
+            gSaveContext.isMagicAcquired = true;
+            gSaveContext.isDoubleMagicAcquired = false;
+            gSaveContext.extraMagicPower = 0;
         }
         if (ImGui::Selectable("None")) {
             gSaveContext.magicLevel = 0;
             gSaveContext.isMagicAcquired = false;
             gSaveContext.isDoubleMagicAcquired = false;
+            gSaveContext.extraMagicPower = 0;
         }
 
         ImGui::EndCombo();
     }
     UIWidgets::InsertHelpHoverText("Current magic level");
-    gSaveContext.magicCapacity = gSaveContext.magicLevel * 0x30; // Set to get the bar drawn in the UI
+    gSaveContext.magicCapacity = Inferface_CalculateMaxMagic(); // Set to get the bar drawn in the UI
     if (gSaveContext.magic > gSaveContext.magicCapacity) {
         gSaveContext.magic = gSaveContext.magicCapacity; // Clamp magic to new max
     }

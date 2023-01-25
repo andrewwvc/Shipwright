@@ -551,6 +551,7 @@ void SaveManager::InitFileNormal() {
     gSaveContext.SariaDateDay = 0;
     gSaveContext.RutoDateDay = 0;
     gSaveContext.maxBoosts = INITIAL_BOOSTS;
+    gSaveContext.extraMagicPower = 0;
 
     //RANDOTODO (ADD ITEMLOCATIONS TO GSAVECONTEXT)
 }
@@ -1344,6 +1345,7 @@ void SaveManager::LoadBaseVersion3() {
     SaveManager::Instance->LoadData("SariaDateDay", gSaveContext.SariaDateDay);
     SaveManager::Instance->LoadData("RutoDateDay", gSaveContext.RutoDateDay);
     SaveManager::Instance->LoadData("maxBoosts", gSaveContext.maxBoosts, INITIAL_BOOSTS);
+    SaveManager::Instance->LoadData("extraMagicPower", gSaveContext.extraMagicPower);
 }
 
 void SaveManager::SaveBase() {
@@ -1525,6 +1527,7 @@ void SaveManager::SaveBase() {
     SaveManager::Instance->SaveData("SariaDateDay", gSaveContext.SariaDateDay);
     SaveManager::Instance->SaveData("RutoDateDay", gSaveContext.RutoDateDay);
     SaveManager::Instance->SaveData("maxBoosts", gSaveContext.maxBoosts);
+    SaveManager::Instance->SaveData("extraMagicPower", gSaveContext.extraMagicPower);
 }
 
 void SaveManager::SaveArray(const std::string& name, const size_t size, SaveArrayFunc func) {
