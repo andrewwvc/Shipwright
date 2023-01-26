@@ -111,6 +111,9 @@ void BgDyYoseizo_Init(Actor* thisx, PlayState* play2) {
 }
 
 void BgDyYoseizo_Destroy(Actor* this, PlayState* play) {
+    BgDyYoseizo* thisf = (BgDyYoseizo*)this;
+    if (thisf->giveDefenseHearts)
+        gSaveContext.inventory.defenseHearts = thisf->defenseHeartsTempStore;
 }
 
 static Color_RGB8 sParticlePrimColors[] = {

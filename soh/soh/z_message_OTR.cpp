@@ -280,9 +280,9 @@ extern "C" void OTRMessage_Init()
     );
 
     //Get Item Text
-    MakeBlueMsgEng(0x810, "You received an icon of magic power!&This will increase your magic capacity.&It looks awfully like an ordinary&magic jar though.");
-    MakeBlueMsgEng(0x811, "You received a packet of horse food!&This will add a boost&to Epona's stamina.&Carrots and oats are delicious!");
-    MakeBlueMsgEng(0x812, "You received a heart barrier! This&will protect one of your hearts,&if you find someone with powerful&enough magic to activate it.");
+    MakeBlueMsgEng(0x810, "You received an Icon of Magic Power!&This will increase your magic capacity.&It looks awfully like an ordinary&magic jar though.");
+    MakeBlueMsgEng(0x811, "You received a Packet of Horse Food!&This will add a boost&to Epona's stamina.&Carrots and oats are delicious!");
+    MakeBlueMsgEng(0x812, "You received a Heart Barrier! This&will protect one of your hearts,&if you find someone with powerful&enough magic to activate it.");
 
     //Great Fairy Text
     MakeNormalMsgEng(0xE8, "Your magic power has been&enhanced! Now you can gain even&more Magic Capacity!^Collecting %gIcons of Magic%w&will allow for greater enhancement!");
@@ -292,12 +292,12 @@ extern "C" void OTRMessage_Init()
     MakeBlueMsgEng(0x405, "They say that one part of&the secret directions&to a lost place is:^West&East&South&West");//Medigoron Crater Text
     MakeBlueMsgEng(0x408, "They say that one part of&the secret directions&to a lost place is:^East&North&North&East");//Ruto
     MakeBlueMsgEng(0x408, "They say that Princess Ruto's emotions&are at their highest on the&day before the full moon.");//Chicken Lady
-    MakeBlueMsgEng(0x409, "Some think that the Gerudo Mask,&owned by a certian salesman,&might be useful to gain&entry to the Gerudo Fortress.^But the naive and obvious&way of using it&will likely not work.");//Hold Targeting
+    MakeBlueMsgEng(0x409, "Some think that the Gerudo Mask,&owned by a certian salesman,&might be useful to gain&entry to the Gerudo Fortress.^But the naive and obvious&way of using it will&likely not amount to much.");//Hold Targeting
     MakeBlueMsgEng(0x40D, "They say that the Gerudo&currently keep something special&above their highest prison cell.");//Running Man
     MakeBlueMsgEng(0x411, "They say that one part of&the secret directions&to a lost place is:^West&East&South&West");//Gerudo Valley
     MakeBlueMsgEng(0x41A, "They say that the reward&for completing the Gerudo&Training Grounds has many uses.^And experimenting, in order to&discover what kinds of things it&works on, could pay off well.");//Gerudo Colossus
     MakeBlueMsgEng(0x420, "They say that Dampe, the gravekeeper,&has a reward reserved for those&with very impresive speed.^However, he unlikely&to relinquish anything until&he gives up the ghost.");//Deku Tree
-    MakeBlueMsgEng(StoneMsg+0,"There may be something special&behind falls that are not water...");
+    MakeBlueMsgEng(StoneMsg+0,"There may be something special&behind falls that are %rnot%w water...");
     MakeBlueMsgEng(StoneMsg+2,"They say that many people&would like Hyrule Field to&be cleared of Peahats.");
     //MakeBlueMsgEng(StoneMsg+8, "They say that one part of&the secret directions&to a lost place is:^South&North&West&West");
     MakeBlueMsgEng(StoneMsg+12, "They say that certain items, when&they are used together, may be&able to combine their abilities.^So it may pay to experiemnt&with methods of pairing things!");
@@ -961,7 +961,7 @@ extern "C" void OTRMessage_Init()
     MakeNormalMsgEng(GoronMsg+12, "Hmm...that's strange, I just&saw brother traveling&out for trade.^But I thought I already saw&him leave earlier.");
     MakeNormalMsgEng(GoronMsg+13, "Hmmm...the market doesn't&seem to be doing too well today.^I can't buy or sell&much here now.^I'll have to come back&some other time.");
     MakeNormalMsgEng(GoronMsg+14, "Ohh, the market is so crowded.&I hardly get a chance to buy anything.");
-    MakeNormalMsgEng(GoronMsg+15, "Things are quiet now.&I'm surprised nobody seems to&be open at this time of day anymore.");
+    MakeNormalMsgEng(GoronMsg+15, "Things are quiet now.&I'm surprised nobody seems to&be letting me trade at&this time of day anymore.^Why could that be?");
     MakeNormalMsgEng(GoronMsg+16, "Wait, how did you get in&here at this time?");
     MakeNormalMsgEng(GoronMsg+17, "Some brothers are off racing.&It's quite a spectacle&if you want to see it.^The races are usually quite close.");
     MakeNormalMsgEng(GoronMsg+18, "Look at our big brother's&refined rolling.^He's matured quite a bit&since his wilder days.");

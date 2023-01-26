@@ -475,6 +475,15 @@ void DrawInfoTab() {
     ImGui::InputScalar("Bgs Day Count", ImGuiDataType_S32, &gSaveContext.bgsDayCount);
     UIWidgets::InsertHelpHoverText("Total number of days elapsed since giving Biggoron the claim check");
 
+    ImGui::InputScalar("Goron Trade Day", ImGuiDataType_S32, &gSaveContext.goronTimeDay);
+    UIWidgets::InsertHelpHoverText("The day a Goron left to go shopping");
+
+    ImGui::InputScalar("Saria Date Day", ImGuiDataType_S32, &gSaveContext.SariaDateDay);
+    UIWidgets::InsertHelpHoverText("The specific date Saria will come around");
+
+    ImGui::InputScalar("Ruto Date Day", ImGuiDataType_S32, &gSaveContext.RutoDateDay);
+    UIWidgets::InsertHelpHoverText("The specific date Ruto will meet you");
+
     ImGui::InputScalar("Entrance Index", ImGuiDataType_S32, &gSaveContext.entranceIndex);
     UIWidgets::InsertHelpHoverText("From which entrance did Link arrive?");
 
@@ -1081,6 +1090,9 @@ void DrawFlagsTab() {
                             break;
                         case EVENT_INF:
                             DrawFlagArray16(flagTable, j, gSaveContext.eventInf[j]);
+                            break;
+                        case NPC_GORON:
+                            DrawFlagArray16(flagTable, j, gSaveContext.goronTimeStatus);
                             break;
                         case RANDOMIZER_INF:
                             DrawFlagArray16(flagTable, j, gSaveContext.randomizerInf[j]);
