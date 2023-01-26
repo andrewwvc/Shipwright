@@ -337,6 +337,7 @@ void DrawInfoTab() {
 
     const uint16_t healthMin = 0;
     const uint16_t healthMax = gSaveContext.healthCapacity;
+    const uint16_t heartsGreatestMax = 20;
     ImGui::SetNextItemWidth(ImGui::GetFontSize() * 15);
     ImGui::SliderScalar("Health", ImGuiDataType_S16, &gSaveContext.health, &healthMin, &healthMax);
     UIWidgets::InsertHelpHoverText("Current health. 16 units per full heart");
@@ -344,10 +345,16 @@ void DrawInfoTab() {
     bool isDoubleDefenseAcquired = gSaveContext.isDoubleDefenseAcquired != 0;
     if (ImGui::Checkbox("Double Defense", &isDoubleDefenseAcquired)) {
         gSaveContext.isDoubleDefenseAcquired = isDoubleDefenseAcquired;
-        gSaveContext.inventory.defenseHearts =
-            gSaveContext.isDoubleDefenseAcquired ? 20 : 0; // Set to get the border drawn in the UI
+        //gSaveContext.inventory.defenseHearts =
+        //    gSaveContext.isDoubleDefenseAcquired ? 20 : 0; // Set to get the border drawn in the UI
     }
     UIWidgets::InsertHelpHoverText("Is double defense unlocked?");
+
+    int8_t defenseHeartNum = gSaveContext.inventory.defenseHearts;
+    if (ImGui::SliderScalar("Defense Hearts", ImGuiDataType_S8, &defenseHeartNum,&healthMin,&heartsGreatestMax)) {
+        gSaveContext.inventory.defenseHearts = defenseHeartNum;
+    }
+    UIWidgets::InsertHelpHoverText("Number of hearts protected by double defense");
 
     std::string magicName;
     if (gSaveContext.magicLevel == 2) {

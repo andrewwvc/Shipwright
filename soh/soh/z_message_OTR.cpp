@@ -280,8 +280,9 @@ extern "C" void OTRMessage_Init()
     );
 
     //Get Item Text
-    MakeBlueMsgEng(0x810, "You recieved an icon of magic power!&This will increase your magic capacity.&It looks awfully like an ordinary&magic jar though.");
-    MakeBlueMsgEng(0x811, "You recieved a packet of horse food!&This will add a boost&to Epona's stamina.&Carrots and oats are delicious!");
+    MakeBlueMsgEng(0x810, "You received an icon of magic power!&This will increase your magic capacity.&It looks awfully like an ordinary&magic jar though.");
+    MakeBlueMsgEng(0x811, "You received a packet of horse food!&This will add a boost&to Epona's stamina.&Carrots and oats are delicious!");
+    MakeBlueMsgEng(0x812, "You received a heart barrier! This&will protect one of your hearts,&if you find someone with powerful&enough magic to activate it.");
 
     //Great Fairy Text
     MakeNormalMsgEng(0xE8, "Your magic power has been&enhanced! Now you can gain even&more Magic Capacity!^Collecting %gIcons of Magic%w&will allow for greater enhancement!");
