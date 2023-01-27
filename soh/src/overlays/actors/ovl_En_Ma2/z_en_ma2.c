@@ -142,6 +142,9 @@ u16 func_80AA1B58(EnMa2* this, PlayState* play) {
     if (LINK_IS_CHILD) {
         return 0;
     }
+    if (play->sceneNum == SCENE_SPOT00) {
+        return 4;
+    }
     if (!(gSaveContext.eventChkInf[1] & 0x100) && (play->sceneNum == SCENE_MALON_STABLE) && IS_DAY &&
         (this->actor.shape.rot.z == 5)) {
         return 1;
@@ -214,7 +217,8 @@ void EnMa2_Init(Actor* thisx, PlayState* play) {
     EnMa2* this = (EnMa2*)thisx;
     s32 pad;
 
-    ActorShape_Init(&this->actor.shape, 0.0f, ActorShadow_DrawCircle, 18.0f);
+    if ((this->actor.params & 0xF) != 0xB)
+        ActorShape_Init(&this->actor.shape, 0.0f, ActorShadow_DrawCircle, 18.0f);
     SkelAnime_InitFlex(play, &this->skelAnime, &gMalonAdultSkel, NULL, NULL, NULL, 0);
     Collider_InitCylinder(play, &this->collider);
     Collider_SetCylinder(play, &this->collider, &this->actor, &sCylinderInit);
@@ -237,6 +241,10 @@ void EnMa2_Init(Actor* thisx, PlayState* play) {
             }
             this->actionFunc = func_80AA2018;
             break;
+        case 4:
+            EnMa2_ChangeAnim(this, ENMA2_ANIM_2);
+            this->actionFunc = func_80AA2018;
+            break;
         case 0:
             Actor_Kill(&this->actor);
             return;
@@ -246,6 +254,10 @@ void EnMa2_Init(Actor* thisx, PlayState* play) {
     Actor_SetScale(&this->actor, 0.01f);
     this->actor.targetMode = 6;
     this->unk_1E0.unk_00 = 0;
+    if ((this->actor.params & 0xF) == 0xB) {
+        this->collider.base.ocFlags1 &= ~OC1_ON;
+        this->actor.flags &= ~ACTOR_FLAG_0;
+    }
 }
 
 void EnMa2_Destroy(Actor* thisx, PlayState* play) {
@@ -319,7 +331,7 @@ void EnMa2_Update(Actor* thisx, PlayState* play) {
     this->actionFunc(this, play);
     func_80AA1DB4(this, play);
     func_80AA1AE4(this, play);
-    if (this->actionFunc != func_80AA20E4) {
+    if (this->actionFunc != func_80AA20E4 && this->actor.params != 0xB) {
         func_800343CC(play, &this->actor, &this->unk_1E0.unk_00, (f32)this->collider.dim.radius + 30.0f,
                       func_80AA19A0, func_80AA1A38);
     }
@@ -328,6 +340,13 @@ void EnMa2_Update(Actor* thisx, PlayState* play) {
 s32 EnMa2_OverrideLimbDraw(PlayState* play, s32 limbIndex, Gfx** dList, Vec3f* pos, Vec3s* rot, void* thisx) {
     EnMa2* this = (EnMa2*)thisx;
     Vec3s vec;
+
+    if (limbIndex == MALON_ADULT_ROOT_LIMB) {
+        if (this->actor.params == 0xB) {
+            Matrix_Translate(0.0f, 4000.0f, 0.0f, MTXMODE_APPLY);
+            //pos->y += 4000.0f;
+        }
+    }
 
     if ((limbIndex == MALON_ADULT_LEFT_THIGH_LIMB) || (limbIndex == MALON_ADULT_RIGHT_THIGH_LIMB)) {
         *dList = NULL;

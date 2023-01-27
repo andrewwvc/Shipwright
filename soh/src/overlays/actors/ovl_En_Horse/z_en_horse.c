@@ -27,12 +27,14 @@ void EnHorse_ResetIdleAnimation(EnHorse* this);
 void EnHorse_StartIdleRidable(EnHorse* this);
 void EnHorse_InitInactive(EnHorse* this);
 void EnHorse_InitIngoHorse(EnHorse* this);
+void EnHorse_InitMalonHorse(EnHorse* this);
 
 void EnHorse_Frozen(EnHorse* this, PlayState* play);
 void EnHorse_Inactive(EnHorse* this, PlayState* play);
 void EnHorse_Idle(EnHorse* this, PlayState* play);
 void EnHorse_FollowPlayer(EnHorse* this, PlayState* play);
 void EnHorse_UpdateIngoRace(EnHorse* this, PlayState* play);
+void EnHorse_UpdateMalonRide(EnHorse* this, PlayState* play);
 void EnHorse_MountedIdle(EnHorse* this, PlayState* play);
 void EnHorse_MountedIdleWhinneying(EnHorse* this, PlayState* play);
 void EnHorse_MountedTurn(EnHorse* this, PlayState* play);
@@ -374,6 +376,13 @@ static RaceWaypoint sIngoRaceWaypoints[] = {
 };
 
 static RaceInfo sIngoRace = { 8, sIngoRaceWaypoints };
+
+static RaceWaypoint sMalonRideWaypoints[] = {
+    { 200, 1, 2100, 6, 0x7000 },  { 200, 1, 3000, 6, 0x8000 },   { -600, 1, 3500, 6, -0x6000 },
+    { -1200, 1, 2600, 6, -0x3000 },     { -600, 1, 2700, 4, -0x4000 },
+};
+
+static RaceInfo sMalonRide = { 5, sMalonRideWaypoints };
 static s32 sAnimSoundFrames[] = { 0, 16 };
 
 static InitChainEntry sInitChain[] = {
@@ -434,6 +443,7 @@ static EnHorseActionFunc sActionFuncs[] = {
     EnHorse_Idle,
     EnHorse_FollowPlayer,
     EnHorse_UpdateIngoRace,
+    EnHorse_UpdateMalonRide,
     EnHorse_MountedIdle,
     EnHorse_MountedIdleWhinneying,
     EnHorse_MountedTurn,
@@ -583,6 +593,60 @@ void EnHorse_UpdateIngoRaceInfo(EnHorse* this, PlayState* play, RaceInfo* raceIn
         }
         this->actor.shape.rot.y = this->actor.world.rot.y;
     }
+
+    sp50 = Actor_WorldDistXZToActor(&this->actor, &GET_PLAYER(play)->actor);
+    relPlayerYaw = Actor_WorldYawTowardActor(&this->actor, &GET_PLAYER(play)->actor) - this->actor.world.rot.y;
+    if (sp50 <= 200.0f || (fabsf(Math_SinS(relPlayerYaw)) < 0.8f && Math_CosS(relPlayerYaw) > 0.0f)) {
+        if (this->actor.speedXZ < this->ingoHorseMaxSpeed) {
+            this->actor.speedXZ += 0.47f;
+        } else {
+            this->actor.speedXZ -= 0.47f;
+        }
+        this->ingoRaceFlags |= 1;
+        return;
+    }
+
+    if (this->actor.speedXZ < raceInfo->waypoints[this->curRaceWaypoint].speed) {
+        this->actor.speedXZ = this->actor.speedXZ + 0.4f;
+    } else {
+        this->actor.speedXZ = this->actor.speedXZ - 0.4f;
+    }
+    this->ingoRaceFlags &= ~0x1;
+}
+
+void EnHorse_UpdateMalonRideInfo(EnHorse* this, PlayState* play, RaceInfo* raceInfo) {
+    Vec3f curWaypointPos;
+    Vec3f prevWaypointPos;
+    f32 playerDist;
+    f32 sp50;
+    s16 relPlayerYaw;
+    f32 px;
+    f32 pz;
+    f32 d;
+    f32 dist;
+    s32 prevWaypoint;
+
+    EnHorse_RaceWaypointPos(raceInfo->waypoints, this->curRaceWaypoint, &curWaypointPos);
+    Math3D_RotateXZPlane(&curWaypointPos, raceInfo->waypoints[this->curRaceWaypoint].angle, &px, &pz, &d);
+    if (((this->actor.world.pos.x * px) + (pz * this->actor.world.pos.z) + d) > 0.0f) {
+        this->curRaceWaypoint++;
+        if (this->curRaceWaypoint >= raceInfo->numWaypoints) {
+            this->curRaceWaypoint = 0;
+        }
+    }
+
+    EnHorse_RaceWaypointPos(raceInfo->waypoints, this->curRaceWaypoint, &curWaypointPos);
+
+    prevWaypoint = this->curRaceWaypoint - 1;
+    if (prevWaypoint < 0) {
+        prevWaypoint = raceInfo->numWaypoints - 1;
+    }
+    EnHorse_RaceWaypointPos(raceInfo->waypoints, prevWaypoint, &prevWaypointPos);
+    Math3D_PointDistToLine2D(this->actor.world.pos.x, this->actor.world.pos.z, prevWaypointPos.x, prevWaypointPos.z,
+                             curWaypointPos.x, curWaypointPos.z, &dist);
+    EnHorse_RotateToPoint(this, play, &curWaypointPos, 400);
+
+    this->actor.shape.rot.y = this->actor.world.rot.y;
 
     sp50 = Actor_WorldDistXZToActor(&this->actor, &GET_PLAYER(play)->actor);
     relPlayerYaw = Actor_WorldYawTowardActor(&this->actor, &GET_PLAYER(play)->actor) - this->actor.world.rot.y;
@@ -763,12 +827,13 @@ void EnHorse_Init(Actor* thisx, PlayState* play2) {
         this->type = HORSE_HNI;
 
         if ((this->bankIndex = Object_GetIndex(&play->objectCtx, OBJECT_HNI)) < 0) {
-            Actor_Kill(&this->actor);
-            return;
-        }
-
+            //Actor_Kill(&this->actor);
         do {
+            Object_Spawn(&play->objectCtx, OBJECT_HNI);
+            this->bankIndex = Object_GetIndex(&play->objectCtx, OBJECT_HNI);
         } while (!Object_IsLoaded(&play->objectCtx, this->bankIndex));
+            //return;
+        }
 
         this->actor.objBankIndex = this->bankIndex;
         Actor_SetObjectDependency(play, &this->actor);
@@ -800,6 +865,9 @@ void EnHorse_Init(Actor* thisx, PlayState* play2) {
             }
         } else if (this->actor.params == 1) {
             this->stateFlags = ENHORSE_FLAG_7;
+        } else if (this->actor.params == 11) {
+           this->stateFlags |= ENHORSE_FLAG_19 | ENHORSE_UNRIDEABLE;
+           this->actor.flags |= ACTOR_FLAG_6;
         } else {
             this->stateFlags = 0;
         }
@@ -884,6 +952,15 @@ void EnHorse_Init(Actor* thisx, PlayState* play2) {
         Interface_InitHorsebackArchery(play);
     } else if (play->sceneNum == SCENE_SPOT20 && !Flags_GetEventChkInf(0x18) && !DREG(1)) {
         EnHorse_InitFleePlayer(this);
+    } else if (this->actor.params == 11) {
+        EnHorse_InitMalonHorse(this);
+        this->rider =
+            Actor_Spawn(&play->actorCtx, play, ACTOR_EN_MA2, this->actor.world.pos.x, this->actor.world.pos.y,
+                        this->actor.world.pos.z, this->actor.shape.rot.x, this->actor.shape.rot.y, 0, 0xB, true);
+        if (this->rider == NULL) {
+            //__assert("this->race.rider != NULL");
+            ASSERT(this->rider == NULL);
+        }
     } else {
         if (play->sceneNum == SCENE_SOUKO) {
             EnHorse_ResetIdleAnimation(this);
@@ -1980,17 +2057,25 @@ void EnHorse_FollowPlayer(EnHorse* this, PlayState* play) {
     }
 }
 
-void EnHorse_UpdateIngoHorseAnim(EnHorse* this);
+void EnHorse_UpdateOtherHorseAnim(EnHorse* this, s32 actionID);
 
 void EnHorse_InitIngoHorse(EnHorse* this) {
     this->curRaceWaypoint = 0;
     this->soundTimer = 0;
     this->actor.speedXZ = 0.0f;
-    EnHorse_UpdateIngoHorseAnim(this);
+    EnHorse_UpdateOtherHorseAnim(this,ENHORSE_ACT_INGO_RACE);
     this->unk_21C = this->unk_228;
     if (this->stateFlags & ENHORSE_DRAW) {
         Audio_PlaySoundGeneral(NA_SE_IT_INGO_HORSE_NEIGH, &this->unk_21C, 4, &D_801333E0, &D_801333E0, &D_801333E8);
     }
+}
+
+void EnHorse_InitMalonHorse(EnHorse* this) {
+    this->curRaceWaypoint = 0;
+    this->soundTimer = 0;
+    this->actor.speedXZ = 0.0f;
+    EnHorse_UpdateOtherHorseAnim(this,ENHORSE_ACT_MALON_RIDE);
+    this->unk_21C = this->unk_228;
 }
 
 void EnHorse_SetIngoAnimation(s32 idx, f32 curFrame, s32 arg2, s16* animIdxOut, f32* curFrameOut) {
@@ -2010,11 +2095,11 @@ void EnHorse_SetIngoAnimation(s32 idx, f32 curFrame, s32 arg2, s16* animIdxOut, 
     }
 }
 
-void EnHorse_UpdateIngoHorseAnim(EnHorse* this) {
+void EnHorse_UpdateOtherHorseAnim(EnHorse* this, s32 actionID) {
     s32 animChanged = 0;
     f32 animSpeed;
 
-    this->action = ENHORSE_ACT_INGO_RACE;
+    this->action = actionID;
     this->stateFlags &= ~ENHORSE_SANDDUST_SOUND;
     if (this->actor.speedXZ == 0.0f) {
         if (this->animationIdx != ENHORSE_ANIM_IDLE) {
@@ -2075,7 +2160,7 @@ void EnHorse_UpdateIngoRace(EnHorse* this, PlayState* play) {
         this->actor.speedXZ = 0.0f;
         this->rider->speedXZ = 0.0f;
         if (this->animationIdx != ENHORSE_ANIM_IDLE) {
-            EnHorse_UpdateIngoHorseAnim(this);
+            EnHorse_UpdateOtherHorseAnim(this,ENHORSE_ACT_INGO_RACE);
         }
     }
 
@@ -2091,7 +2176,7 @@ void EnHorse_UpdateIngoRace(EnHorse* this, PlayState* play) {
     this->skin.skelAnime.playSpeed = playSpeed;
     if (SkelAnime_Update(&this->skin.skelAnime) ||
         (this->animationIdx == ENHORSE_ANIM_IDLE && this->actor.speedXZ != 0.0f)) {
-        EnHorse_UpdateIngoHorseAnim(this);
+        EnHorse_UpdateOtherHorseAnim(this,ENHORSE_ACT_INGO_RACE);
     }
 
     if (this->stateFlags & ENHORSE_INGO_WON) {
@@ -2102,6 +2187,31 @@ void EnHorse_UpdateIngoRace(EnHorse* this, PlayState* play) {
 
     EnHorse_SetIngoAnimation(this->animationIdx, this->skin.skelAnime.curFrame, this->ingoRaceFlags & 1,
                              &((EnIn*)this->rider)->animationIdx, &((EnIn*)this->rider)->unk_1E0);
+}
+
+void EnHorse_UpdateMalonRide(EnHorse* this, PlayState* play) {
+    f32 playSpeed;
+    if (this->animationIdx == ENHORSE_ANIM_IDLE || this->animationIdx == ENHORSE_ANIM_WHINNEY) {
+        EnHorse_IdleAnimSounds(this, play);
+    } else if (this->animationIdx == ENHORSE_ANIM_WALK) {
+        EnHorse_PlayWalkingSound(this);
+    }
+
+    EnHorse_UpdateMalonRideInfo(this, play, &sMalonRide);
+    if (this->animationIdx == ENHORSE_ANIM_WALK) {
+        playSpeed = this->actor.speedXZ * 0.5f;
+    } else if (this->animationIdx == ENHORSE_ANIM_TROT) {
+        playSpeed = this->actor.speedXZ * 0.25f;
+    } else if (this->animationIdx == ENHORSE_ANIM_GALLOP) {
+        playSpeed = this->actor.speedXZ * 0.2f;
+    } else {
+        playSpeed = 1.0f;
+    }
+    this->skin.skelAnime.playSpeed = playSpeed;
+    if (SkelAnime_Update(&this->skin.skelAnime) ||
+        (this->animationIdx == ENHORSE_ANIM_IDLE && this->actor.speedXZ != 0.0f)) {
+        EnHorse_UpdateOtherHorseAnim(this,ENHORSE_ACT_MALON_RIDE);
+    }
 }
 
 void EnHorse_CsMoveInit(EnHorse* this, PlayState* play, CsCmdActorAction* action) {
@@ -3499,7 +3609,7 @@ void EnHorse_Update(Actor* thisx, PlayState* play2) {
             EnHorse_RegenBoost(this, play);
         }
         Actor_MoveForward(thisx);
-        if (this->action == ENHORSE_ACT_INGO_RACE) {
+        if (this->action == ENHORSE_ACT_INGO_RACE || this->action == ENHORSE_ACT_MALON_RIDE) {
             if (this->rider != NULL) {
                 this->rider->world.pos.x = thisx->world.pos.x;
                 this->rider->world.pos.y = thisx->world.pos.y + 10.0f;
