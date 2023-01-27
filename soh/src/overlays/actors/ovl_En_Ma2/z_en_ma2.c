@@ -341,10 +341,30 @@ s32 EnMa2_OverrideLimbDraw(PlayState* play, s32 limbIndex, Gfx** dList, Vec3f* p
     EnMa2* this = (EnMa2*)thisx;
     Vec3s vec;
 
-    if (limbIndex == MALON_ADULT_ROOT_LIMB) {
-        if (this->actor.params == 0xB) {
+    if (this->actor.params == 0xB) {
+        if (limbIndex == MALON_ADULT_ROOT_LIMB) {
             Matrix_Translate(0.0f, 4000.0f, 0.0f, MTXMODE_APPLY);
-            //pos->y += 4000.0f;
+        }
+
+        if (limbIndex == MALON_ADULT_LEFT_LEG_LIMB) {
+            Vec3f rotPole2 = {0.0f,0.0f,1.0f};
+            Matrix_RotateAxis(-M_PI/4, &rotPole2, MTXMODE_APPLY);
+            Vec3f rotPole1 = {0.0f,1.0f,0.0f};
+            Matrix_RotateAxis(-M_PI/6, &rotPole1, MTXMODE_APPLY);
+        }
+
+        if (limbIndex == MALON_ADULT_RIGHT_LEG_LIMB) {
+            Vec3f rotPole2 = {0.0f,0.0f,1.0f};
+            Matrix_RotateAxis(-M_PI/6, &rotPole2, MTXMODE_APPLY);
+            Vec3f rotPole1 = {0.0f,1.0f,0.0f};
+            Matrix_RotateAxis(M_PI/6, &rotPole1, MTXMODE_APPLY);
+        }
+
+        if (limbIndex == MALON_ADULT_DRESS_LIMB) {
+            Vec3f rotPole = {0.0f,0.0f,1.0f};
+            Matrix_RotateAxis(-M_PI/8, &rotPole, MTXMODE_APPLY);
+            Matrix_Translate(-800.0f, -1000.0f, 0.0f, MTXMODE_APPLY);
+            Matrix_Scale(1.0f, 1.34, 1.3f, MTXMODE_APPLY);
         }
     }
 
