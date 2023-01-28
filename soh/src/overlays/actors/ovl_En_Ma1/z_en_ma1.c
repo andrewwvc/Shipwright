@@ -25,6 +25,7 @@ void func_80AA106C(EnMa1* this, PlayState* play);
 void func_80AA10EC(EnMa1* this, PlayState* play);
 void func_80AA1150(EnMa1* this, PlayState* play);
 void EnMa1_DoNothing(EnMa1* this, PlayState* play);
+void EnMa1_DoSomething(EnMa1* this, PlayState* play);
 void EnMa1_WaitForSongGive(EnMa1* this, PlayState* play);
 
 const ActorInit En_Ma1_InitVars = {
@@ -95,6 +96,7 @@ bool Randomizer_ObtainedMalonHCReward() {
 }
 
 u16 EnMa1_GetText(PlayState* play, Actor* thisx) {
+    u16 RanchMsg = GetTextID("ranch");
     // Special case for Malon Hyrule Castle Text. Placing it here at the beginning
     // has the added benefit of circumventing mask text if wearing bunny hood.
     if (gSaveContext.n64ddFlag && play->sceneNum == SCENE_SPOT15) {
@@ -104,6 +106,16 @@ u16 EnMa1_GetText(PlayState* play, Actor* thisx) {
 
     if (faceReaction != 0) {
         return faceReaction;
+    }
+
+    if (thisx->params == 0x1){
+        return RanchMsg+2;
+    }
+    if (play->sceneNum == SCENE_SOUKO) {
+        if (gSaveContext.eventChkInf[2] & 0x0100)
+            return RanchMsg+1;
+        else
+            return RanchMsg+0;
     }
     if (!gSaveContext.n64ddFlag) {
         if (CHECK_QUEST_ITEM(QUEST_SONG_EPONA)) {
@@ -137,6 +149,7 @@ u16 EnMa1_GetText(PlayState* play, Actor* thisx) {
 }
 
 s16 func_80AA0778(PlayState* play, Actor* thisx) {
+    u16 RanchMsg = GetTextID("ranch");
     s16 ret = 1;
 
     switch (Message_GetState(&play->msgCtx)) {
@@ -166,6 +179,8 @@ s16 func_80AA0778(PlayState* play, Actor* thisx) {
                     ret = 2;
                     break;
                 default:
+                    if (thisx->textId == RanchMsg+0)
+                        gSaveContext.eventChkInf[2] |= 0x0100;
                     ret = 0;
                     break;
             }
@@ -223,6 +238,11 @@ s32 func_80AA08C4(EnMa1* this, PlayState* play) {
     // Don't spawn Malon if none of the above are true and we are not in Lon Lon Ranch.
     if (play->sceneNum != SCENE_SPOT20) {
         return 0;
+    } else {//We are in the ranch
+        if (this->actor.params == 0x1 && (gSaveContext.eventChkInf[2] & 0x0100)) {
+            gSaveContext.eventChkInf[2] &= ~0x0100;
+            return 1;
+        }
     }
     // If we've gotten this far, we're in Lon Lon Ranch. Spawn Malon if it is daytime, Talon has left Hyrule Castle, and
     // either we are not randomized, or we are and we have received Malon's item at Hyrule Castle.
@@ -325,6 +345,11 @@ void EnMa1_Init(Actor* thisx, PlayState* play) {
 
         this->actionFunc = func_80AA0F44;
         EnMa1_ChangeAnim(this, ENMA1_ANIM_2);
+    }
+
+    if (play->sceneNum == SCENE_SOUKO) {
+        this->actionFunc = EnMa1_DoSomething;
+        EnMa1_ChangeAnim(this, ENMA1_ANIM_1);
     }
 }
 
@@ -507,6 +532,9 @@ void func_80AA1150(EnMa1* this, PlayState* play) {
 }
 
 void EnMa1_DoNothing(EnMa1* this, PlayState* play) {
+}
+
+void EnMa1_DoSomething(EnMa1* this, PlayState* play) {
 }
 
 void EnMa1_Update(Actor* thisx, PlayState* play) {

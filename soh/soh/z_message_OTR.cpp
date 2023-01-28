@@ -990,6 +990,12 @@ extern "C" void OTRMessage_Init()
     MakeNormalMsgEng(0xF000, "\x08%rPiece of Heart   200 Rupees%w&Adds a quarter of a section&to your heart container.&4 together will improve your life!\t\n\x02")
     MakeNormalMsgEng(0xF001, "\x08Piece of Heart   200 Rupees&\x09\x1B&%gBuy&Don't buy%w\x02")
 
+    u16 RanchMsg = TextIDAllocator::Instance->allocateRange("ranch", 20);
+
+    MakeNormalMsgEng(RanchMsg+0, "Oh, I really can't get to sleep.^Hey, fairy boy, when did&you get in here anyway?&You've been sneaking about,&haven't you?^Hmm...we could go out and play,&but you'd have to be careful&to not wake dad.^I'll see you outside.");
+    MakeNormalMsgEng(RanchMsg+1, "Don't worry.^I should be able to get&out through the window.");
+    MakeNormalMsgEng(RanchMsg+2, "Well, I did want to play,&but there are all these&mean birds flying around.^There's no way I can go&out there like this now.");
+
     u16 ZoraMsg = TextIDAllocator::Instance->allocateRange("zora", 30);
 
     MakeNormalMsgEng(0x402D, "Hey you know, ever since Ruto&returned, all she ever talks about&is the new boy she likes.");
