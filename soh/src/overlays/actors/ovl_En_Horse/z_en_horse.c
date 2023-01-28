@@ -378,8 +378,8 @@ static RaceWaypoint sIngoRaceWaypoints[] = {
 static RaceInfo sIngoRace = { 8, sIngoRaceWaypoints };
 
 static RaceWaypoint sMalonRideWaypoints[] = {
-    { 200, 1, 2100, 6, 0x7000 },  { 200, 1, 3000, 6, 0x8000 },   { -600, 1, 3500, 6, -0x6000 },
-    { -1200, 1, 2600, 6, -0x3000 },     { -600, 1, 2700, 4, -0x4000 },
+    { 200, 1, 2100, 8, 0x4000 },  { 200, 1, 4000, 8, 0x0000 },   { -600, 1, 4500, 8, -0x4000 },
+    { -1200, 1, 2600, 8, -0x7000 },     { -600, 1, 2400, 4, 0x5000 },
 };
 
 static RaceInfo sMalonRide = { 5, sMalonRideWaypoints };
@@ -622,13 +622,18 @@ void EnHorse_UpdateMalonRideInfo(EnHorse* this, PlayState* play, RaceInfo* raceI
     s16 relPlayerYaw;
     f32 px;
     f32 pz;
-    f32 d;
+    //f32 d;
     f32 dist;
     s32 prevWaypoint;
 
     EnHorse_RaceWaypointPos(raceInfo->waypoints, this->curRaceWaypoint, &curWaypointPos);
-    Math3D_RotateXZPlane(&curWaypointPos, raceInfo->waypoints[this->curRaceWaypoint].angle, &px, &pz, &d);
-    if (((this->actor.world.pos.x * px) + (pz * this->actor.world.pos.z) + d) > 0.0f) {
+    //Math3D_RotateXZPlane(&curWaypointPos, raceInfo->waypoints[this->curRaceWaypoint].angle, &px, &pz, &d);
+    s16 angle = raceInfo->waypoints[this->curRaceWaypoint].angle;
+    //Vec3f proj = {1.0f,0.0f,1.0f};
+    px = Math_SinS(angle);
+    pz = Math_CosS(angle);
+
+    if (((px*(this->actor.world.pos.x -curWaypointPos.x)) + (pz * (this->actor.world.pos.z-curWaypointPos.z))) > 0.0f) {
         this->curRaceWaypoint++;
         if (this->curRaceWaypoint >= raceInfo->numWaypoints) {
             this->curRaceWaypoint = 0;
@@ -648,17 +653,17 @@ void EnHorse_UpdateMalonRideInfo(EnHorse* this, PlayState* play, RaceInfo* raceI
 
     this->actor.shape.rot.y = this->actor.world.rot.y;
 
-    sp50 = Actor_WorldDistXZToActor(&this->actor, &GET_PLAYER(play)->actor);
-    relPlayerYaw = Actor_WorldYawTowardActor(&this->actor, &GET_PLAYER(play)->actor) - this->actor.world.rot.y;
-    if (sp50 <= 200.0f || (fabsf(Math_SinS(relPlayerYaw)) < 0.8f && Math_CosS(relPlayerYaw) > 0.0f)) {
-        if (this->actor.speedXZ < this->ingoHorseMaxSpeed) {
-            this->actor.speedXZ += 0.47f;
-        } else {
-            this->actor.speedXZ -= 0.47f;
-        }
-        this->ingoRaceFlags |= 1;
-        return;
-    }
+    // sp50 = Actor_WorldDistXZToActor(&this->actor, &GET_PLAYER(play)->actor);
+    // relPlayerYaw = Actor_WorldYawTowardActor(&this->actor, &GET_PLAYER(play)->actor) - this->actor.world.rot.y;
+    // if (sp50 <= 200.0f || (fabsf(Math_SinS(relPlayerYaw)) < 0.8f && Math_CosS(relPlayerYaw) > 0.0f)) {
+    //     if (this->actor.speedXZ < this->ingoHorseMaxSpeed) {
+    //         this->actor.speedXZ += 0.47f;
+    //     } else {
+    //         this->actor.speedXZ -= 0.47f;
+    //     }
+    //     this->ingoRaceFlags |= 1;
+    //     return;
+    // }
 
     if (this->actor.speedXZ < raceInfo->waypoints[this->curRaceWaypoint].speed) {
         this->actor.speedXZ = this->actor.speedXZ + 0.4f;
@@ -3616,6 +3621,8 @@ void EnHorse_Update(Actor* thisx, PlayState* play2) {
                 this->rider->world.pos.z = thisx->world.pos.z;
                 this->rider->shape.rot.x = thisx->shape.rot.x;
                 this->rider->shape.rot.y = thisx->shape.rot.y;
+                if (this->action == ENHORSE_ACT_MALON_RIDE)
+                    this->rider->shape.rot.z = thisx->shape.rot.z;
             }
         }
         if (this->jntSph.elements[0].info.ocElemFlags & 2) {
