@@ -343,7 +343,7 @@ s32 EnMa2_OverrideLimbDraw(PlayState* play, s32 limbIndex, Gfx** dList, Vec3f* p
 
     if (this->actor.params == 0xB) {
         if (limbIndex == MALON_ADULT_ROOT_LIMB) {
-            Matrix_Translate(0.0f, 4000.0f, 0.0f, MTXMODE_APPLY);
+            Matrix_Translate(0.0f, -2500.0f, 0.0f, MTXMODE_APPLY);
         }
 
         if (limbIndex == MALON_ADULT_LEFT_LEG_LIMB) {
