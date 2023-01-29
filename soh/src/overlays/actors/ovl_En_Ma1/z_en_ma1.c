@@ -6,6 +6,7 @@
 
 #include "z_en_ma1.h"
 #include "objects/object_ma1/object_ma1.h"
+#include "src/overlays/actors/ovl_En_Crow/z_en_crow.h"
 
 #define FLAGS (ACTOR_FLAG_0 | ACTOR_FLAG_3 | ACTOR_FLAG_4 | ACTOR_FLAG_5 | ACTOR_FLAG_25)
 
@@ -96,6 +97,7 @@ bool Randomizer_ObtainedMalonHCReward() {
 }
 
 u16 EnMa1_GetText(PlayState* play, Actor* thisx) {
+    EnMa1* this = ((EnMa1*)thisx);
     u16 RanchMsg = GetTextID("ranch");
     // Special case for Malon Hyrule Castle Text. Placing it here at the beginning
     // has the added benefit of circumventing mask text if wearing bunny hood.
@@ -109,13 +111,24 @@ u16 EnMa1_GetText(PlayState* play, Actor* thisx) {
     }
 
     if (thisx->params == 0x1){
-        return RanchMsg+2;
+        if (this->talkProgress && (EnCrow_ExportDeathCount() || EnCrow_ExportDeathCountBig())){
+            if (EnCrow_ExportDeathCountBig())
+                return RanchMsg+4;
+            else
+                return RanchMsg+3;
+        } else {
+            return RanchMsg+2;
+        }
     }
     if (play->sceneNum == SCENE_SOUKO) {
-        if (gSaveContext.eventChkInf[2] & 0x0100)
+        if (gSaveContext.eventChkInf[2] & 0x0100) {
             return RanchMsg+1;
-        else
-            return RanchMsg+0;
+        } else {
+            if (gSaveContext.eventChkInf[2] & 0x0200)
+                return RanchMsg+5;
+            else
+                return RanchMsg+0;
+        }
     }
     if (!gSaveContext.n64ddFlag) {
         if (CHECK_QUEST_ITEM(QUEST_SONG_EPONA)) {
@@ -149,6 +162,7 @@ u16 EnMa1_GetText(PlayState* play, Actor* thisx) {
 }
 
 s16 func_80AA0778(PlayState* play, Actor* thisx) {
+    EnMa1* this = ((EnMa1*)thisx);
     u16 RanchMsg = GetTextID("ranch");
     s16 ret = 1;
 
@@ -179,8 +193,14 @@ s16 func_80AA0778(PlayState* play, Actor* thisx) {
                     ret = 2;
                     break;
                 default:
-                    if (thisx->textId == RanchMsg+0)
-                        gSaveContext.eventChkInf[2] |= 0x0100;
+                    if (thisx->textId == RanchMsg+0) {
+                        gSaveContext.eventChkInf[2] |= 0x0100;//Set to go outside at night
+                        gSaveContext.MalonPlayDay = gSaveContext.totalDays;
+                    } else if (thisx->textId == RanchMsg+2) {
+                        this->talkProgress = 1;
+                    } else if (thisx->textId == RanchMsg+4) {
+                        gSaveContext.eventChkInf[2] |= 0x0200;//Set to be impressed
+                    }
                     ret = 0;
                     break;
             }
@@ -231,8 +251,10 @@ s32 func_80AA08C4(EnMa1* this, PlayState* play) {
             return 0;                              // don't make her appear at the castle
         }
     }
-    // Malon asleep in her bed if Talon has left Hyrule Castle and it is nighttime.
+    // Malon (not) asleep in her bed if Talon has left Hyrule Castle and it is nighttime.
     if ((play->sceneNum == SCENE_SOUKO) && IS_NIGHT && (gSaveContext.eventChkInf[1] & 0x10)) {
+        if ((gSaveContext.eventChkInf[2] & 0x0100) && (gSaveContext.MalonPlayDay != gSaveContext.totalDays))
+            gSaveContext.eventChkInf[2] &= ~0x0100;
         return 1;
     }
     // Don't spawn Malon if none of the above are true and we are not in Lon Lon Ranch.
@@ -240,8 +262,10 @@ s32 func_80AA08C4(EnMa1* this, PlayState* play) {
         return 0;
     } else {//We are in the ranch
         if (this->actor.params == 0x1 && (gSaveContext.eventChkInf[2] & 0x0100)) {
-            gSaveContext.eventChkInf[2] &= ~0x0100;
-            return 1;
+            if ((gSaveContext.MalonPlayDay == gSaveContext.totalDays))
+                return 1;
+            else
+                gSaveContext.eventChkInf[2] &= ~0x0100;
         }
     }
     // If we've gotten this far, we're in Lon Lon Ranch. Spawn Malon if it is daytime, Talon has left Hyrule Castle, and

@@ -96,6 +96,7 @@ static DamageTable sDamageTable = {
 };
 
 static u32 sDeathCount = 0;
+static u32 sDeathCountBig = 0;
 
 static InitChainEntry sInitChain[] = {
     ICHAIN_F32(uncullZoneScale, 3000, ICHAIN_CONTINUE),
@@ -105,6 +106,14 @@ static InitChainEntry sInitChain[] = {
 };
 
 static Vec3f sHeadVec = { 2500.0f, 0.0f, 0.0f };
+
+u32 EnCrow_ExportDeathCount() {
+    return sDeathCount;
+}
+
+u32 EnCrow_ExportDeathCountBig() {
+    return sDeathCountBig;
+}
 
 void EnCrow_Init(Actor* thisx, PlayState* play) {
     EnCrow* this = (EnCrow*)thisx;
@@ -117,6 +126,7 @@ void EnCrow_Init(Actor* thisx, PlayState* play) {
     CollisionCheck_SetInfo(&this->actor.colChkInfo, &sDamageTable, &sColChkInfoInit);
     ActorShape_Init(&this->actor.shape, 2000.0f, ActorShadow_DrawCircle, 20.0f);
     sDeathCount = 0;
+    sDeathCountBig = 0;
     EnCrow_SetupFlyIdle(this);
 }
 
@@ -357,6 +367,7 @@ void EnCrow_Die(EnCrow* this, PlayState* play) {
             sDeathCount++;
             Item_DropCollectibleRandom(play, &this->actor, &this->actor.world.pos, 0);
         } else {
+            sDeathCountBig++;
             Item_DropCollectible(play, &this->actor.world.pos, ITEM00_RUPEE_RED);
         }
         if (!CVar_GetS32("gRandomizedEnemies", 0)) {

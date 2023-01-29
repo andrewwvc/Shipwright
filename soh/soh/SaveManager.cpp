@@ -550,6 +550,7 @@ void SaveManager::InitFileNormal() {
     gSaveContext.goronTimeDay = gSaveContext.totalDays;
     gSaveContext.SariaDateDay = 0;
     gSaveContext.RutoDateDay = 0;
+    gSaveContext.MalonPlayDay = 0;
     gSaveContext.maxBoosts = INITIAL_BOOSTS;
     gSaveContext.extraMagicPower = 0;
 
@@ -1344,6 +1345,7 @@ void SaveManager::LoadBaseVersion3() {
     SaveManager::Instance->LoadData("goronTimeDay", gSaveContext.goronTimeDay);
     SaveManager::Instance->LoadData("SariaDateDay", gSaveContext.SariaDateDay);
     SaveManager::Instance->LoadData("RutoDateDay", gSaveContext.RutoDateDay);
+    SaveManager::Instance->LoadData("MalonPlayDay", gSaveContext.MalonPlayDay);
     SaveManager::Instance->LoadData("maxBoosts", gSaveContext.maxBoosts, INITIAL_BOOSTS);
     SaveManager::Instance->LoadData("extraMagicPower", gSaveContext.extraMagicPower);
 }
@@ -1526,6 +1528,7 @@ void SaveManager::SaveBase() {
     SaveManager::Instance->SaveData("goronTimeDay", gSaveContext.goronTimeDay);
     SaveManager::Instance->SaveData("SariaDateDay", gSaveContext.SariaDateDay);
     SaveManager::Instance->SaveData("RutoDateDay", gSaveContext.RutoDateDay);
+    SaveManager::Instance->SaveData("MalonPlayDay", gSaveContext.MalonPlayDay);
     SaveManager::Instance->SaveData("maxBoosts", gSaveContext.maxBoosts);
     SaveManager::Instance->SaveData("extraMagicPower", gSaveContext.extraMagicPower);
 }

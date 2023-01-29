@@ -995,6 +995,9 @@ extern "C" void OTRMessage_Init()
     MakeNormalMsgEng(RanchMsg+0, "Oh, I really can't get to sleep.^Hey, fairy boy, when did&you get in here anyway?&You've been sneaking about,&haven't you?^Hmm...we could go out and play,&but you'd have to be careful&to not wake dad.^I'll see you outside.");
     MakeNormalMsgEng(RanchMsg+1, "Don't worry.^I should be able to get&out through the window.");
     MakeNormalMsgEng(RanchMsg+2, "Well, I did want to play,&but there are all these&mean birds flying around.^There's no way I can go&out there like this now.");
+    MakeNormalMsgEng(RanchMsg+3, "Oh, you're getting them.&They still don't seem&to be going away though.");
+    MakeNormalMsgEng(RanchMsg+4, "Oh, you're pretty good at this.&Those birds just keep comming,&but I guess I feel safer&knowing you're here.^Maybe we should call it a night.");
+    MakeNormalMsgEng(RanchMsg+5, "Oh, I guess you here to defend&us against those pesky birds.^I'll be waiting then.");
 
     u16 ZoraMsg = TextIDAllocator::Instance->allocateRange("zora", 30);
 

@@ -279,6 +279,7 @@ typedef struct {
     /*        */ s32 goronTimeDay;
     /*        */ s32 SariaDateDay;
     /*        */ s32 RutoDateDay;
+    /*        */ s32 MalonPlayDay;
     /*        */ u8 maxBoosts;
     /*        */ u8 extraMagicPower;
     // #endregion
