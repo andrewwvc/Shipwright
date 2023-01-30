@@ -10983,6 +10983,7 @@ void Player_Update(Actor* thisx, PlayState* play) {
     Actor* dog;
 
     osSyncPrintf("LinkPos: {%d,%d,%d},",(s16)this->actor.world.pos.x,(s16)this->actor.world.pos.y,(s16)this->actor.world.pos.z);
+    osSyncPrintf("interfaceMode: %d",(u16)play->interfaceCtx.unk_1EE);
 
     if (func_8084FCAC(this, play)) {
         if (gSaveContext.dogParams < 0) {

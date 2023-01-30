@@ -3436,7 +3436,8 @@ void EnHorse_CheckBoost(EnHorse* thisx, PlayState* play2) {
 
     if (this->action == ENHORSE_ACT_MOUNTED_WALK || this->action == ENHORSE_ACT_MOUNTED_TROT ||
         this->action == ENHORSE_ACT_MOUNTED_GALLOP) {
-        if (CHECK_BTN_ALL(play->state.input[0].press.button, BTN_A) && (play->interfaceCtx.unk_1EE == 8)) {
+        if (CHECK_BTN_ALL(play->state.input[0].press.button, BTN_A) && (play->interfaceCtx.unk_1EE == 8 ||
+                    (play->interfaceCtx.unk_1EE == DO_ACTION_RETURN && play->msgCtx.msgMode == MSGMODE_TEXT_DONE))) {//Allows horses to boost speed even while receiving a message, seems to still disallow boosting while in FPS mode
             if (!(this->stateFlags & ENHORSE_BOOST) && !(this->stateFlags & ENHORSE_FLAG_8) &&
                 !(this->stateFlags & ENHORSE_FLAG_9)) {
                 if (this->numBoosts > 0) {

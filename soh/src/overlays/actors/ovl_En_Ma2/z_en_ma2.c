@@ -19,6 +19,7 @@ void func_80AA2018(EnMa2* this, PlayState* play);
 void func_80AA204C(EnMa2* this, PlayState* play);
 void func_80AA20E4(EnMa2* this, PlayState* play);
 void func_80AA21C8(EnMa2* this, PlayState* play);
+void EnMa2_FreeRiding(EnMa2* this, PlayState* play);
 
 const ActorInit En_Ma2_InitVars = {
     ACTOR_EN_MA2,
@@ -223,6 +224,7 @@ void EnMa2_Init(Actor* thisx, PlayState* play) {
     Collider_InitCylinder(play, &this->collider);
     Collider_SetCylinder(play, &this->collider, &this->actor, &sCylinderInit);
     CollisionCheck_SetInfo2(&this->actor.colChkInfo, DamageTable_Get(22), &sColChkInfoInit);
+    this->rideProgress = 0;
 
     switch (func_80AA1B58(this, play)) {
         case 1:
@@ -243,7 +245,7 @@ void EnMa2_Init(Actor* thisx, PlayState* play) {
             break;
         case 4:
             EnMa2_ChangeAnim(this, ENMA2_ANIM_2);
-            this->actionFunc = func_80AA2018;
+            this->actionFunc = EnMa2_FreeRiding;
             break;
         case 0:
             Actor_Kill(&this->actor);
@@ -271,6 +273,15 @@ void func_80AA2018(EnMa2* this, PlayState* play) {
     if (this->unk_1E0.unk_00 == 2) {
         this->actor.flags &= ~ACTOR_FLAG_16;
         this->unk_1E0.unk_00 = 0;
+    }
+}
+
+void EnMa2_FreeRiding(EnMa2* this, PlayState* play) {
+    u16 RanchMsg = GetTextID("ranch");
+
+    if (this->rideProgress == 0 && this->actor.xzDistToPlayer < 200.0f) {
+        Message_StartTextbox(play, RanchMsg+6, NULL);
+        this->rideProgress++;
     }
 }
 

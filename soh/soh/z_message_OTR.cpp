@@ -998,6 +998,7 @@ extern "C" void OTRMessage_Init()
     MakeNormalMsgEng(RanchMsg+3, "Oh, you're getting them.&They still don't seem&to be going away though.");
     MakeNormalMsgEng(RanchMsg+4, "Oh, you're pretty good at this.&Those birds just keep comming,&but I guess I feel safer&knowing you're here.^Maybe we should call it a night.");
     MakeNormalMsgEng(RanchMsg+5, "Oh, I guess you here to defend&us against those pesky birds.^I'll be waiting then.");
+    MakeNormalMsgEng(RanchMsg+6, "\x08Hey!\016<\x02");
 
     u16 ZoraMsg = TextIDAllocator::Instance->allocateRange("zora", 30);
 
