@@ -224,7 +224,7 @@ void EnMa2_Init(Actor* thisx, PlayState* play) {
     Collider_InitCylinder(play, &this->collider);
     Collider_SetCylinder(play, &this->collider, &this->actor, &sCylinderInit);
     CollisionCheck_SetInfo2(&this->actor.colChkInfo, DamageTable_Get(22), &sColChkInfoInit);
-    this->rideProgress = 0;
+    this->rideActor = NULL;
 
     switch (func_80AA1B58(this, play)) {
         case 1:
@@ -277,12 +277,6 @@ void func_80AA2018(EnMa2* this, PlayState* play) {
 }
 
 void EnMa2_FreeRiding(EnMa2* this, PlayState* play) {
-    u16 RanchMsg = GetTextID("ranch");
-
-    if (this->rideProgress == 0 && this->actor.xzDistToPlayer < 200.0f) {
-        Message_StartTextbox(play, RanchMsg+6, NULL);
-        this->rideProgress++;
-    }
 }
 
 void func_80AA204C(EnMa2* this, PlayState* play) {

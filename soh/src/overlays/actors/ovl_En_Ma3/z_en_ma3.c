@@ -75,6 +75,7 @@ static AnimationFrameCountInfo sAnimationInfo[] = {
 u16 func_80AA2AA0(PlayState* play, Actor* thisx) {
     Player* player = GET_PLAYER(play);
     s16* timer1ValuePtr; // weirdness with this necessary to match
+    u16 RanchMsg = GetTextID("ranch");
 
     if (!(gSaveContext.infTable[11] & 0x100)) {
         return 0x2000;
@@ -98,6 +99,9 @@ u16 func_80AA2AA0(PlayState* play, Actor* thisx) {
             return 0x2004;
         }
     }
+    if ((gSaveContext.eventChkInf[1] & 0x4000) && (gSaveContext.eventChkInf[2] & 0x0200) && !(gSaveContext.eventChkInf[2] & 0x0400) && (gSaveContext.MalonRideDay < gSaveContext.totalDays)) {
+        return RanchMsg+8;
+    }
     if ((!(player->stateFlags1 & 0x800000)) &&
         (Actor_FindNearby(play, thisx, ACTOR_EN_HORSE, 1, 1200.0f) == NULL)) {
         return 0x2001;
@@ -111,6 +115,7 @@ u16 func_80AA2AA0(PlayState* play, Actor* thisx) {
 
 s16 func_80AA2BD4(PlayState* play, Actor* thisx) {
     s16 ret = 1;
+    u16 RanchMsg;
 
     switch (Message_GetState(&play->msgCtx)) {
         case TEXT_STATE_EVENT:
@@ -125,19 +130,30 @@ s16 func_80AA2BD4(PlayState* play, Actor* thisx) {
             break;
         case TEXT_STATE_CHOICE:
             if (Message_ShouldAdvance(play)) {
-                gSaveContext.infTable[11] |= 0x200;
-                if (play->msgCtx.choiceIndex == 0) {
-                    if (gSaveContext.eventChkInf[1] & 0x4000) {
-                        Message_ContinueTextbox(play, 0x2091);
-                    } else if (HIGH_SCORE(HS_HORSE_RACE) == 0) {
-                        Message_ContinueTextbox(play, 0x2092);
+                RanchMsg = GetTextID("ranch");
+                if (thisx->textId == RanchMsg+8) {
+                    if (play->msgCtx.choiceIndex == 0) {
+                        gSaveContext.eventChkInf[2] |=  0x0400;
+                        gSaveContext.MalonRideDay = gSaveContext.totalDays+1;
                     } else {
-                        Message_ContinueTextbox(play, 0x2090);
+                        gSaveContext.MalonRideDay = gSaveContext.totalDays+1;
+                    }
+                } else {
+                    gSaveContext.infTable[11] |= 0x200;
+                    if (play->msgCtx.choiceIndex == 0) {
+                        if (gSaveContext.eventChkInf[1] & 0x4000) {
+                            Message_ContinueTextbox(play, 0x2091);
+                        } else if (HIGH_SCORE(HS_HORSE_RACE) == 0) {
+                            Message_ContinueTextbox(play, 0x2092);
+                        } else {
+                            Message_ContinueTextbox(play, 0x2090);
+                        }
                     }
                 }
             }
             break;
         case TEXT_STATE_CLOSING:
+
             switch (thisx->textId) {
                 case 0x2000:
                     gSaveContext.infTable[11] |= 0x100;
@@ -198,7 +214,8 @@ s32 func_80AA2EC8(EnMa3* this, PlayState* play) {
     if (LINK_IS_CHILD) {
         return 2;
     }
-    if (!(gSaveContext.eventChkInf[1] & 0x100)) {
+    if (!(gSaveContext.eventChkInf[1] & 0x100) ||
+        ((gSaveContext.eventChkInf[2] & 0x0400) && gSaveContext.MalonRideDay == gSaveContext.totalDays)) {
         return 2;
     }
     if (gSaveContext.eventInf[0] & 0x400) {
@@ -248,6 +265,12 @@ void EnMa3_Init(Actor* thisx, PlayState* play) {
     Collider_InitCylinder(play, &this->collider);
     Collider_SetCylinder(play, &this->collider, &this->actor, &sCylinderInit);
     CollisionCheck_SetInfo2(&this->actor.colChkInfo, DamageTable_Get(22), &sColChkInfoInit);
+
+    if (gSaveContext.MalonRideDay < gSaveContext.totalDays) {
+        gSaveContext.MalonRideDay = 0;
+        if (gSaveContext.eventChkInf[2] & 0x0400)
+            gSaveContext.eventChkInf[2] &= ~0x0400;
+    }
 
     switch (func_80AA2EC8(this, play)) {
         case 0:

@@ -487,6 +487,9 @@ void DrawInfoTab() {
     ImGui::InputScalar("Malon Play Day", ImGuiDataType_S32, &gSaveContext.MalonPlayDay);
     UIWidgets::InsertHelpHoverText("The specific date Malon has come out at night");
 
+    ImGui::InputScalar("Malon Ride Day", ImGuiDataType_S32, &gSaveContext.MalonRideDay);
+    UIWidgets::InsertHelpHoverText("The specific date Malon has chosen to ride in the field");
+
     ImGui::InputScalar("Entrance Index", ImGuiDataType_S32, &gSaveContext.entranceIndex);
     UIWidgets::InsertHelpHoverText("From which entrance did Link arrive?");
 

@@ -280,6 +280,7 @@ typedef struct {
     /*        */ s32 SariaDateDay;
     /*        */ s32 RutoDateDay;
     /*        */ s32 MalonPlayDay;
+    /*        */ s32 MalonRideDay;
     /*        */ u8 maxBoosts;
     /*        */ u8 extraMagicPower;
     // #endregion

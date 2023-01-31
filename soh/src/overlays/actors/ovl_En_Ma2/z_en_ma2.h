@@ -3,6 +3,7 @@
 
 #include "ultra64.h"
 #include "global.h"
+#include "src/overlays/actors/ovl_En_Horse/z_en_horse.h"
 
 struct EnMa2;
 
@@ -43,7 +44,7 @@ typedef struct EnMa2 {
     /* 0x020E */ s16 eyeIndex;
     /* 0x0210 */ s16 mouthIndex;
     /* 0x0212 */ Vec3s unk_212[MALON_ADULT_LIMB_MAX];
-    /*        */ s16 rideProgress;
+    /*        */ EnHorse* rideActor;
 } EnMa2; // size = 0x0284
 
 #endif
