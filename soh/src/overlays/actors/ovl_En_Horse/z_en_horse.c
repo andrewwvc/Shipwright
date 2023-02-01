@@ -378,12 +378,24 @@ static RaceWaypoint sIngoRaceWaypoints[] = {
 
 static RaceInfo sIngoRace = { 8, sIngoRaceWaypoints };
 
+const static RaceWaypoint sMalonInitialRideOutWaypoints[] = {
+    { -2232, 319, 6075, 5, 0x5A00 },  { -1880,220, 5940, 7, 0x7000 },  { -400,0, 3000, 7, 0x8000 },
+};
+
+const static RaceInfo sMalonRideOut = { 3, sMalonInitialRideOutWaypoints };
+
 const static RaceWaypoint sMalonRideWaypoints[] = {
     { 200, 1, 2100, 8, 0x4000 },  { 200, 1, 4000, 8, 0x0000 },   { -600, 1, 4500, 8, -0x4000 },
     { -1200, 1, 2600, 8, -0x7000 },     { -600, 1, 2400, 4, 0x5000 },
 };
 
 const static RaceInfo sMalonRide = { 5, sMalonRideWaypoints };
+
+const static RaceWaypoint sMalonTransitionWaypoints1[] = {
+    { -550, 0, 2875, 8, 0x4000 },  { 155,0, 2250, 8, 0x5000 },  { 1370,0, 2180, 8, 0x3000 },
+};
+
+const static RaceInfo sMalonTransition1 = { 3, sMalonTransitionWaypoints1 };
 
 const static RaceWaypoint sMalonRideWaypoints2[] = {
     { 200, 1, 2100, 4, 0x4000 },  { 2500, 1, 4300, 8, 0x0000 },   { 500, 1, 7700, 10, -0x1800 },
@@ -394,8 +406,8 @@ const static RaceWaypoint sMalonRideWaypoints2[] = {
 const static RaceInfo sMalonRide2 = { 8, sMalonRideWaypoints2 };
 static s32 sAnimSoundFrames[] = { 0, 16 };
 
-static RaceInfo* sMalonRoute[] = {&sMalonRide,&sMalonRide2};
-static s16 sMalonRouteNum;
+static RaceInfo* sMalonRoute;//[] = {&sMalonRide,&sMalonRide2};
+//static s16 sMalonRouteNum;
 
 #define MALON_PARAMS 0xB
 
@@ -650,7 +662,17 @@ void EnHorse_UpdateMalonRideInfo(EnHorse* this, PlayState* play, RaceInfo* raceI
     if (((px*(this->actor.world.pos.x-curWaypointPos.x)) + (pz * (this->actor.world.pos.z-curWaypointPos.z))) > 0.0f) {
         this->curRaceWaypoint++;
         if (this->curRaceWaypoint >= raceInfo->numWaypoints) {
-            this->curRaceWaypoint = 0;
+            if (this->raceFlags == -1) {
+                this->raceFlags = 0;
+                sMalonRoute = &sMalonRide;
+                this->curRaceWaypoint = 0;
+            } else if (this->raceFlags == 1) {
+                this->raceFlags = 2;
+                sMalonRoute = &sMalonRide2;
+                this->curRaceWaypoint = 0;
+            } else {
+                this->curRaceWaypoint = 0;
+            }
         }
     }
 
@@ -927,9 +949,13 @@ void EnHorse_Init(Actor* thisx, PlayState* play2) {
         }
         this->stateFlags |= ENHORSE_UNRIDEABLE;
     } else if (this->actor.params == MALON_PARAMS) {
-        if (!(gSaveContext.eventChkInf[2] & 0x0400) || !(gSaveContext.MalonRideDay == gSaveContext.totalDays)) {
+        sMalonRoute = &sMalonRide;
+        if (!(gSaveContext.eventChkInf[2] & 0x0400)) {
             Actor_Kill(&this->actor);
             return;
+        } else if ((gSaveContext.MalonRideDay > gSaveContext.totalDays)) {
+            this->raceFlags = -2;
+            sMalonRoute = &sMalonRideOut;
         }
     }
 
@@ -966,7 +992,6 @@ void EnHorse_Init(Actor* thisx, PlayState* play2) {
     } else if (play->sceneNum == SCENE_SPOT20 && !Flags_GetEventChkInf(0x18) && !DREG(1)) {
         EnHorse_InitFleePlayer(this);
     } else if (this->actor.params == MALON_PARAMS) {
-        sMalonRouteNum = 0;
         EnHorse_InitMalonHorse(this);
         this->rider =
             Actor_Spawn(&play->actorCtx, play, ACTOR_EN_MA2, this->actor.world.pos.x, this->actor.world.pos.y,
@@ -2218,12 +2243,34 @@ void EnHorse_UpdateMalonRide(EnHorse* this, PlayState* play) {
     }
     Player* player = GET_PLAYER(play);
 
-    if (this->raceFlags == 0 && !this->delayTimer && this->actor.xzDistToPlayer < 200.0f) {
+    if (this->raceFlags == -2) {
+        if (gSaveContext.totalDays == gSaveContext.MalonRideDay) {
+            this->actor.world.pos.x = sMalonRideOut.waypoints[0].x;
+            this->actor.world.pos.y = sMalonRideOut.waypoints[0].y;
+            this->actor.world.pos.z = sMalonRideOut.waypoints[0].z;
+            this->lastPos = this->actor.world.pos;
+            this->actor.world.rot.y = this->actor.shape.rot.y = sMalonRideOut.waypoints[0].angle;
+            this->raceFlags = -1;
+            sMalonRoute = &sMalonRideOut;
+            this->curRaceWaypoint = 1;
+        } else {
+            this->actor.world.pos.x = -2800.0f;
+            this->actor.world.pos.y = -1000.0f;
+            this->actor.world.pos.z = 7250.0f;
+            this->actor.prevPos = this->actor.world.pos;
+            this->yFront = this->actor.world.pos.y;
+            this->yBack = this->actor.world.pos.y;
+            this->lastPos = this->actor.world.pos;
+            return;
+        }
+    } else if (this->raceFlags == -1) {
+
+    } else if (this->raceFlags == 0 && !this->delayTimer && this->actor.xzDistToPlayer < 200.0f) {
         if (player->stateFlags1 & PLAYER_STATE1_23) {
             Message_StartTextbox(play, RanchMsg+6, NULL);
-            this->raceFlags++;
-            sMalonRouteNum = 1;
-            this->curRaceWaypoint = 0;
+            this->raceFlags = 1;
+            sMalonRoute = &sMalonTransition1;
+            this->curRaceWaypoint = 1;
         } else {
             Message_StartTextbox(play, RanchMsg+7, NULL);
             this->delayTimer = 120;
@@ -2232,7 +2279,7 @@ void EnHorse_UpdateMalonRide(EnHorse* this, PlayState* play) {
 
     DECR(this->delayTimer);
 
-    EnHorse_UpdateMalonRideInfo(this, play, sMalonRoute[sMalonRouteNum]);
+    EnHorse_UpdateMalonRideInfo(this, play, sMalonRoute);
     if (this->animationIdx == ENHORSE_ANIM_WALK) {
         playSpeed = this->actor.speedXZ * 0.5f;
     } else if (this->animationIdx == ENHORSE_ANIM_TROT) {

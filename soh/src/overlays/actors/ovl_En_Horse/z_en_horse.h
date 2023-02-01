@@ -142,7 +142,7 @@ typedef struct EnHorse {
     /* 0x0388 */ s32 inRace;
     /* 0x038C */ Actor* rider;
     /* 0x0390 */ u32 unk_390;
-    /* 0x0394 */ u16 raceFlags;
+    /* 0x0394 */ s16 raceFlags;
     /* 0x0398 */ f32 ingoHorseMaxSpeed;
     /*        */ s16 delayTimer;
     // } race; //?

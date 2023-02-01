@@ -135,8 +135,10 @@ s16 func_80AA2BD4(PlayState* play, Actor* thisx) {
                     if (play->msgCtx.choiceIndex == 0) {
                         gSaveContext.eventChkInf[2] |=  0x0400;
                         gSaveContext.MalonRideDay = gSaveContext.totalDays+1;
+                        Message_ContinueTextbox(play, RanchMsg+9);
                     } else {
                         gSaveContext.MalonRideDay = gSaveContext.totalDays+1;
+                        Message_ContinueTextbox(play, RanchMsg+10);
                     }
                 } else {
                     gSaveContext.infTable[11] |= 0x200;

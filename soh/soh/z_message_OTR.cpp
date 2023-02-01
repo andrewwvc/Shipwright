@@ -1001,6 +1001,8 @@ extern "C" void OTRMessage_Init()
     MakeNormalMsgEng(RanchMsg+6, "\x08Hey! Let's set off.&Try following me.\016<\x02");
     MakeNormalMsgEng(RanchMsg+7, "\x08Oh, I see Epona isn't&with you yet!\016<\x02");
     MakeNormalMsgEng(RanchMsg+8, "You seem to really have a knack&for understanding horses.^Hey, fairy boy, remember the times&when we used to stay up all&night and play around the ranch?^It barely feels that long ago,&doesn't it?^Say, why don't you come&riding with me sometime?^You up for it?&\x1B&%gYes&Sorry, I'm busy.%w\x02");
+    MakeNormalMsgEng(RanchMsg+9, "Great, I'll see you tomorrow,&just outside the ranch.&Make sure to take Epona.");
+    MakeNormalMsgEng(RanchMsg+10, "Oh, alright.^I guess maybe we could&try for next week then.");
 
     u16 ZoraMsg = TextIDAllocator::Instance->allocateRange("zora", 30);
 

@@ -152,7 +152,10 @@ u16 func_80AA1B58(EnMa2* this, PlayState* play) {
     }
     if (!(gSaveContext.eventChkInf[1] & 0x100) && (play->sceneNum == SCENE_SPOT20) && IS_NIGHT &&
         (this->actor.shape.rot.z == 6)) {
-        return 2;
+        if ((gSaveContext.eventChkInf[2] & 0x0400) && gSaveContext.MalonRideDay == gSaveContext.totalDays)//Prevent Malon from appearing in this form at night if she's out riding
+            return 0;
+        else
+            return 2;
     }
     if (!(gSaveContext.eventChkInf[1] & 0x100) || (play->sceneNum != SCENE_SPOT20)) {
         return 0;
@@ -161,7 +164,10 @@ u16 func_80AA1B58(EnMa2* this, PlayState* play) {
         return 3;
     }
     if ((this->actor.shape.rot.z == 8) && IS_NIGHT) {
-        return 3;
+        if ((gSaveContext.eventChkInf[2] & 0x0400) && gSaveContext.MalonRideDay == gSaveContext.totalDays)//Prevent Malon from appearing in this form at night if she's out riding
+            return 0;
+        else
+            return 3;
     }
     return 0;
 }
