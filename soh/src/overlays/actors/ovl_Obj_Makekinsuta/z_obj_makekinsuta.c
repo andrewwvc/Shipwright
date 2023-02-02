@@ -55,6 +55,7 @@ void ObjMakekinsuta_Init(Actor* thisx, PlayState* play) {
     } else if (this->actor.home.rot.z == 2) {
         this->actionFunc = ObjMakekinsuta_WaitForHammer;
     } else if (this->actor.home.rot.z == 3) {
+        this->actor.flags |= (ACTOR_FLAG_0 | ACTOR_FLAG_27);
         this->actionFunc = ObjMakekinsuta_WaitForBoulder;
     } else {
         this->actionFunc = ObjMakekinsuta_DoNothing;
@@ -92,6 +93,7 @@ void ObjMakekinsuta_WaitForBoulder(ObjMakekinsuta* this, PlayState* play) {
         Actor_Spawn(&play->actorCtx,play, ACTOR_EN_ITEM00,this->actor.world.pos.x,this->actor.world.pos.y,this->actor.world.pos.z, 0,0,0, (this->actor.params<<8)+ITEM00_HEART_PIECE, false);
         func_8002F7DC(&this->actor,NA_SE_SY_CORRECT_CHIME);
         EnGoroiwa_Annihilate((EnGoroiwa*)boulder, play);
+        this->actor.flags &= ~(ACTOR_FLAG_0 | ACTOR_FLAG_27);
         this->actionFunc = ObjMakekinsuta_DoNothing;
     }
 }
