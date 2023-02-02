@@ -349,6 +349,7 @@ void EnItem00_Init(Actor* thisx, PlayState* play) {
     s32 getItemId = GI_NONE;
     this->randoGiEntry = (GetItemEntry)GET_ITEM_NONE;
     s16 spawnParam8000 = this->actor.params & 0x8000;
+    s16 spawnParam4000 = this->actor.params & 0x4000;
     s32 pad1;
 
     this->ogParams = this->actor.params;
@@ -380,6 +381,10 @@ void EnItem00_Init(Actor* thisx, PlayState* play) {
             this->unk_158 = 0;
             if (play->sceneNum == 0x3E && play->roomCtx.curRoom.num == 0x07) {
                 this->actor.flags |= ACTOR_FLAG_7;
+            }
+            if (spawnParam4000) {
+                Actor_SetScale(&this->actor, 0.00f);
+                //this->scale = 0.00f;
             }
             break;
         case ITEM00_HEART:
@@ -1052,7 +1057,8 @@ void EnItem00_Draw(Actor* thisx, PlayState* play) {
                 }
             case ITEM00_HEART_PIECE:
                 if (CVar_GetS32("gNewDrops", 0) && !gSaveContext.n64ddFlag) {
-                    Actor_SetScale(&this->actor, 0.5f);
+                    if (!(this->ogParams & 0x4000))
+                        Actor_SetScale(&this->actor, 0.5f);
                     this->scale = 0.5f;
                     this->actor.shape.yOffset = 50.0f;
                     this->actor.world.rot.x = 0x4000;
@@ -1061,7 +1067,8 @@ void EnItem00_Draw(Actor* thisx, PlayState* play) {
                 } else {
                     this->actor.shape.yOffset = 650.0f;
                     this->actor.shape.shadowScale = 0.03f;
-                    Actor_SetScale(&this->actor, 0.02f);
+                    if (!(this->ogParams & 0x4000))
+                        Actor_SetScale(&this->actor, 0.02f);
                     this->scale = 0.02f;
                     EnItem00_DrawHeartPiece(this, play);
                 }

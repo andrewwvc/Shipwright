@@ -305,8 +305,8 @@ void BossGanondrof_Init(Actor* thisx, PlayState* play) {
         Actor_Kill(&this->actor);
         Actor_Spawn(&play->actorCtx, play, ACTOR_DOOR_WARP1, GND_BOSSROOM_CENTER_X, GND_BOSSROOM_CENTER_Y,
                     GND_BOSSROOM_CENTER_Z, 0, 0, 0, WARP_DUNGEON_ADULT, true);
-        Actor_Spawn(&play->actorCtx, play, ACTOR_ITEM_B_HEART, 200.0f + GND_BOSSROOM_CENTER_X,
-                    GND_BOSSROOM_CENTER_Y, GND_BOSSROOM_CENTER_Z, 0, 0, 0, 0, true);
+        Actor_Spawn(&play->actorCtx, play, ACTOR_EN_ITEM00, 200.0f + GND_BOSSROOM_CENTER_X,
+                    GND_BOSSROOM_CENTER_Y, GND_BOSSROOM_CENTER_Z, 0, 0, 0, 0x1F00+(uint16_t)ITEM00_HEART_PIECE, true);
     } else {
         Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, ACTOR_EN_FHG, this->actor.world.pos.x,
                            this->actor.world.pos.y, this->actor.world.pos.z, 0, 0, 0, this->actor.params);
@@ -1139,8 +1139,8 @@ void BossGanondrof_Death(BossGanondrof* this, PlayState* play) {
                 this->deathCamera = 0;
                 func_80064534(play, &play->csCtx);
                 func_8002DF54(play, &this->actor, 7);
-                Actor_Spawn(&play->actorCtx, play, ACTOR_ITEM_B_HEART, GND_BOSSROOM_CENTER_X,
-                            GND_BOSSROOM_CENTER_Y, GND_BOSSROOM_CENTER_Z + 200.0f, 0, 0, 0, 0, true);
+                Actor_Spawn(&play->actorCtx, play, ACTOR_EN_ITEM00, GND_BOSSROOM_CENTER_X,
+                            GND_BOSSROOM_CENTER_Y, GND_BOSSROOM_CENTER_Z + 200.0f, 0, 0, 0, 0x4000+0x1F00+(uint16_t)ITEM00_HEART_PIECE, true);
                 this->actor.child = &horse->actor;
                 this->killActor = true;
                 horse->killActor = true;

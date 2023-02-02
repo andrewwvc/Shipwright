@@ -363,7 +363,7 @@ void BossGoma_Init(Actor* thisx, PlayState* play) {
         Actor_Kill(&this->actor);
         Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, ACTOR_DOOR_WARP1, 0.0f, -640.0f, 0.0f, 0, 0,
                            0, WARP_DUNGEON_CHILD);
-        Actor_Spawn(&play->actorCtx, play, ACTOR_ITEM_B_HEART, 141.0f, -640.0f, -84.0f, 0, 0, 0, 0, true);
+        Actor_Spawn(&play->actorCtx, play, ACTOR_EN_ITEM00, 141.0f, -640.0f, -84.0f, 0, 0, 0, 0x1F00+(uint16_t)ITEM00_HEART_PIECE, true);
     }
 }
 
@@ -1125,8 +1125,8 @@ void BossGoma_Defeated(BossGoma* this, PlayState* play) {
                 this->timer = 70;
                 this->decayingProgress = 0;
                 this->subCameraFollowSpeed = 0.0f;
-                Actor_Spawn(&play->actorCtx, play, ACTOR_ITEM_B_HEART, this->actor.world.pos.x,
-                            this->actor.world.pos.y, this->actor.world.pos.z, 0, 0, 0, 0, true);
+                Actor_Spawn(&play->actorCtx, play, ACTOR_EN_ITEM00, this->actor.world.pos.x,
+                            this->actor.world.pos.y, this->actor.world.pos.z, 0, 0, 0, 0x4000+0x1F00+(uint16_t)ITEM00_HEART_PIECE, true);
             }
             break;
 

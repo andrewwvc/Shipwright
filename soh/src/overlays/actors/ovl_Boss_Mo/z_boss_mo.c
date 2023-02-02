@@ -364,7 +364,7 @@ void BossMo_Init(Actor* thisx, PlayState* play2) {
             Actor_Kill(&this->actor);
             Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, ACTOR_DOOR_WARP1, 0.0f, -280.0f, 0.0f, 0,
                                0, 0, WARP_DUNGEON_ADULT);
-            Actor_Spawn(&play->actorCtx, play, ACTOR_ITEM_B_HEART, -200.0f, -280.0f, 0.0f, 0, 0, 0, 0, true);
+            Actor_Spawn(&play->actorCtx, play, ACTOR_EN_ITEM00, -200.0f, -280.0f, 0.0f, 0, 0, 0, 0x1F00+(uint16_t)ITEM00_HEART_PIECE, true);
             play->roomCtx.unk_74[0] = 0xFF;
             MO_WATER_LEVEL(play) = -500;
             return;
@@ -1111,8 +1111,8 @@ void BossMo_Tentacle(BossMo* this, PlayState* play) {
                     Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, ACTOR_DOOR_WARP1,
                                        this->actor.world.pos.x, -280.0f, this->actor.world.pos.z, 0, 0, 0,
                                        WARP_DUNGEON_ADULT);
-                    Actor_Spawn(&play->actorCtx, play, ACTOR_ITEM_B_HEART, this->actor.world.pos.x + 200.0f,
-                                -280.0f, this->actor.world.pos.z, 0, 0, 0, 0, true);
+                    Actor_Spawn(&play->actorCtx, play, ACTOR_EN_ITEM00, this->actor.world.pos.x + 200.0f,
+                                -280.0f, this->actor.world.pos.z, 0, 0, 0, 0x4000+0x1F00+(uint16_t)ITEM00_HEART_PIECE, true);
                     Audio_QueueSeqCmd(SEQ_PLAYER_BGM_MAIN << 24 | NA_BGM_BOSS_CLEAR);
                     Flags_SetClear(play, play->roomCtx.curRoom.num);
                 }

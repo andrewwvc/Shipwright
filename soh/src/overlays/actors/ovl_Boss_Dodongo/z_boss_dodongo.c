@@ -229,7 +229,7 @@ void BossDodongo_Init(Actor* thisx, PlayState* play) {
         Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, ACTOR_DOOR_WARP1, -890.0f, -1523.76f,
                            -3304.0f, 0, 0, 0, WARP_DUNGEON_CHILD);
         Actor_Spawn(&play->actorCtx, play, ACTOR_BG_BREAKWALL, -890.0f, -1523.76f, -3304.0f, 0, 0, 0, 0x6000, true);
-        Actor_Spawn(&play->actorCtx, play, ACTOR_ITEM_B_HEART, -690.0f, -1523.76f, -3304.0f, 0, 0, 0, 0, true);
+        Actor_Spawn(&play->actorCtx, play, ACTOR_EN_ITEM00, -690.0f, -1523.76f, -3304.0f, 0, 0, 0, 0x1F00+(uint16_t)ITEM00_HEART_PIECE, true);
 
         for (i = 0; i < 2048; i++) {
             temp_v0 = i;
@@ -1618,10 +1618,10 @@ void BossDodongo_DeathCutscene(BossDodongo* this, PlayState* play) {
 
             if (this->unk_1DA == 820) {
                 Audio_QueueSeqCmd(SEQ_PLAYER_BGM_MAIN << 24 | NA_BGM_BOSS_CLEAR);
-                Actor_Spawn(&play->actorCtx, play, ACTOR_ITEM_B_HEART,
+                Actor_Spawn(&play->actorCtx, play, ACTOR_EN_ITEM00,
                             Math_SinS(this->actor.shape.rot.y) * -50.0f + this->actor.world.pos.x,
                             this->actor.world.pos.y,
-                            Math_CosS(this->actor.shape.rot.y) * -50.0f + this->actor.world.pos.z, 0, 0, 0, 0, true);
+                            Math_CosS(this->actor.shape.rot.y) * -50.0f + this->actor.world.pos.z, 0, 0, 0, 0x4000+0x1F00+(uint16_t)ITEM00_HEART_PIECE, true);
             }
             if (this->unk_1DA == 600) {
                 camera = Play_GetCamera(play, MAIN_CAM);
