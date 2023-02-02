@@ -179,6 +179,9 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, Ship::ActorSp
         { 0x00, {
             { -1, -1, { ACTOR_BG_JYA_KANAAMI, -382,200,115, 0,-0x4000,0, 0x0 }},
             { -1, -1, { ACTOR_EN_A_OBJ, -430,415,0, 0,-0x4000,0, 0x8 }},
+            { -1, -1, { ACTOR_EN_A_OBJ, -510,415,0, 0,-0x4000,0, 0x8 }},
+            { -1, -1, { ACTOR_EN_A_OBJ, -590,415,0, 0,-0x4000,0, 0x8 }},
+            { -1, -1, { ACTOR_EN_ITEM00, -590,495,0, 0,0,0, 0x400+(uint16_t)ITEM00_HEART_PIECE  }},
         } },
         { 0x02, {
             { 0, -1,  {ACTOR_EN_MA1, 1556,164,-160, 0,0,0, 0x0}}, { 1, -1,  {ACTOR_EN_MA1, 1556,164,-160, 0,0,0, 0x0}},
