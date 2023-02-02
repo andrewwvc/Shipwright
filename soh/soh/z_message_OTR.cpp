@@ -299,11 +299,12 @@ extern "C" void OTRMessage_Init()
     MakeBlueMsgEng(0x420, "They say that Dampe, the gravekeeper,&has a reward reserved for those&with very impresive speed.^However, he unlikely&to relinquish anything until&he gives up the ghost.");//Deku Tree
     MakeBlueMsgEng(StoneMsg+0,"There may be something special&behind falls that are %rnot%w water...");
     MakeBlueMsgEng(StoneMsg+2,"They say that many people&would like Hyrule Field to&be cleared of Peahats.");
-    //MakeBlueMsgEng(StoneMsg+8, "They say that one part of&the secret directions&to a lost place is:^South&North&West&West");
+    MakeBlueMsgEng(StoneMsg+8, "They say that dungeons may&have hidden areas that are&not even marked on any map.");
+    MakeBlueMsgEng(StoneMsg+9,"They say that a level of&tension resides between the&various races in Hyrule.^The use of masks may be&the key to allow one to&better understand this.");
     MakeBlueMsgEng(StoneMsg+12, "They say that certain items, when&they are used together, may be&able to combine their abilities.^So it may pay to experiemnt&with methods of pairing things!");
     MakeBlueMsgEng(StoneMsg+20, "They say that certain shops&may be doing business&at hours that they&advertise as being closed.");
     MakeBlueMsgEng(StoneMsg+23, "They say there is a secret&that most cannot see,&in a place where&fairies no longer live.");
-    (*textIDSubstitutionTable)[StoneMsg+8] = 0x413;//Previous dungeons
+   // (*textIDSubstitutionTable)[StoneMsg+8] = 0x413;//Previous dungeons
     (*textIDSubstitutionTable)[StoneMsg+26] = 0x405;
     (*textIDSubstitutionTable)[0x041F] = 0x420;
     //MakeBlueMsgEng(StoneMsg+26, );//Mountain Crater Grotto
@@ -971,7 +972,7 @@ extern "C" void OTRMessage_Init()
     MakeNormalMsgEng(GoronMsg+22, "Big brother is both courteous and&tough. He tries to avoid hitting&anyone if he can help it,^and is barely phased by the&explosions of our special crop anymore.^I hear he still dislikes being&hit by them though.");
     MakeNormalMsgEng(GoronMsg+23, "Oh, I give up,&I might as well ask you&to pawn this off for me.^I'll take %g200 rupees%w for it.&\x1B&%gYes&No%w\x02");
     MakeNormalMsgEng(GoronMsg+24, "Ah, I like it here.&It's so peaceful and quiet.^You know, I think it's&about time I went shopping again.^I remember the last time I went,&and hope it goes better this time.^Should I try again?&\x1B&%gYes&No%w\x02");
-    MakeNormalMsgEng(GoronMsg+25, "Oh, I can't believe they&kicked me out!^There was someone else there&rolling around my usual spot.^Reminded me of myself&when I was younger too.^Anyway, since nobody wants&me there now, I guess&I'll be heading off.");
+    MakeNormalMsgEng(GoronMsg+25, "Oh, I can't believe it.^There was someone else there&rolling around my usual spot.^Reminded me of myself&when I was younger too.^I don't understand,&but the least I can do&is stay out here instead^to watch out for&anyone who might try to&imprison our tribe again.");
     MakeNormalMsgEng(GoronMsg+26, "Aww, too bad.");
     MakeNormalMsgEng(GoronMsg+27, "What, you don't have enough either?");
     MakeNormalMsgEng(GoronMsg+28, "We have a deal then.\x0B\x02");
@@ -987,8 +988,18 @@ extern "C" void OTRMessage_Init()
     MakeNormalMsgEng(HylianMsg+0, "Oh, so I guess you're here&for the night trade then.^We normally don't let&kids get involved, but&you seem savy enough.");
     MakeNormalMsgEng(HylianMsg+1, "Here's our special night offers.\x0B\x02");
     MakeNormalMsgEng(HylianMsg+2, "I don't typically take&guests during the day.^That's why I lock my door,&as you'd know.^If you have business here,&please let that be known&ahead of time.");
-    MakeNormalMsgEng(0xF000, "\x08%rPiece of Heart   200 Rupees%w&Adds a quarter of a section&to your heart container.&4 together will improve your life!\t\n\x02")
-    MakeNormalMsgEng(0xF001, "\x08Piece of Heart   200 Rupees&\x09\x1B&%gBuy&Don't buy%w\x02")
+    MakeNormalMsgEng(HylianMsg+3, "You know, I heard there's some&shady business going on in&some of the shops around here.^Apparantly there are secret deals&being done on luxury items that&aren't being offered to the public.");
+    MakeNormalMsgEng(HylianMsg+4, "And how would this guy know&about what he's telling me?^He thinks he's got the&dirt on everything.");
+    MakeNormalMsgEng(HylianMsg+5, "You know, I heard that the&folks at Lon Lon Ranch are&having trouble getting enough milk.^Apparantly, they don't have&enough cows themselves to&provide enough supply.");
+    MakeNormalMsgEng(HylianMsg+6, "I would help them, but&I can't make any milk myself!");
+    MakeNormalMsgEng(HylianMsg+7, "Now there, surely there's something&they could each be used for, otherwise&why would people borrow&them in the first place?");
+    MakeNormalMsgEng(HylianMsg+8, "Useless, they're useless I tell you.^There's no way even half&the masks that the mask&shop offers have any use at all.^They are just children's toys.");
+    MakeNormalMsgEng(HylianMsg+9, "I'm not saying that&there MUST BE one.^I'm mearly pointing out that we&cannot rule out the possible existence&of an invisible talking chicken.^There could be one somewhere&for all we know.");
+    MakeNormalMsgEng(HylianMsg+10, "I can't believe&what this guy is saying.^He believes that there is&an invisible, talking chicken!&Absurd.");
+    MakeNormalMsgEng(HylianMsg+11, "You know, I heard that the&girl with the red hair from&the ranch is a terrible sleeper.");
+    MakeNormalMsgEng(HylianMsg+12, "I also heard.^When she stayed at the inn,&she kept me up all&night with her singing!");
+    MakeNormalMsgEng(0xF000, "\x08%rPiece of Heart   200 Rupees%w&Adds a quarter of a section&to your heart container.&4 together will improve your life!\t\n\x02");
+    MakeNormalMsgEng(0xF001, "\x08Piece of Heart   200 Rupees&\x09\x1B&%gBuy&Don't buy%w\x02");
 
     u16 RanchMsg = TextIDAllocator::Instance->allocateRange("ranch", 20);
 
@@ -1006,7 +1017,7 @@ extern "C" void OTRMessage_Init()
 
     u16 ZoraMsg = TextIDAllocator::Instance->allocateRange("zora", 30);
 
-    MakeNormalMsgEng(0x402D, "Hey you know, ever since Ruto&returned, all she ever talks about&is the new boy she likes.");
+    MakeNormalMsgEng(0x402D, "Hey you know, ever since Ruto&returned, all she ever talks about&is the new boy she likes.^It's a bit worrying, honestly.");
     MakeNormalMsgEng(ZoraMsg+0, "Wow! I never suspected that&anyone who was not a&Zora could dive like that!^You cannot refuse this token&of my awe!\x0B\x02");
     MakeNormalMsgEng(ZoraMsg+1, "Oh, you do know a boy was&seen hanging around this domain&on the day Ruto snuck away again.^Surely you understand why people&are...suspecting things?");
     MakeNormalMsgEng(ZoraMsg+2, "Oh, you do know a boy was&seen hanging around the&shores of Lake Hylia&on the day Ruto snuck away again.^Surely you understand why people&are...suspecting things?");
@@ -1026,6 +1037,8 @@ extern "C" void OTRMessage_Init()
     MakeNormalMsgEng(ZoraMsg+16, "Well...she is very pretty&isn't she?^You wouldn't have&any pictures of her,&now would you?^I'd promise to not show&them to anyone else.");
     MakeNormalMsgEng(ZoraMsg+17, "I heard the boy Ruto met&was acting very strange&when she showed up.^Like he wouldn't even talk&to her even after she'd&greeted him.^Creepy.");
     MakeNormalMsgEng(ZoraMsg+18, "Ruto sure is a strange&and wild girl.^And some days she's even stranger&and wilder than usual.^It's unfitting for a princess,&but I guess girls her&age will be that way.");
+    MakeNormalMsgEng(ZoraMsg+19, "The water that comes directly from&Zora's Fountain is incredibly fresh.^As long as there's nothing tainting it,&it should be the purest water&in all the land.");
+    MakeNormalMsgEng(ZoraMsg+20, "Apparantly, we Zoras have an&affinity for the Moon unique&to all the races in Hyrule.^I can't say I feel much for it&myself though, even if others might.");
 
     u16 RutoMsg = TextIDAllocator::Instance->allocateRange("ruto", 30);
 
