@@ -994,8 +994,8 @@ extern "C" void OTRMessage_Init()
     MakeNormalMsgEng(HylianMsg+6, "I would help them, but&I can't make any milk myself!");
     MakeNormalMsgEng(HylianMsg+7, "Now there, surely there's something&they could each be used for, otherwise&why would people borrow&them in the first place?");
     MakeNormalMsgEng(HylianMsg+8, "Useless, they're useless I tell you.^There's no way even half&the masks that the mask&shop offers have any use at all.^They are just children's toys.");
-    MakeNormalMsgEng(HylianMsg+9, "I'm not saying that&there MUST BE one.^I'm mearly pointing out that we&cannot rule out the possible existence&of an invisible talking chicken.^There could be one somewhere&for all we know.");
-    MakeNormalMsgEng(HylianMsg+10, "I can't believe&what this guy is saying.^He believes that there is&an invisible, talking chicken!&Absurd.");
+    MakeNormalMsgEng(HylianMsg+9, "I'm not saying that&there MUST BE one.^I'm mearly pointing out that we&cannot rule out the possible existence&of an invisible talking cucco.^There could be one somewhere&for all we know.");
+    MakeNormalMsgEng(HylianMsg+10, "I can't believe&what this guy is saying.^He believes that there is&an invisible, talking cucco!&Absurd.");
     MakeNormalMsgEng(HylianMsg+11, "You know, I heard that the&girl with the red hair from&the ranch is a terrible sleeper.");
     MakeNormalMsgEng(HylianMsg+12, "I also heard.^When she stayed at the inn,&she kept me up all&night with her singing!");
     MakeNormalMsgEng(0xF000, "\x08%rPiece of Heart   200 Rupees%w&Adds a quarter of a section&to your heart container.&4 together will improve your life!\t\n\x02");
@@ -1078,7 +1078,9 @@ extern "C" void OTRMessage_Init()
     u16 MiscMsg = TextIDAllocator::Instance->allocateRange("misc", 20);
     MakeNormalMsgEng(MiscMsg+0, "Mooooo! I feel really great&like I'm about to produce&something amazing!&Hang on!\x0B\x02");
     MakeNormalMsgEng(MiscMsg+1, "Hey did you see the large&Goron that just zoomed past?&Anyway, I still must say.&The current time is \x1F.");
+    MakeNormalMsgEng(MiscMsg+2, "WHAT!?^You can actually see&and hear me, can't you?^It is of no concern to&me how you may be able to&pull off such a feat, but alas,^all I can do is bestow&apon you a fitting enough trinket,&such that you JUST BUZZ OFF&and leave me alone.");
+    MakeNormalMsgEng(MiscMsg+3, "I do believe I&told you to SCRAM.");
 
     u16 GerudoMsg = TextIDAllocator::Instance->allocateRange("gerudo", 10);
-    MakeNormalMsgEng(GerudoMsg+0, "Heh, since you're clearly a master,&try for a perfect score of %r2000%w,&if you can!\x0B\x02");
+    MakeNormalMsgEng(GerudoMsg+0, "Heh, since you're clearly a master,&the only thing left is&to try for a perfect score,&if you can!\x0B\x02");
 }

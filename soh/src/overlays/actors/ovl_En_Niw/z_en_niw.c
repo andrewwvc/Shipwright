@@ -32,6 +32,7 @@ void func_80AB714C(EnNiw* this, PlayState* play);
 void func_80AB7204(EnNiw* this, PlayState* play);
 void func_80AB7290(EnNiw* this, PlayState* play);
 void func_80AB7328(EnNiw* this, PlayState* play);
+void EnNiw_BeTalking(EnNiw* this, PlayState* play);
 void EnNiw_FeatherSpawn(EnNiw* this, Vec3f* pos, Vec3f* vel, Vec3f* accel, f32 scale);
 void EnNiw_FeatherUpdate(EnNiw* this, PlayState* play);
 void EnNiw_FeatherDraw(EnNiw* this, PlayState* play);
@@ -415,6 +416,12 @@ void EnNiw_ResetAction(EnNiw* this, PlayState* play) {
             break;
         case 0xD:
             this->actionFunc = func_80AB6324;
+            break;
+        case 0x10:
+            Actor_ChangeCategory(play, &play->actorCtx, &this->actor, ACTORCAT_NPC);
+            this->actor.flags |= (ACTOR_FLAG_0 | ACTOR_FLAG_3 | ACTOR_FLAG_5 | ACTOR_FLAG_7 | ACTOR_FLAG_27);
+            this->path = 1;
+            this->actionFunc = EnNiw_BeTalking;
             break;
         default:
             this->actionFunc = func_80AB6570;
@@ -875,6 +882,65 @@ void func_80AB747C(EnNiw* this, PlayState* play) {
     }
 }
 
+u16 EnNiw_ProvideText(PlayState* play, Actor* thisx) {
+    u16 MiscMsg = GetTextID("misc");
+    if (gSaveContext.infTable[29] & 0x8000) {
+        thisx->textId = MiscMsg+3;
+    } else {
+        thisx->textId = MiscMsg+2;
+    }
+
+    return thisx->textId;
+}
+
+s16 EnNiw_GiveItem(EnNiw* this, PlayState* play) {
+    if (Actor_HasParent(&this->actor, play)) {
+        this->actor.parent = NULL;
+        this->actionFunc = EnNiw_BeTalking;
+        gSaveContext.infTable[29] |= 0x8000;
+    } else {
+        func_8002F434(this, play, GI_HEART_PIECE, 250.0f, 250.0f);
+    }
+}
+
+s16 EnNiw_ProcessTalk(PlayState* play, Actor* thisx) {
+    EnNiw* this = (EnNiw*)thisx;
+    u16 MiscMsg = GetTextID("misc");
+
+    switch (Message_GetState(&play->msgCtx)) {
+        case TEXT_STATE_CLOSING:
+        case TEXT_STATE_NONE:
+        case TEXT_STATE_DONE_HAS_NEXT:
+        case TEXT_STATE_DONE_FADING:
+            break;
+        case TEXT_STATE_CHOICE:
+        case TEXT_STATE_EVENT:
+        case TEXT_STATE_DONE:
+            if (Message_ShouldAdvance(play)) {
+                if (thisx->textId == MiscMsg+2) {
+                    gSaveContext.infTable[29] |= 0x8000;
+                    func_8002F434(this, play, GI_HEART_PIECE, 250.0f, 250.0f);
+                    this->actionFunc = EnNiw_GiveItem;
+                }
+                Message_CloseTextbox(play);
+                return 0;
+            }
+        case TEXT_STATE_SONG_DEMO_DONE:
+        case TEXT_STATE_9:
+            break;
+    }
+    return 1;
+}
+
+void EnNiw_BeTalking(EnNiw* this, PlayState* play) {
+    if (this->path > 0 && play->actorCtx.lensActive)
+        this->path = 0;
+        func_800343CC(play, &this->actor, &this->path, (f32)this->collider.dim.radius + 70.0f,
+                        EnNiw_ProvideText, EnNiw_ProcessTalk);
+    if (Message_GetState(&play->msgCtx) == TEXT_STATE_NONE)
+        this->path = 1;
+}
+
 void EnNiw_Update(Actor* thisx, PlayState* play) {
     s32 pad1;
     EnNiw* this = (EnNiw*)thisx;
@@ -1033,7 +1099,7 @@ void EnNiw_Update(Actor* thisx, PlayState* play) {
     }
 
     if (thisx->bgCheckFlags & 0x20 && thisx->yDistToWater > 15.0f && this->actionFunc != func_80AB6F04 &&
-        thisx->params != 0xD && thisx->params != 0xE && thisx->params != 0xA) {
+        thisx->params != 0xD && thisx->params != 0xE && thisx->params != 0xA && thisx->params != 0x10) {
         thisx->velocity.y = 0.0f;
         thisx->gravity = 0.0f;
         Math_Vec3f_Copy(&pos, &thisx->world.pos);
@@ -1048,7 +1114,7 @@ void EnNiw_Update(Actor* thisx, PlayState* play) {
         return;
     }
 
-    if (D_80AB85E0 == 0 && this->unk_2A4 <= 0 && thisx->params != 0xD && thisx->params != 0xE && thisx->params != 0xA) {
+    if (D_80AB85E0 == 0 && this->unk_2A4 <= 0 && thisx->params != 0xD && thisx->params != 0xE && thisx->params != 0xA && thisx->params != 0x10) {
         this->timer6 = 100;
 
         if (thisx->xzDistToPlayer > 10.0f) {
@@ -1083,7 +1149,7 @@ void EnNiw_Update(Actor* thisx, PlayState* play) {
         this->sfxTimer2 = 7;
         Audio_PlayActorSound2(&this->actor, NA_SE_EN_DEKU_WAKEUP);
     }
-    if (this->sfxTimer1 == 0) {
+    if (this->sfxTimer1 == 0 && this->actionFunc != EnNiw_BeTalking) {
         if (this->actionFunc != func_80AB6570) {
             this->sfxTimer1 = 30;
             Audio_PlayActorSound2(&this->actor, NA_SE_EV_CHICKEN_CRY_A);
