@@ -263,7 +263,7 @@ extern "C" void OTRMessage_Init()
         questMessageTableID, WonderMsg+0x3F,
         {
           TEXTBOX_TYPE_BLUE, TEXTBOX_POS_MIDDLE,
-          "History of Hyrule's days.^In this land, each day,&with its characteristic Moon,&has a unique reason and purpose&for the people living under its sky.^The first day, with the biggest&and brightest Moon, is a&day of beginnings,&love and renewal.^The second, the day of&the golden Moon, is a day of&industriousness and seriousness of work.^The third, the day of Moonfire,&is a day for testing and&understanding oneself.",
+          "History of Hyrule's days.^In this land, each day,&with its characteristic Moon,&has a unique reason and purpose&for the people living under its sky.^The first day, with the biggest&and brightest Moon, is a&day of beginnings,&love and renewal.^The second, the day of the&Golden Moon, is a day of industry&and seriousness of work.^The third, the day of Moonfire,&is a day of the markets.^Many are filled with wonder at&the kinds of things that&this day brings.",
           "",
           "",
         }
@@ -273,7 +273,7 @@ extern "C" void OTRMessage_Init()
         questMessageTableID, WonderMsg+0x40,
         {
           TEXTBOX_TYPE_BLUE, TEXTBOX_POS_MIDDLE,
-          "The fourth day, the darkest day,&is a day of the markets, and also one that brings mystery.^Many are filled with wonder at&the kinds of things that&tend to be brought by this day.^The fifth, a day loved&by the multitudes, is a day of&festivity and celabration.^And finally the sixth,&the day of rest, one even&more loved by some.",
+          "The fourth day, the darkest&night, a day for testing&and understanding oneself, and&also one that brings mystery.^The fifth, a day loved&by the multitudes, is a day of&festivity and celabration.^And finally the sixth,&the day of rest, one even&more loved by some.",
           "",
           "",
         }

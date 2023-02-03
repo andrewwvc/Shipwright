@@ -197,6 +197,12 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, Ship::ActorSp
             { 0, -1,  {ACTOR_EN_MA1, 1236,0,-2371, 0,0,0, 0x1}}, { 1, -1,  {ACTOR_EN_MA1, 1236,0,-2371, 0,0,0, 0x1}},
         } },
     } },
+    { 0x37, {//Impa's
+        { 0x00, {
+            { -1, -1, { ACTOR_EN_WONDER_TALK2, 142,20,210, 0,15350,0, 0x8000|(0x3F<<6)|0x3f }},
+            { -1, -1, { ACTOR_EN_WONDER_TALK2, 142,20,67,  0,15350,0, 0x8000|(0x40<<6)|0x3f }},
+        } },
+    } },
     { 0x52, { // Kakariko
         { 0x00, {
             //{ -1, 18, { 0x95, -18,800,1800, 0,-32768,0, 0xb140 }},
