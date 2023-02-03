@@ -2639,6 +2639,9 @@ s32 EnRu1_IsWillingToSit(EnRu1* this, PlayState* play) {
         EnRu1_InitiateDate();
         this->action = 26;
         this->actor.flags &= ~(ACTOR_FLAG_0 | ACTOR_FLAG_3);
+        Actor_Spawn(&play->actorCtx,play,ACTOR_EN_CROW, -3040,-980,4235, 0,0,0, 0x0,false);
+        Actor_Spawn(&play->actorCtx,play,ACTOR_EN_CROW, -3050,-1020,4685, 0,0,0, 0x0,false);
+        Actor_Spawn(&play->actorCtx,play,ACTOR_EN_CROW, -3045,-1010,5130, 0,0,0, 0x0,false);
         return true;
     }
     return false;
