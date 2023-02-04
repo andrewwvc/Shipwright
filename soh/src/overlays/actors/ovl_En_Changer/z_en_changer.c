@@ -56,8 +56,8 @@ static f32 sBaseRoomPos[] = {
 };
 
 static Vec3f sRelativeChestPos[] = {
-    { -100.0f, 0.0f, -145.0f },  { -100.0f, 20.0f, 0.0f },  { -100.0f, 0.0f, 145.0f },
-    { 140.0f, 0.0f, -145.0f }, { 140.0f, 20.0f, 0.0f }, { 140.0f, 0.0f, 145.0f },
+    { -120.0f, 0.0f, -130.0f },  { -100.0f, 20.0f, 0.0f },  { -120.0f, 0.0f, 145.0f },
+    { 160.0f, 0.0f, -130.0f }, { 140.0f, 20.0f, 0.0f }, { 160.0f, 0.0f, 145.0f },
 };
 
 static s32 sLoserGetItemIds[] = {
@@ -101,7 +101,7 @@ void EnChanger_InitAlt(Actor* thisx, PlayState* play) {
     minigameRoomNum *= 2;
     // Spawn Heart Piece in chest (or Purple Rupee if won Heart Piece)
     if (play->roomCtx.curRoom.num >= 6) {
-        rewardChestParams = ((gSaveContext.itemGetInf[1] & 0x800) ? (0x4EA0) : (0x4EC0));
+        rewardChestParams = ((gSaveContext.itemGetInf[3] & 0x4000) ? (0x4EA0) : (0x4EC0));
         rewardChestParams = sTreasureFlags[5] | rewardChestParams;
         this->finalChest = (EnBox*)Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, ACTOR_EN_BOX,
                                                       20.0f, 20.0f, -2500.0f, 0, 0x7FFF, 0, rewardChestParams);
@@ -111,7 +111,7 @@ void EnChanger_InitAlt(Actor* thisx, PlayState* play) {
                 Actor_Kill(&this->actor);
                 return;
             } else {
-                rewardParams = ((gSaveContext.itemGetInf[1] & 0x800) ? (ITEM_ETC_RUPEE_PURPLE_CHEST_GAME)
+                rewardParams = ((gSaveContext.itemGetInf[3] & 0x4000) ? (ITEM_ETC_RUPEE_PURPLE_CHEST_GAME)
                                                                      : (ITEM_ETC_HEART_PIECE_CHEST_GAME)) &
                                0xFF;
                 Actor_Spawn(&play->actorCtx, play, ACTOR_ITEM_ETCETERA, 20.0f, 20.0f, -2500.0f, 0, 0, 0,
@@ -173,8 +173,10 @@ void EnChanger_InitAlt(Actor* thisx, PlayState* play) {
 }
 
 void EnChanger_Init(Actor* thisx, PlayState* play2) {
-    EnChanger_InitAlt(thisx,play2);
-    return;
+    if (gSaveContext.eventInf[3] & 0x8000) {
+        EnChanger_InitAlt(thisx,play2);
+        return;
+    }
     EnChanger* this = (EnChanger*)thisx;
     PlayState* play = play2;
     s16 leftChestParams;
@@ -435,7 +437,11 @@ void EnChanger_OpenChests(EnChanger* this, PlayState* play) {
 
 void EnChanger_SetHeartPieceFlag(EnChanger* this, PlayState* play) {
     if (this->finalChest->unk_1F4 != 0) {
-        if (!(gSaveContext.itemGetInf[1] & 0x800)) {
+        if (gSaveContext.eventInf[3]& 0x8000) {
+            if (!(gSaveContext.itemGetInf[3] & 0x4000))
+                gSaveContext.itemGetInf[3] |= 0x4000;
+
+        } else if (!(gSaveContext.itemGetInf[1] & 0x800)) {
             gSaveContext.itemGetInf[1] |= 0x800;
         }
         Actor_Kill(&this->actor);
