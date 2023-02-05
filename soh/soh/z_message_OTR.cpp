@@ -998,6 +998,8 @@ extern "C" void OTRMessage_Init()
     MakeNormalMsgEng(HylianMsg+10, "I can't believe&what this guy is saying.^He believes that there is&an invisible, talking cucco!&Absurd.");
     MakeNormalMsgEng(HylianMsg+11, "You know, I heard that the&girl with the red hair from&the ranch is a terrible sleeper.");
     MakeNormalMsgEng(HylianMsg+12, "I also heard.^When she stayed at the inn,&she kept me up all&night with her singing!");
+    MakeNormalMsgEng(HylianMsg+13, "You know, I'm not sure if&anyone has ever won the&Super Special Treasure Chest Game.&How do we know it's not rigged?");
+    MakeNormalMsgEng(HylianMsg+14, "Surely I've never heard of&anyone winning. Shouldn't some&inspector make sure nothing&funny is going on?");
     MakeNormalMsgEng(0xF000, "\x08%rPiece of Heart   200 Rupees%w&Adds a quarter of a section&to your heart container.&4 together will improve your life!\t\n\x02");
     MakeNormalMsgEng(0xF001, "\x08Piece of Heart   200 Rupees&\x09\x1B&%gBuy&Don't buy%w\x02");
 

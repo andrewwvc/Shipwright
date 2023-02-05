@@ -509,6 +509,8 @@ u16 func_80A6F810(PlayState* play, Actor* thisx) {
                             return HylianMsg+10;
                         case 5:
                             return HylianMsg+12;
+                        case 0:
+                            return HylianMsg+14;
                     }
                 }
                 return (gSaveContext.eventChkInf[8] & 1) ? 0x7049
@@ -532,6 +534,8 @@ u16 func_80A6F810(PlayState* play, Actor* thisx) {
                             return HylianMsg+9;
                         case 5:
                             return HylianMsg+11;
+                        case 0:
+                            return HylianMsg+13;
                     }
                 }
                 return (gSaveContext.eventChkInf[8] & 1) ? 0x7046
