@@ -104,6 +104,7 @@ typedef struct EnHorse {
     /* 0x01F4 */ Vec3f lastPos;
     /* 0x0200 */ s16 lastYaw;
     /* 0x0204 */ s32 curRaceWaypoint;
+    /* 0x0204 */ s32 curSlalomWaypoint;
     /* 0x0208 */ s32 boostSpeed;
     /* 0x020C */ s32 playerControlled;
     /* 0x0210 */ s32 animationIdx;

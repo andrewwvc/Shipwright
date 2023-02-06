@@ -370,6 +370,44 @@ typedef struct {
     RaceWaypoint* waypoints;
 } RaceInfo;
 
+typedef struct {
+    f32 leftX;
+    f32 leftZ;
+    f32 rightX;
+    f32 rightZ;
+} SlalomWaypoint;
+
+typedef struct {
+    s32 numGates;
+    SlalomWaypoint* gates;
+} SlalomInfo;
+
+#define FAILED -1
+#define NOT_YET 0
+#define PASSED 1
+
+s32 EnHorse_HasPassedThroughSlalom(EnHorse* this, PlayState* play, SlalomWaypoint* gate) {
+    Vec3f diff;
+    diff.x = gate->rightX-gate->leftX;
+    diff.z = gate->rightZ-gate->leftZ;
+    f32 px = diff.z;
+    f32 pz = -diff.x;
+
+    f32 hDiffx = (this->actor.world.pos.x-gate->leftX);
+    f32 hDiffz = (this->actor.world.pos.z-gate->leftZ);
+    f32 rDiffx = (this->actor.world.pos.x-gate->rightX);
+    f32 rDiffz = (this->actor.world.pos.z-gate->rightZ);
+    if (((px*hDiffx) + (pz*hDiffz)) > 0.0f) {
+        if ((((diff.x*hDiffx) + (diff.z*hDiffz)) > 0.0f) && (((diff.x*rDiffx) + (diff.z*rDiffz)) < 0.0f)) {
+            return PASSED;
+        }
+
+        return FAILED;
+    }
+
+    return NOT_YET;
+}
+
 static RaceWaypoint sIngoRaceWaypoints[] = {
     { 1056, 1, -1540, 11, 0x2A8D },  { 1593, 1, -985, 10, 0xFC27 },   { 1645, 1, -221, 11, 0xE891 },
     { 985, 1, 403, 10, 0xBB9C },     { -1023, 1, 354, 11, 0xA37D },   { -1679, 1, -213, 10, 0x889C },
@@ -392,21 +430,47 @@ const static RaceWaypoint sMalonRideWaypoints[] = {
 const static RaceInfo sMalonRide = { 5, sMalonRideWaypoints };
 
 const static RaceWaypoint sMalonTransitionWaypoints1[] = {
-    { -550, 0, 2875, 8, 0x4000 },  { 155,0, 2250, 8, 0x5000 },  { 1370,0, 2180, 8, 0x3000 },
+    { -550, 0, 2875, 8, 0x4000 },  { 155,0, 2250, 10, 0x5000 },  { 1370,0, 2180, 10, 0x3000 }, { 2500, 1, 4300, 10, 0x0000 },   { 500, 1, 7700, 12, -0x1800 },
+    { -1000, 1, 8700, 13, -0x3000 }, { -1005, 1, 9940, 12, 0x0000 }
 };
 
-const static RaceInfo sMalonTransition1 = { 3, sMalonTransitionWaypoints1 };
+const static RaceInfo sMalonTransition1 = { 7, sMalonTransitionWaypoints1 };
 
-const static RaceWaypoint sMalonRideWaypoints2[] = {
+const static RaceWaypoint sMalonSlalomWaypoints[] = {
+    { -1005, 1, 9940, 11, 0x0000 },   { -1127, 1, 11750, 12, -0x0000 },
+    { -1620, 1, 12910, 10, 0x1000 },     { -1566, 1, 132600, 10, -0x2500 }, { -1310, 1, 13385, 8, -0x3000 },
+    { -637, 1, 12790, 5, 0x6000 }, { 115, 1, 12947, 6, 0x3500 }, { 536, 1, 13060, 4, 0x3500 },
+    { 1270, 1, 12530, 5, 0x6000 }, { 1666, 1, 12347, 5, 0x4000 }, { 1833, 1, 12766, 5, 0x0000 },
+    { 1555, 1, 13257, 5, -0x1000 }, { 884, 1, 12904, 5, -0x7000 },
+    { 567, 1, 12424, 7, -0x6000 }, { 151, 1, 11652, 4, -0x6000 }, { 350, 1, 11407, 4, 0x6000 }, { 970, 1, 12000, 10, 0x3500 },
+    { 1060, 1, 12540, 4, 0x1000 }, { 1208, 1, 12390, 4, 0x1000 }, { 969, 1, 12746, 4, -0x2000 }, /*{ 653, 1, 12521, 5, -0x6000 },*/
+    { 534, 1, 12427, 5, -0x6000 }, { 462, 1, 12226, 5, -0x6000 }, { 309, 1, 12100, 4, -0x6000 }, { 191, 1, 12075, 4, -0x6000 }, { 169, 1, 12048, 4, -0x2000 }, /*{ 12, 1, 12045, 8, 0x2000 },*/
+    //{ 1123, 1, 11617, 6, -0x7000 }, { 888, 1, 11455, 8, -0x5000 },  { 1047, 1, 12190, 5, -0x5000 }, { 258, 1, 11523, 7, -0x3000 }, { 22, 1, 12068, 6, -0x2000 },
+    { -154, 1, 12148, 12, -0x2000 }, { -325, 1, 12061, 12, -0x3000 }, { -995, 1, 12320, 12, -0x4000 },
+};
+
+const static RaceInfo sMalonSlalomPoints = { 28, sMalonSlalomWaypoints };
+
+const static SlalomWaypoint sSlalomGates[] = {
+    {-270,12634,-447,11258}, {544,12962,470,13150}, {1110,12125,1508,12492}, {1740,13330,1512,13158}, {470,12488,615,12360}, {45,11405,350,11610},
+    {1120,12150,945,12202}, {1512,13158,920,12560}, {470,12488,615,12360}, {75,12152,-30,12000}
+};
+
+const static SlalomInfo sSlalomCourse = { 10, sSlalomGates};
+
+const static RaceWaypoint sMalonRideWaypoints3[] = {
     { 200, 1, 2100, 4, 0x4000 },  { 2500, 1, 4300, 8, 0x0000 },   { 500, 1, 7700, 10, -0x1800 },
     { -1000, 1, 8700, 12, -0x3000 },     { -4500, 1, 8600, 12, -0x5800 }, { -5300, 1, 6900, 9, -0x7000 },
     { -4900, 1, 5100, 9, 0x1000 }, { -3100, 1, 3600, 10, 0x2000 },
 };
 
-const static RaceInfo sMalonRide2 = { 8, sMalonRideWaypoints2 };
+const static RaceInfo sMalonRide3 = { 8, sMalonRideWaypoints3 };
 static s32 sAnimSoundFrames[] = { 0, 16 };
 
+static SlalomWaypoint sSlalomGate1 = {{-803,0,5566},{-1026,0,5700}};
+
 static RaceInfo* sMalonRoute;//[] = {&sMalonRide,&sMalonRide2};
+static u8 sSlalomActive;
 //static s16 sMalonRouteNum;
 
 #define MALON_PARAMS 0xB
@@ -668,7 +732,7 @@ void EnHorse_UpdateMalonRideInfo(EnHorse* this, PlayState* play, RaceInfo* raceI
                 this->curRaceWaypoint = 0;
             } else if (this->raceFlags == 1) {
                 this->raceFlags = 2;
-                sMalonRoute = &sMalonRide2;
+                sMalonRoute = &sMalonSlalomPoints;
                 this->curRaceWaypoint = 0;
             } else {
                 this->curRaceWaypoint = 0;
@@ -845,6 +909,7 @@ void EnHorse_Init(Actor* thisx, PlayState* play2) {
     this->noInputTimer = 0;
     this->noInputTimerMax = 0;
     this->riderPos.y = this->riderPos.y + 70.0f;
+    sSlalomActive = 0;
 
     if (DREG(4) == 0) {
         DREG(4) = 70;
@@ -953,6 +1018,10 @@ void EnHorse_Init(Actor* thisx, PlayState* play2) {
         if (!(gSaveContext.eventChkInf[2] & 0x0400)) {
             Actor_Kill(&this->actor);
             return;
+        } else if (gSaveContext.MalonRideDay < gSaveContext.totalDays) {
+            gSaveContext.eventChkInf[2] &= ~0x0400;
+            Actor_Kill(&this->actor);
+            return;
         } else if ((gSaveContext.MalonRideDay > gSaveContext.totalDays)) {
             this->raceFlags = -2;
             sMalonRoute = &sMalonRideOut;
@@ -967,6 +1036,7 @@ void EnHorse_Init(Actor* thisx, PlayState* play2) {
     EnHorse_ResetCutscene(this, play);
     EnHorse_ResetRace(this, play);
     EnHorse_ResetHorsebackArchery(this, play);
+    this->curSlalomWaypoint = 0;
 
     if (this->actor.params == 2) {
         EnHorse_InitInactive(this);
@@ -3667,6 +3737,15 @@ void EnHorse_Update(Actor* thisx, PlayState* play2) {
     this->lastYaw = thisx->shape.rot.y;
     EnHorse_UpdateStick(this, play);
     EnHorse_UpdatePlayerDir(this, play);
+
+    if (this->type == HORSE_EPONA) {
+        s32 res = EnHorse_HasPassedThroughSlalom(this,play,&sSlalomGate1);
+        if (res == PASSED) {
+            //Rupees_ChangeBy(1);
+        } else if (res == FAILED) {
+            //Rupees_ChangeBy(-1);
+        }
+    }
 
     if (!(this->stateFlags & ENHORSE_INACTIVE)) {
         EnHorse_MountDismount(this, play);
