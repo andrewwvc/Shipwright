@@ -113,6 +113,7 @@ typedef struct EnHorse {
     /* 0x021C */ Vec3f unk_21C;
     /* 0x0228 */ Vec3f unk_228;
     /* 0x0234 */ s32 unk_234;
+                 u8 curSlalomResult;
     /* 0x0238 */ u8 numBoosts;
     /* 0x023C */ s32 boostRegenTime;
     /* 0x0240 */ s32 boostTimer;

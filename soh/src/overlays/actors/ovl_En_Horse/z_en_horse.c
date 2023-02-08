@@ -386,7 +386,7 @@ typedef struct {
 #define NOT_YET 0
 #define PASSED 1
 
-s32 EnHorse_HasPassedThroughSlalom(EnHorse* this, PlayState* play, SlalomWaypoint* gate) {
+s8 EnHorse_HasPassedThroughSlalom(EnHorse* this, SlalomWaypoint* gate) {
     Vec3f diff;
     diff.x = gate->rightX-gate->leftX;
     diff.z = gate->rightZ-gate->leftZ;
@@ -452,11 +452,11 @@ const static RaceWaypoint sMalonSlalomWaypoints[] = {
 const static RaceInfo sMalonSlalomPoints = { 28, sMalonSlalomWaypoints };
 
 const static SlalomWaypoint sSlalomGates[] = {
-    {-270,12634,-447,11258}, {544,12962,470,13150}, {1110,12125,1508,12492}, {1740,13330,1512,13158}, {470,12488,615,12360}, {45,11405,350,11610},
-    {1120,12150,945,12202}, {1512,13158,920,12560}, {470,12488,615,12360}, {75,12152,-30,12000}
+    {-270,12634,-447,12950}, {544,12962,470,13150}, {1110,12125,1508,12492}, {1740,13330,1512,13158}, {470,12488,615,12360}, {45,11405,350,11610},
+    {1120,12150,945,12202}, {1512,13158,920,12560}, {470,12488,615,12360}, {75,12152,-30,12000}, {-425,12350,-788,11294}
 };
 
-const static SlalomInfo sSlalomCourse = { 10, sSlalomGates};
+const static SlalomInfo sSlalomCourse = { 11, sSlalomGates};
 
 const static RaceWaypoint sMalonRideWaypoints3[] = {
     { 200, 1, 2100, 4, 0x4000 },  { 2500, 1, 4300, 8, 0x0000 },   { 500, 1, 7700, 10, -0x1800 },
@@ -465,13 +465,26 @@ const static RaceWaypoint sMalonRideWaypoints3[] = {
 };
 
 const static RaceInfo sMalonRide3 = { 8, sMalonRideWaypoints3 };
+
+const static RaceWaypoint sMalonReturnWaypoints[] = {
+    { -4500, 1, 8600, 12, -0x5800 }, { -5300, 1, 6900, 9, -0x7000 },
+    { -4900, 1, 5100, 9, 0x1000 }, { -3100, 1, 3600, 10, 0x2000 },
+};
+
+const static RaceInfo sMalonReturn = { 4, sMalonReturnWaypoints };
+
 static s32 sAnimSoundFrames[] = { 0, 16 };
 
 static SlalomWaypoint sSlalomGate1 = {{-803,0,5566},{-1026,0,5700}};
 
-static RaceInfo* sMalonRoute;//[] = {&sMalonRide,&sMalonRide2};
-static u8 sSlalomActive;
-//static s16 sMalonRouteNum;
+static RaceInfo* sMalonRoute;
+
+#define NONE 0
+#define SLALOM 1
+
+static u8 sRideState;
+static u16 sPassedGates;
+static EnHorse* sMalonHorse;
 
 #define MALON_PARAMS 0xB
 
@@ -733,6 +746,7 @@ void EnHorse_UpdateMalonRideInfo(EnHorse* this, PlayState* play, RaceInfo* raceI
             } else if (this->raceFlags == 1) {
                 this->raceFlags = 2;
                 sMalonRoute = &sMalonSlalomPoints;
+                sRideState = SLALOM;
                 this->curRaceWaypoint = 0;
             } else {
                 this->curRaceWaypoint = 0;
@@ -909,7 +923,6 @@ void EnHorse_Init(Actor* thisx, PlayState* play2) {
     this->noInputTimer = 0;
     this->noInputTimerMax = 0;
     this->riderPos.y = this->riderPos.y + 70.0f;
-    sSlalomActive = 0;
 
     if (DREG(4) == 0) {
         DREG(4) = 70;
@@ -988,6 +1001,8 @@ void EnHorse_Init(Actor* thisx, PlayState* play2) {
     this->actor.focus.pos = this->actor.world.pos;
     this->actor.focus.pos.y += 70.0f;
     this->playerControlled = false;
+    sRideState = NONE;
+    sPassedGates = 0;
 
     if ((play->sceneNum == SCENE_SPOT20) && (gSaveContext.sceneSetupIndex < 4)) {
         if (this->type == HORSE_HNI) {
@@ -1015,6 +1030,7 @@ void EnHorse_Init(Actor* thisx, PlayState* play2) {
         this->stateFlags |= ENHORSE_UNRIDEABLE;
     } else if (this->actor.params == MALON_PARAMS) {
         sMalonRoute = &sMalonRide;
+        sMalonHorse = this;
         if (!(gSaveContext.eventChkInf[2] & 0x0400)) {
             Actor_Kill(&this->actor);
             return;
@@ -1037,6 +1053,7 @@ void EnHorse_Init(Actor* thisx, PlayState* play2) {
     EnHorse_ResetRace(this, play);
     EnHorse_ResetHorsebackArchery(this, play);
     this->curSlalomWaypoint = 0;
+    this->curSlalomResult = FAILED;
 
     if (this->actor.params == 2) {
         EnHorse_InitInactive(this);
@@ -2303,6 +2320,57 @@ void EnHorse_UpdateIngoRace(EnHorse* this, PlayState* play) {
                              &((EnIn*)this->rider)->animationIdx, &((EnIn*)this->rider)->unk_1E0);
 }
 
+void EnHorse_ProgressSlalom(EnHorse* this, PlayState* play, SlalomInfo* slalom) {
+    u16 RanchMsg = GetTextID("ranch");
+    s8 res = EnHorse_HasPassedThroughSlalom(this,&slalom->gates[this->curSlalomWaypoint]);
+
+    if (this->curSlalomResult != res) {
+        if (this->curSlalomResult == NOT_YET) {
+            if (res == PASSED) {
+                if (++this->curSlalomWaypoint >= slalom->numGates) {
+                    this->curSlalomWaypoint = 0;
+                }
+                if (this->actor.params == MALON_PARAMS) {
+                }
+                if (this->type == HORSE_EPONA && sMalonHorse->curSlalomWaypoint == this->curSlalomWaypoint) {
+                    Audio_PlaySoundGeneral(NA_SE_SY_RUPY_COUNT, &D_801333D4, 4, &D_801333E0, &D_801333E0, &D_801333E8);
+                    sPassedGates++;
+                    if (this->curSlalomWaypoint == 0) {
+                        if (sPassedGates == sSlalomCourse.numGates) {
+                            sMalonHorse->raceFlags = 3;
+                            sMalonHorse->curRaceWaypoint = 0;
+                            sRideState = NONE;
+                            sMalonRoute = &sMalonReturn;
+                        } else {
+                            sPassedGates = 0;
+                        }
+                    }
+                }
+                    //Rupees_ChangeBy(1);
+            } else if (res == FAILED) {
+                if (++this->curSlalomWaypoint >= slalom->numGates) {
+                    this->curSlalomWaypoint = 0;
+                }
+                if (this->actor.params == MALON_PARAMS) {
+                    Message_StartTextbox(play, RanchMsg+11, NULL);
+                }
+                //else if (this->type == HORSE_EPONA)
+                    //Rupees_ChangeBy(-1);
+            }
+        } else if (this->curSlalomResult == PASSED) {
+            if (res == FAILED) {
+            } else { //NOT_YET
+
+            }
+        } else { //FAILED
+            if (res == PASSED) {
+            } else {//NOT_YET
+            }
+        }
+        this->curSlalomResult = res;
+    }
+}
+
 void EnHorse_UpdateMalonRide(EnHorse* this, PlayState* play) {
     u16 RanchMsg = GetTextID("ranch");
     f32 playSpeed;
@@ -2350,6 +2418,11 @@ void EnHorse_UpdateMalonRide(EnHorse* this, PlayState* play) {
     DECR(this->delayTimer);
 
     EnHorse_UpdateMalonRideInfo(this, play, sMalonRoute);
+
+    if (sMalonRoute == &sMalonSlalomPoints) {
+        EnHorse_ProgressSlalom(this,play,&sSlalomCourse);
+    }
+
     if (this->animationIdx == ENHORSE_ANIM_WALK) {
         playSpeed = this->actor.speedXZ * 0.5f;
     } else if (this->animationIdx == ENHORSE_ANIM_TROT) {
@@ -3738,15 +3811,6 @@ void EnHorse_Update(Actor* thisx, PlayState* play2) {
     EnHorse_UpdateStick(this, play);
     EnHorse_UpdatePlayerDir(this, play);
 
-    if (this->type == HORSE_EPONA) {
-        s32 res = EnHorse_HasPassedThroughSlalom(this,play,&sSlalomGate1);
-        if (res == PASSED) {
-            //Rupees_ChangeBy(1);
-        } else if (res == FAILED) {
-            //Rupees_ChangeBy(-1);
-        }
-    }
-
     if (!(this->stateFlags & ENHORSE_INACTIVE)) {
         EnHorse_MountDismount(this, play);
     }
@@ -3761,6 +3825,9 @@ void EnHorse_Update(Actor* thisx, PlayState* play2) {
             EnHorse_StartRearing(this);
         }
     }
+
+    if (this->type == HORSE_EPONA && sRideState == SLALOM)
+        EnHorse_ProgressSlalom(this,play,&sSlalomCourse);
 
     sActionFuncs[this->action](this, play);
     this->stateFlags &= ~ENHORSE_OBSTACLE;
