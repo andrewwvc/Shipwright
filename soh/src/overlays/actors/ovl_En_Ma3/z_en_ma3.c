@@ -17,11 +17,13 @@ void EnMa3_Draw(Actor* thisx, PlayState* play);
 u16 func_80AA2AA0(PlayState* play, Actor* this);
 s16 func_80AA2BD4(PlayState* play, Actor* this);
 
+
 void func_80AA2E54(EnMa3* this, PlayState* play);
 s32 func_80AA2EC8(EnMa3* this, PlayState* play);
 s32 func_80AA2F28(EnMa3* this);
 void EnMa3_UpdateEyes(EnMa3* this);
 void func_80AA3200(EnMa3* this, PlayState* play);
+void EnMa3_Give_Reward(EnMa3* this, PlayState* play);
 
 const ActorInit En_Ma3_InitVars = {
     ACTOR_EN_MA3,
@@ -99,6 +101,9 @@ u16 func_80AA2AA0(PlayState* play, Actor* thisx) {
             return 0x2004;
         }
     }
+    if ((gSaveContext.eventChkInf[2] & (1 << 11))) {
+        return RanchMsg+12;
+    }
     if ((gSaveContext.eventChkInf[1] & 0x4000) && (gSaveContext.eventChkInf[2] & 0x0200) && !(gSaveContext.eventChkInf[2] & 0x0400) && (gSaveContext.MalonRideDay < gSaveContext.totalDays)) {
         return RanchMsg+8;
     }
@@ -115,7 +120,7 @@ u16 func_80AA2AA0(PlayState* play, Actor* thisx) {
 
 s16 func_80AA2BD4(PlayState* play, Actor* thisx) {
     s16 ret = 1;
-    u16 RanchMsg;
+    u16 RanchMsg = GetTextID("ranch");
 
     switch (Message_GetState(&play->msgCtx)) {
         case TEXT_STATE_EVENT:
@@ -130,7 +135,6 @@ s16 func_80AA2BD4(PlayState* play, Actor* thisx) {
             break;
         case TEXT_STATE_CHOICE:
             if (Message_ShouldAdvance(play)) {
-                RanchMsg = GetTextID("ranch");
                 if (thisx->textId == RanchMsg+8) {
                     if (play->msgCtx.choiceIndex == 0) {
                         gSaveContext.eventChkInf[2] |=  0x0400;
@@ -182,6 +186,8 @@ s16 func_80AA2BD4(PlayState* play, Actor* thisx) {
                     }
                     break;
                 default:
+                    if (thisx->textId == RanchMsg+12) {
+                    }
                     ret = 0;
             }
             break;
@@ -189,6 +195,21 @@ s16 func_80AA2BD4(PlayState* play, Actor* thisx) {
         case TEXT_STATE_DONE_HAS_NEXT:
         case TEXT_STATE_DONE_FADING:
         case TEXT_STATE_DONE:
+            if (Message_ShouldAdvance(play)) {
+                if (thisx->textId == RanchMsg+12) {
+                    if (gSaveContext.eventChkInf[2] & (1 << 12)) {
+                        gSaveContext.eventChkInf[2] &= ~(1 << 11);
+                        return ret;
+                    } else {
+                        thisx->textId = RanchMsg+13;
+                        Message_ContinueTextbox(play, thisx->textId);
+                    }
+                } else if (thisx->textId == RanchMsg+13) {
+                    ((EnMa3*)thisx)->actionFunc = EnMa3_Give_Reward;
+                    func_8002F434(thisx, play, GI_EPONA_BOOST, 100.0f, 100.0f);
+                }
+            }
+            break;
         case TEXT_STATE_SONG_DEMO_DONE:
         case TEXT_STATE_8:
         case TEXT_STATE_9:
@@ -304,6 +325,18 @@ void func_80AA3200(EnMa3* this, PlayState* play) {
     if (this->unk_1E0.unk_00 == 2) {
         this->actor.flags &= ~ACTOR_FLAG_16;
         this->unk_1E0.unk_00 = 0;
+    }
+}
+
+void EnMa3_Give_Reward(EnMa3* this, PlayState* play) {
+    if (Actor_HasParent(&this->actor, play)) {
+        this->actor.parent = NULL;
+        this->actionFunc = func_80AA3200;
+        gSaveContext.eventChkInf[2] |= (1 << 12);
+        gSaveContext.eventChkInf[2] &= ~(1 << 11);
+
+    } else {
+        func_8002F434(this, play, GI_EPONA_BOOST, 100.0f, 100.0f);
     }
 }
 

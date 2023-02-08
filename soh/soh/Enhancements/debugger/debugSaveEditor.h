@@ -58,6 +58,7 @@ const std::vector<FlagTable> flagTables = {
         { 0x29, "Defended Malon as young Link" },
         { 0x2A, "Meeting Malon for horse riding" },
         { 0x2B, "Finished a good ride" },
+        { 0x2C, "Received Malon's ride reward" },
         { 0x2F, "Death Mountain Erupted" },
         { 0x30, "Spoke to a Zora" },
         { 0x31, "Obtained Ruto's Letter" },

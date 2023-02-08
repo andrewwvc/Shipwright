@@ -281,7 +281,7 @@ extern "C" void OTRMessage_Init()
 
     //Get Item Text
     MakeBlueMsgEng(0x810, "You received an Icon of Magic Power!&This will increase your magic capacity.&It looks awfully like an ordinary&magic jar though.");
-    MakeBlueMsgEng(0x811, "You received a Packet of Horse Food!&This will add a boost&to Epona's stamina.&Carrots and oats are delicious!");
+    MakeBlueMsgEng(0x811, "You received some Horse Food!&This will add a boost&to Epona's stamina.&Carrots are delicious!");
     MakeBlueMsgEng(0x812, "You received a Heart Barrier! This&will protect one of your hearts,&if you find someone with powerful&enough magic to activate it.");
 
     //Great Fairy Text
@@ -1017,6 +1017,8 @@ extern "C" void OTRMessage_Init()
     MakeNormalMsgEng(RanchMsg+9, "Great, I'll see you tomorrow,&just outside the ranch.&Make sure to take Epona.");
     MakeNormalMsgEng(RanchMsg+10, "Oh, alright.^I guess maybe we could&try for next week then.");
     MakeNormalMsgEng(RanchMsg+11, "\x08Oops. Missed that one.\016<\x02");
+    MakeNormalMsgEng(RanchMsg+12, "I really enjoyed that.");
+    MakeNormalMsgEng(RanchMsg+13, "It would be nice if Epona&had a special treat&once in a while.^She really deserves it,&don't you think.");
 
     u16 ZoraMsg = TextIDAllocator::Instance->allocateRange("zora", 30);
 
