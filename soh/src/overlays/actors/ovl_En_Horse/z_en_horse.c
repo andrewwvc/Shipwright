@@ -467,11 +467,12 @@ const static RaceWaypoint sMalonRideWaypoints3[] = {
 const static RaceInfo sMalonRide3 = { 8, sMalonRideWaypoints3 };
 
 const static RaceWaypoint sMalonReturnWaypoints[] = {
-    { -4500, 1, 8600, 12, -0x5800 }, { -5300, 1, 6900, 9, -0x7000 },
-    { -4900, 1, 5100, 9, 0x1000 }, { -3100, 1, 3600, 10, 0x2000 },
+    { -2250, 1, 8940, 10, -0x5800 }, { -4500, 1, 8600, 12, -0x5800 }, { -5300, 1, 6900, 9, -0x7000 },
+    { -4900, 1, 5100, 9, 0x1000 }, { -2952, 1, 4600, 9, 0x4000 }, { -2223, 1, 4585, 8, 0x3000 },
+    { -1693, 1, 4764, 6, 0x1000 }, { -1700, 1, 5755, 5, -0x2000 }, { -1880, 1, 6012, 7, -0x3000 }, { -2200, 1, 6055, 4, -2000 }, { -2272, 1, 6180, 4, 0x0000 },
 };
 
-const static RaceInfo sMalonReturn = { 4, sMalonReturnWaypoints };
+const static RaceInfo sMalonReturn = { 11, sMalonReturnWaypoints };
 
 static s32 sAnimSoundFrames[] = { 0, 16 };
 
@@ -748,6 +749,11 @@ void EnHorse_UpdateMalonRideInfo(EnHorse* this, PlayState* play, RaceInfo* raceI
                 sMalonRoute = &sMalonSlalomPoints;
                 sRideState = SLALOM;
                 this->curRaceWaypoint = 0;
+            } else if (this->raceFlags == 3) {
+                this->curRaceWaypoint = 0;
+                if (this->rider)
+                    Actor_Kill(this->rider);
+                Actor_Kill(&this->actor);
             } else {
                 this->curRaceWaypoint = 0;
             }
@@ -2341,6 +2347,7 @@ void EnHorse_ProgressSlalom(EnHorse* this, PlayState* play, SlalomInfo* slalom) 
                             sMalonHorse->curRaceWaypoint = 0;
                             sRideState = NONE;
                             sMalonRoute = &sMalonReturn;
+                            gSaveContext.eventChkInf[2] |= (1 << 11);
                         } else {
                             sPassedGates = 0;
                         }
