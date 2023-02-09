@@ -1593,6 +1593,7 @@ void func_80AEE488(EnRu1* this, PlayState* play) {
         curRoomNum = play->roomCtx.curRoom.num;
         this->roomNum3 = curRoomNum;
         this->action = 31;
+        this->expressionState = 0;
         func_80AED520(this, play);
     } else if ((!func_80AEE394(this, play)) && (!(this->actor.bgCheckFlags & 1))) {
         this->actor.minVelocityY = -((kREG(24) * 0.01f) + 6.8f);
@@ -1625,6 +1626,7 @@ void func_80AEE628(EnRu1* this, PlayState* play) {
                          Animation_GetLastFrame(&gRutoChildSittingAnim), ANIMMODE_LOOP, -8.0f);
         gSaveContext.infTable[20] |= 0x10;
         this->action = 31;
+        this->expressionState = 0;
     }
     this->roomNum3 = curRoomNum;
 }
@@ -1694,6 +1696,7 @@ void func_80AEE7C4(EnRu1* this, PlayState* play) {
                 frameCount = Animation_GetLastFrame(&gRutoChildSittingAnim);
                 Animation_Change(&this->skelAnime, &gRutoChildSittingAnim, 1.0f, 0, frameCount, ANIMMODE_LOOP, -8.0f);
                 this->action = 31;
+                this->expressionState = 0;
                 *unk_370 = 0.0f;
             }
         }
@@ -1855,6 +1858,7 @@ void EnRu1_Action31(EnRu1* this, PlayState* play) {
     func_80AEAECC(this, play);
     func_80AEE2F8(this, play);
     EnRu1_UpdateEyes(this);
+    EnRu1_DetectExpressHarm(this,play);
     func_80AED6F8(play);
     func_80AEE7C4(this, play);
 }
@@ -2706,7 +2710,7 @@ void EnRu1_DateDuringFinalTalk(EnRu1* this, PlayState* play) {
 void EnRu1_DateEnd(EnRu1* this, PlayState* play) {
     s32 cond;
 
-    this->actor.speedXZ = 1.0f;
+    this->actor.speedXZ = 2.0f;
     Math_ApproachS(&this->actor.world.rot.y, 0x8000, 1, 0x200);
     func_80AEEF68(this, play);
     EnRu1_UpdateSkelAnime(this);
@@ -3008,9 +3012,18 @@ void EnRu1_DrawOpa(EnRu1* this, PlayState* play) {
     gDPSetEnvColor(POLY_OPA_DISP++, 0, 0, 0, 255);
     gSPSegment(POLY_OPA_DISP++, 0x0C, &D_80116280[2]);
 
+    if (this->action == 53) {
+        Matrix_Push();
+        if (this->actor.world.pos.y >= -1253.300f)//This is here to keep Ruto above the island while she walks off it
+            Matrix_Translate(0.0f, 800.0f*(1.0f-this->skelAnime.morphWeight), 0.0f, MTXMODE_APPLY);
+    }
+
     POLY_OPA_DISP = SkelAnime_DrawFlex(play, skelAnime->skeleton, skelAnime->jointTable, skelAnime->dListCount,
                                        EnRu1_OverrideLimbDraw, EnRu1_PostLimbDraw, this, POLY_OPA_DISP);
 
+    if (this->action == 53) {
+        Matrix_Pop();
+    }
     CLOSE_DISPS(play->state.gfxCtx);
 }
 
