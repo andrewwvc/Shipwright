@@ -433,9 +433,12 @@ u16 EnMd_GetTextLostWoods(PlayState* play, EnMd* this) {
         if (gSaveContext.infTable[1] & 0x200) {
             // 0x1071;
             if (gSaveContext.infTable[3] & (1<<1) && !(gSaveContext.infTable[3] & (1<<0))) {
-                if (gSaveContext.itemGetInf[3] & 0x40)
+                if (gSaveContext.itemGetInf[3] & 0x40) {
+                    if (gSaveContext.infTable[3] & (1<<5)) {
+                        return MidoMsg+20;
+                    }
                     return MidoMsg+15;
-                else
+                } else
                     return MidoMsg+14;
             }
             else
@@ -515,7 +518,7 @@ s16 func_80AAAF04(PlayState* play, Actor* thisx) {
                         }
                 }
                 if (this->actor.textId == MidoMsg+9 || this->actor.textId == MidoMsg+10) {
-                    if (gSaveContext.infTable[3] & (1<<1) && !(gSaveContext.infTable[3] & (1<<0)))
+                    if ((gSaveContext.infTable[3] & (1<<1)) && !(gSaveContext.infTable[3] & (1<<0)))
                         this->actor.textId = MidoMsg+14;
                     else
                         this->actor.textId = MidoMsg+11;
@@ -531,6 +534,11 @@ s16 func_80AAAF04(PlayState* play, Actor* thisx) {
                     return 1;
                 }
                 if (this->actor.textId == MidoMsg+14) {
+                    if (gSaveContext.itemGetInf[3] & 0x40) {
+                        Message_CloseTextbox(play);
+                        return 1;
+                    }
+
                     this->actor.textId = MidoMsg+4;
                     Message_ContinueTextbox(play,this->actor.textId);
                     return 1;
@@ -541,12 +549,15 @@ s16 func_80AAAF04(PlayState* play, Actor* thisx) {
                     return 1;
                 }
                 if (this->actor.textId == MidoMsg+18 ||this->actor.textId == MidoMsg+19) {
+                    gSaveContext.infTable[3] |= (1<<5);
                     this->actor.textId = MidoMsg+20;
                     Message_ContinueTextbox(play,this->actor.textId);
                     return 1;
                 }
                 if (this->actor.textId == MidoMsg+4) {
                     func_8002F434(this, play, GI_HEART_PIECE, 100.0f, 100.0f);
+                    gSaveContext.itemGetInf[3] |= 0x40;
+                    gSaveContext.infTable[1] |= 0x200;
                     this->actionFunc = give_gratitude;
                 }
             }
@@ -589,6 +600,7 @@ s16 func_80AAAF04(PlayState* play, Actor* thisx) {
             if (this->actor.textId == MidoMsg+1) {
                 gSaveContext.infTable[3] &= ~1;
                 gSaveContext.infTable[1] &= ~0x200;//Change this later so that the variable is reset on returning to the child era
+                gSaveContext.infTable[3] &= ~(1<<5);
             }
             if (this->actor.textId >= MidoMsg+9 && this->actor.textId <= MidoMsg+15) {
                 gSaveContext.infTable[1] |= 0x200;
