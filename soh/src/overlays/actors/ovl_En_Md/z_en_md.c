@@ -555,7 +555,7 @@ s16 func_80AAAF04(PlayState* play, Actor* thisx) {
                     return 1;
                 }
                 if (this->actor.textId == MidoMsg+4) {
-                    func_8002F434(this, play, GI_HEART_PIECE, 100.0f, 100.0f);
+                    func_8002F434(this, play, GI_EXTRA_MAGIC, 100.0f, 100.0f);
                     gSaveContext.itemGetInf[3] |= 0x40;
                     gSaveContext.infTable[1] |= 0x200;
                     this->actionFunc = give_gratitude;
@@ -851,7 +851,7 @@ void give_gratitude(EnMd* this, PlayState* play) {
         gSaveContext.itemGetInf[3] |= 0x40;
 
     } else {
-        func_8002F434(this, play, GI_HEART_PIECE, 100.0f, 100.0f);
+        func_8002F434(this, play, GI_EXTRA_MAGIC, 100.0f, 100.0f);
     }
 }
 
