@@ -282,9 +282,9 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, Ship::ActorSp
             { 0, -1, { ACTOR_EN_NIW, 1525,834,-2020, 0,16384,0, 0xFFFF }},
             { 1, -1, { ACTOR_EN_NIW, 1525,834,-2020, 0,16384,0, 0xFFFF }},
             { 0, -1, { ACTOR_BG_UMAJUMP, 190,1103,-2915, 0x4000,880,0, 0xFFFF }},
-            { 0, -1, { ACTOR_BG_UMAJUMP, 190,1103,-2915, 0x4000,880+0x8000,0, 0xFFFF }},
+            { 0, -1, { ACTOR_BG_UMAJUMP, 190,1103,-2915, 0x4000,-0x7C90,0, 0xFFFF }},//rot.y is 880+0x8000
             { 1, -1, { ACTOR_BG_UMAJUMP, 190,1103,-2915, 0x4000,880,0, 0xFFFF }},
-            { 1, -1, { ACTOR_BG_UMAJUMP, 190,1103,-2915, 0x4000,880+0x8000,0, 0xFFFF }},
+            { 1, -1, { ACTOR_BG_UMAJUMP, 190,1103,-2915, 0x4000,-0x7C90,0, 0xFFFF }},//rot.y is 880+0x8000
             { 0, 21, { 0xA, 926,1042,-2512, 0,-16384,0, 0x7c1 }},
             { 1, 21, { 0xA, 926,1042,-2512, 0,-16384,0, 0x7c1 }},
         } },
