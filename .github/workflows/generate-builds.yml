@@ -145,7 +145,7 @@ jobs:
           soh.appimage
           readme.txt
   build-switch:
-    needs: extract-assets
+    #needs: extract-assets
     runs-on: ubuntu-latest
     container:
       image: devkitpro/devkita64:latest
