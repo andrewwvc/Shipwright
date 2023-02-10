@@ -67,7 +67,7 @@ jobs:
     #     name: assets
     - name: Build SoH
       run: |
-        unzip -o assets.zip
+        #unzip -o assets.zip
 
         export PATH="/usr/lib/ccache:/usr/local/opt/ccache/libexec:$PATH"
         cmake --no-warn-unused-cli -H. -Bbuild-cmake -GNinja -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"
@@ -124,7 +124,7 @@ jobs:
     #     name: assets
     - name: Build SoH
       run: |
-        unzip -o assets.zip
+        #unzip -o assets.zip
 
         export PATH="/usr/lib/ccache:/usr/local/opt/ccache/libexec:$PATH"
         cmake --no-warn-unused-cli -H. -Bbuild-cmake -GNinja -DCMAKE_BUILD_TYPE:STRING=Release
@@ -167,7 +167,7 @@ jobs:
     #     name: assets
     - name: Build SoH
       run: |
-        unzip -o assets.zip
+        #unzip -o assets.zip
 
         cmake -H. -Bbuild-switch -GNinja -DCMAKE_TOOLCHAIN_FILE=/opt/devkitpro/cmake/Switch.cmake -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache
         cmake --build build-switch --target soh_nro -j3
@@ -204,7 +204,7 @@ jobs:
     #     name: assets
     - name: Build SoH
       run: |
-        unzip -o assets.zip
+        #unzip -o assets.zip
 
         cmake -H. -Bbuild-wiiu -GNinja -DCMAKE_TOOLCHAIN_FILE=/opt/devkitpro/cmake/WiiU.cmake -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache
         cmake --build build-wiiu --target soh_wuhb --config Release -j3
