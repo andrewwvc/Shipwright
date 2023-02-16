@@ -13,7 +13,7 @@ extern "C" MessageTableEntry* sNesMessageEntryTablePtr;
 extern "C" MessageTableEntry* sGerMessageEntryTablePtr;
 extern "C" MessageTableEntry* sFraMessageEntryTablePtr;
 extern "C" MessageTableEntry* sStaffMessageEntryTablePtr;
-extern std::unordered_map<uint16_t, uint16_t>* textIDSubstitutionTable;
+extern "C" std::unordered_map<uint16_t, uint16_t>* textIDSubstitutionTable;
 //extern "C" MessageTableEntry* _message_0xFFFC_nes;	
 
 MessageTableEntry* OTRMessage_LoadTable(const char* filePath, bool isNES) {
@@ -296,7 +296,7 @@ extern "C" void OTRMessage_Init()
     MakeBlueMsgEng(0x40D, "They say that the Gerudo&currently keep something special&above their highest prison cell.");//Running Man
     MakeBlueMsgEng(0x411, "They say that one part of&the secret directions&to a lost place is:^West&East&South&West");//Gerudo Valley
     MakeBlueMsgEng(0x41A, "They say that the reward&for completing the Gerudo&Training Grounds has many uses.^And experimenting, in order to&discover what kinds of things it&works on, could pay off well.");//Gerudo Colossus
-    MakeBlueMsgEng(0x420, "They say that Dampe, the gravekeeper,&has a reward reserved for those&with very impresive speed.^However, he unlikely&to relinquish anything until&he gives up the ghost.");//Deku Tree
+    MakeBlueMsgEng(0x420, "They say that Dampe, the gravekeeper,&has a reward reserved for one&with very impresive speed.^However, he's unlikely&to relinquish anything until&he gives up the ghost.");//Deku Tree
     MakeBlueMsgEng(StoneMsg+0,"There may be something special&behind falls that are %rnot%w water...");
     MakeBlueMsgEng(StoneMsg+2,"They say that many people&would like Hyrule Field to&be cleared of Peahats.");
     MakeBlueMsgEng(StoneMsg+8, "They say that dungeons may&have hidden areas that are&not even marked on any map.");

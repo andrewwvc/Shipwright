@@ -2062,28 +2062,30 @@ extern "C" int CustomMessage_RetrieveIfExists(PlayState* play) {
                 }
 
                 uint16_t newTextId = GetTextID("stone")+actorParams;
-                uint16_t substituteID = RetrieveTextSubstitution(newTextId);
-                if (newTextId == substituteID) {
+                //uint16_t substituteID = RetrieveTextSubstitution(newTextId);
+                //if (newTextId == substituteID) {
                     messageEntry = CustomMessageManager::Instance->RetrieveMessage(questMessageTableID, newTextId);
-                } else {
-                    textId = msgCtx->textId = substituteID;
-                }
+                // } else {
+                //     textId = msgCtx->textId = substituteID;
+                // }
                 if (messageEntry.textBoxType == -1) {
                     messageEntry = CustomMessageManager::Instance->RetrieveMessage(questMessageTableID, textId);
                 }
             } else {
-                uint16_t substituteID = RetrieveTextSubstitution(textId);
-                if (substituteID == textId)
-                    messageEntry = CustomMessageManager::Instance->RetrieveMessage(questMessageTableID, substituteID);
-                else
-                    textId = msgCtx->textId = substituteID;
+                // uint16_t substituteID = RetrieveTextSubstitution(textId);
+                // if (substituteID == textId)
+                //     messageEntry = CustomMessageManager::Instance->RetrieveMessage(questMessageTableID, substituteID);
+                // else
+                //     textId = msgCtx->textId = substituteID;
+                messageEntry = CustomMessageManager::Instance->RetrieveMessage(questMessageTableID, textId);
             }
         } else {
-            uint16_t substituteID = RetrieveTextSubstitution(textId);
-            if (substituteID == textId)
-                messageEntry = CustomMessageManager::Instance->RetrieveMessage(questMessageTableID, substituteID);
-            else
-                textId = msgCtx->textId = substituteID;
+            // uint16_t substituteID = RetrieveTextSubstitution(textId);
+            // if (substituteID == textId)
+            //     messageEntry = CustomMessageManager::Instance->RetrieveMessage(questMessageTableID, substituteID);
+            // else
+            //     textId = msgCtx->textId = substituteID;
+            messageEntry = CustomMessageManager::Instance->RetrieveMessage(questMessageTableID, textId);
         }
     }
     if (textId == TEXT_GS_NO_FREEZE || textId == TEXT_GS_FREEZE) {
