@@ -83,7 +83,7 @@ SaveManager* SaveManager::Instance;
 CustomMessageManager* CustomMessageManager::Instance;
 TextIDAllocator* TextIDAllocator::Instance;
 ItemTableManager* ItemTableManager::Instance;
-std::unordered_map<uint16_t, uint16_t>* textIDSubstitutionTable;
+//std::unordered_map<uint16_t, uint16_t>* textIDSubstitutionTable;
 
 OTRGlobals::OTRGlobals() {
     std::vector<std::string> OTRFiles;
@@ -431,13 +431,13 @@ extern "C" uint16_t GetTextID(const char* name) {
     return TextIDAllocator::Instance->getId(name);
 }
 
-extern "C" uint16_t RetrieveTextSubstitution(uint16_t textID) {
-    std::unordered_map<uint16_t,uint16_t>::const_iterator iter = textIDSubstitutionTable->find(textID);
-    if (iter != textIDSubstitutionTable->end()) {
-        return iter->second;
-    }
-    return textID;
-}
+// extern "C" uint16_t RetrieveTextSubstitution(uint16_t textID) {
+//     std::unordered_map<uint16_t,uint16_t>::const_iterator iter = textIDSubstitutionTable->find(textID);
+//     if (iter != textIDSubstitutionTable->end()) {
+//         return iter->second;
+//     }
+//     return textID;
+// }
 
 extern "C" void InitOTR() {
 #ifdef __SWITCH__
@@ -453,7 +453,7 @@ extern "C" void InitOTR() {
     CustomMessageManager::Instance = new CustomMessageManager();
     TextIDAllocator::Instance = new TextIDAllocator();
     ItemTableManager::Instance = new ItemTableManager();
-    textIDSubstitutionTable = new std::unordered_map<uint16_t, uint16_t>();
+    //textIDSubstitutionTable = new std::unordered_map<uint16_t, uint16_t>();
 
     clearMtx = (uintptr_t)&gMtxClear;
     OTRMessage_Init();

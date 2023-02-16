@@ -13,7 +13,7 @@ extern "C" MessageTableEntry* sNesMessageEntryTablePtr;
 extern "C" MessageTableEntry* sGerMessageEntryTablePtr;
 extern "C" MessageTableEntry* sFraMessageEntryTablePtr;
 extern "C" MessageTableEntry* sStaffMessageEntryTablePtr;
-extern "C" std::unordered_map<uint16_t, uint16_t>* textIDSubstitutionTable;
+//extern std::unordered_map<uint16_t, uint16_t>* textIDSubstitutionTable;
 //extern "C" MessageTableEntry* _message_0xFFFC_nes;	
 
 MessageTableEntry* OTRMessage_LoadTable(const char* filePath, bool isNES) {
@@ -304,9 +304,9 @@ extern "C" void OTRMessage_Init()
     MakeBlueMsgEng(StoneMsg+12, "They say that certain items, when&they are used together, may be&able to combine their abilities.^So it may pay to experiemnt&with methods of pairing things!");
     MakeBlueMsgEng(StoneMsg+20, "They say that certain shops&may be doing business&at hours that they&advertise as being closed.");
     MakeBlueMsgEng(StoneMsg+23, "They say there is a secret&that most cannot see,&in a place where&fairies no longer live.");
-   // (*textIDSubstitutionTable)[StoneMsg+8] = 0x413;//Previous dungeons
-    (*textIDSubstitutionTable)[StoneMsg+26] = 0x405;
-    (*textIDSubstitutionTable)[0x041F] = 0x420;
+    //(*textIDSubstitutionTable)[StoneMsg+8] = 0x413;//Previous dungeons
+    //(*textIDSubstitutionTable)[StoneMsg+26] = 0x405;
+    //(*textIDSubstitutionTable)[0x041F] = 0x420;
     //MakeBlueMsgEng(StoneMsg+26, );//Mountain Crater Grotto
     //"They say that the Gerudo Mask,&owned by a certian salesman,&could be useful to enter the gate.^But not necessarily in the way&you might think."
     //"They say that Dampe,&the gravekeeper, has a reward reserved&for those with very impresive speed."
