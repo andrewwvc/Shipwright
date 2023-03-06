@@ -188,6 +188,7 @@ typedef enum {
     /* 0x44 */ CAM_FUNC_SPEC7,
     /* 0x45 */ CAM_FUNC_SPEC8,
     /* 0x46 */ CAM_FUNC_SPEC9,
+    /* 0x1B */ CAM_FUNC_BATT5,
     /* 0x47 */ CAM_FUNC_MAX
 } CameraFuncType;
 

@@ -63,10 +63,8 @@ void BossGanondrof_Throw(BossGanondrof* this, PlayState* play);
 void BossGanondrof_SetupBlock(BossGanondrof* this, PlayState* play);
 void BossGanondrof_Block(BossGanondrof* this, PlayState* play);
 void BossGanondrof_SetupReturn(BossGanondrof* this, PlayState* play);
-void BossGanondrof_Return(BossGanondrof* this, PlayState* play);
 void BossGanondrof_SetupCharge(BossGanondrof* this, PlayState* play);
 void BossGanondrof_Charge(BossGanondrof* this, PlayState* play);
-void BossGanondrof_Stunned(BossGanondrof* this, PlayState* play);
 void BossGanondrof_Death(BossGanondrof* this, PlayState* play);
 
 const ActorInit Boss_Ganondrof_InitVars = {

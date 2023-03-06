@@ -1349,7 +1349,7 @@ CameraMode sCamSetBossPhantomGanonModes[] = {
     CAM_SETTING_MODE_ENTRY(CAM_FUNC_PARA1, sSetNormal0ModeTargetData),
     CAM_SETTING_MODE_ENTRY(CAM_FUNC_KEEP1, sSetNormal0ModeFollowTargetData),
     CAM_SETTING_MODE_ENTRY(CAM_FUNC_KEEP3, sSetNormal0ModeTalkData),
-    CAM_SETTING_MODE_ENTRY(CAM_FUNC_BATT1, sSetBossPhantomGanonModeBattleData),
+    CAM_SETTING_MODE_ENTRY(CAM_FUNC_BATT5, sSetBossPhantomGanonModeBattleData),
     CAM_SETTING_MODE_ENTRY(CAM_FUNC_JUMP2, sSetNormal0ModeClimbData),
     CAM_SETTING_MODE_ENTRY(CAM_FUNC_SUBJ3, sSetNormal0ModeFirstPersonData),
     CAM_SETTING_MODE_ENTRY(CAM_FUNC_SUBJ3, sSetNormal0ModeBowArrowData),
@@ -2143,6 +2143,7 @@ s32 Camera_Special6(Camera* camera);
 s32 Camera_Special7(Camera* camera);
 s32 Camera_Special8(Camera* camera);
 s32 Camera_Special9(Camera* camera);
+s32 Camera_Battle5(Camera* camera);
 
 s32 (*sCameraFunctions[])(Camera*) = {
     NULL,
@@ -2216,6 +2217,7 @@ s32 (*sCameraFunctions[])(Camera*) = {
     Camera_Special7,
     Camera_Special8,
     Camera_Special9,
+    Camera_Battle5,
 };
 
 s32 sInitRegs = 1;
