@@ -3177,7 +3177,7 @@ s32 Camera_Battle4(Camera* camera) {
 
 #include "overlays/actors/ovl_Boss_Ganondrof/z_boss_ganondrof.h"
 
-#define ALT_HEIGHT 40
+#define ALT_HEIGHT 50
 
 s32 Camera_Battle5(Camera* camera) {
     s32 isInVolley = false;
@@ -3457,7 +3457,7 @@ s32 Camera_Battle5(Camera* camera) {
                                    camera->fov, camera->fovUpdateRate, 1.0f);
 
     if (sCameraSettings[camera->setting].cameraModes[camera->mode].values == ALT_HEIGHT)
-        camera->fov = 80;
+        camera->fov = 90;
 }
 
 s32 Camera_Battle0(Camera* camera) {
