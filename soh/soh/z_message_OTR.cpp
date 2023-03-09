@@ -156,6 +156,7 @@ extern "C" void createFishString(int num)
 
 extern "C" void OTRMessage_Init()
 {
+    TextIDAllocator::Instance->reset();
     sNesMessageEntryTablePtr = OTRMessage_LoadTable("text/nes_message_data_static/nes_message_data_static", true);
     sGerMessageEntryTablePtr = OTRMessage_LoadTable("text/ger_message_data_static/ger_message_data_static", false);
     sFraMessageEntryTablePtr = OTRMessage_LoadTable("text/fra_message_data_static/fra_message_data_static", false);

@@ -194,12 +194,16 @@ std::string CustomMessageManager::PLAYER_NAME() {
 
 
 TextIDAllocator::TextIDAllocator() {
-    start = 0x8000;
-    max_range = 0xFFFF;
-    end = start;
+    reset();
 }
 
 TextIDAllocator::~TextIDAllocator() {
+}
+
+void TextIDAllocator::reset() {
+    start = 0x8000;
+    max_range = 0xFFFF;
+    end = start;
 }
 
 uint16_t TextIDAllocator::allocateRange(std::string name, uint16_t num_ids) {

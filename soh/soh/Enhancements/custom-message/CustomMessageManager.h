@@ -132,6 +132,7 @@ class TextIDAllocator {
     TextIDAllocator();
     ~TextIDAllocator();
 
+    void reset();
     uint16_t allocateRange(std::string name, uint16_t num_ids);
     uint16_t getId(std::string name);
 };
