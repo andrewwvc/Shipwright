@@ -966,11 +966,11 @@ extern "C" void OTRMessage_Init()
     MakeNormalMsgEng(GoronMsg+15, "Things are quiet now.&I'm surprised nobody seems to&be letting me trade at&this time of day anymore.^Why could that be?");
     MakeNormalMsgEng(GoronMsg+16, "Wait, how did you get in&here at this time?");
     MakeNormalMsgEng(GoronMsg+17, "Some brothers are off racing.&It's quite a spectacle&if you want to see it.^The races are usually quite close.");
-    MakeNormalMsgEng(GoronMsg+18, "Look at our big brother's&refined rolling.^He's matured quite a bit&since his wilder days.");
+    MakeNormalMsgEng(GoronMsg+18, "Look at our heavy brother's&refined rolling.^He's matured quite a bit&since his wilder days.");
     MakeNormalMsgEng(GoronMsg+19, "I still miss the shiny&red stone that sat here.&Oh how it glowed.");
     MakeNormalMsgEng(GoronMsg+20, "Sorry! Let me express my feelings&with more refined rolling!");
-    MakeNormalMsgEng(GoronMsg+21, "Big brother isn't here now.&I wonder where he went.");
-    MakeNormalMsgEng(GoronMsg+22, "Big brother is both courteous and&tough. He tries to avoid hitting&anyone if he can help it,^and is barely phased by the&explosions of our special crop anymore.^I hear he still dislikes being&hit by them though.");
+    MakeNormalMsgEng(GoronMsg+21, "Our heavy brother isn't here now.&I wonder where he went.");
+    MakeNormalMsgEng(GoronMsg+22, "Our heavy brother is both courteous&and tough. He tries to avoid&hitting anyone if he can help it,^and is barely phased by the&explosions of our special crop anymore.^I hear he still dislikes being&hit by them though.");
     MakeNormalMsgEng(GoronMsg+23, "Oh, I give up,&I might as well ask you&to pawn this off for me.^I'll take %g200 rupees%w for it.&\x1B&%gYes&No%w\x02");
     MakeNormalMsgEng(GoronMsg+24, "Ah, I like it here.&It's so peaceful and quiet.^You know, I think it's&about time I went shopping again.^I remember the last time I went,&and hope it goes better this time.^Should I try again?&\x1B&%gYes&No%w\x02");
     MakeNormalMsgEng(GoronMsg+25, "Oh, I can't believe it.^There was someone else there&rolling around my usual spot.^Reminded me of myself&when I was younger too.^I don't understand,&but the least I can do&is stay out here instead^to watch out for&anyone who might try to&imprison our tribe again.");
