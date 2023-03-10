@@ -295,7 +295,7 @@ extern "C" void OTRMessage_Init()
     MakeBlueMsgEng(0x408, "They say that Princess Ruto's emotions&are at their highest on the&day before the full moon.");//Chicken Lady
     MakeBlueMsgEng(0x409, "Some think that the Gerudo Mask,&owned by a certian salesman,&might be useful to gain&entry to the Gerudo Fortress.^But the naive and obvious&way of using it will&likely not amount to much.");//Hold Targeting
     MakeBlueMsgEng(0x40D, "They say that the Gerudo&currently keep something special&above their highest prison cell.");//Running Man
-    MakeBlueMsgEng(0x411, "They say that one part of&the secret directions&to a lost place is:^West&East&South&West");//Gerudo Valley
+    MakeBlueMsgEng(0x411, "They say that one part of&the secret directions&to a lost place is:^South&North&West&West");//Gerudo Valley
     MakeBlueMsgEng(0x41A, "They say that the reward&for completing the Gerudo&Training Grounds has many uses.^And experimenting, in order to&discover what kinds of things it&works on, could pay off well.");//Gerudo Colossus
     MakeBlueMsgEng(0x420, "They say that Dampe, the gravekeeper,&has a reward reserved for those&with very impresive speed.^However, he unlikely&to relinquish anything until&he gives up the ghost.");//Deku Tree
     MakeBlueMsgEng(StoneMsg+0,"There may be something special&behind falls that are %rnot%w water...");
