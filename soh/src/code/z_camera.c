@@ -5916,6 +5916,100 @@ s32 Camera_Unique9(Camera* camera) {
     return true;
 }
 
+/**
+ * Camera is at a fixed point specified by the scene's camera data,
+ * camera rotates to follow player
+ */
+s32 Camera_Unique10(Camera* camera) {
+    static s32 previouslyTracking = false;
+    s32 pad;
+    Unique7* uniq7 = (Unique7*)camera->paramData;
+    CameraModeValue* values;
+    VecSph playerPosEyeOffset;
+    s16 fov;
+    Vec3s* sceneCamData;
+    Vec3s sceneCamRot;
+    Vec3f* at = &camera->at;
+    PosRot* playerPosRot = &camera->playerPosRot;
+    Vec3f* eye = &camera->eye;
+    Vec3f* eyeNext = &camera->eyeNext;
+    Unique7Unk8* unk08 = &uniq7->unk_08;
+
+    Vec3f pos1 = {1000.0f, 200.0f, 100.0f};
+    Actor* actor = camera->play->actorCtx.actorLists[ACTORCAT_BOSS].head;
+
+    while (actor != NULL) {
+        if (ACTOR_BOSS_SST == actor->id) {
+            break;
+        }
+        actor = actor->next;
+    }
+
+    if (actor) {
+        previouslyTracking = true;
+        pos1.x = -actor->world.pos.x;
+        pos1.z = -actor->world.pos.z;
+        f32 magnitudeInvScaled = 1000.0f/sqrt(pos1.x*pos1.x + pos1.z*pos1.z);
+        pos1.x *= magnitudeInvScaled;
+        pos1.z *= magnitudeInvScaled;
+    } else {
+        if (previouslyTracking)
+            camera->animState = 0;
+
+        return Camera_Normal1(camera);
+    }
+
+    if (RELOAD_PARAMS) {
+        values = sCameraSettings[camera->setting].cameraModes[camera->mode].values;
+        uniq7->fov = NEXTSETTING;
+        uniq7->interfaceFlags = 0x0000;//(s16)NEXTSETTING;
+    }
+    if (R_RELOAD_CAM_PARAMS) {
+        Camera_CopyPREGToModeValues(camera);
+    }
+
+    //sceneCamData = Camera_GetCamBGData(camera);
+
+    //Camera_Vec3sToVec3f(eyeNext, &BGCAM_POS(sceneCamData));
+
+    *eyeNext = pos1;
+    *eye = *eyeNext;
+    //sceneCamRot = BGCAM_ROT(sceneCamData); // unused
+    //(void)sceneCamRot;                     // suppresses set but unused warning
+
+    OLib_Vec3fDiffToVecSphGeo(&playerPosEyeOffset, eye, &playerPosRot->pos);
+
+    // fov actually goes unused since it's hard set later on.
+    //fov = BGCAM_FOV(sceneCamData);
+    //if (fov == -1) {
+    //    fov = uniq7->fov * 100.0f;
+    //}
+
+    //if (fov < 361) {
+    //    fov *= 100;
+    //}
+
+    sCameraInterfaceFlags = uniq7->interfaceFlags;
+
+    if (camera->animState == 0) {
+        camera->animState++;
+        //camera->fov = PCT(fov);
+        camera->atLERPStepScale = 0.0f;
+        camera->roll = 0;
+        unk08->unk_00.x = playerPosEyeOffset.yaw;
+    }
+
+    camera->fov = 60.0f;
+
+    // 0x7D0 ~ 10.98 degres.
+    unk08->unk_00.x = Camera_LERPFloorS(playerPosEyeOffset.yaw, unk08->unk_00.x, 0.4f, 0x7D0);
+    playerPosEyeOffset.pitch =
+        /*-BGCAM_ROT(sceneCamData).x */ Math_CosS(playerPosEyeOffset.yaw /*- BGCAM_ROT(sceneCamData).y*/);
+    Camera_Vec3fVecSphGeoAdd(at, eye, &playerPosEyeOffset);
+    camera->unk_14C |= 0x400;
+    return true;
+}
+
 void Camera_DebugPrintSplineArray(char* name, s16 length, CutsceneCameraPoint cameraPoints[]) {
     s32 i;
 
