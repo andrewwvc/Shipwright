@@ -1702,8 +1702,8 @@ void BossSst_HandClap(BossSst* this, PlayState* play) {
 
         if (this->timer == 0) {
             if (dropFlag) {
-                Item_DropCollectible(play, &this->actor.world.pos,
-                                     (Rand_ZeroOne() < 0.5f) ? ITEM00_ARROWS_SMALL : ITEM00_MAGIC_SMALL);
+                //Item_DropCollectible(play, &this->actor.world.pos,
+                //                     (Rand_ZeroOne() < 0.5f) ? ITEM00_ARROWS_SMALL : ITEM00_MAGIC_SMALL);
                 dropFlag = false;
             }
 
@@ -1816,8 +1816,8 @@ void BossSst_HandGrab(BossSst* this, PlayState* play) {
                     BossSst_HandSetupSwing(this);
                 }
             } else {
-                Item_DropCollectible(play, &this->actor.world.pos,
-                                     (Rand_ZeroOne() < 0.5f) ? ITEM00_ARROWS_SMALL : ITEM00_MAGIC_SMALL);
+                //Item_DropCollectible(play, &this->actor.world.pos,
+                //                     (Rand_ZeroOne() < 0.5f) ? ITEM00_ARROWS_SMALL : ITEM00_MAGIC_SMALL);
                 BossSst_HandSetupRetreat(this);
             }
         }
@@ -2533,8 +2533,8 @@ void BossSst_HandCollisionCheck(BossSst* this, PlayState* play) {
             }
 
             BossSst_HeadSetupDamagedHand(sHead, bothHands);
-            Item_DropCollectible(play, &this->actor.world.pos,
-                                 (Rand_ZeroOne() < 0.5f) ? ITEM00_ARROWS_SMALL : ITEM00_MAGIC_SMALL);
+            //Item_DropCollectible(play, &this->actor.world.pos,
+            //                     (Rand_ZeroOne() < 0.5f) ? ITEM00_ARROWS_SMALL : ITEM00_MAGIC_SMALL);
             Audio_PlayActorSound2(&this->actor, NA_SE_EN_SHADEST_DAMAGE_HAND);
         }
     }
