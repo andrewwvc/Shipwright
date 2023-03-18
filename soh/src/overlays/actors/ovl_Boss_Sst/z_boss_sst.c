@@ -3102,7 +3102,8 @@ s32 BossSst_CameraState() {
     if (sHead) {
         if ((sHead->actionFunc == BossSst_HeadReadyCharge) || (sHead->actionFunc == BossSst_HeadCharge) ||
             (sHead->actionFunc == BossSst_HeadFrozenHand) || (sHead->actionFunc == BossSst_HeadStunned) ||
-            (sHead->actionFunc == BossSst_HeadVulnerable) || (sHead->actionFunc == BossSst_HeadDamage))
+            (sHead->actionFunc == BossSst_HeadVulnerable) || (sHead->actionFunc == BossSst_HeadDamage) ||
+            (!(sHands[LEFT]->actor.flags & ACTOR_FLAG_0) && !(sHands[RIGHT]->actor.flags & ACTOR_FLAG_0)))
             return 0;
         else
             return 1;
