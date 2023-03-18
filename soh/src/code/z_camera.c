@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include "overlays/actors/ovl_En_Horse/z_en_horse.h"
+#include "src/overlays/actors/ovl_Boss_Sst/z_boss_sst.h"
 
 #include "soh/frame_interpolation.h"
 
@@ -5945,7 +5946,7 @@ s32 Camera_Unique10(Camera* camera) {
         actor = actor->next;
     }
 
-    if (actor) {
+    if (actor && BossSst_CameraState()) {
         previouslyTracking = true;
         pos1.x = -actor->world.pos.x;
         pos1.z = -actor->world.pos.z;
@@ -5953,8 +5954,10 @@ s32 Camera_Unique10(Camera* camera) {
         pos1.x *= magnitudeInvScaled;
         pos1.z *= magnitudeInvScaled;
     } else {
-        if (previouslyTracking)
+        if (previouslyTracking) {
             camera->animState = 0;
+            previouslyTracking = false;
+        }
 
         return Camera_Normal1(camera);
     }

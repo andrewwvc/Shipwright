@@ -3098,6 +3098,19 @@ void BossSst_IceShatter(BossSst* this) {
     }
 }
 
+s32 BossSst_CameraState() {
+    if (sHead) {
+        if ((sHead->actionFunc == BossSst_HeadReadyCharge) || (sHead->actionFunc == BossSst_HeadCharge) ||
+            (sHead->actionFunc == BossSst_HeadFrozenHand) || (sHead->actionFunc == BossSst_HeadStunned) ||
+            (sHead->actionFunc == BossSst_HeadVulnerable) || (sHead->actionFunc == BossSst_HeadDamage))
+            return 0;
+        else
+            return 1;
+    }
+
+    return 0;
+}
+
 void BossSst_UpdateEffect(Actor* thisx, PlayState* play) {
     BossSst* this = (BossSst*)thisx;
     BossSstEffect* effect;
