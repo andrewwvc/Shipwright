@@ -593,7 +593,7 @@ void BossTw_TurnToPlayer(BossTw* this, PlayState* play) {
     func_8002D908(&this->actor);
     func_8002D7EC(&this->actor);
     if (this->timers[0] == 0) {
-        if ((otherTw->actionFunc != BossTw_ShootBeam) && this->work[CAN_SHOOT]) {
+        if (1 || (otherTw->actionFunc != BossTw_ShootBeam) && this->work[CAN_SHOOT]) {
             this->work[CAN_SHOOT] = false;
             BossTw_SetupShootBeam(this, play);
             this->actor.speedXZ = 0.0f;
@@ -1305,6 +1305,7 @@ void BossTw_FinishBeamShoot(BossTw* this, PlayState* play) {
 
 void BossTw_SetupHitByBeam(BossTw* this, PlayState* play) {
     this->actionFunc = BossTw_HitByBeam;
+    this->beamScale = 0.0f;
     Animation_MorphToPlayOnce(&this->skelAnime, &object_tw_Anim_00578C, 0.0f);
     this->timers[0] = 53;
     this->actor.speedXZ = 0.0f;
