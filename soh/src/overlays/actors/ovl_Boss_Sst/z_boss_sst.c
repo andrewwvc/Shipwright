@@ -231,11 +231,15 @@ static Vec3f sZeroVec = { 0.0f, 0.0f, 0.0f };
 static u32 sBodyStatic = false;
 
 // Unreferenced. Maybe two zero vectors?
-static u32 sUnkValues[] = { 0, 0, 0, 0, 0, 0 };
+//static u32 sUnkValues[] = { 0, 0, 0, 0, 0, 0 };
 
 static Color_RGBA8 sBodyColor = { 255, 255, 255, 255 };
 static Color_RGBA8 sStaticColor = { 0, 0, 0, 255 };
 static s32 sHandState[] = { HAND_WAIT, HAND_WAIT };
+static BossSstHandState sPreviousAttack = 0;
+static BossSstHandState sNextAttack = 0;
+static u32 sHandTimer = 0;
+static u32 sAttackPunishPoints[] = {1,1,1,1,1};
 
 const ActorInit Boss_Sst_InitVars = {
     ACTOR_BOSS_SST,
@@ -277,6 +281,12 @@ void BossSst_Init(Actor* thisx, PlayState* play2) {
     CollisionCheck_SetInfo(&this->actor.colChkInfo, &sDamageTable, &sColChkInfoInit);
     Flags_SetSwitch(play, 0x14);
     if (this->actor.params == BONGO_HEAD) {
+        sPreviousAttack = 0;
+        sNextAttack = 0;
+        sHandTimer = 0;
+        for (s16 ii = 0; ii < 5; ii++) {
+            sAttackPunishPoints[ii] = 1;
+        }
         sFloor = (BgSstFloor*)Actor_Spawn(&play->actorCtx, play, ACTOR_BG_SST_FLOOR, sRoomCenter.x,
                                           sRoomCenter.y, sRoomCenter.z, 0, 0, 0, BONGOFLOOR_REST, true);
         SkelAnime_InitFlex(play, &this->skelAnime, &gBongoHeadSkel, &gBongoHeadEyeOpenIdleAnim, this->jointTable,
@@ -903,6 +913,7 @@ void BossSst_HeadVulnerable(BossSst* this, PlayState* play) {
 
 void BossSst_HeadSetupDamage(BossSst* this) {
     Animation_MorphToPlayOnce(&this->skelAnime, &gBongoHeadDamageAnim, -3.0f);
+    this->skelAnime.playSpeed = 0.333333f;
     Actor_SetColorFilter(&this->actor, 0x4000, 0xFF, 0, Animation_GetLastFrame(&gBongoHeadDamageAnim));
     Actor_SetColorFilter(&sHands[LEFT]->actor, 0x4000, 0xFF, 0, Animation_GetLastFrame(&gBongoHeadDamageAnim));
     Actor_SetColorFilter(&sHands[RIGHT]->actor, 0x4000, 0xFF, 0, Animation_GetLastFrame(&gBongoHeadDamageAnim));
@@ -1221,7 +1232,7 @@ void BossSst_HandSetupWait(BossSst* this) {
     this->colliderJntSph.base.atFlags &= ~(AT_ON | AT_HIT);
     Animation_MorphToLoop(&this->skelAnime, sHandIdleAnims[this->actor.params], 5.0f);
     this->ready = false;
-    this->timer = 20;
+    this->timer = 2;
     this->actionFunc = BossSst_HandWait;
 }
 
@@ -1463,9 +1474,11 @@ void BossSst_HandReadySlam(BossSst* this, PlayState* play) {
 
 void BossSst_HandSetupSlam(BossSst* this) {
     HAND_STATE(this) = HAND_SLAM;
+    sHandTimer = 0;
+    sNextAttack = 0;
     this->actor.velocity.y = 1.0f;
     Animation_MorphToPlayOnce(&this->skelAnime, sHandFlatPoses[this->actor.params], 10.0f);
-    BossSst_HandSetDamage(this, 0x20);
+    BossSst_HandSetDamage(this, 0x30);
     this->ready = false;
     Audio_PlayActorSound2(&this->actor, NA_SE_EN_SHADEST_FLY_ATTACK);
     this->actionFunc = BossSst_HandSlam;
@@ -1521,6 +1534,8 @@ void BossSst_HandSlam(BossSst* this, PlayState* play) {
 
 void BossSst_HandSetupReadySweep(BossSst* this) {
     HAND_STATE(this) = HAND_SWEEP;
+    sHandTimer = 0;
+    sNextAttack = 1;
     Animation_MorphToPlayOnce(&this->skelAnime, sHandOpenPoses[this->actor.params], 10.0f);
     this->radius = Actor_WorldDistXZToPoint(&this->actor, &sHead->actor.world.pos);
     this->actor.world.rot.y = Actor_WorldYawTowardPoint(&sHead->actor, &this->actor.world.pos);
@@ -1606,11 +1621,13 @@ void BossSst_HandReadyPunch(BossSst* this, PlayState* play) {
 }
 
 void BossSst_HandSetupPunch(BossSst* this) {
+    sHandTimer = 0;
+    sNextAttack = 2;
     this->actor.speedXZ = 1.0f;
     Animation_MorphToPlayOnce(&this->skelAnime, sHandFistPoses[this->actor.params], 5.0f);
     BossSst_HandSetInvulnerable(this, true);
     this->targetRoll = this->vParity * 0x3F00;
-    BossSst_HandSetDamage(this, 0x20);
+    BossSst_HandSetDamage(this, 0x30);
     this->actionFunc = BossSst_HandPunch;
 }
 
@@ -1682,12 +1699,14 @@ void BossSst_HandReadyClap(BossSst* this, PlayState* play) {
 }
 
 void BossSst_HandSetupClap(BossSst* this) {
+    sHandTimer = 0;
+    sNextAttack = 4;
     Animation_MorphToPlayOnce(&this->skelAnime, sHandFlatPoses[this->actor.params], 3.0f);
     this->timer = 0;
     this->handMaxSpeed = 0x240;
     this->handAngSpeed = 0;
     this->ready = false;
-    BossSst_HandSetDamage(this, 0x20);
+    BossSst_HandSetDamage(this, 0x40);
     this->actionFunc = BossSst_HandClap;
 }
 
@@ -1788,12 +1807,14 @@ void BossSst_HandReadyGrab(BossSst* this, PlayState* play) {
 }
 
 void BossSst_HandSetupGrab(BossSst* this) {
+    sHandTimer = 0;
+    sNextAttack = 3;
     Animation_MorphToPlayOnce(&this->skelAnime, sHandFistPoses[this->actor.params], 5.0f);
     this->actor.world.rot.y = this->actor.shape.rot.y + (this->vParity * 0x4000);
     this->targetYaw = this->actor.world.rot.y;
     this->timer = 30;
     this->actor.speedXZ = 0.5f;
-    BossSst_HandSetDamage(this, 0x20);
+    BossSst_HandSetDamage(this, 0x30);
     this->actionFunc = BossSst_HandGrab;
 }
 
@@ -1873,7 +1894,7 @@ void BossSst_HandCrush(BossSst* this, PlayState* play) {
                 func_8002F7DC(&player->actor, NA_SE_VO_LI_DAMAGE_S);
             }
 
-            play->damagePlayer(play, -8);
+            play->damagePlayer(play, -0x30);
         }
         if (Animation_OnFrame(&this->skelAnime, 0.0f)) {
             Audio_PlayActorSound2(&this->actor, NA_SE_EN_SHADEST_CATCH);
@@ -2462,28 +2483,70 @@ void BossSst_MoveAround(BossSst* this) {
 }
 
 void BossSst_HandSelectAttack(BossSst* this) {
-    f32 rand = Rand_ZeroOne() * 6.0f;
-    s32 randInt;
+    // f32 rand = Rand_ZeroOne() * 6.0f;
+    // s32 randInt;
+
+    // if (HAND_STATE(OTHER_HAND(this)) == HAND_DAMAGED) {
+    //     rand *= 5.0f / 6;
+    //     if (rand > 4.0f) {
+    //         rand = 4.0f;
+    //     }
+    // }
+
+    // randInt = rand;
+    // if (randInt == 0) {
+    //     BossSst_HandSetupReadySlam(this);
+    // } else if (randInt == 1) {
+    //     BossSst_HandSetupReadySweep(this);
+    // } else if (randInt == 2) {
+    //     BossSst_HandSetupReadyPunch(this);
+    // } else if (randInt == 5) {
+    //     BossSst_HandSetupReadyClap(this);
+    // } else { // randInt == 3 || randInt == 4
+    //     BossSst_HandSetupReadyGrab(this);
+    // }
+
+    f32 totalProbability = 0.0f;
+    f32 partialProbability = 0.0f;
+    f32 probabilityMasses[5];
+    for (s16 ii = 0; ii < 5; ii++){
+        probabilityMasses[ii] = (1.0f/sAttackPunishPoints[ii]);
+    }
 
     if (HAND_STATE(OTHER_HAND(this)) == HAND_DAMAGED) {
-        rand *= 5.0f / 6;
-        if (rand > 4.0f) {
-            rand = 4.0f;
+        for (s16 ii = 0; ii < 4; ii++){
+            totalProbability += probabilityMasses[ii];
+        }
+    } else {
+        for (s16 ii = 0; ii < 5; ii++){
+            totalProbability += probabilityMasses[ii];
         }
     }
 
-    randInt = rand;
-    if (randInt == 0) {
+    f32 rand = Rand_ZeroOne() * totalProbability;
+
+    partialProbability += probabilityMasses[0];
+    if (rand <= partialProbability) {
         BossSst_HandSetupReadySlam(this);
-    } else if (randInt == 1) {
-        BossSst_HandSetupReadySweep(this);
-    } else if (randInt == 2) {
-        BossSst_HandSetupReadyPunch(this);
-    } else if (randInt == 5) {
-        BossSst_HandSetupReadyClap(this);
-    } else { // randInt == 3 || randInt == 4
-        BossSst_HandSetupReadyGrab(this);
+        return;
     }
+    partialProbability += probabilityMasses[1];
+    if (rand <= partialProbability) {
+        BossSst_HandSetupReadySweep(this);
+        return;
+    }
+    partialProbability += probabilityMasses[2];
+    if (rand <= partialProbability) {
+        BossSst_HandSetupReadyPunch(this);
+        return;
+    }
+    partialProbability += probabilityMasses[3];
+    if (rand <= partialProbability || HAND_STATE(OTHER_HAND(this)) == HAND_DAMAGED) {
+        BossSst_HandSetupReadyGrab(this);
+        return;
+    }
+    BossSst_HandSetupReadyClap(this);
+
 }
 
 void BossSst_HandSetDamage(BossSst* this, s32 damage) {
@@ -2516,6 +2579,7 @@ void BossSst_HandCollisionCheck(BossSst* this, PlayState* play) {
 
         this->colliderJntSph.base.acFlags &= ~AC_HIT;
         if ((this->actor.colChkInfo.damageEffect != 0) || (this->actor.colChkInfo.damage != 0)) {
+            sAttackPunishPoints[sPreviousAttack]++;
             this->colliderJntSph.base.atFlags &= ~(AT_ON | AT_HIT);
             this->colliderJntSph.base.acFlags &= ~AC_ON;
             this->colliderJntSph.base.ocFlags1 &= ~OC1_NO_PUSH;
@@ -2631,6 +2695,10 @@ void BossSst_UpdateHand(Actor* thisx, PlayState* play) {
 void BossSst_UpdateHead(Actor* thisx, PlayState* play) {
     s32 pad;
     BossSst* this = (BossSst*)thisx;
+    sHandTimer++;
+    if (sHandTimer == 5) {
+        sPreviousAttack = sNextAttack;
+    }
 
     func_8002DBD0(&this->actor, &sHandOffsets[RIGHT], &sHands[RIGHT]->actor.world.pos);
     func_8002DBD0(&this->actor, &sHandOffsets[LEFT], &sHands[LEFT]->actor.world.pos);
