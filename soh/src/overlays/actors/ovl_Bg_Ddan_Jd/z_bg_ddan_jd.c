@@ -16,6 +16,7 @@ void BgDdanJd_Draw(Actor* thisx, PlayState* play);
 
 void BgDdanJd_Idle(BgDdanJd* this, PlayState* play);
 void BgDdanJd_Move(BgDdanJd* this, PlayState* play);
+void BgDdanJd_Static(BgDdanJd* this, PlayState* play);
 
 const ActorInit Bg_Ddan_Jd_InitVars = {
     ACTOR_BG_DDAN_JD,
@@ -66,12 +67,15 @@ void BgDdanJd_Init(Actor* thisx, PlayState* play) {
     // Missing check for actor.params < 0x40. This will cause inconsistent behavior if params >= 0x40 and the bound
     // switch state is turned on while in the same room, as the shortcut behavior won't become enabled until the actor
     // is reloaded.
-    if (Flags_GetSwitch(play, this->dyna.actor.params)) {
+    if ((this->dyna.actor.params != 0x1000) && Flags_GetSwitch(play, this->dyna.actor.params)) {
         this->ySpeed = SHORTCUT_Y_SPEED;
     } else {
         this->ySpeed = DEFAULT_Y_SPEED;
     }
-    this->actionFunc = BgDdanJd_Idle;
+    if ((this->dyna.actor.params == 0x2000))
+        this->actionFunc = BgDdanJd_Static;
+    else
+        this->actionFunc = BgDdanJd_Idle;
 }
 
 void BgDdanJd_Destroy(Actor* thisx, PlayState* play) {
@@ -108,6 +112,8 @@ void BgDdanJd_Idle(BgDdanJd* this, PlayState* play) {
                 this->state = STATE_GO_BOTTOM;
                 this->targetY = this->dyna.actor.home.pos.y;
             }
+            if (this->dyna.actor.params == 0x1000)
+                this->idleTimer = 0;
         } else if (this->state == STATE_GO_MIDDLE_FROM_TOP) {
             // If the platform has been activated as a shortcut
             if (this->ySpeed != DEFAULT_Y_SPEED) {
@@ -162,11 +168,15 @@ void BgDdanJd_Move(BgDdanJd* this, PlayState* play) {
         this->idleTimer = 0;
         this->actionFunc = BgDdanJd_Idle;
         OnePointCutscene_Init(play, 3060, -99, &this->dyna.actor, MAIN_CAM);
-    } else if (Math_StepToF(&this->dyna.actor.world.pos.y, this->targetY, this->ySpeed)) {
+    } else if (Math_StepToF(&this->dyna.actor.world.pos.y, this->targetY, this->ySpeed * ((this->dyna.actor.params == 0x1000) ? 2 : 1))) {
         Audio_PlayActorSound2(&this->dyna.actor, NA_SE_EV_PILLAR_MOVE_STOP);
         this->actionFunc = BgDdanJd_Idle;
     }
     BgDdanJd_MoveEffects(this, play);
+}
+
+// Implements the platform's movement state
+void BgDdanJd_Static(BgDdanJd* this, PlayState* play) {
 }
 
 void BgDdanJd_Update(Actor* thisx, PlayState* play) {
