@@ -67,6 +67,10 @@ static Vec3f sCornerPositions[] = {
     { -390.0f, 0.0f, -3804.0f },
 };
 
+#define NUM_PILLARS 21
+
+static BgDdanJd* sPillars[NUM_PILLARS];
+
 static Vec3f sPillarPositions[] = {
                                                                 {X_CENTER-PILLAR_DIFF, PILLAR_FLOOR, Z_CENTER-2*PILLAR_DIFF}, {X_CENTER, PILLAR_FLOOR, Z_CENTER-2*PILLAR_DIFF}, {X_CENTER+PILLAR_DIFF, PILLAR_FLOOR, Z_CENTER-2*PILLAR_DIFF},
     {X_CENTER-2*PILLAR_DIFF, PILLAR_FLOOR, Z_CENTER-PILLAR_DIFF}, {X_CENTER-PILLAR_DIFF, PILLAR_BASE, Z_CENTER-PILLAR_DIFF}, {X_CENTER, PILLAR_BASE, Z_CENTER-PILLAR_DIFF}, {X_CENTER+PILLAR_DIFF, PILLAR_BASE, Z_CENTER-PILLAR_DIFF},       {X_CENTER+2*PILLAR_DIFF, PILLAR_FLOOR, Z_CENTER-PILLAR_DIFF},
@@ -242,7 +246,7 @@ s32 BossDodongo_AteExplosive(BossDodongo* this, PlayState* play) {
 }
 
 void BossDodongo_CreatePillars(PlayState* play) {
-    for (s32 ii = 0; ii < 21; ii++) {
+    for (s32 ii = 0; ii < NUM_PILLARS; ii++) {
         s32 par = 0x0045;
         if (sPillarModeInit[ii] == 2)
             par = 0x1000;
@@ -250,12 +254,21 @@ void BossDodongo_CreatePillars(PlayState* play) {
             par = 0x2000;
         Actor* act = Actor_Spawn(&play->actorCtx,play,ACTOR_BG_DDAN_JD,sPillarPositions[ii].x,sPillarPositions[ii].y,sPillarPositions[ii].z, 0.0f,0.0f,0.0f, par, false);
         if (act) {
+            sPillars[ii] = ((BgDdanJd*)act);
             ((BgDdanJd*)act)->idleTimer = sPillarTimingInit[ii];
             if (sPillarModeInit[ii] == 1) {
                 ((BgDdanJd*)act)->state = 1;
                 act->world.pos.y = ((BgDdanJd*)act)->dyna.actor.home.pos.y + 140.0f;
             }
+        } else {
+            sPillars[ii] = NULL;
         }
+    }
+}
+
+void BossDodongo_DropPillars() {
+    for (int ii = 0; ii < NUM_PILLARS; ii++) {
+        sPillars[ii]->dyna.actor.params = DROP_PILLAR_PARAMS;
     }
 }
 
@@ -579,8 +592,20 @@ void BossDodongo_SetupBlowFire(BossDodongo* this) {
     Animation_Change(&this->skelAnime, &object_kingdodongo_Anim_0061D4, 1.0f, 0.0f,
                      Animation_GetLastFrame(&object_kingdodongo_Anim_0061D4), ANIMMODE_ONCE, 0.0f);
     this->actionFunc = BossDodongo_BlowFire;
-    this->unk_1DA = 50;
+    this->unk_1DA = 150;
     this->unk_1AE = 0;
+
+    if (this->unk_1A2 == 0) {
+        this->unk_1A0 += 2;
+        if (this->unk_1A0 >= 4) {
+            this->unk_1A0 -= 4;
+        }
+    } else {
+        this->unk_1A0 -= 2;
+        if (this->unk_1A0 < 0) {
+            this->unk_1A0 += 4;
+        }
+    }
 }
 
 void BossDodongo_SetupInhale(BossDodongo* this) {
@@ -686,8 +711,12 @@ void BossDodongo_BlowFire(BossDodongo* this, PlayState* play) {
     s32 pad;
     Vec3f unusedZeroVec1 = { 0.0f, 0.0f, 0.0f };
     Vec3f unusedZeroVec2 = { 0.0f, 0.0f, 0.0f };
+    Vec3f* endCorner;
+    Vec3f* midCorner;
+    f32 xDiff, yDiff;
 
-    SkelAnime_Update(&this->skelAnime);
+    if ((this->skelAnime.curFrame < 35.0f) || (this->unk_1DA < 20))
+        SkelAnime_Update(&this->skelAnime);
 
     if (Animation_OnFrame(&this->skelAnime, 12.0f)) {
         Audio_PlayActorSound2(&this->actor, NA_SE_EN_DODO_K_CRY);
@@ -697,10 +726,46 @@ void BossDodongo_BlowFire(BossDodongo* this, PlayState* play) {
         this->unk_1C8 = 28;
     }
 
-    if ((this->skelAnime.curFrame > 17.0f) && (this->skelAnime.curFrame < 35.0f)) {
+    if ((this->skelAnime.curFrame > 17.0f) && (this->unk_1DA > 0) /*(this->skelAnime.curFrame < 35.0f)*/) {
+        s16 currRotY = this->actor.world.rot.y;
         BossDodongo_SpawnFire(this, play, this->unk_1AE);
-        this->unk_1AE++;
+        if (this->unk_1DA < 20)
+            this->unk_1AE++;
         Math_SmoothStepToF(&this->unk_244, 0.0f, 1.0f, 8.0f, 0.0f);
+
+        endCorner = &sCornerPositions[this->unk_1A0];
+        xDiff = endCorner->x - this->actor.world.pos.x;
+        yDiff = endCorner->z - this->actor.world.pos.z;
+        s16 endAngle = Math_FAtan2F(xDiff, yDiff) * (0x8000 / M_PI);
+        if (!(this->skelAnime.curFrame < 35.0f))
+            Math_SmoothStepToS(&this->actor.world.rot.y, endAngle, 5,
+                       0x100, 5);
+
+        s16 angDiff = this->actor.world.rot.y - currRotY;
+        //This section checks to see when the flame's redirection might need to change when sweeping past the opposing corner
+        if (angDiff != 0) {
+            s16 midCornerIndex;
+            if (angDiff < 0) {
+                midCornerIndex = this->unk_1A0 + 1;
+                if (midCornerIndex >= 4)
+                    midCornerIndex -= 4;
+            } else {
+                midCornerIndex = this->unk_1A0 - 1;
+                if (midCornerIndex < 0)
+                    midCornerIndex += 4;
+            }
+
+            midCorner = &sCornerPositions[midCornerIndex];
+            xDiff = midCorner->x - this->actor.world.pos.x;
+            yDiff = midCorner->z - this->actor.world.pos.z;
+            s16 midAngle = Math_FAtan2F(xDiff, yDiff) * (0x8000 / M_PI);
+
+            if (angDiff * (this->actor.world.rot.y - midAngle) >= 0) {
+                if (ABS(this->actor.world.rot.y - midAngle) < ABS(angDiff)) {
+                    this->unk_1A2 = 1 - this->unk_1A2;
+                }
+            }
+        }
     }
 
     if (this->unk_1DA == 0) {
@@ -1097,7 +1162,7 @@ void BossDodongo_Update(Actor* thisx, PlayState* play2) {
 
         CollisionCheck_SetOC(play, &play->colChkCtx, &this->collider.base);
 
-        if (this->actionFunc == BossDodongo_Roll) {
+        if (this->actionFunc == BossDodongo_Roll || this->actionFunc == BossDodongo_Inhale || this->actionFunc == BossDodongo_BlowFire) {
             CollisionCheck_SetAT(play, &play->colChkCtx, &this->collider.base);
         }
     }
@@ -1392,6 +1457,9 @@ void BossDodongo_DeathCutscene(BossDodongo* this, PlayState* play) {
             this->cameraAt.x = camera->at.x;
             this->cameraAt.y = camera->at.y;
             this->cameraAt.z = camera->at.z;
+            BossDodongo_DropPillars();
+            this->items[1].dim.modelSphere.radius = 60;
+            this->items[2].dim.modelSphere.radius = 60;
             gSaveContext.sohStats.timestamp[TIMESTAMP_DEFEAT_KING_DODONGO] = GAMEPLAYSTAT_TOTAL_TIME;
             break;
         case 5:

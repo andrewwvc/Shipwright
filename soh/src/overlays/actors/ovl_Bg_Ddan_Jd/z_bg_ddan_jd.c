@@ -16,6 +16,7 @@ void BgDdanJd_Draw(Actor* thisx, PlayState* play);
 
 void BgDdanJd_Idle(BgDdanJd* this, PlayState* play);
 void BgDdanJd_Move(BgDdanJd* this, PlayState* play);
+void BgDdanJd_MoveThenStop(BgDdanJd* this, PlayState* play);
 void BgDdanJd_Static(BgDdanJd* this, PlayState* play);
 
 const ActorInit Bg_Ddan_Jd_InitVars = {
@@ -67,12 +68,12 @@ void BgDdanJd_Init(Actor* thisx, PlayState* play) {
     // Missing check for actor.params < 0x40. This will cause inconsistent behavior if params >= 0x40 and the bound
     // switch state is turned on while in the same room, as the shortcut behavior won't become enabled until the actor
     // is reloaded.
-    if ((this->dyna.actor.params != 0x1000) && Flags_GetSwitch(play, this->dyna.actor.params)) {
+    if ((this->dyna.actor.params != FAST_PILLAR_PARAMS) && Flags_GetSwitch(play, this->dyna.actor.params)) {
         this->ySpeed = SHORTCUT_Y_SPEED;
     } else {
         this->ySpeed = DEFAULT_Y_SPEED;
     }
-    if ((this->dyna.actor.params == 0x2000))
+    if ((this->dyna.actor.params == STATIC_PILLAR_PARAMS))
         this->actionFunc = BgDdanJd_Static;
     else
         this->actionFunc = BgDdanJd_Idle;
@@ -112,7 +113,7 @@ void BgDdanJd_Idle(BgDdanJd* this, PlayState* play) {
                 this->state = STATE_GO_BOTTOM;
                 this->targetY = this->dyna.actor.home.pos.y;
             }
-            if (this->dyna.actor.params == 0x1000)
+            if (this->dyna.actor.params == FAST_PILLAR_PARAMS)
                 this->idleTimer = 0;
         } else if (this->state == STATE_GO_MIDDLE_FROM_TOP) {
             // If the platform has been activated as a shortcut
@@ -128,6 +129,14 @@ void BgDdanJd_Idle(BgDdanJd* this, PlayState* play) {
             this->targetY = this->dyna.actor.home.pos.y + MOVE_HEIGHT_MIDDLE;
         }
         this->actionFunc = BgDdanJd_Move;
+    }
+
+    //
+    if (this->dyna.actor.params == DROP_PILLAR_PARAMS) {
+        this->ySpeed = 10;
+        this->targetY = this->dyna.actor.home.pos.y;
+        this->actionFunc = BgDdanJd_MoveThenStop;
+        return;
     }
 }
 
@@ -168,11 +177,20 @@ void BgDdanJd_Move(BgDdanJd* this, PlayState* play) {
         this->idleTimer = 0;
         this->actionFunc = BgDdanJd_Idle;
         OnePointCutscene_Init(play, 3060, -99, &this->dyna.actor, MAIN_CAM);
-    } else if (Math_StepToF(&this->dyna.actor.world.pos.y, this->targetY, this->ySpeed * ((this->dyna.actor.params == 0x1000) ? 2 : 1))) {
+    } else if (Math_StepToF(&this->dyna.actor.world.pos.y, this->targetY, this->ySpeed * ((this->dyna.actor.params == FAST_PILLAR_PARAMS) ? 2 : 1))) {
         Audio_PlayActorSound2(&this->dyna.actor, NA_SE_EV_PILLAR_MOVE_STOP);
         this->actionFunc = BgDdanJd_Idle;
     }
     BgDdanJd_MoveEffects(this, play);
+}
+
+// Implements the platform's movement state
+void BgDdanJd_MoveThenStop(BgDdanJd* this, PlayState* play) {
+    if (Math_StepToF(&this->dyna.actor.world.pos.y, this->targetY, this->ySpeed)) {
+        this->actionFunc = BgDdanJd_Static;
+    } else {
+        BgDdanJd_MoveEffects(this, play);
+    }
 }
 
 // Implements the platform's movement state
