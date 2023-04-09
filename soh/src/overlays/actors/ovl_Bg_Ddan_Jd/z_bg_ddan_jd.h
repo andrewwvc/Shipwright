@@ -20,5 +20,6 @@ typedef struct BgDdanJd {
 #define FAST_PILLAR_PARAMS 0x1000
 #define STATIC_PILLAR_PARAMS 0x2000
 #define DROP_PILLAR_PARAMS 0x4000
+#define RAISED_PILLAR_PARAMS 0x4100
 
 #endif

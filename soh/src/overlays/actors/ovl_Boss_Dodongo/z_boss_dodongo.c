@@ -80,11 +80,11 @@ static BgDdanJd* sPillars[NUM_PILLARS];
 // };
 
 static Vec3f sPillarPositions[] = {
-                                                                {X_CENTER-PILLAR_DIFF, PILLAR_FLOOR, Z_CENTER-2*PILLAR_DIFF}, {X_CENTER, PILLAR_FLOOR, Z_CENTER-2*PILLAR_DIFF}, {X_CENTER+PILLAR_DIFF, PILLAR_FLOOR, Z_CENTER-2*PILLAR_DIFF},
-    {X_CENTER-2*PILLAR_DIFF, PILLAR_FLOOR, Z_CENTER-PILLAR_DIFF}, {X_CENTER-PILLAR_DIFF, PILLAR_FLOOR, Z_CENTER-PILLAR_DIFF}, {X_CENTER, PILLAR_FLOOR, Z_CENTER-PILLAR_DIFF}, {X_CENTER+PILLAR_DIFF, PILLAR_FLOOR, Z_CENTER-PILLAR_DIFF},       {X_CENTER+2*PILLAR_DIFF, PILLAR_FLOOR, Z_CENTER-PILLAR_DIFF},
-    {X_CENTER-2*PILLAR_DIFF, PILLAR_FLOOR, Z_CENTER},            {X_CENTER-PILLAR_DIFF, PILLAR_FLOOR, Z_CENTER},             {X_CENTER, PILLAR_FLOOR, Z_CENTER},             {X_CENTER+PILLAR_DIFF, PILLAR_FLOOR, Z_CENTER},                    {X_CENTER+2*PILLAR_DIFF, PILLAR_FLOOR, Z_CENTER},
-    {X_CENTER-2*PILLAR_DIFF, PILLAR_FLOOR, Z_CENTER+PILLAR_DIFF},{X_CENTER-PILLAR_DIFF, PILLAR_FLOOR, Z_CENTER+PILLAR_DIFF}, {X_CENTER, PILLAR_FLOOR, Z_CENTER+PILLAR_DIFF}, {X_CENTER+PILLAR_DIFF, PILLAR_FLOOR, Z_CENTER+PILLAR_DIFF},        {X_CENTER+2*PILLAR_DIFF, PILLAR_FLOOR, Z_CENTER+PILLAR_DIFF},
-                                                                {X_CENTER-PILLAR_DIFF, PILLAR_FLOOR, Z_CENTER+2*PILLAR_DIFF}, {X_CENTER, PILLAR_FLOOR, Z_CENTER+2*PILLAR_DIFF}, {X_CENTER+PILLAR_DIFF, PILLAR_FLOOR, Z_CENTER+2*PILLAR_DIFF},
+                                                                {X_CENTER-PILLAR_DIFF, PILLAR_FLOOR+2, Z_CENTER-2*PILLAR_DIFF}, {X_CENTER, PILLAR_FLOOR-2, Z_CENTER-2*PILLAR_DIFF}, {X_CENTER+PILLAR_DIFF, PILLAR_FLOOR+2, Z_CENTER-2*PILLAR_DIFF},
+    {X_CENTER-2*PILLAR_DIFF, PILLAR_FLOOR+2, Z_CENTER-PILLAR_DIFF}, {X_CENTER-PILLAR_DIFF, PILLAR_BASE, Z_CENTER-PILLAR_DIFF}, {X_CENTER, PILLAR_BASE, Z_CENTER-PILLAR_DIFF}, {X_CENTER+PILLAR_DIFF, PILLAR_BASE, Z_CENTER-PILLAR_DIFF},       {X_CENTER+2*PILLAR_DIFF, PILLAR_FLOOR+2, Z_CENTER-PILLAR_DIFF},
+    {X_CENTER-2*PILLAR_DIFF, PILLAR_FLOOR-2, Z_CENTER},            {X_CENTER-PILLAR_DIFF, PILLAR_BASE, Z_CENTER},             {X_CENTER, PILLAR_BASE, Z_CENTER},             {X_CENTER+PILLAR_DIFF, PILLAR_BASE, Z_CENTER},                    {X_CENTER+2*PILLAR_DIFF, PILLAR_FLOOR-2, Z_CENTER},
+    {X_CENTER-2*PILLAR_DIFF, PILLAR_FLOOR+2, Z_CENTER+PILLAR_DIFF},{X_CENTER-PILLAR_DIFF, PILLAR_BASE, Z_CENTER+PILLAR_DIFF}, {X_CENTER, PILLAR_BASE, Z_CENTER+PILLAR_DIFF}, {X_CENTER+PILLAR_DIFF, PILLAR_BASE+2, Z_CENTER+PILLAR_DIFF},        {X_CENTER+2*PILLAR_DIFF, PILLAR_FLOOR+2, Z_CENTER+PILLAR_DIFF},
+                                                                {X_CENTER-PILLAR_DIFF, PILLAR_FLOOR+2, Z_CENTER+2*PILLAR_DIFF}, {X_CENTER, PILLAR_FLOOR-2, Z_CENTER+2*PILLAR_DIFF}, {X_CENTER+PILLAR_DIFF, PILLAR_FLOOR+2, Z_CENTER+2*PILLAR_DIFF},
 };
 
 static s16 sPillarTimingInit[] = {
@@ -103,11 +103,19 @@ static s16 sPillarTimingInit[] = {
 //        3, 3, 3,
 // };
 
+// static s16 sPillarModeInit[] = {
+//        3, 3, 3,
+//     3, 3, 3, 3, 3,
+//     3, 3, 3, 3, 3,
+//     3, 3, 3, 3, 3,
+//        3, 3, 3,
+// };
+
 static s16 sPillarModeInit[] = {
        3, 3, 3,
-    3, 3, 3, 3, 3,
-    3, 3, 3, 3, 3,
-    3, 3, 3, 3, 3,
+    3, 4, 4, 4, 3,
+    3, 4, 4, 4, 3,
+    3, 4, 4, 4, 3,
        3, 3, 3,
 };
 
@@ -268,12 +276,16 @@ void BossDodongo_CreatePillars(PlayState* play) {
             par = FAST_PILLAR_PARAMS;
         else if (sPillarModeInit[ii] == 3)
             par = STATIC_PILLAR_PARAMS;
+        else if (sPillarModeInit[ii] == 4)
+            par = RAISED_PILLAR_PARAMS;
         Actor* act = Actor_Spawn(&play->actorCtx,play,ACTOR_BG_DDAN_JD,sPillarPositions[ii].x,sPillarPositions[ii].y,sPillarPositions[ii].z, 0.0f,0.0f,0.0f, par, false);
         if (act) {
             sPillars[ii] = ((BgDdanJd*)act);
             ((BgDdanJd*)act)->idleTimer = sPillarTimingInit[ii];
             if (sPillarModeInit[ii] == 1) {
                 ((BgDdanJd*)act)->state = 1;
+                act->world.pos.y = ((BgDdanJd*)act)->dyna.actor.home.pos.y + 140.0f;
+            } else if (sPillarModeInit[ii] == 4) {
                 act->world.pos.y = ((BgDdanJd*)act)->dyna.actor.home.pos.y + 140.0f;
             }
         } else {
@@ -311,6 +323,7 @@ void BossDodongo_Init(Actor* thisx, PlayState* play) {
     this->unk_224 = 2.0f;
     this->unk_228 = 9200.0f;
     this->rapidFire = 1;
+    this->tempTimer = 0;
     Collider_InitJntSph(play, &this->collider);
     Collider_SetJntSph(play, &this->collider, &this->actor, &sJntSphInit, this->items);
 

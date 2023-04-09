@@ -73,7 +73,7 @@ void BgDdanJd_Init(Actor* thisx, PlayState* play) {
     } else {
         this->ySpeed = DEFAULT_Y_SPEED;
     }
-    if ((this->dyna.actor.params == STATIC_PILLAR_PARAMS))
+    if ((this->dyna.actor.params == STATIC_PILLAR_PARAMS || this->dyna.actor.params == RAISED_PILLAR_PARAMS))
         this->actionFunc = BgDdanJd_Static;
     else
         this->actionFunc = BgDdanJd_Idle;
@@ -83,6 +83,15 @@ void BgDdanJd_Destroy(Actor* thisx, PlayState* play) {
     BgDdanJd* this = (BgDdanJd*)thisx;
 
     DynaPoly_DeleteBgActor(play, &play->colCtx.dyna, this->dyna.bgId);
+}
+
+void BgDdanJd_SetupMoveThenStop(BgDdanJd* this) {
+    if (this->dyna.actor.params == DROP_PILLAR_PARAMS) {
+        this->ySpeed = 10;
+        this->targetY = this->dyna.actor.home.pos.y;
+        this->actionFunc = BgDdanJd_MoveThenStop;
+        return;
+    }
 }
 
 void BgDdanJd_Idle(BgDdanJd* this, PlayState* play) {
@@ -131,13 +140,7 @@ void BgDdanJd_Idle(BgDdanJd* this, PlayState* play) {
         this->actionFunc = BgDdanJd_Move;
     }
 
-    //
-    if (this->dyna.actor.params == DROP_PILLAR_PARAMS) {
-        this->ySpeed = 10;
-        this->targetY = this->dyna.actor.home.pos.y;
-        this->actionFunc = BgDdanJd_MoveThenStop;
-        return;
-    }
+    BgDdanJd_SetupMoveThenStop(this);
 }
 
 // Handles dust particles and sfx when moving
@@ -195,6 +198,7 @@ void BgDdanJd_MoveThenStop(BgDdanJd* this, PlayState* play) {
 
 // Implements the platform's movement state
 void BgDdanJd_Static(BgDdanJd* this, PlayState* play) {
+    BgDdanJd_SetupMoveThenStop(this);
 }
 
 void BgDdanJd_Update(Actor* thisx, PlayState* play) {
