@@ -713,6 +713,9 @@ void EnGoma_Update(Actor* thisx, PlayState* play) {
         this->invincibilityTimer--;
     }
 
+    if ((s8)this->actor.colChkInfo.health <= 0 && this->actionFunc != EnGoma_Die && this->actionFunc != EnGoma_Dead && this->actionFunc != EnGoma_Hurt)
+        EnGoma_SetupDie(this);
+
     this->actionFunc(this, play);
     Actor_MoveForward(&this->actor);
     this->actor.world.pos.x = this->actor.world.pos.x + this->shieldKnockbackVel.x;
