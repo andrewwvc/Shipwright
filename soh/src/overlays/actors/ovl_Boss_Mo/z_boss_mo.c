@@ -175,20 +175,36 @@ f32 BossMo_RandZeroOne(void) {
 
 s32 BossMo_NearLand(Vec3f* pos, f32 margin) {
     if (450.0f - margin <= fabsf(pos->x)) {
-        return true;
+        if (450.0f - margin <= fabsf(pos->z))
+            return 4;
+        return 1;
     }
     if (450.0f - margin <= fabsf(pos->z)) {
-        return true;
+        return 2;
     }
     if ((fabsf(pos->x - 180.0f) < 90.0f + margin) || (fabsf(pos->x - -180.0f) < 90.0f + margin)) {
         if (fabsf(pos->z - 180.0f) < 90.0f + margin) {
-            return true;
+            return 3;
         }
         if (fabsf(pos->z - -180.0f) < 90.0f + margin) {
-            return true;
+            return 3;
         }
     }
-    return false;
+
+    return 0;
+}
+
+s32 BossMo_NonCollidingPosition(Vec3f* pos, Vec3f* prevPos, f32 margin) {
+    s32 res = BossMo_NearLand(pos,margin);
+
+    if (res == 3) {
+        if ((fabsf(prevPos->x - 180.0f) < 90.0f + margin) || (fabsf(prevPos->x - -180.0f) < 90.0f + margin))
+            return 2;
+        else
+            return 1;
+    } else {
+        return res;
+    }
 }
 
 void BossMo_SpawnRipple(BossMoEffect* effect, Vec3f* pos, f32 scale, f32 maxScale, s16 maxAlpha, s16 partLimit,
@@ -2326,12 +2342,19 @@ void BossMo_UpdateTent(Actor* thisx, PlayState* play) {
             this->timers[i]--;
         }
     }
-    Math_ApproachS(&this->actor.world.rot.y, this->actor.yawTowardsPlayer, 0xA, 0xC8);
+    Math_ApproachS(&this->actor.world.rot.y, this->actor.yawTowardsPlayer, 0x2, 0xC80);
+    //Math_ApproachS(&this->actor.world.rot.y, this->actor.yawTowardsPlayer, 0xA, 0xC8);
     Actor_MoveForward(&this->actor);
-    Math_ApproachF(&this->actor.speedXZ, 0.0, 1.0f, 0.02f);
+    Math_ApproachF(&this->actor.speedXZ, 8.0, 1.0f, 0.02f);
 
-    if (BossMo_NearLand(&this->actor.world.pos, 40)) {
-        this->actor.world.pos = this->actor.prevPos;
+    s32 colVal =  BossMo_NonCollidingPosition(&this->actor.world.pos, &this->actor.prevPos, 40);
+    if (colVal) {
+        if (colVal == 4)
+            this->actor.world.pos = this->actor.prevPos;
+        else if (colVal == 1)
+            this->actor.world.pos.x = this->actor.prevPos.x;
+        else
+            this->actor.world.pos.z = this->actor.prevPos.z;
     }
     if ((this->work[MO_TENT_VAR_TIMER] % 8) == 0) {
         f32 rippleScale;
