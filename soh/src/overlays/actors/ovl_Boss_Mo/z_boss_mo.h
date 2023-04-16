@@ -127,6 +127,9 @@ typedef struct BossMo {
     /* 0x103C */ ColliderJntSphElement tentElements[19];
     /* 0x14FC */ ColliderCylinder coreCollider;
     /* 0x1548 */ char unk_1548[0x44];
+    /*        */ Vec3f spitPos;
+    /*        */ s16 spitState;
+    /*        */ s16 spitRot;
 } BossMo; // size = 0x158C
 
 #define BOSSMO_CORE -1
