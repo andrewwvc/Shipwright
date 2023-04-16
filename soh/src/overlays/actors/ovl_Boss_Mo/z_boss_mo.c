@@ -432,6 +432,9 @@ void BossMo_SetupTentacle(BossMo* this, PlayState* play) {
     this->timers[0] = 50 + (s16)Rand_ZeroFloat(20.0f);
 }
 
+#define IN_CORNER ((ABS(GET_PLAYER(play)->actor.world.pos.x) > 500.0f) && (ABS(GET_PLAYER(play)->actor.world.pos.z) > 500.0f))
+#define UPSCALE ( IN_CORNER ? 1.5f : 1.0f)
+
 void BossMo_Tentacle(BossMo* this, PlayState* play) {
     s16 tentXrot;
     s16 sp1B4 = 0;
@@ -679,7 +682,7 @@ void BossMo_Tentacle(BossMo* this, PlayState* play) {
             Math_ApproachF(&this->waterLevelMod, -5.0f, 0.1f, 0.4f);
             for (indS1 = 0; indS1 < 41; indS1++) {
                 Math_ApproachF(&this->tentStretch[indS1].y,
-                               this->fwork[MO_TENT_MAX_STRETCH] * ((((40 - indS1) * 25.0f) / 100.0f) + 5.0f), 0.5f,
+                               this->fwork[MO_TENT_MAX_STRETCH] * ((((40 - indS1) * 25.0f * UPSCALE) / 100.0f) + 5.0f), 0.5f,
                                0.7f);
                 Math_ApproachS(&this->tentRot[indS1].x, sAttackRot[indS1] * 0x100, 1.0f / this->tentMaxAngle,
                                this->tentSpeed);
@@ -688,11 +691,12 @@ void BossMo_Tentacle(BossMo* this, PlayState* play) {
             this->targetPos = this->actor.world.pos;
             Math_ApproachF(&this->tentMaxAngle, 0.5f, 1.0f, 0.01);
             Math_ApproachF(&this->tentSpeed, 160.0f, 1.0f, 50.0f);
+            Math_ApproachS(&this->actor.shape.rot.y, this->actor.yawTowardsPlayer, 0xA, 0x80);
             if ((this->timers[0] == 0) || (this->linkHitTimer != 0)) {
                 dx = this->tentPos[22].x - player->actor.world.pos.x;
                 dy = this->tentPos[22].y - player->actor.world.pos.y;
                 dz = this->tentPos[22].z - player->actor.world.pos.z;
-                if ((fabsf(dy) < 50.0f) && !HAS_LINK(otherTent) && (sqrtf(SQ(dx) + SQ(dy) + SQ(dz)) < 120.0f)) {
+                if ((fabsf(dy) < 50.0f * UPSCALE) && !HAS_LINK(otherTent) && (sqrtf(SQ(dx) + SQ(dy) + SQ(dz)) < 120.0f * UPSCALE)) {
                     this->tentMaxAngle = .001f;
                     this->work[MO_TENT_ACTION_STATE] = MO_TENT_CURL;
                     this->timers[0] = 40;
@@ -1787,7 +1791,18 @@ void BossMo_CoreCollisionCheck(BossMo* this, PlayState* play) {
 
                 this->actor.speedXZ = 15.0f;
 
-                this->actor.world.rot.y = this->actor.yawTowardsPlayer + 0x8000;
+                if (IN_CORNER) {
+                    this->actor.world.rot.y = 0x8000 + Math_Atan2S(this->actor.world.pos.z, this->actor.world.pos.x);
+                    s16 rotDiff = this->actor.world.rot.y - this->actor.yawTowardsPlayer;
+                    if (ABS(rotDiff) < 0x0C00) {
+                        if (rotDiff > 0)
+                            this->actor.world.rot.y = this->actor.yawTowardsPlayer + 0x0C00;
+                        else
+                            this->actor.world.rot.y = this->actor.yawTowardsPlayer - 0x0C00;
+                    }
+                } else {
+                    this->actor.world.rot.y = this->actor.yawTowardsPlayer + 0x8000;
+                }
                 this->work[MO_CORE_DMG_FLASH_TIMER] = 15;
                 Audio_PlayActorSound2(&this->actor, NA_SE_EN_MOFER_CORE_DAMAGE);
                 this->actor.colChkInfo.health -= damage;
