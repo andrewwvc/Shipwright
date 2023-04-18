@@ -349,8 +349,6 @@ static f32 sDropletWidth[41] = {
     0.0f,      0.0f,      0.0f,      0.0f,      0.0f,
 }; // These are sqrt(9^2 - (i/2 - 9)^2), a sphere of radius 9.
 
-#define SPIT_STARTUP 20
-
 void BossMo_Init(Actor* thisx, PlayState* play2) {
     PlayState* play = play2;
     BossMo* this = (BossMo*)thisx;
@@ -358,9 +356,6 @@ void BossMo_Init(Actor* thisx, PlayState* play2) {
 
     Actor_ProcessInitChain(&this->actor, sInitChain);
     ActorShape_Init(&this->actor.shape, 0.0f, NULL, 0.0f);
-    this->spitPos = this->actor.world.pos;
-    this->spitState = SPIT_STARTUP;
-    this->spitRot = 0x0;
     if (this->actor.params != BOSSMO_TENTACLE) {
         Flags_SetSwitch(play, 0x14);
         sMorphaCore = this;
@@ -1974,13 +1969,11 @@ void BossMo_Core(BossMo* this, PlayState* play) {
                 this->work[MO_TENT_ACTION_STATE] = MO_CORE_ATTACK;
                 this->work[MO_CORE_POS_IN_TENT] = 0;
                 this->timers[0] = 0;
-                this->spitState = SPIT_STARTUP;
             }
             if (sMorphaTent1->work[MO_TENT_ACTION_STATE] == MO_TENT_ATTACK) {
                 this->work[MO_TENT_ACTION_STATE] = MO_CORE_ATTACK;
                 this->work[MO_CORE_POS_IN_TENT] = 0;
                 this->timers[0] = 0;
-                this->spitState = SPIT_STARTUP;
                 this->actor.speedXZ = 0.0f;
             }
             break;
@@ -2016,33 +2009,6 @@ void BossMo_Core(BossMo* this, PlayState* play) {
                         this->work[MO_CORE_POS_IN_TENT] = temp;
                     }
                 }
-
-                //Handles spitbubbles
-                if (this->spitState > 0)
-                    this->spitState--;
-                else if (this->spitState < 0) {
-                    this->spitPos.x += Math_SinS(this->spitRot)*14.0f;
-                    this->spitPos.z += Math_CosS(this->spitRot)*14.0f;
-                    Vec3f zeroVec = {0.0f,0.0f,0.0f};
-                    BossMo_SpawnBubble(play->specialEffects, &this->spitPos, &zeroVec, &zeroVec, 1.5f, NULL);
-
-                    this->spitState++;
-                    if (SQ(this->spitPos.x - player->actor.world.pos.x)+SQ(this->spitPos.y - player->actor.world.pos.y)+SQ(this->spitPos.z - player->actor.world.pos.z) < SQ(70.0f)) {
-                        play->damagePlayer(play, -0x10);
-                        func_80078914(&this->spitPos, NA_SE_EV_OUT_OF_WATER);
-                        this->spitState = SPIT_STARTUP;
-                    }
-                    if (this->spitState == 0) {
-                        this->spitState = SPIT_STARTUP;
-                    }
-                }
-                if (this->spitState == 0 && this->work[MO_CORE_POS_IN_TENT] >20) {
-                    this->spitPos = sMorphaTent1->tentPos[this->work[MO_CORE_POS_IN_TENT]];
-                    this->spitState = -100;
-                    this->spitRot = this->actor.yawTowardsPlayer;
-                    func_80078914(&this->spitPos, NA_SE_EV_DIVE_WATER);
-                }
-
                 if ((sMorphaTent1->work[MO_TENT_ACTION_STATE] != MO_TENT_ATTACK) &&
                     (sMorphaTent1->work[MO_TENT_ACTION_STATE] != MO_TENT_CUT)) {
                     this->work[MO_TENT_ACTION_STATE] = MO_CORE_RETREAT;
