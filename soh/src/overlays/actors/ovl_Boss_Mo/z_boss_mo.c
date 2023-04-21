@@ -356,6 +356,8 @@ static f32 sDropletWidth[41] = {
     0.0f,      0.0f,      0.0f,      0.0f,      0.0f,
 }; // These are sqrt(9^2 - (i/2 - 9)^2), a sphere of radius 9.
 
+#define MAX_HEALTH 20
+
 void BossMo_Init(Actor* thisx, PlayState* play2) {
     PlayState* play = play2;
     BossMo* this = (BossMo*)thisx;
@@ -377,7 +379,7 @@ void BossMo_Init(Actor* thisx, PlayState* play2) {
         this->actor.world.pos.y = MO_WATER_LEVEL(play) + 50.0f;
         this->fwork[MO_TENT_SWING_SIZE_X] = 5.0f;
         this->drawActor = true;
-        this->actor.colChkInfo.health = 20;
+        this->actor.colChkInfo.health = MAX_HEALTH;
         this->actor.colChkInfo.mass = 0;
         this->actor.params = 0;
         Actor_SetScale(&this->actor, 0.01f);
@@ -590,6 +592,7 @@ void BossMo_Tentacle(BossMo* this, PlayState* play) {
     }
     switch (this->work[MO_TENT_ACTION_STATE]) {
         case MO_TENT_WAIT:
+            this->actor.speedXZ = 0;
             this->actor.flags &= ~ACTOR_FLAG_0;
             if (this == sMorphaTent2 || this == sMorphaTent3) {
                 this->work[MO_TENT_ACTION_STATE] = MO_TENT_SPAWN;
@@ -698,7 +701,8 @@ void BossMo_Tentacle(BossMo* this, PlayState* play) {
             this->targetPos = this->actor.world.pos;
             Math_ApproachF(&this->tentMaxAngle, 0.5f, 1.0f, 0.01);
             Math_ApproachF(&this->tentSpeed, 160.0f, 1.0f, 50.0f);
-            Math_ApproachS(&this->actor.shape.rot.y, this->actor.yawTowardsPlayer, 0xA, 0x80);
+            if (sMorphaCore->hitCount >= 1)
+                Math_ApproachS(&this->actor.shape.rot.y, this->actor.yawTowardsPlayer, 0xA, 0x80);
             if ((this->timers[0] == 0) || (this->linkHitTimer != 0)) {
                 dx = this->tentPos[22].x - player->actor.world.pos.x;
                 dy = this->tentPos[22].y - player->actor.world.pos.y;
@@ -927,6 +931,7 @@ void BossMo_Tentacle(BossMo* this, PlayState* play) {
             }
             break;
         case MO_TENT_RETREAT:
+            this->actor.speedXZ = 0;
             if (this->csCamera != 0) {
                 Math_ApproachF(&this->cameraAt.x, player->actor.world.pos.x, 0.5f, 50.0f);
                 Math_ApproachF(&this->cameraAt.y, player->actor.world.pos.y, 0.5f, 50.0f);
@@ -980,7 +985,7 @@ void BossMo_Tentacle(BossMo* this, PlayState* play) {
                     }
                 }
             }
-            if ((this == sMorphaTent1) && (sMorphaCore->hitCount >= 3) && (sMorphaTent2 == NULL)) {
+            if ((this == sMorphaTent1) && (sMorphaCore->actor.colChkInfo.health <= MAX_HEALTH - 6) && (sMorphaTent2 == NULL)) {
                 sMorphaTent2 =
                     (BossMo*)Actor_Spawn(&play->actorCtx, play, ACTOR_BOSS_MO, this->actor.world.pos.x,
                                          this->actor.world.pos.y, this->actor.world.pos.z, 0, 0, 0, BOSSMO_TENTACLE, true);
@@ -998,24 +1003,24 @@ void BossMo_Tentacle(BossMo* this, PlayState* play) {
                 sMorphaTent2->otherTent = &sMorphaTent1->actor;
                 sMorphaTent1->otherTent = &sMorphaTent2->actor;
             }
-            if ((this == sMorphaTent1) && sMorphaTent2 && (sMorphaTent3 == NULL) && (sMorphaCore->hitCount >= 5)) {
-                sMorphaTent3 =
-                    (BossMo*)Actor_Spawn(&play->actorCtx, play, ACTOR_BOSS_MO, this->actor.world.pos.x,
-                                         this->actor.world.pos.y, this->actor.world.pos.z, 0, 0, 0, BOSSMO_TENTACLE, true);
+            // if ((this == sMorphaTent1) && sMorphaTent2 && (sMorphaTent3 == NULL) && (sMorphaCore->hitCount >= 5)) {
+            //     sMorphaTent3 =
+            //         (BossMo*)Actor_Spawn(&play->actorCtx, play, ACTOR_BOSS_MO, this->actor.world.pos.x,
+            //                              this->actor.world.pos.y, this->actor.world.pos.z, 0, 0, 0, BOSSMO_TENTACLE, true);
 
-                sMorphaTent3->tentSpawnPos = this->tentSpawnPos;
-                if (sMorphaTent3->tentSpawnPos > 10) {
-                    sMorphaTent3->tentSpawnPos--;
-                } else {
-                    sMorphaTent3->tentSpawnPos++;
-                }
+            //     sMorphaTent3->tentSpawnPos = this->tentSpawnPos;
+            //     if (sMorphaTent3->tentSpawnPos > 10) {
+            //         sMorphaTent3->tentSpawnPos--;
+            //     } else {
+            //         sMorphaTent3->tentSpawnPos++;
+            //     }
 
-                sMorphaTent3->targetPos.x = sTentSpawnPos[sMorphaTent3->tentSpawnPos].x;
-                sMorphaTent3->targetPos.z = sTentSpawnPos[sMorphaTent3->tentSpawnPos].y;
-                sMorphaTent3->timers[0] = 100;
-                sMorphaTent3->work[MO_TENT_ACTION_STATE] = MO_TENT_DESPAWN;
-                sMorphaTent3->otherTent = NULL;
-            }
+            //     sMorphaTent3->targetPos.x = sTentSpawnPos[sMorphaTent3->tentSpawnPos].x;
+            //     sMorphaTent3->targetPos.z = sTentSpawnPos[sMorphaTent3->tentSpawnPos].y;
+            //     sMorphaTent3->timers[0] = 100;
+            //     sMorphaTent3->work[MO_TENT_ACTION_STATE] = MO_TENT_DESPAWN;
+            //     sMorphaTent3->otherTent = NULL;
+            // }
             break;
         case MO_TENT_DESPAWN:
             this->actor.flags &= ~ACTOR_FLAG_0;
@@ -1206,7 +1211,7 @@ void BossMo_TentCollisionCheck(BossMo* this, PlayState* play) {
             }
             hurtbox = this->tentCollider.elements[i1].info.acHitInfo;
             this->work[MO_TENT_INVINC_TIMER] = 5;
-            if (hurtbox->toucher.dmgFlags & 0x00020000) {
+            if (hurtbox->toucher.dmgFlags & 0x40020040) {
                 func_80078914(&this->tentTipPos, NA_SE_EN_MOFER_CUT);
                 this->cutIndex = 15;
                 this->meltIndex = this->cutIndex + 1;
@@ -2391,10 +2396,16 @@ void BossMo_UpdateTent(Actor* thisx, PlayState* play) {
             this->timers[i]--;
         }
     }
-    Math_ApproachS(&this->actor.world.rot.y, this->actor.yawTowardsPlayer, 0x2, 0xC80);
-    //Math_ApproachS(&this->actor.world.rot.y, this->actor.yawTowardsPlayer, 0xA, 0xC8);
-    Actor_MoveForward(&this->actor);
-    Math_ApproachF(&this->actor.speedXZ, 8.0, 1.0f, 0.02f);
+
+    if (sMorphaCore->hitCount < 1) {
+        Actor_MoveForward(&this->actor);
+        Math_ApproachF(&this->actor.speedXZ, 0.0f, 1.0f, 0.08f);
+    } else {
+        Math_ApproachS(&this->actor.world.rot.y, this->actor.yawTowardsPlayer, 0x2, 0xC80);
+        //Math_ApproachS(&this->actor.world.rot.y, this->actor.yawTowardsPlayer, 0xA, 0xC8);
+        Actor_MoveForward(&this->actor);
+        Math_ApproachF(&this->actor.speedXZ, 8.0f, 1.0f, 0.08f);
+    }
 
     s32 colVal =  BossMo_NonCollidingPosition(&this->actor.world.pos, &this->actor.prevPos, 40);
     if (colVal) {
