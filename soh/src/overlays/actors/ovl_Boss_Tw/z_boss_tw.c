@@ -744,6 +744,9 @@ void BossTw_SpawnGroundBlast(BossTw* this, PlayState* play, s16 blastType) {
             sKotakePtr->workf[UNK_F12] = 0.005f;
             sKotakePtr->workf[UNK_F14] = 1.0f;
             sKotakePtr->workf[UNK_F16] = 70.0f;
+            groundBlast->workf[UNK_F9] = 250.0f;
+            groundBlast->workf[UNK_F11] = 50.0f;
+            groundBlast->workf[UNK_F12] = 0.005f;;
             sKotakePtr->groundBlastPos2 = groundBlast->actor.world.pos;
             sEnvType = 3;
         }
@@ -3512,20 +3515,6 @@ void BossTw_Draw(Actor* thisx, PlayState* play2) {
 
     if (this->actor.params == TW_KOTAKE) {
         if (this->workf[UNK_F9] > 0.0f) {
-            if (this->workf[UNK_F11] > 0.0f) {
-                Vec3f diff;
-                diff.x = this->groundBlastPos2.x - player->actor.world.pos.x;
-                diff.y = this->groundBlastPos2.y - player->actor.world.pos.y;
-                diff.z = this->groundBlastPos2.z - player->actor.world.pos.z;
-
-                if ((fabsf(diff.y) < 10.0f) && (player->actor.bgCheckFlags & 1) &&
-                    (sqrtf(SQ(diff.x) + SQ(diff.z)) < (this->workf[UNK_F12] * 4600.0f)) && (sFreezeState == 0) &&
-                    (this->workf[UNK_F11] > 200.0f)) {
-                    sFreezeState = 1;
-                    sTwinrovaPtr->timers[2] = 100;
-                }
-            }
-
             func_80941BC0(this, play);
         }
     } else {
@@ -4026,15 +4015,15 @@ void BossTw_BlastFire(BossTw* this, PlayState* play) {
                     sEnvType = 0;
                 }
 
-                if (sGroundBlastType == 2) {
-                    this->timers[0] = 0;
-                }
+                // if (sGroundBlastType == 2) {
+                //     this->timers[0] = 0;
+                // }
 
                 Audio_PlayActorSound2(&this->actor, NA_SE_EN_TWINROBA_FIRE_EXP - SFX_FLAG);
 
-                xDiff = sKoumePtr->groundBlastPos2.x - player->actor.world.pos.x;
-                yDiff = sKoumePtr->groundBlastPos2.y - player->actor.world.pos.y;
-                zDiff = sKoumePtr->groundBlastPos2.z - player->actor.world.pos.z;
+                xDiff = /*sKoumePtr->groundBlastPos2*/this->actor.world.pos.x - player->actor.world.pos.x;
+                yDiff = /*sKoumePtr->groundBlastPos2*/this->actor.world.pos.y - player->actor.world.pos.y;
+                zDiff = /*sKoumePtr->groundBlastPos2*/this->actor.world.pos.z - player->actor.world.pos.z;
 
                 if (!player->isBurning && (player->actor.bgCheckFlags & 1) && (fabsf(yDiff) < 10.0f) &&
                     (sqrtf(SQ(xDiff) + SQ(zDiff)) < (sKoumePtr->workf[UNK_F13] * 4550.0f))) {
@@ -4059,12 +4048,15 @@ void BossTw_BlastFire(BossTw* this, PlayState* play) {
             }
 
             {
-                f32 sp4C = sGroundBlastType == 2 ? 3.0f : 1.0f;
+                f32 sp4C = 1.0f;// sGroundBlastType == 2 ? 3.0f : 1.0f;
 
+                Math_ApproachF(&this->workf[UNK_F9], 0.0f, 1.0f, 10.0f * sp4C);
                 Math_ApproachF(&sKoumePtr->workf[UNK_F9], 0.0f, 1.0f, 10.0f * sp4C);
                 Math_ApproachF(&sKoumePtr->workf[UNK_F12], 0.0f, 1.0f, 0.03f * sp4C);
+                Math_ApproachF(&this->workf[UNK_F12], 0.0f, 1.0f, 0.03f * sp4C);
                 Math_ApproachF(&sKoumePtr->workf[TAIL_ALPHA], 0.0f, 1.0f, 3.0f * sp4C);
                 Math_ApproachF(&sKoumePtr->workf[UNK_F11], 0.0f, 1.0f, 6.0f * sp4C);
+                Math_ApproachF(&this->workf[UNK_F11], 0.0f, 1.0f, 6.0f * sp4C);
             }
 
             if (sKoumePtr->workf[TAIL_ALPHA] <= 0.0f) {
@@ -4217,9 +4209,9 @@ void BossTw_BlastIce(BossTw* this, PlayState* play) {
                     sEnvType = 0;
                 }
 
-                if (sGroundBlastType == 1) {
-                    this->timers[0] = 0;
-                }
+                // if (sGroundBlastType == 1) {
+                //     this->timers[0] = 0;
+                // }
 
                 Audio_PlayActorSound2(&this->actor, NA_SE_EV_ICE_FREEZE - SFX_FLAG);
 
@@ -4249,8 +4241,11 @@ void BossTw_BlastIce(BossTw* this, PlayState* play) {
                 }
 
                 Math_ApproachF(&sKotakePtr->workf[UNK_F9], 80.0f, 1.0f, 3.0f);
+                Math_ApproachF(&this->workf[UNK_F9], 80.0f, 1.0f, 3.0f);
                 Math_ApproachF(&sKotakePtr->workf[UNK_F11], 255.0f, 1.0f, 10.0f);
+                Math_ApproachF(&this->workf[UNK_F11], 255.0f, 1.0f, 10.0f);
                 Math_ApproachF(&sKotakePtr->workf[UNK_F12], 0.04f, 0.1f, 0.002f);
+                Math_ApproachF(&this->workf[UNK_F12], 0.04f, 0.1f, 0.002f);
                 Math_ApproachF(&sKotakePtr->workf[UNK_F16], 70.0f, 1.0f, 5.0f);
 
                 if ((this->timers[0] == 70) || (this->timers[0] == 30)) {
@@ -4263,8 +4258,8 @@ void BossTw_BlastIce(BossTw* this, PlayState* play) {
             } else {
                 f32 sp80;
 
-                if (sGroundBlastType == 1) {
-                    if (sKotakePtr->workf[UNK_F11] > 1.0f) {
+                if ( false && sGroundBlastType == 1) {
+                    if (this->workf[UNK_F11] > 1.0f) {
                         for (i = 0; i < 3; i++) {
                             Vec3f pos;
                             Vec3f velocity;
@@ -4289,9 +4284,13 @@ void BossTw_BlastIce(BossTw* this, PlayState* play) {
 
                 Math_ApproachF(&sKotakePtr->workf[UNK_F14], 0.0f, 1.0f, 0.2f * sp80);
                 Math_ApproachF(&sKotakePtr->workf[UNK_F11], 0.0f, 1.0f, 5.0f * sp80);
+                Math_ApproachF(&this->workf[UNK_F11], 0.0f, 1.0f, 5.0f * sp80);
                 Math_ApproachF(&sKotakePtr->workf[UNK_F9], 0.0f, 1.0f, sp80);
+                Math_ApproachF(&this->workf[UNK_F9], 0.0f, 1.0f, sp80);
 
-                if (sKotakePtr->workf[UNK_F9] <= 0.0f) {
+                if (this->workf[UNK_F9] <= 0.0f) {
+                    if (sFreezeState == 1)
+                        sFreezeState = 0;
                     Actor_Kill(&this->actor);
                 }
             }
@@ -4417,6 +4416,7 @@ void BossTw_BlastDraw(Actor* thisx, PlayState* play2) {
     f32 scaleFactor;
     s16 tailIdx;
     s16 i;
+    Player* player = GET_PLAYER(play2);
 
     OPEN_DISPS(play->state.gfxCtx);
 
@@ -4477,6 +4477,20 @@ void BossTw_BlastDraw(Actor* thisx, PlayState* play2) {
             break;
 
         case TW_ICE_BLAST_GROUND:
+            Vec3f diff;
+            diff.x = this->actor.world.pos.x - player->actor.world.pos.x;
+            diff.y = this->actor.world.pos.y - player->actor.world.pos.y;
+            diff.z = this->actor.world.pos.z - player->actor.world.pos.z;
+            if (this->workf[UNK_F9] > 0.0f) {
+                if (this->workf[UNK_F11] > 0.0f) {
+                    if ((fabsf(diff.y) < 10.0f) && (player->actor.bgCheckFlags & 1) &&
+                        (sqrtf(SQ(diff.x) + SQ(diff.z)) < (this->workf[UNK_F12] * 4600.0f)) && (sFreezeState == 0) &&
+                        (this->workf[UNK_F11] > 200.0f)) {
+                        sFreezeState = 1;
+                        sTwinrovaPtr->timers[2] = 100;
+                    }
+                }
+            }
             break;
     }
 
@@ -4787,9 +4801,9 @@ void BossTw_UpdateEffects(PlayState* play) {
                 if (eff->work[EFF_ARGS] < eff->frame) {
                     phi_f0 = 1.0f;
 
-                    if (eff->target != NULL || sGroundBlastType == 1) {
-                        phi_f0 *= 3.0f;
-                    }
+                    // if (eff->target != NULL || sGroundBlastType == 1) {
+                    //     phi_f0 *= 3.0f;
+                    // }
 
                     Math_ApproachF(&eff->workf[EFF_SCALE], 0.0f, 1.0f, 0.0005f * phi_f0);
 
@@ -4801,9 +4815,9 @@ void BossTw_UpdateEffects(PlayState* play) {
                         }
                     }
                 } else {
-                    if (sGroundBlastType == 1) {
-                        eff->frame = 100;
-                    }
+                    // if (sGroundBlastType == 1) {
+                    //     eff->frame = 100;
+                    // }
                     Math_ApproachF(&eff->workf[EFF_DIST], 0.8f, 0.2f, 0.04f);
 
                     if (eff->target == NULL) {
