@@ -529,6 +529,7 @@ void BossTw_Init(Actor* thisx, PlayState* play2) {
 
         this->actor.params = TW_TWINROVA;
         sTwinrovaPtr = this;
+        this->blastAngle = 0x1000;
 
         if (Flags_GetClear(play, play->roomCtx.curRoom.num)) {
             // twinrova has been defeated.
@@ -724,6 +725,12 @@ void BossTw_SpawnGroundBlast(BossTw* this, PlayState* play, s16 blastType) {
             sKoumePtr->workf[KM_GD_FLM_A] = sKoumePtr->workf[KM_GD_SMOKE_A] = sKoumePtr->workf[KM_GRND_CRTR_A] = 255.0f;
             sKoumePtr->workf[KM_GD_FLM_SCL] = 1.0f;
             sKoumePtr->workf[KM_GD_CRTR_SCL] = 0.005f;
+            groundBlast->workf[TAIL_ALPHA] = 250.0f;
+            groundBlast->workf[KM_GD_FLM_A] = groundBlast->workf[KM_GD_SMOKE_A] = groundBlast->workf[KM_GRND_CRTR_A] = 255.0f;
+            groundBlast->workf[KM_GD_FLM_SCL] = 1.0f;
+            groundBlast->workf[KM_GD_CRTR_SCL] = 0.005f;
+            groundBlast->work[CS_TIMER_1] = sKoumePtr->work[CS_TIMER_1];
+            groundBlast->workf[UNK_F13] = sKoumePtr->workf[UNK_F13];
             sKoumePtr->groundBlastPos2 = groundBlast->actor.world.pos;
             sEnvType = 4;
         }
@@ -746,7 +753,10 @@ void BossTw_SpawnGroundBlast(BossTw* this, PlayState* play, s16 blastType) {
             sKotakePtr->workf[UNK_F16] = 70.0f;
             groundBlast->workf[UNK_F9] = 250.0f;
             groundBlast->workf[UNK_F11] = 50.0f;
-            groundBlast->workf[UNK_F12] = 0.005f;;
+            groundBlast->workf[UNK_F12] = 0.005f;
+            groundBlast->workf[UNK_F14] = 1.0f;
+            groundBlast->workf[UNK_F16] = 70.0f;
+            groundBlast->work[CS_TIMER_2] = sKotakePtr->work[CS_TIMER_2];
             sKotakePtr->groundBlastPos2 = groundBlast->actor.world.pos;
             sEnvType = 3;
         }
@@ -1444,7 +1454,7 @@ void BossTw_SetupWait(BossTw* this, PlayState* play) {
 void BossTw_Wait(BossTw* this, PlayState* play) {
     if ((this->actor.params == TW_TWINROVA) && (sKoumePtr->actionFunc == BossTw_FlyTo) &&
         (sKotakePtr->actionFunc == BossTw_FlyTo) &&
-        ((sKoumePtr->actor.colChkInfo.health + sKotakePtr->actor.colChkInfo.health) >= 4)) {
+        ((sKoumePtr->actor.colChkInfo.health + sKotakePtr->actor.colChkInfo.health) >= 0)) {
 
         BossTw_TwinrovaSetupMergeCS(this, play);
         BossTw_SetupMergeCS(sKotakePtr, play);
@@ -3239,47 +3249,47 @@ void BossTw_PostLimbDraw(PlayState* play, s32 limbIndex, Gfx** dList, Vec3s* rot
 }
 
 void func_80941BC0(BossTw* this, PlayState* play) {
-    s32 pad;
+    // s32 pad;
 
-    OPEN_DISPS(play->state.gfxCtx);
+    // OPEN_DISPS(play->state.gfxCtx);
 
-    Matrix_Push();
-    Gfx_SetupDL_25Xlu(play->state.gfxCtx);
-    Matrix_Translate(this->groundBlastPos2.x, this->groundBlastPos2.y, this->groundBlastPos2.z, MTXMODE_NEW);
-    Matrix_Scale(this->workf[UNK_F12], this->workf[UNK_F12], this->workf[UNK_F12], MTXMODE_APPLY);
-    gSPMatrix(POLY_XLU_DISP++, MATRIX_NEWMTX(play->state.gfxCtx),
-              G_MTX_LOAD | G_MTX_MODELVIEW | G_MTX_NOPUSH);
-    gDPSetPrimColor(POLY_XLU_DISP++, 0, 0, 255, 255, 255, (s16)this->workf[UNK_F11]);
-    gDPSetEnvColor(POLY_XLU_DISP++, 0, 40, 30, 80);
-    gSPDisplayList(POLY_XLU_DISP++, SEGMENTED_TO_VIRTUAL(object_tw_DL_01BC00));
-    gDPSetPrimColor(POLY_XLU_DISP++, 0, 0, 215, 215, 215, (s16)this->workf[UNK_F11] * this->workf[UNK_F14]);
-    gDPSetEnvColor(POLY_XLU_DISP++, 255, 255, 255, 128);
-    gSPSegment(POLY_XLU_DISP++, 8,
-               Gfx_TwoTexScroll(play->state.gfxCtx, 0, 0, 0, 0x20, 0x40, 1, (u32)this->workf[UNK_F16] & 0x3F,
-                                (this->work[CS_TIMER_2] * 4) & 0x3F, 0x10, 0x10));
-    Matrix_Push();
-    Matrix_RotateY(this->workf[UNK_F15], MTXMODE_APPLY);
-    gSPMatrix(POLY_XLU_DISP++, MATRIX_NEWMTX(play->state.gfxCtx),
-              G_MTX_LOAD | G_MTX_MODELVIEW | G_MTX_NOPUSH);
-    gSPDisplayList(POLY_XLU_DISP++, SEGMENTED_TO_VIRTUAL(object_tw_DL_01C1C0));
-    Matrix_Pop();
-    gSPMatrix(POLY_XLU_DISP++, MATRIX_NEWMTX(play->state.gfxCtx),
-              G_MTX_LOAD | G_MTX_MODELVIEW | G_MTX_NOPUSH);
-    gSPSegment(POLY_XLU_DISP++, 0xD,
-               Gfx_TwoTexScroll(play->state.gfxCtx, 0, this->work[CS_TIMER_2] & 0x7F,
-                                (this->work[CS_TIMER_2] * 8) & 0xFF, 0x20, 0x40, 1,
-                                (-this->work[CS_TIMER_2] * 2) & 0x3F, 0, 0x10, 0x10));
-    gDPSetPrimColor(POLY_XLU_DISP++, 0, 0, 195, 225, 235, (s16)this->workf[UNK_F9]);
-    gDPSetEnvColor(POLY_XLU_DISP++, 255, 255, 255, 128);
-    gDPSetRenderMode(POLY_XLU_DISP++,
-                     Z_CMP | IM_RD | CVG_DST_SAVE | ZMODE_DEC | FORCE_BL |
-                         GBL_c1(G_BL_CLR_FOG, G_BL_A_SHADE, G_BL_CLR_IN, G_BL_1MA),
-                     G_RM_ZB_OVL_SURF2);
-    gSPSetGeometryMode(POLY_XLU_DISP++, G_CULL_BACK | G_FOG);
-    gSPDisplayList(POLY_XLU_DISP++, SEGMENTED_TO_VIRTUAL(object_tw_DL_01A790));
-    Matrix_Pop();
+    // Matrix_Push();
+    // Gfx_SetupDL_25Xlu(play->state.gfxCtx);
+    // Matrix_Translate(this->groundBlastPos2.x, this->groundBlastPos2.y, this->groundBlastPos2.z, MTXMODE_NEW);
+    // Matrix_Scale(this->workf[UNK_F12], this->workf[UNK_F12], this->workf[UNK_F12], MTXMODE_APPLY);
+    // gSPMatrix(POLY_XLU_DISP++, MATRIX_NEWMTX(play->state.gfxCtx),
+    //           G_MTX_LOAD | G_MTX_MODELVIEW | G_MTX_NOPUSH);
+    // gDPSetPrimColor(POLY_XLU_DISP++, 0, 0, 255, 255, 255, (s16)this->workf[UNK_F11]);
+    // gDPSetEnvColor(POLY_XLU_DISP++, 0, 40, 30, 80);
+    // gSPDisplayList(POLY_XLU_DISP++, SEGMENTED_TO_VIRTUAL(object_tw_DL_01BC00));
+    // gDPSetPrimColor(POLY_XLU_DISP++, 0, 0, 215, 215, 215, (s16)this->workf[UNK_F11] * this->workf[UNK_F14]);
+    // gDPSetEnvColor(POLY_XLU_DISP++, 255, 255, 255, 128);
+    // gSPSegment(POLY_XLU_DISP++, 8,
+    //            Gfx_TwoTexScroll(play->state.gfxCtx, 0, 0, 0, 0x20, 0x40, 1, (u32)this->workf[UNK_F16] & 0x3F,
+    //                             (this->work[CS_TIMER_2] * 4) & 0x3F, 0x10, 0x10));
+    // Matrix_Push();
+    // Matrix_RotateY(this->workf[UNK_F15], MTXMODE_APPLY);
+    // gSPMatrix(POLY_XLU_DISP++, MATRIX_NEWMTX(play->state.gfxCtx),
+    //           G_MTX_LOAD | G_MTX_MODELVIEW | G_MTX_NOPUSH);
+    // gSPDisplayList(POLY_XLU_DISP++, SEGMENTED_TO_VIRTUAL(object_tw_DL_01C1C0));
+    // Matrix_Pop();
+    // gSPMatrix(POLY_XLU_DISP++, MATRIX_NEWMTX(play->state.gfxCtx),
+    //           G_MTX_LOAD | G_MTX_MODELVIEW | G_MTX_NOPUSH);
+    // gSPSegment(POLY_XLU_DISP++, 0xD,
+    //            Gfx_TwoTexScroll(play->state.gfxCtx, 0, this->work[CS_TIMER_2] & 0x7F,
+    //                             (this->work[CS_TIMER_2] * 8) & 0xFF, 0x20, 0x40, 1,
+    //                             (-this->work[CS_TIMER_2] * 2) & 0x3F, 0, 0x10, 0x10));
+    // gDPSetPrimColor(POLY_XLU_DISP++, 0, 0, 195, 225, 235, (s16)this->workf[UNK_F9]);
+    // gDPSetEnvColor(POLY_XLU_DISP++, 255, 255, 255, 128);
+    // gDPSetRenderMode(POLY_XLU_DISP++,
+    //                  Z_CMP | IM_RD | CVG_DST_SAVE | ZMODE_DEC | FORCE_BL |
+    //                      GBL_c1(G_BL_CLR_FOG, G_BL_A_SHADE, G_BL_CLR_IN, G_BL_1MA),
+    //                  G_RM_ZB_OVL_SURF2);
+    // gSPSetGeometryMode(POLY_XLU_DISP++, G_CULL_BACK | G_FOG);
+    // gSPDisplayList(POLY_XLU_DISP++, SEGMENTED_TO_VIRTUAL(object_tw_DL_01A790));
+    // Matrix_Pop();
 
-    CLOSE_DISPS(play->state.gfxCtx);
+    // CLOSE_DISPS(play->state.gfxCtx);
 }
 
 void func_80942180(BossTw* this, PlayState* play) {
@@ -3290,7 +3300,7 @@ void func_80942180(BossTw* this, PlayState* play) {
     Matrix_Push();
 
     Gfx_SetupDL_25Xlu(play->state.gfxCtx);
-    Matrix_Translate(this->groundBlastPos2.x, this->groundBlastPos2.y, this->groundBlastPos2.z, MTXMODE_NEW);
+    Matrix_Translate(this->actor.world.pos.x, this->actor.world.pos.y, this->actor.world.pos.z, MTXMODE_NEW);
     Matrix_Scale(this->workf[KM_GD_CRTR_SCL], this->workf[KM_GD_CRTR_SCL], this->workf[KM_GD_CRTR_SCL], MTXMODE_APPLY);
     gSPSegment(POLY_XLU_DISP++, 8,
                Gfx_TwoTexScroll(play->state.gfxCtx, 0, (-this->work[CS_TIMER_1]) & 0x7F, 0, 0x20, 0x20, 1,
@@ -3518,7 +3528,7 @@ void BossTw_Draw(Actor* thisx, PlayState* play2) {
             func_80941BC0(this, play);
         }
     } else {
-        func_80942180(this, play);
+        //func_80942180(this, play);
     }
 
     if (this->visible) {
@@ -3892,7 +3902,8 @@ void BossTw_BlastFire(BossTw* this, PlayState* play) {
                     yDiff = (player->actor.world.pos.y + 30.0f) - this->actor.world.pos.y;
                     zDiff = player->actor.world.pos.z - this->actor.world.pos.z;
                     // yaw
-                    this->actor.world.rot.y = Math_FAtan2F(xDiff, zDiff) * (32768 / M_PI);
+                    this->actor.world.rot.y = sTwinrovaPtr->blastAngle + Math_FAtan2F(xDiff, zDiff) * (32768 / M_PI);
+                    sTwinrovaPtr->blastAngle = -sTwinrovaPtr->blastAngle;
                     // pitch
                     distXZ = sqrtf(SQ(xDiff) + SQ(zDiff));
                     this->actor.world.rot.x = Math_FAtan2F(yDiff, distXZ) * (32768 / M_PI);
@@ -4026,7 +4037,7 @@ void BossTw_BlastFire(BossTw* this, PlayState* play) {
                 zDiff = /*sKoumePtr->groundBlastPos2*/this->actor.world.pos.z - player->actor.world.pos.z;
 
                 if (!player->isBurning && (player->actor.bgCheckFlags & 1) && (fabsf(yDiff) < 10.0f) &&
-                    (sqrtf(SQ(xDiff) + SQ(zDiff)) < (sKoumePtr->workf[UNK_F13] * 4550.0f))) {
+                    (sqrtf(SQ(xDiff) + SQ(zDiff)) < (this->workf[UNK_F13] * 4550.0f))) {
                     s16 j;
 
                     for (j = 0; j < 18; j++) {
@@ -4044,6 +4055,7 @@ void BossTw_BlastFire(BossTw* this, PlayState* play) {
                 }
 
                 Math_ApproachF(&sKoumePtr->workf[UNK_F13], 0.04f, 0.1f, 0.002f);
+                Math_ApproachF(&this->workf[UNK_F13], 0.04f, 0.1f, 0.002f);
                 break;
             }
 
@@ -4055,11 +4067,12 @@ void BossTw_BlastFire(BossTw* this, PlayState* play) {
                 Math_ApproachF(&sKoumePtr->workf[UNK_F12], 0.0f, 1.0f, 0.03f * sp4C);
                 Math_ApproachF(&this->workf[UNK_F12], 0.0f, 1.0f, 0.03f * sp4C);
                 Math_ApproachF(&sKoumePtr->workf[TAIL_ALPHA], 0.0f, 1.0f, 3.0f * sp4C);
+                Math_ApproachF(&this->workf[TAIL_ALPHA], 0.0f, 1.0f, 3.0f * sp4C);
                 Math_ApproachF(&sKoumePtr->workf[UNK_F11], 0.0f, 1.0f, 6.0f * sp4C);
                 Math_ApproachF(&this->workf[UNK_F11], 0.0f, 1.0f, 6.0f * sp4C);
             }
 
-            if (sKoumePtr->workf[TAIL_ALPHA] <= 0.0f) {
+            if (this->workf[TAIL_ALPHA] <= 0.0f) {
                 Actor_Kill(&this->actor);
             }
 
@@ -4085,7 +4098,8 @@ void BossTw_BlastIce(BossTw* this, PlayState* play) {
                     xDiff = player->actor.world.pos.x - this->actor.world.pos.x;
                     yDiff = (player->actor.world.pos.y + 30.0f) - this->actor.world.pos.y;
                     zDiff = player->actor.world.pos.z - this->actor.world.pos.z;
-                    this->actor.world.rot.y = Math_FAtan2F(xDiff, zDiff) * (32768 / M_PI);
+                    this->actor.world.rot.y = -sTwinrovaPtr->blastAngle +  Math_FAtan2F(xDiff, zDiff) * (32768 / M_PI);
+                    sTwinrovaPtr->blastAngle = -sTwinrovaPtr->blastAngle;
                     xzDist = sqrtf(SQ(xDiff) + SQ(zDiff));
                     this->actor.world.rot.x = Math_FAtan2F(yDiff, xzDist) * (32768 / M_PI);
                     this->actor.speedXZ = 20.0f;
@@ -4247,13 +4261,16 @@ void BossTw_BlastIce(BossTw* this, PlayState* play) {
                 Math_ApproachF(&sKotakePtr->workf[UNK_F12], 0.04f, 0.1f, 0.002f);
                 Math_ApproachF(&this->workf[UNK_F12], 0.04f, 0.1f, 0.002f);
                 Math_ApproachF(&sKotakePtr->workf[UNK_F16], 70.0f, 1.0f, 5.0f);
+                Math_ApproachF(&this->workf[UNK_F16], 70.0f, 1.0f, 5.0f);
 
                 if ((this->timers[0] == 70) || (this->timers[0] == 30)) {
                     sKotakePtr->workf[UNK_F16] = 10.0f;
+                    this->workf[UNK_F16] = 10.0f;
                 }
 
                 if ((this->timers[0] % 4) == 0) {
                     sKotakePtr->workf[UNK_F15] = (2.0f * (s16)Rand_ZeroFloat(9.9f) * M_PI) / 10.0f;
+                    this->workf[UNK_F15] = sKotakePtr->workf[UNK_F15];
                 }
             } else {
                 f32 sp80;
@@ -4283,6 +4300,7 @@ void BossTw_BlastIce(BossTw* this, PlayState* play) {
                 }
 
                 Math_ApproachF(&sKotakePtr->workf[UNK_F14], 0.0f, 1.0f, 0.2f * sp80);
+                Math_ApproachF(&this->workf[UNK_F14], 0.0f, 1.0f, 0.2f * sp80);
                 Math_ApproachF(&sKotakePtr->workf[UNK_F11], 0.0f, 1.0f, 5.0f * sp80);
                 Math_ApproachF(&this->workf[UNK_F11], 0.0f, 1.0f, 5.0f * sp80);
                 Math_ApproachF(&sKotakePtr->workf[UNK_F9], 0.0f, 1.0f, sp80);
@@ -4449,6 +4467,7 @@ void BossTw_BlastDraw(Actor* thisx, PlayState* play2) {
             break;
 
         case TW_FIRE_BLAST_GROUND:
+            func_80942180(this,play);
             break;
 
         case TW_ICE_BLAST:
@@ -4477,6 +4496,49 @@ void BossTw_BlastDraw(Actor* thisx, PlayState* play2) {
             break;
 
         case TW_ICE_BLAST_GROUND:
+            s32 pad;
+            if (this->workf[UNK_F9] > 0.0f) {
+                OPEN_DISPS(play->state.gfxCtx);
+
+                Matrix_Push();
+                Gfx_SetupDL_25Xlu(play->state.gfxCtx);
+                Matrix_Translate(this->actor.world.pos.x, this->actor.world.pos.y, this->actor.world.pos.z, MTXMODE_NEW);
+                Matrix_Scale(this->workf[UNK_F12], this->workf[UNK_F12], this->workf[UNK_F12], MTXMODE_APPLY);
+                gSPMatrix(POLY_XLU_DISP++, MATRIX_NEWMTX(play->state.gfxCtx),
+                        G_MTX_LOAD | G_MTX_MODELVIEW | G_MTX_NOPUSH);
+                gDPSetPrimColor(POLY_XLU_DISP++, 0, 0, 255, 255, 255, (s16)this->workf[UNK_F11]);
+                gDPSetEnvColor(POLY_XLU_DISP++, 0, 40, 30, 80);
+                gSPDisplayList(POLY_XLU_DISP++, SEGMENTED_TO_VIRTUAL(object_tw_DL_01BC00));
+                gDPSetPrimColor(POLY_XLU_DISP++, 0, 0, 215, 215, 215, (s16)this->workf[UNK_F11] * this->workf[UNK_F14]);
+                gDPSetEnvColor(POLY_XLU_DISP++, 255, 255, 255, 128);
+                gSPSegment(POLY_XLU_DISP++, 8,
+                        Gfx_TwoTexScroll(play->state.gfxCtx, 0, 0, 0, 0x20, 0x40, 1, (u32)this->workf[UNK_F16] & 0x3F,
+                                            (this->work[CS_TIMER_2] * 4) & 0x3F, 0x10, 0x10));
+                Matrix_Push();
+                Matrix_RotateY(this->workf[UNK_F15], MTXMODE_APPLY);
+                gSPMatrix(POLY_XLU_DISP++, MATRIX_NEWMTX(play->state.gfxCtx),
+                        G_MTX_LOAD | G_MTX_MODELVIEW | G_MTX_NOPUSH);
+                gSPDisplayList(POLY_XLU_DISP++, SEGMENTED_TO_VIRTUAL(object_tw_DL_01C1C0));
+                Matrix_Pop();
+                gSPMatrix(POLY_XLU_DISP++, MATRIX_NEWMTX(play->state.gfxCtx),
+                        G_MTX_LOAD | G_MTX_MODELVIEW | G_MTX_NOPUSH);
+                gSPSegment(POLY_XLU_DISP++, 0xD,
+                        Gfx_TwoTexScroll(play->state.gfxCtx, 0, this->work[CS_TIMER_2] & 0x7F,
+                                            (this->work[CS_TIMER_2] * 8) & 0xFF, 0x20, 0x40, 1,
+                                            (-this->work[CS_TIMER_2] * 2) & 0x3F, 0, 0x10, 0x10));
+                gDPSetPrimColor(POLY_XLU_DISP++, 0, 0, 195, 225, 235, (s16)this->workf[UNK_F9]);
+                gDPSetEnvColor(POLY_XLU_DISP++, 255, 255, 255, 128);
+                gDPSetRenderMode(POLY_XLU_DISP++,
+                                Z_CMP | IM_RD | CVG_DST_SAVE | ZMODE_DEC | FORCE_BL |
+                                    GBL_c1(G_BL_CLR_FOG, G_BL_A_SHADE, G_BL_CLR_IN, G_BL_1MA),
+                                G_RM_ZB_OVL_SURF2);
+                gSPSetGeometryMode(POLY_XLU_DISP++, G_CULL_BACK | G_FOG);
+                gSPDisplayList(POLY_XLU_DISP++, SEGMENTED_TO_VIRTUAL(object_tw_DL_01A790));
+                Matrix_Pop();
+
+                CLOSE_DISPS(play->state.gfxCtx);
+            }
+
             Vec3f diff;
             diff.x = this->actor.world.pos.x - player->actor.world.pos.x;
             diff.y = this->actor.world.pos.y - player->actor.world.pos.y;
@@ -4830,10 +4892,28 @@ void BossTw_UpdateEffects(PlayState* play) {
                         } else {
                             player->stateFlags2 &= ~0x8000;
                         }
+                        s32 isStillFreezing = false;
+                        Actor* start = play->actorCtx.actorLists[ACTORCAT_BOSS].head;
 
-                        if ((sKotakePtr->workf[UNK_F11] > 10.0f) && (sKotakePtr->workf[UNK_F11] < 200.0f)) {
-                            eff->frame = 100;
+                        while (start) {
+                            //NOTE: This may result in inaccurate timing of ice thawing for multiple ice blasts
+                            if (start->id == ACTOR_BOSS_TW && start->params == TW_ICE_BLAST_GROUND) {
+                                if ((((BossTw*)start)->workf[UNK_F11] > 10.0f) && (((BossTw*)start)->workf[UNK_F11] < 200.0f)) {
+                                    //eff->frame = 100;
+                                } else {
+                                    Vec3f diff;
+                                    diff.x = start->world.pos.x - player->actor.world.pos.x;
+                                    //diff.y = this->actor.world.pos.y - player->actor.world.pos.y;
+                                    diff.z = start->world.pos.z - player->actor.world.pos.z;
+                                    if (sqrtf(SQ(diff.x) + SQ(diff.z)) < (0.04 * 4600.0f))
+                                        isStillFreezing = true;
+                                }
+                            }
+                            start = start->next;
                         }
+
+                        if (!isStillFreezing)
+                            eff->frame = 100;
 
                         if (!(play->gameplayFrames & 1)) {
                             play->damagePlayer(play, -1);
@@ -5218,17 +5298,48 @@ void BossTw_TwinrovaShootBlast(BossTw* this, PlayState* play) {
     }
 
     if (Animation_OnFrame(&this->skelAnime, 12.0f)) {
-        if (sTwinrovaBlastType != 0) {
+        //if (sTwinrovaBlastType != 0) {
             magicParams = TW_FIRE_BLAST;
             magicSpawnPos = &this->rightScepterPos;
-        } else {
-            magicParams = TW_ICE_BLAST;
-            magicSpawnPos = &this->leftScepterPos;
-        }
+        //} else {
+        //    magicParams = TW_ICE_BLAST;
+        //    magicSpawnPos = &this->leftScepterPos;
+        //}
 
         twMagic =
-            (BossTw*)Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, ACTOR_BOSS_TW, magicSpawnPos->x,
-                                        magicSpawnPos->y, magicSpawnPos->z, 0, 0, 0, magicParams);
+            (BossTw*)Actor_Spawn(&play->actorCtx, play, ACTOR_BOSS_TW, magicSpawnPos->x,
+                                        magicSpawnPos->y, magicSpawnPos->z, 0, 0, 0, magicParams,false);
+
+        if (twMagic != NULL) {
+            twMagic->blastType = magicParams == TW_ICE_BLAST ? 0 : 1;
+        }
+
+        sEnvType = twMagic->blastType + 1;
+
+        {
+            Vec3f velocity = { 0.0f, 0.0f, 0.0f };
+            Vec3f accel = { 0.0f, 0.0f, 0.0f };
+
+            for (i = 0; i < 100; i++) {
+                velocity.x = Rand_CenteredFloat(30.0f);
+                velocity.y = Rand_CenteredFloat(30.0f);
+                velocity.z = Rand_CenteredFloat(30.0f);
+                BossTw_AddDotEffect(play, magicSpawnPos, &velocity, &accel, (s16)Rand_ZeroFloat(2.0f) + 11,
+                                    twMagic->blastType, 75);
+            }
+        }
+
+        //if (sTwinrovaBlastType != 0) {
+            magicParams = TW_FIRE_BLAST;
+            //magicSpawnPos = &this->rightScepterPos;
+        //} else {
+        //    magicParams = TW_ICE_BLAST;
+            magicSpawnPos = &this->leftScepterPos;
+        //}
+
+        twMagic =
+            (BossTw*)Actor_Spawn(&play->actorCtx, play, ACTOR_BOSS_TW, magicSpawnPos->x,
+                                        magicSpawnPos->y, magicSpawnPos->z, 0, 0, 0, magicParams,false);
 
         if (twMagic != NULL) {
             twMagic->blastType = magicParams == TW_ICE_BLAST ? 0 : 1;
