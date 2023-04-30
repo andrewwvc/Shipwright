@@ -1455,7 +1455,7 @@ void BossTw_SetupWait(BossTw* this, PlayState* play) {
 void BossTw_Wait(BossTw* this, PlayState* play) {
     if ((this->actor.params == TW_TWINROVA) && (sKoumePtr->actionFunc == BossTw_FlyTo) &&
         (sKotakePtr->actionFunc == BossTw_FlyTo) &&
-        ((sKoumePtr->actor.colChkInfo.health + sKotakePtr->actor.colChkInfo.health) >= 0)) {
+        ((sKoumePtr->actor.colChkInfo.health + sKotakePtr->actor.colChkInfo.health) >= 4)) {
 
         BossTw_TwinrovaSetupMergeCS(this, play);
         BossTw_SetupMergeCS(sKotakePtr, play);
@@ -3891,13 +3891,13 @@ void BossTW_DrawFires(Actor* thisx, PlayState* play) {
         BossTW_DisplayFlare(0, 2000, cType, this, play);
         BossTW_DisplayFlare(8000, 10000, this->selectionIndex == 1 ? -cType : cType, this, play);
         BossTW_DisplayFlare(-8000, 10000, this->selectionIndex == 2 ? -cType : cType, this, play);
-        BossTW_DisplayFlare(8000, -6000, this->selectionIndex == 3 ? -cType : cType, this, play);
-        BossTW_DisplayFlare(-8000, -6000, this->selectionIndex == 4 ? -cType : cType, this, play);
+        BossTW_DisplayFlare(-8000, -6000, this->selectionIndex == 3 ? -cType : cType, this, play);
+        BossTW_DisplayFlare(8000, -6000, this->selectionIndex == 4 ? -cType : cType, this, play);
     } else if (PT_COVER == this->patternIndex) {
         BossTW_DisplayFlare(6000, 8000, this->selectionIndex == 1 ? -cType : cType, this, play);
         BossTW_DisplayFlare(-6000, 8000, this->selectionIndex == 2 ? -cType : cType, this, play);
-        BossTW_DisplayFlare(6000, -4000, this->selectionIndex == 3 ? -cType : cType, this, play);
-        BossTW_DisplayFlare(-6000, -4000, this->selectionIndex == 4 ? -cType : cType, this, play);
+        BossTW_DisplayFlare(-6000, -4000, this->selectionIndex == 3 ? -cType : cType, this, play);
+        BossTW_DisplayFlare(6000, -4000, this->selectionIndex == 4 ? -cType : cType, this, play);
     }
 
 }
@@ -5234,10 +5234,12 @@ void BossTw_TwinrovaArriveAtTarget(BossTw* this, PlayState* play) {
 void BossTw_TwinrovaSetupChargeBlast(BossTw* this, PlayState* play) {
     this->actionFunc = BossTw_TwinrovaChargeBlast;
     Animation_MorphToPlayOnce(&this->skelAnime, &object_tw_Anim_036FBC, -5.0f);
-    this->skelAnime.playSpeed = 1.6f;
+    this->skelAnime.playSpeed = 1.2f;
     this->workf[ANIM_SW_TGT] = Animation_GetLastFrame(&object_tw_Anim_036FBC);
     this->csState1 = 0;
 }
+
+#define MIXED_BLAST_THRESHOLD 20
 
 void BossTw_TwinrovaChargeBlast(BossTw* this, PlayState* play) {
     SkelAnime_Update(&this->skelAnime);
@@ -5248,14 +5250,14 @@ void BossTw_TwinrovaChargeBlast(BossTw* this, PlayState* play) {
     Math_ApproachS(&this->actor.shape.rot.y, this->actor.yawTowardsPlayer, 5, 0x1000);
 
     if (Animation_OnFrame(&this->skelAnime, this->workf[ANIM_SW_TGT])) {
-        if ((s8)this->actor.colChkInfo.health > 30) {
+        if ((s8)this->actor.colChkInfo.health > 35) {
             if (++sFixedBlatSeq >= 5) {
                 sFixedBlatSeq = 1;
                 sFixedBlastType = !sFixedBlastType;
             }
 
             sTwinrovaBlastType = sFixedBlastType;
-        } else if ((s8)this->actor.colChkInfo.health > 15) {
+        } else if ((s8)this->actor.colChkInfo.health > MIXED_BLAST_THRESHOLD) {
             sTwinrovaBlastType = Rand_ZeroFloat(1.99f);
         } else {
             if (sShieldFireCharge)
@@ -5342,6 +5344,10 @@ void BossTw_TwinrovaShootBlast(BossTw* this, PlayState* play) {
             } else {
                 this->patternIndex = PT_COVER;
             }
+        }
+
+        if ((s8)this->actor.colChkInfo.health > MIXED_BLAST_THRESHOLD) {
+            this->selectionIndex = 0;
         }
     }
 
@@ -5459,6 +5465,25 @@ void BossTw_TwinrovaShootBlast(BossTw* this, PlayState* play) {
             }
         } else {
             if (this->patternIndex == PT_STAR) {
+                s16 selectValue = this->selectionIndex;
+                if (selectValue > 0) {
+                    selectValue--;
+                    if (ABS(this->actor.world.pos.z) > ABS(this->actor.world.pos.x)) {
+                        if (this->actor.world.pos.z < 0) {
+                            selectValue += 1;
+                        } else {
+                            selectValue += 3;
+                        }
+                    } else {
+                        if (this->actor.world.pos.x < 0) {
+                            selectValue += 2;
+                        }
+                    }
+
+                    selectValue = selectValue % 4;
+                    selectValue++;
+                }
+
                 twMagic =
                     (BossTw*)Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, ACTOR_BOSS_TW, magicSpawnPos->x,
                                                 magicSpawnPos->y, magicSpawnPos->z, 0, player->actor.world.pos.y, 0, magicParams);
@@ -5470,123 +5495,95 @@ void BossTw_TwinrovaShootBlast(BossTw* this, PlayState* play) {
                 twMagic =
                     (BossTw*)Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, ACTOR_BOSS_TW, magicSpawnPos->x,
                                                 magicSpawnPos->y, magicSpawnPos->z, BLAST_SPACING, player->actor.world.pos.y, BLAST_SPACING,
-                                                ((magicParams == TW_ICE_BLAST) == (this->selectionIndex != 1)) ? TW_ICE_BLAST : TW_FIRE_BLAST);
+                                                ((magicParams == TW_ICE_BLAST) == (selectValue != 1)) ? TW_ICE_BLAST : TW_FIRE_BLAST);
 
                 if (twMagic != NULL) {
-                    twMagic->blastType = ((magicParams == TW_ICE_BLAST) == (this->selectionIndex != 1)) ? 0 : 1;
-                }
-
-                twMagic =
-                    (BossTw*)Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, ACTOR_BOSS_TW, magicSpawnPos->x,
-                                                magicSpawnPos->y, magicSpawnPos->z, -BLAST_SPACING, player->actor.world.pos.y, BLAST_SPACING,
-                                                ((magicParams == TW_ICE_BLAST) == (this->selectionIndex != 2)) ? TW_ICE_BLAST : TW_FIRE_BLAST);
-
-                if (twMagic != NULL) {
-                    twMagic->blastType = ((magicParams == TW_ICE_BLAST) == (this->selectionIndex != 2)) ? 0 : 1;
+                    twMagic->blastType = ((magicParams == TW_ICE_BLAST) == (selectValue != 1)) ? 0 : 1;
                 }
 
                 twMagic =
                     (BossTw*)Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, ACTOR_BOSS_TW, magicSpawnPos->x,
                                                 magicSpawnPos->y, magicSpawnPos->z, BLAST_SPACING, player->actor.world.pos.y, -BLAST_SPACING,
-                                                ((magicParams == TW_ICE_BLAST) == (this->selectionIndex != 3)) ? TW_ICE_BLAST : TW_FIRE_BLAST);
+                                                ((magicParams == TW_ICE_BLAST) == (selectValue != 2)) ? TW_ICE_BLAST : TW_FIRE_BLAST);
 
                 if (twMagic != NULL) {
-                    twMagic->blastType = ((magicParams == TW_ICE_BLAST) == (this->selectionIndex != 3)) ? 0 : 1;
+                    twMagic->blastType = ((magicParams == TW_ICE_BLAST) == (selectValue != 2)) ? 0 : 1;
                 }
 
                 twMagic =
                     (BossTw*)Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, ACTOR_BOSS_TW, magicSpawnPos->x,
                                                 magicSpawnPos->y, magicSpawnPos->z, -BLAST_SPACING, player->actor.world.pos.y, -BLAST_SPACING,
-                                                ((magicParams == TW_ICE_BLAST) == (this->selectionIndex != 4)) ? TW_ICE_BLAST : TW_FIRE_BLAST);
+                                                ((magicParams == TW_ICE_BLAST) == (selectValue != 3)) ? TW_ICE_BLAST : TW_FIRE_BLAST);
 
                 if (twMagic != NULL) {
-                    twMagic->blastType = ((magicParams == TW_ICE_BLAST) == (this->selectionIndex != 4)) ? 0 : 1;
+                    twMagic->blastType = ((magicParams == TW_ICE_BLAST) == (selectValue != 3)) ? 0 : 1;
+                }
+
+                twMagic =
+                    (BossTw*)Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, ACTOR_BOSS_TW, magicSpawnPos->x,
+                                                magicSpawnPos->y, magicSpawnPos->z, -BLAST_SPACING, player->actor.world.pos.y, BLAST_SPACING,
+                                                ((magicParams == TW_ICE_BLAST) == (selectValue != 4)) ? TW_ICE_BLAST : TW_FIRE_BLAST);
+
+                if (twMagic != NULL) {
+                    twMagic->blastType = ((magicParams == TW_ICE_BLAST) == (selectValue != 4)) ? 0 : 1;
                 }
             } else {
+                s16 selectValue = this->selectionIndex;
+                if (selectValue > 0) {
+                    selectValue--;
+                    if (ABS(this->actor.world.pos.z) > ABS(this->actor.world.pos.x)) {
+                        if (this->actor.world.pos.z < 0) {
+                            selectValue += 1;
+                        } else {
+                            selectValue += 3;
+                        }
+                    } else {
+                        if (this->actor.world.pos.x < 0) {
+                            selectValue += 2;
+                        }
+                    }
+
+                    selectValue = selectValue % 4;
+                    selectValue++;
+                }
+
                 twMagic =
                     (BossTw*)Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, ACTOR_BOSS_TW, magicSpawnPos->x,
                                                 magicSpawnPos->y, magicSpawnPos->z, BLAST_DIAG_SPACING, player->actor.world.pos.y, BLAST_DIAG_SPACING,
-                                                ((magicParams == TW_ICE_BLAST) == (this->selectionIndex != 1)) ? TW_ICE_BLAST : TW_FIRE_BLAST);
+                                                ((magicParams == TW_ICE_BLAST) == (selectValue != 1)) ? TW_ICE_BLAST : TW_FIRE_BLAST);
 
                 if (twMagic != NULL) {
-                    twMagic->blastType = ((magicParams == TW_ICE_BLAST) == (this->selectionIndex != 1)) ? 0 : 1;
-                }
-
-                twMagic =
-                    (BossTw*)Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, ACTOR_BOSS_TW, magicSpawnPos->x,
-                                                magicSpawnPos->y, magicSpawnPos->z, -BLAST_DIAG_SPACING, player->actor.world.pos.y, BLAST_DIAG_SPACING,
-                                                ((magicParams == TW_ICE_BLAST) == (this->selectionIndex != 2)) ? TW_ICE_BLAST : TW_FIRE_BLAST);
-
-                if (twMagic != NULL) {
-                    twMagic->blastType = ((magicParams == TW_ICE_BLAST) == (this->selectionIndex != 2)) ? 0 : 1;
+                    twMagic->blastType = ((magicParams == TW_ICE_BLAST) == (selectValue!= 1)) ? 0 : 1;
                 }
 
                 twMagic =
                     (BossTw*)Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, ACTOR_BOSS_TW, magicSpawnPos->x,
                                                 magicSpawnPos->y, magicSpawnPos->z, BLAST_DIAG_SPACING, player->actor.world.pos.y, -BLAST_DIAG_SPACING,
-                                                ((magicParams == TW_ICE_BLAST) == (this->selectionIndex != 3)) ? TW_ICE_BLAST : TW_FIRE_BLAST);
+                                                ((magicParams == TW_ICE_BLAST) == (selectValue != 2)) ? TW_ICE_BLAST : TW_FIRE_BLAST);
 
                 if (twMagic != NULL) {
-                    twMagic->blastType = ((magicParams == TW_ICE_BLAST) == (this->selectionIndex != 3)) ? 0 : 1;
+                    twMagic->blastType = ((magicParams == TW_ICE_BLAST) == (selectValue != 2)) ? 0 : 1;
                 }
 
                 twMagic =
                     (BossTw*)Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, ACTOR_BOSS_TW, magicSpawnPos->x,
                                                 magicSpawnPos->y, magicSpawnPos->z, -BLAST_DIAG_SPACING, player->actor.world.pos.y, -BLAST_DIAG_SPACING,
-                                                ((magicParams == TW_ICE_BLAST) == (this->selectionIndex != 4)) ? TW_ICE_BLAST : TW_FIRE_BLAST);
+                                                ((magicParams == TW_ICE_BLAST) == (selectValue != 3)) ? TW_ICE_BLAST : TW_FIRE_BLAST);
 
                 if (twMagic != NULL) {
-                    twMagic->blastType = ((magicParams == TW_ICE_BLAST) == (this->selectionIndex != 4)) ? 0 : 1;
+                    twMagic->blastType = ((magicParams == TW_ICE_BLAST) == (selectValue != 3)) ? 0 : 1;
                 }
 
-                // twMagic =
-                //     (BossTw*)Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, ACTOR_BOSS_TW, magicSpawnPos->x,
-                //                                 magicSpawnPos->y, magicSpawnPos->z, BLAST_CARD_SPACING, player->actor.world.pos.y, 0, magicParams);
+                twMagic =
+                    (BossTw*)Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, ACTOR_BOSS_TW, magicSpawnPos->x,
+                                                magicSpawnPos->y, magicSpawnPos->z, -BLAST_DIAG_SPACING, player->actor.world.pos.y, BLAST_DIAG_SPACING,
+                                                ((magicParams == TW_ICE_BLAST) == (selectValue != 4)) ? TW_ICE_BLAST : TW_FIRE_BLAST);
 
-                // if (twMagic != NULL) {
-                //     twMagic->blastType = magicParams == TW_ICE_BLAST ? 0 : 1;
-                // }
-
-                // twMagic =
-                //     (BossTw*)Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, ACTOR_BOSS_TW, magicSpawnPos->x,
-                //                                 magicSpawnPos->y, magicSpawnPos->z, -BLAST_CARD_SPACING, player->actor.world.pos.y, 0, magicParams);
-
-                // if (twMagic != NULL) {
-                //     twMagic->blastType = magicParams == TW_ICE_BLAST ? 0 : 1;
-                // }
-
-                // twMagic =
-                //     (BossTw*)Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, ACTOR_BOSS_TW, magicSpawnPos->x,
-                //                                 magicSpawnPos->y, magicSpawnPos->z, 0, player->actor.world.pos.y, BLAST_CARD_SPACING, magicParams);
-
-                // if (twMagic != NULL) {
-                //     twMagic->blastType = magicParams == TW_ICE_BLAST ? 0 : 1;
-                // }
-
-                // twMagic =
-                //     (BossTw*)Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, ACTOR_BOSS_TW, magicSpawnPos->x,
-                //                                 magicSpawnPos->y, magicSpawnPos->z, 0, player->actor.world.pos.y, -BLAST_CARD_SPACING, magicParams);
-
-                // if (twMagic != NULL) {
-                //     twMagic->blastType = magicParams == TW_ICE_BLAST ? 0 : 1;
-                // }
+                if (twMagic != NULL) {
+                    twMagic->blastType = ((magicParams == TW_ICE_BLAST) == (selectValue != 4)) ? 0 : 1;
+                }
             }
         }
-        // twMagic =
-        //     (BossTw*)Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, ACTOR_BOSS_TW, magicSpawnPos->x,
-        //                                 magicSpawnPos->y, magicSpawnPos->z, player->actor.world.pos.x, player->actor.world.pos.y, player->actor.world.pos.z+200, magicParams);
-
-        // if (twMagic != NULL) {
-        //     twMagic->blastType = magicParams == TW_ICE_BLAST ? 0 : 1;
-        // }
-
-        // twMagic =
-        //     (BossTw*)Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, ACTOR_BOSS_TW, magicSpawnPos->x,
-        //                                 magicSpawnPos->y, magicSpawnPos->z, player->actor.world.pos.x, player->actor.world.pos.y, player->actor.world.pos.z-200, magicParams);
-
-        // if (twMagic != NULL) {
-        //     twMagic->blastType = magicParams == TW_ICE_BLAST ? 0 : 1;
-        //}
 
         sEnvType = twMagic->blastType + 1;
 
