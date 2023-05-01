@@ -718,11 +718,7 @@ void BossTw_SpawnGroundBlast(BossTw* this, PlayState* play, s16 blastType) {
                                                   this->groundBlastPos.x, this->groundBlastPos.y,
                                                   this->groundBlastPos.z, 0, 0, 0, TW_FIRE_BLAST_GROUND);
         if (groundBlast != NULL) {
-            if (sTwinrovaPtr->actionFunc == BossTw_Wait) {
-                groundBlast->timers[0] = 100;
-            } else {
-                groundBlast->timers[0] = 50;
-            }
+            groundBlast->timers[0] = 100;
             sKoumePtr->workf[KM_GD_FLM_A] = sKoumePtr->workf[KM_GD_SMOKE_A] = sKoumePtr->workf[KM_GRND_CRTR_A] = 255.0f;
             sKoumePtr->workf[KM_GD_FLM_SCL] = 1.0f;
             sKoumePtr->workf[KM_GD_CRTR_SCL] = 0.005f;
@@ -741,12 +737,7 @@ void BossTw_SpawnGroundBlast(BossTw* this, PlayState* play, s16 blastType) {
                                                   this->groundBlastPos.x, this->groundBlastPos.y,
                                                   this->groundBlastPos.z, 0, 0, 0, TW_ICE_BLAST_GROUND);
         if (groundBlast != NULL) {
-            if (sTwinrovaPtr->actionFunc == BossTw_Wait) {
-                groundBlast->timers[0] = 100;
-            } else {
-                groundBlast->timers[0] = 50;
-            }
-
+            groundBlast->timers[0] = 100;
             sKotakePtr->workf[UNK_F11] = 50.0f;
             sKotakePtr->workf[UNK_F9] = 250.0f;
             sKotakePtr->workf[UNK_F12] = 0.005f;
