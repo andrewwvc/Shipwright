@@ -3945,7 +3945,7 @@ void BossTw_TwinrovaDraw(Actor* thisx, PlayState* play2) {
 }
 
 #define BLAST_SPEED 20.0f
-#define GROUND_GROWTH_SPEED 0.004f
+#define GROUND_GROWTH_SPEED 0.006f
 
 void BossTw_BlastFire(BossTw* this, PlayState* play) {
     s16 i;
@@ -5240,8 +5240,17 @@ void BossTw_TwinrovaSetupChargeBlast(BossTw* this, PlayState* play) {
 }
 
 #define MIXED_BLAST_THRESHOLD 20
+#define CENTRAL_HEIGHT 240
+#define PILLAR_HEIGHT 230
+#define HEIGHT_THRESHOLD (PILLAR_HEIGHT-80)
+#define BLAST_SPACING 210
+#define BLAST_DIAG_SPACING 170
+#define BLAST_CARD_SPACING 240
+#define OUTER_BOUNDERY 360.0f
+#define INNER_BOUNDERY 280.0f
 
 void BossTw_TwinrovaChargeBlast(BossTw* this, PlayState* play) {
+    Player* player = GET_PLAYER(play);
     SkelAnime_Update(&this->skelAnime);
 
     Math_ApproachF(&this->actor.world.pos.x, this->targetPos.x, 0.03f, fabsf(this->actor.velocity.x) * 1.5f);
@@ -5250,14 +5259,14 @@ void BossTw_TwinrovaChargeBlast(BossTw* this, PlayState* play) {
     Math_ApproachS(&this->actor.shape.rot.y, this->actor.yawTowardsPlayer, 5, 0x1000);
 
     if (Animation_OnFrame(&this->skelAnime, this->workf[ANIM_SW_TGT])) {
-        if ((s8)this->actor.colChkInfo.health > 35) {
+        if ((s8)this->actor.colChkInfo.health > 35 && player->actor.world.pos.y > HEIGHT_THRESHOLD) {
             if (++sFixedBlatSeq >= 5) {
                 sFixedBlatSeq = 1;
                 sFixedBlastType = !sFixedBlastType;
             }
 
             sTwinrovaBlastType = sFixedBlastType;
-        } else if ((s8)this->actor.colChkInfo.health > MIXED_BLAST_THRESHOLD) {
+        } else if ((s8)this->actor.colChkInfo.health > MIXED_BLAST_THRESHOLD && player->actor.world.pos.y > HEIGHT_THRESHOLD) {
             sTwinrovaBlastType = Rand_ZeroFloat(1.99f);
         } else {
             if (sShieldFireCharge)
@@ -5285,14 +5294,6 @@ void BossTw_TwinrovaSetupShootBlast(BossTw* this, PlayState* play) {
     this->workf[ANIM_SW_TGT] = Animation_GetLastFrame(&object_tw_Anim_023750);
 }
 
-#define CENTRAL_HEIGHT 240
-#define PILLAR_HEIGHT 230
-#define BLAST_SPACING 210
-#define BLAST_DIAG_SPACING 170
-#define BLAST_CARD_SPACING 240
-#define OUTER_BOUNDERY 360.0f
-#define INNER_BOUNDERY 280.0f
-
 void BossTw_TwinrovaShootBlast(BossTw* this, PlayState* play) {
     BossTw* twMagic;
     Vec3f* magicSpawnPos;
@@ -5302,9 +5303,9 @@ void BossTw_TwinrovaShootBlast(BossTw* this, PlayState* play) {
 
     SkelAnime_Update(&this->skelAnime);
 
-    if (Animation_OnFrame(&this->skelAnime, 1.0f)) {
+    if (Animation_OnFrame(&this->skelAnime, 5.0f)) {
         s16 cardVal = 0;
-        if (player->actor.world.pos.y >= PILLAR_HEIGHT-80.0f && (/*(ABS(player->actor.world.pos.x) > OUTER_BOUNDERY || ABS(player->actor.world.pos.z) > OUTER_BOUNDERY) ||*/
+        if (player->actor.world.pos.y >= HEIGHT_THRESHOLD && (/*(ABS(player->actor.world.pos.x) > OUTER_BOUNDERY || ABS(player->actor.world.pos.z) > OUTER_BOUNDERY) ||*/
                                                                  ((ABS(player->actor.world.pos.x) > INNER_BOUNDERY || ABS(player->actor.world.pos.z) > INNER_BOUNDERY))
                                                                  /*&& (Rand_ZeroOne() < 0.5f)*/)) {
             this->storedPosition = player->actor.world.pos;
@@ -5325,7 +5326,7 @@ void BossTw_TwinrovaShootBlast(BossTw* this, PlayState* play) {
                 this->patternIndex = PT_VERTICAL;
                 this->selectionIndex = Rand_ZeroFloat(2.99f);
             }
-        } else if (Rand_ZeroOne() < 0.5f) {
+        } else if (Rand_ZeroOne() < 0.5f || player->actor.world.pos.y <= HEIGHT_THRESHOLD) {
             f32 xVal, zVal;
             this->selectionIndex = Rand_ZeroFloat(2.99f);
             if (Rand_ZeroOne() < 0.5f) {
@@ -5346,7 +5347,7 @@ void BossTw_TwinrovaShootBlast(BossTw* this, PlayState* play) {
             }
         }
 
-        if ((s8)this->actor.colChkInfo.health > MIXED_BLAST_THRESHOLD) {
+        if ((s8)this->actor.colChkInfo.health > MIXED_BLAST_THRESHOLD || player->actor.world.pos.y <= HEIGHT_THRESHOLD) {
             this->selectionIndex = 0;
         }
     }
