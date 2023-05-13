@@ -318,7 +318,7 @@ extern "C" void OTRMessage_Init()
     MakeNormalMsgEng(0x10E0,"\x12\x38\x82""All right! You win! In return,&I'll tell you a secret&if you pay me %r50 rupees%w!\x07\x10\xA3");
     MakeNormalMsgEng(0x10E1,"\x12\x38\x80""OK, there is path to a place&hidden in the woods that is&revealed in %bthree%w parts,&of %bfour%w directions each!^The order of the parts is&something you will have&to work out yourself!^But I can say that there&is a final hidden direction,&and that is %gSouth%w!\x0B\x02");
 
-    u16 SariaMsg = TextIDAllocator::Instance->allocateRange("saria", 30);
+    u16 SariaMsg = TextIDAllocator::Instance->allocateRange("saria", 40);
     CustomMessageManager::Instance->CreateMessage(
         questMessageTableID, SariaMsg,
         {
@@ -395,7 +395,7 @@ extern "C" void OTRMessage_Init()
         questMessageTableID, SariaMsg+8,
         {
           TEXTBOX_TYPE_BLUE, TEXTBOX_POS_BOTTOM,
-          "Hmm... I never would have known&there was a place with&so much water.&It must look amazing!^Come to think of it I do&wonder what it would be&like to be a creture that&could live under water.\x0B\x02",
+          "Hmm... I never would have known&there was a place with&so much water.&It must look amazing!^Come to think of it I do&wonder what it would be&like to be a creature that&could live under water.\x0B\x02",
           "",
           "",
         }
@@ -568,7 +568,7 @@ extern "C" void OTRMessage_Init()
         questMessageTableID, SariaMsg+27,
         {
           TEXTBOX_TYPE_BLACK, TEXTBOX_POS_BOTTOM,
-          "Nice to see you here! I'd love&to hear all about your travels,&so try playing my song&when you're out and about.^I often can't help but&wish I could come along,&but still, at least I'm thankful^that this place is nice&and confortable and I'm&protected in the forrest.",
+          "Nice to see you here! I'd love&to hear all about your travels,&so try playing my song&when you're out and about.^I often can't help but&wish I could come along,&but still, at least I'm thankful^that this place is nice&and confortable and I'm&protected in the forest.",
           "",
           "",
         }
@@ -578,6 +578,15 @@ extern "C" void OTRMessage_Init()
         {
           TEXTBOX_TYPE_BLACK, TEXTBOX_POS_BOTTOM,
           "Hey, nice to see you!^Hmm...anyway, you'll never&guesswhat a bird told me...^I heard that you were at&the lake, and the the water&princess was there with you!^I'm so jealous tee hee!",
+          "",
+          "",
+        }
+    );
+    CustomMessageManager::Instance->CreateMessage(
+        questMessageTableID, SariaMsg+29,
+        {
+          TEXTBOX_TYPE_BLACK, TEXTBOX_POS_BOTTOM,
+          "Link, there's something&I want to talk about.^Ever since I started hearing the&change in the tone of your&ocarina, I've been noticing things about you.^You havn't been acting the same since&that time and there are times where&I feel, in my heart, that you are&no longer with us in this world.^Please, \x0F, I don't want to&feel so afraid for you,&you can tell me what's going on.",
           "",
           "",
         }
