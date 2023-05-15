@@ -285,6 +285,23 @@ extern "C" void OTRMessage_Init()
     MakeBlueMsgEng(0x811, "You received some Horse Food!&This will add a boost&to Epona's stamina.&Carrots are delicious!");
     MakeBlueMsgEng(0x812, "You received a Heart Barrier! This&will protect one of your hearts,&if you find someone with powerful&enough magic to activate it.");
 
+    MakeBlueMsgEng(0x7,  "\x13\x48You got a&%rDeku Seed Bullet Bag%w.&This bag can hold up to %y"+std::to_string(CAPACITY(UPG_BULLET_BAG,2))+"%w&slingshot bullets.");
+    MakeBlueMsgEng(0x6C, "\x13\x49Your %rDeku Seed Bullet Bag%w&has become bigger!&Now you can carry more bullets!&This bag can hold %y"+std::to_string(CAPACITY(UPG_BULLET_BAG,3))+"%w bullets!");
+    auto& str90 = "\x13\x00Now you can pick up&many %rDeku Sticks%w!&You can carry up to %y";
+    std::string s90(std::begin(str90), std::end(str90)-1);
+    MakeBlueMsgEng(0x90, s90+std::to_string(CAPACITY(UPG_STICKS,2))+"%w of them!");
+    auto& str91 = "\x13\x00Now you can pick up&even more %rDeku Sticks%w!&You can carry up to %y";
+    std::string s91(std::begin(str91), std::end(str91)-1);
+    MakeBlueMsgEng(0x91, s91+std::to_string(CAPACITY(UPG_STICKS,3))+"%w of them!");
+    MakeBlueMsgEng(0xA7, "\x13\x01Now you can carry&many %rDeku Nuts%w!&You can hold up to %y"+std::to_string(CAPACITY(UPG_NUTS,2))+"%w nuts!");
+    MakeBlueMsgEng(0xA8, "\x13\x01Now you can carry even&more %rDeku Nuts%w!You can carry&up to %y"+std::to_string(CAPACITY(UPG_NUTS,3))+"%w nuts!");
+    MakeBlueMsgEng(0x56, "\x13\x4BYou upgraded your quiver to a&%rBig Quiver%w!&Now you can carry more arrows-&%y"+std::to_string(CAPACITY(UPG_QUIVER,2))+"%w in total!");
+    MakeBlueMsgEng(0x57, "\x13\x4BYou upgraded your quiver to&the %rBiggest Quiver%w!&Now you can carry even more&arrows, to a maximum of %y"+std::to_string(CAPACITY(UPG_QUIVER,3))+"%w!");
+    MakeBlueMsgEng(0x59, "\x13\x4EYou got a %rBig Bomb Bag%w!&Now you can carry more&Bombs, up to a maximum of %y"+std::to_string(CAPACITY(UPG_BOMB_BAG,2))+"%w!");
+    MakeBlueMsgEng(0x5A, "\x13\x4FYou got the&%rBiggest Bomb Bag%w!&Now, you can carry up to&%y"+std::to_string(CAPACITY(UPG_BOMB_BAG,3))+"%w Bombs!");
+    MakeBlueMsgEng(0x5E, "\x13\x56You got an Adult's Wallet!&Adults are allowed to carry a&lot of money. Now you can hold&up to %y"+std::to_string(CAPACITY(UPG_WALLET,1))+" Rupees%w.");
+    MakeBlueMsgEng(0x5F, "\x13\x57You got a Giant's Wallet!&What a huge wallet!&Now you can carry up to %y"+std::to_string(CAPACITY(UPG_WALLET,2))+" Rupees%w.");
+
     //Great Fairy Text
     MakeNormalMsgEng(0xE8, "Your magic power has been&enhanced! Now you can gain even&more Magic Capacity!^Collecting %gIcons of Magic%w&will allow for greater enhancement!");
 

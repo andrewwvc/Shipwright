@@ -451,7 +451,7 @@ u16 EnGo2_GetTextIdGoronCityRollingBig(PlayState* play, EnGo2* this) {
                 return GoronMsg+30;
     if (gSaveContext.infTable[17] & 0x4000) {
         return 0x3013;
-    } else if ((CUR_CAPACITY(UPG_BOMB_BAG) >= 20 || gSaveContext.n64ddFlag) && this->waypoint > 7 && this->waypoint < 12) {
+    } else if ((CUR_UPG_VALUE(UPG_BOMB_BAG) >= 1 || gSaveContext.n64ddFlag) && this->waypoint > 7 && this->waypoint < 12) {
         return 0x3012;
     } else {
         return 0x3011;
@@ -484,7 +484,7 @@ s16 EnGo2_GetStateGoronCityRollingBig(PlayState* play, EnGo2* this) {
                 if (this->actor.textId == 0x3012) {
                     this->actionFunc = EnGo2_SetupGetItem;
                     if(!gSaveContext.n64ddFlag) {
-                        EnGo2_GetItem(this, play, CUR_CAPACITY(UPG_BOMB_BAG) == 30 ? GI_BOMB_BAG_40 : GI_BOMB_BAG_30);
+                        EnGo2_GetItem(this, play, (CUR_UPG_VALUE(UPG_BOMB_BAG) == 2) ? GI_BOMB_BAG_40 : GI_BOMB_BAG_30);
                     } else {
                         EnGo2_GetItemEntry(this, play, Randomizer_GetItemFromKnownCheck(RC_GC_ROLLING_GORON_AS_CHILD, GI_BOMB_BAG_40));
                     }

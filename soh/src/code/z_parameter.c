@@ -4944,8 +4944,8 @@ void Interface_Draw(PlayState* play) {
     static s16 D_80125B1C[][3] = {
         { 0, 150, 0 }, { 100, 255, 0 }, { 255, 255, 255 }, { 0, 0, 0 }, { 255, 255, 255 },
     };
-    static s16 rupeeDigitsFirst[] = { 1, 0, 0, 0 };
-    static s16 rupeeDigitsCount[] = { 2, 3, 3, 3 };
+    static s16 rupeeDigitsFirst[] = { 2, 1, 0, 0 };
+    static s16 rupeeDigitsCount[] = { 2, 3, 4, 4 };
 
     // courtesy of https://github.com/TestRunnerSRL/OoT-Randomizer/blob/Dev/ASM/c/hud_colors.c
     static Color_RGB8 rupeeWalletColors[4] = {
@@ -5185,21 +5185,26 @@ void Interface_Draw(PlayState* play) {
             gDPSetCombineLERP(OVERLAY_DISP++, 0, 0, 0, PRIMITIVE, TEXEL0, 0, PRIMITIVE, 0, 0, 0, 0, PRIMITIVE, TEXEL0, 0,
                               PRIMITIVE, 0);
 
-            interfaceCtx->counterDigits[0] = interfaceCtx->counterDigits[1] = 0;
-            interfaceCtx->counterDigits[2] = gSaveContext.rupees;
+            interfaceCtx->counterDigits[0] = interfaceCtx->counterDigits[1] = interfaceCtx->counterDigits[2] = 0;
+            interfaceCtx->counterDigits[3] = gSaveContext.rupees;
 
-            if ((interfaceCtx->counterDigits[2] > 9999) || (interfaceCtx->counterDigits[2] < 0)) {
-                interfaceCtx->counterDigits[2] &= 0xDDD;
+            if ((interfaceCtx->counterDigits[3] > 9999) || (interfaceCtx->counterDigits[3] < 0)) {
+                interfaceCtx->counterDigits[3] &= 0xDDD;
             }
 
-            while (interfaceCtx->counterDigits[2] >= 100) {
+            while (interfaceCtx->counterDigits[3] >= 1000) {
                 interfaceCtx->counterDigits[0]++;
-                interfaceCtx->counterDigits[2] -= 100;
+                interfaceCtx->counterDigits[3] -= 1000;
             }
 
-            while (interfaceCtx->counterDigits[2] >= 10) {
+            while (interfaceCtx->counterDigits[3] >= 100) {
                 interfaceCtx->counterDigits[1]++;
-                interfaceCtx->counterDigits[2] -= 10;
+                interfaceCtx->counterDigits[3] -= 100;
+            }
+
+            while (interfaceCtx->counterDigits[3] >= 10) {
+                interfaceCtx->counterDigits[2]++;
+                interfaceCtx->counterDigits[3] -= 10;
             }
 
             svar2 = rupeeDigitsFirst[CUR_UPG_VALUE(UPG_WALLET)];
