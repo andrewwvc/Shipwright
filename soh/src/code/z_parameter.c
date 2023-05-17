@@ -4944,8 +4944,8 @@ void Interface_Draw(PlayState* play) {
     static s16 D_80125B1C[][3] = {
         { 0, 150, 0 }, { 100, 255, 0 }, { 255, 255, 255 }, { 0, 0, 0 }, { 255, 255, 255 },
     };
-    static s16 rupeeDigitsFirst[] = { 2, 1, 0, 0 };
-    static s16 rupeeDigitsCount[] = { 2, 3, 4, 4 };
+    static s16 rupeeDigitsFirst[] = { 2, 1, 1, 0 };
+    static s16 rupeeDigitsCount[] = { 2, 3, 3, 4 };
 
     // courtesy of https://github.com/TestRunnerSRL/OoT-Randomizer/blob/Dev/ASM/c/hud_colors.c
     static Color_RGB8 rupeeWalletColors[4] = {
