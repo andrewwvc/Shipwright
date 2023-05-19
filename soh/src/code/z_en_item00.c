@@ -440,6 +440,10 @@ void EnItem00_Init(Actor* thisx, PlayState* play) {
             shadowScale = 0.6f;
             this->actor.world.rot.x = 0x4000;
             break;
+        case ITEM00_MAX:
+            Actor_Kill(&this->actor);
+            return;
+            break;
     }
 
     this->unk_156 = 0;
@@ -844,6 +848,7 @@ void EnItem00_Update(Actor* thisx, PlayState* play) {
         return;
     }
 
+    insertSpawnResource(this->actor.entryNum);
     switch (this->actor.params) {
         case ITEM00_RUPEE_GREEN:
             Item_Give(play, ITEM_RUPEE_GREEN);

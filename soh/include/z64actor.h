@@ -191,7 +191,8 @@ typedef struct Actor {
     /* 0x138 */ ActorOverlay* overlayEntry; // Pointer to the overlay table entry for this actor
     /* 0x13C */ Vec3f teleportVec;
     /* 0x148 */ u8 isTeleported;
-    /* 0x149 */ char dbgPad[0x3]; // Padding that only exists in the debug rom
+    /* 0x149 */ s16 entryNum;
+    /*       */ char dbgPad[0x1]; // Padding that only exists in the debug rom
 } Actor; // size = 0x14C
 
 typedef enum {
@@ -276,6 +277,7 @@ typedef enum {
     /* 0x18 */ ITEM00_TUNIC_GORON,
     /* 0x19 */ ITEM00_BOMBS_SPECIAL,
     /* 0x20 */ ITEM00_BOMBCHU,
+               ITEM00_MAX,
 } Item00Type;
 
 struct EnItem00;

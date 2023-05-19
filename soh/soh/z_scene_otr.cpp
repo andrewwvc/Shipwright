@@ -13,6 +13,109 @@
 #include <Text.h>
 #include <Blob.h>
 
+struct ActorSpawnResource {
+    public:
+    int scene;
+    int room;
+    Ship::ActorSpawnEntry entry;
+};
+
+bool operator==(const Ship::ActorSpawnEntry& lhs, const Ship::ActorSpawnEntry& rhs)
+{
+    return (lhs.actorNum == rhs.actorNum)
+    && (lhs.posX == rhs.posX)
+    && (lhs.posY == rhs.posY)
+    && (lhs.posZ == rhs.posZ)
+    && (lhs.rotX == rhs.rotX)
+    && (lhs.rotY == rhs.rotY)
+    && (lhs.rotZ == rhs.rotZ)
+    && (lhs.initVar == rhs.initVar);
+}
+
+constexpr bool operator<(const ActorSpawnResource& lhs, const ActorSpawnResource& rhs)
+{
+    if (lhs.scene < rhs.scene)
+        return true;
+    else if (lhs.scene > rhs.scene)
+        return false;
+    else if (lhs.room < rhs.room)
+        return true;
+    else if (lhs.room > rhs.room)
+        return false;
+    else if (lhs.entry.actorNum < rhs.entry.actorNum)
+        return true;
+    else if (lhs.entry.actorNum > rhs.entry.actorNum)
+        return false;
+    else if (lhs.entry.posX < rhs.entry.posX)
+        return true;
+    else if (lhs.entry.posX > rhs.entry.posX)
+        return false;
+    else if (lhs.entry.posY < rhs.entry.posY)
+        return true;
+    else if (lhs.entry.posY > rhs.entry.posY)
+        return false;
+    else if (lhs.entry.posZ < rhs.entry.posZ)
+        return true;
+    else if (lhs.entry.posZ > rhs.entry.posZ)
+        return false;
+    else if (lhs.entry.rotX < rhs.entry.rotX)
+        return true;
+    else if (lhs.entry.rotX > rhs.entry.rotX)
+        return false;
+    else if (lhs.entry.rotY < rhs.entry.rotY)
+        return true;
+    else if (lhs.entry.rotY > rhs.entry.rotY)
+        return false;
+    else if (lhs.entry.rotZ < rhs.entry.rotZ)
+        return true;
+    else if (lhs.entry.rotZ > rhs.entry.rotZ)
+        return false;
+    else if (lhs.entry.initVar < rhs.entry.initVar)
+        return true;
+    else if (lhs.entry.initVar > rhs.entry.initVar)
+        return false;
+
+    return false;
+}
+
+static std::map<ActorSpawnResource,int> UsedResources = {};
+static std::map<int,ActorSpawnResource> TempResourceEntries = {};
+
+void insertSpawnResource(int entry) {
+    auto itt = TempResourceEntries.find(entry);
+    if (itt != TempResourceEntries.end()) {
+        ActorSpawnResource sw = itt->second;
+        UsedResources.insert({sw,1});
+    }
+}
+
+//Returns -1 if entry was found, otherwise return the entry number
+s32 createTempEntry(PlayState* play, ActorEntry* spawn) {
+    ActorSpawnResource sw;
+    sw.scene = play->sceneNum;
+    sw.room = play->roomCtx.curRoom.num;
+    sw.entry.actorNum = spawn->id;
+    sw.entry.initVar = spawn->params;
+    sw.entry.posX = spawn->pos.x;
+    sw.entry.posY = spawn->pos.y;
+    sw.entry.posZ = spawn->pos.z;
+    sw.entry.rotX = spawn->rot.x;
+    sw.entry.rotY = spawn->rot.y;
+    sw.entry.rotZ = spawn->rot.z;
+    int entNum;
+    auto node = TempResourceEntries.rbegin();
+    if (node != TempResourceEntries.rend())
+        entNum = node->first+1;
+    else
+        entNum = 0;
+    auto foundVal = UsedResources.find(sw);
+    if (foundVal != UsedResources.end()) {
+        return -1;
+    }
+    TempResourceEntries.insert({entNum, sw});
+    return entNum;
+}
+
 extern Ship::Resource* OTRPlay_LoadFile(PlayState* play, const char* fileName);
 extern "C" s32 Object_Spawn(ObjectContext* objectCtx, s16 objectId);
 extern "C" RomFile sNaviMsgFiles[];
@@ -336,9 +439,9 @@ bool Scene_CommandActorList(PlayState* play, Ship::SceneCommand* cmd) {
 
     play->numSetupActors = cmdActor->entries.size();
 
-    if (cmdActor->cachedGameData != nullptr)
-        play->setupActorList = (ActorEntry*)cmdActor->cachedGameData;
-    else
+    // if (cmdActor->cachedGameData != nullptr)
+    //     play->setupActorList = (ActorEntry*)cmdActor->cachedGameData;
+    // else
     {
         if (sceneActorOverrides.find(play->sceneNum) != sceneActorOverrides.end() &&
                         sceneActorOverrides.at(play->sceneNum).find(play->roomCtx.curRoom.num) != sceneActorOverrides.at(play->sceneNum).end()) {
@@ -358,6 +461,7 @@ bool Scene_CommandActorList(PlayState* play, Ship::SceneCommand* cmd) {
         SPDLOG_INFO("Scene: 0x{0:x}, Room: 0x{1:x}, Setup: 0x{2:x}", (uint16_t)play->sceneNum, (uint16_t)play->roomCtx.curRoom.num, (uint32_t)gSaveContext.sceneSetupIndex);
 
         ActorEntry* entries = (ActorEntry*)malloc(cmdActor->entries.size() * sizeof(ActorEntry));
+        TempResourceEntries = {};
 
         for (int i = 0; i < cmdActor->entries.size(); i++)
         {
@@ -370,12 +474,47 @@ bool Scene_CommandActorList(PlayState* play, Ship::SceneCommand* cmd) {
             entries[i].rot.z = cmdActor->entries[i].rotZ;
             entries[i].params = cmdActor->entries[i].initVar;
 
+            if (entries[i].id == ACTOR_OBJ_TSUBO) {
+                ActorSpawnResource sw;
+                sw.scene = play->sceneNum;
+                sw.room = play->roomCtx.curRoom.num;
+                sw.entry = cmdActor->entries[i];
+                TempResourceEntries.insert({i,sw});
+                auto foundVal = UsedResources.find(sw);
+                if (foundVal != UsedResources.end()) {
+                    entries[i].params &= 0xFFE0;
+                    entries[i].params |= ITEM00_MAX;
+                }
+            } else if (entries[i].id == ACTOR_EN_WONDER_ITEM) {
+                ActorSpawnResource sw;
+                sw.scene = play->sceneNum;
+                sw.room = play->roomCtx.curRoom.num;
+                sw.entry = cmdActor->entries[i];
+                TempResourceEntries.insert({i,sw});
+                auto foundVal = UsedResources.find(sw);
+                if (foundVal != UsedResources.end()) {
+                    entries[i].params &= 0x07FF;
+                    entries[i].params |= (0xA << 0xB);
+                }
+            } else if (entries[i].id == ACTOR_EN_ITEM00) {
+                ActorSpawnResource sw;
+                sw.scene = play->sceneNum;
+                sw.room = play->roomCtx.curRoom.num;
+                sw.entry = cmdActor->entries[i];
+                TempResourceEntries.insert({i,sw});
+                auto foundVal = UsedResources.find(sw);
+                if (foundVal != UsedResources.end()) {
+                    entries[i].params &= 0xFF00;
+                    entries[i].params |= ITEM00_MAX;
+                }
+            }
+
             SPDLOG_INFO("Entity {0:d}\t ID: 0x{1:x}, \tParams: 0x{2:x}, \tpos: {3:d},{4:d},{5:d}, \t{6:d},{7:d},{8:d}",
             i, (uint16_t)entries[i].id, (uint16_t)entries[i].params,
             entries[i].pos.x, entries[i].pos.y, entries[i].pos.z, entries[i].rot.x, entries[i].rot.y, entries[i].rot.z);
         }
 
-        cmdActor->cachedGameData = entries;
+        //cmdActor->cachedGameData = entries;
         play->setupActorList = entries;
     }
 
