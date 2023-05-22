@@ -111,6 +111,7 @@ void ObjKibako2_SpawnCollectible(ObjKibako2* this, PlayState* play) {
     collectibleFlagTemp = this->collectibleFlag;
     itemDropped = this->dyna.actor.home.rot.x;
     if (itemDropped >= 0 && itemDropped < 0x1A) {
+        insertSpawnResource(this->dyna.actor.entryNum);
         Item_DropCollectible(play, &this->dyna.actor.world.pos, itemDropped | (collectibleFlagTemp << 8));
     }
 }

@@ -41,6 +41,33 @@ const ActorInit En_Ex_Ruppy_InitVars = {
     NULL,
 };
 
+static s32 guardRupeesUsed = 0;
+static s32 diveRupeesUsed = 0;
+
+void useGuardRupees(s32 num) {
+    guardRupeesUsed += num;
+}
+
+s32 getGuardRupees() {
+    return guardRupeesUsed;
+}
+
+void resetGuardRupees() {
+    guardRupeesUsed = 0;
+}
+
+void useDiveRupees(s32 num) {
+    guardRupeesUsed += num;
+}
+
+s32 getDiveRupees() {
+    return guardRupeesUsed;
+}
+
+void resetDiveRupees() {
+    guardRupeesUsed = 0;
+}
+
 void EnExRuppy_Init(Actor* thisx, PlayState* play) {
     EnExRuppy* this = (EnExRuppy*)thisx;
     EnDivingGame* divingGame;
@@ -71,19 +98,20 @@ void EnExRuppy_Init(Actor* thisx, PlayState* play) {
                 this->colorIdx = 1;
             } else {
                 temp1 = 200.99f;
+                temp2 = 0.0f;
                 if (this->actor.parent != NULL) {
                     divingGame = (EnDivingGame*)this->actor.parent;
                     if (divingGame->actor.update != NULL) {
                         temp2 = divingGame->extraWinCount * 10.0f;
-                        temp1 += temp2;
+                        //temp1 += temp2;
                     }
                 }
 
-                temp3 = Rand_ZeroFloat(temp1);
-                if ((temp3 >= 0) && (temp3 < 40)) {
+                temp3 = Rand_ZeroFloat(temp1+getDiveRupees()*2);
+                if (((temp3 >= 0) && (temp3 < 40)) || (temp3 > 200 && temp3%3 > 0)) {
                     this->rupeeValue = 1;
                     this->colorIdx = 0;
-                } else if ((temp3 >= 40) && (temp3 < 170)) {
+                } else if (((temp3 >= 40) && (temp3 < 170)) || (temp3 > 200)) {
                     this->rupeeValue = 5;
                     this->colorIdx = 1;
                 } else if ((temp3 >= 170) && (temp3 < 190)) {
@@ -92,7 +120,7 @@ void EnExRuppy_Init(Actor* thisx, PlayState* play) {
                 } else if ((temp3 >= 190) && (temp3 < 200)) {
                     this->rupeeValue = 50;
                     this->colorIdx = 4;
-                } else {
+                } else if (temp3 == 200 && temp2 > 1.0f) {
                     this->unk_160 = 0.02f;
                     Actor_SetScale(&this->actor, this->unk_160);
                     this->rupeeValue = 500;
@@ -157,7 +185,13 @@ void EnExRuppy_Init(Actor* thisx, PlayState* play) {
                 Actor_SetScale(&this->actor, 0.02f);
             }
             this->colorIdx = 0;
-            switch ((s16)Rand_ZeroFloat(30.99f)) {
+            s32 rupHalf = (getGuardRupees()>>2);
+            s32 randVal = (s32)Rand_ZeroFloat(30.99f + (rupHalf*rupHalf));
+            if (randVal > 30) {
+                Actor_Kill(&this->actor);
+                return;
+            }
+            switch (randVal) {
                 case 0:
                     this->colorIdx = 2;
                     break;
@@ -322,6 +356,9 @@ void EnExRuppy_WaitInGame(EnExRuppy* this, PlayState* play) {
                 this->actionFunc = EnExRuppy_Kill;
             } else if (this->actor.xyzDistToPlayerSq < SQ(localConst)) {
                 Rupees_ChangeBy(this->rupeeValue);
+                if (this->type == 0 && (gSaveContext.eventChkInf[3] & 0x100)) {
+                    useDiveRupees(sRupeeValues[this->colorIdx]);
+                }
                 func_80078884(NA_SE_SY_GET_RUPY);
                 divingGame->grabbedRupeesCounter++;
                 Actor_Kill(&this->actor);
@@ -386,6 +423,10 @@ void EnExRuppy_WaitAsCollectible(EnExRuppy* this, PlayState* play) {
     f32 localConst = 30.0f;
 
     if (this->actor.xyzDistToPlayerSq < SQ(localConst)) {
+        if (this->type == 3) {
+            useGuardRupees(sRupeeValues[this->colorIdx]);
+        }
+
         func_80078884(NA_SE_SY_GET_RUPY);
         Item_DropCollectible(play, &this->actor.world.pos, (sEnExRuppyCollectibleTypes[this->colorIdx] | 0x8000));
         Actor_Kill(&this->actor);

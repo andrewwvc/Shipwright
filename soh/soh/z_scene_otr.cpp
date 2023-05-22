@@ -18,6 +18,7 @@ struct ActorSpawnResource {
     int scene;
     int room;
     Ship::ActorSpawnEntry entry;
+    s16 dirt;
 };
 
 bool operator==(const Ship::ActorSpawnEntry& lhs, const Ship::ActorSpawnEntry& rhs)
@@ -74,6 +75,10 @@ constexpr bool operator<(const ActorSpawnResource& lhs, const ActorSpawnResource
         return true;
     else if (lhs.entry.initVar > rhs.entry.initVar)
         return false;
+    else if (lhs.dirt < rhs.dirt)
+        return true;
+    else if (lhs.dirt > rhs.dirt)
+        return false;
 
     return false;
 }
@@ -89,8 +94,7 @@ void insertSpawnResource(int entry) {
     }
 }
 
-//Returns -1 if entry was found, otherwise return the entry number
-s32 createTempEntry(PlayState* play, ActorEntry* spawn) {
+s32 createTempEntryPlus(PlayState* play, ActorEntry* spawn, s16 dirt) {
     ActorSpawnResource sw;
     sw.scene = play->sceneNum;
     sw.room = play->roomCtx.curRoom.num;
@@ -102,6 +106,7 @@ s32 createTempEntry(PlayState* play, ActorEntry* spawn) {
     sw.entry.rotX = spawn->rot.x;
     sw.entry.rotY = spawn->rot.y;
     sw.entry.rotZ = spawn->rot.z;
+    sw.dirt = dirt;
     int entNum;
     auto node = TempResourceEntries.rbegin();
     if (node != TempResourceEntries.rend())
@@ -114,6 +119,32 @@ s32 createTempEntry(PlayState* play, ActorEntry* spawn) {
     }
     TempResourceEntries.insert({entNum, sw});
     return entNum;
+}
+
+//Returns -1 if entry was found, otherwise return the entry number
+s32 createTempEntry(PlayState* play, ActorEntry* spawn) {
+    return createTempEntryPlus(play,spawn,0);
+}
+
+s32 isResourceUsed(PlayState* play, ActorEntry* spawn, s16 dirt) {
+    ActorSpawnResource sw;
+    sw.scene = play->sceneNum;
+    sw.room = play->roomCtx.curRoom.num;
+    sw.entry.actorNum = spawn->id;
+    sw.entry.initVar = spawn->params;
+    sw.entry.posX = spawn->pos.x;
+    sw.entry.posY = spawn->pos.y;
+    sw.entry.posZ = spawn->pos.z;
+    sw.entry.rotX = spawn->rot.x;
+    sw.entry.rotY = spawn->rot.y;
+    sw.entry.rotZ = spawn->rot.z;
+    sw.dirt = dirt;
+    auto foundVal = UsedResources.find(sw);
+    if (foundVal != UsedResources.end()) {
+        return 1;
+    } else {
+        return 0;
+    }
 }
 
 extern Ship::Resource* OTRPlay_LoadFile(PlayState* play, const char* fileName);
@@ -479,33 +510,70 @@ bool Scene_CommandActorList(PlayState* play, Ship::SceneCommand* cmd) {
                 sw.scene = play->sceneNum;
                 sw.room = play->roomCtx.curRoom.num;
                 sw.entry = cmdActor->entries[i];
+                sw.dirt = 0;
                 TempResourceEntries.insert({i,sw});
                 auto foundVal = UsedResources.find(sw);
                 if (foundVal != UsedResources.end()) {
                     entries[i].params &= 0xFFE0;
                     entries[i].params |= ITEM00_MAX;
                 }
-            } else if (entries[i].id == ACTOR_EN_WONDER_ITEM) {
+            } else if (entries[i].id == ACTOR_EN_WONDER_ITEM && (gSaveContext.eventChkInf[0] & (1<<7))) {
                 ActorSpawnResource sw;
                 sw.scene = play->sceneNum;
                 sw.room = play->roomCtx.curRoom.num;
                 sw.entry = cmdActor->entries[i];
+                sw.dirt = 0;
                 TempResourceEntries.insert({i,sw});
                 auto foundVal = UsedResources.find(sw);
                 if (foundVal != UsedResources.end()) {
                     entries[i].params &= 0x07FF;
                     entries[i].params |= (0xA << 0xB);
                 }
-            } else if (entries[i].id == ACTOR_EN_ITEM00) {
+            } else if (entries[i].id == ACTOR_EN_ITEM00 && (gSaveContext.eventChkInf[0] & (1<<7))) {
                 ActorSpawnResource sw;
                 sw.scene = play->sceneNum;
                 sw.room = play->roomCtx.curRoom.num;
                 sw.entry = cmdActor->entries[i];
+                sw.dirt = 0;
                 TempResourceEntries.insert({i,sw});
                 auto foundVal = UsedResources.find(sw);
                 if (foundVal != UsedResources.end()) {
                     entries[i].params &= 0xFF00;
                     entries[i].params |= ITEM00_MAX;
+                }
+            } else if (entries[i].id == ACTOR_EN_KUSA && (entries[i].params & 0x3) == 0) {
+                // ActorSpawnResource sw;
+                // sw.scene = play->sceneNum;
+                // sw.room = play->roomCtx.curRoom.num;
+                // sw.entry = cmdActor->entries[i];
+                // sw.dirt = 0;
+                // TempResourceEntries.insert({i,sw});
+                // auto foundVal = UsedResources.find(sw);
+                // if (foundVal != UsedResources.end()) {
+                //     entries[i].params &= 0xFFFC;
+                //     entries[i].params |= 3;
+                // }
+            } else if (entries[i].id == ACTOR_OBJ_KIBAKO2) {
+                ActorSpawnResource sw;
+                sw.scene = play->sceneNum;
+                sw.room = play->roomCtx.curRoom.num;
+                sw.entry = cmdActor->entries[i];
+                sw.dirt = 0;
+                TempResourceEntries.insert({i,sw});
+                auto foundVal = UsedResources.find(sw);
+                if (foundVal != UsedResources.end()) {
+                    entries[i].rot.x = 0x1C;
+                }
+            } else if (entries[i].id == ACTOR_EN_SKJ) {
+                ActorSpawnResource sw;
+                sw.scene = play->sceneNum;
+                sw.room = play->roomCtx.curRoom.num;
+                sw.entry = cmdActor->entries[i];
+                sw.dirt = 0;
+                TempResourceEntries.insert({i,sw});
+                auto foundVal = UsedResources.find(sw);
+                if (foundVal != UsedResources.end()) {
+                    entries[i].rot.z = 0x1;
                 }
             }
 

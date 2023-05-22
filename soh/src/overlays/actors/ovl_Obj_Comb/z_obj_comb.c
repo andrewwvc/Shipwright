@@ -129,6 +129,33 @@ void ObjComb_Break(ObjComb* this, PlayState* play) {
 }
 
 void ObjComb_ChooseItemDrop(ObjComb* this, PlayState* play) {
+    s16 actorParams = 0;
+    s32 entVal = -1;
+    ActorEntry ae;
+
+    ae.id = this->actor.id;
+    ae.pos.x = round(this->actor.home.pos.x);
+    ae.pos.y = round(this->actor.home.pos.y);
+    ae.pos.z = round(this->actor.home.pos.z);
+    ae.rot = this->actor.home.rot;
+    ae.params = this->actor.params;
+
+    if (play->sceneNum == SCENE_KAKUSIANA) {
+        int numOfActorLists =
+        sizeof(play->actorCtx.actorLists) / sizeof(play->actorCtx.actorLists[0]);
+        for (int ii = 0; ii < numOfActorLists; ii++) {
+            if (play->actorCtx.actorLists[ii].length) {
+                if (play->actorCtx.actorLists[ii].head->id == 10) {
+                    // set the params for the hint check to be negative chest params
+                    actorParams = play->actorCtx.actorLists[ii].head->params;
+                }
+            }
+        }
+    }
+    if (isResourceUsed(play, &ae, actorParams))
+        this->actor.params = 0x1C;
+
+
     s16 params = this->actor.params & 0x1F;
 
     if ((params > 0) || (params < 0x1A)) {
@@ -141,7 +168,16 @@ void ObjComb_ChooseItemDrop(ObjComb* this, PlayState* play) {
         } else if (Rand_ZeroOne() < 0.5f) {
             params = -1;
         }
-        if (params >= 0 && !CVar_GetS32("gNoRandomDrops", 0)) {
+        if (params >= 0 && params != 0x1C  && !CVar_GetS32("gNoRandomDrops", 0)) {
+
+            if (play->sceneNum == SCENE_KAKUSIANA) {
+                entVal = createTempEntryPlus(play, &ae, actorParams);
+            } else {
+                entVal = createTempEntry(play, &ae);
+            }
+            this->actor.entryNum = entVal;
+
+            insertSpawnResource(this->actor.entryNum);
             Item_DropCollectible(play, &this->actor.world.pos, params);
         }
     }

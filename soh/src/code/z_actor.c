@@ -3396,7 +3396,8 @@ Actor* Actor_SpawnEntry(ActorContext* actorCtx, ActorEntry* actorEntry, PlayStat
     gMapLoading = 1;
     Actor* ret = Actor_Spawn(actorCtx, play, actorEntry->id, actorEntry->pos.x, actorEntry->pos.y, actorEntry->pos.z,
                        actorEntry->rot.x, actorEntry->rot.y, actorEntry->rot.z, actorEntry->params, true);
-    ret->entryNum = entryNum;
+    if (ret)
+        ret->entryNum = entryNum;
     gMapLoading = 0;
 
     return ret;
