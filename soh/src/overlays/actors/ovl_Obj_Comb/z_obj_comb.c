@@ -177,8 +177,10 @@ void ObjComb_ChooseItemDrop(ObjComb* this, PlayState* play) {
             }
             this->actor.entryNum = entVal;
 
-            insertSpawnResource(this->actor.entryNum);
-            Item_DropCollectible(play, &this->actor.world.pos, params);
+            EnItem00* item = Item_DropCollectible(play, &this->actor.world.pos, params);
+            if (item) {
+                item->actor.entryNum = this->actor.entryNum;
+        }
         }
     }
 }

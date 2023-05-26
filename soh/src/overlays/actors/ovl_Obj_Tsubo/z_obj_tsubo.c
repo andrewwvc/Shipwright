@@ -87,9 +87,11 @@ void ObjTsubo_SpawnCollectible(ObjTsubo* this, PlayState* play) {
     s16 dropParams = this->actor.params & 0x1F;
 
     if ((dropParams >= ITEM00_RUPEE_GREEN) && (dropParams <= ITEM00_BOMBS_SPECIAL)) {
-        insertSpawnResource(this->actor.entryNum);
-        Item_DropCollectible(play, &this->actor.world.pos,
+        EnItem00* item = Item_DropCollectible(play, &this->actor.world.pos,
                              (dropParams | (((this->actor.params >> 9) & 0x3F) << 8)));
+        if (item) {
+            item->actor.entryNum = this->actor.entryNum;
+        }
     }
 }
 
