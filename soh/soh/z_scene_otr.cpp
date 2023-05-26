@@ -86,11 +86,14 @@ constexpr bool operator<(const ActorSpawnResource& lhs, const ActorSpawnResource
 static std::map<ActorSpawnResource,int> UsedResources = {};
 static std::map<int,ActorSpawnResource> TempResourceEntries = {};
 
-void insertSpawnResource(int entry) {
+void insertSpawnResource(int entry, int extraTime) {
     auto itt = TempResourceEntries.find(entry);
     if (itt != TempResourceEntries.end()) {
         ActorSpawnResource sw = itt->second;
-        UsedResources.insert({sw,1});
+        auto existing = UsedResources.insert({sw,gSaveContext.savedFrameCount+extraTime});
+        if (!existing.second) {
+            existing.first->second = gSaveContext.savedFrameCount+extraTime;
+        }
     }
 }
 
@@ -465,6 +468,8 @@ Entity 40	 ID: 0x1ae, 	Params: 0xfc25, 	pos: -311,1500,-393, 	0,-4915,0
 -673,1192,747
 */
 
+#define DEKU_TREE_DEAD (gSaveContext.eventChkInf[0] & (1<<7))
+
 bool Scene_CommandActorList(PlayState* play, Ship::SceneCommand* cmd) {
     Ship::SetActorList* cmdActor = (Ship::SetActorList*)cmd;
 
@@ -513,11 +518,11 @@ bool Scene_CommandActorList(PlayState* play, Ship::SceneCommand* cmd) {
                 sw.dirt = 0;
                 TempResourceEntries.insert({i,sw});
                 auto foundVal = UsedResources.find(sw);
-                if (foundVal != UsedResources.end()) {
+                if (foundVal != UsedResources.end() && foundVal->second > gSaveContext.savedFrameCount) {
                     entries[i].params &= 0xFFE0;
                     entries[i].params |= ITEM00_MAX;
                 }
-            } else if (entries[i].id == ACTOR_EN_WONDER_ITEM && (gSaveContext.eventChkInf[0] & (1<<7))) {
+            } else if (entries[i].id == ACTOR_EN_WONDER_ITEM && DEKU_TREE_DEAD) {
                 ActorSpawnResource sw;
                 sw.scene = play->sceneNum;
                 sw.room = play->roomCtx.curRoom.num;
@@ -529,7 +534,7 @@ bool Scene_CommandActorList(PlayState* play, Ship::SceneCommand* cmd) {
                     entries[i].params &= 0x07FF;
                     entries[i].params |= (0xA << 0xB);
                 }
-            } else if (entries[i].id == ACTOR_EN_ITEM00 && (gSaveContext.eventChkInf[0] & (1<<7))) {
+            } else if (entries[i].id == ACTOR_EN_ITEM00 && DEKU_TREE_DEAD) {
                 ActorSpawnResource sw;
                 sw.scene = play->sceneNum;
                 sw.room = play->roomCtx.curRoom.num;

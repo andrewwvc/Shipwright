@@ -941,7 +941,7 @@ void Environment_AdjustLights(PlayState* play, f32 arg1, f32 arg2, f32 arg3, f32
 s32 Environment_GetBgsDayCount(void);
 void Environment_ClearBgsDayCount(void);
 s32 Environment_GetTotalDays(void);
-void insertSpawnResource(int entry);
+void insertSpawnResource(int entry, int extraTime);
 void useGuardRupees(s32 num);
 s32 getGuardRupees();
 s32 createTempEntryPlus(PlayState* play, ActorEntry* spawn, s16 dirt);

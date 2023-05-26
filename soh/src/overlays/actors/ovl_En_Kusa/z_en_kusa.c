@@ -126,7 +126,7 @@ s32 EnKusa_SnapToFloor(EnKusa* this, PlayState* play, f32 yOffset) {
 void EnKusa_DropCollectible(EnKusa* this, PlayState* play) {
     s16 dropParams;
 
-    insertSpawnResource(this->actor.entryNum);
+    insertSpawnResource(this->actor.entryNum, 1000);
     switch (this->actor.params & 3) {
         case ENKUSA_TYPE_0:
         case ENKUSA_TYPE_2:

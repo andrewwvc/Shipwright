@@ -1084,6 +1084,7 @@ void Play_Update(PlayState* play) {
                 }
 
                 play->gameplayFrames++;
+                gSaveContext.savedFrameCount++;
                 // Gameplay stat tracking
                 if (!gSaveContext.sohStats.gameComplete) {
                       gSaveContext.sohStats.playTimer++;

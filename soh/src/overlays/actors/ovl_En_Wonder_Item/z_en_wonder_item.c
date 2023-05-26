@@ -96,7 +96,7 @@ void EnWonderItem_DropCollectible(EnWonderItem* this, PlayState* play, s32 autoC
             }
         }
     }
-    insertSpawnResource(this->actor.entryNum);
+    insertSpawnResource(this->actor.entryNum, 1000);
     if (this->switchFlag >= 0) {
         Flags_SetSwitch(play, this->switchFlag);
     }

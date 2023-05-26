@@ -546,6 +546,7 @@ void SaveManager::InitFileNormal() {
     gSaveContext.infTable[29] = 1;
     gSaveContext.sceneFlags[5].swch = 0x40000000;
 
+    gSaveContext.savedFrameCount = 0;
     gSaveContext.goronTimeStatus = 0;
     gSaveContext.goronTimeDay = gSaveContext.totalDays;
     gSaveContext.SariaDateDay = 0;
@@ -1342,6 +1343,7 @@ void SaveManager::LoadBaseVersion3() {
     });
     SaveManager::Instance->LoadData("isMasterQuest", gSaveContext.isMasterQuest);
 
+    SaveManager::Instance->LoadData("savedFrameCount", gSaveContext.savedFrameCount);
     SaveManager::Instance->LoadData("goronTimeStatus", gSaveContext.goronTimeStatus);
     SaveManager::Instance->LoadData("goronTimeDay", gSaveContext.goronTimeDay);
     SaveManager::Instance->LoadData("SariaDateDay", gSaveContext.SariaDateDay);
@@ -1526,6 +1528,7 @@ void SaveManager::SaveBase() {
     });
     SaveManager::Instance->SaveData("isMasterQuest", gSaveContext.isMasterQuest);
 
+    SaveManager::Instance->SaveData("savedFrameCount", gSaveContext.savedFrameCount);
     SaveManager::Instance->SaveData("goronTimeStatus", gSaveContext.goronTimeStatus);
     SaveManager::Instance->SaveData("goronTimeDay", gSaveContext.goronTimeDay);
     SaveManager::Instance->SaveData("SariaDateDay", gSaveContext.SariaDateDay);
