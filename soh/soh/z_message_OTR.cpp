@@ -274,7 +274,7 @@ extern "C" void OTRMessage_Init()
         questMessageTableID, WonderMsg+0x40,
         {
           TEXTBOX_TYPE_BLUE, TEXTBOX_POS_MIDDLE,
-          "The fourth day, the darkest&night, a day for testing&and understanding oneself, and&also one that brings mystery.^The fifth, a day loved&by the multitudes, is a day of&festivity and celabration.^And finally the sixth,&the day of rest, one even&more loved by some.",
+          "The fourth day, the darkest&night, a day for testing&and understanding oneself, and&also one that brings mystery.^The fifth, a day loved&by the multitudes, is a day of&festivity and celebration.^And finally the sixth,&the day of rest, one even&more loved by some.",
           "",
           "",
         }
