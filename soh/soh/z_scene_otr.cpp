@@ -470,6 +470,10 @@ Entity 40	 ID: 0x1ae, 	Params: 0xfc25, 	pos: -311,1500,-393, 	0,-4915,0
 
 #define DEKU_TREE_DEAD (gSaveContext.eventChkInf[0] & (1<<7))
 
+bool isResourceRestored(auto val) {
+   return val->second > gSaveContext.savedFrameCount;
+}
+
 bool Scene_CommandActorList(PlayState* play, Ship::SceneCommand* cmd) {
     Ship::SetActorList* cmdActor = (Ship::SetActorList*)cmd;
 
@@ -518,7 +522,7 @@ bool Scene_CommandActorList(PlayState* play, Ship::SceneCommand* cmd) {
                 sw.dirt = 0;
                 TempResourceEntries.insert({i,sw});
                 auto foundVal = UsedResources.find(sw);
-                if (foundVal != UsedResources.end() && foundVal->second > gSaveContext.savedFrameCount) {
+                if (foundVal != UsedResources.end() && isResourceRestored(foundVal)) {
                     entries[i].params &= 0xFFE0;
                     entries[i].params |= ITEM00_MAX;
                 }

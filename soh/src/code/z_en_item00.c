@@ -900,7 +900,7 @@ void EnItem00_Update(Actor* thisx, PlayState* play) {
         return;
     }
 
-    insertSpawnResource(this->actor.entryNum, 1000);
+    insertSpawnResource(this->actor.entryNum, 100000);
     switch (this->actor.params) {
         case ITEM00_RUPEE_GREEN:
             Item_Give(play, ITEM_RUPEE_GREEN);
