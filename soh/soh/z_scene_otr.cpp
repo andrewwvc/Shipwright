@@ -780,6 +780,10 @@ bool Scene_CommandCollisionHeader(PlayState* play, Ship::SceneCommand* cmd)
         {
             colHeader->surfaceTypeList[i].data[0] = colRes->polygonTypes[i] >> 32;
             colHeader->surfaceTypeList[i].data[1] = colRes->polygonTypes[i] & 0xFFFFFFFF;
+
+            if (play->sceneNum == SCENE_HAKAANA_OUKE && i == 0x9 || i == 0xA) {
+                colHeader->surfaceTypeList[i].data[0] |= 0x14 << 24;
+            }
         }
 
         if (play->sceneNum == SCENE_BESITU) {
