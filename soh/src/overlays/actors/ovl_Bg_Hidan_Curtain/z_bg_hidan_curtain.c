@@ -84,7 +84,7 @@ void BgHidanCurtain_Init(Actor* thisx, PlayState* play) {
         return;
     }
 
-    this->size = ((this->type == 2) || (this->type == 4)) ? 1 : 0;
+    this->size = ((this->type == 2) || (this->type == 4) || (this->type == 8)) ? 1 : 0;
     hcParams = &sHCParams[this->size];
     this->treasureFlag = (thisx->params >> 6) & 0x3F;
     thisx->params &= 0x3F;

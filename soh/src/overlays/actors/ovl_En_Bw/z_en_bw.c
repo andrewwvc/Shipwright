@@ -170,7 +170,7 @@ s32 EnBw_Is_On_Fire(Actor* thisx) {
     EnBw* this = (EnBw*)thisx;
     EnBwActionFunc BWfunc = (this->actionFunc);
     //s32 ret = (BWfunc == func_809CEA24 || BWfunc == func_809CF984 || BWfunc == func_809CF7AC);
-    return (this->unk_221 == 3 || this->unk_221 == 0 || BWfunc == func_809CF984 || BWfunc == func_809CF7AC);
+    return (this->unk_221 == 3 || this->unk_221 == 0 || BWfunc == func_809CF984 || BWfunc == func_809CF7AC) && this->iceTimer == 0 && thisx->colorFilterTimer == 0;
 }
 
 void func_809CE884(EnBw* this, PlayState* play) {
@@ -383,7 +383,7 @@ void func_809CEA24(EnBw* this, PlayState* play) {
                 Math_SmoothStepToS(&this->actor.world.rot.y, this->unk_236 + this->unk_238, 1,
                                    this->actor.speedXZ * 1000.0f, 0);
             }
-            if (this->unk_224 <= 200) {
+            if (this->unk_224 <= 100) {
                 sp60 = Math_SinS(this->unk_224 * (0x960 - this->unk_224)) * 55.0f;
                 this->color1.r = 255 - ABS(sp60);
                 sp60 = Math_SinS(this->unk_224 * (0x960 - this->unk_224)) * 115.0f;
@@ -638,7 +638,7 @@ void func_809D0268(EnBw* this, PlayState* play) {
         func_809CE9A8(this);
         this->color1.r = this->color1.g = 200;
         this->color1.b = 255;
-        this->unk_224 = 0x258;
+        this->unk_224 = 200;
         this->unk_221 = 1;
         this->unk_250 = 0.7f;
         this->unk_236++;
@@ -663,7 +663,7 @@ void func_809D0424(EnBw* this, PlayState* play) {
                 func_809CE9A8(this);
                 this->color1.r = this->color1.g = 200;
                 this->color1.b = 255;
-                this->unk_224 = 0x258;
+                this->unk_224 = 200;
                 this->unk_221 = 1;
                 this->unk_250 = 0.7f;
                 this->unk_236++;
