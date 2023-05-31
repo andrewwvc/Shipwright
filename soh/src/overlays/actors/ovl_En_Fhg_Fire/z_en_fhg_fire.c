@@ -142,6 +142,7 @@ void EnFhgFire_Init(Actor* thisx, PlayState* play) {
         f32 dzL;
         f32 dxzL;
 
+        this->speedLimit = 8.0f;
         this->actor.speedXZ = (this->actor.world.rot.x == 0) ? 8.0f : 3.0f;
         EnFhgFire_SetUpdate(this, EnFhgFire_EnergyBall);
 
@@ -417,7 +418,7 @@ void EnFhgFire_SpearLight(EnFhgFire* this, PlayState* play) {
     }
 }
 
-static const f32 MAX_BALL_SPEED = 23.0f;
+static const f32 MAX_BALL_SPEED = 24.0f;
 
 void EnFhgFire_EnergyBall(EnFhgFire* this, PlayState* play) {
     f32 dxL;
@@ -508,6 +509,7 @@ void EnFhgFire_EnergyBall(EnFhgFire* this, PlayState* play) {
                         if (bossGnd->flyMode == GND_FLY_NEUTRAL) {
                             angleModX = Rand_ZeroFloat(0x1000);
                             angleModY = Rand_CenteredFloat(0x2000);
+                            this->speedLimit = 15.0f;
                             this->actor.speedXZ = 15.0f;
                         } else {
                             angleModX = 0;
@@ -519,8 +521,10 @@ void EnFhgFire_EnergyBall(EnFhgFire* this, PlayState* play) {
 
                             if (!canBottleReflect2 && (player->meleeWeaponAnimation >= 24)) {
                                 this->actor.speedXZ = MAX_BALL_SPEED;
+                                this->speedLimit = MAX_BALL_SPEED;
                                 this->work[FHGFIRE_RETURN_COUNT] = 4;
                             } else {
+                                this->speedLimit += 1.0f;
                                 this->actor.speedXZ += 1.0f;
                             }
                         }
@@ -540,7 +544,7 @@ void EnFhgFire_EnergyBall(EnFhgFire* this, PlayState* play) {
                     if ((bossGnd->flyMode >= GND_FLY_VOLLEY) && (this->work[FHGFIRE_RETURN_COUNT] >= 2)) {
                         Audio_PlayActorSound2(&this->actor, NA_SE_EN_FANTOM_LAUGH);
                     }
-                    func_8002F698(play, &this->actor, 3.0f, this->actor.world.rot.y, 0.0f, 3, 0x10);
+                    func_8002F698(play, &this->actor, 3.0f, this->actor.world.rot.y, 0.0f, 3, 0x20);
                 }
                 break;
             case FHGFIRE_LIGHT_BLUE:
@@ -571,12 +575,14 @@ void EnFhgFire_EnergyBall(EnFhgFire* this, PlayState* play) {
                 break;
             case FHGFIRE_LIGHT_REFLECT:
                 if (this->work[FHGFIRE_TIMER] == 0) {
-                    static const s16 MAX_ANGLE = 0x1100;
+                    static const s16 MAX_ANGLE = 0x1200;
                     s16 i3;
                     Vec3f sp88;
                     Vec3f sp7C = { 0.0f, -0.5f, 0.0f };
                     f32 randAng = Rand_CenteredFloat(2.0f);
-                    f32 tempMaxSpeed = MAX_BALL_SPEED*(1.0f-0.8f*fabsf(randAng));
+                    if (fabsf(randAng) < 0.4)
+                        randAng = 0.0f;
+                    f32 tempMaxSpeed = MAX_BALL_SPEED*(1.0f-0.7f*fabsf(randAng));
 
                     for (i3 = 0; i3 < 30; i3++) {
                         sp88.x = Rand_CenteredFloat(20.0f);
@@ -590,9 +596,13 @@ void EnFhgFire_EnergyBall(EnFhgFire* this, PlayState* play) {
                     this->actor.world.rot.x = Math_FAtan2F(dyL, dxzL) * (0x8000 / M_PI);
                     this->work[FHGFIRE_FIRE_MODE] = FHGFIRE_LIGHT_GREEN;
                     Audio_PlayActorSound2(&this->actor, NA_SE_IT_SWORD_REFLECT_MG);
-                    this->actor.speedXZ += 2.0f;
+                    this->speedLimit += 2.0f;
+                    if (this->speedLimit > MAX_BALL_SPEED)
+                        this->speedLimit = MAX_BALL_SPEED;
+                    this->actor.speedXZ = this->speedLimit;
                     if (this->actor.speedXZ > tempMaxSpeed)
                         this->actor.speedXZ = tempMaxSpeed;
+                    //lusprintf(0,0,0,"SpeedLimit %f\t : speedXZ %f", this->speedLimit, this->actor.speedXZ);
                 }
                 break;
         }
