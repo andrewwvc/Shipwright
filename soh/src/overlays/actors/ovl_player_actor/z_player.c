@@ -4116,6 +4116,7 @@ s32 func_808382DC(Player* this, PlayState* play) {
                 if (this->shieldRelaxTimer <= 6 && !Player_HoldsTwoHandedWeapon(this))
                     return 0;
 
+                this->crouchCharge = 0;
                 func_8083264C(this, 180, 20, 100, 0);
 
                 if (!Player_IsChildWithHylianShield(this)) {
@@ -8086,7 +8087,7 @@ s32 func_8084285C(Player* this, f32 arg1, f32 arg2, f32 arg3) {
 }
 
 s32 func_808428D8(Player* this, PlayState* play) {
-    if (Player_IsChildWithHylianShield(this) || !Player_GetSwordHeld(this) || !D_80853614 || (this->crouchCharge <= 5)) {
+    if (Player_IsChildWithHylianShield(this) || !Player_GetSwordHeld(this) || !D_80853614 || (this->crouchCharge < 15)) {
         return 0;
     }
 
@@ -8096,9 +8097,9 @@ s32 func_808428D8(Player* this, PlayState* play) {
     this->currentYaw = this->actor.shape.rot.y + this->unk_6BE;
     this->crouchCharge = 0;
 
-    if (!CVar_GetS32("gCrouchStabHammerFix", 0)) {
-        return 1;
-    }
+    // if (!CVar_GetS32("gCrouchStabHammerFix", 0)) {
+    //     return 1;
+    // }
 
     u32 swordId;
     if (Player_HoldsBrokenKnife(this)) {
@@ -8107,9 +8108,9 @@ s32 func_808428D8(Player* this, PlayState* play) {
         swordId = Player_GetSwordHeld(this) - 1;
     }
 
-    if (swordId != 4 && !CVar_GetS32("gCrouchStabFix", 0)) { // 4 = Megaton Hammer
-        return 1;
-    }
+    // if (swordId != 4 && !CVar_GetS32("gCrouchStabFix", 0)) { // 4 = Megaton Hammer
+    //     return 1;
+    // }
 
     u32 flags = D_80854488[swordId][0];
     func_80837918(this, 0, flags);
@@ -10793,6 +10794,7 @@ void Player_SetShieldRecoveryDefault(PlayState* play) {
     Player* player = GET_PLAYER(play);
 
     player->shieldRelaxTimer = SHIELD_TIME_MAX;
+    player->crouchCharge = 0;
 }
 
 void Player_UpdateCommon(Player* this, PlayState* play, Input* input) {
