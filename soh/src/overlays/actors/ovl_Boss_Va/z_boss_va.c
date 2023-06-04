@@ -63,7 +63,8 @@ typedef enum {
     /* 3 */ SPARK_BLAST,
     /* 4 */ SPARK_UNUSED,
     /* 5 */ SPARK_BODY,
-    /* 6 */ SPARK_LINK
+    /* 6 */ SPARK_LINK,
+    /* 7 */ SPARK_PREFIRE
 } BossVaSparkMode;
 
 typedef enum {
@@ -1918,11 +1919,13 @@ void BossVa_SetupZapperAttack(BossVa* this, PlayState* play) {
     BossVa_SetupAction(this, BossVa_ZapperAttack);
 }
 
+const s16 burstTime = 16;
+const f32 maxTargetSpeed = 6.5f;
+
 void BossVa_ZapperAttack(BossVa* this, PlayState* play) {
     Player* player = GET_PLAYER(play);
     EnBoom* boomerang;
     Actor* boomTarget;
-    const s16 burstTime = 16;
     s16 angle;//yaw
     s16 playerToArmYaw;//sp98
     s16 totalSkelPitch;//sp96
@@ -1955,7 +1958,6 @@ void BossVa_ZapperAttack(BossVa* this, PlayState* play) {
         } else if (this->decisionState == 0) {
             f32 tSpeed;
             f32 tTime = 2*burstTime;
-            f32 maxTargetSpeed = 5.5f;
             if (maxTargetSpeed > 0.0f && player->actor.speedXZ > maxTargetSpeed)
                 tSpeed = maxTargetSpeed;
             else
@@ -2151,6 +2153,8 @@ void BossVa_ZapperAttack(BossVa* this, PlayState* play) {
 
                 BossVa_SpawnZapperCharge(play, sVaEffects, this, &sp44, &this->headRot, 100, 0);
             }
+            BossVa_Spark(play, this, 2, 40, 5.0f, 5.0f, SPARK_PREFIRE, 5.0f, true);
+            BossVa_Spark(play, this, 2, 40, 5.0f, 5.0f, SPARK_PREFIRE, 7.0f, true);
         }
 
         this->timer2++;
@@ -2290,9 +2294,10 @@ void BossVa_SetupZapperEnraged(BossVa* this, PlayState* play) {
     BossVa_SetupAction(this, BossVa_ZapperEnraged);
 }
 
+const s16 burstTimeRage = 12;
+
 void BossVa_ZapperEnraged(BossVa* this, PlayState* play) {
     Player* player = GET_PLAYER(play);
-    const s16 burstTime = 10;
     s32 pad;
     s16 tmp16;
     s16 sp6C;
@@ -2306,8 +2311,7 @@ void BossVa_ZapperEnraged(BossVa* this, PlayState* play) {
         sp54.y -= 25.0;
     } else {
         f32 tSpeed;
-        f32 tTime = 2*burstTime;
-        f32 maxTargetSpeed = 5.5f;
+        f32 tTime = 2*burstTimeRage;
         if (maxTargetSpeed > 0.0f && player->actor.speedXZ > maxTargetSpeed)
             tSpeed = maxTargetSpeed;
         else
@@ -2411,8 +2415,8 @@ void BossVa_ZapperEnraged(BossVa* this, PlayState* play) {
     }
 
     if (this->burst && (this->burst != 2)) { // burst can never be 2
-        if (this->timer2 >= burstTime) {
-            if (this->timer2 == burstTime+2) {
+        if (this->timer2 >= burstTimeRage) {
+            if (this->timer2 == burstTimeRage+2) {
                 Audio_PlayActorSound2(&this->actor, NA_SE_EN_BALINADE_THUNDER);
             }
 
@@ -2423,7 +2427,7 @@ void BossVa_ZapperEnraged(BossVa* this, PlayState* play) {
             CollisionCheck_SetAC(play, &play->colChkCtx, &this->colliderLightning.base);
         } else {
             BossVa_Spark(play, this, 2, 50, 15.0f, 0.0f, SPARK_BODY, (this->timer2 >> 1) + 1, true);
-            if (this->timer2 == burstTime-2) {
+            if (this->timer2 == burstTimeRage-2) {
                 BossVa_SetSparkEnv(play);
             }
             if (this->timer2 == 2) {
@@ -2431,10 +2435,12 @@ void BossVa_ZapperEnraged(BossVa* this, PlayState* play) {
 
                 BossVa_SpawnZapperCharge(play, sVaEffects, this, &sp48, &this->headRot, 100, 0);
             }
+            BossVa_Spark(play, this, 2, 40, 5.0f, 5.0f, SPARK_PREFIRE, 5.0f, true);
+            BossVa_Spark(play, this, 2, 40, 5.0f, 5.0f, SPARK_PREFIRE, 7.0f, true);
         }
 
         this->timer2++;
-        if (this->timer2 >= burstTime*2) {
+        if (this->timer2 >= burstTimeRage*2) {
             this->burst = false;
         }
     }
@@ -3162,9 +3168,9 @@ void BossVa_ZapperPostLimbDraw(PlayState* play, s32 limbIndex, Gfx** dList, Vec3
             Matrix_RotateZYX(sp3E, sp3C, 0, MTXMODE_APPLY);
             sp70.x = 0.0f;
             if (sFightPhase >= PHASE_4) {
-                sp70.z = ((this->timer2 - 16) & 7) * 120.0f;
+                sp70.z = ((this->timer2 - burstTimeRage) & 7) * 120.0f;
             } else {
-                sp70.z = ((this->timer2 - 32) & 0xF) * 80.0f;
+                sp70.z = ((this->timer2 - burstTime) & 0xF) * 80.0f;
             }
             sp4C.z = sp40.z = sp70.z += 40.0f;
             sp70.z += 50.0f;
@@ -3755,12 +3761,13 @@ void BossVa_DrawEffects(BossVaEffect* effect, PlayState* play) {
     for (i = 0, flag = 0; i < ARRAY_COUNT(sVaEffects); i++, effect++) {
         if (effect->type == VA_BLAST_SPARK) {
             FrameInterpolation_RecordOpenChild(effect, effect->epoch);
-            if (!flag) {
-                Gfx_SetupDL_25Xlu2(play->state.gfxCtx);
+            Gfx_SetupDL_25Xlu2(play->state.gfxCtx);
+            if (effect->mode == SPARK_PREFIRE)
+                gDPSetEnvColor(POLY_XLU_DISP++, 30, 30, 130, 0);
+            else
                 gDPSetEnvColor(POLY_XLU_DISP++, 130, 130, 30, 0);
-                gSPDisplayList(POLY_XLU_DISP++, gBarinadeDL_0156A0);
-                flag++;
-            }
+            gSPDisplayList(POLY_XLU_DISP++, gBarinadeDL_0156A0);
+            flag++;
 
             gDPSetPrimColor(POLY_XLU_DISP++, 0, 0, 230, 230, 230, effect->primColor[3]);
             Matrix_Translate(effect->pos.x, effect->pos.y, effect->pos.z, MTXMODE_NEW);
@@ -3839,6 +3846,7 @@ void BossVa_SpawnSpark(PlayState* play, BossVaEffect* effect, BossVa* this, Vec3
                     break;
 
                 case SPARK_BLAST:
+                case SPARK_PREFIRE:
                     effect->type = VA_BLAST_SPARK;
                     effect->pos.x = offset->x + this->actor.world.pos.x;
                     effect->pos.y = offset->y + this->actor.world.pos.y;
