@@ -47,9 +47,23 @@ void func_80B9A9D0(ObjMure3* this, PlayState* play) {
     Math_Vec3f_Copy(&spawnPos, &this->actor.world.pos);
     for (i = 0; i < 5; i++, spawnPos.y += 20.0f) {
         if (!((this->unk_16C >> i) & 1)) {
-            this->unk_150[i] = Item_DropCollectible2(play, &spawnPos, 0x4000 | ITEM00_RUPEE_BLUE);
+                ActorEntry ae;
+                s32 entVal = -1;
+                ae.id = ACTOR_EN_ITEM00;
+                ae.pos.x = round(spawnPos.x);
+                ae.pos.y = round(spawnPos.y);
+                ae.pos.z = round(spawnPos.z);
+                const Vec3s zeroVec = {0,0,0};
+                ae.rot = zeroVec;
+                ae.params = ITEM00_RUPEE_BLUE;
+                entVal = createTempEntry(play, &ae);
+            if (entVal != -1)
+                this->unk_150[i] = Item_DropCollectible2(play, &spawnPos, 0x4000 | ITEM00_RUPEE_BLUE);
+            else
+                this->unk_150[i] = NULL;
             if (this->unk_150[i] != NULL) {
                 this->unk_150[i]->actor.room = this->actor.room;
+                this->unk_150[i]->actor.entryNum = entVal;
             }
         }
     }
@@ -68,9 +82,24 @@ void func_80B9AA90(ObjMure3* this, PlayState* play) {
         if (!((this->unk_16C >> i) & 1)) {
             spawnPos.x = this->actor.world.pos.x + (sn * radius);
             spawnPos.z = this->actor.world.pos.z + (cos * radius);
-            this->unk_150[i] = Item_DropCollectible2(play, &spawnPos, 0x4000 | ITEM00_RUPEE_GREEN);
+
+                ActorEntry ae;
+                s32 entVal = -1;
+                ae.id = ACTOR_EN_ITEM00;
+                ae.pos.x = round(spawnPos.x);
+                ae.pos.y = round(spawnPos.y);
+                ae.pos.z = round(spawnPos.z);
+                const Vec3s zeroVec = {0,0,0};
+                ae.rot = zeroVec;
+                ae.params = ITEM00_RUPEE_GREEN;
+                entVal = createTempEntry(play, &ae);
+            if (entVal != -1)
+                this->unk_150[i] = Item_DropCollectible2(play, &spawnPos, 0x4000 | ITEM00_RUPEE_GREEN);
+            else
+                this->unk_150[i] = NULL;
             if (this->unk_150[i] != NULL) {
                 this->unk_150[i]->actor.room = this->actor.room;
+                this->unk_150[i]->actor.entryNum = entVal;
             }
         }
     }
