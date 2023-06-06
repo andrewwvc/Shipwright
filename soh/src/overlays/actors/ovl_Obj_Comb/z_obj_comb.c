@@ -180,7 +180,7 @@ void ObjComb_ChooseItemDrop(ObjComb* this, PlayState* play) {
             EnItem00* item = Item_DropCollectible(play, &this->actor.world.pos, params);
             if (item) {
                 item->actor.entryNum = this->actor.entryNum;
-        }
+            }
         }
     }
 }
