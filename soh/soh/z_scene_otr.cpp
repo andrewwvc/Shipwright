@@ -584,6 +584,17 @@ bool Scene_CommandActorList(PlayState* play, Ship::SceneCommand* cmd) {
                 if (foundVal != UsedResources.end()) {
                     entries[i].rot.z = 0x1;
                 }
+            } else if (entries[i].id == ACTOR_EN_COW) {
+                ActorSpawnResource sw;
+                sw.scene = play->sceneNum;
+                sw.room = play->roomCtx.curRoom.num;
+                sw.entry = cmdActor->entries[i];
+                sw.dirt = 0;
+                TempResourceEntries.insert({i,sw});
+                auto foundVal = UsedResources.find(sw);
+                if (foundVal != UsedResources.end()) {
+                    entries[i].rot.z = 0x1;
+                }
             }
 
             SPDLOG_INFO("Entity {0:d}\t ID: 0x{1:x}, \tParams: 0x{2:x}, \tpos: {3:d},{4:d},{5:d}, \t{6:d},{7:d},{8:d}",
