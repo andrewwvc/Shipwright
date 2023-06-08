@@ -1725,6 +1725,16 @@ EnItem00* Item_DropCollectible2(PlayState* play, Vec3f* spawnPos, s16 params) {
 }
 
 void Item_DropCollectibleRandom(PlayState* play, Actor* fromActor, Vec3f* spawnPos, s16 params) {
+    if (Rand_ZeroOne() < 0.25f)
+        Item_DropCollectibleRandom1(play, fromActor, spawnPos, params, 0);
+}
+
+void Item_DropCollectibleRandomSmall(PlayState* play, Actor* fromActor, Vec3f* spawnPos, s16 params) {
+    if (Rand_ZeroOne() < 0.5f)
+        Item_DropCollectibleRandom1(play, fromActor, spawnPos, params, 1);
+}
+
+void Item_DropCollectibleRandom1(PlayState* play, Actor* fromActor, Vec3f* spawnPos, s16 params, s16 mod) {
     s32 pad;
     EnItem00* spawnedActor;
     s16 dropQuantity;
@@ -1817,7 +1827,10 @@ void Item_DropCollectibleRandom(PlayState* play, Actor* fromActor, Vec3f* spawnP
 
     if (dropId != 0xFF && (!CVar_GetS32("gNoHeartDrops", 0) || dropId != ITEM00_HEART)) {
         //Provide the regular variety of drops when in Kokiri Village prior to the Deku Tree's death, change this afterwards to reduced drops
-        dropQuantity = !(gSaveContext.eventChkInf[0] & (1<<7)) ? sDropQuantities[params + dropTableIndex] : sDropQuantitiesAlt[params + dropTableIndex];
+        if (mod)
+            dropQuantity = !(gSaveContext.eventChkInf[0] & (1<<7)) ? sDropQuantities[params + dropTableIndex] : sDropQuantitiesAlt[params + dropTableIndex];
+        else
+            dropQuantity = sDropQuantities[params + dropTableIndex];
         while (dropQuantity > 0) {
             if (!param8000) {
                 dropId = func_8001F404(dropId);

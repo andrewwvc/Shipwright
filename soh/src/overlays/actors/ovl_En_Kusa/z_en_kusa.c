@@ -135,7 +135,7 @@ void EnKusa_DropCollectible(EnKusa* this, PlayState* play) {
             if (dropParams >= 0xD) {
                 dropParams = 0;
             }
-            Item_DropCollectibleRandom(play, NULL, &this->actor.world.pos, dropParams << 4);
+            Item_DropCollectibleRandomSmall(play, NULL, &this->actor.world.pos, dropParams << 4);
             break;
         case ENKUSA_TYPE_1:
             if (CVar_GetS32("gNoRandomDrops", 0)) {
