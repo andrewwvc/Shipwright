@@ -12,25 +12,30 @@
 #include <Path.h>
 #include <Text.h>
 #include <Blob.h>
+#include "SaveManager.h"
 
-struct ActorSpawnResource {
-    public:
-    int scene;
-    int room;
-    Ship::ActorSpawnEntry entry;
-    s16 dirt;
-};
+using json = nlohmann::json;
 
-bool operator==(const Ship::ActorSpawnEntry& lhs, const Ship::ActorSpawnEntry& rhs)
-{
-    return (lhs.actorNum == rhs.actorNum)
-    && (lhs.posX == rhs.posX)
-    && (lhs.posY == rhs.posY)
-    && (lhs.posZ == rhs.posZ)
-    && (lhs.rotX == rhs.rotX)
-    && (lhs.rotY == rhs.rotY)
-    && (lhs.rotZ == rhs.rotZ)
-    && (lhs.initVar == rhs.initVar);
+// bool operator==(const Ship::ActorSpawnEntry& lhs, const Ship::ActorSpawnEntry& rhs)
+// {
+//     return (lhs.actorNum == rhs.actorNum)
+//     && (lhs.posX == rhs.posX)
+//     && (lhs.posY == rhs.posY)
+//     && (lhs.posZ == rhs.posZ)
+//     && (lhs.rotX == rhs.rotX)
+//     && (lhs.rotY == rhs.rotY)
+//     && (lhs.rotZ == rhs.rotZ)
+//     && (lhs.initVar == rhs.initVar);
+// }
+
+void copyActorSpawn(ActorSpawnEnt& lhs, const Ship::ActorSpawnEntry& rhs) {
+    lhs.actorNum = rhs.actorNum;
+    lhs.posX = rhs.posX;
+    lhs.posY = rhs.posY;
+    lhs.posZ = rhs.posZ;
+    lhs.rotX = rhs.rotX;
+    lhs.rotY = rhs.rotY;
+    lhs.rotZ = rhs.rotZ;
 }
 
 constexpr bool operator<(const ActorSpawnResource& lhs, const ActorSpawnResource& rhs)
@@ -83,8 +88,28 @@ constexpr bool operator<(const ActorSpawnResource& lhs, const ActorSpawnResource
     return false;
 }
 
-static std::map<ActorSpawnResource,int> UsedResources = {};
-static std::map<int,ActorSpawnResource> TempResourceEntries = {};
+void to_json(json& j, const ActorSpawnResource& p) {
+    j = json{{"scene", p.scene}, {"room", p.room}, {"actorNum", p.entry.actorNum},
+        {"posX", p.entry.posX}, {"posY", p.entry.posY}, {"posZ", p.entry.posZ},
+        {"rotX", p.entry.rotX}, {"rotY", p.entry.rotY}, {"rotZ", p.entry.rotZ},
+        {"initVar", p.entry.initVar}, {"dirt", p.dirt}};
+}
+
+void from_json(const json& j, ActorSpawnResource& p) {
+    j.at("scene").get_to(p.scene);
+    j.at("room").get_to(p.room);
+    j.at("actorNum").get_to(p.entry.actorNum);
+    j.at("posX").get_to(p.entry.posX);
+    j.at("posY").get_to(p.entry.posY);
+    j.at("posZ").get_to(p.entry.posZ);
+    j.at("rotX").get_to(p.entry.rotX);
+    j.at("rotY").get_to(p.entry.rotY);
+    j.at("rotZ").get_to(p.entry.rotZ);
+    j.at("dirt").get_to(p.dirt);
+}
+
+extern std::map<ActorSpawnResource,int> UsedResources;
+extern std::map<int,ActorSpawnResource> TempResourceEntries;
 
 void insertSpawnResource(int entry, int extraTime) {
     auto itt = TempResourceEntries.find(entry);
@@ -518,7 +543,7 @@ bool Scene_CommandActorList(PlayState* play, Ship::SceneCommand* cmd) {
                 ActorSpawnResource sw;
                 sw.scene = play->sceneNum;
                 sw.room = play->roomCtx.curRoom.num;
-                sw.entry = cmdActor->entries[i];
+                copyActorSpawn(sw.entry, cmdActor->entries[i]);
                 sw.dirt = 0;
                 TempResourceEntries.insert({i,sw});
                 auto foundVal = UsedResources.find(sw);
@@ -530,7 +555,7 @@ bool Scene_CommandActorList(PlayState* play, Ship::SceneCommand* cmd) {
                 ActorSpawnResource sw;
                 sw.scene = play->sceneNum;
                 sw.room = play->roomCtx.curRoom.num;
-                sw.entry = cmdActor->entries[i];
+                copyActorSpawn(sw.entry, cmdActor->entries[i]);
                 sw.dirt = 0;
                 TempResourceEntries.insert({i,sw});
                 auto foundVal = UsedResources.find(sw);
@@ -542,7 +567,7 @@ bool Scene_CommandActorList(PlayState* play, Ship::SceneCommand* cmd) {
                 ActorSpawnResource sw;
                 sw.scene = play->sceneNum;
                 sw.room = play->roomCtx.curRoom.num;
-                sw.entry = cmdActor->entries[i];
+                copyActorSpawn(sw.entry, cmdActor->entries[i]);
                 sw.dirt = 0;
                 TempResourceEntries.insert({i,sw});
                 auto foundVal = UsedResources.find(sw);
@@ -554,7 +579,7 @@ bool Scene_CommandActorList(PlayState* play, Ship::SceneCommand* cmd) {
                 // ActorSpawnResource sw;
                 // sw.scene = play->sceneNum;
                 // sw.room = play->roomCtx.curRoom.num;
-                // sw.entry = cmdActor->entries[i];
+                // copyActorSpawn(sw.entry, cmdActor->entries[i]);
                 // sw.dirt = 0;
                 // TempResourceEntries.insert({i,sw});
                 // auto foundVal = UsedResources.find(sw);
@@ -566,7 +591,7 @@ bool Scene_CommandActorList(PlayState* play, Ship::SceneCommand* cmd) {
                 ActorSpawnResource sw;
                 sw.scene = play->sceneNum;
                 sw.room = play->roomCtx.curRoom.num;
-                sw.entry = cmdActor->entries[i];
+                copyActorSpawn(sw.entry, cmdActor->entries[i]);
                 sw.dirt = 0;
                 TempResourceEntries.insert({i,sw});
                 auto foundVal = UsedResources.find(sw);
@@ -577,7 +602,7 @@ bool Scene_CommandActorList(PlayState* play, Ship::SceneCommand* cmd) {
                 ActorSpawnResource sw;
                 sw.scene = play->sceneNum;
                 sw.room = play->roomCtx.curRoom.num;
-                sw.entry = cmdActor->entries[i];
+                copyActorSpawn(sw.entry, cmdActor->entries[i]);
                 sw.dirt = 0;
                 TempResourceEntries.insert({i,sw});
                 auto foundVal = UsedResources.find(sw);
@@ -588,7 +613,7 @@ bool Scene_CommandActorList(PlayState* play, Ship::SceneCommand* cmd) {
                 ActorSpawnResource sw;
                 sw.scene = play->sceneNum;
                 sw.room = play->roomCtx.curRoom.num;
-                sw.entry = cmdActor->entries[i];
+                copyActorSpawn(sw.entry, cmdActor->entries[i]);
                 sw.dirt = 0;
                 TempResourceEntries.insert({i,sw});
                 auto foundVal = UsedResources.find(sw);

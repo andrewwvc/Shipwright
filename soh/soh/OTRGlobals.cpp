@@ -84,6 +84,8 @@ CustomMessageManager* CustomMessageManager::Instance;
 TextIDAllocator* TextIDAllocator::Instance;
 ItemTableManager* ItemTableManager::Instance;
 std::unordered_map<uint16_t, uint16_t>* textIDSubstitutionTable;
+std::map<ActorSpawnResource,int> UsedResources = {};
+std::map<int,ActorSpawnResource> TempResourceEntries = {};
 
 OTRGlobals::OTRGlobals() {
     std::vector<std::string> OTRFiles;

@@ -15,6 +15,7 @@
 #include <array>
 
 extern "C" SaveContext gSaveContext;
+extern std::map<ActorSpawnResource,int> UsedResources;
 
 std::filesystem::path SaveManager::GetFileName(int fileNum) {
     const std::filesystem::path sSavePath(Ship::Window::GetPathRelativeToAppDirectory("Save"));
@@ -555,6 +556,7 @@ void SaveManager::InitFileNormal() {
     gSaveContext.MalonRideDay = 0;
     gSaveContext.maxBoosts = INITIAL_BOOSTS;
     gSaveContext.extraMagicPower = 0;
+    UsedResources = {};
 
     //RANDOTODO (ADD ITEMLOCATIONS TO GSAVECONTEXT)
 }
@@ -1352,6 +1354,7 @@ void SaveManager::LoadBaseVersion3() {
     SaveManager::Instance->LoadData("MalonRideDay", gSaveContext.MalonRideDay);
     SaveManager::Instance->LoadData("maxBoosts", gSaveContext.maxBoosts, INITIAL_BOOSTS);
     SaveManager::Instance->LoadData("extraMagicPower", gSaveContext.extraMagicPower);
+    SaveManager::Instance->LoadData("usedResources", UsedResources, {});
 }
 
 void SaveManager::SaveBase() {
@@ -1537,6 +1540,7 @@ void SaveManager::SaveBase() {
     SaveManager::Instance->SaveData("MalonRideDay", gSaveContext.MalonRideDay);
     SaveManager::Instance->SaveData("maxBoosts", gSaveContext.maxBoosts);
     SaveManager::Instance->SaveData("extraMagicPower", gSaveContext.extraMagicPower);
+    SaveManager::Instance->SaveData("usedResources", UsedResources);
 }
 
 void SaveManager::SaveArray(const std::string& name, const size_t size, SaveArrayFunc func) {

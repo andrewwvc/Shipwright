@@ -27,6 +27,30 @@ typedef struct {
 
 #include <nlohmann/json.hpp>
 
+struct ActorSpawnEnt {
+  public:
+    uint16_t actorNum;
+    int16_t posX;
+    int16_t posY;
+    int16_t posZ;
+    int16_t rotX;
+    int16_t rotY;
+    int16_t rotZ;
+    uint16_t initVar;
+};
+
+struct ActorSpawnResource {
+    public:
+    int scene;
+    int room;
+    ActorSpawnEnt entry;
+    s16 dirt;
+};
+
+void to_json(nlohmann::json& j, const ActorSpawnResource& p);
+void from_json(const nlohmann::json& j, ActorSpawnResource& p);
+constexpr bool operator<(const ActorSpawnResource& lhs, const ActorSpawnResource& rhs);
+
 class SaveManager {
 public:
     static SaveManager* Instance;
