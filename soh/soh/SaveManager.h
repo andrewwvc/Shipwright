@@ -140,6 +140,9 @@ public:
     static void InitFileNormal();
     static void InitFileDebug();
 
+    static void LoadPersistenceVersion1();
+    static void SavePersistence();
+
     static void LoadRandomizerVersion1();
     static void LoadRandomizerVersion2();
     static void SaveRandomizer();

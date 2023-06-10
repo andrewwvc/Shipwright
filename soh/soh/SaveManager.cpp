@@ -32,6 +32,9 @@ SaveManager::SaveManager() {
     AddLoadFunction("randomizer", 2, LoadRandomizerVersion2);
     AddSaveFunction("randomizer", 2, SaveRandomizer);
 
+    AddLoadFunction("persistence", 1, LoadPersistenceVersion1);
+    AddSaveFunction("persistence", 1, SavePersistence);
+
     AddInitFunction(InitFileImpl);
 
     for (SaveFileMetaInfo& info : fileMetaInfo) {
@@ -1354,7 +1357,6 @@ void SaveManager::LoadBaseVersion3() {
     SaveManager::Instance->LoadData("MalonRideDay", gSaveContext.MalonRideDay);
     SaveManager::Instance->LoadData("maxBoosts", gSaveContext.maxBoosts, INITIAL_BOOSTS);
     SaveManager::Instance->LoadData("extraMagicPower", gSaveContext.extraMagicPower);
-    SaveManager::Instance->LoadData("usedResources", UsedResources, {});
 }
 
 void SaveManager::SaveBase() {
@@ -1540,6 +1542,13 @@ void SaveManager::SaveBase() {
     SaveManager::Instance->SaveData("MalonRideDay", gSaveContext.MalonRideDay);
     SaveManager::Instance->SaveData("maxBoosts", gSaveContext.maxBoosts);
     SaveManager::Instance->SaveData("extraMagicPower", gSaveContext.extraMagicPower);
+}
+
+void SaveManager::LoadPersistenceVersion1() {
+    SaveManager::Instance->LoadData("usedResources", UsedResources, {});
+}
+
+void SaveManager::SavePersistence() {
     SaveManager::Instance->SaveData("usedResources", UsedResources);
 }
 
