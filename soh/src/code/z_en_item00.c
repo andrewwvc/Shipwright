@@ -1772,7 +1772,7 @@ void Item_DropCollectibleRandom1(PlayState* play, Actor* fromActor, Vec3f* spawn
                 dropTableIndex = 1;
             }
         }
-        if (fromActor->dropFlag & 0x20) {
+        if (fromActor->dropFlag & 0x20 && (Rand_ZeroOne() <= 0.01f)) {
             dropId = ITEM00_RUPEE_PURPLE;
         } else {
             dropId = sItemDropIds[params + dropTableIndex];
