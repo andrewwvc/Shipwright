@@ -2219,9 +2219,15 @@ void BossGanon_Wait(BossGanon* this, PlayState* play) {
 
     SkelAnime_Update(&this->skelAnime);
 
-    if ((this->unk_1C2 == 0) && !(player->actor.world.pos.y < 0.0f)) {
-        if (!(player->stateFlags1 & 0x2000) && (fabsf(player->actor.world.pos.x) < 110.0f) &&
-            (fabsf(player->actor.world.pos.z) < 110.0f)) {
+    if (((player->stateFlags1 & 0x2000) || (player->stateFlags1 & PLAYER_STATE1_21)) && (fabsf(player->actor.world.pos.x) < 140.0f) &&
+            (fabsf(player->actor.world.pos.z) < 140.0f)) {
+        if (this->timers[4] < 60)
+            this->timers[4] = 60;
+    }
+
+    if ((this->unk_1C2 == 0) && !(player->actor.world.pos.y < 0.0f) && (this->timers[4] == 0)) {
+        if (!(player->stateFlags1 & 0x2000) && (fabsf(player->actor.world.pos.x) < 120.0f) &&
+            (fabsf(player->actor.world.pos.z) < 120.0f)) {
             BossGanon_SetupPoundFloor(this, play);
         } else if ((this->timers[0] == 0) && !(player->stateFlags1 & 0x2000)) {
             this->timers[0] = (s16)Rand_ZeroFloat(30.0f) + 30;
@@ -2959,7 +2965,7 @@ void BossGanon_Update(Actor* thisx, PlayState* play2) {
                                     Rand_CenteredFloat(M_PI / 5) + (M_PI / 2));
     }
 
-    // see if light ball hit and should knock platform down?
+    // See if ground pound should knock platforms down
     if ((this->unk_19C != 0) && (this->unk_19E < 4)) {
         if ((this->unk_19A == 0) && (this->unk_19C == 20)) {
             this->unk_19A = 1;
@@ -4038,7 +4044,7 @@ void BossGanon_LightBall_Update(Actor* thisx, PlayState* play2) {
 
             case 1:
                 if ((ganondorf->actionFunc == BossGanon_PlayTennis) && (ganondorf->unk_1C2 == 1)) {
-                    minReflectDist = (this->actor.speedXZ >= 19.0f) ? 250.0f : 170.0f;
+                    minReflectDist = 250.0f; /*(this->actor.speedXZ >= 19.0f) ? 250.0f :170.0f*/;
 
                     if (sqrtf(SQ(xDistFromGanondorf) + SQ(yDistFromGanondorf) + SQ(zDistFromGanondorf)) <
                         minReflectDist) {
@@ -4051,9 +4057,23 @@ void BossGanon_LightBall_Update(Actor* thisx, PlayState* play2) {
 
             case 2:
                 if (this->timers[0] == 1) {
+                    const f32 MAX_BALL_SPEED = 20.0f;
+                    const s16 MAX_ANGLE = 0x1200;
+                    f32 randAng = Rand_CenteredFloat(2.0f);
+                    f32 speedVariation = 0.0f;
+                    if (fabsf(randAng) < 0.40f) {
+                        randAng = 0.0f;
+                        if (Rand_ZeroOne() < 0.3f)
+                            speedVariation = Rand_ZeroOne()*6.0f;
+                    }
+                    f32 tempMaxSpeed = MAX_BALL_SPEED*(1.0f-0.4f*fabsf(randAng))-speedVariation;
+                    this->actor.speedXZ = tempMaxSpeed;
+                    this->actor.world.rot.y = Math_FAtan2F(xDistFromLink, zDistFromLink) * (0x8000 / M_PI) + (s16)(MAX_ANGLE*randAng);
+                    //dxzL = sqrtf(SQ(dxL) + SQ(dzL));
+                    this->actor.world.rot.x = Math_FAtan2F(yDistFromLink, sqrtf(SQ(xDistFromLink) + SQ(zDistFromLink))) * (0x8000 / M_PI);
                     spBA = 1;
-                    this->actor.world.rot.y = Math_Atan2S(zDistFromLink, xDistFromLink);
-                    this->actor.world.rot.x = Math_Atan2S(sqrtf(SQ(xDistFromLink) + SQ(zDistFromLink)), yDistFromLink);
+                    //this->actor.world.rot.y = Math_Atan2S(zDistFromLink, xDistFromLink);
+                    //this->actor.world.rot.x = Math_Atan2S(sqrtf(SQ(xDistFromLink) + SQ(zDistFromLink)), yDistFromLink);
                     this->timers[1] = 2;
                     Audio_PlayActorSound2(&this->actor, NA_SE_IT_SWORD_REFLECT_MG);
                     Audio_PlayActorSound2(&this->actor, NA_SE_EN_GANON_AT_RETURN);
@@ -4104,6 +4124,12 @@ void BossGanon_LightBall_Update(Actor* thisx, PlayState* play2) {
         if ((fabsf(this->actor.world.pos.x) > 465.0f) || (this->actor.world.pos.y > 500.0f) ||
             (fabsf(this->actor.world.pos.z) > 465.0f)) {
             spBA = 4;
+            Vec3f projection = {0.0f, 0.0f, 0.0f};
+            projection.x = this->actor.world.pos.x;
+            projection.z = this->actor.world.pos.z;
+            BossGanonEff_SpawnDustLight(play, &projection, 0, 3.0f, 10);
+            BossGanonEff_SpawnShockwave(play, &projection, 0, 3.0f);
+            BossGanon_CheckFallingPlatforms(this, play, &projection);
         }
 
         if ((spBA != 0) || (this->actor.bgCheckFlags & 1)) {
@@ -4143,7 +4169,12 @@ void BossGanon_LightBall_Update(Actor* thisx, PlayState* play2) {
                 this->unk_1A8 = 1;
 
                 if (spBA == 0) {
-                    BossGanon_CheckFallingPlatforms(this, play, &this->actor.world.pos);
+                    Vec3f projection = {0.0f, 0.0f, 0.0f};
+                    projection.x = this->actor.world.pos.x;
+                    projection.z = this->actor.world.pos.z;
+                    BossGanonEff_SpawnDustLight(play, &projection, 0, 3.0f, 10);
+                    BossGanonEff_SpawnShockwave(play, &projection, 0, 3.0f);
+                    BossGanon_CheckFallingPlatforms(this, play, &projection);
                 }
 
                 if (spBA == 3) {
