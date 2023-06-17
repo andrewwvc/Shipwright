@@ -103,9 +103,9 @@ typedef struct BossGanon2 {
     /* 0x041C */ f32 unk_41C;
     /* 0x0420 */ f32 unk_420;
     /* 0x0424 */ ColliderJntSph unk_424;
-    /* 0x0444 */ ColliderJntSph unk_444;
+    /* 0x0444 */ ColliderTris unk_444;
     /* 0x0464 */ ColliderJntSphElement unk_464[16];
-    /* 0x0864 */ ColliderJntSphElement unk_864[2];
+    /* 0x0864 */ ColliderTrisElement unk_864[4];
 } BossGanon2; // size = 0x08E4
 
 #endif

@@ -166,8 +166,8 @@ void BossGanon2_Init(Actor* thisx, PlayState* play) {
     this->actor.colChkInfo.health = 30;
     Collider_InitJntSph(play, &this->unk_424);
     Collider_SetJntSph(play, &this->unk_424, &this->actor, &sJntSphInit1, this->unk_464);
-    Collider_InitJntSph(play, &this->unk_444);
-    Collider_SetJntSph(play, &this->unk_444, &this->actor, &sJntSphInit2, this->unk_864);
+    Collider_InitTris(play, &this->unk_444);
+    Collider_SetTris(play, &this->unk_444, &this->actor, &sTrisInit2, this->unk_864);
     BossGanon2_SetObjectSegment(this, play, OBJECT_GANON, false);
     SkelAnime_InitFlex(play, &this->skelAnime, &gGanondorfSkel, NULL, NULL, NULL, 0);
     func_808FD5C4(this, play);
@@ -180,7 +180,7 @@ void BossGanon2_Destroy(Actor* thisx, PlayState* play) {
 
     SkelAnime_Free(&this->skelAnime, play);
     Collider_DestroyJntSph(play, &this->unk_424);
-    Collider_DestroyJntSph(play, &this->unk_444);
+    Collider_DestroyTris(play, &this->unk_444);
 }
 
 void func_808FD4D4(BossGanon2* this, PlayState* play, s16 arg2, s16 arg3) {
@@ -1929,7 +1929,8 @@ void func_80902524(BossGanon2* this, PlayState* play) {
             if (this->unk_424.elements[0].info.bumperFlags & 2) {
                 this->unk_424.elements[0].info.bumperFlags &= ~2;
                 acHitInfo = this->unk_424.elements[0].info.acHitInfo;
-                if ((acHitInfo->toucher.dmgFlags & 0x2000) && (this->actionFunc != func_80900890)) {
+                //This is currently never true
+                if (0 && (acHitInfo->toucher.dmgFlags & 0x2000) && (this->actionFunc != func_80900890)) {
                     func_809000A0(this, play);
                     Audio_PlayActorSound2(&this->actor, NA_SE_EN_FANTOM_HIT_THUNDER);
                     Audio_PlayActorSound2(&this->actor, NA_SE_EN_MGANON_DAMAGE);
@@ -2626,16 +2627,50 @@ void BossGanon2_PostLimbDraw(PlayState* play, s32 limbIndex, Gfx** dList, Vec3s*
     }
 
     if (*dList != NULL) {
-        if ((limbIndex == 7) && (this->unk_312 == 1)) {
+        if ((limbIndex == 7)) {
+            Vec3f tripos[3];
+            Vec3f tripos2[3];
             Matrix_MultVec3f(&D_809070FC, &this->unk_218);
-            func_808FD080(0, &this->unk_444, &this->unk_218);
+            Matrix_MultVec3f(&Sword_Verts[0], &tripos[0]);
+            Matrix_MultVec3f(&Sword_Verts[1], &tripos[1]);
+            Matrix_MultVec3f(&Sword_Verts[2], &tripos[2]);
+            Matrix_MultVec3f(&Sword_Verts2[0], &tripos2[0]);
+            Matrix_MultVec3f(&Sword_Verts2[1], &tripos2[1]);
+            Matrix_MultVec3f(&Sword_Verts2[2], &tripos2[2]);
+            //func_808FD080(0, &this->unk_444, &this->unk_218);
+            Collider_SetTrisVertices(&this->unk_444, 0, tripos,tripos+1,tripos+2);
+            Collider_SetTrisVertices(&this->unk_444, 1, tripos2,tripos2+1,tripos2+2);
             Matrix_MultVec3f(&D_80907120, &this->unk_200);
             Matrix_MultVec3f(&D_8090712C, &this->unk_20C);
-        } else if ((limbIndex == 13) && (this->unk_312 == 2)) {
+            if (this->unk_312 == 1) {
+                this->unk_444.elements->info.toucher.dmgFlags = 0x20000000;
+                this->unk_444.elements->info.bumper.dmgFlags = 0xFFCFFFFF;
+            } else {
+                this->unk_444.elements->info.toucher.dmgFlags = 0xFFCFFFFF;
+                this->unk_444.elements->info.bumper.dmgFlags = 0xFFDFFFFF;
+            }
+        } else if ((limbIndex == 13)) {
+            Vec3f tripos[3];
+            Vec3f tripos2[3];
             Matrix_MultVec3f(&D_809070FC, &this->unk_218);
-            func_808FD080(1, &this->unk_444, &this->unk_218);
+            Matrix_MultVec3f(&Sword_Verts[0], &tripos[0]);
+            Matrix_MultVec3f(&Sword_Verts[1], &tripos[1]);
+            Matrix_MultVec3f(&Sword_Verts[2], &tripos[2]);
+            Matrix_MultVec3f(&Sword_Verts2[0], &tripos2[0]);
+            Matrix_MultVec3f(&Sword_Verts2[1], &tripos2[1]);
+            Matrix_MultVec3f(&Sword_Verts2[2], &tripos2[2]);
+            //func_808FD080(1, &this->unk_444, &this->unk_218);
+            Collider_SetTrisVertices(&this->unk_444, 2, tripos,tripos+1,tripos+2);
+            Collider_SetTrisVertices(&this->unk_444, 3, tripos2,tripos2+1,tripos2+2);
             Matrix_MultVec3f(&D_80907120, &this->unk_200);
             Matrix_MultVec3f(&D_8090712C, &this->unk_20C);
+            if (this->unk_312 == 2) {
+                this->unk_444.elements->info.toucher.dmgFlags = 0x20000000;
+                this->unk_444.elements->info.bumper.dmgFlags = 0xFFCFFFFF;
+            } else {
+                this->unk_444.elements->info.toucher.dmgFlags = 0xFFCFFFFF;
+                this->unk_444.elements->info.bumper.dmgFlags = 0xFFDFFFFF;
+            }
         }
     }
 
@@ -2814,8 +2849,12 @@ void BossGanon2_Draw(Actor* thisx, PlayState* play) {
         case 2:
             BossGanon2_SetObjectSegment(this, play, OBJECT_GANON2, true);
             gSPSegment(POLY_OPA_DISP++, 0x08, SEGMENTED_TO_VIRTUAL(sEyeTextures[this->unk_310]));
-            func_808FD080(0, &this->unk_444, &D_8090717C);
-            func_808FD080(1, &this->unk_444, &D_8090717C);
+            //func_808FD080(0, &this->unk_444, &D_8090717C);
+            //func_808FD080(1, &this->unk_444, &D_8090717C);
+            Collider_SetTrisVertices(&this->unk_444, 0, Sword_Verts_Rev,Sword_Verts_Rev+1,Sword_Verts_Rev+2);
+            Collider_SetTrisVertices(&this->unk_444, 1, Sword_Verts_Rev,Sword_Verts_Rev+1,Sword_Verts_Rev+2);
+            Collider_SetTrisVertices(&this->unk_444, 2, Sword_Verts_Rev,Sword_Verts_Rev+1,Sword_Verts_Rev+2);
+            Collider_SetTrisVertices(&this->unk_444, 3, Sword_Verts_Rev,Sword_Verts_Rev+1,Sword_Verts_Rev+2);
             this->unk_218 = D_8090717C;
             if (this->unk_342 & 1) {
                 POLY_OPA_DISP = Gfx_SetFog(POLY_OPA_DISP, 0xFF, 0, 0, 0xFF, 0x384, 0x44B);
