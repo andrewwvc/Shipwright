@@ -143,7 +143,7 @@ void EnVm_Init(Actor* thisx, PlayState* play) {
     Collider_SetQuad(play, &this->colliderQuad1, thisx, &sQuadInit1);
     Collider_InitQuad(play, &this->colliderQuad2);
     Collider_SetQuad(play, &this->colliderQuad2, thisx, &sQuadInit2);
-    this->beamSightRange = (thisx->params >> 8) * 40.0f;
+    this->beamSightRange = (thisx->params >> 8) * 60.0f;
     thisx->params &= 0xFF;
     thisx->naviEnemyId = 0x39;
 
@@ -193,7 +193,7 @@ void EnVm_Wait(EnVm* this, PlayState* play) {
 
             dist = this->beamSightRange - this->actor.xzDistToPlayer;
 
-            if (this->actor.xzDistToPlayer <= this->beamSightRange && ABS(headRot) <= 0x2710 && pitch >= 0xE38 &&
+            if (this->actor.xzDistToPlayer <= this->beamSightRange && ABS(headRot) <= 0x2710 && pitch >= 0x238 &&
                 this->actor.yDistToPlayer <= 80.0f && this->actor.yDistToPlayer >= -160.0f) {
                 Math_SmoothStepToS(&this->beamRot.x, pitch, 10, 0xFA0, 0);
                 if (Math_SmoothStepToS(&this->headRotY, this->actor.yawTowardsPlayer - this->actor.shape.rot.y, 1,
@@ -234,7 +234,7 @@ void EnVm_Wait(EnVm* this, PlayState* play) {
             this->beamRot.x = 0x1B91;
         }
 
-        if (this->beamRot.x < 0xAAA) {
+        if (this->beamRot.x < 0x6AA) {
             this->skelAnime.startFrame = this->skelAnime.curFrame = this->skelAnime.endFrame;
             this->unk_25E = this->unk_260 = 0;
             this->timer = 10;
@@ -277,7 +277,7 @@ void EnVm_Attack(EnVm* this, PlayState* play) {
         }
     }
 
-    if (this->beamRot.x < 0xAAA || this->timer == 0) {
+    if (this->beamRot.x < 0x6AA || this->timer == 0 || this->actor.xzDistToPlayer > this->beamSightRange*1.3333f || this->actor.yDistToPlayer < -160.0f) {
         Math_SmoothStepToF(&this->beamScale.x, 0.0f, 1.0f, 0.03f, 0.0f);
         this->unk_260 = 0;
 
@@ -290,7 +290,7 @@ void EnVm_Attack(EnVm* this, PlayState* play) {
             return;
         }
         
-        s16 frameScaleY = this->timer-200;
+        s16 frameScaleY = this->timer-250;
         if (frameScaleY <= 0)
             frameScaleY = 1;
         else {
