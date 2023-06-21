@@ -329,6 +329,8 @@ static InitChainEntry sInitChain[] = {
     ICHAIN_F32(targetArrowOffset, 0, ICHAIN_STOP),
 };
 
+#define MAX_HEALTH 40
+
 void BossGanon_Init(Actor* thisx, PlayState* play2) {
     s16 i;
     PlayState* play = play2;
@@ -348,7 +350,7 @@ void BossGanon_Init(Actor* thisx, PlayState* play2) {
         }
 
         sBossGanonGanondorf = this;
-        thisx->colChkInfo.health = 40;
+        thisx->colChkInfo.health = MAX_HEALTH;
         Actor_ProcessInitChain(thisx, sInitChain);
         ActorShape_Init(&thisx->shape, 0, NULL, 0);
         Actor_SetScale(thisx, 0.01f);
@@ -4000,23 +4002,28 @@ void BossGanon_LightBall_Update(Actor* thisx, PlayState* play2) {
                                                &D_801333E0, &D_801333E8);
                         func_800AA000(this->actor.xyzDistToPlayerSq, 0xB4, 0x14, 0x64);
 
+                        s16 minVolley = 3 + ((MAX_HEALTH - ganondorf->actor.colChkInfo.health)*5)/MAX_HEALTH;
+
                         if (hitWithBottle == false) {
+                            // if a spin attack is used
+                            if (player->meleeWeaponAnimation >= 0x18) {
+                                this->actor.speedXZ = 20.0f;
+                                minVolley -= 1;
+                            }
+
                             // if ganondorf is 250 units away from link, at least 3 volleys are required
-                            if ((ganondorf->actor.xyzDistToPlayerSq > 62500.0f) && (this->unk_1A4 < 3)) {
+                            if ((ganondorf->actor.xyzDistToPlayerSq > 62500.0f) && (this->unk_1A4 < minVolley)) {
                                 this->unk_1C2 = 1;
-                            } else if (Rand_ZeroOne() < 0.7f) {
+                            } else if ((this->actor.speedXZ < 19.0f) ? Rand_ZeroOne() < 0.7f : Rand_ZeroOne() < 0.6f) {
                                 this->unk_1C2 = 1;
                             } else {
                                 this->unk_1C2 = 3;
                             }
-
-                            // if a spin attack is used
-                            if (player->meleeWeaponAnimation >= 0x18) {
-                                this->actor.speedXZ = 20.0f;
-                            }
                             break;
                         } else {
-                            if (Rand_ZeroOne() < 0.9f) {
+                            if ((this->unk_1A4 < minVolley)) {
+                                this->unk_1C2 = 1;
+                            } else if (Rand_ZeroOne() < 0.6f) {
                                 this->unk_1C2 = 1;
                             } else {
                                 this->unk_1C2 = 3;
@@ -4044,7 +4051,7 @@ void BossGanon_LightBall_Update(Actor* thisx, PlayState* play2) {
 
             case 1:
                 if ((ganondorf->actionFunc == BossGanon_PlayTennis) && (ganondorf->unk_1C2 == 1)) {
-                    minReflectDist = 250.0f; /*(this->actor.speedXZ >= 19.0f) ? 250.0f :170.0f*/;
+                    minReflectDist = this->actor.speedXZ*10.0f+50.0f;  //(this->actor.speedXZ >= 19.0f) ? 250.0f :170.0f;
 
                     if (sqrtf(SQ(xDistFromGanondorf) + SQ(yDistFromGanondorf) + SQ(zDistFromGanondorf)) <
                         minReflectDist) {
@@ -4063,7 +4070,7 @@ void BossGanon_LightBall_Update(Actor* thisx, PlayState* play2) {
                     f32 speedVariation = 0.0f;
                     if (fabsf(randAng) < 0.40f) {
                         randAng = 0.0f;
-                        if (Rand_ZeroOne() < 0.3f)
+                        if (Rand_ZeroOne() < 0.25f)
                             speedVariation = Rand_ZeroOne()*6.0f;
                     }
                     f32 tempMaxSpeed = MAX_BALL_SPEED*(1.0f-0.4f*fabsf(randAng))-speedVariation;
@@ -4576,7 +4583,8 @@ void func_808E2544(Actor* thisx, PlayState* play) {
             zDiff = dorf->unk_1FC.z - this->actor.world.pos.z;
 
             if (sqrtf(SQ(xDiff) + SQ(zDiff) + SQ(yDiff)) < 45.0f) {
-                BossGanon_SetupHitByLightBall(dorf, play);
+                //BossGanon_SetupHitByLightBall(dorf, play);
+                BossGanon_SetupBlock(dorf, play);
                 this->timers[0] = 150;
                 numEffects = 40;
                 this->unk_1C2 = 1;
