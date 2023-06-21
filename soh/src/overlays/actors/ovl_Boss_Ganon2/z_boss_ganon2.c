@@ -68,6 +68,7 @@ Vec3f D_80910608[4];
 
 s8 D_80910638;
 
+#define MAX_HEALTH 30
 
 void BossGanon2_InitRand(s32 seedInit0, s32 seedInit1, s32 seedInit2) {
     sBossGanon2Seed1 = seedInit0;
@@ -163,11 +164,17 @@ void BossGanon2_Init(Actor* thisx, PlayState* play) {
     }
 
     this->actor.colChkInfo.mass = MASS_IMMOVABLE;
-    this->actor.colChkInfo.health = 30;
+    this->actor.colChkInfo.health = MAX_HEALTH;
     Collider_InitJntSph(play, &this->unk_424);
     Collider_SetJntSph(play, &this->unk_424, &this->actor, &sJntSphInit1, this->unk_464);
+    Collider_InitJntSph(play, &this->swordSpheres1);
+    Collider_InitJntSph(play, &this->swordSpheres2);
+    Collider_SetJntSph(play, &this->swordSpheres1, &this->actor, &sJntSphInit2, this->swordSphereElement1);
+    Collider_SetJntSph(play, &this->swordSpheres2, &this->actor, &sJntSphInit2, this->swordSphereElement2);
     Collider_InitTris(play, &this->unk_444);
+    Collider_InitTris(play, &this->unk_445);
     Collider_SetTris(play, &this->unk_444, &this->actor, &sTrisInit2, this->unk_864);
+    Collider_SetTris(play, &this->unk_445, &this->actor, &sTrisInit3, this->unk_865);
     BossGanon2_SetObjectSegment(this, play, OBJECT_GANON, false);
     SkelAnime_InitFlex(play, &this->skelAnime, &gGanondorfSkel, NULL, NULL, NULL, 0);
     func_808FD5C4(this, play);
@@ -180,7 +187,10 @@ void BossGanon2_Destroy(Actor* thisx, PlayState* play) {
 
     SkelAnime_Free(&this->skelAnime, play);
     Collider_DestroyJntSph(play, &this->unk_424);
+    Collider_DestroyJntSph(play, &this->swordSphereElement1);
+    Collider_DestroyJntSph(play, &this->swordSphereElement2);
     Collider_DestroyTris(play, &this->unk_444);
+    Collider_DestroyTris(play, &this->unk_445);
 }
 
 void func_808FD4D4(BossGanon2* this, PlayState* play, s16 arg2, s16 arg3) {
@@ -1094,7 +1104,7 @@ void func_808FFEBC(BossGanon2* this, PlayState* play) {
     SkelAnime_Update(&this->skelAnime);
     Math_ApproachZeroF(&this->actor.speedXZ, 0.5f, 1.0f);
 
-    if (this->unk_1A2[0] == 0) {
+    if ((this->actor.colChkInfo.health != MAX_HEALTH) || this->unk_1A2[0] == 0) {
         func_809002CC(this, play);
     } else if (this->unk_1A2[1] == 0) {
         func_808FFCFC(this, play);
@@ -1871,24 +1881,95 @@ void func_80902348(BossGanon2* this, PlayState* play) {
     s16 i;
     s16 j;
     s16 phi_v0_2;
+    s16 isBlocked1 = 0;
+    s16 isBlocked2 = 0;
+    s16 isBlockedSphere1 = 0;
+    s16 isBlockedSphere2 = 0;
 
     if (this->unk_316 == 0) {
         for (i = 0; i < ARRAY_COUNT(this->unk_864); i++) {
             if (this->unk_444.elements[i].info.bumperFlags & 2) {
                 this->unk_444.elements[i].info.bumperFlags &= ~2;
-            } else if (this->unk_444.elements[i].info.toucherFlags & 2) {
+                isBlocked1 = 1;
+            }
+            if (this->unk_445.elements[i].info.bumperFlags & 2) {
+                this->unk_445.elements[i].info.bumperFlags &= ~2;
+                isBlocked2 = 1;
+            }
+        }
+        for (i = 0; i < ARRAY_COUNT(this->swordSphereElement1); i++) {
+            if (this->swordSpheres1.elements[i].info.bumperFlags & 2) {
+                this->swordSpheres1.elements[i].info.bumperFlags &= ~2;
+                isBlocked1 = 1;
+            }
+            if (this->swordSpheres2.elements[i].info.bumperFlags & 2) {
+                this->swordSpheres2.elements[i].info.bumperFlags &= ~2;
+                isBlocked2 = 1;
+            }
+        }
+
+        for (i = 0; i < ARRAY_COUNT(this->unk_864); i++) {
+            if (this->unk_444.elements[i].info.toucherFlags & 2) {
                 this->unk_444.elements[i].info.toucherFlags &= ~2;
+                if (!isBlocked1) {
+                    if (this->unk_312 == 1) {
+                        phi_v0_2 = 0x1800;
+                    } else {
+                        phi_v0_2 = 0;
+                    }
 
-                if (this->unk_312 == 1) {
-                    phi_v0_2 = 0x1800;
-                } else {
-                    phi_v0_2 = 0;
+                    func_8002F6D4(play, &this->actor, 15.0f, this->actor.yawTowardsPlayer + phi_v0_2, 2.0f, 0);
+                    sBossGanon2Zelda->unk_3C8 = 8;
+                    this->unk_316 = 10;
+                    break;
                 }
+            }
+            if (this->unk_445.elements[i].info.toucherFlags & 2) {
+                this->unk_445.elements[i].info.toucherFlags &= ~2;
+                if (!isBlocked2) {
+                    if (this->unk_312 == 1) {
+                        phi_v0_2 = 0x1800;
+                    } else {
+                        phi_v0_2 = 0;
+                    }
 
-                func_8002F6D4(play, &this->actor, 15.0f, this->actor.yawTowardsPlayer + phi_v0_2, 2.0f, 0);
-                sBossGanon2Zelda->unk_3C8 = 8;
-                this->unk_316 = 10;
-                break;
+                    func_8002F6D4(play, &this->actor, 15.0f, this->actor.yawTowardsPlayer + phi_v0_2, 2.0f, 0);
+                    sBossGanon2Zelda->unk_3C8 = 8;
+                    this->unk_316 = 10;
+                    break;
+                }
+            }
+        }
+        for (i = 0; i < ARRAY_COUNT(this->swordSphereElement1); i++) {
+            if (this->swordSpheres1.elements[i].info.toucherFlags & 2) {
+                this->swordSpheres1.elements[i].info.toucherFlags &= ~2;
+                if (!isBlocked1) {
+                    if (this->unk_312 == 1) {
+                        phi_v0_2 = 0x1800;
+                    } else {
+                        phi_v0_2 = 0;
+                    }
+
+                    func_8002F6D4(play, &this->actor, 15.0f, this->actor.yawTowardsPlayer + phi_v0_2, 2.0f, 0);
+                    sBossGanon2Zelda->unk_3C8 = 8;
+                    this->unk_316 = 10;
+                    break;
+                }
+            }
+            if (this->swordSpheres2.elements[i].info.toucherFlags & 2) {
+                this->swordSpheres2.elements[i].info.toucherFlags &= ~2;
+                if (!isBlocked2) {
+                    if (this->unk_312 == 1) {
+                        phi_v0_2 = 0x1800;
+                    } else {
+                        phi_v0_2 = 0;
+                    }
+
+                    func_8002F6D4(play, &this->actor, 15.0f, this->actor.yawTowardsPlayer + phi_v0_2, 2.0f, 0);
+                    sBossGanon2Zelda->unk_3C8 = 8;
+                    this->unk_316 = 10;
+                    break;
+                }
             }
         }
     }
@@ -2100,10 +2181,19 @@ void BossGanon2_Update(Actor* thisx, PlayState* play) {
     if (this->actionFunc != func_8090120C) {
         func_80902524(this, play);
         CollisionCheck_SetAC(play, &play->colChkCtx, &this->unk_424.base);
+        CollisionCheck_SetOC(play, &play->colChkCtx, &this->swordSpheres1.base);
+        CollisionCheck_SetAC(play, &play->colChkCtx, &this->swordSpheres1.base);
+        CollisionCheck_SetOC(play, &play->colChkCtx, &this->swordSpheres2.base);
+        CollisionCheck_SetAC(play, &play->colChkCtx, &this->swordSpheres2.base);
         CollisionCheck_SetOC(play, &play->colChkCtx, &this->unk_444.base);
         CollisionCheck_SetAC(play, &play->colChkCtx, &this->unk_444.base);
+        CollisionCheck_SetOC(play, &play->colChkCtx, &this->unk_445.base);
+        CollisionCheck_SetAC(play, &play->colChkCtx, &this->unk_445.base);
         if (this->unk_39E == 0) {
+            CollisionCheck_SetAT(play, &play->colChkCtx, &this->swordSpheres1.base);
+            CollisionCheck_SetAT(play, &play->colChkCtx, &this->swordSpheres2.base);
             CollisionCheck_SetAT(play, &play->colChkCtx, &this->unk_444.base);
+            CollisionCheck_SetAT(play, &play->colChkCtx, &this->unk_445.base);
         }
     }
     if ((this->unk_332 == 0) && (this->unk_336 != 0)) {
@@ -2630,46 +2720,80 @@ void BossGanon2_PostLimbDraw(PlayState* play, s32 limbIndex, Gfx** dList, Vec3s*
         if ((limbIndex == 7)) {
             Vec3f tripos[3];
             Vec3f tripos2[3];
+            Vec3f spherePos[3];
+            Matrix_MultVec3f(&SpherePos0, spherePos);
             Matrix_MultVec3f(&D_809070FC, &this->unk_218);
+            Matrix_MultVec3f(&SpherePos2, spherePos+2);
             Matrix_MultVec3f(&Sword_Verts[0], &tripos[0]);
             Matrix_MultVec3f(&Sword_Verts[1], &tripos[1]);
             Matrix_MultVec3f(&Sword_Verts[2], &tripos[2]);
             Matrix_MultVec3f(&Sword_Verts2[0], &tripos2[0]);
             Matrix_MultVec3f(&Sword_Verts2[1], &tripos2[1]);
             Matrix_MultVec3f(&Sword_Verts2[2], &tripos2[2]);
-            //func_808FD080(0, &this->unk_444, &this->unk_218);
+            func_808FD080(0, &this->swordSpheres1, spherePos);
+            func_808FD080(1, &this->swordSpheres1, &this->unk_218);
+            func_808FD080(2, &this->swordSpheres1, spherePos+2);
             Collider_SetTrisVertices(&this->unk_444, 0, tripos,tripos+1,tripos+2);
             Collider_SetTrisVertices(&this->unk_444, 1, tripos2,tripos2+1,tripos2+2);
             Matrix_MultVec3f(&D_80907120, &this->unk_200);
             Matrix_MultVec3f(&D_8090712C, &this->unk_20C);
             if (this->unk_312 == 1) {
-                this->unk_444.elements->info.toucher.dmgFlags = 0x20000000;
-                this->unk_444.elements->info.bumper.dmgFlags = 0xFFCFFFFF;
+                for (s32 ii = 0; ii < ARRAY_COUNT(this->unk_864); ii++) {
+                    this->unk_444.elements[ii].info.toucher.dmgFlags = 0x20000000;
+                    this->unk_444.elements[ii].info.bumper.dmgFlags = 0xFFCFFFFF;
+                }
+                for (s32 ii = 0; ii < ARRAY_COUNT(this->swordSphereElement1); ii++) {
+                    this->swordSpheres1.elements->info.toucher.dmgFlags = 0x20000000;
+                    this->swordSpheres1.elements->info.bumper.dmgFlags = 0xFFCFFFFF;
+                }
             } else {
-                this->unk_444.elements->info.toucher.dmgFlags = 0xFFCFFFFF;
-                this->unk_444.elements->info.bumper.dmgFlags = 0xFFDFFFFF;
+                for (s32 ii = 0; ii < ARRAY_COUNT(this->unk_864); ii++) {
+                    this->unk_444.elements->info.toucher.dmgFlags = 0xFFCFFFFF;
+                    this->unk_444.elements->info.bumper.dmgFlags = 0xFFDFFFFF;
+                }
+                for (s32 ii = 0; ii < ARRAY_COUNT(this->swordSphereElement1); ii++) {
+                    this->swordSpheres1.elements->info.toucher.dmgFlags = 0xFFCFFFFF;
+                    this->swordSpheres1.elements->info.bumper.dmgFlags = 0xFFDFFFFF;
+                }
             }
         } else if ((limbIndex == 13)) {
             Vec3f tripos[3];
             Vec3f tripos2[3];
+            Vec3f spherePos[3];
+            Matrix_MultVec3f(&SpherePos0, spherePos);
             Matrix_MultVec3f(&D_809070FC, &this->unk_218);
+            Matrix_MultVec3f(&SpherePos2, spherePos+2);
             Matrix_MultVec3f(&Sword_Verts[0], &tripos[0]);
             Matrix_MultVec3f(&Sword_Verts[1], &tripos[1]);
             Matrix_MultVec3f(&Sword_Verts[2], &tripos[2]);
             Matrix_MultVec3f(&Sword_Verts2[0], &tripos2[0]);
             Matrix_MultVec3f(&Sword_Verts2[1], &tripos2[1]);
             Matrix_MultVec3f(&Sword_Verts2[2], &tripos2[2]);
-            //func_808FD080(1, &this->unk_444, &this->unk_218);
-            Collider_SetTrisVertices(&this->unk_444, 2, tripos,tripos+1,tripos+2);
-            Collider_SetTrisVertices(&this->unk_444, 3, tripos2,tripos2+1,tripos2+2);
+            func_808FD080(0, &this->swordSpheres2, spherePos);
+            func_808FD080(1, &this->swordSpheres2, &this->unk_218);
+            func_808FD080(2, &this->swordSpheres2, spherePos+2);
+            Collider_SetTrisVertices(&this->unk_445, 0, tripos,tripos+1,tripos+2);
+            Collider_SetTrisVertices(&this->unk_445, 1, tripos2,tripos2+1,tripos2+2);
             Matrix_MultVec3f(&D_80907120, &this->unk_200);
             Matrix_MultVec3f(&D_8090712C, &this->unk_20C);
             if (this->unk_312 == 2) {
-                this->unk_444.elements->info.toucher.dmgFlags = 0x20000000;
-                this->unk_444.elements->info.bumper.dmgFlags = 0xFFCFFFFF;
+                for (s32 ii = 0; ii < ARRAY_COUNT(this->unk_865); ii++) {
+                    this->unk_445.elements->info.toucher.dmgFlags = 0x20000000;
+                    this->unk_445.elements->info.bumper.dmgFlags = 0xFFCFFFFF;
+                }
+                for (s32 ii = 0; ii < ARRAY_COUNT(this->swordSphereElement2); ii++) {
+                    this->swordSpheres2.elements->info.toucher.dmgFlags = 0x20000000;
+                    this->swordSpheres2.elements->info.bumper.dmgFlags = 0xFFCFFFFF;
+                }
             } else {
-                this->unk_444.elements->info.toucher.dmgFlags = 0xFFCFFFFF;
-                this->unk_444.elements->info.bumper.dmgFlags = 0xFFDFFFFF;
+                for (s32 ii = 0; ii < ARRAY_COUNT(this->unk_865); ii++) {
+                    this->unk_445.elements->info.toucher.dmgFlags = 0xFFCFFFFF;
+                    this->unk_445.elements->info.bumper.dmgFlags = 0xFFDFFFFF;
+                }
+                for (s32 ii = 0; ii < ARRAY_COUNT(this->swordSphereElement2); ii++) {
+                    this->swordSpheres2.elements->info.toucher.dmgFlags = 0xFFCFFFFF;
+                    this->swordSpheres2.elements->info.bumper.dmgFlags = 0xFFDFFFFF;
+                }
             }
         }
     }
@@ -2851,10 +2975,16 @@ void BossGanon2_Draw(Actor* thisx, PlayState* play) {
             gSPSegment(POLY_OPA_DISP++, 0x08, SEGMENTED_TO_VIRTUAL(sEyeTextures[this->unk_310]));
             //func_808FD080(0, &this->unk_444, &D_8090717C);
             //func_808FD080(1, &this->unk_444, &D_8090717C);
+            func_808FD080(0, &this->swordSpheres1, &D_8090717C);
+            func_808FD080(1, &this->swordSpheres1, &D_8090717C);
+            func_808FD080(2, &this->swordSpheres1, &D_8090717C);
+            func_808FD080(0, &this->swordSpheres2, &D_8090717C);
+            func_808FD080(1, &this->swordSpheres2, &D_8090717C);
+            func_808FD080(2, &this->swordSpheres2, &D_8090717C);
             Collider_SetTrisVertices(&this->unk_444, 0, Sword_Verts_Rev,Sword_Verts_Rev+1,Sword_Verts_Rev+2);
             Collider_SetTrisVertices(&this->unk_444, 1, Sword_Verts_Rev,Sword_Verts_Rev+1,Sword_Verts_Rev+2);
-            Collider_SetTrisVertices(&this->unk_444, 2, Sword_Verts_Rev,Sword_Verts_Rev+1,Sword_Verts_Rev+2);
-            Collider_SetTrisVertices(&this->unk_444, 3, Sword_Verts_Rev,Sword_Verts_Rev+1,Sword_Verts_Rev+2);
+            Collider_SetTrisVertices(&this->unk_445, 0, Sword_Verts_Rev,Sword_Verts_Rev+1,Sword_Verts_Rev+2);
+            Collider_SetTrisVertices(&this->unk_445, 1, Sword_Verts_Rev,Sword_Verts_Rev+1,Sword_Verts_Rev+2);
             this->unk_218 = D_8090717C;
             if (this->unk_342 & 1) {
                 POLY_OPA_DISP = Gfx_SetFog(POLY_OPA_DISP, 0xFF, 0, 0, 0xFF, 0x384, 0x44B);

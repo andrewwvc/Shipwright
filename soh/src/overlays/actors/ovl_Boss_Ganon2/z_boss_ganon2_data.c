@@ -178,7 +178,7 @@ static ColliderJntSphElementInit sJntSphItemsInit1[] = {
         {
             ELEMTYPE_UNK0,
             { 0xFFCFFFFF, 0x00, 0x00 },
-            { 0xFFCFFFFF, 0x00, 0x00 },
+            { 0xFFCFFFFE, 0x00, 0x00 },//Filters damage to tail from nuts
             TOUCH_ON | TOUCH_SFX_NORMAL,
             BUMP_ON,
             OCELEM_ON,
@@ -200,67 +200,105 @@ static ColliderJntSphInit sJntSphInit1 = {
     sJntSphItemsInit1,
 };
 
-// static ColliderJntSphElementInit sJntSphItemsInit2[] = {
-//     {
-//         {
-//             ELEMTYPE_UNK2,
-//             { 0x20000000, 0x00, 0x40 },
-//             { 0xFFCFFFFF, 0x00, 0x00 },
-//             TOUCH_ON | TOUCH_SFX_NORMAL,
-//             BUMP_ON,
-//             OCELEM_ON,
-//         },
-//         { 15, { { 0, 0, 0 }, 45 }, 100 },
-//     },
-//     {
-//         {
-//             ELEMTYPE_UNK2,
-//             { 0x20000000, 0x00, 0x40 },
-//             { 0xFFCFFFFF, 0x00, 0x00 },
-//             TOUCH_ON | TOUCH_SFX_NORMAL,
-//             BUMP_ON,
-//             OCELEM_ON,
-//         },
-//         { 16, { { 0, 0, 0 }, 45 }, 100 },
-//     },
-// };
+static ColliderJntSphElementInit sJntSphItemsInit2[] = {
+    {
+        {
+            ELEMTYPE_UNK2,
+            { 0x20000000, 0x00, 0x40 },
+            { 0xFFCFFFFF, 0x00, 0x00 },
+            TOUCH_ON | TOUCH_SFX_NORMAL,
+            BUMP_ON,
+            OCELEM_ON,
+        },
+        { 15, { { 0, 0, 0 }, 25 }, 100 },
+    },
+    {
+        {
+            ELEMTYPE_UNK2,
+            { 0x20000000, 0x00, 0x40 },
+            { 0xFFCFFFFF, 0x00, 0x00 },
+            TOUCH_ON | TOUCH_SFX_NORMAL,
+            BUMP_ON,
+            OCELEM_ON,
+        },
+        { 15, { { 0, 0, 0 }, 25 }, 100 },
+    },
+    {
+        {
+            ELEMTYPE_UNK2,
+            { 0x20000000, 0x00, 0x40 },
+            { 0xFFCFFFFF, 0x00, 0x00 },
+            TOUCH_ON | TOUCH_SFX_NORMAL,
+            BUMP_ON,
+            OCELEM_ON,
+        },
+        { 15, { { 0, 0, 0 }, 25 }, 100 },
+    },
+};
 
-// static ColliderJntSphInit sJntSphInit2 = {
-//     {
-//         COLTYPE_METAL,
-//         AT_ON | AT_TYPE_ENEMY,
-//         AC_ON | AC_TYPE_PLAYER,
-//         OC1_ON | OC1_TYPE_PLAYER,
-//         OC2_TYPE_1,
-//         COLSHAPE_JNTSPH,
-//     },
-//     ARRAY_COUNT(sJntSphItemsInit2),
-//     sJntSphItemsInit2,
-// };
+static ColliderJntSphInit sJntSphInit2 = {
+    {
+        COLTYPE_METAL,
+        AT_ON | AT_TYPE_ENEMY,
+        AC_ON | AC_TYPE_PLAYER,
+        OC1_ON | OC1_TYPE_PLAYER,
+        OC2_TYPE_1,
+        COLSHAPE_JNTSPH,
+    },
+    ARRAY_COUNT(sJntSphItemsInit2),
+    sJntSphItemsInit2,
+};
+
+static ColliderJntSphElementInit sJntSphItemsInit3[] = {
+    {
+        {
+            ELEMTYPE_UNK2,
+            { 0x20000000, 0x00, 0x40 },
+            { 0xFFCFFFFF, 0x00, 0x00 },
+            TOUCH_ON | TOUCH_SFX_NORMAL,
+            BUMP_ON,
+            OCELEM_ON,
+        },
+        { 16, { { 0, 0, 0 }, 25 }, 100 },
+    },
+    {
+        {
+            ELEMTYPE_UNK2,
+            { 0x20000000, 0x00, 0x40 },
+            { 0xFFCFFFFF, 0x00, 0x00 },
+            TOUCH_ON | TOUCH_SFX_NORMAL,
+            BUMP_ON,
+            OCELEM_ON,
+        },
+        { 16, { { 0, 0, 0 }, 25 }, 100 },
+    },
+    {
+        {
+            ELEMTYPE_UNK2,
+            { 0x20000000, 0x00, 0x40 },
+            { 0xFFCFFFFF, 0x00, 0x00 },
+            TOUCH_ON | TOUCH_SFX_NORMAL,
+            BUMP_ON,
+            OCELEM_ON,
+        },
+        { 16, { { 0, 0, 0 }, 25 }, 100 },
+    },
+};
+
+static ColliderJntSphInit sJntSphInit3 = {
+    {
+        COLTYPE_METAL,
+        AT_ON | AT_TYPE_ENEMY,
+        AC_ON | AC_TYPE_PLAYER,
+        OC1_ON | OC1_TYPE_PLAYER,
+        OC2_TYPE_1,
+        COLSHAPE_JNTSPH,
+    },
+    ARRAY_COUNT(sJntSphItemsInit3),
+    sJntSphItemsInit3,
+};
 
 static ColliderTrisElementInit sTrisItemsInit2[] = {
-    {
-        {
-            ELEMTYPE_UNK2,
-            { 0x20000000, 0x00, 0x40 },
-            { 0xFFCFFFFF, 0x00, 0x00 },
-            TOUCH_ON | TOUCH_SFX_NORMAL,
-            BUMP_ON,
-            OCELEM_ON,
-        },
-        { { { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, } },
-    },
-    {
-        {
-            ELEMTYPE_UNK2,
-            { 0x20000000, 0x00, 0x40 },
-            { 0xFFCFFFFF, 0x00, 0x00 },
-            TOUCH_ON | TOUCH_SFX_NORMAL,
-            BUMP_ON,
-            OCELEM_ON,
-        },
-        { { { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, } },
-    },
     {
         {
             ELEMTYPE_UNK2,
@@ -298,6 +336,44 @@ static ColliderTrisInit sTrisInit2 = {
     sTrisItemsInit2,
 };
 
+static ColliderTrisElementInit sTrisItemsInit3[] = {
+    {
+        {
+            ELEMTYPE_UNK2,
+            { 0x20000000, 0x00, 0x40 },
+            { 0xFFCFFFFF, 0x00, 0x00 },
+            TOUCH_ON | TOUCH_SFX_NORMAL,
+            BUMP_ON,
+            OCELEM_ON,
+        },
+        { { { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, } },
+    },
+    {
+        {
+            ELEMTYPE_UNK2,
+            { 0x20000000, 0x00, 0x40 },
+            { 0xFFCFFFFF, 0x00, 0x00 },
+            TOUCH_ON | TOUCH_SFX_NORMAL,
+            BUMP_ON,
+            OCELEM_ON,
+        },
+        { { { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, } },
+    },
+};
+
+static ColliderTrisInit sTrisInit3 = {
+    {
+        COLTYPE_METAL,
+        AT_ON | AT_TYPE_ENEMY,
+        AC_ON | AC_TYPE_PLAYER,
+        OC1_ON | OC1_TYPE_PLAYER,
+        OC2_TYPE_1,
+        COLSHAPE_TRIS,
+    },
+    ARRAY_COUNT(sTrisItemsInit3),
+    sTrisItemsInit3,
+};
+
 static Vec3f D_8090702C[] = {
     { 10.0f, -10.0f, 0.0f },
     { 0.0f, 0.0f, -60.0f },
@@ -330,7 +406,9 @@ static s8 D_809070CC[] = {
     0x00, 0xFF, 0xFF, 0x02, 0x0C, 0x0D, 0x0E, 0x09, 0x0A, 0x0B, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00,
 };
 
+static Vec3f SpherePos0 = { 0.0f, 0.0f, 2500.0f };
 static Vec3f D_809070FC = { 0.0f, 0.0f, 5000.0f };
+static Vec3f SpherePos2 = { 0.0f, 0.0f, 7500.0f };
 static Vec3f Sword_Verts[] = {{ 0.0f, 0.0f, 12000.0f }, { 0.0f, 1500.0f, 0.0f }, { 0.0f, -1500.0f, 0.0f }};
 static Vec3f Sword_Verts2[] = {{ 800.0f, 0.0f, 0.0f }, { 800.0f, 1500.0f, 12000.0f }, { 800.0f, -1500.0f, 12000.0f }};
 
