@@ -4047,9 +4047,9 @@ s32 func_808382DC(Player* this, PlayState* play) {
     if (this->unk_A86 != 0) {
         if (!Player_InBlockingCsMode(play, this)) {
             s32 damageToInflict;
-            if (gSaveContext.health <= 0x30)
-                damageToInflict = 0x10;
-            else {
+            if (gSaveContext.health <= 0x30 || play->sceneNum == SCENE_SPOT13) {
+                damageToInflict = 0x10;//Voidouts in the desert wasteland are reduced to a single heart to give players the chance to complete things blind
+            } else {
                 s32 majorDamage = 0x10*(1+(gSaveContext.health/0x10 - 1)/3);
                 s32 minorDamage = (gSaveContext.health/0x10)%3 == 0 ? gSaveContext.health%0x10 : 0x00;
                 damageToInflict = majorDamage+minorDamage;
