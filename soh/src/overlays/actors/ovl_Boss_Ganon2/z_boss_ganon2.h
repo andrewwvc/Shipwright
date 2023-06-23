@@ -108,8 +108,8 @@ typedef struct BossGanon2 {
     /* 0x0444 */ ColliderTris unk_444;
     /* 0x0444 */ ColliderTris unk_445;
     /* 0x0464 */ ColliderJntSphElement unk_464[16];
-    /* 0x0464 */ ColliderJntSphElement swordSphereElement1[3];
-    /* 0x0464 */ ColliderJntSphElement swordSphereElement2[3];
+    /* 0x0464 */ ColliderJntSphElement swordSphereElement1[4];
+    /* 0x0464 */ ColliderJntSphElement swordSphereElement2[8];
     /* 0x0864 */ ColliderTrisElement unk_864[2];
     /* 0x0864 */ ColliderTrisElement unk_865[2];
 } BossGanon2; // size = 0x08E4

@@ -170,7 +170,7 @@ void BossGanon2_Init(Actor* thisx, PlayState* play) {
     Collider_InitJntSph(play, &this->swordSpheres1);
     Collider_InitJntSph(play, &this->swordSpheres2);
     Collider_SetJntSph(play, &this->swordSpheres1, &this->actor, &sJntSphInit2, this->swordSphereElement1);
-    Collider_SetJntSph(play, &this->swordSpheres2, &this->actor, &sJntSphInit2, this->swordSphereElement2);
+    Collider_SetJntSph(play, &this->swordSpheres2, &this->actor, &sJntSphInit3, this->swordSphereElement2);
     Collider_InitTris(play, &this->unk_444);
     Collider_InitTris(play, &this->unk_445);
     Collider_SetTris(play, &this->unk_444, &this->actor, &sTrisInit2, this->unk_864);
@@ -1902,6 +1902,8 @@ void func_80902348(BossGanon2* this, PlayState* play) {
                 this->swordSpheres1.elements[i].info.bumperFlags &= ~2;
                 isBlocked1 = 1;
             }
+        }
+        for (i = 0; i < ARRAY_COUNT(this->swordSphereElement2); i++) {
             if (this->swordSpheres2.elements[i].info.bumperFlags & 2) {
                 this->swordSpheres2.elements[i].info.bumperFlags &= ~2;
                 isBlocked2 = 1;
@@ -1956,6 +1958,8 @@ void func_80902348(BossGanon2* this, PlayState* play) {
                     break;
                 }
             }
+        }
+        for (i = 0; i < ARRAY_COUNT(this->swordSphereElement2); i++) {
             if (this->swordSpheres2.elements[i].info.toucherFlags & 2) {
                 this->swordSpheres2.elements[i].info.toucherFlags &= ~2;
                 if (!isBlocked2) {
@@ -2187,13 +2191,13 @@ void BossGanon2_Update(Actor* thisx, PlayState* play) {
         CollisionCheck_SetAC(play, &play->colChkCtx, &this->swordSpheres2.base);
         CollisionCheck_SetOC(play, &play->colChkCtx, &this->unk_444.base);
         CollisionCheck_SetAC(play, &play->colChkCtx, &this->unk_444.base);
-        CollisionCheck_SetOC(play, &play->colChkCtx, &this->unk_445.base);
-        CollisionCheck_SetAC(play, &play->colChkCtx, &this->unk_445.base);
+        //CollisionCheck_SetOC(play, &play->colChkCtx, &this->unk_445.base);
+        //CollisionCheck_SetAC(play, &play->colChkCtx, &this->unk_445.base);
         if (this->unk_39E == 0) {
             CollisionCheck_SetAT(play, &play->colChkCtx, &this->swordSpheres1.base);
             CollisionCheck_SetAT(play, &play->colChkCtx, &this->swordSpheres2.base);
             CollisionCheck_SetAT(play, &play->colChkCtx, &this->unk_444.base);
-            CollisionCheck_SetAT(play, &play->colChkCtx, &this->unk_445.base);
+            //CollisionCheck_SetAT(play, &play->colChkCtx, &this->unk_445.base);
         }
     }
     if ((this->unk_332 == 0) && (this->unk_336 != 0)) {
@@ -2720,10 +2724,11 @@ void BossGanon2_PostLimbDraw(PlayState* play, s32 limbIndex, Gfx** dList, Vec3s*
         if ((limbIndex == 7)) {
             Vec3f tripos[3];
             Vec3f tripos2[3];
-            Vec3f spherePos[3];
+            Vec3f spherePos[4];
             Matrix_MultVec3f(&SpherePos0, spherePos);
-            Matrix_MultVec3f(&D_809070FC, &this->unk_218);
+            Matrix_MultVec3f(&D_809070FC, spherePos+1);
             Matrix_MultVec3f(&SpherePos2, spherePos+2);
+            Matrix_MultVec3f(&SpherePos3, spherePos+3);
             Matrix_MultVec3f(&Sword_Verts[0], &tripos[0]);
             Matrix_MultVec3f(&Sword_Verts[1], &tripos[1]);
             Matrix_MultVec3f(&Sword_Verts[2], &tripos[2]);
@@ -2731,38 +2736,45 @@ void BossGanon2_PostLimbDraw(PlayState* play, s32 limbIndex, Gfx** dList, Vec3s*
             Matrix_MultVec3f(&Sword_Verts2[1], &tripos2[1]);
             Matrix_MultVec3f(&Sword_Verts2[2], &tripos2[2]);
             func_808FD080(0, &this->swordSpheres1, spherePos);
-            func_808FD080(1, &this->swordSpheres1, &this->unk_218);
+            func_808FD080(1, &this->swordSpheres1, spherePos+1);
             func_808FD080(2, &this->swordSpheres1, spherePos+2);
+            func_808FD080(3, &this->swordSpheres1, spherePos+3);
             Collider_SetTrisVertices(&this->unk_444, 0, tripos,tripos+1,tripos+2);
             Collider_SetTrisVertices(&this->unk_444, 1, tripos2,tripos2+1,tripos2+2);
             Matrix_MultVec3f(&D_80907120, &this->unk_200);
             Matrix_MultVec3f(&D_8090712C, &this->unk_20C);
             if (this->unk_312 == 1) {
+                Matrix_MultVec3f(&D_809070FC, &this->unk_218);
                 for (s32 ii = 0; ii < ARRAY_COUNT(this->unk_864); ii++) {
                     this->unk_444.elements[ii].info.toucher.dmgFlags = 0x20000000;
                     this->unk_444.elements[ii].info.bumper.dmgFlags = 0xFFCFFFFF;
                 }
                 for (s32 ii = 0; ii < ARRAY_COUNT(this->swordSphereElement1); ii++) {
-                    this->swordSpheres1.elements->info.toucher.dmgFlags = 0x20000000;
-                    this->swordSpheres1.elements->info.bumper.dmgFlags = 0xFFCFFFFF;
+                    this->swordSpheres1.elements[ii].info.toucher.dmgFlags = 0x20000000;
+                    this->swordSpheres1.elements[ii].info.bumper.dmgFlags = 0xFFCFFFFF;
                 }
             } else {
                 for (s32 ii = 0; ii < ARRAY_COUNT(this->unk_864); ii++) {
-                    this->unk_444.elements->info.toucher.dmgFlags = 0xFFCFFFFF;
-                    this->unk_444.elements->info.bumper.dmgFlags = 0xFFDFFFFF;
+                    this->unk_444.elements[ii].info.toucher.dmgFlags = 0xFFCFFFFF;
+                    this->unk_444.elements[ii].info.bumper.dmgFlags = 0xFFDFFFFF;
                 }
                 for (s32 ii = 0; ii < ARRAY_COUNT(this->swordSphereElement1); ii++) {
-                    this->swordSpheres1.elements->info.toucher.dmgFlags = 0xFFCFFFFF;
-                    this->swordSpheres1.elements->info.bumper.dmgFlags = 0xFFDFFFFF;
+                    this->swordSpheres1.elements[ii].info.toucher.dmgFlags = 0xFFCFFFFF;
+                    this->swordSpheres1.elements[ii].info.bumper.dmgFlags = 0xFFDFFFFF;
                 }
             }
         } else if ((limbIndex == 13)) {
             Vec3f tripos[3];
             Vec3f tripos2[3];
-            Vec3f spherePos[3];
+            Vec3f spherePos[8];
             Matrix_MultVec3f(&SpherePos0, spherePos);
-            Matrix_MultVec3f(&D_809070FC, &this->unk_218);
+            Matrix_MultVec3f(&D_809070FC, spherePos+1);
             Matrix_MultVec3f(&SpherePos2, spherePos+2);
+            Matrix_MultVec3f(&SpherePos3, spherePos+3);
+            Matrix_MultVec3f(&SpherePosX0, spherePos+4);
+            Matrix_MultVec3f(&SpherePosX1, spherePos+5);
+            Matrix_MultVec3f(&SpherePosX2, spherePos+6);
+            Matrix_MultVec3f(&SpherePosX3, spherePos+7);
             Matrix_MultVec3f(&Sword_Verts[0], &tripos[0]);
             Matrix_MultVec3f(&Sword_Verts[1], &tripos[1]);
             Matrix_MultVec3f(&Sword_Verts[2], &tripos[2]);
@@ -2770,29 +2782,35 @@ void BossGanon2_PostLimbDraw(PlayState* play, s32 limbIndex, Gfx** dList, Vec3s*
             Matrix_MultVec3f(&Sword_Verts2[1], &tripos2[1]);
             Matrix_MultVec3f(&Sword_Verts2[2], &tripos2[2]);
             func_808FD080(0, &this->swordSpheres2, spherePos);
-            func_808FD080(1, &this->swordSpheres2, &this->unk_218);
+            func_808FD080(1, &this->swordSpheres2, spherePos+1);
             func_808FD080(2, &this->swordSpheres2, spherePos+2);
+            func_808FD080(3, &this->swordSpheres2, spherePos+3);
+            func_808FD080(4, &this->swordSpheres2, spherePos+4);
+            func_808FD080(5, &this->swordSpheres2, spherePos+5);
+            func_808FD080(5, &this->swordSpheres2, spherePos+6);
+            func_808FD080(5, &this->swordSpheres2, spherePos+7);
             Collider_SetTrisVertices(&this->unk_445, 0, tripos,tripos+1,tripos+2);
             Collider_SetTrisVertices(&this->unk_445, 1, tripos2,tripos2+1,tripos2+2);
             Matrix_MultVec3f(&D_80907120, &this->unk_200);
             Matrix_MultVec3f(&D_8090712C, &this->unk_20C);
             if (this->unk_312 == 2) {
+                Matrix_MultVec3f(&D_809070FC, &this->unk_218);
                 for (s32 ii = 0; ii < ARRAY_COUNT(this->unk_865); ii++) {
-                    this->unk_445.elements->info.toucher.dmgFlags = 0x20000000;
-                    this->unk_445.elements->info.bumper.dmgFlags = 0xFFCFFFFF;
+                    this->unk_445.elements[ii].info.toucher.dmgFlags = 0x20000000;
+                    this->unk_445.elements[ii].info.bumper.dmgFlags = 0xFFCFFFFF;
                 }
                 for (s32 ii = 0; ii < ARRAY_COUNT(this->swordSphereElement2); ii++) {
-                    this->swordSpheres2.elements->info.toucher.dmgFlags = 0x20000000;
-                    this->swordSpheres2.elements->info.bumper.dmgFlags = 0xFFCFFFFF;
+                    this->swordSpheres2.elements[ii].info.toucher.dmgFlags = 0x20000000;
+                    this->swordSpheres2.elements[ii].info.bumper.dmgFlags = 0xFFCFFFFF;
                 }
             } else {
                 for (s32 ii = 0; ii < ARRAY_COUNT(this->unk_865); ii++) {
-                    this->unk_445.elements->info.toucher.dmgFlags = 0xFFCFFFFF;
-                    this->unk_445.elements->info.bumper.dmgFlags = 0xFFDFFFFF;
+                    this->unk_445.elements[ii].info.toucher.dmgFlags = 0xFFCFFFFF;
+                    this->unk_445.elements[ii].info.bumper.dmgFlags = 0xFFDFFFFF;
                 }
                 for (s32 ii = 0; ii < ARRAY_COUNT(this->swordSphereElement2); ii++) {
-                    this->swordSpheres2.elements->info.toucher.dmgFlags = 0xFFCFFFFF;
-                    this->swordSpheres2.elements->info.bumper.dmgFlags = 0xFFDFFFFF;
+                    this->swordSpheres2.elements[ii].info.toucher.dmgFlags = 0xFFCFFFFF;
+                    this->swordSpheres2.elements[ii].info.bumper.dmgFlags = 0xFFDFFFFF;
                 }
             }
         }
@@ -2975,12 +2993,12 @@ void BossGanon2_Draw(Actor* thisx, PlayState* play) {
             gSPSegment(POLY_OPA_DISP++, 0x08, SEGMENTED_TO_VIRTUAL(sEyeTextures[this->unk_310]));
             //func_808FD080(0, &this->unk_444, &D_8090717C);
             //func_808FD080(1, &this->unk_444, &D_8090717C);
-            func_808FD080(0, &this->swordSpheres1, &D_8090717C);
-            func_808FD080(1, &this->swordSpheres1, &D_8090717C);
-            func_808FD080(2, &this->swordSpheres1, &D_8090717C);
-            func_808FD080(0, &this->swordSpheres2, &D_8090717C);
-            func_808FD080(1, &this->swordSpheres2, &D_8090717C);
-            func_808FD080(2, &this->swordSpheres2, &D_8090717C);
+            for (s16 ii = 0; ii < ARRAY_COUNT(this->swordSphereElement1); ii++) {
+                func_808FD080(ii, &this->swordSpheres1, &D_8090717C);
+            }
+            for (s16 ii = 0; ii < ARRAY_COUNT(this->swordSphereElement2); ii++) {
+                func_808FD080(ii, &this->swordSpheres2, &D_8090717C);
+            }
             Collider_SetTrisVertices(&this->unk_444, 0, Sword_Verts_Rev,Sword_Verts_Rev+1,Sword_Verts_Rev+2);
             Collider_SetTrisVertices(&this->unk_444, 1, Sword_Verts_Rev,Sword_Verts_Rev+1,Sword_Verts_Rev+2);
             Collider_SetTrisVertices(&this->unk_445, 0, Sword_Verts_Rev,Sword_Verts_Rev+1,Sword_Verts_Rev+2);

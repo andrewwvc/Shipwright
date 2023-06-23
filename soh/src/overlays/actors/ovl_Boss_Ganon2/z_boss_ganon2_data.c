@@ -234,6 +234,17 @@ static ColliderJntSphElementInit sJntSphItemsInit2[] = {
         },
         { 15, { { 0, 0, 0 }, 25 }, 100 },
     },
+    {
+        {
+            ELEMTYPE_UNK2,
+            { 0x20000000, 0x00, 0x40 },
+            { 0xFFCFFFFF, 0x00, 0x00 },
+            TOUCH_ON | TOUCH_SFX_NORMAL,
+            BUMP_ON,
+            OCELEM_ON,
+        },
+        { 15, { { 0, 0, 0 }, 25 }, 100 },
+    },
 };
 
 static ColliderJntSphInit sJntSphInit2 = {
@@ -250,6 +261,61 @@ static ColliderJntSphInit sJntSphInit2 = {
 };
 
 static ColliderJntSphElementInit sJntSphItemsInit3[] = {
+    {
+        {
+            ELEMTYPE_UNK2,
+            { 0x20000000, 0x00, 0x40 },
+            { 0xFFCFFFFF, 0x00, 0x00 },
+            TOUCH_ON | TOUCH_SFX_NORMAL,
+            BUMP_ON,
+            OCELEM_ON,
+        },
+        { 16, { { 0, 0, 0 }, 25 }, 100 },
+    },
+    {
+        {
+            ELEMTYPE_UNK2,
+            { 0x20000000, 0x00, 0x40 },
+            { 0xFFCFFFFF, 0x00, 0x00 },
+            TOUCH_ON | TOUCH_SFX_NORMAL,
+            BUMP_ON,
+            OCELEM_ON,
+        },
+        { 16, { { 0, 0, 0 }, 25 }, 100 },
+    },
+    {
+        {
+            ELEMTYPE_UNK2,
+            { 0x20000000, 0x00, 0x40 },
+            { 0xFFCFFFFF, 0x00, 0x00 },
+            TOUCH_ON | TOUCH_SFX_NORMAL,
+            BUMP_ON,
+            OCELEM_ON,
+        },
+        { 16, { { 0, 0, 0 }, 25 }, 100 },
+    },
+    {
+        {
+            ELEMTYPE_UNK2,
+            { 0x20000000, 0x00, 0x40 },
+            { 0xFFCFFFFF, 0x00, 0x00 },
+            TOUCH_ON | TOUCH_SFX_NORMAL,
+            BUMP_ON,
+            OCELEM_ON,
+        },
+        { 16, { { 0, 0, 0 }, 25 }, 100 },
+    },
+    {
+        {
+            ELEMTYPE_UNK2,
+            { 0x20000000, 0x00, 0x40 },
+            { 0xFFCFFFFF, 0x00, 0x00 },
+            TOUCH_ON | TOUCH_SFX_NORMAL,
+            BUMP_ON,
+            OCELEM_ON,
+        },
+        { 16, { { 0, 0, 0 }, 25 }, 100 },
+    },
     {
         {
             ELEMTYPE_UNK2,
@@ -409,6 +475,11 @@ static s8 D_809070CC[] = {
 static Vec3f SpherePos0 = { 0.0f, 0.0f, 2500.0f };
 static Vec3f D_809070FC = { 0.0f, 0.0f, 5000.0f };
 static Vec3f SpherePos2 = { 0.0f, 0.0f, 7500.0f };
+static Vec3f SpherePos3 = { 0.0f, 0.0f, 10000.0f };
+static Vec3f SpherePosX0 = { 0.0f, 3000.0f, 2500.0f };
+static Vec3f SpherePosX1 = { 0.0f, 3000.0f, 5000.0f };
+static Vec3f SpherePosX2 = { 0.0f, 3000.0f, 7500.0f };
+static Vec3f SpherePosX3 = { 0.0f, 3000.0f, 10000.0f };
 static Vec3f Sword_Verts[] = {{ 0.0f, 0.0f, 12000.0f }, { 0.0f, 1500.0f, 0.0f }, { 0.0f, -1500.0f, 0.0f }};
 static Vec3f Sword_Verts2[] = {{ 800.0f, 0.0f, 0.0f }, { 800.0f, 1500.0f, 12000.0f }, { 800.0f, -1500.0f, 12000.0f }};
 
