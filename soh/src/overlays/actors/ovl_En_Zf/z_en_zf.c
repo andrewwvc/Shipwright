@@ -1512,15 +1512,15 @@ void func_80B463E4(EnZf* this, PlayState* play) {
 
 void EnZf_SetupSlash(EnZf* this) {
     if (this->stance == ENZF_HIGH)
-        Animation_Change(&this->skelAnime, &gZfSlashAnim, 2.0f, 0.0f, Animation_GetLastFrame(&gZfSlashAnim), ANIMMODE_ONCE,
+        Animation_Change(&this->skelAnime, &gZfSlashAnim, 1.5f, 0.0f, Animation_GetLastFrame(&gZfSlashAnim), ANIMMODE_ONCE,
                      -4.0f);
     else
-        Animation_Change(&this->skelAnime, &gZfLizalfosSkelGzfsliceanimAnim, 2.0f, 0.0f, Animation_GetLastFrame(&gZfLizalfosSkelGzfsliceanimAnim), ANIMMODE_ONCE,
+        Animation_Change(&this->skelAnime, &gZfLizalfosSkelGzfsliceanimAnim, 1.5f, 0.0f, Animation_GetLastFrame(&gZfLizalfosSkelGzfsliceanimAnim), ANIMMODE_ONCE,
                      -4.0f);
 
     if (this->actor.params == ENZF_TYPE_DINOLFOS) {
-        this->skelAnime.playSpeed = 2.25f;
-    }
+       this->skelAnime.playSpeed = 2.0f;
+   }
 
     this->swordCollider.base.atFlags &= ~AT_BOUNCED;
     this->action = ENZF_ACTION_SLASH;
