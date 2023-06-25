@@ -482,6 +482,8 @@ static Vec3f SpherePosX2 = { 0.0f, 3000.0f, 7500.0f };
 static Vec3f SpherePosX3 = { 0.0f, 3000.0f, 10000.0f };
 static Vec3f Sword_Verts[] = {{ 0.0f, 0.0f, 12000.0f }, { 0.0f, 1500.0f, 0.0f }, { 0.0f, -1500.0f, 0.0f }};
 static Vec3f Sword_Verts2[] = {{ 800.0f, 0.0f, 0.0f }, { 800.0f, 1500.0f, 12000.0f }, { 800.0f, -1500.0f, 12000.0f }};
+static Vec3f Sword_VertsAug[] = {{ 0.0f, 3000.0f, 12000.0f }, { 0.0f, 3000.0f, 0.0f }, { 0.0f, -3000.0f, 0.0f }};
+static Vec3f Sword_VertsAug2[] = {{ 0.0f, -3000.0f, 0.0f }, { 0.0f, -3000.0f, 12000.0f }, { 0.0f, 3000.0f, 12000.0f }};
 
 static Vec3f D_80907108 = { 0.0f, 2000.0f, 0.0f };
 

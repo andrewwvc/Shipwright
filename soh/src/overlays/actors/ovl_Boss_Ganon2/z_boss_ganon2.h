@@ -102,6 +102,7 @@ typedef struct BossGanon2 {
     /* 0x0410 */ Vec3f unk_410;
     /* 0x041C */ f32 unk_41C;
     /* 0x0420 */ f32 unk_420;
+                 s16 isTrackingLink;
     /* 0x0424 */ ColliderJntSph unk_424;
     /* 0x0424 */ ColliderJntSph swordSpheres1;
     /* 0x0424 */ ColliderJntSph swordSpheres2;
