@@ -664,18 +664,69 @@ bool Scene_CommandCollisionHeader(PlayState* play, Ship::SceneCommand* cmd)
         colHeader->maxBounds.y = colRes->absMaxY;
         colHeader->maxBounds.z = colRes->absMaxZ;
 
-        colHeader->vtxList = (Vec3s*)malloc(sizeof(Vec3s) * colRes->vertices.size());
-        colHeader->numVertices = colRes->vertices.size();
+        int extraVerts = 0;
+        if (play->sceneNum == SCENE_BESITU) {
+            extraVerts = 4;
+        }
+
+        colHeader->vtxList = (Vec3s*)malloc(sizeof(Vec3s) * (colRes->vertices.size()+extraVerts));
+        colHeader->numVertices = colRes->vertices.size()+extraVerts;
 
         for (int i = 0; i < colRes->vertices.size(); i++)
         {
             colHeader->vtxList[i].x = colRes->vertices[i].x;
             colHeader->vtxList[i].y = colRes->vertices[i].y;
             colHeader->vtxList[i].z = colRes->vertices[i].z;
+
+            if (play->sceneNum == SCENE_BESITU) {
+                // switch (i) {
+                //     case 0: case 3: case 4: case 7:
+                //     case 8: case 11: case 12: case 15:
+                //     colHeader->vtxList[i].y -= 200;
+                //     break;
+                //     default:
+                //     break;
+                // }
+
+                if (colHeader->vtxList[i].y == 0)
+                    colHeader->vtxList[i].y = -200;
+
+                if (colHeader->vtxList[i].y > colHeader->maxBounds.y)
+                    colHeader->maxBounds.y = colHeader->vtxList[i].y;
+                if (colHeader->vtxList[i].y < colHeader->minBounds.y)
+                    colHeader->minBounds.y = colHeader->vtxList[i].y;
+            }
         }
 
-        colHeader->polyList = (CollisionPoly*)malloc(sizeof(CollisionPoly) * colRes->polygons.size());
-        colHeader->numPolygons = colRes->polygons.size();
+        size_t ss = colRes->vertices.size();
+
+        if (play->sceneNum == SCENE_BESITU) {
+            colHeader->vtxList[ss].x = -100; colHeader->vtxList[ss].y = 0; colHeader->vtxList[ss].z = 20;
+            colHeader->vtxList[ss+1].x = 100; colHeader->vtxList[ss+1].y = 0; colHeader->vtxList[ss+1].z = 20;
+            colHeader->vtxList[ss+2].x = -100; colHeader->vtxList[ss+2].y = 80; colHeader->vtxList[ss+2].z = 200;
+            colHeader->vtxList[ss+3].x = 100; colHeader->vtxList[ss+3].y = 80; colHeader->vtxList[ss+3].z = 200;
+        }
+
+        for (int ii = colRes->vertices.size(); ii < colRes->vertices.size()+extraVerts; ii++){
+            if (colHeader->vtxList[ii].x > colHeader->maxBounds.x)
+                colHeader->maxBounds.x = colHeader->vtxList[ii].x;
+            if (colHeader->vtxList[ii].x < colHeader->minBounds.x)
+                colHeader->minBounds.x = colHeader->vtxList[ii].x;
+            if (colHeader->vtxList[ii].y > colHeader->maxBounds.y)
+                colHeader->maxBounds.y = colHeader->vtxList[ii].y;
+            if (colHeader->vtxList[ii].y < colHeader->minBounds.y)
+                colHeader->minBounds.y = colHeader->vtxList[ii].y;
+            if (colHeader->vtxList[ii].z > colHeader->maxBounds.z)
+                colHeader->maxBounds.z = colHeader->vtxList[ii].z;
+            if (colHeader->vtxList[ii].z < colHeader->minBounds.z)
+                colHeader->minBounds.z = colHeader->vtxList[ii].z;
+        }
+
+        int extraPolys = 0;
+        if (play->sceneNum == SCENE_BESITU)
+            extraPolys = 2;
+        colHeader->polyList = (CollisionPoly*)malloc(sizeof(CollisionPoly) * (colRes->polygons.size()+extraPolys));
+        colHeader->numPolygons = colRes->polygons.size()+extraPolys;
 
         for (int i = 0; i < colRes->polygons.size(); i++)
         {
@@ -687,14 +738,102 @@ bool Scene_CommandCollisionHeader(PlayState* play, Ship::SceneCommand* cmd)
             colHeader->polyList[i].normal.y = colRes->polygons[i].b;
             colHeader->polyList[i].normal.z = colRes->polygons[i].c;
             colHeader->polyList[i].dist = colRes->polygons[i].d;
+
+            // if (play->sceneNum == SCENE_BESITU && i >= 34 && i < 40) {
+            //     colHeader->polyList[i].dist += 200;
+            // }
+            if (play->sceneNum == SCENE_BESITU) {
+                if (colHeader->vtxList[colHeader->polyList[i].flags_vIA].x != (s16)round(colRes->vertices[colHeader->polyList[i].flags_vIA].x) ||
+                    colHeader->vtxList[colHeader->polyList[i].flags_vIA].y != (s16)round(colRes->vertices[colHeader->polyList[i].flags_vIA].y) ||
+                    colHeader->vtxList[colHeader->polyList[i].flags_vIA].z != (s16)round(colRes->vertices[colHeader->polyList[i].flags_vIA].z) ||
+                    colHeader->vtxList[colHeader->polyList[i].flags_vIB].x != (s16)round(colRes->vertices[colHeader->polyList[i].flags_vIB].x) ||
+                    colHeader->vtxList[colHeader->polyList[i].flags_vIB].y != (s16)round(colRes->vertices[colHeader->polyList[i].flags_vIB].y) ||
+                    colHeader->vtxList[colHeader->polyList[i].flags_vIB].z != (s16)round(colRes->vertices[colHeader->polyList[i].flags_vIB].z) ||
+                    colHeader->vtxList[colHeader->polyList[i].vIC].x != (s16)round(colRes->vertices[colHeader->polyList[i].vIC].x) ||
+                    colHeader->vtxList[colHeader->polyList[i].vIC].y != (s16)round(colRes->vertices[colHeader->polyList[i].vIC].y) ||
+                    colHeader->vtxList[colHeader->polyList[i].vIC].z != (s16)round(colRes->vertices[colHeader->polyList[i].vIC].z)) {
+                        Vec3f a1, b1, c1, oNorm;
+                        f32 dist;
+                        a1.x = colHeader->vtxList[colHeader->polyList[i].flags_vIA].x;
+                        a1.y = colHeader->vtxList[colHeader->polyList[i].flags_vIA].y;
+                        a1.z = colHeader->vtxList[colHeader->polyList[i].flags_vIA].z;
+                        b1.x = colHeader->vtxList[colHeader->polyList[i].flags_vIB].x;
+                        b1.y = colHeader->vtxList[colHeader->polyList[i].flags_vIB].y;
+                        b1.z = colHeader->vtxList[colHeader->polyList[i].flags_vIB].z;
+                        c1.x = colHeader->vtxList[colHeader->polyList[i].vIC].x;
+                        c1.y = colHeader->vtxList[colHeader->polyList[i].vIC].y;
+                        c1.z = colHeader->vtxList[colHeader->polyList[i].vIC].z;
+
+                        // Math3D_Vec3f_Cross(&a1,&b1,&c1);
+                        oNorm.x = colHeader->polyList[i].normal.x;
+                        oNorm.y = colHeader->polyList[i].normal.y;
+                        oNorm.z = colHeader->polyList[i].normal.z;
+
+                        Math3D_DefPlane(&a1,&b1, &c1,
+                                        &c1.x,&c1.y,&c1.z,&dist);
+
+                        f32 sign = DOTXYZ(c1,oNorm);
+                        if (sign < 0) {
+                            c1.x = -c1.x;
+                            c1.y = -c1.y;
+                            c1.z = -c1.z;
+                            dist = -dist;
+                        }
+
+                        colHeader->polyList[i].normal.x = c1.x*0x7FFF;
+                        colHeader->polyList[i].normal.y = c1.y*0x7FFF;
+                        colHeader->polyList[i].normal.z = c1.z*0x7FFF;
+                        colHeader->polyList[i].dist = dist;
+                }
+            }
         }
 
-        colHeader->surfaceTypeList = (SurfaceType*)malloc(colRes->polygonTypes.size() * sizeof(SurfaceType));
+        size_t pp = colRes->polygons.size();
+        if (play->sceneNum == SCENE_BESITU) {
+            colHeader->polyList[pp].type = 0x0;
+            colHeader->polyList[pp].flags_vIA = ss; colHeader->polyList[pp].flags_vIB = ss+2; colHeader->polyList[pp].vIC = ss+1;
+            colHeader->polyList[pp+1].type = 0x1;
+            colHeader->polyList[pp+1].flags_vIA = ss+3; colHeader->polyList[pp+1].flags_vIB = ss+1; colHeader->polyList[pp+1].vIC = ss+2;
+        }
+
+        for (int ii = colRes->polygons.size(); ii < colHeader->numPolygons; ii++){
+            Vec3f a1, b1, c1, norm;
+            f32 dist;
+            a1.x = colHeader->vtxList[colHeader->polyList[ii].flags_vIA].x;
+            a1.y = colHeader->vtxList[colHeader->polyList[ii].flags_vIA].y;
+            a1.z = colHeader->vtxList[colHeader->polyList[ii].flags_vIA].z;
+            b1.x = colHeader->vtxList[colHeader->polyList[ii].flags_vIB].x;
+            b1.y = colHeader->vtxList[colHeader->polyList[ii].flags_vIB].y;
+            b1.z = colHeader->vtxList[colHeader->polyList[ii].flags_vIB].z;
+            c1.x = colHeader->vtxList[colHeader->polyList[ii].vIC].x;
+            c1.y = colHeader->vtxList[colHeader->polyList[ii].vIC].y;
+            c1.z = colHeader->vtxList[colHeader->polyList[ii].vIC].z;
+
+            Math3D_DefPlane(&a1,&b1, &c1,&norm.x,&norm.y,&norm.z,&dist);
+            colHeader->polyList[ii].normal.x = norm.x*0x7FFF;
+            colHeader->polyList[ii].normal.y = norm.y*0x7FFF;
+            colHeader->polyList[ii].normal.z = norm.z*0x7FFF;
+            colHeader->polyList[ii].dist = dist;
+        }
+
+        int extraSurfs = 0;
+        if (play->sceneNum == SCENE_BESITU)
+            extraSurfs = 1;
+        colHeader->surfaceTypeList = (SurfaceType*)malloc((colRes->polygonTypes.size()+extraSurfs) * sizeof(SurfaceType));
 
         for (int i = 0; i < colRes->polygonTypes.size(); i++)
         {
             colHeader->surfaceTypeList[i].data[0] = colRes->polygonTypes[i] >> 32;
             colHeader->surfaceTypeList[i].data[1] = colRes->polygonTypes[i] & 0xFFFFFFFF;
+
+            if (play->sceneNum == SCENE_HAKAANA_OUKE && i == 0x9 || i == 0xA) {
+                colHeader->surfaceTypeList[i].data[0] |= 0x14 << 24;
+            }
+        }
+
+        if (play->sceneNum == SCENE_BESITU) {
+            colHeader->surfaceTypeList[colRes->polygonTypes.size()].data[0] = 0x100;
+            colHeader->surfaceTypeList[colRes->polygonTypes.size()].data[1] = 0x0;
         }
 
         colHeader->cameraDataList = (CamData*)malloc(sizeof(CamData) * colRes->camData->entries.size());
@@ -1460,6 +1599,16 @@ s32 OTRScene_ExecuteCommands(PlayState* play, Ship::Scene* scene)
 
         //sceneCmd++;
     }
+
+    if (play->sceneNum == SCENE_BESITU) {
+        play->setupExitList = (int16_t*)malloc((1) * sizeof(int16_t));
+        play->setupExitList[0] = 0;
+        play->numSetupActors = 2;
+        play->setupActorList = (ActorEntry*)malloc(play->numSetupActors * sizeof(ActorEntry));
+        play->setupActorList[0] = { ACTOR_EN_WONDER_ITEM, -79,0,-151, 0,0,1, 0x1241};
+        play->setupActorList[1] = { ACTOR_EN_ITEM00, 200,-200,0, 0,0,0, 0x100+(uint16_t)ITEM00_HEART_PIECE  };
+    }
+
     return 0;
 }
 
