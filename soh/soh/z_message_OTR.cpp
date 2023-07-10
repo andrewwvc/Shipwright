@@ -304,6 +304,7 @@ extern "C" void OTRMessage_Init()
 
     //Great Fairy Text
     MakeNormalMsgEng(0xE8, "Your magic power has been&enhanced! Now you can gain even&more Magic Capacity!^Collecting %gIcons of Magic%w&will allow for greater enhancement!");
+    MakeNormalMsgEng(0xE9, "Your defensive power has been&enhanced! Damage inflicted by &enemies will be reduced by half.^But this only applies to&hearts protected by any&%rHeart Barriers%w you have collected.");
 
     u16 StoneMsg = TextIDAllocator::Instance->allocateRange("stone", 64);
 
