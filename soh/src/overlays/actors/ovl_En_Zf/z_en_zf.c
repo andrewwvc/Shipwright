@@ -3,9 +3,240 @@
  * Overlay: ovl_En_Zf
  * Description: Lizalfos and Dinolfos
  */
-
+#define INCLUDE_GAME_PRINTF
 #include "z_en_zf.h"
 #include "objects/object_zf/object_zf.h"
+
+s16 gZfLizalfosSkelGzfsliceanimAnimFrameData[2791] = {
+	0xffff, 0x0000, 0xb8ab, 0xd53d, 0xfe08, 0xfd8d, 0xbfff, 0x0008, 0x0008, 0x0008, 0x0008, 0x0008, 0x0008, 0x0008, 0x0008, 0xfffd, 
+	0x0008, 0x0008, 0x0068, 0x0008, 0x0008, 0x0008, 0x0008, 0x0008, 0x0008, 0x0008, 0x0008, 0x0008, 0x0008, 0x0001, 0x0000, 0x0001, 
+	0x0003, 0x0005, 0x0007, 0x0008, 0x0708, 0x0708, 0x0708, 0x079d, 0x079d, 0x079d, 0x079d, 0x07d3, 0x0793, 0x0793, 0x0793, 0x0793, 
+	0x06f3, 0x06f3, 0x06f3, 0x06f3, 0x06f3, 0x06f3, 0x06f3, 0x06f3, 0x06f3, 0x06f3, 0x0658, 0x067d, 0x06a4, 0x06ca, 0x06ea, 0x0700, 
+	0x0708, 0xfe7e, 0xfe7e, 0xfe7e, 0xfd3e, 0xfd3e, 0xfd3e, 0xfd3e, 0xfc49, 0xfe73, 0xfe89, 0xfe89, 0xff88, 0x0288, 0x031d, 0x031d, 
+	0x031d, 0x031d, 0x031d, 0x031d, 0x031d, 0x031d, 0x031d, 0x005a, 0xffeb, 0xff7d, 0xff1a, 0xfec9, 0xfe92, 0xfe7e, 0x00ac, 0x027b, 
+	0x0325, 0xbfff, 0xbfff, 0xbfff, 0xbfff, 0xbfff, 0xd9a4, 0xbfff, 0xbfff, 0xbfff, 0x4000, 0x4000, 0x4000, 0x4000, 0x4000, 0x4000, 
+	0x4000, 0x4000, 0x4000, 0x4000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x4000, 0x4000, 0x4000, 0x34ad, 0x34ad, 
+	0x34ad, 0x34ad, 0x34ad, 0x38e2, 0x3a3a, 0x3a3a, 0x3a3a, 0x3828, 0x3828, 0x3828, 0x3828, 0x3828, 0x3828, 0x3828, 0x3828, 0x3828, 
+	0x3828, 0x4000, 0x4000, 0x4000, 0x4000, 0x4000, 0x4000, 0x4000, 0x0000, 0x0000, 0x0000, 0xbfff, 0xbfff, 0xbfff, 0xbfff, 0xbfff, 
+	0xd958, 0xbfff, 0xbfff, 0xbfff, 0x4000, 0x4000, 0x4000, 0x4000, 0x4000, 0x4000, 0x4000, 0x4000, 0x4000, 0x4000, 0x0000, 0x0000, 
+	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0xf253, 0xf253, 0xf253, 0xf251, 0xf251, 0xf251, 0xf251, 0xf251, 0xf251, 0xf251, 0xf251, 
+	0xf251, 0xf251, 0xf251, 0xf251, 0xf12c, 0xf190, 0xf251, 0xf251, 0xf251, 0xf251, 0xf251, 0xfb71, 0xf946, 0xf72b, 0xf545, 0xf3bb, 
+	0xf2b3, 0xf253, 0x0e41, 0x0e41, 0x0e41, 0x08f2, 0x08f2, 0x08f2, 0x08f2, 0x08f2, 0x08f2, 0x08f2, 0x08f2, 0x08f2, 0x08f2, 0x08f2, 
+	0x08f2, 0x0982, 0x0951, 0x08f2, 0x08f2, 0x08f2, 0x08f2, 0x08f2, 0x039b, 0x0654, 0x08d8, 0x0b05, 0x0cbc, 0x0ddb, 0x0e41, 0x4b64, 
+	0x4b64, 0x4b64, 0x4b63, 0x4b63, 0x4b63, 0x4b63, 0x4b63, 0x4b63, 0x4b63, 0x4b63, 0x4b63, 0x4b63, 0x4b63, 0x4b63, 0x4b21, 0x4b38, 
+	0x4b63, 0x4b63, 0x4b63, 0x4b63, 0x4b63, 0x52b5, 0x50e5, 0x4f2f, 0x4dad, 0x4c79, 0x4bad, 0x4b64, 0x01ad, 0x01ad, 0x01ad, 0xfbfc, 
+	0xfbfc, 0xfbfc, 0xfbfc, 0xfbfc, 0x0826, 0x0826, 0x0826, 0x0826, 0x0d60, 0x0d60, 0x0c64, 0x0b25, 0x09ef, 0x0718, 0x0718, 0x0718, 
+	0x0718, 0x0718, 0xff6f, 0xfed5, 0xff09, 0xffba, 0x009b, 0x015c, 0x01ad, 0xf499, 0xf499, 0xf499, 0xf270, 0xf270, 0xf270, 0xf270, 
+	0xf270, 0xe5f9, 0xe5f9, 0xe5f9, 0xe5f9, 0xe807, 0xe807, 0xe904, 0xea53, 0xeba7, 0xef04, 0xef04, 0xef04, 0xef04, 0xef04, 0xf018, 
+	0xf019, 0xf0d7, 0xf1fe, 0xf339, 0xf433, 0xf499, 0x0d3b, 0x0d3b, 0x0d3b, 0x1f37, 0x1f37, 0x1f37, 0x1f37, 0x1f37, 0x1ca7, 0x1ca7, 
+	0x1ca7, 0x1ca7, 0x0e59, 0x0e59, 0x0ed8, 0x0f70, 0x0ffa, 0x1118, 0x1118, 0x1118, 0x1118, 0x1118, 0x0183, 0x0310, 0x056d, 0x081c, 
+	0x0aa2, 0x0c80, 0x0d3b, 0x071c, 0x071c, 0x071c, 0x071c, 0x071c, 0x071c, 0x071c, 0x071c, 0x071c, 0x071c, 0x071c, 0x071c, 0x071c, 
+	0x071c, 0x071c, 0x071c, 0x071c, 0x071c, 0x071c, 0x071c, 0x071c, 0x071c, 0x006c, 0x0204, 0x0390, 0x04f4, 0x0614, 0x06d6, 0x071c, 
+	0x0279, 0x0279, 0x0279, 0x0279, 0x0279, 0x0279, 0x0279, 0x0279, 0x0279, 0x0279, 0x0279, 0x0279, 0x0279, 0x0279, 0x0279, 0x0279, 
+	0x0279, 0x0279, 0x0279, 0x0279, 0x0279, 0x0279, 0x0419, 0x03aa, 0x0346, 0x02f2, 0x02b1, 0x0288, 0x0279, 0xfd58, 0xfd58, 0xfd58, 
+	0xfd58, 0xfd58, 0xfd58, 0xfd58, 0xfd58, 0xfd58, 0xfd58, 0xfd58, 0xfd58, 0xfd58, 0xfd58, 0xfd58, 0xfd58, 0xfd58, 0xfd58, 0xfd58, 
+	0xfd58, 0xfd58, 0xfd58, 0x016b, 0x007d, 0xff8e, 0xfeb3, 0xfdff, 0xfd85, 0xfd58, 0xf8d3, 0xf8d3, 0xf8d3, 0xf8d3, 0xf8d3, 0xf8d3, 
+	0xf8d3, 0xf8d3, 0x03b4, 0x03b4, 0x03b4, 0x03b4, 0x03b4, 0x03b4, 0x03b4, 0x03b4, 0x0380, 0x03c5, 0x03b4, 0x03b4, 0x03e2, 0x03f8, 
+	0x0674, 0x042e, 0x01e9, 0xffa3, 0xfd5e, 0xfb19, 0xf8d3, 0xfb18, 0xfb18, 0xfb18, 0xfb18, 0xfb18, 0xfb18, 0xfb18, 0xfb18, 0x0b1e, 
+	0x0b1e, 0x0b1e, 0x0b1e, 0x0b1e, 0x0b1e, 0x0b1e, 0x0b1e, 0x0b18, 0x0b25, 0x0b1e, 0x0b1e, 0x0b2f, 0x0b38, 0xfd7e, 0xfd18, 0xfcb1, 
+	0xfc4b, 0xfbe5, 0xfb7f, 0xfb18, 0x2d34, 0x2d34, 0x2d34, 0x2d34, 0x2d34, 0x2d34, 0x2d34, 0x2d34, 0x2c0b, 0x2c0b, 0x2c0b, 0x2c0b, 
+	0x2c0b, 0x2c0b, 0x2c0b, 0x2c0b, 0x2b12, 0x2c88, 0x2c0b, 0x2c0b, 0x2d56, 0x2df6, 0x3639, 0x34b8, 0x3338, 0x31b7, 0x3036, 0x2eb5, 
+	0x2d34, 0xffff, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0xffff, 0x0000, 0x0000, 0x0000, 0x00c0, 0x00bc, 0x00be, 
+	0x00c0, 0x00c0, 0x008c, 0x002e, 0xff87, 0xff66, 0xfeef, 0xffff, 0xffff, 0xffff, 0x0000, 0x0000, 0x0000, 0xffff, 0x0000, 0xffff, 
+	0xffff, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0108, 0x00fe, 0x00e7, 0x0108, 0x0108, 0x0120, 
+	0x0147, 0x017f, 0x0189, 0x01a6, 0xffff, 0x0000, 0x0000, 0x0000, 0x0000, 0xffff, 0x0000, 0x7fff, 0x7fff, 0x7fff, 0x7fff, 0x7fff, 
+	0x7fff, 0x7fff, 0x7fff, 0x7fff, 0x7fff, 0x7fff, 0x7fff, 0x70ad, 0x712a, 0x7258, 0x70ad, 0x70ad, 0x6f93, 0x6da0, 0x6a41, 0x699a, 
+	0x673f, 0x7fff, 0x7fff, 0x7fff, 0x7fff, 0x7fff, 0x7fff, 0x7fff, 0xffff, 0x0000, 0x0000, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 
+	0xffff, 0x0000, 0x0000, 0x0000, 0x0050, 0x0050, 0x0050, 0x0067, 0x0067, 0x0067, 0x0067, 0x0067, 0x0067, 0x0067, 0x0000, 0xffff, 
+	0xffff, 0x0000, 0xffff, 0x0000, 0x0000, 0xffff, 0x0000, 0x0000, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 
+	0xffff, 0x0041, 0x0041, 0x0041, 0x0051, 0x0051, 0x0051, 0x0051, 0x0051, 0x0051, 0x0051, 0xffff, 0xffff, 0xffff, 0x0000, 0x0000, 
+	0xffff, 0x0000, 0x8067, 0x8067, 0x8067, 0x8067, 0x8067, 0x8067, 0x8067, 0x8067, 0x8067, 0x8067, 0x8067, 0x8067, 0x853f, 0x853f, 
+	0x853f, 0x868a, 0x868a, 0x868a, 0x868a, 0x868a, 0x868a, 0x868a, 0x7e91, 0x7eb6, 0x7f0e, 0x7f7f, 0x7fef, 0x8045, 0x8067, 0xffff, 
+	0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0x0000, 0xffff, 0xffff, 0xffff, 0xff3f, 0xff3f, 0xff3f, 0xff28, 0xff28, 
+	0xff28, 0xff28, 0xff28, 0xff28, 0xff28, 0x0000, 0x0000, 0xffff, 0x0000, 0xffff, 0xffff, 0x0000, 0x0000, 0x0000, 0x0000, 0xffff, 
+	0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xfef7, 0xfef7, 0xfef7, 0xfec4, 0xfec4, 0xfec4, 0xfec4, 0xfec4, 
+	0xfec4, 0xfec4, 0x0000, 0xffff, 0xffff, 0xffff, 0x0000, 0x0000, 0xffff, 0xffff, 0x0000, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 
+	0xffff, 0xffff, 0x0000, 0x0000, 0x0000, 0xf0ad, 0xf0ad, 0xf0ad, 0xee0e, 0xee0e, 0xee0e, 0xee0e, 0xee0e, 0xee0e, 0xee0e, 0x0000, 
+	0x0000, 0x0000, 0x0000, 0x0000, 0xffff, 0xffff, 0xffff, 0x0000, 0x0000, 0xffff, 0xffff, 0x0000, 0xffff, 0xffff, 0x02cd, 0x02cd, 
+	0x02cd, 0x02cd, 0x02cd, 0x02cd, 0x02cd, 0x02cd, 0x02cd, 0x02cd, 0x02cd, 0x02cd, 0x02cd, 0x02cd, 0x0000, 0x0000, 0xffff, 0x0000, 
+	0xffff, 0x0000, 0xffff, 0xffff, 0x0000, 0xffff, 0xffff, 0x0000, 0xffff, 0xffff, 0xffff, 0x0471, 0x0471, 0x0471, 0x0471, 0x0471, 
+	0x0471, 0x0471, 0x0471, 0x0471, 0x0471, 0x0471, 0x0471, 0x0471, 0x0471, 0xffff, 0xffff, 0xffff, 0xffff, 0x0000, 0x0000, 0xffff, 
+	0xffff, 0xffff, 0xffff, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0xfe3d, 0xfe3d, 0xfe3d, 0xfe3d, 0xfe3d, 0xfe3d, 0xfe3d, 0xfe3d, 
+	0xfe3d, 0xfe3d, 0xfe3d, 0xfe3d, 0xfe3d, 0xfe3d, 0xffff, 0xffff, 0x0000, 0xffff, 0xffff, 0xffff, 0x0000, 0x31f7, 0x22e5, 0x34ca, 
+	0x304f, 0x304f, 0x304f, 0x304f, 0x304f, 0x1db3, 0x8844, 0x8844, 0x8844, 0x95d7, 0xa030, 0x8c0f, 0x9d99, 0x9d99, 0xa548, 0x25e7, 
+	0x07f0, 0x1372, 0x1382, 0x4000, 0x4000, 0x4000, 0x4000, 0x4000, 0x4000, 0x4000, 0x04f6, 0x11d8, 0x18df, 0x273a, 0x273a, 0x273a, 
+	0x273a, 0x273a, 0x2edd, 0x38a9, 0x38a9, 0x38a9, 0x3002, 0x2e94, 0x31c2, 0x2d48, 0x2d48, 0x3372, 0x49f0, 0x3aef, 0x3262, 0x3125, 
+	0x0000, 0xffff, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0xbe6a, 0xbf16, 0xbd7c, 0xb7b0, 0xb7b0, 0xb7b0, 0xb7b0, 0xb7b0, 0xa104, 
+	0x08ed, 0x08ed, 0x08ed, 0x14e5, 0x2030, 0x0b8f, 0x28ac, 0x28ac, 0x307d, 0xb2a6, 0x9c55, 0xa741, 0xb492, 0xb8ab, 0xb8ab, 0xb8ab, 
+	0xb8ab, 0xb8ab, 0xb8ab, 0xb8ab, 0x490c, 0x466d, 0x490c, 0x490c, 0x490c, 0x490c, 0x490c, 0x490c, 0x490c, 0x490c, 0x490c, 0x490c, 
+	0x5025, 0x5025, 0x5025, 0x5025, 0x56bb, 0x56bb, 0x56bb, 0x56bb, 0x56bb, 0x56bb, 0x1e17, 0x27ac, 0x316b, 0x3a7b, 0x4201, 0x4725, 
+	0x490c, 0x1193, 0x1432, 0x1193, 0x1193, 0x1193, 0x1193, 0x1193, 0x1193, 0x1193, 0x1193, 0x1193, 0x1193, 0x1f1c, 0x1f1c, 0x1f1c, 
+	0x1f1c, 0x1d24, 0x1d24, 0x1d24, 0x1d24, 0x1d24, 0x1d24, 0x0c34, 0x0d56, 0x0e89, 0x0faf, 0x10a7, 0x1153, 0x1193, 0xcbec, 0xc901, 
+	0xcbec, 0xcbec, 0xcbec, 0xcbec, 0xcbec, 0xcbec, 0xcbec, 0xcbec, 0xcbec, 0xcbec, 0xd17b, 0xd17b, 0xd17b, 0xd17b, 0xd7b5, 0xd7b5, 
+	0xd7b5, 0xd7b5, 0xd7b5, 0xd7b5, 0xaf48, 0xb6b1, 0xbd7a, 0xc351, 0xc7e2, 0xcadc, 0xcbec, 0xe543, 0xd952, 0x0269, 0x1cdf, 0x1cdf, 
+	0x1cdf, 0x1cdf, 0x1cdf, 0xb421, 0xd96b, 0xd96b, 0xd96b, 0xd96b, 0xd97a, 0xecaf, 0xf6fc, 0xf6fc, 0xf6fc, 0xf6fc, 0xf6bd, 0xfe78, 
+	0x1667, 0x36a5, 0x4231, 0xcd17, 0xd6b2, 0xde5b, 0xe36e, 0xe543, 0xb318, 0xb558, 0xb834, 0xba52, 0xba52, 0xba52, 0xba52, 0xba52, 
+	0xca50, 0xcca3, 0xcca3, 0xcca3, 0xcca3, 0xc81e, 0xcd14, 0xfa20, 0xfa20, 0xfa20, 0xfa20, 0xeafc, 0xd2f5, 0xd59a, 0xe18d, 0xdc70, 
+	0xa862, 0xaca4, 0xb009, 0xb248, 0xb318, 0x10d4, 0x1ed3, 0xee8c, 0xcc2f, 0xcc2f, 0xcc2f, 0xcc2f, 0xcc2f, 0x355d, 0x1351, 0x1351, 
+	0x1351, 0x1351, 0x176c, 0x04bb, 0x0171, 0x0171, 0x0171, 0x0171, 0xfea1, 0xf638, 0xd5eb, 0xc2fd, 0xb690, 0x2ad7, 0x2081, 0x1842, 
+	0x12cd, 0x10d4, 0xf741, 0xe939, 0xf741, 0xf1ec, 0xf1ec, 0xf1ec, 0xf1ec, 0xf1ec, 0xfb66, 0xfb66, 0xfb66, 0xfb66, 0xf39b, 0xe35b, 
+	0xf44f, 0xea98, 0xeb26, 0xeb26, 0xeb26, 0xeb26, 0xeb26, 0xe6a1, 0xfb22, 0xfa2c, 0xf944, 0xf877, 0xf7d4, 0xf768, 0xf741, 0xfcd3, 
+	0x1263, 0xfcd3, 0x0131, 0x0131, 0x0131, 0x0131, 0x0131, 0x07f6, 0x07f6, 0x07f6, 0x07f6, 0x0288, 0xfc1a, 0x106d, 0x1432, 0x2626, 
+	0x2626, 0x2626, 0x2626, 0x2626, 0x1051, 0x031a, 0x018c, 0x0015, 0xfec9, 0xfdc1, 0xfd12, 0xfcd3, 0x0970, 0x0c7c, 0x0970, 0x0ffc, 
+	0x0ffc, 0x0ffc, 0x0ffc, 0x0ffc, 0x28be, 0x28be, 0x28be, 0x28be, 0x2286, 0x20ca, 0x2eec, 0x18fd, 0x211e, 0x211e, 0x211e, 0x211e, 
+	0x211e, 0x1595, 0x1cbf, 0x17f7, 0x1373, 0x0f79, 0x0c4c, 0x0a33, 0x0970, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0x0000, 
+	0x0000, 0x0000, 0x0000, 0x0000, 0xffff, 0x0000, 0x0000, 0x0000, 0x0381, 0x0381, 0x0864, 0x0864, 0x0864, 0x0864, 0x0864, 0xffff, 
+	0xffff, 0xffff, 0x0000, 0x0000, 0x0000, 0xffff, 0x0000, 0xffff, 0x0000, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0x0000, 0x0000, 
+	0xffff, 0xffff, 0x0000, 0x0000, 0xffff, 0x012b, 0x012b, 0xfef0, 0xfef0, 0xfef0, 0xfef0, 0xfef0, 0x0000, 0x0000, 0xffff, 0xffff, 
+	0x0000, 0xffff, 0xffff, 0xffff, 0xffff, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0xffff, 0xffff, 0x0000, 0x0000, 0x0000, 
+	0xffff, 0x0000, 0x0201, 0x0201, 0x0a8e, 0x0a8e, 0x0a8e, 0x0a8e, 0x0a8e, 0x0000, 0x0000, 0xffff, 0xffff, 0x0000, 0x0000, 0xffff, 
+	0xee2b, 0xee2b, 0xee2b, 0xee2b, 0xee2b, 0xee2b, 0xee2b, 0xee2b, 0xee2b, 0xee2b, 0xee2b, 0xee2b, 0xee2b, 0xee2b, 0xee2b, 0xee2b, 
+	0xee2b, 0xee2b, 0xee2b, 0xee2b, 0xee2b, 0xee2b, 0xdd07, 0xdf75, 0xe246, 0xe615, 0xe9f4, 0xecf6, 0xee2b, 0xdd92, 0xdd92, 0xdd92, 
+	0xdd92, 0xdd92, 0xdd92, 0xdd92, 0xdd92, 0xdd92, 0xdd92, 0xdd92, 0xdd92, 0xdd92, 0xdd92, 0xdd92, 0xdd92, 0xdd92, 0xdd92, 0xdd92, 
+	0xdd92, 0xdd92, 0xdd92, 0xe801, 0xead2, 0xead8, 0xe7bc, 0xe34a, 0xdf4d, 0xdd92, 0xbf71, 0xbf71, 0xbf71, 0xbf71, 0xbf71, 0xbf71, 
+	0xbf71, 0xbf71, 0xbf71, 0xbf71, 0xbf71, 0xbf71, 0xbf71, 0xbf71, 0xbf71, 0xbf71, 0xbf71, 0xbf71, 0xbf71, 0xbf71, 0xbf71, 0xbf71, 
+	0xeb94, 0xe99f, 0xe3c3, 0xd91d, 0xcd2f, 0xc376, 0xbf71, 0x06f8, 0x06f8, 0x06f8, 0x06f8, 0x06f8, 0x06f8, 0x06f8, 0x06f8, 0x06f8, 
+	0x06f8, 0x06f8, 0x06f8, 0x06f8, 0x06f8, 0x06f8, 0x06f8, 0x06f8, 0x06f8, 0x06f8, 0x06f8, 0x06f8, 0x06f8, 0x0812, 0x07bd, 0x0777, 
+	0x0740, 0x0718, 0x0700, 0x06f8, 0xf3f7, 0xf3f7, 0xf3f7, 0xf3f7, 0xf3f7, 0xf3f7, 0xf3f7, 0xf3f7, 0xf3f7, 0xf3f7, 0xf3f7, 0xf3f7, 
+	0xf3f7, 0xf3f7, 0xf3f7, 0xf3f7, 0xf3f7, 0xf3f7, 0xf3f7, 0xf3f7, 0xf3f7, 0xf3f7, 0xfb38, 0xf98b, 0xf7e2, 0xf65d, 0xf51e, 0xf446, 
+	0xf3f7, 0xc2a8, 0xc2a8, 0xc2a8, 0xc2a8, 0xc2a8, 0xc2a8, 0xc2a8, 0xc2a8, 0xc2a8, 0xc2a8, 0xc2a8, 0xc2a8, 0xc2a8, 0xc2a8, 0xc2a8, 
+	0xc2a8, 0xc2a8, 0xc2a8, 0xc2a8, 0xc2a8, 0xc2a8, 0xc2a8, 0xe2ee, 0xdb63, 0xd3f8, 0xcd3a, 0xc7ba, 0xc404, 0xc2a8, 0x4c5f, 0x4c5f, 
+	0x4c5f, 0x4c5f, 0x4c5f, 0x4c5f, 0x4c5f, 0x4c5f, 0x4c5f, 0x4c5f, 0x4c5f, 0x4c5f, 0x4c5f, 0x4c5f, 0x4aa4, 0x4a82, 0x4c5f, 0x4c5f, 
+	0x4c5f, 0x4c5f, 0x4c5f, 0x4c5f, 0xeb3b, 0xe616, 0xe0f1, 0xdbcd, 0x56a9, 0x5184, 0x4c5f, 0x5115, 0x5115, 0x5115, 0x5115, 0x5115, 
+	0x5115, 0x5115, 0x5115, 0x5115, 0x5115, 0x5115, 0x5115, 0x5115, 0x5115, 0x50da, 0x50d6, 0x5115, 0x5115, 0x5115, 0x5115, 0x5115, 
+	0x5115, 0x1aea, 0x1e40, 0x2195, 0x24eb, 0x57c0, 0x546a, 0x5115, 0x0481, 0x0481, 0x0481, 0x0481, 0x0481, 0x0481, 0x0481, 0x0481, 
+	0x0481, 0x0481, 0x0481, 0x0481, 0x0481, 0x0481, 0x029d, 0x0278, 0x0481, 0x0481, 0x0481, 0x0481, 0x0481, 0x0481, 0xa79c, 0xa1c2, 
+	0x9be8, 0x960e, 0x1035, 0x0a5b, 0x0481, 0xfa19, 0xfa19, 0xfa19, 0xfa19, 0xfa19, 0xfa19, 0xfa19, 0xfa19, 0xfa19, 0xfa19, 0xfa19, 
+	0xfa19, 0xfa19, 0xfa19, 0xfa19, 0xfa19, 0xfa19, 0xfa19, 0xfa19, 0xfa19, 0xfa19, 0xfa19, 0xfb27, 0xfb2b, 0xfb00, 0xfaba, 0xfa6f, 
+	0xfa32, 0xfa19, 0xdeb0, 0xdeb0, 0xdeb0, 0xdeb0, 0xdeb0, 0xdeb0, 0xdeb0, 0xdeb0, 0xdeb0, 0xdeb0, 0xdeb0, 0xdeb0, 0xdeb0, 0xdeb0, 
+	0xdeb0, 0xdeb0, 0xdeb0, 0xdeb0, 0xdeb0, 0xdeb0, 0xdeb0, 0xdeb0, 0x050c, 0xfc57, 0xf398, 0xeb88, 0xe4e1, 0xe05b, 0xdeb0, 0x23ac, 
+	0x23ac, 0x23ac, 0x23ac, 0x23ac, 0x23ac, 0x23ac, 0x23ac, 0x23ac, 0x23ac, 0x23ac, 0x23ac, 0x23ac, 0x23ac, 0x23ac, 0x23ac, 0x23ac, 
+	0x23ac, 0x23ac, 0x23ac, 0x23ac, 0x23ac, 0x19d8, 0x1c6e, 0x1ec5, 0x20c3, 0x2250, 0x2351, 0x23ac, 0x0000, 0xffff, 0x0000, 0xffff, 
+	0xffff, 0xffff, 0xffff, 0x0000, 0x0000, 0xffff, 0x0000, 0xffff, 0x0000, 0xf98d, 0xfe20, 0xf691, 0xf7c8, 0xf6b6, 0xf6b6, 0xf6b6, 
+	0xf6b6, 0xf6b6, 0xffff, 0x0000, 0xffff, 0x0000, 0xffff, 0xffff, 0x0000, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0x0000, 
+	0x0000, 0xffff, 0x0000, 0xffff, 0x0000, 0x0000, 0x001e, 0x0a6a, 0x14ff, 0x0fd5, 0x07a8, 0x07a8, 0x07a8, 0x07a8, 0x07a8, 0xffff, 
+	0x0000, 0x0000, 0x0000, 0xffff, 0xffff, 0x0000, 0x0000, 0xffff, 0x0000, 0x0000, 0x0000, 0xffff, 0xffff, 0x0000, 0xffff, 0x0000, 
+	0x0000, 0x0000, 0xffff, 0xf975, 0xf444, 0xe7b8, 0xec92, 0xf3f9, 0xf3f9, 0xf3f9, 0xf3f9, 0xf3f9, 0xffff, 0x0000, 0xffff, 0x0000, 
+	0x0000, 0x0000, 0x0000, 0xf8e2, 0xf8e2, 0xf8e2, 0xf8e2, 0xf8e2, 0xf8e2, 0xf8e2, 0xf8e2, 0xf8e2, 0xf8e2, 0xf8e2, 0xf8e2, 0xf8e2, 
+	0xf8e2, 0xf8e2, 0xf8e2, 0xf8e2, 0xf8e2, 0xf8e2, 0xf8e2, 0xf8e2, 0xf8e2, 0xf86c, 0xf8bc, 0xf8e8, 0xf8f6, 0xf8f2, 0xf8e8, 0xf8e2, 
+	0xfe79, 0xfe79, 0xfe79, 0xfe79, 0xfe79, 0xfe79, 0xfe79, 0xfe79, 0xfe79, 0xfe79, 0xfe79, 0xfe79, 0xfe79, 0xfe79, 0xfe79, 0xfe79, 
+	0xfe79, 0xfe79, 0xfe79, 0xfe79, 0xfe79, 0xfe79, 0xf341, 0xf27d, 0xf3a0, 0xf695, 0xfa2c, 0xfd33, 0xfe79, 0xe321, 0xe321, 0xe321, 
+	0xe321, 0xe321, 0xe321, 0xe321, 0xe321, 0xe321, 0xe321, 0xe321, 0xe321, 0xe321, 0xe321, 0xe321, 0xe321, 0xe321, 0xe321, 0xe321, 
+	0xe321, 0xe321, 0xe321, 0xde2d, 0xdb18, 0xda9f, 0xdc74, 0xdf52, 0xe1f8, 0xe321, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 
+	0x0000, 0x016b, 0x0000, 0x0000, 0x0000, 0xfd90, 0xffff, 0xffff, 0xffff, 0x0000, 0x0000, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 
+	0x0000, 0xffff, 0x0000, 0x0000, 0x0000, 0xffff, 0x0000, 0xffff, 0x0000, 0xffff, 0xffff, 0xffff, 0x0000, 0xffff, 0x0286, 0xffff, 
+	0x0000, 0x0000, 0xfd24, 0xffff, 0x0000, 0x0000, 0xffff, 0xffff, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0xffff, 0xffff, 0x0000, 
+	0xffff, 0x0000, 0xffff, 0x0000, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0x0000, 0xffff, 0xf929, 0x0000, 0xffff, 0xffff, 0x0903, 
+	0xffff, 0xffff, 0xffff, 0x0000, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0x0000, 0xffff, 0xffff, 0x0000, 
+	0xffff, 0xeedd, 0xeedd, 0xeedd, 0xf18c, 0xf18c, 0xf18c, 0xf18c, 0xf185, 0xf18c, 0xf18c, 0xf18c, 0xf18c, 0xf4a0, 0xf6af, 0xf6af, 
+	0xf6af, 0xf6af, 0xf6af, 0xf6af, 0xf6af, 0xf6af, 0xf6af, 0xf87d, 0xf611, 0xf3b2, 0xf1a3, 0xf018, 0xef2b, 0xeedd, 0x18b4, 0x18b4, 
+	0x18b4, 0x15f7, 0x15f7, 0x15f7, 0x15f7, 0x17a2, 0x15f7, 0x15f7, 0x15f7, 0x15f7, 0x1f7a, 0x215c, 0x215c, 0x215c, 0x215c, 0x215c, 
+	0x215c, 0x215c, 0x215c, 0x215c, 0x0dfe, 0x1116, 0x13d1, 0x1600, 0x1788, 0x186a, 0x18b4, 0x6281, 0x6281, 0x6281, 0x6532, 0x6532, 
+	0x6532, 0x6532, 0x6923, 0x6532, 0x6532, 0x6532, 0x6532, 0x7ed2, 0x85ec, 0x85ec, 0x85ec, 0x85ec, 0x85ec, 0x85ec, 0x85ec, 0x85ec, 
+	0x85ec, 0x77fd, 0x742f, 0x6fba, 0x6b08, 0x66c0, 0x63ab, 0x6281, 0xffff, 0x0000, 0xffff, 0xff68, 0xff68, 0xff68, 0xff68, 0xff7f, 
+	0xff68, 0xff68, 0xff68, 0xfe37, 0xff0b, 0x02e5, 0x02e5, 0x02e5, 0x02e5, 0x02e5, 0x02e5, 0x02e5, 0x02e5, 0x02e5, 0xffff, 0x0000, 
+	0x0000, 0xffff, 0xffff, 0x0000, 0x0000, 0x0000, 0xffff, 0xffff, 0xfe81, 0xfe81, 0xfe81, 0xfe81, 0xfebf, 0xfe81, 0xfe81, 0xfe81, 
+	0xf996, 0xefcd, 0xe926, 0xe926, 0xe926, 0xe926, 0xe926, 0xe926, 0xe926, 0xe926, 0xe926, 0x0000, 0xffff, 0x0000, 0x0000, 0xffff, 
+	0x0000, 0x0000, 0x491a, 0x491a, 0x491a, 0x4659, 0x4659, 0x4659, 0x4659, 0x46ca, 0x4659, 0x4659, 0x4659, 0x3dbc, 0x2c6b, 0x1db2, 
+	0x1db2, 0x1db2, 0x1db2, 0x1db2, 0x1db2, 0x1db2, 0x1db2, 0x1db2, 0x3ccb, 0x4105, 0x4457, 0x46af, 0x4824, 0x48e2, 0x491a, 0x10a0, 
+	0x10a0, 0x10a0, 0x0e35, 0x0e35, 0x0e35, 0x0e35, 0x0e35, 0x0e35, 0x0e35, 0x0e35, 0x0e35, 0x12d9, 0x12d9, 0x12d9, 0x12d9, 0x12d9, 
+	0x12d9, 0x12d9, 0x12d9, 0x12d9, 0x12d9, 0x10a0, 0x10a0, 0x10a0, 0x10a0, 0x10a0, 0x10a0, 0x10a0, 0xf19b, 0xf19b, 0xf19b, 0xee78, 
+	0xee78, 0xee78, 0xee78, 0xee78, 0xee78, 0xee78, 0xee78, 0xee78, 0xf69a, 0xf69a, 0xf69a, 0xf69a, 0xf69a, 0xf69a, 0xf69a, 0xf69a, 
+	0xf69a, 0xf69a, 0xf19b, 0xf19b, 0xf19b, 0xf19b, 0xf19b, 0xf19b, 0xf19b, 0x84bc, 0x84bc, 0x84bc, 0x8c4b, 0x8c4b, 0x8c4b, 0x8c4b, 
+	0x8c4b, 0x8c4b, 0x8c4b, 0x8c4b, 0x8c4b, 0x7ab9, 0x7ab9, 0x7ab9, 0x7ab9, 0x7ab9, 0x7ab9, 0x7ab9, 0x7ab9, 0x7ab9, 0x7ab9, 0x84bc, 
+	0x84bc, 0x84bc, 0x84bc, 0x84bc, 0x84bc, 0x84bc, 0x0000, 0x0000, 0x0000, 0xffff, 0xffff, 0xffff, 0xffff, 0x0047, 0xffff, 0x0000, 
+	0x0000, 0x0000, 0x008d, 0x00d1, 0x00d1, 0x00d1, 0x00d1, 0x00d1, 0x00d1, 0x00d1, 0x00d1, 0x00d1, 0x0000, 0xffff, 0x0000, 0xffff, 
+	0xffff, 0x0000, 0x0000, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0x0000, 0xffc9, 0xffff, 0xffff, 0xffff, 0xffff, 0xff84, 
+	0xff2d, 0xff2d, 0xff2d, 0xff2d, 0xff2d, 0xff2d, 0xff2d, 0xff2d, 0xff2d, 0x0000, 0x0000, 0xffff, 0x0000, 0xffff, 0x0000, 0xffff, 
+	0xffff, 0x0000, 0xffff, 0x0000, 0x0000, 0xffff, 0x0000, 0x049d, 0xffff, 0xffff, 0xffff, 0x0000, 0x09b6, 0x0f67, 0x0f67, 0x0f67, 
+	0x0f67, 0x0f67, 0x0f67, 0x0f67, 0x0f67, 0x0f67, 0xffff, 0xffff, 0xffff, 0x0000, 0xffff, 0xffff, 0x0000, 0xffff, 0xffff, 0xffff, 
+	0x0000, 0x0000, 0xffff, 0x0000, 0x0000, 0xffff, 0xffff, 0xffff, 0x0000, 0xfe03, 0xfe03, 0xfe03, 0xfe03, 0xfe03, 0xfe03, 0xfe03, 
+	0xfe03, 0xfe03, 0xfe03, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0x0000, 0xffff, 0xffff, 0xffff, 0xffff, 0x0000, 
+	0xffff, 0x0000, 0xffff, 0xffff, 0xffff, 0xffff, 0xf6f9, 0xf6f9, 0xf6f9, 0xf6f9, 0xf6f9, 0xf6f9, 0xf6f9, 0xf6f9, 0xf6f9, 0xf6f9, 
+	0x0000, 0x0000, 0xffff, 0x0000, 0x0000, 0x0000, 0x0000, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0x0000, 
+	0x0000, 0x0000, 0xffff, 0xf029, 0xf029, 0xf029, 0xf029, 0xf029, 0xf029, 0xf029, 0xf029, 0xf029, 0xf029, 0x0000, 0xffff, 0x0000, 
+	0x0000, 0x0000, 0xffff, 0xffff, 0x508e, 0x508e, 0x508e, 0x508e, 0x508e, 0x508e, 0x508e, 0x508e, 0x4ecc, 0x4ecc, 0x4ecc, 0x4ecc, 
+	0xcf6b, 0xcf6b, 0xcf6b, 0xcf21, 0xcf21, 0xcf21, 0xcf21, 0xcf21, 0xcf21, 0xcf21, 0x5c77, 0x59a7, 0x56e8, 0x546d, 0x5269, 0x510d, 
+	0x508e, 0x584c, 0x584c, 0x584c, 0x584c, 0x584c, 0x584c, 0x584c, 0x584c, 0x5b93, 0x5b93, 0x5b93, 0x5b93, 0x1c05, 0x1c05, 0x1c05, 
+	0x1cce, 0x1cce, 0x1cce, 0x1cce, 0x1cce, 0x1cce, 0x1cce, 0x5e8c, 0x5cf6, 0x5b7e, 0x5a36, 0x5933, 0x5889, 0x584c, 0xf91e, 0xf91e, 
+	0xf91e, 0xf91e, 0xf91e, 0xf91e, 0xf91e, 0xf91e, 0xef85, 0xef85, 0xef85, 0xef85, 0x5bb9, 0x5bb9, 0x5bb9, 0x5d79, 0x5d79, 0x5d79, 
+	0x5d79, 0x5d79, 0x5d79, 0x5d79, 0x04b3, 0x01c3, 0xff08, 0xfca9, 0xfac9, 0xf98f, 0xf91e, 0x0b8c, 0x0b8c, 0x0b8c, 0x1270, 0x1270, 
+	0x1270, 0x1270, 0x1270, 0x1270, 0x1270, 0x1270, 0x1270, 0x1270, 0x1270, 0x1270, 0x1270, 0x1270, 0x1270, 0x1270, 0x1270, 0x1270, 
+	0x1270, 0x0941, 0x09d3, 0x0a5c, 0x0ad5, 0x0b35, 0x0b75, 0x0b8c, 0x0f5f, 0x0f5f, 0x0f5f, 0x05b5, 0x05b5, 0x05b5, 0x05b5, 0x05b5, 
+	0x05b5, 0x05b5, 0x05b5, 0x05b5, 0x05b5, 0x05b5, 0x05b5, 0x05b5, 0x05b5, 0x05b5, 0x05b5, 0x05b5, 0x05b5, 0x05b5, 0x119d, 0x10fb, 
+	0x106c, 0x0ff8, 0x0fa3, 0x0f6f, 0x0f5f, 0xb8a7, 0xb8a7, 0xb8a7, 0xc3a2, 0xc3a2, 0xc3a2, 0xc3a2, 0xc3a2, 0xc3a2, 0xc3a2, 0xc3a2, 
+	0xc3a2, 0xc3a2, 0xc3a2, 0xc3a2, 0xc3a2, 0xc3a2, 0xc3a2, 0xc3a2, 0xc3a2, 0xc3a2, 0xc3a2, 0xae70, 0xb146, 0xb3b8, 0xb5bd, 0xb749, 
+	0xb84a, 0xb8a7, 0xfebd, 0xfe21, 0xfd8b, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0xffff, 0x0000, 
+	0x0000, 0x01e2, 0x01e2, 0x01e2, 0x01e2, 0x01e2, 0x01e2, 0x01e2, 0xffff, 0x0000, 0x0000, 0xffff, 0x0000, 0xffff, 0x0000, 0xfc1b, 
+	0xf9fd, 0xf7c6, 0x0000, 0x0000, 0xffff, 0x0000, 0x0000, 0xffff, 0xffff, 0x0000, 0xffff, 0x0000, 0xffff, 0xffff, 0x029e, 0x029e, 
+	0x029e, 0x029e, 0x029e, 0x029e, 0x029e, 0x0000, 0x0000, 0x0000, 0xffff, 0xffff, 0xffff, 0x0000, 0x3765, 0x3675, 0x3583, 0x3935, 
+	0x3935, 0x3935, 0x3935, 0x3935, 0x3935, 0x3935, 0x3935, 0x3935, 0x3935, 0x3935, 0x3935, 0x3356, 0x3356, 0x3356, 0x3356, 0x3356, 
+	0x3356, 0x3356, 0x4b6e, 0x47d9, 0x43ef, 0x400a, 0x3c9a, 0x3a24, 0x3935, 0x0086, 0x0086, 0x0086, 0x0086, 0x0086, 0x0086, 0x0086, 
+	0x0086, 0x0086, 0x0086, 0x0086, 0x0086, 0x0086, 0x0086, 0x0086, 0x0086, 0x0086, 0x0086, 0x0086, 0x0086, 0x0086, 0x0086, 0xfd7e, 
+	0xfe42, 0xfef8, 0xff97, 0x0015, 0x0068, 0x0086, 0x0849, 0x0849, 0x0849, 0x0849, 0x0849, 0x0849, 0x0849, 0x0849, 0x0849, 0x0849, 
+	0x0849, 0x0849, 0x0849, 0x0849, 0x0849, 0x0849, 0x0849, 0x0849, 0x0849, 0x0849, 0x0849, 0x0849, 0x0396, 0x04cd, 0x05ea, 0x06e0, 
+	0x079f, 0x081d, 0x0849, 0xb3c5, 0xb3c5, 0xb3c5, 0xb3c5, 0xb3c5, 0xb3c5, 0xb3c5, 0xb3c5, 0xb3c5, 0xb3c5, 0xb3c5, 0xb3c5, 0xb3c5, 
+	0xb3c5, 0xb3c5, 0xb3c5, 0xb3c5, 0xb3c5, 0xb3c5, 0xb3c5, 0xb3c5, 0xb3c5, 0xa7e3, 0xaae1, 0xadab, 0xb01c, 0xb20a, 0xb350, 0xb3c5, 
+	0xffff, 0x0000, 0x0000, 0xffff, 0xffff, 0x0000, 0xffff, 0xffff, 0x0000, 0xffff, 0xffff, 0xffff, 0xffff, 0x0000, 0x0000, 0x02c1, 
+	0x02c1, 0x02c1, 0x02c1, 0x02c1, 0x02c1, 0x02c1, 0xffff, 0x0000, 0xffff, 0xffff, 0xffff, 0x0000, 0xffff, 0xffff, 0x0000, 0xffff, 
+	0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0x0000, 0xffff, 0x0000, 0xffff, 0xffff, 0xffff, 0xffff, 0xfd82, 0xfd82, 0xfd82, 0xfd82, 
+	0xfd82, 0xfd82, 0xfd82, 0xffff, 0x0000, 0x0000, 0x0000, 0x0000, 0xffff, 0xffff, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 
+	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0xffff, 0xffff, 0xffff, 0x0b77, 0x0b77, 0x0b77, 0x0b77, 0x0b77, 0x0b77, 0x0b77, 
+	0x0000, 0xffff, 0xffff, 0xffff, 0x0000, 0xffff, 0x0000, };
+
+JointIndex gZfLizalfosSkelGzfsliceanimAnimJointIndices[49] = {
+	{ 0x0007, 0x0024, 0x0041, },
+	{ 0x005e, 0x007b, 0x0098, },
+	{ 0x00b5, 0x00d2, 0x00ef, },
+	{ 0x010c, 0x0129, 0x0146, },
+	{ 0x0163, 0x0180, 0x019d, },
+	{ 0x01ba, 0x01d7, 0x01f4, },
+	{ 0x0211, 0x022e, 0x024b, },
+	{ 0x0268, 0x0285, 0x02a2, },
+	{ 0x0000, 0x0000, 0x0000, },
+	{ 0x02bf, 0x02dc, 0x02f9, },
+	{ 0x0316, 0x0333, 0x0350, },
+	{ 0x036d, 0x038a, 0x03a7, },
+	{ 0x03c4, 0x03e1, 0x03fe, },
+	{ 0x041b, 0x0438, 0x0455, },
+	{ 0x0472, 0x048f, 0x04ac, },
+	{ 0x04c9, 0x04e6, 0x0503, },
+	{ 0x0000, 0x0000, 0x0000, },
+	{ 0x0000, 0x0000, 0x0001, },
+	{ 0x0001, 0x0000, 0x0002, },
+	{ 0x0520, 0x053d, 0x055a, },
+	{ 0x0577, 0x0594, 0x05b1, },
+	{ 0x0001, 0x0000, 0x0001, },
+	{ 0x0001, 0x0000, 0x0001, },
+	{ 0x0001, 0x0000, 0x0001, },
+	{ 0x0001, 0x0001, 0x0000, },
+	{ 0x0001, 0x0000, 0x0001, },
+	{ 0x0003, 0x0004, 0x0005, },
+	{ 0x05ce, 0x05eb, 0x0608, },
+	{ 0x0625, 0x0642, 0x065f, },
+	{ 0x067c, 0x0699, 0x06b6, },
+	{ 0x0000, 0x0001, 0x0000, },
+	{ 0x0001, 0x0001, 0x0006, },
+	{ 0x06d3, 0x06f0, 0x070d, },
+	{ 0x0000, 0x0001, 0x0000, },
+	{ 0x072a, 0x0747, 0x0764, },
+	{ 0x0781, 0x079e, 0x07bb, },
+	{ 0x07d8, 0x07f5, 0x0812, },
+	{ 0x082f, 0x084c, 0x0869, },
+	{ 0x0886, 0x08a3, 0x08c0, },
+	{ 0x08dd, 0x08fa, 0x0917, },
+	{ 0x0000, 0x0000, 0x0001, },
+	{ 0x0934, 0x0951, 0x096e, },
+	{ 0x098b, 0x09a8, 0x09c5, },
+	{ 0x09e2, 0x09ff, 0x0a1c, },
+	{ 0x0a39, 0x0a56, 0x0a73, },
+	{ 0x0a90, 0x0aad, 0x0aca, },
+	{ 0x0000, 0x0000, 0x0001, },
+	{ 0x0000, 0x0000, 0x0000, },
+	{ 0x0001, 0x0000, 0x0000, },
+};
+
+AnimationHeader gZfLizalfosSkelGzfsliceanimAnim = { { 29 }, gZfLizalfosSkelGzfsliceanimAnimFrameData, gZfLizalfosSkelGzfsliceanimAnimJointIndices, 7 };
 
 #define FLAGS (ACTOR_FLAG_0 | ACTOR_FLAG_2 | ACTOR_FLAG_4)
 
@@ -31,6 +262,7 @@ void func_80B463E4(EnZf* this, PlayState* play);
 void EnZf_SetupSlash(EnZf* this);
 void EnZf_Slash(EnZf* this, PlayState* play);
 void EnZf_RecoilFromBlockedSlash(EnZf* this, PlayState* play);
+void EnZf_SpinDodge(EnZf* this, PlayState* play);
 void EnZf_SetupJumpBack(EnZf* this);
 void EnZf_JumpBack(EnZf* this, PlayState* play);
 void EnZf_Stunned(EnZf* this, PlayState* play);
@@ -133,6 +365,8 @@ static ColliderCylinderInit sBodyCylinderInit = {
     { 20, 70, 0, { 0, 0, 0 } },
 };
 
+#define ENZF_STANDARD_DAMAGE 0x08
+
 static ColliderQuadInit sSwordQuadInit = {
     {
         COLTYPE_NONE,
@@ -144,7 +378,7 @@ static ColliderQuadInit sSwordQuadInit = {
     },
     {
         ELEMTYPE_UNK0,
-        { 0xFFCFFFFF, 0x00, 0x08 },
+        { 0xFFCFFFFF, 0x00, ENZF_STANDARD_DAMAGE },
         { 0x00000000, 0x00, 0x00 },
         TOUCH_ON | TOUCH_SFX_NORMAL | TOUCH_UNK7,
         BUMP_ON,
@@ -164,21 +398,21 @@ typedef enum {
 static DamageTable sDamageTable = {
     /* Deku nut      */ DMG_ENTRY(0, ENZF_DMGEFF_STUN),
     /* Deku stick    */ DMG_ENTRY(2, ENZF_DMGEFF_NONE),
-    /* Slingshot     */ DMG_ENTRY(1, ENZF_DMGEFF_PROJECTILE),
+    /* Slingshot     */ DMG_ENTRY(1, ENZF_DMGEFF_IMMUNE),//ENZF_DMGEFF_PROJECTILE
     /* Explosive     */ DMG_ENTRY(2, ENZF_DMGEFF_NONE),
     /* Boomerang     */ DMG_ENTRY(0, ENZF_DMGEFF_STUN),
-    /* Normal arrow  */ DMG_ENTRY(2, ENZF_DMGEFF_NONE),
+    /* Normal arrow  */ DMG_ENTRY(2, ENZF_DMGEFF_IMMUNE),
     /* Hammer swing  */ DMG_ENTRY(2, ENZF_DMGEFF_NONE),
     /* Hookshot      */ DMG_ENTRY(0, ENZF_DMGEFF_STUN),
     /* Kokiri sword  */ DMG_ENTRY(1, ENZF_DMGEFF_NONE),
     /* Master sword  */ DMG_ENTRY(2, ENZF_DMGEFF_NONE),
     /* Giant's Knife */ DMG_ENTRY(4, ENZF_DMGEFF_NONE),
-    /* Fire arrow    */ DMG_ENTRY(2, ENZF_DMGEFF_PROJECTILE),
+    /* Fire arrow    */ DMG_ENTRY(2, ENZF_DMGEFF_IMMUNE),//ENZF_DMGEFF_PROJECTILE
     /* Ice arrow     */ DMG_ENTRY(4, ENZF_DMGEFF_ICE),
-    /* Light arrow   */ DMG_ENTRY(2, ENZF_DMGEFF_PROJECTILE),
-    /* Unk arrow 1   */ DMG_ENTRY(2, ENZF_DMGEFF_PROJECTILE),
-    /* Unk arrow 2   */ DMG_ENTRY(2, ENZF_DMGEFF_PROJECTILE),
-    /* Unk arrow 3   */ DMG_ENTRY(2, ENZF_DMGEFF_PROJECTILE),
+    /* Light arrow   */ DMG_ENTRY(2, ENZF_DMGEFF_NONE),//ENZF_DMGEFF_PROJECTILE
+    /* Unk arrow 1   */ DMG_ENTRY(2, ENZF_DMGEFF_NONE),//ENZF_DMGEFF_PROJECTILE
+    /* Unk arrow 2   */ DMG_ENTRY(2, ENZF_DMGEFF_NONE),//ENZF_DMGEFF_PROJECTILE
+    /* Unk arrow 3   */ DMG_ENTRY(2, ENZF_DMGEFF_NONE),//ENZF_DMGEFF_PROJECTILE
     /* Fire magic    */ DMG_ENTRY(0, ENZF_DMGEFF_IMMUNE),
     /* Ice magic     */ DMG_ENTRY(3, ENZF_DMGEFF_ICE),
     /* Light magic   */ DMG_ENTRY(0, ENZF_DMGEFF_IMMUNE),
@@ -201,6 +435,9 @@ static InitChainEntry sInitChain[] = {
     ICHAIN_VEC3F_DIV1000(scale, 15, ICHAIN_CONTINUE),
     ICHAIN_F32_DIV1000(gravity, -3500, ICHAIN_STOP),
 };
+
+static const s16 STICKY_FRAMES = 20;
+static const s16 TRANSITION_FRAMES = 4;
 
 static AnimationHeader* sHoppingAnims[] = { &gZfHopCrouchingAnim, &gZfHopLeapingAnim, &gZfHopLandingAnim };
 
@@ -237,8 +474,16 @@ s32 EnZf_PrimaryFloorCheck(EnZf* this, PlayState* play, f32 dist) {
     this->actor.world.pos.z += cos;
 
     Actor_UpdateBgCheckInfo(play, &this->actor, 0.0f, 0.0f, 0.0f, 0x1C);
-    this->actor.world.pos = curPos;
     ret = !(this->actor.bgCheckFlags & 1);
+    //DEBUG
+    // if (ret) {
+    //     Vec3f zero = {0.0f,0.0f,0.0f};
+    //     Vec3f up = {0.0f,2.0f,0.0f};
+    //     Vec3f highWorld = this->actor.world.pos;
+    //     EffectSsIceSmoke_Spawn(play,&highWorld,&up,&zero,50);//TEST
+    // }
+    //DEBUG
+    this->actor.world.pos = curPos;
     this->actor.bgCheckFlags = curBgCheckFlags;
     return ret;
 }
@@ -272,6 +517,60 @@ s16 EnZf_SecondaryFloorCheck(EnZf* this, PlayState* play, f32 dist) {
     ret = !(this->actor.bgCheckFlags & 1);
     this->actor.bgCheckFlags = curBgCheckFlags;
     return ret;
+}
+
+s32 EnZf_HighJumpCheck(EnZf* this, PlayState* play, f32 dist, f32 height) {
+    s16 ret;
+    s16 curBgCheckFlags;
+    f32 sin;
+    f32 cos;
+    Vec3f curPos;
+
+    if (this->actor.yDistToPlayer < 10.0f)
+        return false;
+
+    if (dist == 0.0f) {
+        dist = ((this->actor.speedXZ >= 0.0f) ? 1.0f : -1.0f);
+        dist = ((this->actor.params >= ENZF_TYPE_LIZALFOS_MINIBOSS_A) ? dist * 45.0f : dist * 30.0f);
+    }
+
+    if (height == 0.0f) {
+        height = 100.0f;
+    }
+
+    // Save currents to restore later
+    curPos = this->actor.world.pos;
+    curBgCheckFlags = this->actor.bgCheckFlags;
+
+    sin = Math_SinS(this->actor.world.rot.y) * dist;
+    cos = Math_CosS(this->actor.world.rot.y) * dist;
+
+    this->actor.world.pos.x += sin;
+    this->actor.world.pos.z += cos;
+    Actor_UpdateBgCheckInfo(play, &this->actor, 0.0f, 0.0f, 0.0f, 0x1C);
+    if ((this->actor.bgCheckFlags & 1) && !(this->actor.bgCheckFlags & 8)) {
+        ret = false;
+    } else {
+        this->actor.world.pos.y += height;
+
+        CollisionPoly* cPol;
+        s32 fBGID;
+        //Actor_UpdateBgCheckInfo(play, &this->actor, height, 0.0f, height+70.0f, 0x1C);
+        f32 floorHeight = BgCheck_EntityRaycastFloor5(play, &play->colCtx, &cPol, &fBGID, &this->actor, &this->actor.world.pos);
+        ret = (!(floorHeight <= BGCHECK_Y_MIN));
+    }
+    this->actor.world.pos = curPos;
+    this->actor.bgCheckFlags = curBgCheckFlags;
+    return ret;
+}
+
+s32 EnZf_IsOnPlayerPlatform(EnZf* this, PlayState* play) {
+    Player* player = GET_PLAYER(play);
+    if (this->actor.params >= ENZF_TYPE_LIZALFOS_MINIBOSS_A) {
+        this->curPlatform = EnZf_FindPlatform(&this->actor.world.pos, this->curPlatform);
+        s16 playerPlatform = EnZf_FindPlatform(&player->actor.world.pos, this->curPlatform);
+        return (this->curPlatform == playerPlatform);
+    }
 }
 
 void EnZf_Init(Actor* thisx, PlayState* play) {
@@ -351,6 +650,15 @@ void EnZf_Init(Actor* thisx, PlayState* play) {
             Actor_Kill(thisx);
         }
     }
+    
+    this->stance = ENZF_HIGH;
+    this->stanceTimer = STICKY_FRAMES;
+    this->stanceTransition = 0;
+    this->ignoreAttack = 0;
+    this->selectionTimer = 0;
+    this->cautionTimer = 0;
+    //DEBUG
+    // this->isBelow = 0;
 }
 
 void EnZf_Destroy(Actor* thisx, PlayState* play) {
@@ -524,9 +832,15 @@ s16 EnZf_FindNextPlatformTowardsPlayer(Vec3f* pos, s16 curPlatform, s16 arg2, Pl
 }
 
 // Player not targeting this or another EnZf?
-s32 EnZf_CanAttack(PlayState* play, EnZf* this) {
+s32 EnZf_CanAttack1(PlayState* play, EnZf* this, s32 timeToHit) {
     Actor* targetedActor;
     Player* player = GET_PLAYER(play);
+
+    if (ABS(player->invincibilityTimer) >= timeToHit)
+        return false;
+
+    if (this->stanceTransition > 0)
+        return false;
 
     if (this->actor.params >= ENZF_TYPE_LIZALFOS_MINIBOSS_A) { // miniboss
         if (player->stateFlags1 & 0x6000) {                    // Hanging or climbing
@@ -557,6 +871,29 @@ s32 EnZf_CanAttack(PlayState* play, EnZf* this) {
     return false;
 }
 
+// Player not targeting this or another EnZf?
+s32 EnZf_CanAttack(PlayState* play, EnZf* this) {
+    return EnZf_CanAttack1(play,this,7);
+}
+
+s32 EnZf_CanAttackSlash(PlayState* play, EnZf* this) {
+    Player* player = GET_PLAYER(play);
+
+    if (isPlayerInHorizontalAttack(play) && (this->actor.xzDistToPlayer < 120.0f) && Player_IsFacingActor(&this->actor,0x2000,play))
+        return false;
+
+    if (isPlayerInVerticalAttack(play) && (this->actor.xzDistToPlayer < 120.0f) && Player_IsFacingActor(&this->actor,0x800,play))
+        return false;
+
+    return EnZf_CanAttack(play, this);
+}
+
+void EnZf_SwitchStance(EnZf* this) {
+    this->stance = !this->stance;
+    this->stanceTransition = 0;
+    this->stanceTimer = STICKY_FRAMES;
+}
+
 void func_80B44DC4(EnZf* this, PlayState* play) {
     s16 angleDiff = this->actor.yawTowardsPlayer - this->actor.shape.rot.y;
 
@@ -567,7 +904,7 @@ void func_80B44DC4(EnZf* this, PlayState* play) {
     if (angleDiff >= 0x1B58) {
         func_80B483E4(this, play);
     } else if ((this->actor.xzDistToPlayer <= 100.0f) && ((play->gameplayFrames % 8) != 0) &&
-               EnZf_CanAttack(play, this)) {
+               EnZf_CanAttackSlash(play, this)) {
         EnZf_SetupSlash(this);
     } else {
         func_80B45384(this);
@@ -584,13 +921,14 @@ s32 EnZf_ChooseAction(PlayState* play, EnZf* this) {
     if (func_800354B4(play, &this->actor, 100.0f, 0x5DC0, 0x2AA8, this->actor.shape.rot.y)) {
         this->actor.shape.rot.y = this->actor.world.rot.y = this->actor.yawTowardsPlayer;
 
-        if ((this->actor.bgCheckFlags & 8) && (ABS(angleToWall) < 0x2EE0) && (this->actor.xzDistToPlayer < 80.0f)) {
+        if ((this->actor.bgCheckFlags & 8) && (ABS(angleToWall) < 0x2EE0) && (this->actor.xzDistToPlayer < 80.0f) &&
+                    EnZf_CanAttack1(play, this, 40) && (!EnZf_PrimaryFloorCheck(this, play, 135.0f))) {
             EnZf_SetupJumpUp(this);
             return true;
-        } else if ((this->actor.xzDistToPlayer < 90.0f) && ((play->gameplayFrames % 2) != 0)) {
+        } else if ((this->actor.xzDistToPlayer < 90.0f) && ((play->gameplayFrames % 2) != 0) && (!EnZf_PrimaryFloorCheck(this, play, 135.0f))) {
             EnZf_SetupJumpUp(this);
             return true;
-        } else {
+        } else if (!EnZf_PrimaryFloorCheck(this, play, -180.0f)) {
             EnZf_SetupJumpBack(this);
             return true;
         }
@@ -609,7 +947,7 @@ s32 EnZf_ChooseAction(PlayState* play, EnZf* this) {
                 EnZf_SetupCircleAroundPlayer(this, 4.0f);
                 return true;
             }
-        } else {
+        } else if (!EnZf_PrimaryFloorCheck(this, play, -180.0f)) {
             EnZf_SetupJumpBack(this);
             return true;
         }
@@ -760,6 +1098,7 @@ void EnZf_SetupApproachPlayer(EnZf* this, PlayState* play) {
         this->hopAnimIndex = 0;
     }
     this->actor.speedXZ = 0.0f;
+    this->selectionTimer = Rand_S16Offset(6,10);
     EnZf_SetupAction(this, EnZf_ApproachPlayer);
 }
 
@@ -782,9 +1121,13 @@ void EnZf_ApproachPlayer(EnZf* this, PlayState* play) {
             sp44 = 270.0f;
         }
     }
+    DECR(this->selectionTimer);
 
-    if (!EnZf_DodgeRangedEngaging(play, this)) {
-        if (sp48 != this->curPlatform) {
+    if (EnZf_DodgeRangedEngaging(play, this)) {}
+    else /*if ((isRangedWeaponReady(play) || Actor_GetProjectileActor(play, &this->actor, 600.0f)) && (this->selectionTimer == 0)) {
+        func_80B483E4(this,play);
+    } else*/ {
+        if (sp48 != this->curPlatform /*&& !isRangedWeaponReady(play)*/) {
             this->nextPlatform = EnZf_FindNextPlatformTowardsPlayer(&this->actor.world.pos, this->curPlatform,
                                                                     this->homePlatform, play);
 
@@ -797,6 +1140,11 @@ void EnZf_ApproachPlayer(EnZf* this, PlayState* play) {
 
                 temp_v1 = this->actor.wallYaw - this->actor.shape.rot.y;
                 temp_v1 = ABS(temp_v1);
+
+                if ((this->actor.speedXZ > 0.0f) && EnZf_HighJumpCheck(this,play, 40.0f,0.0f)) {
+                    EnZf_SetupJumpUp(this);
+                    return;
+                }
 
                 if ((this->unk_3F8 && (this->actor.speedXZ > 0.0f)) ||
                     ((this->actor.bgCheckFlags & 8) && (temp_v1 >= 0x5C19))) {
@@ -824,7 +1172,7 @@ void EnZf_ApproachPlayer(EnZf* this, PlayState* play) {
             sp40 = 100.0f;
         }
 
-        if (this->actor.xzDistToPlayer <= (70.0f + sp40)) {
+        if (this->actor.xzDistToPlayer <= (70.0f + sp40) /*|| isRangedWeaponReady(play) || Actor_GetProjectileActor(play, &this->actor, 600.0f)*/) {
             Math_SmoothStepToF(&this->actor.speedXZ, -8.0f, 1.0f, 0.5f, 0.0f);
         } else {
             Math_SmoothStepToF(&this->actor.speedXZ, 8.0f, 1.0f, 0.5f, 0.0f);
@@ -858,7 +1206,10 @@ void EnZf_ApproachPlayer(EnZf* this, PlayState* play) {
                     func_80B45384(this);
                 }
             } else if (this->actor.xzDistToPlayer < 100.0f) {
-                if ((Rand_ZeroOne() > 0.05f) && EnZf_CanAttack(play, this)) {
+                if ((Rand_ZeroOne() < 0.05f) && EnZf_CanAttack(play, this) && !EnZf_PrimaryFloorCheck(this, play, 135.0f)) {
+                    //EnZf_SetupSlash(this);
+                    EnZf_SetupJumpUp(this);
+                } else if ((Rand_ZeroOne() < 0.50f) && EnZf_CanAttackSlash(play, this)) {
                     EnZf_SetupSlash(this);
                 } else if (Rand_ZeroOne() > 0.5f) {
                     func_80B483E4(this, play);
@@ -949,7 +1300,7 @@ void EnZf_JumpForward(EnZf* this, PlayState* play) {
     }
 
     if ((this->actor.params == ENZF_TYPE_DINOLFOS) && (this->actor.bgCheckFlags & 3)) {
-        if (EnZf_CanAttack(play, this)) {
+        if (EnZf_CanAttackSlash(play, this)) {
             EnZf_SetupSlash(this);
         } else {
             func_80B483E4(this, play);
@@ -1067,6 +1418,12 @@ void func_80B463E4(EnZf* this, PlayState* play) {
             }
         }
 
+        f32 speedABS = ABS(this->actor.speedXZ);
+        if ((speedABS > 0.0f) && EnZf_HighJumpCheck(this,play, 40.0f,0.0f)) {
+            EnZf_SetupJumpUp(this);
+            return;
+        }
+
         if (this->actor.params >= ENZF_TYPE_LIZALFOS_MINIBOSS_A) { // miniboss
             if (this->unk_3F8) {
                 this->actor.speedXZ = -this->actor.speedXZ;
@@ -1142,7 +1499,7 @@ void func_80B463E4(EnZf* this, PlayState* play) {
             this->actor.world.rot.y = this->actor.shape.rot.y;
 
             if ((this->actor.xzDistToPlayer <= 100.0f) && ((play->gameplayFrames % 4) == 0) &&
-                EnZf_CanAttack(play, this)) {
+                EnZf_CanAttackSlash(play, this)) {
                 EnZf_SetupSlash(this);
             } else {
                 func_80B45384(this);
@@ -1154,17 +1511,22 @@ void func_80B463E4(EnZf* this, PlayState* play) {
 }
 
 void EnZf_SetupSlash(EnZf* this) {
-    Animation_Change(&this->skelAnime, &gZfSlashAnim, 1.25f, 0.0f, Animation_GetLastFrame(&gZfSlashAnim), ANIMMODE_ONCE,
+    if (this->stance == ENZF_HIGH)
+        Animation_Change(&this->skelAnime, &gZfSlashAnim, 1.5f, 0.0f, Animation_GetLastFrame(&gZfSlashAnim), ANIMMODE_ONCE,
+                     -4.0f);
+    else
+        Animation_Change(&this->skelAnime, &gZfLizalfosSkelGzfsliceanimAnim, 1.5f, 0.0f, Animation_GetLastFrame(&gZfLizalfosSkelGzfsliceanimAnim), ANIMMODE_ONCE,
                      -4.0f);
 
     if (this->actor.params == ENZF_TYPE_DINOLFOS) {
-        this->skelAnime.playSpeed = 1.75f;
-    }
+       this->skelAnime.playSpeed = 2.0f;
+   }
 
     this->swordCollider.base.atFlags &= ~AT_BOUNCED;
     this->action = ENZF_ACTION_SLASH;
     Audio_PlayActorSound2(&this->actor, NA_SE_EN_RIZA_CRY);
     this->actor.speedXZ = 0.0f;
+    this->ignoreAttack = 0;
     EnZf_SetupAction(this, EnZf_Slash);
 }
 
@@ -1174,6 +1536,11 @@ void EnZf_Slash(EnZf* this, PlayState* play) {
     s16 yawDiff;
 
     this->actor.speedXZ = 0.0f;
+
+    if (this->actor.xzDistToPlayer > 70.0f)
+        this->actor.speedXZ = 3.0f;
+    Math_SmoothStepToS(&this->actor.world.rot.y, this->actor.yawTowardsPlayer, 1, 0xA00, 0);
+    Math_SmoothStepToS(&this->actor.shape.rot.y, this->actor.yawTowardsPlayer, 1, 0x800, 0);
 
     if ((s32)this->skelAnime.curFrame == 10) {
         Audio_PlayActorSound2(&this->actor, NA_SE_EN_RIZA_ATTACK);
@@ -1206,14 +1573,21 @@ void EnZf_Slash(EnZf* this, PlayState* play) {
                         this->actor.world.rot.y = this->actor.yawTowardsPlayer;
                         func_80B483E4(this, play);
                     } else if (player->stateFlags1 & 0x6010) {
-                        if (this->actor.isTargeted) {
+                        if (EnZf_CanAttackSlash(play, this)) {
+                            // if (this->stance == ENFZ_SIDE && Rand_ZeroOne() > 0.5f) {
+                            //     EnZf_SwitchStance(this);
+                            // }
                             EnZf_SetupSlash(this);
                         } else {
                             func_80B483E4(this, play);
                         }
-                    } else {
+                    } else if (EnZf_CanAttackSlash(play, this)) {
+                        // if (this->stance == ENFZ_SIDE && Rand_ZeroOne() > 0.5f) {
+                        //     EnZf_SwitchStance(this);
+                        // }
                         EnZf_SetupSlash(this);
-                    }
+                    } else
+                        func_80B483E4(this, play);
                 } else {
                     func_80B483E4(this, play);
                 }
@@ -1224,9 +1598,16 @@ void EnZf_Slash(EnZf* this, PlayState* play) {
 
 void EnZf_SetupRecoilFromBlockedSlash(EnZf* this) {
     f32 frame = this->skelAnime.curFrame - 3.0f;
+    this->actor.speedXZ *= -0.5;
 
-    Animation_Change(&this->skelAnime, &gZfSlashAnim, -1.0f, frame, 0.0f, ANIMMODE_ONCE, 0.0f);
+    if (this->stance == ENZF_HIGH)
+        Animation_Change(&this->skelAnime, &gZfSlashAnim, -1.0f, frame, 0.0f, ANIMMODE_ONCE, 0.0f);
+    else
+        Animation_Change(&this->skelAnime, &gZfLizalfosSkelGzfsliceanimAnim, -1.0f, frame, 0.0f, ANIMMODE_ONCE, 0.0f);
     this->action = ENZF_ACTION_RECOIL_FROM_BLOCKED_SLASH;
+    if (this->stance == ENFZ_SIDE && Rand_ZeroOne() > 0.5f) {
+        EnZf_SwitchStance(this);
+    }
     EnZf_SetupAction(this, EnZf_RecoilFromBlockedSlash);
 }
 
@@ -1235,9 +1616,126 @@ void EnZf_RecoilFromBlockedSlash(EnZf* this, PlayState* play) {
         if (Rand_ZeroOne() > 0.7f) {
             func_80B45384(this);
         } else if ((Rand_ZeroOne() > 0.2f) && EnZf_CanAttack(play, this)) {
-            EnZf_SetupSlash(this);
+            if (Rand_ZeroOne() > 0.6f && this->actor.xzDistToPlayer < 100.0f && EnZf_CanAttackSlash(play, this)) {
+                EnZf_SetupSlash(this);
+                return;
+             } else {
+                this->actor.world.rot.y = this->actor.shape.rot.y = this->actor.yawTowardsPlayer;
+                EnZf_SetupJumpUp(this);
+                return;
+             }
         } else {
             func_80B483E4(this, play);
+        }
+    }
+}
+
+void EnZf_SetupSpinDodge(EnZf* this, PlayState* play) {
+    s16 sp3E;
+    Player* player = GET_PLAYER(play);
+    f32 lastFrame = Animation_GetLastFrame(&gZfSidesteppingAnim);
+
+    Animation_Change(&this->skelAnime, &gZfSidesteppingAnim, 1.0f, 0.0f, lastFrame, ANIMMODE_LOOP_INTERP, 0.0f);
+    sp3E = player->actor.shape.rot.y;
+    if (Math_SinS(sp3E - this->actor.shape.rot.y) > 0.0f) {
+        this->actor.speedXZ = -10.0f;
+    } else if (Math_SinS(sp3E - this->actor.shape.rot.y) < 0.0f) {
+        this->actor.speedXZ = 10.0f;
+    } else if (Rand_ZeroOne() > 0.5f) {
+        this->actor.speedXZ = 10.0f;
+    } else {
+        this->actor.speedXZ = -10.0f;
+    }
+    this->skelAnime.playSpeed = -this->actor.speedXZ * 0.5f;
+    this->actor.world.rot.y = this->actor.shape.rot.y;
+    this->unk_3F0 = 6;
+    this->approachRate = 0.0f;
+    this->action = ENZF_SPIN_DODGE;
+
+    EnZf_SetupAction(this, EnZf_SpinDodge);
+}
+
+void EnZf_SpinDodge(EnZf* this, PlayState* play) {
+    s16 phi_v1;
+    s32 thisKeyFrame;
+    s32 pad;
+    s32 lastKeyFrame;
+    s32 nextKeyFrame;
+
+    this->actor.world.rot.y = this->actor.yawTowardsPlayer + 0x3A98;
+    if ((this->actor.bgCheckFlags & 8) ||
+        !Actor_TestFloorInDirection(&this->actor, play, this->actor.speedXZ, this->actor.shape.rot.y + 0x3E80)) {
+        if (this->actor.bgCheckFlags & 8) {
+            if (this->actor.speedXZ >= 0.0f) {
+                phi_v1 = this->actor.shape.rot.y + 0x3E80;
+            } else {
+                phi_v1 = this->actor.shape.rot.y - 0x3E80;
+            }
+            phi_v1 = this->actor.wallYaw - phi_v1;
+        } else {
+            this->actor.speedXZ *= -0.8f;
+            phi_v1 = 0;
+        }
+        if (ABS(phi_v1) > 0x4000) {
+            EnZf_SetupJumpUp(this);
+            return;
+        }
+    }
+    if (this->actor.xzDistToPlayer <= 45.0f) {
+        Math_SmoothStepToF(&this->approachRate, -4.0f, 1.0f, 1.5f, 0.0f);
+    } else if (this->actor.xzDistToPlayer > 40.0f) {
+        Math_SmoothStepToF(&this->approachRate, 4.0f, 1.0f, 1.5f, 0.0f);
+    } else {
+        Math_SmoothStepToF(&this->approachRate, 0.0f, 1.0f, 6.65f, 0.0f);
+    }
+    if (this->approachRate != 0.0f) {
+        this->actor.world.pos.x += Math_SinS(this->actor.yawTowardsPlayer) * this->approachRate;
+        this->actor.world.pos.z += Math_CosS(this->actor.yawTowardsPlayer) * this->approachRate;
+    }
+    if (ABS(this->approachRate) < ABS(this->actor.speedXZ)) {
+        this->skelAnime.playSpeed = -this->actor.speedXZ * 0.5f;
+    } else {
+        this->skelAnime.playSpeed = -this->approachRate * 0.5f;
+    }
+    this->skelAnime.playSpeed = CLAMP(this->skelAnime.playSpeed, -3.0f, 3.0f);
+    thisKeyFrame = this->skelAnime.curFrame;
+    SkelAnime_Update(&this->skelAnime);
+    lastKeyFrame = this->skelAnime.curFrame - ABS(this->skelAnime.playSpeed);
+    nextKeyFrame = (s32)ABS(this->skelAnime.playSpeed) + thisKeyFrame;
+    if ((thisKeyFrame != (s32)this->skelAnime.curFrame) &&
+        ((lastKeyFrame < 0 && 0 < nextKeyFrame) || (lastKeyFrame < 5 && 5 < nextKeyFrame))) {
+        Audio_PlayActorSound2(&this->actor, NA_SE_EN_MUSI_LAND);
+    }
+    if ((play->gameplayFrames & 0x5F) == 0) {
+        Audio_PlayActorSound2(&this->actor, NA_SE_EN_RIZA_CRY);
+    }
+    this->unk_3F0--;
+    if (this->unk_3F0 == 0) {
+        this->actor.shape.rot.y = this->actor.yawTowardsPlayer;
+        if (!EnZf_DodgeRangedEngaging(play, this)) {
+            if (this->actor.xzDistToPlayer <= 70.0f && (Rand_ZeroOne() < 0.6) && EnZf_CanAttack(play,this)) {
+                if ((EnZf_PrimaryFloorCheck(this, play, 135.0f) || Rand_ZeroOne() < 0.6f)) {
+                    if (!EnZf_PrimaryFloorCheck(this, play, -180.0f) && ((Rand_ZeroOne() < 0.3f) || isPlayerInHorizontalAttack(play)))
+                        EnZf_SetupJumpBack(this);
+                    else if (EnZf_CanAttackSlash(play,this))
+                        EnZf_SetupSlash(this);
+                }
+                else
+                    EnZf_SetupJumpUp(this);
+            } else {
+                if (this->actor.xzDistToPlayer <= 120.0f && Rand_ZeroOne() < 0.8f)
+                    func_80B483E4(this,play);
+                else
+                    func_80B462E4(this, play);
+            }
+        }
+        else
+            EnZf_SetupSpinDodge(this,play);
+    } else {
+        if (this->actor.speedXZ >= 0.0f) {
+            this->actor.shape.rot.y += 0x4000;
+        } else {
+            this->actor.shape.rot.y -= 0x4000;
         }
     }
 }
@@ -1249,6 +1747,10 @@ void EnZf_SetupJumpBack(EnZf* this) {
     this->action = ENZF_ACTION_JUMP_BACK;
     this->actor.velocity.y = 15.0f;
     this->actor.speedXZ = -15.0f;
+    //DEBUG
+    //this->recordedPosition = this->actor.world.pos;
+    //this->recordedRotation = this->actor.world.rot;
+    //DEBUG
     Audio_PlayActorSound2(&this->actor, NA_SE_EN_RIZA_JUMP);
     EnZf_SetupAction(this, EnZf_JumpBack);
 }
@@ -1316,7 +1818,8 @@ void EnZf_Stunned(EnZf* this, PlayState* play) {
             EnZf_SetupDie(this);
         } else if ((this->actor.params != ENZF_TYPE_DINOLFOS) || !EnZf_ChooseAction(play, this)) {
             if (D_80B4A1B4 != -1) {
-                func_80B44DC4(this, play);
+                //func_80B44DC4(this, play);
+                EnZf_SetupCircleAroundPlayer(this,8.0f);
             } else {
                 angleToWall = this->actor.wallYaw - this->actor.shape.rot.y;
                 angleToWall = ABS(angleToWall);
@@ -1327,12 +1830,14 @@ void EnZf_Stunned(EnZf* this, PlayState* play) {
                     EnZf_SetupJumpUp(this);
                 } else if (!EnZf_DodgeRangedEngaging(play, this)) {
                     if (this->actor.params != ENZF_TYPE_DINOLFOS) {
-                        func_80B44DC4(this, play);
+                        //func_80B44DC4(this, play);
+                        EnZf_SetupCircleAroundPlayer(this,8.0f);
                     } else if ((this->actor.xzDistToPlayer <= 100.0f) && ((play->gameplayFrames % 4) != 0) &&
-                               EnZf_CanAttack(play, this)) {
+                               EnZf_CanAttackSlash(play, this)) {
                         EnZf_SetupSlash(this);
                     } else {
-                        func_80B44DC4(this, play);
+                        //func_80B44DC4(this, play);
+                        EnZf_SetupCircleAroundPlayer(this,8.0f);
                     }
                 }
             }
@@ -1620,6 +2125,8 @@ void EnZf_SetupDamaged(EnZf* this) {
         this->actor.world.rot.y = this->actor.yawTowardsPlayer;
     }
 
+    this->cautionTimer = 30;
+
     Audio_PlayActorSound2(&this->actor, NA_SE_EN_RIZA_DAMAGE);
     this->action = ENZF_ACTION_DAMAGED;
     EnZf_SetupAction(this, EnZf_Damaged);
@@ -1652,10 +2159,11 @@ void EnZf_Damaged(EnZf* this, PlayState* play) {
 
                 if (!EnZf_PrimaryFloorCheck(this, play, 135.0f) && (this->actor.xzDistToPlayer < 90.0f)) {
                     EnZf_SetupJumpUp(this);
-                } else if ((this->actor.xzDistToPlayer <= 100.0f) && ((play->gameplayFrames % 4) == 0)) {
+                } else if ((this->actor.xzDistToPlayer <= 100.0f) && (Rand_ZeroOne() < 0.125) &&
+                           EnZf_CanAttackSlash(play, this)) {
                     EnZf_SetupSlash(this);
                 } else {
-                    func_80B44DC4(this, play);
+                    func_80B483E4(this, play);
                 }
             }
         } else {
@@ -1672,16 +2180,17 @@ void EnZf_Damaged(EnZf* this, PlayState* play) {
 
                     if (!EnZf_PrimaryFloorCheck(this, play, 135.0f) && (this->actor.xzDistToPlayer < 90.0f)) {
                         EnZf_SetupJumpUp(this);
-                    } else if ((this->actor.xzDistToPlayer <= 100.0f) && ((play->gameplayFrames % 4) == 0)) {
+                    } else/* if ((this->actor.xzDistToPlayer <= 100.0f) && ((play->gameplayFrames % 4) == 0) &&
+                                EnZf_CanAttack(play, this)) {
                         EnZf_SetupSlash(this);
-                    } else {
-                        func_80B44DC4(this, play);
+                    } else */{
+                        func_80B483E4(this, play);
                     }
-                } else if ((this->actor.xzDistToPlayer <= 100.0f) && ((play->gameplayFrames % 4) == 0) &&
-                           EnZf_CanAttack(play, this)) {
+                } else if ((this->actor.xzDistToPlayer <= 100.0f) && (Rand_ZeroOne() < 0.25) &&
+                           EnZf_CanAttackSlash(play, this)) {
                     EnZf_SetupSlash(this);
                 } else {
-                    func_80B44DC4(this, play);
+                    func_80B483E4(this, play);
                 }
             }
         }
@@ -1695,6 +2204,13 @@ void EnZf_SetupJumpUp(EnZf* this) {
     this->action = ENZF_ACTION_JUMP_UP;
     this->actor.velocity.y = 22.0f;
     this->actor.speedXZ = 7.5f;
+    //DEBUG
+    // this->recordedPosition = this->actor.world.pos;
+    // this->recordedRotation = this->actor.world.rot;
+    //DEBUG
+    this->stance = 0;
+    this->stanceTransition = 0;
+    this->stanceTimer = STICKY_FRAMES;
     Audio_PlayActorSound2(&this->actor, NA_SE_EN_RIZA_JUMP);
     this->actor.world.rot.y = this->actor.shape.rot.y;
     EnZf_SetupAction(this, EnZf_JumpUp);
@@ -1716,9 +2232,16 @@ void EnZf_JumpUp(EnZf* this, PlayState* play) {
             this->actor.world.rot.y = this->actor.shape.rot.y = this->actor.yawTowardsPlayer;
             this->actor.speedXZ = 0.0f;
             this->actor.world.pos.y = this->actor.floorHeight;
-            EnZf_SetupSlash(this);
-            Audio_PlayActorSound2(&this->actor, NA_SE_EN_RIZA_ATTACK);
-            this->skelAnime.curFrame = 13.0f;
+            if (EnZf_CanAttack(play, this) && this->actor.xzDistToPlayer < 100.0f) {
+                EnZf_SetupSlash(this);
+                Audio_PlayActorSound2(&this->actor, NA_SE_EN_RIZA_ATTACK);
+                this->skelAnime.curFrame = 12.0f;
+                this->ignoreAttack = 1;
+            } else if ((isPlayerInSpinAttack(play) && (this->actor.xzDistToPlayer < 100.0f)) ||
+                isPlayerInHorizontalAttack(play) || isPlayerInVerticalAttack(play)) {
+                    EnZf_SetupJumpUp(this);
+            } else
+                func_80B483E4(this,play);
         }
     }
 }
@@ -1844,7 +2367,7 @@ void EnZf_CircleAroundPlayer(EnZf* this, PlayState* play) {
         } else {
             EnZf_SetupApproachPlayer(this, play);
         }
-    } else if ((this->actor.params != ENZF_TYPE_DINOLFOS) || !EnZf_ChooseAction(play, this)) {
+    } else if ((this->actor.params != ENZF_TYPE_DINOLFOS) || (!EnZf_ChooseAction(play, this))) {
         if (this->unk_3F0 == 0) {
             phi_v0_4 = player->actor.shape.rot.y - this->actor.shape.rot.y;
 
@@ -1862,8 +2385,8 @@ void EnZf_CircleAroundPlayer(EnZf* this, PlayState* play) {
             } else {
                 this->actor.world.rot.y = this->actor.shape.rot.y;
 
-                if ((this->actor.xzDistToPlayer <= 100.0f) && ((play->gameplayFrames % 4) == 0) &&
-                    EnZf_CanAttack(play, this)) {
+                if ((this->actor.xzDistToPlayer <= 100.0f) && (Rand_ZeroOne() < 0.7) &&
+                    EnZf_CanAttackSlash(play, this)) {
                     EnZf_SetupSlash(this);
                 } else if ((this->actor.xzDistToPlayer < 280.0f) && (this->actor.xzDistToPlayer > 240.0f) &&
                            !EnZf_PrimaryFloorCheck(this, play, 191.9956f) &&
@@ -1984,7 +2507,7 @@ void EnZf_UpdateDamage(EnZf* this, PlayState* play) {
     s32 pad;
     s16 dropParams;
 
-    if ((this->bodyCollider.base.acFlags & AC_HIT) && (this->action <= ENZF_ACTION_STUNNED)) {
+    if ((this->bodyCollider.base.acFlags & AC_HIT) && (this->action <= ENZF_ACTION_STUNNED) && !(this->ignoreAttack && (this->action == ENZF_ACTION_SLASH))) {
         this->bodyCollider.base.acFlags &= ~AC_HIT;
 
         if (((this->actor.params < ENZF_TYPE_LIZALFOS_MINIBOSS_A) /* not miniboss */ ||
@@ -1996,7 +2519,7 @@ void EnZf_UpdateDamage(EnZf* this, PlayState* play) {
             if ((this->actor.colChkInfo.damageEffect == ENZF_DMGEFF_STUN) ||
                 (this->actor.colChkInfo.damageEffect == ENZF_DMGEFF_ICE)) {
                 if (this->action != ENZF_ACTION_STUNNED) {
-                    Actor_SetColorFilter(&this->actor, 0, 120, 0, 80);
+                    Actor_SetColorFilter(&this->actor, 0, 120, 0, 10);
                     Actor_ApplyDamage(&this->actor);
                     EnZf_SetupStunned(this);
                 }
@@ -2031,6 +2554,11 @@ void EnZf_Update(Actor* thisx, PlayState* play) {
     s32 pad;
     EnZf* this = (EnZf*)thisx;
     s32 pad2;
+    Player* player = GET_PLAYER(play);
+
+    s16 setKeepBack = false;
+    if (EnZf_IsOnPlayerPlatform(this,play))
+        setKeepBack = true;
 
     EnZf_UpdateDamage(this, play);
     if (this->actor.colChkInfo.damageEffect != ENZF_DMGEFF_IMMUNE) {
@@ -2050,10 +2578,20 @@ void EnZf_Update(Actor* thisx, PlayState* play) {
 
         Actor_UpdateBgCheckInfo(play, &this->actor, 25.0f, 30.0f, 60.0f, 0x1D);
 
+        //DEBUG
+        // f32 difference;
+        // if (this->actor.world.pos.y < 100.0f && !this->isBelow) {
+        //     difference = sqrt(Math3D_Dist2DSq(this->actor.world.pos.x,this->actor.world.pos.z,this->recordedPosition.x,this->recordedPosition.z));
+        //     this->isBelow = 1;
+        // } else if (this->actor.world.pos.y >= 100.0f && this->isBelow) {
+        //     this->isBelow = 0;
+        // }
+        //DEBUG
+
         if (!(this->actor.bgCheckFlags & 1)) {
             this->hopAnimIndex = 1;
         }
-
+        osSyncPrintf("Action: %d",this->action);
         this->actionFunc(this, play);
     }
 
@@ -2110,8 +2648,12 @@ void EnZf_Update(Actor* thisx, PlayState* play) {
         }
     }
 
+    this->swordCollider.info.toucher.dmgFlags = this->stance ? 0x00100000 : 0xFFCFFFFF;
     if ((this->action == ENZF_ACTION_SLASH) && (this->skelAnime.curFrame >= 14.0f) &&
         (this->skelAnime.curFrame <= 20.0f)) {
+        if ((this->stance == ENFZ_SIDE && this->swordCollider.base.atFlags & AT_BOUNCED) ||
+                    this->swordCollider.base.atFlags & AT_HIT)
+            Player_SetShieldRecoveryDefault(play);
         if (!(this->swordCollider.base.atFlags & AT_BOUNCED) && !(this->swordCollider.base.acFlags & AC_HIT)) {
             CollisionCheck_SetAT(play, &play->colChkCtx, &this->swordCollider.base);
         } else {
@@ -2120,15 +2662,87 @@ void EnZf_Update(Actor* thisx, PlayState* play) {
             EnZf_SetupRecoilFromBlockedSlash(this);
         }
     }
+
+    s16 angleToPlayer = this->actor.yawTowardsPlayer - this->actor.shape.rot.y;
+    if (angleToPlayer == (s16)0x8000)
+        angleToPlayer = (s16)0x7FFF;
+    angleToPlayer = ABS(angleToPlayer);
+    s16 playerAngleDifference = player->actor.shape.rot.y - this->actor.shape.rot.y;
+    if (playerAngleDifference == (s16)0x8000)
+        playerAngleDifference = (s16)0x7FFF;
+    playerAngleDifference = ABS(playerAngleDifference);
+
+    //Make sword attack unblockable if behind player.
+    if (angleToPlayer < 0x4000 && playerAngleDifference < 0x4000 && !Player_IsChildWithHylianShield(player)) {
+        this->swordCollider.info.toucher.dmgFlags = 0x20000000;
+        this->swordCollider.info.toucher.damage = ENZF_STANDARD_DAMAGE*2;
+    } else {
+        this->swordCollider.info.toucher.damage = ENZF_STANDARD_DAMAGE;
+    }
+
+    DECR(this->cautionTimer);
+#define DODGE_CHANCE (this->cautionTimer ? 1.0f : 0.5f)
+    if ((this->action >= ENZF_ACTION_3 && this->action <= ENZF_ACTION_7) || (this->action == ENZF_ACTION_CIRCLE_AROUND_PLAYER)) {
+        if (!EnZf_DodgeRangedEngaging(play,this)) {
+            /*if ((isPlayerInSpinAttack(play) && (this->actor.xzDistToPlayer < 100.0f)))
+                EnZf_SetupSlash(this);
+            else*/ if ((isPlayerInHorizontalAttack(play) && (!EnZf_PrimaryFloorCheck(this, play, 135.0f) && (this->actor.xzDistToPlayer < 80.0f))) ||
+                        (isPlayerInSpinAttack(play) && (this->actor.xzDistToPlayer < 150.0f) && (this->actor.bgCheckFlags & 0x8))) {
+                if (Rand_ZeroOne() < DODGE_CHANCE)
+                    EnZf_SetupJumpUp(this);
+            } else if (((isPlayerInHorizontalAttack(play) && (this->actor.xzDistToPlayer < 100.0f)) ||
+                        (isPlayerInSpinAttack(play) && (this->actor.xzDistToPlayer < 400.0f)) /*||
+                        (isRangedWeaponReady(play) && setKeepBack && !Actor_IsFacingPlayer(&this->actor, 0x400))*/) &&
+                    !EnZf_PrimaryFloorCheck(this, play, -180.0f)) {
+                EnZf_SetupJumpBack(this);
+            } else if (((isPlayerInStab(play) && (this->actor.xzDistToPlayer < 80.0f)) /*|| (isRangedWeaponReady(play) && setKeepBack && (this->actor.xzDistToPlayer < 200.0f))*/) &&
+                        (Rand_ZeroOne() < 0.4) && (!EnZf_PrimaryFloorCheck(this, play, 135.0f))) {
+                if (Rand_ZeroOne() < DODGE_CHANCE) {
+                    this->actor.world.rot.y = this->actor.shape.rot.y = this->actor.yawTowardsPlayer;
+                    EnZf_SetupJumpUp(this);
+                }
+            } else if ((isPlayerInVerticalAttack(play) || isPlayerInStab(play)) && (this->actor.xzDistToPlayer < 120.0f)) {
+                if (Rand_ZeroOne() < DODGE_CHANCE)
+                    EnZf_SetupSpinDodge(this,play);
+            }
+        }
+    }
+
+    DECR(this->stanceTimer);
+    if ((this->action < ENZF_ACTION_STUNNED && this->action != ENZF_ACTION_SLASH) &&
+        (this->stanceTransition > 0 || (this->stanceTimer <= 0 && (!!(player->stateFlags1 & PLAYER_STATE1_22) ^ this->stance)  && Rand_ZeroOne() < 0.2))) {
+        this->stanceTransition++;
+
+        if (this->stanceTransition >= TRANSITION_FRAMES) {
+            this->stance = !this->stance;
+            this->stanceTransition = 0;
+            this->stanceTimer = STICKY_FRAMES;
+        }
+    }
 }
 
 s32 EnZf_OverrideLimbDraw(PlayState* play, s32 limbIndex, Gfx** dList, Vec3f* pos, Vec3s* rot, void* thisx,
                           Gfx** gfx) {
     EnZf* this = (EnZf*)thisx;
+    Player* player = GET_PLAYER(play);
 
     switch (limbIndex) {
+        case ENZF_LIMB_UPPER_BODY_ROOT:
+            if (LINK_IS_CHILD || Player_IsInCrouchBlock(player))
+                rot->z += 0x0800;
+            if (this->action == ENZF_ACTION_SLASH && this->stance == ENFZ_SIDE) {
+                rot->x -= (this->skelAnime.curFrame/this->skelAnime.animLength)*0x1000;
+            }
+            break;
         case ENZF_LIMB_HEAD_ROOT:
             rot->y -= this->headRot;
+            break;
+        case ENZF_LIMB_RIGHT_ARM_ROOT:
+            if (this->action != ENZF_ACTION_SLASH)
+                rot->x += CVar_GetS32("gArmX",0) + this->stance == ENZF_HIGH ? 0x4000*this->stanceTransition/TRANSITION_FRAMES :
+                                                                  0x4000 - 0x4000*this->stanceTransition/TRANSITION_FRAMES;
+            rot->y += CVar_GetS32("gArmY",0);
+            rot->z += CVar_GetS32("gArmZ",0);
             break;
         case ENZF_LIMB_SWORD:
             if (this->swordSheathed) {
@@ -2152,10 +2766,10 @@ void EnZf_PostLimbDraw(PlayState* play, s32 limbIndex, Gfx** dList, Vec3s* rot, 
     static Vec3f footOffset = { 300.0f, 0.0f, 0.0f };
     static Vec3f D_80B4A2A4 = { 300.0f, -1700.0f, 0.0f }; // Sword tip?
     static Vec3f D_80B4A2B0 = { -600.0f, 300.0f, 0.0f };  // Sword hilt?
-    static Vec3f swordQuadOffset1 = { 0.0f, 1500.0f, 0.0f };
-    static Vec3f swordQuadOffset0 = { -600.0f, -3000.0f, 1000.0f };
-    static Vec3f swordQuadOffset3 = { -600.0f, -3000.0f, -1000.0f };
-    static Vec3f swordQuadOffset2 = { 1500.0f, -3000.0f, 0.0f };
+    static Vec3f swordQuadOffset1 = { 0.0f, 3000.0f, 0.0f };
+    static Vec3f swordQuadOffset0 = { 0.0f, -3000.0f, 500.0f };
+    static Vec3f swordQuadOffset3 = { 0.0f, -3000.0f, -500.0f };
+    static Vec3f swordQuadOffset2 = { 0.0f, -3000.0f, 0.0f };
     static Vec3f zeroVec = { 0.0f, 0.0f, 0.0f };
     Vec3f sp54;
     Vec3f sp48;
@@ -2337,18 +2951,22 @@ s32 EnZf_DodgeRangedEngaging(PlayState* play, EnZf* this) {
 
         if ((ABS(yawToProjectile) < 0x2000) || (ABS(yawToProjectile) >= 0x6000)) {
             if (phi_v1 & 1) {
-                EnZf_SetupCircleAroundPlayer(this, 8.0f);
+                //EnZf_SetupCircleAroundPlayer(this, 8.0f);
+                EnZf_SetupSpinDodge(this,play);
                 return true;
             }
-            EnZf_SetupCircleAroundPlayer(this, -8.0f);
+            //EnZf_SetupCircleAroundPlayer(this, -8.0f);
+            EnZf_SetupSpinDodge(this,play);
             return true;
         }
         if (ABS(yawToProjectile) < 0x5FFF) {
             if (phi_v1 & 1) {
-                EnZf_SetupCircleAroundPlayer(this, 4.0f);
+                //EnZf_SetupCircleAroundPlayer(this, 4.0f);
+                EnZf_SetupSpinDodge(this,play);
                 return true;
             }
-            EnZf_SetupCircleAroundPlayer(this, -4.0f);
+            //EnZf_SetupCircleAroundPlayer(this, -4.0f);
+            EnZf_SetupSpinDodge(this,play);
         }
         return true;
     }

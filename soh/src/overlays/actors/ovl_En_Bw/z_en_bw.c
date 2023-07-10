@@ -153,14 +153,24 @@ void EnBw_Init(Actor* thisx, PlayState* play) {
     this->unk_236 = this->actor.world.rot.y;
     this->actor.params = sSlugGroup;
     sSlugGroup = (sSlugGroup + 1) & 3;
+    Actor_SpawnAsChild(&play->actorCtx, thisx,play, ACTOR_BG_HIDAN_CURTAIN,
+                    thisx->world.pos.x,thisx->world.pos.y, thisx->world.pos.z, thisx->world.rot.x, thisx->world.rot.y, thisx->world.rot.z, 0x0 | (8 << 0xC));
 }
 
 void EnBw_Destroy(Actor* thisx, PlayState* play) {
     s32 pad;
     EnBw* this = (EnBw*)thisx;
 
+    Actor_Kill(this->actor.child);
     Collider_DestroyCylinder(play, &this->collider1);
     Collider_DestroyCylinder(play, &this->collider2);
+}
+
+s32 EnBw_Is_On_Fire(Actor* thisx) {
+    EnBw* this = (EnBw*)thisx;
+    EnBwActionFunc BWfunc = (this->actionFunc);
+    //s32 ret = (BWfunc == func_809CEA24 || BWfunc == func_809CF984 || BWfunc == func_809CF7AC);
+    return (this->unk_221 == 3 || this->unk_221 == 0 || BWfunc == func_809CF984 || BWfunc == func_809CF7AC) && this->iceTimer == 0 && thisx->colorFilterTimer == 0;
 }
 
 void func_809CE884(EnBw* this, PlayState* play) {
@@ -373,7 +383,7 @@ void func_809CEA24(EnBw* this, PlayState* play) {
                 Math_SmoothStepToS(&this->actor.world.rot.y, this->unk_236 + this->unk_238, 1,
                                    this->actor.speedXZ * 1000.0f, 0);
             }
-            if (this->unk_224 <= 200) {
+            if (this->unk_224 <= 100) {
                 sp60 = Math_SinS(this->unk_224 * (0x960 - this->unk_224)) * 55.0f;
                 this->color1.r = 255 - ABS(sp60);
                 sp60 = Math_SinS(this->unk_224 * (0x960 - this->unk_224)) * 115.0f;
@@ -628,7 +638,7 @@ void func_809D0268(EnBw* this, PlayState* play) {
         func_809CE9A8(this);
         this->color1.r = this->color1.g = 200;
         this->color1.b = 255;
-        this->unk_224 = 0x258;
+        this->unk_224 = 200;
         this->unk_221 = 1;
         this->unk_250 = 0.7f;
         this->unk_236++;
@@ -653,7 +663,7 @@ void func_809D0424(EnBw* this, PlayState* play) {
                 func_809CE9A8(this);
                 this->color1.r = this->color1.g = 200;
                 this->color1.b = 255;
-                this->unk_224 = 0x258;
+                this->unk_224 = 200;
                 this->unk_221 = 1;
                 this->unk_250 = 0.7f;
                 this->unk_236++;

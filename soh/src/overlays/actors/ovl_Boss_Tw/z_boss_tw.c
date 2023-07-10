@@ -414,6 +414,8 @@ void BossTw_Init(Actor* thisx, PlayState* play2) {
 
     Actor_ProcessInitChain(&this->actor, sInitChain);
     ActorShape_Init(&this->actor.shape, 0.0f, NULL, 0.0f);
+    //this->cardVal = 0; //0 = free, 1 = horizontal restriction, 2 = vertical restriction
+    this->selectionIndex = 0;
 
     if (this->actor.params >= TW_FIRE_BLAST) {
         // Blasts
@@ -511,7 +513,7 @@ void BossTw_Init(Actor* thisx, PlayState* play2) {
         // Twinrova
         Collider_SetCylinder(play, &this->collider, &this->actor, &sCylinderInitTwinrova);
         this->actor.naviEnemyId = 0x5B;
-        this->actor.colChkInfo.health = 24;
+        this->actor.colChkInfo.health = 48;
         this->actor.update = BossTw_TwinrovaUpdate;
         this->actor.draw = BossTw_TwinrovaDraw;
         SkelAnime_InitFlex(play, &this->skelAnime, &object_tw_Skel_032020, &object_tw_Anim_0244B4, NULL, NULL, 0);
@@ -593,7 +595,7 @@ void BossTw_TurnToPlayer(BossTw* this, PlayState* play) {
     func_8002D908(&this->actor);
     func_8002D7EC(&this->actor);
     if (this->timers[0] == 0) {
-        if ((otherTw->actionFunc != BossTw_ShootBeam) && this->work[CAN_SHOOT]) {
+        if (1 || (otherTw->actionFunc != BossTw_ShootBeam) && this->work[CAN_SHOOT]) {
             this->work[CAN_SHOOT] = false;
             BossTw_SetupShootBeam(this, play);
             this->actor.speedXZ = 0.0f;
@@ -716,14 +718,16 @@ void BossTw_SpawnGroundBlast(BossTw* this, PlayState* play, s16 blastType) {
                                                   this->groundBlastPos.x, this->groundBlastPos.y,
                                                   this->groundBlastPos.z, 0, 0, 0, TW_FIRE_BLAST_GROUND);
         if (groundBlast != NULL) {
-            if (sTwinrovaPtr->actionFunc == BossTw_Wait) {
-                groundBlast->timers[0] = 100;
-            } else {
-                groundBlast->timers[0] = 50;
-            }
+            groundBlast->timers[0] = 100;
             sKoumePtr->workf[KM_GD_FLM_A] = sKoumePtr->workf[KM_GD_SMOKE_A] = sKoumePtr->workf[KM_GRND_CRTR_A] = 255.0f;
             sKoumePtr->workf[KM_GD_FLM_SCL] = 1.0f;
             sKoumePtr->workf[KM_GD_CRTR_SCL] = 0.005f;
+            groundBlast->workf[TAIL_ALPHA] = 250.0f;
+            groundBlast->workf[KM_GD_FLM_A] = groundBlast->workf[KM_GD_SMOKE_A] = groundBlast->workf[KM_GRND_CRTR_A] = 255.0f;
+            groundBlast->workf[KM_GD_FLM_SCL] = 1.0f;
+            groundBlast->workf[KM_GD_CRTR_SCL] = 0.005f;
+            groundBlast->work[CS_TIMER_1] = sKoumePtr->work[CS_TIMER_1];
+            groundBlast->workf[UNK_F13] = sKoumePtr->workf[UNK_F13];
             sKoumePtr->groundBlastPos2 = groundBlast->actor.world.pos;
             sEnvType = 4;
         }
@@ -733,17 +737,18 @@ void BossTw_SpawnGroundBlast(BossTw* this, PlayState* play, s16 blastType) {
                                                   this->groundBlastPos.x, this->groundBlastPos.y,
                                                   this->groundBlastPos.z, 0, 0, 0, TW_ICE_BLAST_GROUND);
         if (groundBlast != NULL) {
-            if (sTwinrovaPtr->actionFunc == BossTw_Wait) {
-                groundBlast->timers[0] = 100;
-            } else {
-                groundBlast->timers[0] = 50;
-            }
-
+            groundBlast->timers[0] = 100;
             sKotakePtr->workf[UNK_F11] = 50.0f;
             sKotakePtr->workf[UNK_F9] = 250.0f;
             sKotakePtr->workf[UNK_F12] = 0.005f;
             sKotakePtr->workf[UNK_F14] = 1.0f;
             sKotakePtr->workf[UNK_F16] = 70.0f;
+            groundBlast->workf[UNK_F9] = 250.0f;
+            groundBlast->workf[UNK_F11] = 50.0f;
+            groundBlast->workf[UNK_F12] = 0.005f;
+            groundBlast->workf[UNK_F14] = 1.0f;
+            groundBlast->workf[UNK_F16] = 70.0f;
+            groundBlast->work[CS_TIMER_2] = sKotakePtr->work[CS_TIMER_2];
             sKotakePtr->groundBlastPos2 = groundBlast->actor.world.pos;
             sEnvType = 3;
         }
@@ -1305,6 +1310,7 @@ void BossTw_FinishBeamShoot(BossTw* this, PlayState* play) {
 
 void BossTw_SetupHitByBeam(BossTw* this, PlayState* play) {
     this->actionFunc = BossTw_HitByBeam;
+    this->beamScale = 0.0f;
     Animation_MorphToPlayOnce(&this->skelAnime, &object_tw_Anim_00578C, 0.0f);
     this->timers[0] = 53;
     this->actor.speedXZ = 0.0f;
@@ -3235,42 +3241,40 @@ void BossTw_PostLimbDraw(PlayState* play, s32 limbIndex, Gfx** dList, Vec3s* rot
 }
 
 void func_80941BC0(BossTw* this, PlayState* play) {
-    s32 pad;
-
     OPEN_DISPS(play->state.gfxCtx);
 
     Matrix_Push();
     Gfx_SetupDL_25Xlu(play->state.gfxCtx);
-    Matrix_Translate(this->groundBlastPos2.x, this->groundBlastPos2.y, this->groundBlastPos2.z, MTXMODE_NEW);
+    Matrix_Translate(this->actor.world.pos.x, this->actor.world.pos.y, this->actor.world.pos.z, MTXMODE_NEW);
     Matrix_Scale(this->workf[UNK_F12], this->workf[UNK_F12], this->workf[UNK_F12], MTXMODE_APPLY);
     gSPMatrix(POLY_XLU_DISP++, MATRIX_NEWMTX(play->state.gfxCtx),
-              G_MTX_LOAD | G_MTX_MODELVIEW | G_MTX_NOPUSH);
+            G_MTX_LOAD | G_MTX_MODELVIEW | G_MTX_NOPUSH);
     gDPSetPrimColor(POLY_XLU_DISP++, 0, 0, 255, 255, 255, (s16)this->workf[UNK_F11]);
     gDPSetEnvColor(POLY_XLU_DISP++, 0, 40, 30, 80);
     gSPDisplayList(POLY_XLU_DISP++, SEGMENTED_TO_VIRTUAL(object_tw_DL_01BC00));
     gDPSetPrimColor(POLY_XLU_DISP++, 0, 0, 215, 215, 215, (s16)this->workf[UNK_F11] * this->workf[UNK_F14]);
     gDPSetEnvColor(POLY_XLU_DISP++, 255, 255, 255, 128);
     gSPSegment(POLY_XLU_DISP++, 8,
-               Gfx_TwoTexScroll(play->state.gfxCtx, 0, 0, 0, 0x20, 0x40, 1, (u32)this->workf[UNK_F16] & 0x3F,
+            Gfx_TwoTexScroll(play->state.gfxCtx, 0, 0, 0, 0x20, 0x40, 1, (u32)this->workf[UNK_F16] & 0x3F,
                                 (this->work[CS_TIMER_2] * 4) & 0x3F, 0x10, 0x10));
     Matrix_Push();
     Matrix_RotateY(this->workf[UNK_F15], MTXMODE_APPLY);
     gSPMatrix(POLY_XLU_DISP++, MATRIX_NEWMTX(play->state.gfxCtx),
-              G_MTX_LOAD | G_MTX_MODELVIEW | G_MTX_NOPUSH);
+            G_MTX_LOAD | G_MTX_MODELVIEW | G_MTX_NOPUSH);
     gSPDisplayList(POLY_XLU_DISP++, SEGMENTED_TO_VIRTUAL(object_tw_DL_01C1C0));
     Matrix_Pop();
     gSPMatrix(POLY_XLU_DISP++, MATRIX_NEWMTX(play->state.gfxCtx),
-              G_MTX_LOAD | G_MTX_MODELVIEW | G_MTX_NOPUSH);
+            G_MTX_LOAD | G_MTX_MODELVIEW | G_MTX_NOPUSH);
     gSPSegment(POLY_XLU_DISP++, 0xD,
-               Gfx_TwoTexScroll(play->state.gfxCtx, 0, this->work[CS_TIMER_2] & 0x7F,
+            Gfx_TwoTexScroll(play->state.gfxCtx, 0, this->work[CS_TIMER_2] & 0x7F,
                                 (this->work[CS_TIMER_2] * 8) & 0xFF, 0x20, 0x40, 1,
                                 (-this->work[CS_TIMER_2] * 2) & 0x3F, 0, 0x10, 0x10));
     gDPSetPrimColor(POLY_XLU_DISP++, 0, 0, 195, 225, 235, (s16)this->workf[UNK_F9]);
     gDPSetEnvColor(POLY_XLU_DISP++, 255, 255, 255, 128);
     gDPSetRenderMode(POLY_XLU_DISP++,
-                     Z_CMP | IM_RD | CVG_DST_SAVE | ZMODE_DEC | FORCE_BL |
-                         GBL_c1(G_BL_CLR_FOG, G_BL_A_SHADE, G_BL_CLR_IN, G_BL_1MA),
-                     G_RM_ZB_OVL_SURF2);
+                    Z_CMP | IM_RD | CVG_DST_SAVE | ZMODE_DEC | FORCE_BL |
+                        GBL_c1(G_BL_CLR_FOG, G_BL_A_SHADE, G_BL_CLR_IN, G_BL_1MA),
+                    G_RM_ZB_OVL_SURF2);
     gSPSetGeometryMode(POLY_XLU_DISP++, G_CULL_BACK | G_FOG);
     gSPDisplayList(POLY_XLU_DISP++, SEGMENTED_TO_VIRTUAL(object_tw_DL_01A790));
     Matrix_Pop();
@@ -3286,7 +3290,7 @@ void func_80942180(BossTw* this, PlayState* play) {
     Matrix_Push();
 
     Gfx_SetupDL_25Xlu(play->state.gfxCtx);
-    Matrix_Translate(this->groundBlastPos2.x, this->groundBlastPos2.y, this->groundBlastPos2.z, MTXMODE_NEW);
+    Matrix_Translate(this->actor.world.pos.x, this->actor.world.pos.y, this->actor.world.pos.z, MTXMODE_NEW);
     Matrix_Scale(this->workf[KM_GD_CRTR_SCL], this->workf[KM_GD_CRTR_SCL], this->workf[KM_GD_CRTR_SCL], MTXMODE_APPLY);
     gSPSegment(POLY_XLU_DISP++, 8,
                Gfx_TwoTexScroll(play->state.gfxCtx, 0, (-this->work[CS_TIMER_1]) & 0x7F, 0, 0x20, 0x20, 1,
@@ -3509,27 +3513,13 @@ void BossTw_Draw(Actor* thisx, PlayState* play2) {
         POLY_OPA_DISP = Play_SetFog(play, POLY_OPA_DISP);
     }
 
-    if (this->actor.params == TW_KOTAKE) {
-        if (this->workf[UNK_F9] > 0.0f) {
-            if (this->workf[UNK_F11] > 0.0f) {
-                Vec3f diff;
-                diff.x = this->groundBlastPos2.x - player->actor.world.pos.x;
-                diff.y = this->groundBlastPos2.y - player->actor.world.pos.y;
-                diff.z = this->groundBlastPos2.z - player->actor.world.pos.z;
-
-                if ((fabsf(diff.y) < 10.0f) && (player->actor.bgCheckFlags & 1) &&
-                    (sqrtf(SQ(diff.x) + SQ(diff.z)) < (this->workf[UNK_F12] * 4600.0f)) && (sFreezeState == 0) &&
-                    (this->workf[UNK_F11] > 200.0f)) {
-                    sFreezeState = 1;
-                    sTwinrovaPtr->timers[2] = 100;
-                }
-            }
-
-            func_80941BC0(this, play);
-        }
-    } else {
-        func_80942180(this, play);
-    }
+    // if (this->actor.params == TW_KOTAKE) {
+    //     if (this->workf[UNK_F9] > 0.0f) {
+    //         func_80941BC0(this, play);
+    //     }
+    // } else {
+    //     func_80942180(this, play);
+    // }
 
     if (this->visible) {
         if (this->actionFunc == BossTw_DeathCS) {
@@ -3843,6 +3833,66 @@ void func_80944C50(BossTw* this, PlayState* play) {
     CLOSE_DISPS(play->state.gfxCtx);
 }
 
+void BossTW_DisplayFlare(f32 xT, f32 yT, s32 col, BossTw* this, PlayState* play) {
+    OPEN_DISPS(play->state.gfxCtx);
+
+    Gfx_SetupDL_25Xlu(play->state.gfxCtx);
+
+    gSPSegment(
+        POLY_XLU_DISP++, 0x08,
+        Gfx_TwoTexScroll(play->state.gfxCtx, 0, 0, 0, 32, 64, 1, 0, (this->work[CS_TIMER_1] * -20) & 511, 32, 128));
+
+    if (col > 0) {
+        gDPSetPrimColor(POLY_XLU_DISP++, 0x80, 0x80, 0, 170, 255, 255);
+        gDPSetEnvColor(POLY_XLU_DISP++, 0, 0, 255, 0);
+    } else {
+        gDPSetPrimColor(POLY_XLU_DISP++, 0x80, 0x80, 255, 100, 100, 255);
+        gDPSetEnvColor(POLY_XLU_DISP++, 255, 0, 0, 0);
+    }
+
+    Matrix_Push();
+        Matrix_Translate(xT, yT, 5000.0f, MTXMODE_APPLY);
+        gSPMatrix(POLY_XLU_DISP++, MATRIX_NEWMTX(play->state.gfxCtx),
+                G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+        gSPDisplayList(POLY_XLU_DISP++, gEffFire1DL);
+    Matrix_Pop();
+
+    CLOSE_DISPS(play->state.gfxCtx);
+}
+
+void BossTW_DrawFires(Actor* thisx, PlayState* play) {
+    BossTw* this = (BossTw*)thisx;
+
+    s8 cType = (sTwinrovaBlastType == 1) ? -1 : 1;
+
+    if (PT_SIDE == this->patternIndex) {
+        BossTW_DisplayFlare(0, -4000, cType, this, play);
+        BossTW_DisplayFlare(-8000, 4000, cType, this, play);
+        BossTW_DisplayFlare(0, 4000, cType, this, play);
+        BossTW_DisplayFlare(8000, 4000, cType, this, play);
+    } else if (PT_HORIZONTAL == this->patternIndex) {
+        BossTW_DisplayFlare(-8000, 2000, this->selectionIndex == 1 ? -cType : cType, this, play);
+        BossTW_DisplayFlare(0, 2000, cType, this, play);
+        BossTW_DisplayFlare(8000, 2000, this->selectionIndex == 2 ? -cType : cType, this, play);
+    } else if (PT_VERTICAL == this->patternIndex) {
+        BossTW_DisplayFlare(0, 12000, this->selectionIndex == 1 ? -cType : cType, this, play);
+        BossTW_DisplayFlare(0, 4000, cType, this, play);
+        BossTW_DisplayFlare(0, -4000, this->selectionIndex == 2 ? -cType : cType, this, play);
+    } else if (PT_STAR == this->patternIndex) {
+        BossTW_DisplayFlare(0, 2000, cType, this, play);
+        BossTW_DisplayFlare(8000, 10000, this->selectionIndex == 1 ? -cType : cType, this, play);
+        BossTW_DisplayFlare(-8000, 10000, this->selectionIndex == 2 ? -cType : cType, this, play);
+        BossTW_DisplayFlare(-8000, -6000, this->selectionIndex == 3 ? -cType : cType, this, play);
+        BossTW_DisplayFlare(8000, -6000, this->selectionIndex == 4 ? -cType : cType, this, play);
+    } else if (PT_COVER == this->patternIndex) {
+        BossTW_DisplayFlare(6000, 8000, this->selectionIndex == 1 ? -cType : cType, this, play);
+        BossTW_DisplayFlare(-6000, 8000, this->selectionIndex == 2 ? -cType : cType, this, play);
+        BossTW_DisplayFlare(-6000, -4000, this->selectionIndex == 3 ? -cType : cType, this, play);
+        BossTW_DisplayFlare(6000, -4000, this->selectionIndex == 4 ? -cType : cType, this, play);
+    }
+
+}
+
 void BossTw_TwinrovaDraw(Actor* thisx, PlayState* play2) {
     static Vec3f D_8094A9EC = { 0.0f, 200.0f, 2000.0f };
     PlayState* play = play2;
@@ -3869,6 +3919,8 @@ void BossTw_TwinrovaDraw(Actor* thisx, PlayState* play2) {
                                     play->lightCtx.fogColor[2], 0, play->lightCtx.fogNear, 1000);
     }
 
+    BossTW_DrawFires(thisx,play2);
+
     BossTw_DrawEffects(play);
     BossTw_ShieldChargeDraw(this, play);
 
@@ -3882,6 +3934,9 @@ void BossTw_TwinrovaDraw(Actor* thisx, PlayState* play2) {
 
     CLOSE_DISPS(play->state.gfxCtx);
 }
+
+#define BLAST_SPEED 20.0f
+#define GROUND_GROWTH_SPEED 0.006f
 
 void BossTw_BlastFire(BossTw* this, PlayState* play) {
     s16 i;
@@ -3898,15 +3953,19 @@ void BossTw_BlastFire(BossTw* this, PlayState* play) {
                 case 0:
                     Actor_SetScale(&this->actor, 0.03f);
                     this->csState1 = 1;
-                    xDiff = player->actor.world.pos.x - this->actor.world.pos.x;
-                    yDiff = (player->actor.world.pos.y + 30.0f) - this->actor.world.pos.y;
-                    zDiff = player->actor.world.pos.z - this->actor.world.pos.z;
+                    // xDiff = player->actor.world.pos.x - this->actor.world.pos.x;
+                    // yDiff = (player->actor.world.pos.y + 30.0f) - this->actor.world.pos.y;
+                    // zDiff = player->actor.world.pos.z - this->actor.world.pos.z;
+                    xDiff = this->actor.home.rot.x - this->actor.home.pos.x;
+                    yDiff = this->actor.home.rot.y - this->actor.home.pos.y;
+                    zDiff = this->actor.home.rot.z - this->actor.home.pos.z;
                     // yaw
                     this->actor.world.rot.y = Math_FAtan2F(xDiff, zDiff) * (32768 / M_PI);
                     // pitch
                     distXZ = sqrtf(SQ(xDiff) + SQ(zDiff));
                     this->actor.world.rot.x = Math_FAtan2F(yDiff, distXZ) * (32768 / M_PI);
-                    this->actor.speedXZ = 20.0f;
+                    this->actor.world.rot.z = 0;
+                    this->actor.speedXZ = BLAST_SPEED;
 
                     for (i = 0; i < 50; i++) {
                         this->blastTailPos[i] = this->actor.world.pos;
@@ -4025,18 +4084,14 @@ void BossTw_BlastFire(BossTw* this, PlayState* play) {
                     sEnvType = 0;
                 }
 
-                if (sGroundBlastType == 2) {
-                    this->timers[0] = 0;
-                }
-
                 Audio_PlayActorSound2(&this->actor, NA_SE_EN_TWINROBA_FIRE_EXP - SFX_FLAG);
 
-                xDiff = sKoumePtr->groundBlastPos2.x - player->actor.world.pos.x;
-                yDiff = sKoumePtr->groundBlastPos2.y - player->actor.world.pos.y;
-                zDiff = sKoumePtr->groundBlastPos2.z - player->actor.world.pos.z;
+                xDiff = this->actor.world.pos.x - player->actor.world.pos.x;
+                yDiff = this->actor.world.pos.y - player->actor.world.pos.y;
+                zDiff = this->actor.world.pos.z - player->actor.world.pos.z;
 
                 if (!player->isBurning && (player->actor.bgCheckFlags & 1) && (fabsf(yDiff) < 10.0f) &&
-                    (sqrtf(SQ(xDiff) + SQ(zDiff)) < (sKoumePtr->workf[UNK_F13] * 4550.0f))) {
+                    (sqrtf(SQ(xDiff) + SQ(zDiff)) < (this->workf[UNK_F13] * 4550.0f))) {
                     s16 j;
 
                     for (j = 0; j < 18; j++) {
@@ -4053,20 +4108,25 @@ void BossTw_BlastFire(BossTw* this, PlayState* play) {
                     sTwinrovaPtr->timers[2] = 100;
                 }
 
-                Math_ApproachF(&sKoumePtr->workf[UNK_F13], 0.04f, 0.1f, 0.002f);
+                Math_ApproachF(&sKoumePtr->workf[UNK_F13], 0.04f, 0.1f, GROUND_GROWTH_SPEED);
+                Math_ApproachF(&this->workf[UNK_F13], 0.04f, 0.1f, GROUND_GROWTH_SPEED);
                 break;
             }
 
             {
-                f32 sp4C = sGroundBlastType == 2 ? 3.0f : 1.0f;
+                f32 sp4C = 1.0f;// sGroundBlastType == 2 ? 3.0f : 1.0f;
 
+                Math_ApproachF(&this->workf[UNK_F9], 0.0f, 1.0f, 10.0f * sp4C);
                 Math_ApproachF(&sKoumePtr->workf[UNK_F9], 0.0f, 1.0f, 10.0f * sp4C);
                 Math_ApproachF(&sKoumePtr->workf[UNK_F12], 0.0f, 1.0f, 0.03f * sp4C);
+                Math_ApproachF(&this->workf[UNK_F12], 0.0f, 1.0f, 0.03f * sp4C);
                 Math_ApproachF(&sKoumePtr->workf[TAIL_ALPHA], 0.0f, 1.0f, 3.0f * sp4C);
+                Math_ApproachF(&this->workf[TAIL_ALPHA], 0.0f, 1.0f, 3.0f * sp4C);
                 Math_ApproachF(&sKoumePtr->workf[UNK_F11], 0.0f, 1.0f, 6.0f * sp4C);
+                Math_ApproachF(&this->workf[UNK_F11], 0.0f, 1.0f, 6.0f * sp4C);
             }
 
-            if (sKoumePtr->workf[TAIL_ALPHA] <= 0.0f) {
+            if (this->workf[TAIL_ALPHA] <= 0.0f) {
                 Actor_Kill(&this->actor);
             }
 
@@ -4089,13 +4149,17 @@ void BossTw_BlastIce(BossTw* this, PlayState* play) {
                 case 0:
                     Actor_SetScale(&this->actor, 0.03f);
                     this->csState1 = 1;
-                    xDiff = player->actor.world.pos.x - this->actor.world.pos.x;
-                    yDiff = (player->actor.world.pos.y + 30.0f) - this->actor.world.pos.y;
-                    zDiff = player->actor.world.pos.z - this->actor.world.pos.z;
+                    // xDiff = player->actor.world.pos.x - this->actor.world.pos.x;
+                    // yDiff = (player->actor.world.pos.y + 30.0f) - this->actor.world.pos.y;
+                    // zDiff = player->actor.world.pos.z - this->actor.world.pos.z;
+                    xDiff = this->actor.home.rot.x - this->actor.home.pos.x;
+                    yDiff = this->actor.home.rot.y - this->actor.home.pos.y;
+                    zDiff = this->actor.home.rot.z - this->actor.home.pos.z;
                     this->actor.world.rot.y = Math_FAtan2F(xDiff, zDiff) * (32768 / M_PI);
                     xzDist = sqrtf(SQ(xDiff) + SQ(zDiff));
                     this->actor.world.rot.x = Math_FAtan2F(yDiff, xzDist) * (32768 / M_PI);
-                    this->actor.speedXZ = 20.0f;
+                    this->actor.world.rot.z = 0;
+                    this->actor.speedXZ = BLAST_SPEED;
                     for (i = 0; i < 50; i++) {
                         this->blastTailPos[i] = this->actor.world.pos;
                     }
@@ -4216,10 +4280,6 @@ void BossTw_BlastIce(BossTw* this, PlayState* play) {
                     sEnvType = 0;
                 }
 
-                if (sGroundBlastType == 1) {
-                    this->timers[0] = 0;
-                }
-
                 Audio_PlayActorSound2(&this->actor, NA_SE_EV_ICE_FREEZE - SFX_FLAG);
 
                 if (this->timers[0] > (sTwinrovaPtr->actionFunc == BossTw_Wait ? 70 : 20)) {
@@ -4248,49 +4308,36 @@ void BossTw_BlastIce(BossTw* this, PlayState* play) {
                 }
 
                 Math_ApproachF(&sKotakePtr->workf[UNK_F9], 80.0f, 1.0f, 3.0f);
+                Math_ApproachF(&this->workf[UNK_F9], 80.0f, 1.0f, 3.0f);
                 Math_ApproachF(&sKotakePtr->workf[UNK_F11], 255.0f, 1.0f, 10.0f);
-                Math_ApproachF(&sKotakePtr->workf[UNK_F12], 0.04f, 0.1f, 0.002f);
+                Math_ApproachF(&this->workf[UNK_F11], 255.0f, 1.0f, 10.0f);
+                Math_ApproachF(&sKotakePtr->workf[UNK_F12], 0.04f, 0.1f, GROUND_GROWTH_SPEED);
+                Math_ApproachF(&this->workf[UNK_F12], 0.04f, 0.1f, GROUND_GROWTH_SPEED);
                 Math_ApproachF(&sKotakePtr->workf[UNK_F16], 70.0f, 1.0f, 5.0f);
+                Math_ApproachF(&this->workf[UNK_F16], 70.0f, 1.0f, 5.0f);
 
                 if ((this->timers[0] == 70) || (this->timers[0] == 30)) {
                     sKotakePtr->workf[UNK_F16] = 10.0f;
+                    this->workf[UNK_F16] = 10.0f;
                 }
 
                 if ((this->timers[0] % 4) == 0) {
                     sKotakePtr->workf[UNK_F15] = (2.0f * (s16)Rand_ZeroFloat(9.9f) * M_PI) / 10.0f;
+                    this->workf[UNK_F15] = sKotakePtr->workf[UNK_F15];
                 }
             } else {
-                f32 sp80;
-
-                if (sGroundBlastType == 1) {
-                    if (sKotakePtr->workf[UNK_F11] > 1.0f) {
-                        for (i = 0; i < 3; i++) {
-                            Vec3f pos;
-                            Vec3f velocity;
-                            Vec3f accel;
-                            pos.x = Rand_CenteredFloat(280.0f) + sKotakePtr->groundBlastPos2.x;
-                            pos.z = Rand_CenteredFloat(280.0f) + sKotakePtr->groundBlastPos2.z;
-                            pos.y = sKotakePtr->groundBlastPos2.y + 30.0f;
-                            velocity.x = 0.0f;
-                            velocity.y = 0.0f;
-                            velocity.z = 0.0f;
-                            accel.x = 0.0f;
-                            accel.y = 0.13f;
-                            accel.z = 0.0f;
-                            BossTw_AddDmgCloud(play, 3, &pos, &velocity, &accel, Rand_ZeroFloat(5.0f) + 20, 0, 0,
-                                               80);
-                        }
-                    }
-                    sp80 = 3.0f;
-                } else {
-                    sp80 = 1.0f;
-                }
+                f32 sp80 = 1.0f;
 
                 Math_ApproachF(&sKotakePtr->workf[UNK_F14], 0.0f, 1.0f, 0.2f * sp80);
+                Math_ApproachF(&this->workf[UNK_F14], 0.0f, 1.0f, 0.2f * sp80);
                 Math_ApproachF(&sKotakePtr->workf[UNK_F11], 0.0f, 1.0f, 5.0f * sp80);
+                Math_ApproachF(&this->workf[UNK_F11], 0.0f, 1.0f, 5.0f * sp80);
                 Math_ApproachF(&sKotakePtr->workf[UNK_F9], 0.0f, 1.0f, sp80);
+                Math_ApproachF(&this->workf[UNK_F9], 0.0f, 1.0f, sp80);
 
-                if (sKotakePtr->workf[UNK_F9] <= 0.0f) {
+                if (this->workf[UNK_F9] <= 0.0f) {
+                    if (sFreezeState == 1)
+                        sFreezeState = 0;
                     Actor_Kill(&this->actor);
                 }
             }
@@ -4416,6 +4463,7 @@ void BossTw_BlastDraw(Actor* thisx, PlayState* play2) {
     f32 scaleFactor;
     s16 tailIdx;
     s16 i;
+    Player* player = GET_PLAYER(play2);
 
     OPEN_DISPS(play->state.gfxCtx);
 
@@ -4448,6 +4496,7 @@ void BossTw_BlastDraw(Actor* thisx, PlayState* play2) {
             break;
 
         case TW_FIRE_BLAST_GROUND:
+            func_80942180(this,play);
             break;
 
         case TW_ICE_BLAST:
@@ -4476,6 +4525,24 @@ void BossTw_BlastDraw(Actor* thisx, PlayState* play2) {
             break;
 
         case TW_ICE_BLAST_GROUND:
+            s32 pad;
+            if (this->workf[UNK_F9] > 0.0f) {
+                func_80941BC0(this, play);
+
+                Vec3f diff;
+                diff.x = this->actor.world.pos.x - player->actor.world.pos.x;
+                diff.y = this->actor.world.pos.y - player->actor.world.pos.y;
+                diff.z = this->actor.world.pos.z - player->actor.world.pos.z;
+
+                if (this->workf[UNK_F11] > 0.0f) {
+                    if ((fabsf(diff.y) < 10.0f) && (player->actor.bgCheckFlags & 1) &&
+                        (sqrtf(SQ(diff.x) + SQ(diff.z)) < (this->workf[UNK_F12] * 4600.0f)) && (sFreezeState == 0) &&
+                        (this->workf[UNK_F11] > 200.0f)) {
+                        sFreezeState = 1;
+                        sTwinrovaPtr->timers[2] = 100;
+                    }
+                }
+            }
             break;
     }
 
@@ -4786,10 +4853,6 @@ void BossTw_UpdateEffects(PlayState* play) {
                 if (eff->work[EFF_ARGS] < eff->frame) {
                     phi_f0 = 1.0f;
 
-                    if (eff->target != NULL || sGroundBlastType == 1) {
-                        phi_f0 *= 3.0f;
-                    }
-
                     Math_ApproachF(&eff->workf[EFF_SCALE], 0.0f, 1.0f, 0.0005f * phi_f0);
 
                     if (eff->workf[EFF_SCALE] == 0.0f) {
@@ -4800,9 +4863,6 @@ void BossTw_UpdateEffects(PlayState* play) {
                         }
                     }
                 } else {
-                    if (sGroundBlastType == 1) {
-                        eff->frame = 100;
-                    }
                     Math_ApproachF(&eff->workf[EFF_DIST], 0.8f, 0.2f, 0.04f);
 
                     if (eff->target == NULL) {
@@ -4815,10 +4875,26 @@ void BossTw_UpdateEffects(PlayState* play) {
                         } else {
                             player->stateFlags2 &= ~0x8000;
                         }
+                        s32 isStillFreezing = false;
+                        Actor* start = play->actorCtx.actorLists[ACTORCAT_BOSS].head;
 
-                        if ((sKotakePtr->workf[UNK_F11] > 10.0f) && (sKotakePtr->workf[UNK_F11] < 200.0f)) {
-                            eff->frame = 100;
+                        while (start) {
+                            if (start->id == ACTOR_BOSS_TW && start->params == TW_ICE_BLAST_GROUND) {
+                                if ((((BossTw*)start)->workf[UNK_F11] > 10.0f) && (((BossTw*)start)->workf[UNK_F11] < 200.0f)) {
+                                    //eff->frame = 100;
+                                } else {
+                                    Vec3f diff;
+                                    diff.x = start->world.pos.x - player->actor.world.pos.x;
+                                    diff.z = start->world.pos.z - player->actor.world.pos.z;
+                                    if (sqrtf(SQ(diff.x) + SQ(diff.z)) < (0.04 * 4600.0f))
+                                        isStillFreezing = true;
+                                }
+                            }
+                            start = start->next;
                         }
+
+                        if (!isStillFreezing)
+                            eff->frame = 100;
 
                         if (!(play->gameplayFrames & 1)) {
                             play->damagePlayer(play, -1);
@@ -5149,11 +5225,23 @@ void BossTw_TwinrovaArriveAtTarget(BossTw* this, PlayState* play) {
 void BossTw_TwinrovaSetupChargeBlast(BossTw* this, PlayState* play) {
     this->actionFunc = BossTw_TwinrovaChargeBlast;
     Animation_MorphToPlayOnce(&this->skelAnime, &object_tw_Anim_036FBC, -5.0f);
+    this->skelAnime.playSpeed = 1.2f;
     this->workf[ANIM_SW_TGT] = Animation_GetLastFrame(&object_tw_Anim_036FBC);
     this->csState1 = 0;
 }
 
+#define MIXED_BLAST_THRESHOLD 20
+#define CENTRAL_HEIGHT 240
+#define PILLAR_HEIGHT 230
+#define HEIGHT_THRESHOLD (PILLAR_HEIGHT-80)
+#define BLAST_SPACING 210
+#define BLAST_DIAG_SPACING 170
+#define BLAST_CARD_SPACING 240
+#define OUTER_BOUNDERY 360.0f
+#define INNER_BOUNDERY 280.0f
+
 void BossTw_TwinrovaChargeBlast(BossTw* this, PlayState* play) {
+    Player* player = GET_PLAYER(play);
     SkelAnime_Update(&this->skelAnime);
 
     Math_ApproachF(&this->actor.world.pos.x, this->targetPos.x, 0.03f, fabsf(this->actor.velocity.x) * 1.5f);
@@ -5162,15 +5250,22 @@ void BossTw_TwinrovaChargeBlast(BossTw* this, PlayState* play) {
     Math_ApproachS(&this->actor.shape.rot.y, this->actor.yawTowardsPlayer, 5, 0x1000);
 
     if (Animation_OnFrame(&this->skelAnime, this->workf[ANIM_SW_TGT])) {
-        if ((s8)this->actor.colChkInfo.health < 10) {
-            sTwinrovaBlastType = Rand_ZeroFloat(1.99f);
-        } else {
-            if (++sFixedBlatSeq >= 4) {
+        if ((s8)this->actor.colChkInfo.health > 35 && player->actor.world.pos.y > HEIGHT_THRESHOLD) {
+            if (++sFixedBlatSeq >= 5) {
                 sFixedBlatSeq = 1;
                 sFixedBlastType = !sFixedBlastType;
             }
 
             sTwinrovaBlastType = sFixedBlastType;
+        } else if ((s8)this->actor.colChkInfo.health > MIXED_BLAST_THRESHOLD && player->actor.world.pos.y > HEIGHT_THRESHOLD) {
+            sTwinrovaBlastType = Rand_ZeroFloat(1.99f);
+        } else {
+            if (sShieldFireCharge)
+                sTwinrovaBlastType = 0;
+            else if (sShieldIceCharge)
+                sTwinrovaBlastType = 1;
+            else
+                sTwinrovaBlastType = Rand_ZeroFloat(1.99f);
         }
 
         BossTw_TwinrovaSetupShootBlast(this, play);
@@ -5179,6 +5274,7 @@ void BossTw_TwinrovaChargeBlast(BossTw* this, PlayState* play) {
 
 void BossTw_TwinrovaSetupShootBlast(BossTw* this, PlayState* play) {
     this->actionFunc = BossTw_TwinrovaShootBlast;
+    this->skelAnime.playSpeed = 1.0f;
 
     if (sTwinrovaBlastType == 0) {
         Animation_MorphToPlayOnce(&this->skelAnime, &object_tw_Anim_022700, 0.0f);
@@ -5194,8 +5290,58 @@ void BossTw_TwinrovaShootBlast(BossTw* this, PlayState* play) {
     Vec3f* magicSpawnPos;
     s32 magicParams;
     s16 i;
+    Player* player = GET_PLAYER(play);
 
     SkelAnime_Update(&this->skelAnime);
+
+    if (Animation_OnFrame(&this->skelAnime, 5.0f)) {
+        s16 cardVal = 0;
+        if (player->actor.world.pos.y >= HEIGHT_THRESHOLD && (/*(ABS(player->actor.world.pos.x) > OUTER_BOUNDERY || ABS(player->actor.world.pos.z) > OUTER_BOUNDERY) ||*/
+                                                                 ((ABS(player->actor.world.pos.x) > INNER_BOUNDERY || ABS(player->actor.world.pos.z) > INNER_BOUNDERY))
+                                                                 /*&& (Rand_ZeroOne() < 0.5f)*/)) {
+            this->storedPosition = player->actor.world.pos;
+            cardVal = 1;
+            if (ABS(this->storedPosition.x) >= ABS(this->storedPosition.z)) {
+                if (ABS(sTwinrovaPtr->actor.world.pos.x) >= ABS(sTwinrovaPtr->actor.world.pos.z))
+                    cardVal = 2;
+            } else {
+                if (ABS(sTwinrovaPtr->actor.world.pos.z) >= ABS(sTwinrovaPtr->actor.world.pos.x))
+                    cardVal = 2;
+            }
+            if ((ABS(player->actor.world.pos.x) > OUTER_BOUNDERY || ABS(player->actor.world.pos.z) > OUTER_BOUNDERY) || Rand_ZeroOne() < 0.5f) {
+                this->patternIndex = PT_SIDE;
+            } else if (cardVal != 2 && (cardVal == 1 || Rand_ZeroOne() < 0.5f)) {
+                this->patternIndex = PT_HORIZONTAL;
+                this->selectionIndex = Rand_ZeroFloat(2.99f);
+            } else {
+                this->patternIndex = PT_VERTICAL;
+                this->selectionIndex = Rand_ZeroFloat(2.99f);
+            }
+        } else if (Rand_ZeroOne() < 0.5f || player->actor.world.pos.y <= HEIGHT_THRESHOLD) {
+            f32 xVal, zVal;
+            this->selectionIndex = Rand_ZeroFloat(2.99f);
+            if (Rand_ZeroOne() < 0.5f) {
+                this->patternIndex = PT_HORIZONTAL;
+            } else {
+                this->patternIndex = PT_VERTICAL;
+            }
+            f32 invNorm = 1/(sqrtf(SQ(xVal) + SQ(zVal)));
+            xVal = xVal*invNorm;
+            zVal = zVal*invNorm;
+
+        } else {
+            this->selectionIndex = Rand_ZeroFloat(4.99f);
+            if (Rand_ZeroOne() < 0.5f) {
+                this->patternIndex = PT_STAR;
+            } else {
+                this->patternIndex = PT_COVER;
+            }
+        }
+
+        if ((s8)this->actor.colChkInfo.health > MIXED_BLAST_THRESHOLD || player->actor.world.pos.y <= HEIGHT_THRESHOLD) {
+            this->selectionIndex = 0;
+        }
+    }
 
     if (Animation_OnFrame(&this->skelAnime, 8.0f)) {
         Audio_PlayActorSound2(&this->actor, NA_SE_EN_TWINROBA_THROW_MASIC);
@@ -5207,16 +5353,228 @@ void BossTw_TwinrovaShootBlast(BossTw* this, PlayState* play) {
             magicParams = TW_FIRE_BLAST;
             magicSpawnPos = &this->rightScepterPos;
         } else {
-            magicParams = TW_ICE_BLAST;
-            magicSpawnPos = &this->leftScepterPos;
+           magicParams = TW_ICE_BLAST;
+           magicSpawnPos = &this->leftScepterPos;
         }
 
-        twMagic =
-            (BossTw*)Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, ACTOR_BOSS_TW, magicSpawnPos->x,
-                                        magicSpawnPos->y, magicSpawnPos->z, 0, 0, 0, magicParams);
+        if (PT_SIDE == this->patternIndex) {
+            f32 xxVal, xzVal, zxVal, zzVal;
+            if (ABS(this->storedPosition.x) >= ABS(this->storedPosition.z)) {
+                if (this->storedPosition.x >= 0) {
+                    xxVal = 1;
+                    xzVal = 0;
+                    zxVal = 0;
+                    zzVal = 1;
+                } else {
+                    xxVal = -1;
+                    xzVal = 0;
+                    zxVal = 0;
+                    zzVal = -1;
+                }
 
-        if (twMagic != NULL) {
-            twMagic->blastType = magicParams == TW_ICE_BLAST ? 0 : 1;
+            } else {
+                if (this->storedPosition.z >= 0) {
+                    xxVal = 0;
+                    xzVal = -1;
+                    zxVal = 1;
+                    zzVal = 0;
+                } else {
+                    xxVal = 0;
+                    xzVal = 1;
+                    zxVal = -1;
+                    zzVal = 0;
+                }
+            }
+
+            twMagic =
+                (BossTw*)Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, ACTOR_BOSS_TW, magicSpawnPos->x,
+                                            magicSpawnPos->y, magicSpawnPos->z, 600*xxVal, this->storedPosition.y, 600*zxVal, magicParams);
+
+            if (twMagic != NULL) {
+                twMagic->blastType = magicParams == TW_ICE_BLAST ? 0 : 1;
+            }
+
+            twMagic =
+                (BossTw*)Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, ACTOR_BOSS_TW, magicSpawnPos->x,
+                                            magicSpawnPos->y, magicSpawnPos->z, BLAST_CARD_SPACING*xxVal, this->storedPosition.y, BLAST_CARD_SPACING*zxVal, magicParams);
+
+            if (twMagic != NULL) {
+                twMagic->blastType = magicParams == TW_ICE_BLAST ? 0 : 1;
+            }
+
+            twMagic =
+                (BossTw*)Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, ACTOR_BOSS_TW, magicSpawnPos->x,
+                                            magicSpawnPos->y, magicSpawnPos->z, BLAST_CARD_SPACING*xxVal+170*xzVal, this->storedPosition.y, BLAST_CARD_SPACING*zxVal+170*zzVal, magicParams);
+
+            if (twMagic != NULL) {
+                twMagic->blastType = magicParams == TW_ICE_BLAST ? 0 : 1;
+            }
+
+            twMagic =
+                (BossTw*)Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, ACTOR_BOSS_TW, magicSpawnPos->x,
+                                            magicSpawnPos->y, magicSpawnPos->z, BLAST_CARD_SPACING*xxVal-170*xzVal, this->storedPosition.y, BLAST_CARD_SPACING*zxVal-170*zzVal, magicParams);
+
+            if (twMagic != NULL) {
+                twMagic->blastType = magicParams == TW_ICE_BLAST ? 0 : 1;
+            }
+        } else if (this->patternIndex == PT_VERTICAL || this->patternIndex == PT_HORIZONTAL) {
+            f32 xVal, zVal;
+            if (this->patternIndex == PT_HORIZONTAL) {
+                xVal = this->actor.world.pos.z;
+                zVal = -this->actor.world.pos.x;
+            } else {
+                xVal = this->actor.world.pos.x;
+                zVal = this->actor.world.pos.z;
+            }
+            f32 invNorm = 1/(sqrtf(SQ(xVal) + SQ(zVal)));
+            xVal = xVal*invNorm;
+            zVal = zVal*invNorm;
+
+            twMagic =
+                (BossTw*)Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, ACTOR_BOSS_TW, magicSpawnPos->x,
+                                            magicSpawnPos->y, magicSpawnPos->z, player->actor.world.pos.x, player->actor.world.pos.y, player->actor.world.pos.z, magicParams);
+
+            if (twMagic != NULL) {
+                twMagic->blastType = magicParams == TW_ICE_BLAST ? 0 : 1;
+            }
+
+            twMagic =
+                (BossTw*)Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, ACTOR_BOSS_TW, magicSpawnPos->x,
+                                            magicSpawnPos->y, magicSpawnPos->z, player->actor.world.pos.x+BLAST_SPACING*xVal, player->actor.world.pos.y, player->actor.world.pos.z+BLAST_SPACING*zVal,
+                                            ((magicParams == TW_ICE_BLAST) == (this->selectionIndex != 1)) ? TW_ICE_BLAST : TW_FIRE_BLAST);
+
+            if (twMagic != NULL) {
+                twMagic->blastType = ((magicParams == TW_ICE_BLAST) == (this->selectionIndex != 1)) ? 0 : 1;
+            }
+
+            twMagic =
+                (BossTw*)Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, ACTOR_BOSS_TW, magicSpawnPos->x,
+                                            magicSpawnPos->y, magicSpawnPos->z, player->actor.world.pos.x-BLAST_SPACING*xVal, player->actor.world.pos.y, player->actor.world.pos.z-BLAST_SPACING*zVal,
+                                            ((magicParams == TW_ICE_BLAST) == (this->selectionIndex != 2)) ? TW_ICE_BLAST : TW_FIRE_BLAST);
+
+            if (twMagic != NULL) {
+                twMagic->blastType = ((magicParams == TW_ICE_BLAST) == (this->selectionIndex != 2)) ? 0 : 1;
+            }
+        } else {
+            if (this->patternIndex == PT_STAR) {
+                s16 selectValue = this->selectionIndex;
+                if (selectValue > 0) {
+                    selectValue--;
+                    if (ABS(this->actor.world.pos.z) > ABS(this->actor.world.pos.x)) {
+                        if (this->actor.world.pos.z < 0) {
+                            selectValue += 1;
+                        } else {
+                            selectValue += 3;
+                        }
+                    } else {
+                        if (this->actor.world.pos.x < 0) {
+                            selectValue += 2;
+                        }
+                    }
+
+                    selectValue = selectValue % 4;
+                    selectValue++;
+                }
+
+                twMagic =
+                    (BossTw*)Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, ACTOR_BOSS_TW, magicSpawnPos->x,
+                                                magicSpawnPos->y, magicSpawnPos->z, 0, player->actor.world.pos.y, 0, magicParams);
+
+                if (twMagic != NULL) {
+                    twMagic->blastType = magicParams == TW_ICE_BLAST ? 0 : 1;
+                }
+
+                twMagic =
+                    (BossTw*)Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, ACTOR_BOSS_TW, magicSpawnPos->x,
+                                                magicSpawnPos->y, magicSpawnPos->z, BLAST_SPACING, player->actor.world.pos.y, BLAST_SPACING,
+                                                ((magicParams == TW_ICE_BLAST) == (selectValue != 1)) ? TW_ICE_BLAST : TW_FIRE_BLAST);
+
+                if (twMagic != NULL) {
+                    twMagic->blastType = ((magicParams == TW_ICE_BLAST) == (selectValue != 1)) ? 0 : 1;
+                }
+
+                twMagic =
+                    (BossTw*)Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, ACTOR_BOSS_TW, magicSpawnPos->x,
+                                                magicSpawnPos->y, magicSpawnPos->z, BLAST_SPACING, player->actor.world.pos.y, -BLAST_SPACING,
+                                                ((magicParams == TW_ICE_BLAST) == (selectValue != 2)) ? TW_ICE_BLAST : TW_FIRE_BLAST);
+
+                if (twMagic != NULL) {
+                    twMagic->blastType = ((magicParams == TW_ICE_BLAST) == (selectValue != 2)) ? 0 : 1;
+                }
+
+                twMagic =
+                    (BossTw*)Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, ACTOR_BOSS_TW, magicSpawnPos->x,
+                                                magicSpawnPos->y, magicSpawnPos->z, -BLAST_SPACING, player->actor.world.pos.y, -BLAST_SPACING,
+                                                ((magicParams == TW_ICE_BLAST) == (selectValue != 3)) ? TW_ICE_BLAST : TW_FIRE_BLAST);
+
+                if (twMagic != NULL) {
+                    twMagic->blastType = ((magicParams == TW_ICE_BLAST) == (selectValue != 3)) ? 0 : 1;
+                }
+
+                twMagic =
+                    (BossTw*)Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, ACTOR_BOSS_TW, magicSpawnPos->x,
+                                                magicSpawnPos->y, magicSpawnPos->z, -BLAST_SPACING, player->actor.world.pos.y, BLAST_SPACING,
+                                                ((magicParams == TW_ICE_BLAST) == (selectValue != 4)) ? TW_ICE_BLAST : TW_FIRE_BLAST);
+
+                if (twMagic != NULL) {
+                    twMagic->blastType = ((magicParams == TW_ICE_BLAST) == (selectValue != 4)) ? 0 : 1;
+                }
+            } else {
+                s16 selectValue = this->selectionIndex;
+                if (selectValue > 0) {
+                    selectValue--;
+                    if (ABS(this->actor.world.pos.z) > ABS(this->actor.world.pos.x)) {
+                        if (this->actor.world.pos.z < 0) {
+                            selectValue += 1;
+                        } else {
+                            selectValue += 3;
+                        }
+                    } else {
+                        if (this->actor.world.pos.x < 0) {
+                            selectValue += 2;
+                        }
+                    }
+
+                    selectValue = selectValue % 4;
+                    selectValue++;
+                }
+
+                twMagic =
+                    (BossTw*)Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, ACTOR_BOSS_TW, magicSpawnPos->x,
+                                                magicSpawnPos->y, magicSpawnPos->z, BLAST_DIAG_SPACING, player->actor.world.pos.y, BLAST_DIAG_SPACING,
+                                                ((magicParams == TW_ICE_BLAST) == (selectValue != 1)) ? TW_ICE_BLAST : TW_FIRE_BLAST);
+
+                if (twMagic != NULL) {
+                    twMagic->blastType = ((magicParams == TW_ICE_BLAST) == (selectValue!= 1)) ? 0 : 1;
+                }
+
+                twMagic =
+                    (BossTw*)Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, ACTOR_BOSS_TW, magicSpawnPos->x,
+                                                magicSpawnPos->y, magicSpawnPos->z, BLAST_DIAG_SPACING, player->actor.world.pos.y, -BLAST_DIAG_SPACING,
+                                                ((magicParams == TW_ICE_BLAST) == (selectValue != 2)) ? TW_ICE_BLAST : TW_FIRE_BLAST);
+
+                if (twMagic != NULL) {
+                    twMagic->blastType = ((magicParams == TW_ICE_BLAST) == (selectValue != 2)) ? 0 : 1;
+                }
+
+                twMagic =
+                    (BossTw*)Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, ACTOR_BOSS_TW, magicSpawnPos->x,
+                                                magicSpawnPos->y, magicSpawnPos->z, -BLAST_DIAG_SPACING, player->actor.world.pos.y, -BLAST_DIAG_SPACING,
+                                                ((magicParams == TW_ICE_BLAST) == (selectValue != 3)) ? TW_ICE_BLAST : TW_FIRE_BLAST);
+
+                if (twMagic != NULL) {
+                    twMagic->blastType = ((magicParams == TW_ICE_BLAST) == (selectValue != 3)) ? 0 : 1;
+                }
+
+                twMagic =
+                    (BossTw*)Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, ACTOR_BOSS_TW, magicSpawnPos->x,
+                                                magicSpawnPos->y, magicSpawnPos->z, -BLAST_DIAG_SPACING, player->actor.world.pos.y, BLAST_DIAG_SPACING,
+                                                ((magicParams == TW_ICE_BLAST) == (selectValue != 4)) ? TW_ICE_BLAST : TW_FIRE_BLAST);
+
+                if (twMagic != NULL) {
+                    twMagic->blastType = ((magicParams == TW_ICE_BLAST) == (selectValue != 4)) ? 0 : 1;
+                }
+            }
         }
 
         sEnvType = twMagic->blastType + 1;
@@ -5246,6 +5604,8 @@ void BossTw_TwinrovaSetupDoneBlastShoot(BossTw* this, PlayState* play) {
     this->actionFunc = BossTw_TwinrovaDoneBlastShoot;
     Animation_MorphToLoop(&this->skelAnime, &object_tw_Anim_032BF8, -10.0f);
     this->timers[1] = 60;
+    this->patternIndex = 0;
+    this->selectionIndex = 0;
 }
 
 void BossTw_TwinrovaDoneBlastShoot(BossTw* this, PlayState* play) {

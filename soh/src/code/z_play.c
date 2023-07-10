@@ -1309,6 +1309,7 @@ skip:
         }
 
         Camera_Update(play->cameraPtrs[play->nextCamera]);
+        //lusprintf(0,0,0,"\nCamera\nSetting: %d,\nMode: %d", play->cameraPtrs[play->nextCamera]->setting, play->cameraPtrs[play->nextCamera]->mode);
 
         if (1 && HREG(63)) {
             LOG_NUM("1", 1);

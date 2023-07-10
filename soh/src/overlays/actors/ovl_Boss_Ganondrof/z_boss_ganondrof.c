@@ -63,10 +63,8 @@ void BossGanondrof_Throw(BossGanondrof* this, PlayState* play);
 void BossGanondrof_SetupBlock(BossGanondrof* this, PlayState* play);
 void BossGanondrof_Block(BossGanondrof* this, PlayState* play);
 void BossGanondrof_SetupReturn(BossGanondrof* this, PlayState* play);
-void BossGanondrof_Return(BossGanondrof* this, PlayState* play);
 void BossGanondrof_SetupCharge(BossGanondrof* this, PlayState* play);
 void BossGanondrof_Charge(BossGanondrof* this, PlayState* play);
-void BossGanondrof_Stunned(BossGanondrof* this, PlayState* play);
 void BossGanondrof_Death(BossGanondrof* this, PlayState* play);
 
 const ActorInit Boss_Ganondrof_InitVars = {
@@ -93,7 +91,7 @@ static ColliderCylinderInit sCylinderInitBody = {
     },
     {
         ELEMTYPE_UNK0,
-        { 0xFFCFFFFF, 0x00, 0x10 },
+        { 0xFFCFFFFF, 0x00, 0x20 },
         { 0xFFCFFFFE, 0x00, 0x00 },
         TOUCH_ON | TOUCH_SFX_NORMAL,
         BUMP_ON | BUMP_HOOKABLE,
@@ -287,7 +285,7 @@ void BossGanondrof_Init(Actor* thisx, PlayState* play) {
     SkelAnime_Init(play, &this->skelAnime, &gPhantomGanonSkel, &gPhantomGanonRideAnim, NULL, NULL, 0);
     if (this->actor.params < GND_FAKE_BOSS) {
         this->actor.params = GND_REAL_BOSS;
-        this->actor.colChkInfo.health = 30;
+        this->actor.colChkInfo.health = 46;
         this->lightNode = LightContext_InsertLight(play, &play->lightCtx, &this->lightInfo);
         Lights_PointNoGlowSetInfo(&this->lightInfo, this->actor.world.pos.x, this->actor.world.pos.y,
                                   this->actor.world.pos.z, 255, 255, 255, 255);
@@ -515,7 +513,7 @@ void BossGanondrof_Neutral(BossGanondrof* this, PlayState* play) {
                         this->fwork[GND_FLOAT_SPEED] = 0.0f;
                         Audio_PlayActorSound2(thisx, NA_SE_EN_FANTOM_LAUGH);
                     }
-                } else if ((rand01 < 0.5f) || (this->work[GND_THROW_COUNT] < 5)) {
+                } else if (this->actor.colChkInfo.health > 34 && ((rand01 < 0.5f) || (this->work[GND_THROW_COUNT] < 5))) {
                     BossGanondrof_SetupThrow(this, play);
                 } else {
                     this->flyMode = GND_FLY_VOLLEY;
@@ -714,7 +712,7 @@ void BossGanondrof_Return(BossGanondrof* this, PlayState* play) {
     if (this->returnSuccess) {
         this->returnSuccess = false;
         BossGanondrof_SetupReturn(this, play);
-        this->timers[0] = 80;
+        this->timers[0] = 100;
     }
 }
 
@@ -1286,9 +1284,9 @@ void BossGanondrof_CollisionCheck(BossGanondrof* this, PlayState* play) {
                     }
                     BossGanondrof_SetupStunned(this, play);
                     if (this->returnCount >= 2) {
-                        this->timers[0] = 120;
+                        this->timers[0] = 100;
                     }
-                    this->work[GND_INVINC_TIMER] = 10;
+                    this->work[GND_INVINC_TIMER] = 15;
                     horse->hitTimer = 20;
                     Audio_PlayActorSound2(&this->actor, NA_SE_EN_FANTOM_DAMAGE);
                 } else {

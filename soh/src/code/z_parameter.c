@@ -3105,6 +3105,10 @@ s32 Health_ChangeBy(PlayState* play, s16 healthChange) {
             healthChange >>= 1;
             osSyncPrintf("ハート減少半分！！＝%d\n", healthChange); // "Heart decrease halved!!＝%d"
         }
+        if (gSaveContext.nayrusLoveTimer != 0) {
+            healthChange >>= 1;
+            osSyncPrintf("ハート減少半分！！＝%d\n", healthChange); // "Heart decrease halved!!＝%d"
+        }
     }
     // clang-format on
 
@@ -3315,8 +3319,8 @@ s32 func_80087708(PlayState* play, s16 arg1, s16 arg2) {
             }
         case 3:
             if (gSaveContext.magicState == 0) {
-                if (gSaveContext.magic != 0) {
-                    play->interfaceCtx.unk_230 = 80;
+                if (gSaveContext.magic > arg1) {
+                    play->interfaceCtx.unk_230 = 1;
                     gSaveContext.magicState = 7;
                     return 1;
                 } else {
@@ -3638,6 +3642,7 @@ void Interface_DrawMagicBar(PlayState* play) {
     OPEN_DISPS(play->state.gfxCtx);
 
     if (gSaveContext.magicLevel != 0) {
+
         s16 X_Margins;
         s16 Y_Margins;
         if (CVar_GetS32("gMagicBarUseMargins", 0) != 0) {
