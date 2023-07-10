@@ -479,7 +479,11 @@ void func_80A74398(Actor* thisx, PlayState* play) {
         thisx->naviEnemyId = 0x34;
     } else {
         Actor_SetScale(thisx, 0.012f);
-        thisx->naviEnemyId = 0x35;
+        if (LINK_IS_CHILD)
+            thisx->naviEnemyId = 0x35;
+        else
+            thisx->naviEnemyId = 0x5D;
+
         Actor_ChangeCategory(play, &play->actorCtx, thisx, ACTORCAT_ENEMY);
     }
 
