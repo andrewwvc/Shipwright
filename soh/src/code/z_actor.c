@@ -2480,7 +2480,7 @@ void func_800304DC(PlayState* play, ActorContext* actorCtx, ActorEntry* actorEnt
 
     actorCtx->absoluteSpace = NULL;
 
-    Actor_SpawnEntry(actorCtx, actorEntry, play);
+    Actor_SpawnEntry(actorCtx, actorEntry, play, -1);
     func_8002C0C0(&actorCtx->targetCtx, actorCtx->actorLists[ACTORCAT_PLAYER].head, play);
     func_8002FA60(play);
 }
@@ -2514,7 +2514,7 @@ void Actor_UpdateAll(PlayState* play, ActorContext* actorCtx) {
     if (play->numSetupActors != 0) {
         actorEntry = &play->setupActorList[0];
         for (i = 0; i < play->numSetupActors; i++) {
-            Actor_SpawnEntry(&play->actorCtx, actorEntry++, play);
+            Actor_SpawnEntry(&play->actorCtx, actorEntry++, play, i);
         }
         play->numSetupActors = 0;
     }
@@ -3326,6 +3326,7 @@ Actor* Actor_Spawn(ActorContext* actorCtx, PlayState* play, s16 actorId, f32 pos
     actor->home.rot.y = rotY;
     actor->home.rot.z = rotZ;
     actor->params = params;
+    actor->entryNum = -1;
 
     Actor_AddToCategory(actorCtx, actor, actorInit->category);
 
@@ -3391,10 +3392,12 @@ void Actor_SpawnTransitionActors(PlayState* play, ActorContext* actorCtx) {
     }
 }
 
-Actor* Actor_SpawnEntry(ActorContext* actorCtx, ActorEntry* actorEntry, PlayState* play) {
+Actor* Actor_SpawnEntry(ActorContext* actorCtx, ActorEntry* actorEntry, PlayState* play, s16 entryNum) {
     gMapLoading = 1;
     Actor* ret = Actor_Spawn(actorCtx, play, actorEntry->id, actorEntry->pos.x, actorEntry->pos.y, actorEntry->pos.z,
                        actorEntry->rot.x, actorEntry->rot.y, actorEntry->rot.z, actorEntry->params, true);
+    if (ret)
+        ret->entryNum = entryNum;
     gMapLoading = 0;
 
     return ret;

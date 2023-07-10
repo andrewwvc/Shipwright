@@ -15,6 +15,7 @@
 #include <array>
 
 extern "C" SaveContext gSaveContext;
+extern std::map<ActorSpawnResource,int> UsedResources;
 
 std::filesystem::path SaveManager::GetFileName(int fileNum) {
     const std::filesystem::path sSavePath(Ship::Window::GetPathRelativeToAppDirectory("Save"));
@@ -30,6 +31,9 @@ SaveManager::SaveManager() {
     AddLoadFunction("randomizer", 1, LoadRandomizerVersion1);
     AddLoadFunction("randomizer", 2, LoadRandomizerVersion2);
     AddSaveFunction("randomizer", 2, SaveRandomizer);
+
+    AddLoadFunction("persistence", 1, LoadPersistenceVersion1);
+    AddSaveFunction("persistence", 1, SavePersistence);
 
     AddInitFunction(InitFileImpl);
 
@@ -546,6 +550,7 @@ void SaveManager::InitFileNormal() {
     gSaveContext.infTable[29] = 1;
     gSaveContext.sceneFlags[5].swch = 0x40000000;
 
+    gSaveContext.savedFrameCount = 0;
     gSaveContext.goronTimeStatus = 0;
     gSaveContext.goronTimeDay = gSaveContext.totalDays;
     gSaveContext.SariaDateDay = 0;
@@ -554,6 +559,7 @@ void SaveManager::InitFileNormal() {
     gSaveContext.MalonRideDay = 0;
     gSaveContext.maxBoosts = INITIAL_BOOSTS;
     gSaveContext.extraMagicPower = 0;
+    UsedResources = {};
 
     //RANDOTODO (ADD ITEMLOCATIONS TO GSAVECONTEXT)
 }
@@ -1342,6 +1348,7 @@ void SaveManager::LoadBaseVersion3() {
     });
     SaveManager::Instance->LoadData("isMasterQuest", gSaveContext.isMasterQuest);
 
+    SaveManager::Instance->LoadData("savedFrameCount", gSaveContext.savedFrameCount);
     SaveManager::Instance->LoadData("goronTimeStatus", gSaveContext.goronTimeStatus);
     SaveManager::Instance->LoadData("goronTimeDay", gSaveContext.goronTimeDay);
     SaveManager::Instance->LoadData("SariaDateDay", gSaveContext.SariaDateDay);
@@ -1526,6 +1533,7 @@ void SaveManager::SaveBase() {
     });
     SaveManager::Instance->SaveData("isMasterQuest", gSaveContext.isMasterQuest);
 
+    SaveManager::Instance->SaveData("savedFrameCount", gSaveContext.savedFrameCount);
     SaveManager::Instance->SaveData("goronTimeStatus", gSaveContext.goronTimeStatus);
     SaveManager::Instance->SaveData("goronTimeDay", gSaveContext.goronTimeDay);
     SaveManager::Instance->SaveData("SariaDateDay", gSaveContext.SariaDateDay);
@@ -1534,6 +1542,14 @@ void SaveManager::SaveBase() {
     SaveManager::Instance->SaveData("MalonRideDay", gSaveContext.MalonRideDay);
     SaveManager::Instance->SaveData("maxBoosts", gSaveContext.maxBoosts);
     SaveManager::Instance->SaveData("extraMagicPower", gSaveContext.extraMagicPower);
+}
+
+void SaveManager::LoadPersistenceVersion1() {
+    SaveManager::Instance->LoadData("usedResources", UsedResources, {});
+}
+
+void SaveManager::SavePersistence() {
+    SaveManager::Instance->SaveData("usedResources", UsedResources);
 }
 
 void SaveManager::SaveArray(const std::string& name, const size_t size, SaveArrayFunc func) {

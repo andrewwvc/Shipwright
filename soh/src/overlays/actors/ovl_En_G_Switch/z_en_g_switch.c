@@ -258,7 +258,7 @@ void EnGSwitch_SilverRupeeIdle(EnGSwitch* this, PlayState* play) {
 
     this->actor.shape.rot.y += 0x800;
     if (this->actor.xyzDistToPlayerSq < 900.0f) {
-        Rupees_ChangeBy(5);
+        Rupees_ChangeBy(0);
         sCollectedCount++;
         func_80078884(NA_SE_SY_GET_RUPY);
         this->actor.world.pos = player->actor.world.pos;

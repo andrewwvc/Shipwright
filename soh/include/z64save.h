@@ -275,6 +275,7 @@ typedef struct {
     /*        */ u16 adultTradeItems;
     // #endregion
     // #region SOH [NPC Mod]
+    /*        */ u32 savedFrameCount;
     /*        */ u16 goronTimeStatus;
     /*        */ s32 goronTimeDay;
     /*        */ s32 SariaDateDay;

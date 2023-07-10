@@ -498,7 +498,7 @@ Actor* Actor_Spawn(ActorContext* actorCtx, PlayState* play, s16 actorId, f32 pos
 Actor* Actor_SpawnAsChild(ActorContext* actorCtx, Actor* parent, PlayState* play, s16 actorId, f32 posX,
                           f32 posY, f32 posZ, s16 rotX, s16 rotY, s16 rotZ, s16 params);
 void Actor_SpawnTransitionActors(PlayState* play, ActorContext* actorCtx);
-Actor* Actor_SpawnEntry(ActorContext* actorCtx, ActorEntry* actorEntry, PlayState* play);
+Actor* Actor_SpawnEntry(ActorContext* actorCtx, ActorEntry* actorEntry, PlayState* play, s16 entryNum);
 Actor* Actor_Delete(ActorContext* actorCtx, Actor* actor, PlayState* play);
 Actor* func_80032AF0(PlayState* play, ActorContext* actorCtx, Actor** actorPtr, Player* player);
 Actor* Actor_Find(ActorContext* actorCtx, s32 actorId, s32 actorCategory);
@@ -941,6 +941,12 @@ void Environment_AdjustLights(PlayState* play, f32 arg1, f32 arg2, f32 arg3, f32
 s32 Environment_GetBgsDayCount(void);
 void Environment_ClearBgsDayCount(void);
 s32 Environment_GetTotalDays(void);
+void insertSpawnResource(int entry, int extraTime);
+void useGuardRupees(s32 num);
+s32 getGuardRupees();
+s32 createTempEntryPlus(PlayState* play, ActorEntry* spawn, s16 dirt);
+s32 createTempEntry(PlayState* play, ActorEntry* spawn);
+s32 isResourceUsed(PlayState* play, ActorEntry* spawn, s16 dirt);
 s16 isSariasDayHome(void);
 s16 isSariaAtLinksHouse(void);
 s32 IsAfterRutosDate(void);

@@ -363,6 +363,8 @@ void EnSkj_SetNaviId(EnSkj* this) {
 
 void EnSkj_Init(Actor* thisx, PlayState* play2) {
     s16 type = (thisx->params >> 0xA) & 0x3F;
+    thisx->world.rot.z = 0;
+    thisx->shape.rot.z = 0;
     EnSkj* this = (EnSkj*)thisx;
     PlayState* play = play2;
     s32 pad;
@@ -1321,8 +1323,12 @@ void EnSkj_Update(Actor* thisx, PlayState* play) {
             dropPos.x = this->actor.world.pos.x;
             dropPos.y = this->actor.world.pos.y;
             dropPos.z = this->actor.world.pos.z;
-
-            Item_DropCollectible(play, &dropPos, ITEM00_RUPEE_ORANGE);
+            if (this->actor.home.rot.z != 1) {
+                EnItem00* item = Item_DropCollectible(play, &dropPos, ITEM00_RUPEE_ORANGE);
+                if (item) {
+                    item->actor.entryNum = this->actor.entryNum;
+                }
+            }
         }
         Actor_Kill(&this->actor);
         return;

@@ -74,6 +74,7 @@ static void* sItemDropTex[] = {
 };
 
 static u8 sItemDropIds[] = {
+    //1
     ITEM00_RUPEE_GREEN,
     ITEM00_RUPEE_BLUE,
     0xFF,
@@ -90,6 +91,7 @@ static u8 sItemDropIds[] = {
     ITEM00_SEEDS,
     0xFF,
     ITEM00_RUPEE_BLUE,
+    //2
     ITEM00_RUPEE_GREEN,
     ITEM00_MAGIC_SMALL,
     ITEM00_RUPEE_GREEN,
@@ -106,6 +108,7 @@ static u8 sItemDropIds[] = {
     0xFF,
     0xFF,
     ITEM00_MAGIC_SMALL,
+    //3
     ITEM00_RUPEE_GREEN,
     ITEM00_RUPEE_GREEN,
     ITEM00_MAGIC_SMALL,
@@ -122,6 +125,7 @@ static u8 sItemDropIds[] = {
     0xFF,
     ITEM00_FLEXIBLE,
     ITEM00_MAGIC_SMALL,
+    //4
     ITEM00_RUPEE_GREEN,
     ITEM00_RUPEE_GREEN,
     ITEM00_NUTS,
@@ -138,6 +142,7 @@ static u8 sItemDropIds[] = {
     0xFF,
     0xFF,
     0xFF,
+    //5
     ITEM00_RUPEE_GREEN,
     ITEM00_RUPEE_GREEN,
     ITEM00_SEEDS,
@@ -154,6 +159,7 @@ static u8 sItemDropIds[] = {
     0xFF,
     0xFF,
     ITEM00_MAGIC_SMALL,
+    //6
     ITEM00_RUPEE_GREEN,
     ITEM00_MAGIC_SMALL,
     ITEM00_RUPEE_GREEN,
@@ -170,6 +176,7 @@ static u8 sItemDropIds[] = {
     ITEM00_SEEDS,
     0xFF,
     ITEM00_MAGIC_SMALL,
+    //7
     ITEM00_RUPEE_GREEN,
     ITEM00_RUPEE_BLUE,
     0xFF,
@@ -186,6 +193,7 @@ static u8 sItemDropIds[] = {
     ITEM00_FLEXIBLE,
     0xFF,
     ITEM00_MAGIC_LARGE,
+    //8
     ITEM00_RUPEE_GREEN,
     0xFF,
     ITEM00_RUPEE_BLUE,
@@ -202,6 +210,7 @@ static u8 sItemDropIds[] = {
     0xFF,
     0xFF,
     ITEM00_MAGIC_LARGE,
+    //9 - Arrows
     ITEM00_ARROWS_LARGE,
     ITEM00_ARROWS_MEDIUM,
     ITEM00_ARROWS_MEDIUM,
@@ -218,6 +227,7 @@ static u8 sItemDropIds[] = {
     ITEM00_ARROWS_MEDIUM,
     ITEM00_ARROWS_LARGE,
     ITEM00_ARROWS_LARGE,
+    //10 - Magic
     ITEM00_MAGIC_LARGE,
     ITEM00_MAGIC_SMALL,
     ITEM00_MAGIC_SMALL,
@@ -234,6 +244,7 @@ static u8 sItemDropIds[] = {
     ITEM00_MAGIC_SMALL,
     ITEM00_MAGIC_SMALL,
     ITEM00_MAGIC_LARGE,
+    //11 - Bombs
     ITEM00_BOMBS_A,
     0xFF,
     ITEM00_BOMBS_A,
@@ -250,6 +261,7 @@ static u8 sItemDropIds[] = {
     ITEM00_BOMBS_A,
     0xFF,
     ITEM00_BOMBS_A,
+    //12 - Hearts
     ITEM00_HEART,
     ITEM00_HEART,
     ITEM00_HEART,
@@ -266,6 +278,7 @@ static u8 sItemDropIds[] = {
     ITEM00_HEART,
     ITEM00_HEART,
     ITEM00_HEART,
+    //13 - Large Rupees
     ITEM00_RUPEE_RED,
     ITEM00_RUPEE_BLUE,
     ITEM00_RUPEE_BLUE,
@@ -282,6 +295,7 @@ static u8 sItemDropIds[] = {
     ITEM00_RUPEE_RED,
     ITEM00_RUPEE_RED,
     ITEM00_RUPEE_RED,
+    //14 - Forest Items
     ITEM00_SEEDS,
     0xFF,
     ITEM00_NUTS,
@@ -298,6 +312,7 @@ static u8 sItemDropIds[] = {
     ITEM00_NUTS,
     ITEM00_HEART,
     ITEM00_SEEDS,
+    //15 - Hearts 'n Seeds
     ITEM00_HEART,
     0xFF,
     ITEM00_SEEDS,
@@ -317,13 +332,50 @@ static u8 sItemDropIds[] = {
 };
 
 static u8 sDropQuantities[] = {
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-    1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1, 3, 3, 3, 1, 1, 3, 1, 3, 1, 1, 1, 3, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 0, 0, 0, 0,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1,
+    3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+    3, 3, 3, 1, 3, 3, 3, 1, 1, 3, 1, 3, 1, 1, 1, 3,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1,
+    0, 0, 0, 0,
+};
+
+static u8 sDropQuantitiesAlt[] = {
+    //Green rupee section
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //9 - Arrows
+    0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //10 - Magic
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //11 - Bombs
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //12 - Hearts
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //13 - Large Rupees
+    0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //14 - Forest Items
+    1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //15 - Hearts 'n Seeds
+    1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //Garbage
+    0, 0, 0, 1
 };
 
 void EnItem00_SetupAction(EnItem00* this, EnItem00ActionFunc actionFunc) {
@@ -439,6 +491,10 @@ void EnItem00_Init(Actor* thisx, PlayState* play) {
             yOffset = 0.0f;
             shadowScale = 0.6f;
             this->actor.world.rot.x = 0x4000;
+            break;
+        case ITEM00_MAX:
+            Actor_Kill(&this->actor);
+            return;
             break;
     }
 
@@ -844,6 +900,7 @@ void EnItem00_Update(Actor* thisx, PlayState* play) {
         return;
     }
 
+    insertSpawnResource(this->actor.entryNum, 100000);
     switch (this->actor.params) {
         case ITEM00_RUPEE_GREEN:
             Item_Give(play, ITEM_RUPEE_GREEN);
@@ -1668,6 +1725,16 @@ EnItem00* Item_DropCollectible2(PlayState* play, Vec3f* spawnPos, s16 params) {
 }
 
 void Item_DropCollectibleRandom(PlayState* play, Actor* fromActor, Vec3f* spawnPos, s16 params) {
+    if (Rand_ZeroOne() < 0.25f)
+        Item_DropCollectibleRandom1(play, fromActor, spawnPos, params, 0);
+}
+
+void Item_DropCollectibleRandomSmall(PlayState* play, Actor* fromActor, Vec3f* spawnPos, s16 params) {
+    if (Rand_ZeroOne() < 0.5f)
+        Item_DropCollectibleRandom1(play, fromActor, spawnPos, params, 1);
+}
+
+void Item_DropCollectibleRandom1(PlayState* play, Actor* fromActor, Vec3f* spawnPos, s16 params, s16 mod) {
     s32 pad;
     EnItem00* spawnedActor;
     s16 dropQuantity;
@@ -1705,7 +1772,7 @@ void Item_DropCollectibleRandom(PlayState* play, Actor* fromActor, Vec3f* spawnP
                 dropTableIndex = 1;
             }
         }
-        if (fromActor->dropFlag & 0x20) {
+        if (fromActor->dropFlag & 0x20 && (Rand_ZeroOne() <= 0.01f)) {
             dropId = ITEM00_RUPEE_PURPLE;
         } else {
             dropId = sItemDropIds[params + dropTableIndex];
@@ -1759,7 +1826,11 @@ void Item_DropCollectibleRandom(PlayState* play, Actor* fromActor, Vec3f* spawnP
     }
 
     if (dropId != 0xFF && (!CVar_GetS32("gNoHeartDrops", 0) || dropId != ITEM00_HEART)) {
-        dropQuantity = sDropQuantities[params + dropTableIndex];
+        //Provide the regular variety of drops when in Kokiri Village prior to the Deku Tree's death, change this afterwards to reduced drops
+        if (mod)
+            dropQuantity = !(gSaveContext.eventChkInf[0] & (1<<7)) ? sDropQuantities[params + dropTableIndex] : sDropQuantitiesAlt[params + dropTableIndex];
+        else
+            dropQuantity = sDropQuantities[params + dropTableIndex];
         while (dropQuantity > 0) {
             if (!param8000) {
                 dropId = func_8001F404(dropId);
