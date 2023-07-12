@@ -873,7 +873,8 @@ bool Scene_CommandCollisionHeader(PlayState* play, Ship::SceneCommand* cmd)
             colHeader->surfaceTypeList[i].data[0] = colRes->polygonTypes[i] >> 32;
             colHeader->surfaceTypeList[i].data[1] = colRes->polygonTypes[i] & 0xFFFFFFFF;
 
-            if (play->sceneNum == SCENE_HAKAANA_OUKE && (i == 0x9 || i == 0xA)) {
+            if ((play->sceneNum == SCENE_HAKAANA_OUKE && (i == 0x9 || i == 0xA)) ||
+                (play->sceneNum == 0x8 && ((colHeader->surfaceTypeList[i].data[0] >> 13) == 2))) {//Well surfaces doing spike damage become voidouts
                 colHeader->surfaceTypeList[i].data[0] |= 0x14 << 24;
             }
         }
