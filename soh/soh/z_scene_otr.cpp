@@ -257,6 +257,19 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, Ship::ActorSp
             { -1, 2, { 0xA, 1944,4681,-393, 0,24394,0, 0x07CD }},
         } },
     } },
+    { 0x8, {//Well
+        { 0x00, {
+            { -1, 32, { ACTOR_ELF_MSG2, -627, 97, -1553,  2,0,1, (0x3F<<8)|0xB3 }},
+            { -1, 34, { ACTOR_ELF_MSG2, -986, 59, 87,  2,0,1, (0x3F<<8)|0xB4 }},
+            { -1, -1, { ACTOR_ELF_MSG2, 1186, 97, -1500,  2,0,1, (0x3F<<8)|0xB6 }},
+            { -1, -1, { ACTOR_ELF_MSG2, 865, 40, 305,  2,0,1, (0x3F<<8)|0xB8 }},
+            { -1, -1, { ACTOR_ELF_MSG2, 865, 40, 115,  2,0,1, (0x3F<<8)|0xB7 }},
+            { -1, -1, { ACTOR_ELF_MSG2, 0, 80, -745,  2,0,1, (0x3F<<8)|0xB9 }},
+        } },
+        { 0x02, {
+            { -1, -1, { ACTOR_ELF_MSG2, -2145, 10, -615,  2,0,1, (0x3F<<8)|0xB5 }},
+        } },
+    } },
     { 0x55, { // Kokiri Forest
         { 0x00, {//Village
             //{ -1, -1, { ACTOR_EN_ITEM00, 1297, 240, -553, 0, 0, 0, 0x0800+(uint16_t)ITEM00_HEART_PIECE }},

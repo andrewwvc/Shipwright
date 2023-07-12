@@ -280,6 +280,80 @@ extern "C" void OTRMessage_Init()
         }
     );
 
+    u16 ElfMsg = 0x0100;
+    CustomMessageManager::Instance->CreateMessage(
+        questMessageTableID, ElfMsg+0xB2,
+        {
+          TEXTBOX_TYPE_BLUE, TEXTBOX_POS_BOTTOM,
+          "\x22""Dread the touch&of we the living dead.\x22",
+          "",
+          "",
+        }
+    );
+    CustomMessageManager::Instance->CreateMessage(
+        questMessageTableID, ElfMsg+0xB3,
+        {
+          TEXTBOX_TYPE_BLUE, TEXTBOX_POS_BOTTOM,
+          "\x22""Respect the ears&of us the living dead.&Sound disturbs our rest.\x22",
+          "",
+          "",
+        }
+    );
+    CustomMessageManager::Instance->CreateMessage(
+        questMessageTableID, ElfMsg+0xB4,
+        {
+          TEXTBOX_TYPE_BLUE, TEXTBOX_POS_BOTTOM,
+          "\x22""Do not fear the eyes&of us living dead...&Sight is no longer with us.\x22",
+          "",
+          "",
+        }
+    );
+    CustomMessageManager::Instance->CreateMessage(
+        questMessageTableID, ElfMsg+0xB5,
+        {
+          TEXTBOX_TYPE_BLUE, TEXTBOX_POS_BOTTOM,
+          "\x22""Taking out and putting away&weapons, what irksome sounds&are those to us!\x22",
+          "",
+          "",
+        }
+    );
+    CustomMessageManager::Instance->CreateMessage(
+        questMessageTableID, ElfMsg+0xB6,
+        {
+          TEXTBOX_TYPE_BLUE, TEXTBOX_POS_BOTTOM,
+          "\x22""Those who tread too quickly&and hastily are most irksome&to us!\x22",
+          "",
+          "",
+        }
+    );
+    CustomMessageManager::Instance->CreateMessage(
+        questMessageTableID, ElfMsg+0xB7,
+        {
+          TEXTBOX_TYPE_BLUE, TEXTBOX_POS_BOTTOM,
+          "\x22""When meeting our master,&above all, do not panic.\x22",
+          "",
+          "",
+        }
+    );
+    CustomMessageManager::Instance->CreateMessage(
+        questMessageTableID, ElfMsg+0xB8,
+        {
+          TEXTBOX_TYPE_BLUE, TEXTBOX_POS_BOTTOM,
+          "\x22""Down here, even the faintest&light of the sun cannot reach.^We are thankful for that.\x22",
+          "",
+          "",
+        }
+    );
+    CustomMessageManager::Instance->CreateMessage(
+        questMessageTableID, ElfMsg+0xB9,
+        {
+          TEXTBOX_TYPE_BLUE, TEXTBOX_POS_BOTTOM,
+          "\x22""Those who do not disturb us&need not worry.\x22",
+          "",
+          "",
+        }
+    );
+
     //Get Item Text
     MakeBlueMsgEng(0x810, "You received an Icon of Magic Power!&This will increase your magic capacity.&It looks awfully like an ordinary&magic jar though.");
     MakeBlueMsgEng(0x811, "You received some Horse Food!&This will add a boost&to Epona's stamina.&Carrots are delicious!");
@@ -308,6 +382,7 @@ extern "C" void OTRMessage_Init()
     MakeBlueMsgEng(0x060C, "%wKing Dodongo&%cThis is a huge Dodongo that loves&eating %wfresh%c bomb flowers! Give it a&jolt, and finish it with your %wsword%c!");
     MakeBlueMsgEng(0x060F, "%wLizalfos&%cThese sword weilding enemies may be&able to change the angle they attack&from if you hold up your shield.^%cBut a sneaky attack to your side&can still be blocked if you&%wstop%c holding %w\xA3%c while targeting!");
     MakeBlueMsgEng(0x0610, "%wDinolfos&%cThese sword weilding enemies may be&able to change the angle they attack&from if you hold up your shield.^%cBut a sneaky attack to your side&can still be blocked if you&%wstop%c holding %w\xA3%c while targeting!");
+    MakeBlueMsgEng(0x062F, "%wDead Hand&%c\x0F, just try to stay calm...");
     MakeBlueMsgEng(0x0635, "%wIron Knuckle&%cBeware of the incredibly strong axe!&You may need to use different dodges&depending on how they attack!");
     MakeBlueMsgEng(EnemyMsg+0, "%wIron Knuckle&%cBeware of the incredibly strong axe!&You may need to use different dodges&depending on how they attack!^%cYou're an adult now, so if you're&%w\xA4 Targeting%c, hold %w\xA3%c in order to let&high swings pass over your head.");
 
