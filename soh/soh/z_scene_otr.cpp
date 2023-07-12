@@ -551,9 +551,9 @@ bool Scene_CommandActorList(PlayState* play, Ship::SceneCommand* cmd) {
 
     play->numSetupActors = cmdActor->entries.size();
 
-    // if (cmdActor->cachedGameData != nullptr)
-    //     play->setupActorList = (ActorEntry*)cmdActor->cachedGameData;
-    // else
+    if (cmdActor->cachedGameData != nullptr)
+        play->setupActorList = (ActorEntry*)cmdActor->cachedGameData;
+    else
     {
         if (sceneActorOverrides.find(play->sceneNum) != sceneActorOverrides.end() &&
                         sceneActorOverrides.at(play->sceneNum).find(play->roomCtx.curRoom.num) != sceneActorOverrides.at(play->sceneNum).end()) {
@@ -674,7 +674,7 @@ bool Scene_CommandActorList(PlayState* play, Ship::SceneCommand* cmd) {
             entries[i].pos.x, entries[i].pos.y, entries[i].pos.z, entries[i].rot.x, entries[i].rot.y, entries[i].rot.z);
         }
 
-        //cmdActor->cachedGameData = entries;
+        cmdActor->cachedGameData = entries;
         play->setupActorList = entries;
     }
 
