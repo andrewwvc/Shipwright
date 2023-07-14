@@ -975,7 +975,9 @@ extern "C" void OTRMessage_Init()
 
     MakeNormalMsgEng(KokiriMsg+35, "Hey, you look like a fella&strong enough to wack down&a whole tree!^If you were so big you&could give a big wack to the&top of one, it might&just fall over.");
     MakeNormalMsgEng(KokiriMsg+36, "Ohh, I think you might look like&one of those cave people&someone was talking about.^I think he saw one of them&in the Lost Woods once.");
-
+    MakeNormalMsgEng(0x103E, "Do you want to know how to use&the %y\xA5 Button%w? Or the %rshield%w?&\x1B%y\xA5 %gButton&Shield%w\x02");
+    MakeNormalMsgEng(0x1040, "I'll teach you how to use your&%rshield%w. Pressing \xA3 will bring&it up and let you defend&against attacks to your front.^But holding \xA3 will raise your %btension%w,&which may make you look a&little blue, and stop you attacking&until you've released \xA3 for a while.^Using \xA4 targeting, holding up your&shield will let you move around while&defending your face, but may not guard&your legs from low hits.^Without using \xA4 targeting, you will&duck and can move your shield with&the %c\xAA stick%w, which could be useful&and may block some low attacks.^Are you ready for more tips?&\x1B&%gYes please!&Not Now%w\x02");
+    MakeNormalMsgEng(KokiriMsg+37, "Ok, here are some advanced&%rshield%w tips!^Holding up your shield while an&enemy leaps over you may make&them difficult to see, and this&can break your \xA4 targeting lock!^So you might want to let&go of \xA3 while an enemy is&overhead if you want to&keep targeting them!^Also, some enemies may have attacks&that hit you from the side, that&will actually get around your shield!^The secret to guarding these?&\xA4 target, but %rdon't%w hold \xA3, your&shield will stay at your side and&protect you from these tricky moves.^Still, be careful though, as some&enemies may be able to force you&into %btension%w with their attacks!^Good luck \x0F!");
 
     u16 MidoMsg = TextIDAllocator::Instance->allocateRange("mido", 30);
 

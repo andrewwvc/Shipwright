@@ -697,6 +697,10 @@ s16 func_80A97738(PlayState* play, Actor* thisx) {
                         this->actor.textId = (play->msgCtx.choiceIndex == 0) ? 0x103F : 0x1040;
                         Message_ContinueTextbox(play, this->actor.textId);
                         break;
+                    case 0x1040:
+                        this->actor.textId = (play->msgCtx.choiceIndex == 0) ? KokiriMsg+37 : 0x103B;
+                        Message_ContinueTextbox(play, this->actor.textId);
+                        break;
                     case 0x10B7:
                         gSaveContext.infTable[11] |= 0x1000;
 
