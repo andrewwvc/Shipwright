@@ -540,8 +540,6 @@ Entity 40	 ID: 0x1ae, 	Params: 0xfc25, 	pos: -311,1500,-393, 	0,-4915,0
 -673,1192,747
 */
 
-#define DEKU_TREE_DEAD (gSaveContext.eventChkInf[0] & (1<<7))
-
 bool isResourceRestored(auto val) {
    return val->second > gSaveContext.savedFrameCount;
 }

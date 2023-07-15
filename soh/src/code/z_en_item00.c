@@ -1828,7 +1828,7 @@ void Item_DropCollectibleRandom1(PlayState* play, Actor* fromActor, Vec3f* spawn
     if (dropId != 0xFF && (!CVar_GetS32("gNoHeartDrops", 0) || dropId != ITEM00_HEART)) {
         //Provide the regular variety of drops when in Kokiri Village prior to the Deku Tree's death, change this afterwards to reduced drops
         if (mod)
-            dropQuantity = !(gSaveContext.eventChkInf[0] & (1<<7)) ? sDropQuantities[params + dropTableIndex] : sDropQuantitiesAlt[params + dropTableIndex];
+            dropQuantity = !(DEKU_TREE_DEAD) ? sDropQuantities[params + dropTableIndex] : sDropQuantitiesAlt[params + dropTableIndex];
         else
             dropQuantity = sDropQuantities[params + dropTableIndex];
         while (dropQuantity > 0) {
