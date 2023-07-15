@@ -123,6 +123,8 @@ s32 EnKusa_SnapToFloor(EnKusa* this, PlayState* play, f32 yOffset) {
     }
 }
 
+#define RECEIVE_SEEDS (!DEKU_TREE_DEAD || (AMMO(ITEM_SLINGSHOT) < 6) || (Rand_ZeroOne() < 0.2f))
+
 void EnKusa_DropCollectible(EnKusa* this, PlayState* play) {
     s16 dropParams;
 
@@ -141,12 +143,15 @@ void EnKusa_DropCollectible(EnKusa* this, PlayState* play) {
             if (CVar_GetS32("gNoRandomDrops", 0)) {
             }
             else if (CVar_GetS32("gNoHeartDrops", 0)) {
-                Item_DropCollectible(play, &this->actor.world.pos, ITEM00_SEEDS);
+                if (RECEIVE_SEEDS)
+                    Item_DropCollectible(play, &this->actor.world.pos, ITEM00_SEEDS);
             }
             else if (Rand_ZeroOne() < 0.5f) {
-                Item_DropCollectible(play, &this->actor.world.pos, ITEM00_SEEDS);
+                if (RECEIVE_SEEDS)
+                    Item_DropCollectible(play, &this->actor.world.pos, ITEM00_SEEDS);
             } else {
-                Item_DropCollectible(play, &this->actor.world.pos, ITEM00_HEART);
+                if (gSaveContext.health <= 0x30)
+                    Item_DropCollectible(play, &this->actor.world.pos, ITEM00_HEART);
             }
             break;
         case ENKUSA_TYPE_3:
