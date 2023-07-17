@@ -80,6 +80,12 @@ bool Scene_CommandSpawnList(PlayState* play, Ship::SceneCommand* cmd)
 }
 
 const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, Ship::ActorSpawnEntry>>>> sceneActorOverrides = {
+    { 0x4, {
+        { 0x0A, {
+            { -1, -1, { ACTOR_EN_ZF, -1925,2800,780, 0,24394,0, 0xFFFF }},
+            { -1, -1, { ACTOR_EN_ZF, -1740,2800,-1060, 0,24394,0, 0xFFFF }},
+        } },
+    } },
     {SCENE_SPOT00, {
         {0x0, {
             {2, -1, {ACTOR_EN_MB, -4010,-300,1700, 0,8104,0, 0xffff}},
