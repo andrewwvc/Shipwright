@@ -420,13 +420,31 @@ void func_80AFD7B4(EnSkb* this, PlayState* play) {
 void func_80AFD880(EnSkb* this, PlayState* play) {
     if (BodyBreak_SpawnParts(&this->actor, &this->bodyBreak, play, 1)) {
         if (this->actor.scale.x == 0.01f) {
-            Item_DropCollectibleRandom(play, &this->actor, &this->actor.world.pos, 0x10);
+            if (Rand_ZeroOne() < 0.6f)
+                Item_DropCollectibleRandom1(play, &this->actor, &this->actor.world.pos, 0x10, 0);
         } else if (this->actor.scale.x <= 0.015f) {
             Item_DropCollectible(play, &this->actor.world.pos, ITEM00_RUPEE_BLUE);
         } else {
-            Item_DropCollectible(play, &this->actor.world.pos, ITEM00_RUPEE_RED);
-            Item_DropCollectible(play, &this->actor.world.pos, ITEM00_RUPEE_RED);
-            Item_DropCollectible(play, &this->actor.world.pos, ITEM00_RUPEE_RED);
+            ActorEntry ae;
+            ae.id = this->actor.id;
+            ae.pos.x = 0.0f;
+            ae.pos.y = 0.0f;
+            ae.pos.z = 0.0f;
+            ae.rot.x = 0.0f;
+            ae.rot.y = 0.0f;
+            ae.rot.z = 0.0f;
+            ae.params = this->actor.params;
+            if (!isResourceUsed(play, &ae, 0)) {
+                s32 entVal = -1;
+                entVal = createTempEntry(play, &ae);
+                this->actor.entryNum = entVal;
+                for (s16 ii = 0; ii < 3; ii++) {
+                    EnItem00* item = Item_DropCollectible(play, &this->actor.world.pos, ITEM00_RUPEE_RED);
+                    if (item) {
+                        item->actor.entryNum = this->actor.entryNum;
+                    }
+                }
+            }
         }
 
         this->unk_283 |= 8;
