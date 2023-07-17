@@ -3,7 +3,7 @@
  * Overlay: ovl_En_Zf
  * Description: Lizalfos and Dinolfos
  */
-#define INCLUDE_GAME_PRINTF
+
 #include "z_en_zf.h"
 #include "objects/object_zf/object_zf.h"
 
@@ -1041,7 +1041,7 @@ void func_80B4543C(EnZf* this, PlayState* play) {
     SkelAnime_Update(&this->skelAnime);
 
     if (!EnZf_DodgeRangedEngaging(play, this)) {
-        if (this->actor.params == ENZF_TYPE_DINOLFOS) {
+        if (0 /*this->actor.params == ENZF_TYPE_DINOLFOS*/) {
             if (this->unk_3F4 != 0) {
                 this->unk_3F4--;
                 if (angleToPlayer >= 0x1FFE) {
@@ -1065,7 +1065,7 @@ void func_80B4543C(EnZf* this, PlayState* play) {
             if (Actor_IsFacingPlayer(&this->actor, 30 * 0x10000 / 360)) {
                 if ((this->actor.xzDistToPlayer < 200.0f) && (this->actor.xzDistToPlayer > 100.0f) &&
                     (Rand_ZeroOne() < 0.3f)) {
-                    if (this->actor.params == ENZF_TYPE_DINOLFOS) {
+                    if (0 && this->actor.params == ENZF_TYPE_DINOLFOS) {
                         this->actor.world.rot.y = this->actor.shape.rot.y = this->actor.yawTowardsPlayer;
                         EnZf_SetupJumpForward(this);
                     } else {
@@ -1225,7 +1225,7 @@ void EnZf_ApproachPlayer(EnZf* this, PlayState* play) {
             }
         }
 
-        if (this->actor.params == ENZF_TYPE_DINOLFOS) {
+        if (0 && this->actor.params == ENZF_TYPE_DINOLFOS) {
             if (EnZf_ChooseAction(play, this)) {
                 return;
             }
@@ -1299,7 +1299,7 @@ void EnZf_JumpForward(EnZf* this, PlayState* play) {
         Audio_PlayActorSound2(&this->actor, NA_SE_EN_RIZA_CRY);
     }
 
-    if ((this->actor.params == ENZF_TYPE_DINOLFOS) && (this->actor.bgCheckFlags & 3)) {
+    if (0 && (this->actor.params == ENZF_TYPE_DINOLFOS) && (this->actor.bgCheckFlags & 3)) {
         if (EnZf_CanAttackSlash(play, this)) {
             EnZf_SetupSlash(this);
         } else {
@@ -1322,7 +1322,7 @@ void func_80B46098(EnZf* this, PlayState* play) {
     s16 phi_v1;
 
     if (!EnZf_DodgeRangedEngaging(play, this)) {
-        if ((this->actor.params != ENZF_TYPE_DINOLFOS) || !EnZf_ChooseAction(play, this)) {
+        if (/*(this->actor.params != ENZF_TYPE_DINOLFOS) ||*/ 1 || !EnZf_ChooseAction(play, this)) {
             temp_v0 = this->actor.yawTowardsPlayer - this->actor.shape.rot.y;
 
             if (temp_v0 > 0) {
@@ -1402,7 +1402,7 @@ void func_80B463E4(EnZf* this, PlayState* play) {
     Math_SmoothStepToS(&this->actor.shape.rot.y, this->actor.yawTowardsPlayer, 1, 4000, 1);
 
     if (!EnZf_DodgeRangedEngaging(play, this) &&
-        ((this->actor.params != ENZF_TYPE_DINOLFOS) || !EnZf_ChooseAction(play, this))) {
+        (/*(this->actor.params != ENZF_TYPE_DINOLFOS)*/ 1 || !EnZf_ChooseAction(play, this))) {
         this->actor.world.rot.y = this->actor.shape.rot.y + 0x3A98;
         angleBehindPlayer = player->actor.shape.rot.y + 0x8000;
 
@@ -1549,7 +1549,7 @@ void EnZf_Slash(EnZf* this, PlayState* play) {
     if (SkelAnime_Update(&this->skelAnime)) {
         EffectBlure_AddSpace(Effect_GetByIndex(this->blureIndex));
 
-        if ((this->actor.params == ENZF_TYPE_DINOLFOS) && !Actor_IsFacingPlayer(&this->actor, 5460)) {
+        if (0 && (this->actor.params == ENZF_TYPE_DINOLFOS) && !Actor_IsFacingPlayer(&this->actor, 5460)) {
             func_80B45384(this);
             this->unk_3F0 = Rand_ZeroOne() * 5.0f + 5.0f;
             this->unk_3F4 = Rand_ZeroOne() * 20.0f + 100.0f;
@@ -1816,7 +1816,7 @@ void EnZf_Stunned(EnZf* this, PlayState* play) {
     if ((this->actor.colorFilterTimer == 0) && (this->actor.bgCheckFlags & 1)) {
         if (this->actor.colChkInfo.health == 0) {
             EnZf_SetupDie(this);
-        } else if ((this->actor.params != ENZF_TYPE_DINOLFOS) || !EnZf_ChooseAction(play, this)) {
+        } else if (/*(this->actor.params != ENZF_TYPE_DINOLFOS)*/ 1 || !EnZf_ChooseAction(play, this)) {
             if (D_80B4A1B4 != -1) {
                 //func_80B44DC4(this, play);
                 EnZf_SetupCircleAroundPlayer(this,8.0f);
@@ -1829,7 +1829,7 @@ void EnZf_Stunned(EnZf* this, PlayState* play) {
                     this->actor.world.rot.y = this->actor.shape.rot.y;
                     EnZf_SetupJumpUp(this);
                 } else if (!EnZf_DodgeRangedEngaging(play, this)) {
-                    if (this->actor.params != ENZF_TYPE_DINOLFOS) {
+                    if (1 /*this->actor.params != ENZF_TYPE_DINOLFOS*/) {
                         //func_80B44DC4(this, play);
                         EnZf_SetupCircleAroundPlayer(this,8.0f);
                     } else if ((this->actor.xzDistToPlayer <= 100.0f) && ((play->gameplayFrames % 4) != 0) &&
@@ -2148,7 +2148,7 @@ void EnZf_Damaged(EnZf* this, PlayState* play) {
 
     Math_SmoothStepToS(&this->actor.shape.rot.y, this->actor.yawTowardsPlayer, 1, 4500, 0);
 
-    if (((this->actor.params != ENZF_TYPE_DINOLFOS) || !EnZf_ChooseAction(play, this)) &&
+    if ((/*(this->actor.params != ENZF_TYPE_DINOLFOS)*/ 1 || !EnZf_ChooseAction(play, this)) &&
         SkelAnime_Update(&this->skelAnime) && (this->actor.bgCheckFlags & 1)) {
 
         if (D_80B4A1B4 != -1) {
@@ -2175,7 +2175,7 @@ void EnZf_Damaged(EnZf* this, PlayState* play) {
                 (ABS(wallYawDiff) < 12000) && (this->actor.xzDistToPlayer < 90.0f)) {
                 EnZf_SetupJumpUp(this);
             } else if (!EnZf_DodgeRangedEngaging(play, this)) {
-                if (this->actor.params != ENZF_TYPE_DINOLFOS) {
+                if (1 /*this->actor.params != ENZF_TYPE_DINOLFOS*/) {
                     this->actor.world.rot.y = this->actor.shape.rot.y;
 
                     if (!EnZf_PrimaryFloorCheck(this, play, 135.0f) && (this->actor.xzDistToPlayer < 90.0f)) {
@@ -2367,7 +2367,7 @@ void EnZf_CircleAroundPlayer(EnZf* this, PlayState* play) {
         } else {
             EnZf_SetupApproachPlayer(this, play);
         }
-    } else if ((this->actor.params != ENZF_TYPE_DINOLFOS) || (!EnZf_ChooseAction(play, this))) {
+    } else if (/*(this->actor.params != ENZF_TYPE_DINOLFOS)*/ 1 || (!EnZf_ChooseAction(play, this))) {
         if (this->unk_3F0 == 0) {
             phi_v0_4 = player->actor.shape.rot.y - this->actor.shape.rot.y;
 
