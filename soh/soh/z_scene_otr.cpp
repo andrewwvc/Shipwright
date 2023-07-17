@@ -256,6 +256,10 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, Ship::ActorSp
         { 0x08, {
             { -1, 2, { 0xA, 1944,4681,-393, 0,24394,0, 0x07CD }},
         } },
+        { 0x0A, {
+            { -1, -1, { ACTOR_EN_ZF, -1925,2800,780, 0,24394,0, 0xFFFF }},
+            { -1, -1, { ACTOR_EN_ZF, -1740,2800,-1060, 0,24394,0, 0xFFFF }},
+        } },
     } },
     { 0x8, {//Well
         { 0x00, {
