@@ -173,6 +173,7 @@ void EnSkb_Init(Actor* thisx, PlayState* play) {
     this->collider.elements[1].dim.modelSphere.radius = paramOffsetArm;
     this->actor.home.pos = this->actor.world.pos;
     this->actor.floorHeight = this->actor.world.pos.y;
+    this->walkTimer = 0;
     func_80AFCDF8(this);
 }
 
@@ -195,7 +196,7 @@ void func_80AFCD60(EnSkb* this) {
     // Don't despawn stallchildren during daytime when enemy randomizer is enabled.
     if (IS_DAY && !CVar_GetS32("gRandomizedEnemies", 0)) {
         func_80AFCF48(this);
-    } else if (Actor_IsFacingPlayer(&this->actor, 0x11C7) &&
+    } else if (Actor_IsFacingPlayer(&this->actor, 0x11C7) && (this->walkTimer < 1) &&
                (this->actor.xzDistToPlayer < ATTACK_TRIGGER_DIST_MULT*(60.0f + (this->actor.params * 6.0f)))) {
         func_80AFD33C(this);
     } else {
@@ -293,7 +294,7 @@ void EnSkb_Advance(EnSkb* this, PlayState* play) {
     // Don't despawn stallchildren during daytime or when a stalchildren walks too far away from his "home" when enemy randomizer is enabled.
     if ((Math_Vec3f_DistXZ(&this->actor.home.pos, &player->actor.world.pos) > 800.0f || IS_DAY) && !CVar_GetS32("gRandomizedEnemies", 0)) {
         func_80AFCF48(this);
-    } else if (Actor_IsFacingPlayer(&this->actor, 0x11C7) &&
+    } else if (Actor_IsFacingPlayer(&this->actor, 0x11C7) && (this->walkTimer < 1) &&
                (this->actor.xzDistToPlayer < ATTACK_TRIGGER_DIST_MULT*(60.0f + (this->actor.params * 6.0f)))) {
         func_80AFD33C(this);
     }
@@ -324,6 +325,8 @@ void EnSkb_SetupAttack(EnSkb* this, PlayState* play) {
         this->collider.base.atFlags &= ~6;
         func_80AFD47C(this);
     } else if (SkelAnime_Update(&this->skelAnime) != 0) {
+        if (Rand_ZeroOne() < 0.3333f)
+            this->walkTimer = 5;
         func_80AFCD60(this);
     }
 }
@@ -510,11 +513,15 @@ void EnSkb_Update(Actor* thisx, PlayState* play) {
     this->actionFunc(this, play);
     this->actor.focus.pos = this->actor.world.pos;
     this->actor.focus.pos.y += (3000.0f * this->actor.scale.y);
+    DECR(this->walkTimer);
     
-    if (this->unk_281 != 0)
+    if (this->unk_281 != 0) {
         this->collider.elements[0].info.toucherFlags |= AT_ON;
-    else
+        this->collider.elements[1].info.toucherFlags &= ~AT_ON;
+    } else {
         this->collider.elements[0].info.toucherFlags &= ~AT_ON;
+        this->collider.elements[1].info.toucherFlags |= AT_ON;
+    }
         
     if ((this->unk_280 != 0) && (this->unk_280 != 2) && (this->unk_280 != 6) &&
                     ((this->actor.colorFilterTimer == 0) || ((this->actor.colorFilterParams & 0x4000) == 0)))
