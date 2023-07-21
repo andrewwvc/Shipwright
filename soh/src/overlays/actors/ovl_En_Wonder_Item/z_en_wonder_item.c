@@ -74,6 +74,9 @@ void EnWonderItem_DropCollectible(EnWonderItem* this, PlayState* play, s32 autoC
     };
     s32 i;
     s32 randomDrop;
+    s32 resourceTimeMultiplier = 1;
+    if (this->itemDrop == 10)
+        resourceTimeMultiplier = 2;
 
     func_80078884(NA_SE_SY_GET_ITEM);
 
@@ -96,7 +99,7 @@ void EnWonderItem_DropCollectible(EnWonderItem* this, PlayState* play, s32 autoC
             }
         }
     }
-    insertSpawnResource(this->actor.entryNum, 100000);
+    insertSpawnResource(this->actor.entryNum, DEFAULT_RESOURCE_TIME*resourceTimeMultiplier);
     if (this->switchFlag >= 0) {
         Flags_SetSwitch(play, this->switchFlag);
     }

@@ -255,7 +255,7 @@ void func_809DF7D8(EnCow* this, PlayState* play) {
         Message_CloseTextbox(play);
         this->actionFunc = func_809DF778;
         this->actor.home.rot.z = 1;
-        insertSpawnResource(this->actor.entryNum, 100000);
+        insertSpawnResource(this->actor.entryNum, DEFAULT_RESOURCE_TIME);
         func_8002F434(&this->actor, play, GI_MILK, 10000.0f, 100.0f);
     }
 }

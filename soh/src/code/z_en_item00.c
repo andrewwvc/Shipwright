@@ -900,7 +900,7 @@ void EnItem00_Update(Actor* thisx, PlayState* play) {
         return;
     }
 
-    insertSpawnResource(this->actor.entryNum, 100000);
+    s32 resourceTimeMultiplier = 1;
     switch (this->actor.params) {
         case ITEM00_RUPEE_GREEN:
             Item_Give(play, ITEM_RUPEE_GREEN);
@@ -910,12 +910,15 @@ void EnItem00_Update(Actor* thisx, PlayState* play) {
             break;
         case ITEM00_RUPEE_RED:
             Item_Give(play, ITEM_RUPEE_RED);
+            resourceTimeMultiplier = 2;
             break;
         case ITEM00_RUPEE_PURPLE:
             Item_Give(play, ITEM_RUPEE_PURPLE);
+            resourceTimeMultiplier = 3;
             break;
         case ITEM00_RUPEE_ORANGE:
             Item_Give(play, ITEM_RUPEE_GOLD);
+            resourceTimeMultiplier = 4;
             break;
         case ITEM00_STICK:
             getItemId = GI_STICKS_1;
@@ -981,6 +984,8 @@ void EnItem00_Update(Actor* thisx, PlayState* play) {
             Item_Give(play, ITEM_BOMBCHUS_5);
             break;
     }
+
+    insertSpawnResource(this->actor.entryNum, DEFAULT_RESOURCE_TIME*resourceTimeMultiplier);
 
     params = &this->actor.params;
 
