@@ -508,19 +508,21 @@ bool Scene_CommandActorList(PlayState* play, Ship::SceneCommand* cmd) {
     //     play->setupActorList = (ActorEntry*)cmdActor->cachedGameData;
     // else
     {
-        if (sceneActorOverrides.find(play->sceneNum) != sceneActorOverrides.end() &&
-                        sceneActorOverrides.at(play->sceneNum).find(play->roomCtx.curRoom.num) != sceneActorOverrides.at(play->sceneNum).end()) {
-            auto& roomOverrides = sceneActorOverrides.at(play->sceneNum).at(play->roomCtx.curRoom.num);
-            for (auto& [setup, index, entry] : roomOverrides) {
-                if (setup == -1 || setup == gSaveContext.sceneSetupIndex) {
-                    if (index == -1) {
-                        cmdActor->entries.push_back(entry);
-                    } else {
-                        cmdActor->entries[index] = entry;
+        if (cmdActor->cachedGameData == nullptr) {
+            if (sceneActorOverrides.find(play->sceneNum) != sceneActorOverrides.end() &&
+                            sceneActorOverrides.at(play->sceneNum).find(play->roomCtx.curRoom.num) != sceneActorOverrides.at(play->sceneNum).end()) {
+                auto& roomOverrides = sceneActorOverrides.at(play->sceneNum).at(play->roomCtx.curRoom.num);
+                for (auto& [setup, index, entry] : roomOverrides) {
+                    if (setup == -1 || setup == gSaveContext.sceneSetupIndex) {
+                        if (index == -1) {
+                            cmdActor->entries.push_back(entry);
+                        } else {
+                            cmdActor->entries[index] = entry;
+                        }
                     }
                 }
+                play->numSetupActors = cmdActor->entries.size();
             }
-            play->numSetupActors = cmdActor->entries.size();
         }
 
         SPDLOG_INFO("Scene: 0x{0:x}, Room: 0x{1:x}, Setup: 0x{2:x}", (uint16_t)play->sceneNum, (uint16_t)play->roomCtx.curRoom.num, (uint32_t)gSaveContext.sceneSetupIndex);
@@ -627,7 +629,7 @@ bool Scene_CommandActorList(PlayState* play, Ship::SceneCommand* cmd) {
             entries[i].pos.x, entries[i].pos.y, entries[i].pos.z, entries[i].rot.x, entries[i].rot.y, entries[i].rot.z);
         }
 
-        //cmdActor->cachedGameData = entries;
+        cmdActor->cachedGameData = entries;
         play->setupActorList = entries;
     }
 
