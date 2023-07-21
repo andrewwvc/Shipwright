@@ -399,6 +399,7 @@ void SaveManager::InitFileImpl(bool isDebug) {
 }
 
 const static u8 INITIAL_BOOSTS = 6;
+const static u16 INITIAL_MULTIPLIER = INITIAL_GALLERY_MULTIPLIER;
 
 void SaveManager::InitFileNormal() {
     gSaveContext.totalDays = 0;
@@ -559,6 +560,10 @@ void SaveManager::InitFileNormal() {
     gSaveContext.MalonRideDay = 0;
     gSaveContext.maxBoosts = INITIAL_BOOSTS;
     gSaveContext.extraMagicPower = 0;
+    gSaveContext.galleryMultplierChild = INITIAL_MULTIPLIER;
+    gSaveContext.galleryMultplierAdult = INITIAL_MULTIPLIER;
+    gSaveContext.galleryTimeChild = 0;
+    gSaveContext.galleryTimeAdult = 0;
     UsedResources = {};
 
     //RANDOTODO (ADD ITEMLOCATIONS TO GSAVECONTEXT)
@@ -1357,6 +1362,10 @@ void SaveManager::LoadBaseVersion3() {
     SaveManager::Instance->LoadData("MalonRideDay", gSaveContext.MalonRideDay);
     SaveManager::Instance->LoadData("maxBoosts", gSaveContext.maxBoosts, INITIAL_BOOSTS);
     SaveManager::Instance->LoadData("extraMagicPower", gSaveContext.extraMagicPower);
+    SaveManager::Instance->LoadData("galleryMultplierChild", gSaveContext.galleryMultplierChild, INITIAL_MULTIPLIER);
+    SaveManager::Instance->LoadData("galleryMultplierAdult", gSaveContext.galleryMultplierAdult, INITIAL_MULTIPLIER);
+    SaveManager::Instance->LoadData("galleryTimeChild", gSaveContext.galleryTimeChild);
+    SaveManager::Instance->LoadData("galleryTimeAdult", gSaveContext.galleryTimeAdult);
 }
 
 void SaveManager::SaveBase() {
@@ -1542,6 +1551,10 @@ void SaveManager::SaveBase() {
     SaveManager::Instance->SaveData("MalonRideDay", gSaveContext.MalonRideDay);
     SaveManager::Instance->SaveData("maxBoosts", gSaveContext.maxBoosts);
     SaveManager::Instance->SaveData("extraMagicPower", gSaveContext.extraMagicPower);
+    SaveManager::Instance->SaveData("galleryMultplierChild", gSaveContext.galleryMultplierChild);
+    SaveManager::Instance->SaveData("galleryMultplierAdult", gSaveContext.galleryMultplierAdult);
+    SaveManager::Instance->SaveData("galleryTimeChild", gSaveContext.galleryTimeChild);
+    SaveManager::Instance->SaveData("galleryTimeAdult", gSaveContext.galleryTimeAdult);
 }
 
 void SaveManager::LoadPersistenceVersion1() {

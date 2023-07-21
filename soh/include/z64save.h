@@ -284,6 +284,11 @@ typedef struct {
     /*        */ s32 MalonRideDay;
     /*        */ u8 maxBoosts;
     /*        */ u8 extraMagicPower;
+    /*        */ u16 galleryMultplierChild;
+    /*        */ u16 galleryMultplierAdult;
+    /*        */ s32 galleryTimeChild;
+    /*        */ s32 galleryTimeAdult;
+
     // #endregion
 } SaveContext; // size = 0x1428
 
