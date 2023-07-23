@@ -382,6 +382,7 @@ extern "C" void OTRMessage_Init()
     MakeBlueMsgEng(0x060C, "%wKing Dodongo&%cThis is a huge Dodongo that loves&eating %wfresh%c bomb flowers! Give it a&jolt, and finish it with your %wsword%c!");
     MakeBlueMsgEng(0x060F, "%wLizalfos&%cThese sword weilding enemies may be&able to change the angle they attack&from if you hold up your shield.^%cBut a sneaky attack to your side&can still be blocked if you&%wstop%c holding %w\xA3%c while targeting!");
     MakeBlueMsgEng(0x0610, "%wDinolfos&%cThese sword weilding enemies may be&able to change the angle they attack&from if you hold up your shield.^%cBut a sneaky attack to your side&can still be blocked if you&%wstop%c holding %w\xA3%c while targeting!");
+    MakeBlueMsgEng(0x0622, "%wFlare Dancer&%cExtinguish its flaming clothes&first... though it seems to&keep them intact by spinning...");
     MakeBlueMsgEng(0x062F, "%wDead Hand&%c\x0F, just try to stay calm...");
     MakeBlueMsgEng(0x0635, "%wIron Knuckle&%cBeware of the incredibly strong axe!&You may need to use different dodges&depending on how they attack!");
     MakeBlueMsgEng(EnemyMsg+0, "%wIron Knuckle&%cBeware of the incredibly strong axe!&You may need to use different dodges&depending on how they attack!^%cYou're an adult now, so if you're&%w\xA4 Targeting%c, hold %w\xA3%c in order to let&high swings pass over your head.");
