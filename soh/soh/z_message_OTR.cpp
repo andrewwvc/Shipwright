@@ -274,7 +274,7 @@ extern "C" void OTRMessage_Init()
         questMessageTableID, WonderMsg+0x40,
         {
           TEXTBOX_TYPE_BLUE, TEXTBOX_POS_MIDDLE,
-          "The fourth day, the darkest&night, a day for testing&and understanding oneself, and&also one that brings mystery.^The fifth, a day loved&by the multitudes, is a day of&festivity and celabration.^And finally the sixth,&the day of rest, one even&more loved by some.",
+          "The fourth day, the darkest&night, a day for testing&and understanding oneself, and&also one that brings mystery.^The fifth, a day loved&by the multitudes, is a day of&festivity and celebration.^And finally the sixth,&the day of rest, one even&more loved by some.",
           "",
           "",
         }
@@ -284,6 +284,23 @@ extern "C" void OTRMessage_Init()
     MakeBlueMsgEng(0x810, "You received an Icon of Magic Power!&This will increase your magic capacity.&It looks awfully like an ordinary&magic jar though.");
     MakeBlueMsgEng(0x811, "You received some Horse Food!&This will add a boost&to Epona's stamina.&Carrots are delicious!");
     MakeBlueMsgEng(0x812, "You received a Heart Barrier! This&will protect one of your hearts,&if you find someone with powerful&enough magic to activate it.");
+
+    MakeBlueMsgEng(0x7,  "\x13\x48You got a&%rDeku Seed Bullet Bag%w.&This bag can hold up to %y"+std::to_string(CAPACITY(UPG_BULLET_BAG,2))+"%w&slingshot bullets.");
+    MakeBlueMsgEng(0x6C, "\x13\x49Your %rDeku Seed Bullet Bag%w&has become bigger!&Now you can carry more bullets!&This bag can hold %y"+std::to_string(CAPACITY(UPG_BULLET_BAG,3))+"%w bullets!");
+    auto& str90 = "\x13\x00Now you can pick up&many %rDeku Sticks%w!&You can carry up to %y";
+    std::string s90(std::begin(str90), std::end(str90)-1);
+    MakeBlueMsgEng(0x90, s90+std::to_string(CAPACITY(UPG_STICKS,2))+"%w of them!");
+    auto& str91 = "\x13\x00Now you can pick up&even more %rDeku Sticks%w!&You can carry up to %y";
+    std::string s91(std::begin(str91), std::end(str91)-1);
+    MakeBlueMsgEng(0x91, s91+std::to_string(CAPACITY(UPG_STICKS,3))+"%w of them!");
+    MakeBlueMsgEng(0xA7, "\x13\x01Now you can carry&many %rDeku Nuts%w!&You can hold up to %y"+std::to_string(CAPACITY(UPG_NUTS,2))+"%w nuts!");
+    MakeBlueMsgEng(0xA8, "\x13\x01Now you can carry even&more %rDeku Nuts%w!You can carry&up to %y"+std::to_string(CAPACITY(UPG_NUTS,3))+"%w nuts!");
+    MakeBlueMsgEng(0x56, "\x13\x4BYou upgraded your quiver to a&%rBig Quiver%w!&Now you can carry more arrows-&%y"+std::to_string(CAPACITY(UPG_QUIVER,2))+"%w in total!");
+    MakeBlueMsgEng(0x57, "\x13\x4BYou upgraded your quiver to&the %rBiggest Quiver%w!&Now you can carry even more&arrows, to a maximum of %y"+std::to_string(CAPACITY(UPG_QUIVER,3))+"%w!");
+    MakeBlueMsgEng(0x59, "\x13\x4EYou got a %rBig Bomb Bag%w!&Now you can carry more&Bombs, up to a maximum of %y"+std::to_string(CAPACITY(UPG_BOMB_BAG,2))+"%w!");
+    MakeBlueMsgEng(0x5A, "\x13\x4FYou got the&%rBiggest Bomb Bag%w!&Now, you can carry up to&%y"+std::to_string(CAPACITY(UPG_BOMB_BAG,3))+"%w Bombs!");
+    MakeBlueMsgEng(0x5E, "\x13\x56You got an Adult's Wallet!&Adults are allowed to carry a&lot of money. Now you can hold&up to %y"+std::to_string(CAPACITY(UPG_WALLET,1))+" Rupees%w.");
+    MakeBlueMsgEng(0x5F, "\x13\x57You got a Giant's Wallet!&What a huge wallet!&Now you can carry up to %y"+std::to_string(CAPACITY(UPG_WALLET,2))+" Rupees%w.");
 
     //Great Fairy Text
     MakeNormalMsgEng(0xE8, "Your magic power has been&enhanced! Now you can gain even&more Magic Capacity!^Collecting %gIcons of Magic%w&will allow for greater enhancement!");
@@ -318,7 +335,7 @@ extern "C" void OTRMessage_Init()
     MakeNormalMsgEng(0x10E0,"\x12\x38\x82""All right! You win! In return,&I'll tell you a secret&if you pay me %r50 rupees%w!\x07\x10\xA3");
     MakeNormalMsgEng(0x10E1,"\x12\x38\x80""OK, there is path to a place&hidden in the woods that is&revealed in %bthree%w parts,&of %bfour%w directions each!^The order of the parts is&something you will have&to work out yourself!^But I can say that there&is a final hidden direction,&and that is %gSouth%w!\x0B\x02");
 
-    u16 SariaMsg = TextIDAllocator::Instance->allocateRange("saria", 30);
+    u16 SariaMsg = TextIDAllocator::Instance->allocateRange("saria", 40);
     CustomMessageManager::Instance->CreateMessage(
         questMessageTableID, SariaMsg,
         {
@@ -395,7 +412,7 @@ extern "C" void OTRMessage_Init()
         questMessageTableID, SariaMsg+8,
         {
           TEXTBOX_TYPE_BLUE, TEXTBOX_POS_BOTTOM,
-          "Hmm... I never would have known&there was a place with&so much water.&It must look amazing!^Come to think of it I do&wonder what it would be&like to be a creture that&could live under water.\x0B\x02",
+          "Hmm... I never would have known&there was a place with&so much water.&It must look amazing!^Come to think of it I do&wonder what it would be&like to be a creature that&could live under water.\x0B\x02",
           "",
           "",
         }
@@ -568,7 +585,7 @@ extern "C" void OTRMessage_Init()
         questMessageTableID, SariaMsg+27,
         {
           TEXTBOX_TYPE_BLACK, TEXTBOX_POS_BOTTOM,
-          "Nice to see you here! I'd love&to hear all about your travels,&so try playing my song&when you're out and about.^I often can't help but&wish I could come along,&but still, at least I'm thankful^that this place is nice&and confortable and I'm&protected in the forrest.",
+          "Nice to see you here! I'd love&to hear all about your travels,&so try playing my song&when you're out and about.^I often can't help but&wish I could come along,&but still, at least I'm thankful^that this place is nice&and confortable and I'm&protected in the forest.",
           "",
           "",
         }
@@ -578,6 +595,15 @@ extern "C" void OTRMessage_Init()
         {
           TEXTBOX_TYPE_BLACK, TEXTBOX_POS_BOTTOM,
           "Hey, nice to see you!^Hmm...anyway, you'll never&guesswhat a bird told me...^I heard that you were at&the lake, and the the water&princess was there with you!^I'm so jealous tee hee!",
+          "",
+          "",
+        }
+    );
+    CustomMessageManager::Instance->CreateMessage(
+        questMessageTableID, SariaMsg+29,
+        {
+          TEXTBOX_TYPE_BLACK, TEXTBOX_POS_BOTTOM,
+          "Link, there's something&I want to talk about.^Ever since I started hearing the&change in the tone of your&ocarina, I've been noticing things about you.^You havn't been acting the same since&that time and there are times where&I feel, in my heart, that you are&no longer with us in this world.^Please, \x0F, I don't want to&feel so afraid for you,&you can tell me what's going on.",
           "",
           "",
         }
@@ -965,12 +991,12 @@ extern "C" void OTRMessage_Init()
     MakeNormalMsgEng(GoronMsg+14, "Ohh, the market is so crowded.&I hardly get a chance to buy anything.");
     MakeNormalMsgEng(GoronMsg+15, "Things are quiet now.&I'm surprised nobody seems to&be letting me trade at&this time of day anymore.^Why could that be?");
     MakeNormalMsgEng(GoronMsg+16, "Wait, how did you get in&here at this time?");
-    MakeNormalMsgEng(GoronMsg+17, "Some brothers are off racing.&It's quite a spectacle&if you want to see it.^The races are usually quite close.");
-    MakeNormalMsgEng(GoronMsg+18, "Look at our heavy brother's&refined rolling.^He's matured quite a bit&since his wilder days.");
+    MakeNormalMsgEng(GoronMsg+17, "Some brothers are off racing&outside. It's quite a spectacle&if you want to see it.^The races are usually quite close.");
+    MakeNormalMsgEng(GoronMsg+18, "Look at our bigger brother's&refined rolling.^He's matured quite a bit&since his wilder days.");
     MakeNormalMsgEng(GoronMsg+19, "I still miss the shiny&red stone that sat here.&Oh how it glowed.");
     MakeNormalMsgEng(GoronMsg+20, "Sorry! Let me express my feelings&with more refined rolling!");
-    MakeNormalMsgEng(GoronMsg+21, "Our heavy brother isn't here now.&I wonder where he went.");
-    MakeNormalMsgEng(GoronMsg+22, "Our heavy brother is both courteous&and tough. He tries to avoid&hitting anyone if he can help it,^and is barely phased by the&explosions of our special crop anymore.^I hear he still dislikes being&hit by them though.");
+    MakeNormalMsgEng(GoronMsg+21, "Our bigger brother isn't here now.&I wonder where he went.");
+    MakeNormalMsgEng(GoronMsg+22, "Our bigger brother is both courteous&and tough. He tries to avoid&hitting anyone if he can help it,^and is barely phased by the&explosions of our special crop anymore.^I hear he still dislikes being&hit by them though.");
     MakeNormalMsgEng(GoronMsg+23, "Oh, I give up,&I might as well ask you&to pawn this off for me.^I'll take %g200 rupees%w for it.&\x1B&%gYes&No%w\x02");
     MakeNormalMsgEng(GoronMsg+24, "Ah, I like it here.&It's so peaceful and quiet.^You know, I think it's&about time I went shopping again.^I remember the last time I went,&and hope it goes better this time.^Should I try again?&\x1B&%gYes&No%w\x02");
     MakeNormalMsgEng(GoronMsg+25, "Oh, I can't believe it.^There was someone else there&rolling around my usual spot.^Reminded me of myself&when I was younger too.^I don't understand,&but the least I can do&is stay out here instead^to watch out for&anyone who might try to&imprison our tribe again.");

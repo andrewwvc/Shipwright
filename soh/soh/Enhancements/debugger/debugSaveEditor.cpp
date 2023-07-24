@@ -1268,13 +1268,13 @@ void DrawEquipmentTab() {
     // There is no icon for child wallet, so default to a text list
     // this was const, but I needed to append to it depending in rando settings.
     std::vector<std::string> walletNamesImpl = {
-        "Child (99)",
-        "Adult (200)",
-        "Giant (500)",
+        "Child ("+std::to_string(CAPACITY(UPG_WALLET,0))+")",
+        "Adult ("+std::to_string(CAPACITY(UPG_WALLET,1))+")",
+        "Giant ("+std::to_string(CAPACITY(UPG_WALLET,2))+")",
     };
     // only display Tycoon wallet if you're in a save file that would allow it.
     if (gSaveContext.n64ddFlag && OTRGlobals::Instance->gRandomizer->GetRandoSettingValue(RSK_SHOPSANITY) > RO_SHOPSANITY_ZERO_ITEMS) {
-        const std::string walletName = "Tycoon (999)";
+        const std::string walletName = "Tycoon ("+std::to_string(CAPACITY(UPG_WALLET,3))+")";
         walletNamesImpl.push_back(walletName);
     }
     // copy it to const value for display in ImGui.
@@ -1283,17 +1283,17 @@ void DrawEquipmentTab() {
 
     const std::vector<std::string> stickNames = {
         "None",
-        "10",
-        "20",
-        "30",
+        std::to_string(CAPACITY(UPG_STICKS,1)),
+        std::to_string(CAPACITY(UPG_STICKS,2)),
+        std::to_string(CAPACITY(UPG_STICKS,3)),
     };
     DrawUpgrade("Sticks", UPG_STICKS, stickNames);
 
     const std::vector<std::string> nutNames = {
         "None",
-        "20",
-        "30",
-        "40",
+        std::to_string(CAPACITY(UPG_NUTS,1)),
+        std::to_string(CAPACITY(UPG_NUTS,2)),
+        std::to_string(CAPACITY(UPG_NUTS,3)),
     };
     DrawUpgrade("Deku Nuts", UPG_NUTS, nutNames);
 }
