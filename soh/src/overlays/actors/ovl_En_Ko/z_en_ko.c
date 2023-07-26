@@ -698,7 +698,7 @@ s16 func_80A97738(PlayState* play, Actor* thisx) {
                         Message_ContinueTextbox(play, this->actor.textId);
                         break;
                     case 0x1040:
-                        this->actor.textId = (play->msgCtx.choiceIndex == 0) ? KokiriMsg+37 : 0x103B;
+                        this->actor.textId = (play->msgCtx.choiceIndex == 0) ? KokiriMsg+38 : 0x103B;
                         Message_ContinueTextbox(play, this->actor.textId);
                         break;
                     case 0x10B7:
@@ -713,16 +713,15 @@ s16 func_80A97738(PlayState* play, Actor* thisx) {
             break;
         case TEXT_STATE_DONE:
             if (Message_ShouldAdvance(play)) {
-                if (/*(ENKO_TYPE == ENKO_TYPE_CHILD_1 && this->actor.textId == KokiriMsg+10 && !(gSaveContext.itemGetInf[1] & 0x10))
-                                ||*/ (ENKO_TYPE == ENKO_TYPE_CHILD_2 && this->actor.textId == KokiriMsg+7)) {
+                if ((ENKO_TYPE == ENKO_TYPE_CHILD_1 && this->actor.textId == KokiriMsg+37 && !(gSaveContext.itemGetInf[1] & 0x10))
+                                || (ENKO_TYPE == ENKO_TYPE_CHILD_2 && this->actor.textId == KokiriMsg+7)) {
                     func_8002F434(this, play, GI_HEART_PIECE, 100.0f, 100.0f);
                     this->actionFunc = heart_give;
                     return 3;
                 }
 
-                if (ENKO_TYPE == ENKO_TYPE_CHILD_1 && this->actor.textId == KokiriMsg+8 &&
-                    !(gSaveContext.itemGetInf[1] & 0x10)) {
-                    //MSG_CONT(KokiriMsg+10);
+                if (ENKO_TYPE == ENKO_TYPE_CHILD_1 && (this->actor.textId == KokiriMsg+23 || this->actor.textId == KokiriMsg+24) && !(gSaveContext.itemGetInf[1] & 0x10)) {
+                        MSG_CONT(KokiriMsg+37);
                 } else if ((ENKO_TYPE == ENKO_TYPE_CHILD_2)) {
                     u8 growth[NUM_TREES];
                     u8 numGrowth = 0;

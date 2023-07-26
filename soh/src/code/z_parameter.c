@@ -1967,6 +1967,13 @@ u8 Item_Give(PlayState* play, u8 item) {
         }
         PerformAutosave(play, item);
         return ITEM_NONE;
+    } else if (item == ITEM_WALLET_KING) {
+        Inventory_ChangeUpgrade(UPG_WALLET, 3);
+        if (gSaveContext.n64ddFlag && Randomizer_GetSettingValue(RSK_FULL_WALLETS)) {
+            Rupees_ChangeBy(1000);
+        }
+        PerformAutosave(play, item);
+        return ITEM_NONE;
     } else if (item == ITEM_STICK_UPGRADE_20) {
         if (gSaveContext.inventory.items[slot] == ITEM_NONE) {
             INV_CONTENT(ITEM_STICK) = ITEM_STICK;
@@ -2693,6 +2700,8 @@ u8 Item_CheckObtainability(u8 item) {
     } else if (item == ITEM_EPONA_BOOST) {
         return ITEM_NONE;
     } else if (item == ITEM_DEFENSE_HEART) {
+        return ITEM_NONE;
+    } else if (ITEM_WALLET_KING) {
         return ITEM_NONE;
     } else if (item == ITEM_HEART) {
         return ITEM_HEART;

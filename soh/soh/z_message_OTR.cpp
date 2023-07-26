@@ -358,6 +358,7 @@ extern "C" void OTRMessage_Init()
     MakeBlueMsgEng(0x810, "You received an Icon of Magic Power!&This will increase your magic capacity.&It looks awfully like an ordinary&magic jar though.");
     MakeBlueMsgEng(0x811, "You received some Horse Food!&This will add a boost&to Epona's stamina.&Carrots are delicious!");
     MakeBlueMsgEng(0x812, "You received a Heart Barrier! This&will protect one of your hearts,&if you find someone with powerful&enough magic to activate it.");
+    MakeBlueMsgEng(0x813, "You received a King's Wallet!&This can carry enough money&for a king! I don't even&know how much it can carry!");
 
     MakeBlueMsgEng(0x7,  "\x13\x48You got a&%rDeku Seed Bullet Bag%w.&This bag can hold up to %y"+std::to_string(CAPACITY(UPG_BULLET_BAG,2))+"%w&slingshot bullets.");
     MakeBlueMsgEng(0x6C, "\x13\x49Your %rDeku Seed Bullet Bag%w&has become bigger!&Now you can carry more bullets!&This bag can hold %y"+std::to_string(CAPACITY(UPG_BULLET_BAG,3))+"%w bullets!");
@@ -978,7 +979,9 @@ extern "C" void OTRMessage_Init()
     MakeNormalMsgEng(KokiriMsg+36, "Ohh, I think you might look like&one of those cave people&someone was talking about.^I think he saw one of them&in the Lost Woods once.");
     MakeNormalMsgEng(0x103E, "Do you want to know how to use&the %y\xA5 Button%w? Or the %rshield%w?&\x1B%y\xA5 %gButton&Shield%w\x02");
     MakeNormalMsgEng(0x1040, "I'll teach you how to use your&%rshield%w. Pressing \xA3 will bring&it up and let you defend&against attacks to your front.^But holding \xA3 will raise your %btension%w,&which may make you look a&little blue, and stop you attacking&until you've released \xA3 for a while.^Using \xA4 targeting, holding up your&shield will let you move around while&defending your face, but may not guard&your legs from low hits.^Without using \xA4 targeting, you will&duck and can move your shield with&the %c\xAA stick%w, which could be useful&and may block some low attacks.^Are you ready for more tips?&\x1B&%gYes please!&Not Now%w\x02");
-    MakeNormalMsgEng(KokiriMsg+37, "Ok, here are some advanced&%rshield%w tips!^Holding up your shield while an&enemy leaps over you may make&them difficult to see, and this&can break your \xA4 targeting lock!^So you might want to let&go of \xA3 while an enemy is&overhead if you want to&keep targeting them!^Also, some enemies may have attacks&that hit you from the side, that&will actually get around your shield!^The secret to guarding these?&\xA4 target, but %rdon't%w hold \xA3, your&shield will stay at your side and&protect you from these tricky moves.^Still, be careful though, as some&enemies may be able to force you&into %btension%w with their attacks!^Good luck \x0F!");
+    MakeNormalMsgEng(KokiriMsg+37, "You seem to be good at attracting&life. So this seems appropriate.");
+    MakeNormalMsgEng(KokiriMsg+38, "Ok, here are some advanced&%rshield%w tips!^Holding up your shield while an&enemy leaps over you may make&them difficult to see, and this&can break your \xA4 targeting lock!^So you might want to let&go of \xA3 while an enemy is&overhead if you want to&keep targeting them!^Also, some enemies may have attacks&that hit you from the side, that&will actually get around your shield!^The secret to guarding these?&\xA4 target, but %rdon't%w hold \xA3, your&shield will stay at your side and&protect you from these tricky moves.^Still, be careful though, as some&enemies may be able to force you&into %btension%w with their attacks!^Good luck \x0F!");
+
 
     u16 MidoMsg = TextIDAllocator::Instance->allocateRange("mido", 30);
 
@@ -1079,12 +1082,12 @@ extern "C" void OTRMessage_Init()
     MakeNormalMsgEng(GoronMsg+14, "Ohh, the market is so crowded.&I hardly get a chance to buy anything.");
     MakeNormalMsgEng(GoronMsg+15, "Things are quiet now.&I'm surprised nobody seems to&be letting me trade at&this time of day anymore.^Why could that be?");
     MakeNormalMsgEng(GoronMsg+16, "Wait, how did you get in&here at this time?");
-    MakeNormalMsgEng(GoronMsg+17, "Some brothers are off racing.&It's quite a spectacle&if you want to see it.^The races are usually quite close.");
-    MakeNormalMsgEng(GoronMsg+18, "Look at our heavy brother's&refined rolling.^He's matured quite a bit&since his wilder days.");
+    MakeNormalMsgEng(GoronMsg+17, "Some brothers are off racing&outside. It's quite a spectacle&if you want to see it.^The races are usually quite close.");
+    MakeNormalMsgEng(GoronMsg+18, "Look at our bigger brother's&refined rolling.^He's matured quite a bit&since his wilder days.");
     MakeNormalMsgEng(GoronMsg+19, "I still miss the shiny&red stone that sat here.&Oh how it glowed.");
     MakeNormalMsgEng(GoronMsg+20, "Sorry! Let me express my feelings&with more refined rolling!");
-    MakeNormalMsgEng(GoronMsg+21, "Our heavy brother isn't here now.&I wonder where he went.");
-    MakeNormalMsgEng(GoronMsg+22, "Our heavy brother is both courteous&and tough. He tries to avoid&hitting anyone if he can help it,^and is barely phased by the&explosions of our special crop anymore.^I hear he still dislikes being&hit by them though.");
+    MakeNormalMsgEng(GoronMsg+21, "Our bigger brother isn't here now.&I wonder where he went.");
+    MakeNormalMsgEng(GoronMsg+22, "Our bigger brother is both courteous&and tough. He tries to avoid&hitting anyone if he can help it,^and is barely phased by the&explosions of our special crop anymore.^I hear he still dislikes being&hit by them though.");
     MakeNormalMsgEng(GoronMsg+23, "Oh, I give up,&I might as well ask you&to pawn this off for me.^I'll take %g200 rupees%w for it.&\x1B&%gYes&No%w\x02");
     MakeNormalMsgEng(GoronMsg+24, "Ah, I like it here.&It's so peaceful and quiet.^You know, I think it's&about time I went shopping again.^I remember the last time I went,&and hope it goes better this time.^Should I try again?&\x1B&%gYes&No%w\x02");
     MakeNormalMsgEng(GoronMsg+25, "Oh, I can't believe it.^There was someone else there&rolling around my usual spot.^Reminded me of myself&when I was younger too.^I don't understand,&but the least I can do&is stay out here instead^to watch out for&anyone who might try to&imprison our tribe again.");
