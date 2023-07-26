@@ -284,6 +284,7 @@ extern "C" void OTRMessage_Init()
     MakeBlueMsgEng(0x810, "You received an Icon of Magic Power!&This will increase your magic capacity.&It looks awfully like an ordinary&magic jar though.");
     MakeBlueMsgEng(0x811, "You received some Horse Food!&This will add a boost&to Epona's stamina.&Carrots are delicious!");
     MakeBlueMsgEng(0x812, "You received a Heart Barrier! This&will protect one of your hearts,&if you find someone with powerful&enough magic to activate it.");
+    MakeBlueMsgEng(0x813, "You received a King's Wallet!&This can carry enough money&for a king! I don't even&know how much it can carry!");
 
     MakeBlueMsgEng(0x7,  "\x13\x48You got a&%rDeku Seed Bullet Bag%w.&This bag can hold up to %y"+std::to_string(CAPACITY(UPG_BULLET_BAG,2))+"%w&slingshot bullets.");
     MakeBlueMsgEng(0x6C, "\x13\x49Your %rDeku Seed Bullet Bag%w&has become bigger!&Now you can carry more bullets!&This bag can hold %y"+std::to_string(CAPACITY(UPG_BULLET_BAG,3))+"%w bullets!");
@@ -890,6 +891,7 @@ extern "C" void OTRMessage_Init()
 
     MakeNormalMsgEng(KokiriMsg+35, "Hey, you look like a fella&strong enough to wack down&a whole tree!^If you were so big you&could give a big wack to the&top of one, it might&just fall over.");
     MakeNormalMsgEng(KokiriMsg+36, "Ohh, I think you might look like&one of those cave people&someone was talking about.^I think he saw one of them&in the Lost Woods once.");
+    MakeNormalMsgEng(KokiriMsg+37, "You seem to be good at attracting&life. So this seems appropriate.");
 
 
     u16 MidoMsg = TextIDAllocator::Instance->allocateRange("mido", 30);
