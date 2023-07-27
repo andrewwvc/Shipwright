@@ -813,7 +813,7 @@ void BgDyYoseizo_Give_Reward(BgDyYoseizo* this, PlayState* play) {
 
     if ((play->sceneNum == SCENE_DAIYOUSEI_IZUMI) && (play->csCtx.npcActions[0]->action == 18) && !this->giveDefenseHearts) {
         this->giveDefenseHearts = true;
-        this->defenseHeartsTempStore = 20;//gSaveContext.inventory.defenseHearts; //Revert to this to enable the use of defense barrier rewards
+        this->defenseHeartsTempStore = gSaveContext.inventory.defenseHearts; //Revert this to 20 to disable the use of defense barrier rewards
         gSaveContext.inventory.defenseHearts = 0;
     }
 

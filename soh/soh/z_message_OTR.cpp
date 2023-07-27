@@ -280,10 +280,85 @@ extern "C" void OTRMessage_Init()
         }
     );
 
+    u16 ElfMsg = 0x0100;
+    CustomMessageManager::Instance->CreateMessage(
+        questMessageTableID, ElfMsg+0xB2,
+        {
+          TEXTBOX_TYPE_BLUE, TEXTBOX_POS_BOTTOM,
+          "\x22""Dread the touch&of we the living dead.\x22",
+          "",
+          "",
+        }
+    );
+    CustomMessageManager::Instance->CreateMessage(
+        questMessageTableID, ElfMsg+0xB3,
+        {
+          TEXTBOX_TYPE_BLUE, TEXTBOX_POS_BOTTOM,
+          "\x22""Respect the ears&of us the living dead.&Sound disturbs our rest.\x22",
+          "",
+          "",
+        }
+    );
+    CustomMessageManager::Instance->CreateMessage(
+        questMessageTableID, ElfMsg+0xB4,
+        {
+          TEXTBOX_TYPE_BLUE, TEXTBOX_POS_BOTTOM,
+          "\x22""Do not fear the eyes&of us living dead...&Sight is no longer with us.\x22",
+          "",
+          "",
+        }
+    );
+    CustomMessageManager::Instance->CreateMessage(
+        questMessageTableID, ElfMsg+0xB5,
+        {
+          TEXTBOX_TYPE_BLUE, TEXTBOX_POS_BOTTOM,
+          "\x22""Taking out and putting away&weapons, what irksome sounds&are those to us!\x22",
+          "",
+          "",
+        }
+    );
+    CustomMessageManager::Instance->CreateMessage(
+        questMessageTableID, ElfMsg+0xB6,
+        {
+          TEXTBOX_TYPE_BLUE, TEXTBOX_POS_BOTTOM,
+          "\x22""Those who tread too quickly&and hastily are most irksome&to us!\x22",
+          "",
+          "",
+        }
+    );
+    CustomMessageManager::Instance->CreateMessage(
+        questMessageTableID, ElfMsg+0xB7,
+        {
+          TEXTBOX_TYPE_BLUE, TEXTBOX_POS_BOTTOM,
+          "\x22""When meeting our master,&above all, do not panic.\x22",
+          "",
+          "",
+        }
+    );
+    CustomMessageManager::Instance->CreateMessage(
+        questMessageTableID, ElfMsg+0xB8,
+        {
+          TEXTBOX_TYPE_BLUE, TEXTBOX_POS_BOTTOM,
+          "\x22""Down here, even the faintest&light of the sun cannot reach.^We are thankful for that.\x22",
+          "",
+          "",
+        }
+    );
+    CustomMessageManager::Instance->CreateMessage(
+        questMessageTableID, ElfMsg+0xB9,
+        {
+          TEXTBOX_TYPE_BLUE, TEXTBOX_POS_BOTTOM,
+          "\x22""Those who do not disturb us&need not worry.\x22",
+          "",
+          "",
+        }
+    );
+
     //Get Item Text
     MakeBlueMsgEng(0x810, "You received an Icon of Magic Power!&This will increase your magic capacity.&It looks awfully like an ordinary&magic jar though.");
     MakeBlueMsgEng(0x811, "You received some Horse Food!&This will add a boost&to Epona's stamina.&Carrots are delicious!");
     MakeBlueMsgEng(0x812, "You received a Heart Barrier! This&will protect one of your hearts,&if you find someone with powerful&enough magic to activate it.");
+    MakeBlueMsgEng(0x813, "You received a King's Wallet!&This can carry enough money&for a king! I don't even&know how much it can carry!");
 
     MakeBlueMsgEng(0x7,  "\x13\x48You got a&%rDeku Seed Bullet Bag%w.&This bag can hold up to %y"+std::to_string(CAPACITY(UPG_BULLET_BAG,2))+"%w&slingshot bullets.");
     MakeBlueMsgEng(0x6C, "\x13\x49Your %rDeku Seed Bullet Bag%w&has become bigger!&Now you can carry more bullets!&This bag can hold %y"+std::to_string(CAPACITY(UPG_BULLET_BAG,3))+"%w bullets!");
@@ -302,8 +377,20 @@ extern "C" void OTRMessage_Init()
     MakeBlueMsgEng(0x5E, "\x13\x56You got an Adult's Wallet!&Adults are allowed to carry a&lot of money. Now you can hold&up to %y"+std::to_string(CAPACITY(UPG_WALLET,1))+" Rupees%w.");
     MakeBlueMsgEng(0x5F, "\x13\x57You got a Giant's Wallet!&What a huge wallet!&Now you can carry up to %y"+std::to_string(CAPACITY(UPG_WALLET,2))+" Rupees%w.");
 
+    u16 EnemyMsg = 0x065D;
+    //Navi Enemy Text
+    MakeBlueMsgEng(0x0601, "%wGohma&%cIt's one of the parasitic monsters&inside the Deku Tree! Watch the %weye%c&carefully.^%cDifferent colors may show when it&is vulnerable to different attack types!");
+    MakeBlueMsgEng(0x060C, "%wKing Dodongo&%cThis is a huge Dodongo that loves&eating %wfresh%c bomb flowers! Give it a&jolt, and finish it with your %wsword%c!");
+    MakeBlueMsgEng(0x060F, "%wLizalfos&%cThese sword weilding enemies may be&able to change the angle they attack&from if you hold up your shield.^%cBut a sneaky attack to your side&can still be blocked if you&%wstop%c holding %w\xA3%c while targeting!");
+    MakeBlueMsgEng(0x0610, "%wDinolfos&%cThese sword weilding enemies may be&able to change the angle they attack&from if you hold up your shield.^%cBut a sneaky attack to your side&can still be blocked if you&%wstop%c holding %w\xA3%c while targeting!");
+    MakeBlueMsgEng(0x0622, "%wFlare Dancer&%cExtinguish its flaming clothes&first... though it seems to&keep them intact by spinning...");
+    MakeBlueMsgEng(0x062F, "%wDead Hand&%c\x0F, just try to stay calm...");
+    MakeBlueMsgEng(0x0635, "%wIron Knuckle&%cBeware of the incredibly strong axe!&You may need to use different dodges&depending on how they attack!");
+    MakeBlueMsgEng(EnemyMsg+0, "%wIron Knuckle&%cBeware of the incredibly strong axe!&You may need to use different dodges&depending on how they attack!^%cYou're an adult now, so if you're&%w\xA4 Targeting%c, hold %w\xA3%c in order to let&high swings pass over your head.");
+
     //Great Fairy Text
     MakeNormalMsgEng(0xE8, "Your magic power has been&enhanced! Now you can gain even&more Magic Capacity!^Collecting %gIcons of Magic%w&will allow for greater enhancement!");
+    MakeNormalMsgEng(0xE9, "Your defensive power has been&enhanced! Damage inflicted by &enemies will be reduced by half.^But this only applies to&hearts protected by any&%rHeart Barriers%w you have collected.");
 
     u16 StoneMsg = TextIDAllocator::Instance->allocateRange("stone", 64);
 
@@ -890,6 +977,10 @@ extern "C" void OTRMessage_Init()
 
     MakeNormalMsgEng(KokiriMsg+35, "Hey, you look like a fella&strong enough to wack down&a whole tree!^If you were so big you&could give a big wack to the&top of one, it might&just fall over.");
     MakeNormalMsgEng(KokiriMsg+36, "Ohh, I think you might look like&one of those cave people&someone was talking about.^I think he saw one of them&in the Lost Woods once.");
+    MakeNormalMsgEng(0x103E, "Do you want to know how to use&the %y\xA5 Button%w? Or the %rshield%w?&\x1B%y\xA5 %gButton&Shield%w\x02");
+    MakeNormalMsgEng(0x1040, "I'll teach you how to use your&%rshield%w. Pressing \xA3 will bring&it up and let you defend&against attacks to your front.^But holding \xA3 will raise your %btension%w,&which may make you look a&little blue, and stop you attacking&until you've released \xA3 for a while.^Using \xA4 targeting, holding up your&shield will let you move around while&defending your face, but may not guard&your legs from low hits.^Without using \xA4 targeting, you will&duck and can move your shield with&the %c\xAA stick%w, which could be useful&and may block some low attacks.^Are you ready for more tips?&\x1B&%gYes please!&Not Now%w\x02");
+    MakeNormalMsgEng(KokiriMsg+37, "You seem to be good at attracting&life. So this seems appropriate.");
+    MakeNormalMsgEng(KokiriMsg+38, "Ok, here are some advanced&%rshield%w tips!^Holding up your shield while an&enemy leaps over you may make&them difficult to see, and this&can break your \xA4 targeting lock!^So you might want to let&go of \xA3 while an enemy is&overhead if you want to&keep targeting them!^Also, some enemies may have attacks&that hit you from the side, that&will actually get around your shield!^The secret to guarding these?&\xA4 target, but %rdon't%w hold \xA3, your&shield will stay at your side and&protect you from these tricky moves.^Still, be careful though, as some&enemies may be able to force you&into %btension%w with their attacks!^Good luck \x0F!");
 
 
     u16 MidoMsg = TextIDAllocator::Instance->allocateRange("mido", 30);

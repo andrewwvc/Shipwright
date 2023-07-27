@@ -375,6 +375,8 @@ void ActorShadow_DrawHorse(Actor* actor, Lights* lights, PlayState* play);
 void ActorShadow_DrawFeet(Actor* actor, Lights* lights, PlayState* play);
 void Actor_SetFeetPos(Actor* actor, s32 limbIndex, s32 leftFootIndex, Vec3f* leftFootPos, s32 rightFootIndex,
                       Vec3f* rightFootPos);
+s16 aimToActorMovement(Actor* this, Actor* target, f32 projectileSpeed, PlayState* play, f32* time, f32* projectedY, f32 maxTargetSpeed);
+s16 aimToPlayerMovement(Actor* this, f32 speed, PlayState* play);
 void func_8002BE04(PlayState* play, Vec3f* arg1, Vec3f* arg2, f32* arg3);
 void func_8002C124(TargetContext* targetCtx, PlayState* play);
 s32 Flags_GetSwitch(PlayState* play, s32 flag);
@@ -498,7 +500,7 @@ Actor* Actor_Spawn(ActorContext* actorCtx, PlayState* play, s16 actorId, f32 pos
 Actor* Actor_SpawnAsChild(ActorContext* actorCtx, Actor* parent, PlayState* play, s16 actorId, f32 posX,
                           f32 posY, f32 posZ, s16 rotX, s16 rotY, s16 rotZ, s16 params);
 void Actor_SpawnTransitionActors(PlayState* play, ActorContext* actorCtx);
-Actor* Actor_SpawnEntry(ActorContext* actorCtx, ActorEntry* actorEntry, PlayState* play);
+Actor* Actor_SpawnEntry(ActorContext* actorCtx, ActorEntry* actorEntry, PlayState* play, s16 entryNum);
 Actor* Actor_Delete(ActorContext* actorCtx, Actor* actor, PlayState* play);
 Actor* func_80032AF0(PlayState* play, ActorContext* actorCtx, Actor** actorPtr, Player* player);
 Actor* Actor_Find(ActorContext* actorCtx, s32 actorId, s32 actorCategory);
@@ -941,6 +943,12 @@ void Environment_AdjustLights(PlayState* play, f32 arg1, f32 arg2, f32 arg3, f32
 s32 Environment_GetBgsDayCount(void);
 void Environment_ClearBgsDayCount(void);
 s32 Environment_GetTotalDays(void);
+void insertSpawnResource(int entry, int extraTime);
+void useGuardRupees(s32 num);
+s32 getGuardRupees();
+s32 createTempEntryPlus(PlayState* play, ActorEntry* spawn, s16 dirt);
+s32 createTempEntry(PlayState* play, ActorEntry* spawn);
+s32 isResourceUsed(PlayState* play, ActorEntry* spawn, s16 dirt);
 s16 isSariasDayHome(void);
 s16 isSariaAtLinksHouse(void);
 s32 IsAfterRutosDate(void);
@@ -1120,6 +1128,7 @@ void func_8008EC70(Player* player);
 void Player_SetEquipmentData(PlayState* play, Player* player);
 void Player_UpdateBottleHeld(PlayState* play, Player* player, s32 item, s32 actionParam);
 void func_80837C0C(PlayState* play, Player* this, s32 arg2, f32 arg3, f32 arg4, s16 arg5, s32 arg6);
+void Player_SetShieldRecoveryDefault(PlayState* play);
 void func_8008EDF0(Player* player);
 void func_8008EE08(Player* player);
 void func_8008EEAC(PlayState* play, Actor* actor);

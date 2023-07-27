@@ -103,13 +103,13 @@ typedef struct {
     /* 0x18 */ Vec3f feetPos[2]; // Update by using `Actor_SetFeetPos` in PostLimbDraw
 } ActorShape; // size = 0x30
 
-#define ACTOR_FLAG_0 (1 << 0)
+#define ACTOR_FLAG_0 (1 << 0)//Can actor be targeted?
 #define ACTOR_FLAG_2 (1 << 2)
 #define ACTOR_FLAG_3 (1 << 3)
-#define ACTOR_FLAG_4 (1 << 4)
+#define ACTOR_FLAG_4 (1 << 4)//If this is set, an actor will be updated on a given frame regardless of draw distance settings or distance from the player
 #define ACTOR_FLAG_5 (1 << 5)
-#define ACTOR_FLAG_6 (1 << 6)
-#define ACTOR_FLAG_7 (1 << 7) //Determines if the actor will be invisible without the lens of truth
+#define ACTOR_FLAG_6 (1 << 6)//Determines if an actor should be updated on a given frame based on draw distance
+#define ACTOR_FLAG_7 (1 << 7)//Determines if the actor will be invisible without the lens of truth
 #define ACTOR_FLAG_8 (1 << 8)
 #define ACTOR_FLAG_9 (1 << 9)
 #define ACTOR_FLAG_10 (1 << 10) //Determines if the hookshot can pull Link towards the actor
@@ -191,7 +191,8 @@ typedef struct Actor {
     /* 0x138 */ ActorOverlay* overlayEntry; // Pointer to the overlay table entry for this actor
     /* 0x13C */ Vec3f teleportVec;
     /* 0x148 */ u8 isTeleported;
-    /* 0x149 */ char dbgPad[0x3]; // Padding that only exists in the debug rom
+    /* 0x149 */ s16 entryNum;
+    /*       */ char dbgPad[0x1]; // Padding that only exists in the debug rom
 } Actor; // size = 0x14C
 
 typedef enum {
@@ -276,6 +277,7 @@ typedef enum {
     /* 0x18 */ ITEM00_TUNIC_GORON,
     /* 0x19 */ ITEM00_BOMBS_SPECIAL,
     /* 0x20 */ ITEM00_BOMBCHU,
+               ITEM00_MAX,
 } Item00Type;
 
 struct EnItem00;

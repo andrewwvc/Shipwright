@@ -60,7 +60,7 @@ void EnBdfire_Init(Actor* thisx, PlayState* play) {
         if (this->unk_154 < 0) {
             this->unk_154 = 0;
         }
-        this->unk_188 = 4.2000003f - (this->actor.params * 0.25f * 0.6f);
+        this->unk_188 = 5.2000003f - (this->actor.params * 0.25f * 0.6f);
 
         if (this->unk_188 < 0.90000004f) {
             this->unk_188 = 0.90000004f;
@@ -158,8 +158,24 @@ void func_809BC598(EnBdfire* this, PlayState* play) {
     if (phi_v1_2 != 0) {
         if (this->unk_158 == 0) {
             this->actor.world.rot.y += 0x4000;
+            if (((u16)this->actor.world.rot.y) >= 0x0000 && ((u16)this->actor.world.rot.y) < 0x4000)
+                this->actor.world.rot.y = 0x0000;
+            else if (((u16)this->actor.world.rot.y) >= 0x4000 && ((u16)this->actor.world.rot.y) < 0x8000)
+                this->actor.world.rot.y = 0x4000;
+            else if (((u16)this->actor.world.rot.y) >= 0x8000 && ((u16)this->actor.world.rot.y) < 0xC000)
+                this->actor.world.rot.y = 0x8000;
+            if (((u16)this->actor.world.rot.y) >= 0xC000)
+                this->actor.world.rot.y = 0xC000;
         } else {
             this->actor.world.rot.y -= 0x4000;
+            if ( ((u16)this->actor.world.rot.y) > 0xC000)
+                this->actor.world.rot.y = 0x0000;
+            else if (((u16)this->actor.world.rot.y) < 0xC000 && ((u16)this->actor.world.rot.y) > 0x8000)
+                this->actor.world.rot.y = 0xC000;
+            else if (((u16)this->actor.world.rot.y) < 0x8000 && ((u16)this->actor.world.rot.y) > 0x4000)
+                this->actor.world.rot.y = 0x8000;
+            if (((u16)this->actor.world.rot.y) < 0x4000)
+                this->actor.world.rot.y = 0x4000;
         }
     }
     if (this->unk_154 == 0) {
@@ -181,7 +197,7 @@ void func_809BC598(EnBdfire* this, PlayState* play) {
                 player->flameTimers[i] = Rand_S16Offset(0, 200);
             }
             player->isBurning = true;
-            func_8002F6D4(play, &this->actor, 20.0f, this->actor.world.rot.y, 0.0f, 8);
+            func_8002F6D4(play, &this->actor, 20.0f, this->actor.world.rot.y, 0.0f, 0x10);
             osSyncPrintf("POWER\n");
         }
     }

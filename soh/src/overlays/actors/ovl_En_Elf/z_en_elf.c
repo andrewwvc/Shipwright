@@ -619,6 +619,7 @@ void func_80A0329C(EnElf* this, PlayState* play) {
     }
 
     if (Actor_HasParent(&this->actor, play)) {
+        insertSpawnResource(this->actor.entryNum, DEFAULT_RESOURCE_TIME);
         Actor_Kill(&this->actor);
         return;
     }
@@ -652,6 +653,7 @@ void func_80A0329C(EnElf* this, PlayState* play) {
                 this->unk_28C.y = 30.0f;
                 this->unk_2B4 = 0.0f;
                 this->unk_2AA = 0;
+                insertSpawnResource(this->actor.entryNum, DEFAULT_RESOURCE_TIME);
                 EnElf_SetupAction(this, func_80A03610);
                 return;
             }

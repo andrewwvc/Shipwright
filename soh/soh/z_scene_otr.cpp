@@ -12,6 +12,168 @@
 #include <Path.h>
 #include <Text.h>
 #include <Blob.h>
+#include "SaveManager.h"
+
+using json = nlohmann::json;
+
+// bool operator==(const Ship::ActorSpawnEntry& lhs, const Ship::ActorSpawnEntry& rhs)
+// {
+//     return (lhs.actorNum == rhs.actorNum)
+//     && (lhs.posX == rhs.posX)
+//     && (lhs.posY == rhs.posY)
+//     && (lhs.posZ == rhs.posZ)
+//     && (lhs.rotX == rhs.rotX)
+//     && (lhs.rotY == rhs.rotY)
+//     && (lhs.rotZ == rhs.rotZ)
+//     && (lhs.initVar == rhs.initVar);
+// }
+
+void copyActorSpawn(ActorSpawnEnt& lhs, const Ship::ActorSpawnEntry& rhs) {
+    lhs.actorNum = rhs.actorNum;
+    lhs.posX = rhs.posX;
+    lhs.posY = rhs.posY;
+    lhs.posZ = rhs.posZ;
+    lhs.rotX = rhs.rotX;
+    lhs.rotY = rhs.rotY;
+    lhs.rotZ = rhs.rotZ;
+}
+
+constexpr bool operator<(const ActorSpawnResource& lhs, const ActorSpawnResource& rhs)
+{
+    if (lhs.scene < rhs.scene)
+        return true;
+    else if (lhs.scene > rhs.scene)
+        return false;
+    else if (lhs.room < rhs.room)
+        return true;
+    else if (lhs.room > rhs.room)
+        return false;
+    else if (lhs.entry.actorNum < rhs.entry.actorNum)
+        return true;
+    else if (lhs.entry.actorNum > rhs.entry.actorNum)
+        return false;
+    else if (lhs.entry.posX < rhs.entry.posX)
+        return true;
+    else if (lhs.entry.posX > rhs.entry.posX)
+        return false;
+    else if (lhs.entry.posY < rhs.entry.posY)
+        return true;
+    else if (lhs.entry.posY > rhs.entry.posY)
+        return false;
+    else if (lhs.entry.posZ < rhs.entry.posZ)
+        return true;
+    else if (lhs.entry.posZ > rhs.entry.posZ)
+        return false;
+    else if (lhs.entry.rotX < rhs.entry.rotX)
+        return true;
+    else if (lhs.entry.rotX > rhs.entry.rotX)
+        return false;
+    else if (lhs.entry.rotY < rhs.entry.rotY)
+        return true;
+    else if (lhs.entry.rotY > rhs.entry.rotY)
+        return false;
+    else if (lhs.entry.rotZ < rhs.entry.rotZ)
+        return true;
+    else if (lhs.entry.rotZ > rhs.entry.rotZ)
+        return false;
+    else if (lhs.entry.initVar < rhs.entry.initVar)
+        return true;
+    else if (lhs.entry.initVar > rhs.entry.initVar)
+        return false;
+    else if (lhs.dirt < rhs.dirt)
+        return true;
+    else if (lhs.dirt > rhs.dirt)
+        return false;
+
+    return false;
+}
+
+void to_json(json& j, const ActorSpawnResource& p) {
+    j = json{{"scene", p.scene}, {"room", p.room}, {"actorNum", p.entry.actorNum},
+        {"posX", p.entry.posX}, {"posY", p.entry.posY}, {"posZ", p.entry.posZ},
+        {"rotX", p.entry.rotX}, {"rotY", p.entry.rotY}, {"rotZ", p.entry.rotZ},
+        {"initVar", p.entry.initVar}, {"dirt", p.dirt}};
+}
+
+void from_json(const json& j, ActorSpawnResource& p) {
+    j.at("scene").get_to(p.scene);
+    j.at("room").get_to(p.room);
+    j.at("actorNum").get_to(p.entry.actorNum);
+    j.at("posX").get_to(p.entry.posX);
+    j.at("posY").get_to(p.entry.posY);
+    j.at("posZ").get_to(p.entry.posZ);
+    j.at("rotX").get_to(p.entry.rotX);
+    j.at("rotY").get_to(p.entry.rotY);
+    j.at("rotZ").get_to(p.entry.rotZ);
+    j.at("dirt").get_to(p.dirt);
+}
+
+extern std::map<ActorSpawnResource,int> UsedResources;
+extern std::map<int,ActorSpawnResource> TempResourceEntries;
+
+void insertSpawnResource(int entry, int extraTime) {
+    auto itt = TempResourceEntries.find(entry);
+    if (itt != TempResourceEntries.end()) {
+        ActorSpawnResource sw = itt->second;
+        auto existing = UsedResources.insert({sw,gSaveContext.savedFrameCount+extraTime});
+        if (!existing.second) {
+            existing.first->second = gSaveContext.savedFrameCount+extraTime;
+        }
+    }
+}
+
+s32 createTempEntryPlus(PlayState* play, ActorEntry* spawn, s16 dirt) {
+    ActorSpawnResource sw;
+    sw.scene = play->sceneNum;
+    sw.room = play->roomCtx.curRoom.num;
+    sw.entry.actorNum = spawn->id;
+    sw.entry.initVar = spawn->params;
+    sw.entry.posX = spawn->pos.x;
+    sw.entry.posY = spawn->pos.y;
+    sw.entry.posZ = spawn->pos.z;
+    sw.entry.rotX = spawn->rot.x;
+    sw.entry.rotY = spawn->rot.y;
+    sw.entry.rotZ = spawn->rot.z;
+    sw.dirt = dirt;
+    int entNum;
+    auto node = TempResourceEntries.rbegin();
+    if (node != TempResourceEntries.rend())
+        entNum = node->first+1;
+    else
+        entNum = 0;
+    auto foundVal = UsedResources.find(sw);
+    if (foundVal != UsedResources.end()) {
+        return -1;
+    }
+    TempResourceEntries.insert({entNum, sw});
+    return entNum;
+}
+
+//Returns -1 if entry was found, otherwise return the entry number
+s32 createTempEntry(PlayState* play, ActorEntry* spawn) {
+    return createTempEntryPlus(play,spawn,0);
+}
+
+s32 isResourceUsed(PlayState* play, ActorEntry* spawn, s16 dirt) {
+    ActorSpawnResource sw;
+    sw.scene = play->sceneNum;
+    sw.room = play->roomCtx.curRoom.num;
+    sw.entry.actorNum = spawn->id;
+    sw.entry.initVar = spawn->params;
+    sw.entry.posX = spawn->pos.x;
+    sw.entry.posY = spawn->pos.y;
+    sw.entry.posZ = spawn->pos.z;
+    sw.entry.rotX = spawn->rot.x;
+    sw.entry.rotY = spawn->rot.y;
+    sw.entry.rotZ = spawn->rot.z;
+    sw.dirt = dirt;
+    auto foundVal = UsedResources.find(sw);
+    if (foundVal != UsedResources.end()) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
 
 extern Ship::Resource* OTRPlay_LoadFile(PlayState* play, const char* fileName);
 extern "C" s32 Object_Spawn(ObjectContext* objectCtx, s16 objectId);
@@ -94,6 +256,23 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, Ship::ActorSp
         { 0x08, {
             { -1, 2, { 0xA, 1944,4681,-393, 0,24394,0, 0x07CD }},
         } },
+        { 0x0A, {
+            { -1, -1, { ACTOR_EN_ZF, -1925,2800,780, 0,24394,0, 0xFFFF }},
+            { -1, -1, { ACTOR_EN_ZF, -1740,2800,-1060, 0,24394,0, 0xFFFF }},
+        } },
+    } },
+    { 0x8, {//Well
+        { 0x00, {
+            { -1, 32, { ACTOR_ELF_MSG2, -627, 97, -1553,  2,0,1, (0x3F<<8)|0xB3 }},
+            { -1, 34, { ACTOR_ELF_MSG2, -986, 59, 87,  2,0,1, (0x3F<<8)|0xB4 }},
+            { -1, -1, { ACTOR_ELF_MSG2, 1186, 97, -1500,  2,0,1, (0x3F<<8)|0xB6 }},
+            { -1, -1, { ACTOR_ELF_MSG2, 865, 40, 305,  2,0,1, (0x3F<<8)|0xB8 }},
+            { -1, -1, { ACTOR_ELF_MSG2, 865, 40, 115,  2,0,1, (0x3F<<8)|0xB7 }},
+            { -1, -1, { ACTOR_ELF_MSG2, 0, 80, -745,  2,0,1, (0x3F<<8)|0xB9 }},
+        } },
+        { 0x02, {
+            { -1, -1, { ACTOR_ELF_MSG2, -2145, 10, -615,  2,0,1, (0x3F<<8)|0xB5 }},
+        } },
     } },
     { 0x55, { // Kokiri Forest
         { 0x00, {//Village
@@ -150,6 +329,12 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, Ship::ActorSp
             { 2, -1, { 0x00A7, 116,192,6206, 0, 0, 0, 0x18a4 }}, { 3, -1, { 0x00A7, 116,192,6206, 0, 0, 0, 0x18a4 }},
             { 0, -1, { ACTOR_EN_GO2,  3173,-20,880,  0,-20000,0,  0x03e0 | (13<<10)}}, { 1, -1, { ACTOR_EN_GO2,  3173,-20,880,  0,-20000,0,  0x03e0 | (13<<10)}},
             { 2, -1, { ACTOR_EN_HORSE, 100,0,2000, 0,0,0, 0x800B} }, { 3, -1, { ACTOR_EN_HORSE, 100,0,2000, 0,0,0, 0x800B} },
+            {2, -1, { ACTOR_EN_MB, -4010,-300,1700, 0,8104,0, 0xffff}},
+            {3, -1, { ACTOR_EN_MB, -4010,-300,1700, 0,8104,0, 0xffff}},
+            {2, -1, { ACTOR_EN_MB, -3157,-300,945, 0,8104,0, 0xffff}},
+            {3, -1, { ACTOR_EN_MB, -3157,-300,945, 0,8104,0, 0xffff}},
+            {2, -1, { ACTOR_EN_MB, -5245,-300,2000, 0,-1321,0, 0xffff}},
+            {3, -1, { ACTOR_EN_MB, -5245,-300,2000, 0,-1321,0, 0xffff}},
         } },
     } },
     { SCENE_MARKET_DAY, { // Castle Town Square - Day
@@ -306,6 +491,34 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, Ship::ActorSp
         { 0x00, {
             //{ -1, 0, { 0x5D, 0,0, 100, 0,0,0,  0 }},
             { -1, -1, { ACTOR_EN_ITEM00, 0,20,380, 0,0,0, 0x100+(uint16_t)ITEM00_HEART_PIECE  }},
+            } },
+    } },
+    {SCENE_BMORI1, {
+        {0x0, {
+            {-1, -1, {ACTOR_EN_ST, 118,510,155, 0,0,0, 0x4}}
+        } },
+        {0x3, {
+            {-1, 4, {ACTOR_EN_BB, 1387,510,-1436, 0,0x4000,0, 0xffff}},
+            {-1, -1, {ACTOR_EN_BB, 1187,463,-1436, 0,-0x4000,0, 0xffff}}
+        } },
+        {0x8, {
+            {-1, -1, {ACTOR_EN_DEKUNUTS, -1288,242,-2109, 0,25009,0, 5 << 8}},
+            {-1, -1, {ACTOR_EN_DEKUNUTS, -499,242,-2680, 0,-16512,0, 5 << 8}},
+        } },
+        {0x11, {
+            {-1, -1, {ACTOR_EN_WALLMAS, 128,-779,-1658, 0,0,0, 0x0}},
+            {-1, -1, {ACTOR_EN_WALLMAS, 128,-779,-1658, 0,0,0, 0x4 | (0x10 << 8)}},
+            {-1, -1, {ACTOR_EN_WALLMAS, 128,-779,-1658, 0,0,0, 0x4 | (0x11 << 8)}},
+            {-1, -1, {ACTOR_EN_WALLMAS, 128,-779,-1658, 0,0,0, 0x4 | (0x12 << 8)}},
+        } },
+        {0x0f, {
+            {-1, -1, {ACTOR_EN_WALLMAS, 1830,404,-2700, 0,0,0, 0x2 | (0x20+11 << 8)}},
+            {-1, -1, {ACTOR_EN_ST, 2069,720,-3002, 0,-32768,0, 0x4}}
+        } },
+    } },
+    {SCENE_HIDAN, {
+        {0x18, {
+            {-1, 0, {ACTOR_EN_FD, -2928,2920,139, 0,0,0, 0x0}}
         } },
     } },
 };
@@ -331,33 +544,40 @@ Entity 40	 ID: 0x1ae, 	Params: 0xfc25, 	pos: -311,1500,-393, 	0,-4915,0
 -673,1192,747
 */
 
+bool isResourceRestored(auto val) {
+   return val->second > gSaveContext.savedFrameCount;
+}
+
 bool Scene_CommandActorList(PlayState* play, Ship::SceneCommand* cmd) {
     Ship::SetActorList* cmdActor = (Ship::SetActorList*)cmd;
 
     play->numSetupActors = cmdActor->entries.size();
 
-    if (cmdActor->cachedGameData != nullptr)
-        play->setupActorList = (ActorEntry*)cmdActor->cachedGameData;
-    else
+    //if (cmdActor->cachedGameData != nullptr)
+    //    play->setupActorList = (ActorEntry*)cmdActor->cachedGameData;
+    //else
     {
-        if (sceneActorOverrides.find(play->sceneNum) != sceneActorOverrides.end() &&
-                        sceneActorOverrides.at(play->sceneNum).find(play->roomCtx.curRoom.num) != sceneActorOverrides.at(play->sceneNum).end()) {
-            auto& roomOverrides = sceneActorOverrides.at(play->sceneNum).at(play->roomCtx.curRoom.num);
-            for (auto& [setup, index, entry] : roomOverrides) {
-                if (setup == -1 || setup == gSaveContext.sceneSetupIndex) {
-                    if (index == -1) {
-                        cmdActor->entries.push_back(entry);
-                    } else {
-                        cmdActor->entries[index] = entry;
+        if (cmdActor->cachedGameData == nullptr) {
+            if (sceneActorOverrides.find(play->sceneNum) != sceneActorOverrides.end() &&
+                            sceneActorOverrides.at(play->sceneNum).find(play->roomCtx.curRoom.num) != sceneActorOverrides.at(play->sceneNum).end()) {
+                auto& roomOverrides = sceneActorOverrides.at(play->sceneNum).at(play->roomCtx.curRoom.num);
+                for (auto& [setup, index, entry] : roomOverrides) {
+                    if (setup == -1 || setup == gSaveContext.sceneSetupIndex) {
+                        if (index == -1) {
+                            cmdActor->entries.push_back(entry);
+                        } else {
+                            cmdActor->entries[index] = entry;
+                        }
                     }
                 }
+                play->numSetupActors = cmdActor->entries.size();
             }
-            play->numSetupActors = cmdActor->entries.size();
         }
 
         SPDLOG_INFO("Scene: 0x{0:x}, Room: 0x{1:x}, Setup: 0x{2:x}", (uint16_t)play->sceneNum, (uint16_t)play->roomCtx.curRoom.num, (uint32_t)gSaveContext.sceneSetupIndex);
 
         ActorEntry* entries = (ActorEntry*)malloc(cmdActor->entries.size() * sizeof(ActorEntry));
+        TempResourceEntries = {};
 
         for (int i = 0; i < cmdActor->entries.size(); i++)
         {
@@ -369,6 +589,89 @@ bool Scene_CommandActorList(PlayState* play, Ship::SceneCommand* cmd) {
             entries[i].rot.y = cmdActor->entries[i].rotY;
             entries[i].rot.z = cmdActor->entries[i].rotZ;
             entries[i].params = cmdActor->entries[i].initVar;
+
+            if (entries[i].id == ACTOR_OBJ_TSUBO) {
+                ActorSpawnResource sw;
+                sw.scene = play->sceneNum;
+                sw.room = play->roomCtx.curRoom.num;
+                copyActorSpawn(sw.entry, cmdActor->entries[i]);
+                sw.dirt = 0;
+                TempResourceEntries.insert({i,sw});
+                auto foundVal = UsedResources.find(sw);
+                if (foundVal != UsedResources.end() && isResourceRestored(foundVal)) {
+                    entries[i].params &= 0xFFE0;
+                    entries[i].params |= ITEM00_MAX;
+                }
+            } else if (entries[i].id == ACTOR_EN_WONDER_ITEM && DEKU_TREE_DEAD) {
+                ActorSpawnResource sw;
+                sw.scene = play->sceneNum;
+                sw.room = play->roomCtx.curRoom.num;
+                copyActorSpawn(sw.entry, cmdActor->entries[i]);
+                sw.dirt = 0;
+                TempResourceEntries.insert({i,sw});
+                auto foundVal = UsedResources.find(sw);
+                if (foundVal != UsedResources.end()) {
+                    entries[i].params &= 0x07FF;
+                    entries[i].params |= (0xA << 0xB);
+                }
+            } else if (entries[i].id == ACTOR_EN_ITEM00 && DEKU_TREE_DEAD) {
+                ActorSpawnResource sw;
+                sw.scene = play->sceneNum;
+                sw.room = play->roomCtx.curRoom.num;
+                copyActorSpawn(sw.entry, cmdActor->entries[i]);
+                sw.dirt = 0;
+                TempResourceEntries.insert({i,sw});
+                auto foundVal = UsedResources.find(sw);
+                if (foundVal != UsedResources.end()) {
+                    entries[i].params &= 0xFF00;
+                    entries[i].params |= ITEM00_MAX;
+                }
+            } else if (entries[i].id == ACTOR_EN_KUSA && (entries[i].params & 0x3) == 0) {
+                // ActorSpawnResource sw;
+                // sw.scene = play->sceneNum;
+                // sw.room = play->roomCtx.curRoom.num;
+                // copyActorSpawn(sw.entry, cmdActor->entries[i]);
+                // sw.dirt = 0;
+                // TempResourceEntries.insert({i,sw});
+                // auto foundVal = UsedResources.find(sw);
+                // if (foundVal != UsedResources.end()) {
+                //     entries[i].params &= 0xFFFC;
+                //     entries[i].params |= 3;
+                // }
+            } else if (entries[i].id == ACTOR_OBJ_KIBAKO2) {
+                ActorSpawnResource sw;
+                sw.scene = play->sceneNum;
+                sw.room = play->roomCtx.curRoom.num;
+                copyActorSpawn(sw.entry, cmdActor->entries[i]);
+                sw.dirt = 0;
+                TempResourceEntries.insert({i,sw});
+                auto foundVal = UsedResources.find(sw);
+                if (foundVal != UsedResources.end()) {
+                    entries[i].rot.x = 0x1C;
+                }
+            } else if (entries[i].id == ACTOR_EN_SKJ) {
+                ActorSpawnResource sw;
+                sw.scene = play->sceneNum;
+                sw.room = play->roomCtx.curRoom.num;
+                copyActorSpawn(sw.entry, cmdActor->entries[i]);
+                sw.dirt = 0;
+                TempResourceEntries.insert({i,sw});
+                auto foundVal = UsedResources.find(sw);
+                if (foundVal != UsedResources.end()) {
+                    entries[i].rot.z = 0x1;
+                }
+            } else if (entries[i].id == ACTOR_EN_COW) {
+                ActorSpawnResource sw;
+                sw.scene = play->sceneNum;
+                sw.room = play->roomCtx.curRoom.num;
+                copyActorSpawn(sw.entry, cmdActor->entries[i]);
+                sw.dirt = 0;
+                TempResourceEntries.insert({i,sw});
+                auto foundVal = UsedResources.find(sw);
+                if (foundVal != UsedResources.end()) {
+                    entries[i].rot.z = 0x1;
+                }
+            }
 
             SPDLOG_INFO("Entity {0:d}\t ID: 0x{1:x}, \tParams: 0x{2:x}, \tpos: {3:d},{4:d},{5:d}, \t{6:d},{7:d},{8:d}",
             i, (uint16_t)entries[i].id, (uint16_t)entries[i].params,
@@ -412,18 +715,69 @@ bool Scene_CommandCollisionHeader(PlayState* play, Ship::SceneCommand* cmd)
         colHeader->maxBounds.y = colRes->absMaxY;
         colHeader->maxBounds.z = colRes->absMaxZ;
 
-        colHeader->vtxList = (Vec3s*)malloc(sizeof(Vec3s) * colRes->vertices.size());
-        colHeader->numVertices = colRes->vertices.size();
+        int extraVerts = 0;
+        if (play->sceneNum == SCENE_BESITU) {
+            extraVerts = 4;
+        }
+
+        colHeader->vtxList = (Vec3s*)malloc(sizeof(Vec3s) * (colRes->vertices.size()+extraVerts));
+        colHeader->numVertices = colRes->vertices.size()+extraVerts;
 
         for (int i = 0; i < colRes->vertices.size(); i++)
         {
             colHeader->vtxList[i].x = colRes->vertices[i].x;
             colHeader->vtxList[i].y = colRes->vertices[i].y;
             colHeader->vtxList[i].z = colRes->vertices[i].z;
+
+            if (play->sceneNum == SCENE_BESITU) {
+                // switch (i) {
+                //     case 0: case 3: case 4: case 7:
+                //     case 8: case 11: case 12: case 15:
+                //     colHeader->vtxList[i].y -= 200;
+                //     break;
+                //     default:
+                //     break;
+                // }
+
+                if (colHeader->vtxList[i].y == 0)
+                    colHeader->vtxList[i].y = -200;
+
+                if (colHeader->vtxList[i].y > colHeader->maxBounds.y)
+                    colHeader->maxBounds.y = colHeader->vtxList[i].y;
+                if (colHeader->vtxList[i].y < colHeader->minBounds.y)
+                    colHeader->minBounds.y = colHeader->vtxList[i].y;
+            }
         }
 
-        colHeader->polyList = (CollisionPoly*)malloc(sizeof(CollisionPoly) * colRes->polygons.size());
-        colHeader->numPolygons = colRes->polygons.size();
+        size_t ss = colRes->vertices.size();
+
+        if (play->sceneNum == SCENE_BESITU) {
+            colHeader->vtxList[ss].x = -100; colHeader->vtxList[ss].y = 0; colHeader->vtxList[ss].z = 20;
+            colHeader->vtxList[ss+1].x = 100; colHeader->vtxList[ss+1].y = 0; colHeader->vtxList[ss+1].z = 20;
+            colHeader->vtxList[ss+2].x = -100; colHeader->vtxList[ss+2].y = 80; colHeader->vtxList[ss+2].z = 200;
+            colHeader->vtxList[ss+3].x = 100; colHeader->vtxList[ss+3].y = 80; colHeader->vtxList[ss+3].z = 200;
+        }
+
+        for (int ii = colRes->vertices.size(); ii < colRes->vertices.size()+extraVerts; ii++){
+            if (colHeader->vtxList[ii].x > colHeader->maxBounds.x)
+                colHeader->maxBounds.x = colHeader->vtxList[ii].x;
+            if (colHeader->vtxList[ii].x < colHeader->minBounds.x)
+                colHeader->minBounds.x = colHeader->vtxList[ii].x;
+            if (colHeader->vtxList[ii].y > colHeader->maxBounds.y)
+                colHeader->maxBounds.y = colHeader->vtxList[ii].y;
+            if (colHeader->vtxList[ii].y < colHeader->minBounds.y)
+                colHeader->minBounds.y = colHeader->vtxList[ii].y;
+            if (colHeader->vtxList[ii].z > colHeader->maxBounds.z)
+                colHeader->maxBounds.z = colHeader->vtxList[ii].z;
+            if (colHeader->vtxList[ii].z < colHeader->minBounds.z)
+                colHeader->minBounds.z = colHeader->vtxList[ii].z;
+        }
+
+        int extraPolys = 0;
+        if (play->sceneNum == SCENE_BESITU)
+            extraPolys = 2;
+        colHeader->polyList = (CollisionPoly*)malloc(sizeof(CollisionPoly) * (colRes->polygons.size()+extraPolys));
+        colHeader->numPolygons = colRes->polygons.size()+extraPolys;
 
         for (int i = 0; i < colRes->polygons.size(); i++)
         {
@@ -435,14 +789,103 @@ bool Scene_CommandCollisionHeader(PlayState* play, Ship::SceneCommand* cmd)
             colHeader->polyList[i].normal.y = colRes->polygons[i].b;
             colHeader->polyList[i].normal.z = colRes->polygons[i].c;
             colHeader->polyList[i].dist = colRes->polygons[i].d;
+
+            // if (play->sceneNum == SCENE_BESITU && i >= 34 && i < 40) {
+            //     colHeader->polyList[i].dist += 200;
+            // }
+            if (play->sceneNum == SCENE_BESITU) {
+                if (colHeader->vtxList[colHeader->polyList[i].flags_vIA].x != (s16)round(colRes->vertices[colHeader->polyList[i].flags_vIA].x) ||
+                    colHeader->vtxList[colHeader->polyList[i].flags_vIA].y != (s16)round(colRes->vertices[colHeader->polyList[i].flags_vIA].y) ||
+                    colHeader->vtxList[colHeader->polyList[i].flags_vIA].z != (s16)round(colRes->vertices[colHeader->polyList[i].flags_vIA].z) ||
+                    colHeader->vtxList[colHeader->polyList[i].flags_vIB].x != (s16)round(colRes->vertices[colHeader->polyList[i].flags_vIB].x) ||
+                    colHeader->vtxList[colHeader->polyList[i].flags_vIB].y != (s16)round(colRes->vertices[colHeader->polyList[i].flags_vIB].y) ||
+                    colHeader->vtxList[colHeader->polyList[i].flags_vIB].z != (s16)round(colRes->vertices[colHeader->polyList[i].flags_vIB].z) ||
+                    colHeader->vtxList[colHeader->polyList[i].vIC].x != (s16)round(colRes->vertices[colHeader->polyList[i].vIC].x) ||
+                    colHeader->vtxList[colHeader->polyList[i].vIC].y != (s16)round(colRes->vertices[colHeader->polyList[i].vIC].y) ||
+                    colHeader->vtxList[colHeader->polyList[i].vIC].z != (s16)round(colRes->vertices[colHeader->polyList[i].vIC].z)) {
+                        Vec3f a1, b1, c1, oNorm;
+                        f32 dist;
+                        a1.x = colHeader->vtxList[colHeader->polyList[i].flags_vIA].x;
+                        a1.y = colHeader->vtxList[colHeader->polyList[i].flags_vIA].y;
+                        a1.z = colHeader->vtxList[colHeader->polyList[i].flags_vIA].z;
+                        b1.x = colHeader->vtxList[colHeader->polyList[i].flags_vIB].x;
+                        b1.y = colHeader->vtxList[colHeader->polyList[i].flags_vIB].y;
+                        b1.z = colHeader->vtxList[colHeader->polyList[i].flags_vIB].z;
+                        c1.x = colHeader->vtxList[colHeader->polyList[i].vIC].x;
+                        c1.y = colHeader->vtxList[colHeader->polyList[i].vIC].y;
+                        c1.z = colHeader->vtxList[colHeader->polyList[i].vIC].z;
+
+                        // Math3D_Vec3f_Cross(&a1,&b1,&c1);
+                        oNorm.x = colHeader->polyList[i].normal.x;
+                        oNorm.y = colHeader->polyList[i].normal.y;
+                        oNorm.z = colHeader->polyList[i].normal.z;
+
+                        Math3D_DefPlane(&a1,&b1, &c1,
+                                        &c1.x,&c1.y,&c1.z,&dist);
+
+                        f32 sign = DOTXYZ(c1,oNorm);
+                        if (sign < 0) {
+                            c1.x = -c1.x;
+                            c1.y = -c1.y;
+                            c1.z = -c1.z;
+                            dist = -dist;
+                        }
+
+                        colHeader->polyList[i].normal.x = c1.x*0x7FFF;
+                        colHeader->polyList[i].normal.y = c1.y*0x7FFF;
+                        colHeader->polyList[i].normal.z = c1.z*0x7FFF;
+                        colHeader->polyList[i].dist = dist;
+                }
+            }
         }
 
-        colHeader->surfaceTypeList = (SurfaceType*)malloc(colRes->polygonTypes.size() * sizeof(SurfaceType));
+        size_t pp = colRes->polygons.size();
+        if (play->sceneNum == SCENE_BESITU) {
+            colHeader->polyList[pp].type = 0x0;
+            colHeader->polyList[pp].flags_vIA = ss; colHeader->polyList[pp].flags_vIB = ss+2; colHeader->polyList[pp].vIC = ss+1;
+            colHeader->polyList[pp+1].type = 0x1;
+            colHeader->polyList[pp+1].flags_vIA = ss+3; colHeader->polyList[pp+1].flags_vIB = ss+1; colHeader->polyList[pp+1].vIC = ss+2;
+        }
+
+        for (int ii = colRes->polygons.size(); ii < colHeader->numPolygons; ii++){
+            Vec3f a1, b1, c1, norm;
+            f32 dist;
+            a1.x = colHeader->vtxList[colHeader->polyList[ii].flags_vIA].x;
+            a1.y = colHeader->vtxList[colHeader->polyList[ii].flags_vIA].y;
+            a1.z = colHeader->vtxList[colHeader->polyList[ii].flags_vIA].z;
+            b1.x = colHeader->vtxList[colHeader->polyList[ii].flags_vIB].x;
+            b1.y = colHeader->vtxList[colHeader->polyList[ii].flags_vIB].y;
+            b1.z = colHeader->vtxList[colHeader->polyList[ii].flags_vIB].z;
+            c1.x = colHeader->vtxList[colHeader->polyList[ii].vIC].x;
+            c1.y = colHeader->vtxList[colHeader->polyList[ii].vIC].y;
+            c1.z = colHeader->vtxList[colHeader->polyList[ii].vIC].z;
+
+            Math3D_DefPlane(&a1,&b1, &c1,&norm.x,&norm.y,&norm.z,&dist);
+            colHeader->polyList[ii].normal.x = norm.x*0x7FFF;
+            colHeader->polyList[ii].normal.y = norm.y*0x7FFF;
+            colHeader->polyList[ii].normal.z = norm.z*0x7FFF;
+            colHeader->polyList[ii].dist = dist;
+        }
+
+        int extraSurfs = 0;
+        if (play->sceneNum == SCENE_BESITU)
+            extraSurfs = 1;
+        colHeader->surfaceTypeList = (SurfaceType*)malloc((colRes->polygonTypes.size()+extraSurfs) * sizeof(SurfaceType));
 
         for (int i = 0; i < colRes->polygonTypes.size(); i++)
         {
             colHeader->surfaceTypeList[i].data[0] = colRes->polygonTypes[i] >> 32;
             colHeader->surfaceTypeList[i].data[1] = colRes->polygonTypes[i] & 0xFFFFFFFF;
+
+            if ((play->sceneNum == SCENE_HAKAANA_OUKE && (i == 0x9 || i == 0xA)) ||
+                (play->sceneNum == 0x8 && ((colHeader->surfaceTypeList[i].data[0] >> 13) == 2))) {//Well surfaces doing spike damage become voidouts
+                colHeader->surfaceTypeList[i].data[0] |= 0x14 << 24;
+            }
+        }
+
+        if (play->sceneNum == SCENE_BESITU) {
+            colHeader->surfaceTypeList[colRes->polygonTypes.size()].data[0] = 0x100;
+            colHeader->surfaceTypeList[colRes->polygonTypes.size()].data[1] = 0x0;
         }
 
         colHeader->cameraDataList = (CamData*)malloc(sizeof(CamData) * colRes->camData->entries.size());
@@ -1208,6 +1651,16 @@ s32 OTRScene_ExecuteCommands(PlayState* play, Ship::Scene* scene)
 
         //sceneCmd++;
     }
+
+    if (play->sceneNum == SCENE_BESITU) {
+        play->setupExitList = (int16_t*)malloc((1) * sizeof(int16_t));
+        play->setupExitList[0] = 0;
+        play->numSetupActors = 2;
+        play->setupActorList = (ActorEntry*)malloc(play->numSetupActors * sizeof(ActorEntry));
+        play->setupActorList[0] = { ACTOR_EN_WONDER_ITEM, -79,0,-151, 0,0,1, 0x1241};
+        play->setupActorList[1] = { ACTOR_EN_ITEM00, 200,-200,0, 0,0,0, 0x100+(uint16_t)ITEM00_HEART_PIECE  };
+    }
+
     return 0;
 }
 

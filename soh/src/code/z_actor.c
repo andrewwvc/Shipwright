@@ -8,6 +8,7 @@
 #include "objects/object_bdoor/object_bdoor.h"
 #include "soh/frame_interpolation.h"
 #include "soh/Enhancements/enemyrandomizer.h"
+#include <limits.h>
 
 #if defined(_MSC_VER) || defined(__GNUC__)
 #include <string.h>
@@ -287,6 +288,90 @@ void Actor_SetFeetPos(Actor* actor, s32 limbIndex, s32 leftFootIndex, Vec3f* lef
 void func_8002BE04(PlayState* play, Vec3f* arg1, Vec3f* arg2, f32* arg3) {
     SkinMatrix_Vec3fMtxFMultXYZW(&play->viewProjectionMtxF, arg1, arg2, arg3);
     *arg3 = (*arg3 < 1.0f) ? 1.0f : (1.0f / *arg3);
+}
+
+s16 aimToActorMovement(Actor* this, Actor* target, f32 projectileSpeed, PlayState* play, f32* time, f32* projectedY, f32 maxTargetSpeed) {
+    //maxTargetSpeed should be set to 0.0f to allow for unlimited target speed
+    f32 tSpeed;
+    if (maxTargetSpeed > 0.0f && target->speedXZ > maxTargetSpeed)
+        tSpeed = maxTargetSpeed;
+    else
+        tSpeed = target->speedXZ;
+    f32 posX = target->world.pos.x - this->world.pos.x;
+    f32 posZ = target->world.pos.z - this->world.pos.z;
+    f32 velX = Math_SinS(target->world.rot.y) * tSpeed;
+    f32 velZ = Math_CosS(target->world.rot.y) * tSpeed;
+    Vec3f projectedWorldPos;
+    f32 addedHeight = 80.0f;
+
+    CollisionPoly* outPoly;
+    Vec3f result;
+    s32 bgID;
+
+    if (projectileSpeed < target->speedXZ){
+        *time = 0.0f;
+        *projectedY = BgCheck_EntityRaycastFloor2(play,&play->colCtx,&outPoly,&target->world.pos);
+        if (BGCHECK_Y_MIN == *projectedY)
+            *projectedY = target->world.pos.y;
+        return this->yawTowardsPlayer;
+    } else {
+        f32 a = velX*velX + velZ*velZ - projectileSpeed*projectileSpeed;
+        f32 b = 2.0f*(velX*posX+velZ*posZ);
+        f32 c = posX*posX + posZ*posZ;
+        f32 det = b*b - 4.0f*a*c;
+
+        if (a == 0.0f || a == -0.0f || det < 0.0f)
+            return this->yawTowardsPlayer;
+        //Assumes that the sqrt of det is larger than b and that a is negative.
+        *time = (-b - sqrtf(det))/(2.0f*a);
+
+        f32 projectedX = posX+velX**time;
+        f32 projectedZ = posZ+velZ**time;
+
+        projectedWorldPos.x = projectedX+this->world.pos.x;
+        projectedWorldPos.z = projectedZ+this->world.pos.z;
+        projectedWorldPos.y = target->world.pos.y+addedHeight;
+
+        *projectedY = BgCheck_EntityRaycastFloor2(play,&play->colCtx,&outPoly,&projectedWorldPos);
+        if (BGCHECK_Y_MIN == *projectedY)
+            *projectedY = target->world.pos.y;
+        projectedWorldPos.y = *projectedY;
+
+        //Prevents futilely aiming into walls
+        if (BgCheck_CheckWallImpl(&play->colCtx,(1<<1),&result,&projectedWorldPos,&target->world.pos,12,&outPoly,&bgID,target,80,0)) {
+            projectedWorldPos.x = result.x;
+            projectedWorldPos.z = result.z;
+            projectedWorldPos.y = result.y;
+
+            projectedX = projectedWorldPos.x - this->world.pos.x;
+            projectedZ = projectedWorldPos.z - this->world.pos.z;
+            *projectedY = BgCheck_EntityRaycastFloor2(play,&play->colCtx,&outPoly,&projectedWorldPos);
+            if (BGCHECK_Y_MIN == *projectedY)
+                *projectedY = target->world.pos.y;
+        }
+
+        projectedWorldPos.y += 15.0f;
+        Vec3f augmentedSelfPos = this->world.pos;
+        if (augmentedSelfPos.y < projectedWorldPos.y)
+            augmentedSelfPos.y = projectedWorldPos.y;
+        //Causes the shooter to aim directly at the target if the projected position ends up behind something
+        if (BgCheck_CheckLineImpl(&play->colCtx,(1<<1),0,&augmentedSelfPos,&projectedWorldPos,&result,
+                    &outPoly,&bgID,&target,1.0,BgCheck_GetBccFlags(1,0,0,1,0))) {
+            *projectedY = target->world.pos.y;
+            return this->yawTowardsPlayer;
+        }
+
+        return Math_Atan2S(projectedZ, projectedX);
+    }
+}
+
+s16 aimToPlayerMovement(Actor* this, f32 speed, PlayState* play) {
+    Player* player = GET_PLAYER(play);
+    f32 time;
+    f32 projectedY = 80.0f;
+
+    //Assumes that the player's normal running speed is 6.0f
+    return aimToActorMovement(this, &player->actor, speed, play, &time, &projectedY, 6.0f);
 }
 
 typedef struct {
@@ -1505,6 +1590,9 @@ s32 Actor_ActorBIsFacingActorA(Actor* actorA, Actor* actorB, s16 maxAngle) {
 s32 Actor_IsFacingPlayer(Actor* actor, s16 maxAngle) {
     s16 yawDiff = actor->yawTowardsPlayer - actor->shape.rot.y;
 
+    if (yawDiff == SHRT_MIN)//This is important, as otherwise overflow will cause an actor facing directly away from the player to count as facing towards
+        return false;
+
     if (ABS(yawDiff) < maxAngle) {
         return true;
     }
@@ -1878,7 +1966,7 @@ typedef struct {
 TargetRangeParams D_80115FF8[] = {
     TARGET_RANGE(70, 140),   TARGET_RANGE(170, 255),    TARGET_RANGE(280, 5600),      TARGET_RANGE(350, 525),
     TARGET_RANGE(700, 1050), TARGET_RANGE(1000, 1500),  TARGET_RANGE(100, 105.36842), TARGET_RANGE(140, 163.33333),
-    TARGET_RANGE(240, 576),  TARGET_RANGE(280, 280000),
+    TARGET_RANGE(240, 576),  TARGET_RANGE(280, 280000), TARGET_RANGE(0, 0),
 };
 
 u32 func_8002F090(Actor* actor, f32 arg1) {
@@ -2480,7 +2568,7 @@ void func_800304DC(PlayState* play, ActorContext* actorCtx, ActorEntry* actorEnt
 
     actorCtx->absoluteSpace = NULL;
 
-    Actor_SpawnEntry(actorCtx, actorEntry, play);
+    Actor_SpawnEntry(actorCtx, actorEntry, play, -1);
     func_8002C0C0(&actorCtx->targetCtx, actorCtx->actorLists[ACTORCAT_PLAYER].head, play);
     func_8002FA60(play);
 }
@@ -2514,7 +2602,7 @@ void Actor_UpdateAll(PlayState* play, ActorContext* actorCtx) {
     if (play->numSetupActors != 0) {
         actorEntry = &play->setupActorList[0];
         for (i = 0; i < play->numSetupActors; i++) {
-            Actor_SpawnEntry(&play->actorCtx, actorEntry++, play);
+            Actor_SpawnEntry(&play->actorCtx, actorEntry++, play, i);
         }
         play->numSetupActors = 0;
     }
@@ -3270,7 +3358,7 @@ Actor* Actor_Spawn(ActorContext* actorCtx, PlayState* play, s16 actorId, f32 pos
 
     objBankIndex = Object_GetIndex(&play->objectCtx, actorInit->objectId);
 
-    if (objBankIndex < 0 /*&& (!gMapLoading || CVar_GetS32("gRandomizedEnemies", 0))*/) {
+    if (objBankIndex < 0 /*&& (!gMapLoading || CVar_GetS32("gRandomizedEnemies", 0))*/) { //This is being commented out to enable actor spawn overrides, this will spawn extra enemies in the graveyard if they are not erased
         objBankIndex = 0;
     }
 
@@ -3326,6 +3414,7 @@ Actor* Actor_Spawn(ActorContext* actorCtx, PlayState* play, s16 actorId, f32 pos
     actor->home.rot.y = rotY;
     actor->home.rot.z = rotZ;
     actor->params = params;
+    actor->entryNum = -1;
 
     Actor_AddToCategory(actorCtx, actor, actorInit->category);
 
@@ -3391,10 +3480,12 @@ void Actor_SpawnTransitionActors(PlayState* play, ActorContext* actorCtx) {
     }
 }
 
-Actor* Actor_SpawnEntry(ActorContext* actorCtx, ActorEntry* actorEntry, PlayState* play) {
+Actor* Actor_SpawnEntry(ActorContext* actorCtx, ActorEntry* actorEntry, PlayState* play, s16 entryNum) {
     gMapLoading = 1;
     Actor* ret = Actor_Spawn(actorCtx, play, actorEntry->id, actorEntry->pos.x, actorEntry->pos.y, actorEntry->pos.z,
                        actorEntry->rot.x, actorEntry->rot.y, actorEntry->rot.z, actorEntry->params, true);
+    if (ret)
+        ret->entryNum = entryNum;
     gMapLoading = 0;
 
     return ret;
@@ -3990,13 +4081,14 @@ s32 Actor_IsTargeted(PlayState* play, Actor* actor) {
  * Returns true if the player is targeting an actor other than the provided actor
  */
 s32 Actor_OtherIsTargeted(PlayState* play, Actor* actor) {
-    Player* player = GET_PLAYER(play);
+    return false;
+    /*Player* player = GET_PLAYER(play);
 
     if ((player->stateFlags1 & 0x10) && !actor->isTargeted) {
         return true;
     } else {
         return false;
-    }
+    }*/
 }
 
 f32 func_80033AEC(Vec3f* arg0, Vec3f* arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5) {

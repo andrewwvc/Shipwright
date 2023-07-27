@@ -58,4 +58,6 @@ typedef struct EnGSwitch {
     /* 0x01C8 */ EnGSwitchEffect effects[100];
 } EnGSwitch; // size = 0x12F8
 
+f32 galleryMultiplierValue();
+
 #endif

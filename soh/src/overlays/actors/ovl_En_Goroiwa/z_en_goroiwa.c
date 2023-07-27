@@ -69,8 +69,8 @@ static ColliderJntSphElementInit sJntSphElementsInit[] = {
     {
         {
             ELEMTYPE_UNK0,
-            { 0x20000000, 0x00, 0x04 },
-            { 0xFFCFFFFF, 0x00, 0x00 },
+            { 0x20000000, 0x00, 0x10 },
+            { 0xFFCFFFFF, 0x00, 0x00 },//Setup to allow hammer blows to affect boulders
             TOUCH_ON | TOUCH_SFX_NORMAL,
             BUMP_ON,
             OCELEM_ON,

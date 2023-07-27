@@ -247,6 +247,7 @@ typedef enum {
     /* 0x9C */ ITEM_EXTRA_MAGIC,
     /* 0x9D */ ITEM_EPONA_BOOST,
     /* 0x9E */ ITEM_DEFENSE_HEART,
+    /* 0x9F */ ITEM_WALLET_KING,
     /* 0xFC */ ITEM_LAST_USED = 0xFC,
     /* 0xFE */ ITEM_NONE_FE = 0xFE,
     /* 0xFF */ ITEM_NONE = 0xFF
@@ -386,6 +387,7 @@ typedef enum {
     /* 0x7E */ GI_EXTRA_MAGIC,
     /* 0x7F */ GI_EPONA_BOOST,
     /* 0x80 */ GI_DEFENSE_HEART,
+    /* 0x81 */ GI_WALLET_KING,
     /* 0x84 */ GI_MAX
 } GetItemID;
 

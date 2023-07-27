@@ -111,6 +111,8 @@ void EnCow_Init(Actor* thisx, PlayState* play) {
         EnCow_MoveForRandomizer(thisx, play);
     }
 
+    thisx->world.rot.z = thisx->shape.rot.z = 0;
+
     ActorShape_Init(&this->actor.shape, 0.0f, ActorShadow_DrawCircle, 72.0f);
     switch (this->actor.params) {
         case 0:
@@ -252,6 +254,8 @@ void func_809DF7D8(EnCow* this, PlayState* play) {
         this->actor.flags &= ~ACTOR_FLAG_16;
         Message_CloseTextbox(play);
         this->actionFunc = func_809DF778;
+        this->actor.home.rot.z = 1;
+        insertSpawnResource(this->actor.entryNum, DEFAULT_RESOURCE_TIME);
         func_8002F434(&this->actor, play, GI_MILK, 10000.0f, 100.0f);
     }
 }
@@ -354,10 +358,12 @@ void func_809DF96C(EnCow* this, PlayState* play) {
                         this->actionFunc = EnCow_StartGivePlayerHeartPiece;
                         return;
                     }
-                    this->actionFunc = func_809DF8FC;
-                    this->actor.flags |= ACTOR_FLAG_16;
-                    func_8002F2CC(&this->actor, play, 170.0f);
-                    this->actor.textId = 0x2006;
+                    if (this->actor.home.rot.z != 1) {
+                        this->actionFunc = func_809DF8FC;
+                        this->actor.flags |= ACTOR_FLAG_16;
+                        func_8002F2CC(&this->actor, play, 170.0f);
+                        this->actor.textId = 0x2006;
+                    }
                 } else {
                     this->unk_276 |= 4;
                 }

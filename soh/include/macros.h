@@ -51,6 +51,10 @@
 #define IS_DAY (gSaveContext.nightFlag == 0)
 #define IS_NIGHT (gSaveContext.nightFlag == 1)
 #define DAYS_IN_CYCLE 6
+#define DEFAULT_RESOURCE_TIME 200000
+#define INITIAL_GALLERY_MULTIPLIER 0
+
+#define DEKU_TREE_DEAD (gSaveContext.eventChkInf[0] & (1<<7))
 
 #define SLOT(item) gItemSlots[item]
 #define INV_CONTENT(item) gSaveContext.inventory.items[SLOT(item)]
