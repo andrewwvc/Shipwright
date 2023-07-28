@@ -1729,16 +1729,6 @@ EnItem00* Item_DropCollectible2(PlayState* play, Vec3f* spawnPos, s16 params) {
     return spawnedActor;
 }
 
-void Item_DropCollectibleRandom(PlayState* play, Actor* fromActor, Vec3f* spawnPos, s16 params) {
-    if (Rand_ZeroOne() < 0.25f)
-        Item_DropCollectibleRandom1(play, fromActor, spawnPos, params, 0);
-}
-
-void Item_DropCollectibleRandomSmall(PlayState* play, Actor* fromActor, Vec3f* spawnPos, s16 params) {
-    if (Rand_ZeroOne() < 0.5f)
-        Item_DropCollectibleRandom1(play, fromActor, spawnPos, params, 1);
-}
-
 void Item_DropCollectibleRandom1(PlayState* play, Actor* fromActor, Vec3f* spawnPos, s16 params, s16 mod) {
     s32 pad;
     EnItem00* spawnedActor;
@@ -1864,4 +1854,14 @@ void Item_DropCollectibleRandom1(PlayState* play, Actor* fromActor, Vec3f* spawn
             dropQuantity--;
         }
     }
+}
+
+void Item_DropCollectibleRandom(PlayState* play, Actor* fromActor, Vec3f* spawnPos, s16 params) {
+    if (Rand_ZeroOne() < 0.25f)
+        Item_DropCollectibleRandom1(play, fromActor, spawnPos, params, 0);
+}
+
+void Item_DropCollectibleRandomSmall(PlayState* play, Actor* fromActor, Vec3f* spawnPos, s16 params) {
+    if (Rand_ZeroOne() < 0.5f)
+        Item_DropCollectibleRandom1(play, fromActor, spawnPos, params, 1);
 }
