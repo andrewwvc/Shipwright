@@ -4525,7 +4525,6 @@ void BossTw_BlastDraw(Actor* thisx, PlayState* play2) {
             break;
 
         case TW_ICE_BLAST_GROUND:
-            s32 pad;
             if (this->workf[UNK_F9] > 0.0f) {
                 func_80941BC0(this, play);
 
