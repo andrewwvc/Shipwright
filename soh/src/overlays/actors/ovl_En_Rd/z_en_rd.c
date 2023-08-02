@@ -264,7 +264,7 @@ void func_80AE2744(EnRd* this, PlayState* play) {
 
         this->unk_305 = 0;
 
-        if ((this->actor.xzDistToPlayer <= HearingRange && func_8002DDE4(play)) || (this->actor.xzDistToPlayer <= SenseRange)) {//Causes the undead to only notice the player if they are making noise
+        if ((this->actor.xzDistToPlayer <= HearingRange && Player_IsMakingNoise(play)) || (this->actor.xzDistToPlayer <= SenseRange)) {//Causes the undead to only notice the player if they are making noise
             // Add a height check to redeads/gibdos freeze when Enemy Randomizer is on.
             // Without the height check, redeads/gibdos can freeze the player from insane distances in
             // vertical rooms (like the first room in Deku Tree), making these rooms nearly unplayable.
@@ -367,7 +367,7 @@ void func_80AE2C1C(EnRd* this, PlayState* play) {
     }
 
     if ((ABS(sp32) < 0x2554) && (Actor_WorldDistXYZToActor(&this->actor, &player->actor) <= HearingRange)) {
-        if (!(player->stateFlags1 & 0x2C6080) && !(player->stateFlags2 & 0x80)) {//Causes the undead to only notice the player if they are making noise
+        if (!(player->stateFlags1 & 0x2C6080) && !(player->stateFlags2 & 0x80)) {
             if (this->unk_306 == 0) {
                 if (!(this->unk_312 & 0x80)) {
                     player->actor.freezeTimer = 40;
@@ -439,7 +439,7 @@ void func_80AE2FD0(EnRd* this, PlayState* play) {
     this->actor.world.rot.y = this->actor.shape.rot.y;
     SkelAnime_Update(&this->skelAnime);
 
-    if (!(player->stateFlags1 & 0x2C6080) && !(player->stateFlags2 & 0x80) && //Causes the undead to only notice the player if they are making noise
+    if (!(player->stateFlags1 & 0x2C6080) && !(player->stateFlags2 & 0x80) &&
         (Actor_WorldDistXYZToPoint(&player->actor, &this->actor.home.pos) < HomeRange)) {
         this->actor.targetMode = 0;
         func_80AE2B90(this, play);
