@@ -11,6 +11,8 @@ void EnRd_Draw(Actor* thisx, PlayState* play);
 void func_80AE269C(EnRd* this, PlayState* play);
 void func_80AE2744(EnRd* this, PlayState* play);
 void func_80AE2970(EnRd* this, PlayState* play);
+void EnRd_SetupRiseFromGround(EnRd* this, PlayState* play);
+void EnRd_RiseFromGround(EnRd* this, PlayState* play);
 void func_80AE2A10(EnRd* this, PlayState* play);
 void func_80AE2C1C(EnRd* this, PlayState* play);
 void func_80AE2F50(EnRd* this, PlayState* play);
@@ -163,7 +165,10 @@ void EnRd_Init(Actor* thisx, PlayState* play) {
     Collider_SetCylinder(play, &this->collider, thisx, &sCylinderInit);
 
     if (thisx->params >= -2) {
-        func_80AE269C(this,play);
+        if (thisx->params == 4)
+            EnRd_SetupRiseFromGround(this,play);
+        else
+            func_80AE269C(this,play);
     } else {
         func_80AE2970(this,play);
     }
@@ -311,6 +316,26 @@ void func_80AE2A10(EnRd* this, PlayState* play) {
                 Math_SmoothStepToS(&this->actor.shape.rot.x, 0, 1, 0x7D0, 0);
             }
         }
+    }
+}
+
+void EnRd_SetupRiseFromGround(EnRd* this, PlayState* play) {
+    Animation_Change(&this->skelAnime, &gGibdoRedeadIdleAnim, 0, 0, Animation_GetLastFrame(&gGibdoRedeadIdleAnim),
+                     ANIMMODE_LOOP, -6.0f);
+    this->unk_31B = 11;
+    this->unk_30C = 6;
+    this->actor.world.pos.y = this->actor.home.pos.y - 100.0f;
+    this->actor.gravity = 0.0f;
+    this->actor.shape.yOffset = 0.0f;
+    this->actor.speedXZ = 0.0f;
+    EnRd_SetupAction(this, EnRd_RiseFromGround);
+}
+
+// Rising out of coffin
+void EnRd_RiseFromGround(EnRd* this, PlayState* play) {
+    if (Math_SmoothStepToF(&this->actor.world.pos.y, this->actor.home.pos.y, 0.5f, 10.0f, 1.0f) == 0.0f) {
+        this->actor.gravity = -3.5f;
+        func_80AE269C(this,play);
     }
 }
 
