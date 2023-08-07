@@ -342,6 +342,7 @@ void DrawInfoTab() {
 
     const uint16_t healthMin = 0;
     const uint16_t healthMax = gSaveContext.healthCapacity;
+    const uint16_t heartsGreatestMax = 20;
     ImGui::SetNextItemWidth(ImGui::GetFontSize() * 15);
     ImGui::SliderScalar("Health", ImGuiDataType_S16, &gSaveContext.health, &healthMin, &healthMax);
     UIWidgets::InsertHelpHoverText("Current health. 16 units per full heart");
@@ -349,41 +350,84 @@ void DrawInfoTab() {
     bool isDoubleDefenseAcquired = gSaveContext.isDoubleDefenseAcquired != 0;
     if (ImGui::Checkbox("Double Defense", &isDoubleDefenseAcquired)) {
         gSaveContext.isDoubleDefenseAcquired = isDoubleDefenseAcquired;
-        gSaveContext.inventory.defenseHearts =
-            gSaveContext.isDoubleDefenseAcquired ? 20 : 0; // Set to get the border drawn in the UI
+        //gSaveContext.inventory.defenseHearts =
+        //    gSaveContext.isDoubleDefenseAcquired ? 20 : 0; // Set to get the border drawn in the UI
     }
     UIWidgets::InsertHelpHoverText("Is double defense unlocked?");
 
+    int8_t defenseHeartNum = gSaveContext.inventory.defenseHearts;
+    if (ImGui::SliderScalar("Defense Hearts", ImGuiDataType_S8, &defenseHeartNum,&healthMin,&heartsGreatestMax)) {
+        gSaveContext.inventory.defenseHearts = defenseHeartNum;
+    }
+    UIWidgets::InsertHelpHoverText("Number of hearts protected by double defense");
+
     std::string magicName;
     if (gSaveContext.magicLevel == 2) {
-        magicName = "Double";
+        if (gSaveContext.extraMagicPower == 2)
+            magicName = "Double+2";
+        else if (gSaveContext.extraMagicPower == 1)
+            magicName = "Double+1";
+        else
+            magicName = "Double+0";
     } else if (gSaveContext.magicLevel == 1) {
-        magicName = "Single";
+        if (gSaveContext.extraMagicPower == 2)
+            magicName = "Single+2";
+        else if (gSaveContext.extraMagicPower == 1)
+            magicName = "Single+1";
+        else
+            magicName = "Single+0";
     } else {
         magicName = "None";
     }
     ImGui::SetNextItemWidth(ImGui::GetFontSize() * 6);
     if (ImGui::BeginCombo("Magic Level", magicName.c_str())) {
-        if (ImGui::Selectable("Double")) {
+        if (ImGui::Selectable("Double+2")) {
             gSaveContext.magicLevel = 2;
             gSaveContext.isMagicAcquired = true;
             gSaveContext.isDoubleMagicAcquired = true;
+            gSaveContext.extraMagicPower = 2;
         }
-        if (ImGui::Selectable("Single")) {
+        if (ImGui::Selectable("Double+1")) {
+            gSaveContext.magicLevel = 2;
+            gSaveContext.isMagicAcquired = true;
+            gSaveContext.isDoubleMagicAcquired = true;
+            gSaveContext.extraMagicPower = 1;
+        }
+        if (ImGui::Selectable("Double+0")) {
+            gSaveContext.magicLevel = 2;
+            gSaveContext.isMagicAcquired = true;
+            gSaveContext.isDoubleMagicAcquired = true;
+            gSaveContext.extraMagicPower = 0;
+        }
+        if (ImGui::Selectable("Single+2")) {
             gSaveContext.magicLevel = 1;
             gSaveContext.isMagicAcquired = true;
             gSaveContext.isDoubleMagicAcquired = false;
+            gSaveContext.extraMagicPower = 2;
+        }
+        if (ImGui::Selectable("Single+1")) {
+            gSaveContext.magicLevel = 1;
+            gSaveContext.isMagicAcquired = true;
+            gSaveContext.isDoubleMagicAcquired = false;
+            gSaveContext.extraMagicPower = 1;
+        }
+        if (ImGui::Selectable("Single+0")) {
+            gSaveContext.magicLevel = 1;
+            gSaveContext.isMagicAcquired = true;
+            gSaveContext.isDoubleMagicAcquired = false;
+            gSaveContext.extraMagicPower = 0;
         }
         if (ImGui::Selectable("None")) {
             gSaveContext.magicLevel = 0;
             gSaveContext.isMagicAcquired = false;
             gSaveContext.isDoubleMagicAcquired = false;
+            gSaveContext.extraMagicPower = 0;
         }
 
         ImGui::EndCombo();
     }
     UIWidgets::InsertHelpHoverText("Current magic level");
-    gSaveContext.magicCapacity = gSaveContext.magicLevel * 0x30; // Set to get the bar drawn in the UI
+    gSaveContext.magicCapacity = Inferface_CalculateMaxMagic(); // Set to get the bar drawn in the UI
     if (gSaveContext.magic > gSaveContext.magicCapacity) {
         gSaveContext.magic = gSaveContext.magicCapacity; // Clamp magic to new max
     }
@@ -435,6 +479,21 @@ void DrawInfoTab() {
 
     ImGui::InputScalar("Bgs Day Count", ImGuiDataType_S32, &gSaveContext.bgsDayCount);
     UIWidgets::InsertHelpHoverText("Total number of days elapsed since giving Biggoron the claim check");
+
+    ImGui::InputScalar("Goron Trade Day", ImGuiDataType_S32, &gSaveContext.goronTimeDay);
+    UIWidgets::InsertHelpHoverText("The day a Goron left to go shopping");
+
+    ImGui::InputScalar("Saria Date Day", ImGuiDataType_S32, &gSaveContext.SariaDateDay);
+    UIWidgets::InsertHelpHoverText("The specific date Saria will come around");
+
+    ImGui::InputScalar("Ruto Date Day", ImGuiDataType_S32, &gSaveContext.RutoDateDay);
+    UIWidgets::InsertHelpHoverText("The specific date Ruto will meet you");
+
+    ImGui::InputScalar("Malon Play Day", ImGuiDataType_S32, &gSaveContext.MalonPlayDay);
+    UIWidgets::InsertHelpHoverText("The specific date Malon has come out at night");
+
+    ImGui::InputScalar("Malon Ride Day", ImGuiDataType_S32, &gSaveContext.MalonRideDay);
+    UIWidgets::InsertHelpHoverText("The specific date Malon has chosen to ride in the field");
 
     ImGui::InputScalar("Entrance Index", ImGuiDataType_S32, &gSaveContext.entranceIndex);
     UIWidgets::InsertHelpHoverText("From which entrance did Link arrive?");
@@ -1108,6 +1167,9 @@ void DrawFlagsTab() {
                         case EVENT_INF:
                             DrawFlagTableArray16(flagTable, j, gSaveContext.eventInf[j]);
                             break;
+                        case NPC_GORON:
+                            DrawFlagTableArray16(flagTable, j, gSaveContext.goronTimeStatus);
+                            break;
                         case RANDOMIZER_INF:
                             DrawFlagTableArray16(flagTable, j, gSaveContext.randomizerInf[j]);
                             break;
@@ -1276,13 +1338,13 @@ void DrawEquipmentTab() {
     // There is no icon for child wallet, so default to a text list
     // this was const, but I needed to append to it depending in rando settings.
     std::vector<std::string> walletNamesImpl = {
-        "Child (99)",
-        "Adult (200)",
-        "Giant (500)",
+        "Child ("+std::to_string(CAPACITY(UPG_WALLET,0))+")",
+        "Adult ("+std::to_string(CAPACITY(UPG_WALLET,1))+")",
+        "Giant ("+std::to_string(CAPACITY(UPG_WALLET,2))+")",
     };
     // only display Tycoon wallet if you're in a save file that would allow it.
     if (gSaveContext.n64ddFlag && OTRGlobals::Instance->gRandomizer->GetRandoSettingValue(RSK_SHOPSANITY) > RO_SHOPSANITY_ZERO_ITEMS) {
-        const std::string walletName = "Tycoon (999)";
+        const std::string walletName = "Tycoon ("+std::to_string(CAPACITY(UPG_WALLET,3))+")";
         walletNamesImpl.push_back(walletName);
     }
     // copy it to const value for display in ImGui.
@@ -1291,17 +1353,17 @@ void DrawEquipmentTab() {
 
     const std::vector<std::string> stickNames = {
         "None",
-        "10",
-        "20",
-        "30",
+        std::to_string(CAPACITY(UPG_STICKS,1)),
+        std::to_string(CAPACITY(UPG_STICKS,2)),
+        std::to_string(CAPACITY(UPG_STICKS,3)),
     };
     DrawUpgrade("Sticks", UPG_STICKS, stickNames);
 
     const std::vector<std::string> nutNames = {
         "None",
-        "20",
-        "30",
-        "40",
+        std::to_string(CAPACITY(UPG_NUTS,1)),
+        std::to_string(CAPACITY(UPG_NUTS,2)),
+        std::to_string(CAPACITY(UPG_NUTS,3)),
     };
     DrawUpgrade("Deku Nuts", UPG_NUTS, nutNames);
 }

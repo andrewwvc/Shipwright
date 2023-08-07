@@ -286,12 +286,12 @@ void EnSt_InitColliders(EnSt* this, PlayState* play) {
         Collider_SetCylinder(play, &this->colCylinder[i], &this->actor, cylinders[i]);
     }
 
-    this->colCylinder[0].info.bumper.dmgFlags = 0x0003F8F9;
-    this->colCylinder[1].info.bumper.dmgFlags = 0xFFC00706;
+    this->colCylinder[0].info.bumper.dmgFlags = 0xF0032059;//0x0003F8F9
+    this->colCylinder[1].info.bumper.dmgFlags = 0x0FC01FA6;//0xFFC00706
     this->colCylinder[2].base.colType = COLTYPE_METAL;
     this->colCylinder[2].info.bumperFlags = BUMP_ON | BUMP_HOOKABLE | BUMP_NO_AT_INFO;
     this->colCylinder[2].info.elemType = ELEMTYPE_UNK2;
-    this->colCylinder[2].info.bumper.dmgFlags = 0xFFCC0706;
+    this->colCylinder[2].info.bumper.dmgFlags = 0x0FCC1FA6;//0xFFC00706
 
     CollisionCheck_SetInfo2(&this->actor.colChkInfo, DamageTable_Get(2), &sColChkInit);
 
@@ -789,6 +789,11 @@ void EnSt_Init(Actor* thisx, PlayState* play) {
     Animation_ChangeByInfo(&this->skelAnime, sAnimationInfo, ENST_ANIM_0);
     this->blureIdx = EnSt_CreateBlureEffect(play);
     EnSt_InitColliders(this, play);
+    if (this->actor.params & 4)
+        this->isActivated = false;
+    else
+        this->isActivated = true;
+    this->actor.params &= ~4;
     if (thisx->params == 2) {
         this->actor.flags |= ACTOR_FLAG_LENS;
     }
@@ -797,6 +802,7 @@ void EnSt_Init(Actor* thisx, PlayState* play) {
     } else {
         this->actor.naviEnemyId = 0x04;
     }
+
     EnSt_CheckCeilingPos(this, play);
     this->actor.flags |= ACTOR_FLAG_ARROW_DRAGGABLE;
     this->actor.flags |= ACTOR_FLAG_PLAY_HIT_SFX;
@@ -820,7 +826,7 @@ void EnSt_Destroy(Actor* thisx, PlayState* play) {
 }
 
 void EnSt_WaitOnCeiling(EnSt* this, PlayState* play) {
-    if (EnSt_IsCloseToPlayer(this, play)) {
+    if (EnSt_IsCloseToPlayer(this, play) && this->isActivated) {
         EnSt_SetDropAnimAndVel(this);
         EnSt_SetupAction(this, EnSt_MoveToGround);
     } else {
@@ -1014,6 +1020,9 @@ void EnSt_Update(Actor* thisx, PlayState* play) {
     EnSt* this = (EnSt*)thisx;
     s32 pad;
     Color_RGBA8 color = { 0, 0, 0, 0 };
+
+    if (!EnSt_IsCloseToPlayer(this,play))
+        this->isActivated = true;
 
     if (this->actor.flags & ACTOR_FLAG_DRAGGED_BY_ARROW) {
         SkelAnime_Update(&this->skelAnime);

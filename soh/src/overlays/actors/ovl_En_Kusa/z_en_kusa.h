@@ -11,7 +11,8 @@ typedef void (*EnKusaActionFunc)(struct EnKusa*, PlayState*);
 typedef enum {
     /* 0 */ ENKUSA_TYPE_0,
     /* 1 */ ENKUSA_TYPE_1,
-    /* 2 */ ENKUSA_TYPE_2
+    /* 2 */ ENKUSA_TYPE_2,
+    /* 3 */ ENKUSA_TYPE_3
 } EnKusaType;
 
 typedef struct EnKusa {

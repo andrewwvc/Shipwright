@@ -227,7 +227,7 @@ void BossFd_Init(Actor* thisx, PlayState* play) {
         Actor_Kill(&this->actor);
         Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, ACTOR_DOOR_WARP1, 0.0f, 100.0f, 0.0f, 0, 0, 0,
                            WARP_DUNGEON_ADULT);
-        Actor_Spawn(&play->actorCtx, play, ACTOR_ITEM_B_HEART, 0.0f, 100.0f, 200.0f, 0, 0, 0, 0, true);
+        Actor_Spawn(&play->actorCtx, play, ACTOR_EN_ITEM00, 0.0f, 100.0f, 200.0f, 0, 0, 0, 0x1F00+(uint16_t)ITEM00_HEART_PIECE, true);
     } else {
         Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, ACTOR_BOSS_FD2, this->actor.world.pos.x,
                            this->actor.world.pos.y, this->actor.world.pos.z, 0, 0, 0, this->introState);
@@ -914,8 +914,8 @@ void BossFd_Fly(BossFd* this, PlayState* play) {
                 this->actor.world.pos.y -= 1000.0f;
             }
             if (this->timers[0] == 7 && !gSaveContext.isBossRush) {
-                Actor_Spawn(&play->actorCtx, play, ACTOR_ITEM_B_HEART, this->actor.world.pos.x,
-                            this->actor.world.pos.y, this->actor.world.pos.z, 0, 0, 0, 0, true);
+                Actor_Spawn(&play->actorCtx, play, ACTOR_EN_ITEM00, this->actor.world.pos.x,
+                            this->actor.world.pos.y, this->actor.world.pos.z, 0, 0, 0, 0x4000+0x1F00+(uint16_t)ITEM00_HEART_PIECE, true);
             }
             break;
         case BOSSFD_WAIT_INTRO:

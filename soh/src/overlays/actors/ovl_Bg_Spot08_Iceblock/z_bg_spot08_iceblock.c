@@ -8,6 +8,7 @@
 #include "objects/object_spot08_obj/object_spot08_obj.h"
 
 #define FLAGS 0
+#define MIN_SIZE_INC 0.003f
 
 void BgSpot08Iceblock_Init(Actor* thisx, PlayState* play);
 void BgSpot08Iceblock_Destroy(Actor* thisx, PlayState* play);
@@ -72,6 +73,7 @@ void BgSpot08Iceblock_CheckParams(BgSpot08Iceblock* this) {
         case 0x10:
         case 0x11:
         case 0x12:
+        case 0x1A:
         case 0x14:
         case 0x20:
         case 0x23:
@@ -281,9 +283,13 @@ static InitChainEntry sInitChain[] = {
     ICHAIN_F32(uncullZoneDownward, 2200, ICHAIN_STOP),
 };
 
+f32 scaleTargets[] = {0.0f,0.05f,0.1f,0.2f};
+
 void BgSpot08Iceblock_Init(Actor* thisx, PlayState* play) {
     BgSpot08Iceblock* this = (BgSpot08Iceblock*)thisx;
     CollisionHeader* colHeader;
+    this->water = NULL;
+    this->isThawing = 0;
 
     // "spot08 ice floe"
     osSyncPrintf("(spot08 流氷)(arg_data 0x%04x)\n", this->dyna.actor.params);
@@ -298,7 +304,7 @@ void BgSpot08Iceblock_Init(Actor* thisx, PlayState* play) {
             break;
     }
 
-    switch (this->dyna.actor.params & 0xF) {
+    switch (this->dyna.actor.params & 0x7) {
         case 2:
         case 3:
             BgSpot08Iceblock_InitDynaPoly(this, play, colHeader, DPM_UNK3);
@@ -318,13 +324,21 @@ void BgSpot08Iceblock_Init(Actor* thisx, PlayState* play) {
     switch (this->dyna.actor.params & 0xF0) {
         case 0:
             Actor_SetScale(&this->dyna.actor, 0.2f);
+            this->targetSize = 3;
             break;
         case 0x10:
             Actor_SetScale(&this->dyna.actor, 0.1f);
+            this->targetSize = 2;
             break;
         case 0x20:
             Actor_SetScale(&this->dyna.actor, 0.05f);
+            this->targetSize = 1;
             break;
+    }
+
+    if (this->dyna.actor.params & 0xF000){
+        Actor_SetScale(&this->dyna.actor, MIN_SIZE_INC);
+        this->targetSize = -1;//Prevent collision detection on first frame, before bounding sphere initialization
     }
 
     this->bobPhaseSlow = (s32)(Rand_ZeroOne() * (0xFFFF + 0.5f));
@@ -332,7 +346,7 @@ void BgSpot08Iceblock_Init(Actor* thisx, PlayState* play) {
     this->surfaceNormal.y = 1.0f;
     this->rotationAxis.x = 1.0f;
 
-    switch (this->dyna.actor.params & 0xF) {
+    switch (this->dyna.actor.params & 0x7) {
         case 0:
         case 1:
             BgSpot08Iceblock_SetupFloatNonrotating(this);
@@ -351,6 +365,17 @@ void BgSpot08Iceblock_Init(Actor* thisx, PlayState* play) {
 
 void BgSpot08Iceblock_Destroy(Actor* thisx, PlayState* play) {
     BgSpot08Iceblock* this = (BgSpot08Iceblock*)thisx;
+
+    if (thisx->parent && (((BgSpot08Iceblock*)(thisx->parent))->dyna.actor.params & 0x7) == 0x3) {
+        ((BgSpot08Iceblock*)(thisx->parent))->dyna.actor.params |= 0x100;
+        //((BgSpot08Iceblock*)(actor1->child))->dyna.actor.world.rot.y += 0x8000;
+    }
+
+    if (thisx->child)
+        (thisx->child)->parent = NULL;
+
+    if (thisx->parent)
+        (thisx->parent)->child = NULL;
 
     DynaPoly_DeleteBgActor(play, &play->colCtx.dyna, this->dyna.bgId);
 }
@@ -375,7 +400,7 @@ void BgSpot08Iceblock_FloatRotating(BgSpot08Iceblock* this, PlayState* play) {
     BgSpot08Iceblock_Bobbing(this);
     BgSpot08Iceblock_SinkUnderPlayer(this);
     BgSpot08Iceblock_SetWaterline(this);
-    this->dyna.actor.world.rot.y = this->dyna.actor.world.rot.y + 0x190;
+    this->dyna.actor.world.rot.y = this->dyna.actor.world.rot.y + 0x190*((this->dyna.actor.params & 0x8) ? -1 : 1);
     this->dyna.actor.shape.rot.y = this->dyna.actor.world.rot.y;
     BgSpot08Iceblock_Roll(this, play);
 }
@@ -401,9 +426,45 @@ void BgSpot08Iceblock_FloatOrbitingTwins(BgSpot08Iceblock* this, PlayState* play
         this->dyna.actor.world.pos.x = this->dyna.actor.home.pos.x + sin;
         this->dyna.actor.world.pos.z = this->dyna.actor.home.pos.z + cos;
 
+        CollisionPoly* colPol;
+        s32 backgroundID;
+        Vec3f centerPoint;
+        BgActor* bgActor = &(play->colCtx).dyna.bgActors[this->dyna.bgId];
+        VEC_SET(centerPoint,bgActor->boundingSphere.center.x,bgActor->boundingSphere.center.y,bgActor->boundingSphere.center.z);
+        if (BgCheck_SphVsFirstPolyImpl(&play->colCtx,0,&colPol,&backgroundID,&centerPoint,bgActor->boundingSphere.radius*(1.0f/1.1f),&this->dyna.actor,0) &&
+                    !(((BgSpot08Iceblock*)this->dyna.actor.child)->dyna.bgId == backgroundID)) {
+            DynaPolyActor* dyna1 = DynaPoly_GetActor(&play->colCtx,backgroundID);
+            if (dyna1) {
+                if (dyna1->actor.id == ACTOR_BG_SPOT08_ICEBLOCK && !((BgSpot08Iceblock*)(&dyna1->actor))->isThawing) {
+                    //BgSpot08Iceblock_thaw((BgSpot08Iceblock*)(&dyna1->actor));
+                    DECR(((BgSpot08Iceblock*)(&dyna1->actor))->targetSize);
+                    ((BgSpot08Iceblock*)(&dyna1->actor))->isThawing = 1;
+                }
+            }
+        }
+
         if (this->dyna.actor.child != NULL) {
             this->dyna.actor.child->world.pos.x = this->dyna.actor.home.pos.x - sin;
             this->dyna.actor.child->world.pos.z = this->dyna.actor.home.pos.z - cos;
+
+            BgSpot08Iceblock* this2 = (BgSpot08Iceblock*)this->dyna.actor.child;
+
+            CollisionPoly* colPol2;
+            s32 backgroundID2;
+            Vec3f centerPoint2;
+            BgActor* bgActor2 = &(play->colCtx).dyna.bgActors[this2->dyna.bgId];
+            VEC_SET(centerPoint2,bgActor2->boundingSphere.center.x,bgActor2->boundingSphere.center.y,bgActor2->boundingSphere.center.z);
+            if (BgCheck_SphVsFirstPolyImpl(&play->colCtx,0,&colPol2,&backgroundID2,&centerPoint2,bgActor2->boundingSphere.radius*(1.0f/1.1f),&this2->dyna.actor,0) &&
+                        !(this->dyna.bgId == backgroundID2)) {
+                DynaPolyActor* dyna2 = DynaPoly_GetActor(&play->colCtx,backgroundID2);
+                if (dyna2) {
+                    if (dyna2->actor.id == ACTOR_BG_SPOT08_ICEBLOCK  && !((BgSpot08Iceblock*)(&dyna2->actor))->isThawing) {
+                        //BgSpot08Iceblock_thaw((BgSpot08Iceblock*)(&dyna2->actor));
+                        DECR(((BgSpot08Iceblock*)(&dyna2->actor))->targetSize);
+                        ((BgSpot08Iceblock*)(&dyna2->actor))->isThawing = 1;
+                    }
+                }
+            }
         }
     }
 
@@ -415,12 +476,115 @@ void BgSpot08Iceblock_SetupNoAction(BgSpot08Iceblock* this) {
     BgSpot08Iceblock_SetupAction(this, NULL);
 }
 
+s8 BgSpot08Iceblock_freeze(Actor* thisx) {
+    BgSpot08Iceblock* this = (BgSpot08Iceblock*)thisx;
+    if (!(this->dyna.actor.params & 0x200)) {
+        if (this->targetSize < 3)
+            this->targetSize++;
+        return 1;
+    }
+    return 0;
+}
+
+s8 BgSpot08Iceblock_thaw(Actor* thisx) {
+    BgSpot08Iceblock* this = (BgSpot08Iceblock*)thisx;
+    if (!(this->dyna.actor.params & 0x200)) {
+        Audio_PlayActorSound2(this, NA_SE_EV_ICE_MELT);
+        this->isThawing = 2;
+        if (this->targetSize > 0)
+            this->targetSize--;
+        return 1;
+    }
+    return 0;
+}
+
+//#define ICE_WILL_MOVE 1
+
 void BgSpot08Iceblock_Update(Actor* thisx, PlayState* play) {
     BgSpot08Iceblock* this = (BgSpot08Iceblock*)thisx;
 
     if (Rand_ZeroOne() < 0.05f) {
         this->bobIncrSlow = Rand_S16Offset(300, 100);
         this->bobIncrFast = Rand_S16Offset(800, 400);
+    }
+
+    if (this->targetSize < 0) {
+        this->targetSize = 1;
+    } else {
+        if (this->water && this->water->ySurface != this->dyna.actor.home.pos.y) {
+            this->dyna.actor.home.pos.y = this->water->ySurface;
+            CollisionPoly* colPol;
+            s32 backgroundID;
+            Vec3f centerPoint;
+            BgActor* bgActor = &(play->colCtx).dyna.bgActors[this->dyna.bgId];
+            VEC_SET(centerPoint,bgActor->boundingSphere.center.x,bgActor->boundingSphere.center.y,bgActor->boundingSphere.center.z);
+            if (BgCheck_SphVsFirstPolyImpl(&play->colCtx,0,&colPol,&backgroundID,&centerPoint,bgActor->boundingSphere.radius*(1.0f/1.1f),thisx,0)) {
+                DECR(this->targetSize);
+            }
+        }
+        if (thisx->scale.z < scaleTargets[this->targetSize]) {
+            Actor_SetScale(thisx, thisx->scale.z+MIN_SIZE_INC);
+            if (thisx->scale.z >= scaleTargets[this->targetSize])
+                Actor_SetScale(thisx, scaleTargets[this->targetSize]);
+            if (play->gameplayFrames % 3)
+                Audio_PlayActorSound2(thisx, NA_SE_PL_FREEZE_S);
+            CollisionPoly* colPol;
+            s32 backgroundID;
+            Vec3f centerPoint;
+            BgActor* bgActor = &(play->colCtx).dyna.bgActors[this->dyna.bgId];
+            VEC_SET(centerPoint,bgActor->boundingSphere.center.x,bgActor->boundingSphere.center.y,bgActor->boundingSphere.center.z);
+            if (BgCheck_SphVsFirstPolyImpl(&play->colCtx,0,&colPol,&backgroundID,&centerPoint,bgActor->boundingSphere.radius*(1.0f/1.1f),thisx,0)) {
+#ifdef ICE_WILL_MOVE
+                Vec3f vertices[3];
+                Vec3f avg;
+                CollisionPoly_GetVerticesByBgId(colPol,backgroundID,&play->colCtx,vertices);
+                Math_Vec3f_Sum(&vertices[0],&vertices[1],&avg);
+                Math_Vec3f_Scale(&avg,0.5);
+                Math_Vec3f_Sum(&avg,&vertices[2],&avg);
+                Math_Vec3f_Scale(&avg,0.5);
+                avg.x = centerPoint.x-avg.x;
+                avg.z = centerPoint.z-avg.z;
+                avg.y = 0;
+                f32 abs = sqrt(SQXZ(avg));
+                avg.x /= abs;
+                avg.z /= abs;
+                const f32 FUDGE_FACTOR = 2.0F;
+                f32 distToMove = bgActor->boundingSphere.radius*(1.0f/1.1f)*(MIN_SIZE_INC/thisx->scale.z);
+                distToMove *= FUDGE_FACTOR;
+                centerPoint.x += avg.x*distToMove;
+                centerPoint.z += avg.z*distToMove;
+                if (BgCheck_SphVsFirstPolyImpl(&play->colCtx,0,&colPol,&backgroundID,&centerPoint,bgActor->boundingSphere.radius*(1.0f/1.1f),thisx,0)) {
+#endif
+                    Actor_SetScale(thisx, thisx->scale.z-MIN_SIZE_INC);
+                    DECR(this->targetSize);
+#ifdef ICE_WILL_MOVE
+                } else {
+                    this->dyna.actor.world.pos.x += avg.x*distToMove;
+                    this->dyna.actor.world.pos.z += avg.z*distToMove;
+                }
+#endif
+            }
+        }
+
+        if (thisx->scale.z > scaleTargets[this->targetSize]) {
+            Actor_SetScale(thisx, thisx->scale.z-MIN_SIZE_INC);
+            Vec3f smokePos;
+            smokePos.y = thisx->world.pos.y +10.0f;
+            smokePos.x = thisx->world.pos.x +thisx->scale.x*Rand_Centered()*1500.0f;
+            smokePos.z = thisx->world.pos.z +thisx->scale.z*Rand_Centered()*1500.0f;
+            static Vec3f velocity = {0.0f,3.0f,0.0f};
+            static Vec3f accel = {0.0f,-0.02f,0.0f};
+            if (this->isThawing == 2)
+                EffectSsIceSmoke_Spawn(play,&smokePos,&velocity,&accel,300*(5*thisx->scale.z+0.3f));
+            else
+                this->isThawing = 1;
+            if (thisx->scale.z <= scaleTargets[this->targetSize]){
+                Actor_SetScale(thisx, scaleTargets[this->targetSize]);
+                this->isThawing = 0;
+                if (this->targetSize == 0)
+                    Actor_Kill(&this->dyna.actor);
+            }
+        }
     }
 
     this->bobPhaseSlow += this->bobIncrSlow;

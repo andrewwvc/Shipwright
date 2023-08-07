@@ -92,16 +92,16 @@ typedef struct {
     /* 0x18 */ Vec3f feetPos[2]; // Update by using `Actor_SetFeetPos` in PostLimbDraw
 } ActorShape; // size = 0x30
 
-#define ACTOR_FLAG_TARGETABLE (1 << 0)
+#define ACTOR_FLAG_TARGETABLE (1 << 0)//Can actor be targeted?
 #define ACTOR_FLAG_HOSTILE (1 << 2)
 #define ACTOR_FLAG_FRIENDLY (1 << 3)
-#define ACTOR_FLAG_UPDATE_WHILE_CULLED (1 << 4)
+#define ACTOR_FLAG_UPDATE_WHILE_CULLED (1 << 4)//If this is set, an actor will be updated on a given frame regardless of draw distance settings or distance from the player
 #define ACTOR_FLAG_DRAW_WHILE_CULLED (1 << 5)
-#define ACTOR_FLAG_ACTIVE (1 << 6)
-#define ACTOR_FLAG_LENS (1 << 7)
+#define ACTOR_FLAG_ACTIVE (1 << 6)//Determines if an actor should be updated on a given frame based on draw distance
+#define ACTOR_FLAG_LENS (1 << 7)//Determines if the actor will be invisible without the lens of truth
 #define ACTOR_FLAG_PLAYER_TALKED_TO (1 << 8)
 #define ACTOR_FLAG_HOOKSHOT_DRAGS (1 << 9)
-#define ACTOR_FLAG_DRAGGED_BY_HOOKSHOT (1 << 10)
+#define ACTOR_FLAG_DRAGGED_BY_HOOKSHOT (1 << 10)//Determines if the hookshot can pull Link towards the actor
 #define ACTOR_FLAG_ENKUSA_CUT (1 << 11)
 #define ACTOR_FLAG_IGNORE_QUAKE (1 << 12)
 #define ACTOR_FLAG_HOOKSHOT_ATTACHED (1 << 13)
@@ -177,7 +177,10 @@ typedef struct Actor {
     /* 0x130 */ ActorFunc update; // Update Routine. Called by `Actor_UpdateAll`
     /* 0x134 */ ActorFunc draw; // Draw Routine. Called by `Actor_Draw`
     /* 0x138 */ ActorResetFunc reset;
-    /* 0x13C */ char dbgPad[0x10]; // Padding that only exists in the debug rom
+    /* 0x13C */ Vec3f teleportVec;
+    /* 0x148 */ u8 isTeleported;
+    /* 0x149 */ s16 entryNum;
+    /*       */ char dbgPad[0x1]; // Padding that only exists in the debug rom
 } Actor; // size = 0x14C
 
 typedef enum {
@@ -262,6 +265,7 @@ typedef enum {
     /* 0x18 */ ITEM00_TUNIC_GORON,
     /* 0x19 */ ITEM00_BOMBS_SPECIAL,
     /* 0x20 */ ITEM00_BOMBCHU,
+               ITEM00_MAX,
 } Item00Type;
 
 struct EnItem00;

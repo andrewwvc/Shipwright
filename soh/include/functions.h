@@ -368,6 +368,8 @@ void ActorShadow_DrawHorse(Actor* actor, Lights* lights, PlayState* play);
 void ActorShadow_DrawFeet(Actor* actor, Lights* lights, PlayState* play);
 void Actor_SetFeetPos(Actor* actor, s32 limbIndex, s32 leftFootIndex, Vec3f* leftFootPos, s32 rightFootIndex,
                       Vec3f* rightFootPos);
+s16 aimToActorMovement(Actor* this, Actor* target, f32 projectileSpeed, PlayState* play, f32* time, f32* projectedY, f32 maxTargetSpeed);
+s16 aimToPlayerMovement(Actor* this, f32 speed, PlayState* play);
 void func_8002BE04(PlayState* play, Vec3f* arg1, Vec3f* arg2, f32* arg3);
 void func_8002C124(TargetContext* targetCtx, PlayState* play);
 s32 Flags_GetSwitch(PlayState* play, s32 flag);
@@ -491,7 +493,7 @@ Actor* Actor_Spawn(ActorContext* actorCtx, PlayState* play, s16 actorId, f32 pos
 Actor* Actor_SpawnAsChild(ActorContext* actorCtx, Actor* parent, PlayState* play, s16 actorId, f32 posX,
                           f32 posY, f32 posZ, s16 rotX, s16 rotY, s16 rotZ, s16 params);
 void Actor_SpawnTransitionActors(PlayState* play, ActorContext* actorCtx);
-Actor* Actor_SpawnEntry(ActorContext* actorCtx, ActorEntry* actorEntry, PlayState* play);
+Actor* Actor_SpawnEntry(ActorContext* actorCtx, ActorEntry* actorEntry, PlayState* play, s16 entryNum);
 Actor* Actor_Delete(ActorContext* actorCtx, Actor* actor, PlayState* play);
 Actor* func_80032AF0(PlayState* play, ActorContext* actorCtx, Actor** actorPtr, Player* player);
 Actor* Actor_Find(ActorContext* actorCtx, s32 actorId, s32 actorCategory);
@@ -540,6 +542,7 @@ void Actor_Noop(Actor* actor, PlayState* play);
 void Gfx_DrawDListOpa(PlayState* play, Gfx* dlist);
 void Gfx_DrawDListXlu(PlayState* play, Gfx* dlist);
 Actor* Actor_FindNearby(PlayState* play, Actor* refActor, s16 actorId, u8 actorCategory, f32 range);
+s32 Actor_FindNumberOf(PlayState* play, Actor* refActor, s16 actorId, u8 actorCategory, f32 range, Actor** closest, u8(*predicate)(Actor*, PlayState*));
 s32 func_800354B4(PlayState* play, Actor* actor, f32 range, s16 arg3, s16 arg4, s16 arg5);
 void func_8003555C(PlayState* play, Vec3f* pos, Vec3f* velocity, Vec3f* accel);
 void func_800355B8(PlayState* play, Vec3f* pos);
@@ -628,6 +631,8 @@ s32 BgCheck_AnyLineTest2(CollisionContext* colCtx, Vec3f* posA, Vec3f* posB, Vec
 s32 BgCheck_AnyLineTest3(CollisionContext* colCtx, Vec3f* posA, Vec3f* posB, Vec3f* posResult, CollisionPoly** outPoly,
                          s32 chkWall, s32 chkFloor, s32 chkCeil, s32 chkOneFace, s32* bgId);
 s32 BgCheck_SphVsFirstPoly(CollisionContext* colCtx, Vec3f* center, f32 radius);
+s32 BgCheck_SphVsFirstPolyImpl(CollisionContext* colCtx, u16 xpFlags, CollisionPoly** outPoly, s32* outBgId,
+                               Vec3f* center, f32 radius, Actor* actor, u16 bciFlags);
 void SSNodeList_Initialize(SSNodeList*);
 void SSNodeList_Alloc(PlayState* play, SSNodeList* this, s32 tblMax, s32 numPolys);
 u16 SSNodeList_GetNextNodeIdx(SSNodeList* this);
@@ -859,7 +864,7 @@ void GetItemEntry_Draw(PlayState* play, GetItemEntry getItemEntry);
 void SoundSource_InitAll(PlayState* play);
 void SoundSource_UpdateAll(PlayState* play);
 void SoundSource_PlaySfxAtFixedWorldPos(PlayState* play, Vec3f* pos, s32 duration, u16 sfxId);
-u16 ElfMessage_GetSariaText(PlayState* play);
+u16 ElfMessage_GetSariaText(PlayState* play, s8 status);
 u16 ElfMessage_GetCUpText(PlayState* play);
 u16 Text_GetFaceReaction(PlayState* play, u32 reactionSet);
 void Flags_UnsetAllEnv(PlayState* play);
@@ -906,6 +911,7 @@ void Environment_DisableUnderwaterLights(PlayState* play);
 void Environment_Update(PlayState* play, EnvironmentContext* envCtx, LightContext* lightCtx,
                         PauseContext* pauseCtx, MessageContext* msgCtx, GameOverContext* gameOverCtx,
                         GraphicsContext* gfxCtx);
+s32 getDayOfCycle(void);
 void Environment_DrawSunAndMoon(PlayState* play);
 void Environment_DrawSunLensFlare(PlayState* play, EnvironmentContext* envCtx, View* view,
                                   GraphicsContext* gfxCtx, Vec3f pos, s32 unused);
@@ -928,6 +934,15 @@ void Environment_AdjustLights(PlayState* play, f32 arg1, f32 arg2, f32 arg3, f32
 s32 Environment_GetBgsDayCount(void);
 void Environment_ClearBgsDayCount(void);
 s32 Environment_GetTotalDays(void);
+void insertSpawnResource(int entry, int extraTime);
+void useGuardRupees(s32 num);
+s32 getGuardRupees();
+s32 createTempEntryPlus(PlayState* play, ActorEntry* spawn, s16 dirt);
+s32 createTempEntry(PlayState* play, ActorEntry* spawn);
+s32 isResourceUsed(PlayState* play, ActorEntry* spawn, s16 dirt);
+s16 isSariasDayHome(void);
+s16 isSariaAtLinksHouse(void);
+s32 IsAfterRutosDate(void);
 void Environment_ForcePlaySequence(u16 seqId);
 s32 Environment_IsForcedSequenceDisabled(void);
 void Environment_PlayStormNatureAmbience(PlayState* play);
@@ -1075,6 +1090,8 @@ s32 Health_ChangeBy(PlayState* play, s16 healthChange);
 void Rupees_ChangeBy(s16 rupeeChange);
 void Inventory_ChangeAmmo(s16 item, s16 ammoChange);
 void Magic_Fill(PlayState* play);
+s32 Inferface_CalculateMaxMagic();
+s32 Inferface_CalculateMagicToSet();
 void func_800876C8(PlayState* play);
 s32 func_80087708(PlayState* play, s16 arg1, s16 arg2);
 void func_80088AA0(s16 seconds);
@@ -1102,6 +1119,7 @@ void func_8008EC70(Player* player);
 void Player_SetEquipmentData(PlayState* play, Player* player);
 void Player_UpdateBottleHeld(PlayState* play, Player* player, s32 item, s32 actionParam);
 void func_80837C0C(PlayState* play, Player* this, s32 arg2, f32 arg3, f32 arg4, s16 arg5, s32 arg6);
+void Player_SetShieldRecoveryDefault(PlayState* play);
 void func_8008EDF0(Player* player);
 void func_8008EE08(Player* player);
 void func_8008EEAC(PlayState* play, Actor* actor);
@@ -1791,7 +1809,9 @@ void Matrix_RotateZ(f32 z, u8 mode);
 void Matrix_RotateZYX(s16 x, s16 y, s16 z, u8 mode);
 void Matrix_TranslateRotateZYX(Vec3f* translation, Vec3s* rotation);
 void Matrix_SetTranslateRotateYXZ(f32 translateX, f32 translateY, f32 translateZ, Vec3s* rot);
+void Matrix_SetFalsifiedTranslateRotateYXZ(f32 translateX, f32 translateY, f32 translateZ, Vec3s* rot, Vec3f* posDelta);
 Mtx* Matrix_MtxFToMtx(MtxF* src, Mtx* dest);
+Mtx* Matrix_FalsifiedMtxFToMtx(MtxF* src, Mtx* dest, MtxF* mtxReplace);
 Mtx* Matrix_ToMtx(Mtx* dest, char* file, s32 line);
 Mtx* Matrix_NewMtx(GraphicsContext* gfxCtx, char* file, s32 line);
 Mtx* Matrix_MtxFToNewMtx(MtxF* src, GraphicsContext* gfxCtx);

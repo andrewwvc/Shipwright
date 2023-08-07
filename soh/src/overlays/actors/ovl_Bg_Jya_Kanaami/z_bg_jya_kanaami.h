@@ -13,6 +13,7 @@ typedef struct BgJyaKanaami {
     /* 0x0164 */ BgJyaKanaamiActionFunc actionFunc;
     /* 0x0168 */ s16 unk_168;
     /* 0x016A */ s16 unk_16A;
+    /*        */ ColliderQuad collider1;
 } BgJyaKanaami; // size = 0x016C
 
 #endif

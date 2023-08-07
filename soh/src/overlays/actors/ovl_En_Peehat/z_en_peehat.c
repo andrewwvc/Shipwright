@@ -512,11 +512,12 @@ void EnPeehat_Ground_StateSeekPlayer(EnPeehat* this, PlayState* play) {
     }
     if (IS_DAY && (Math_Vec3f_DistXZ(&this->actor.home.pos, &player->actor.world.pos) < this->xzDistMax)) {
         Math_SmoothStepToS(&this->actor.world.rot.y, this->actor.yawTowardsPlayer, 1, 1000, 0);
-        if (this->unk_2FA != 0) {
-            this->actor.shape.rot.y += 0x1C2;
-        } else {
-            this->actor.shape.rot.y -= 0x1C2;
-        }
+        Math_SmoothStepToS(&this->actor.shape.rot.y, this->actor.yawTowardsPlayer, 1, 500, 0);
+        // if (this->unk_2FA != 0) {
+        //     this->actor.shape.rot.y += 0x1C2;
+        // } else {
+        //     this->actor.shape.rot.y -= 0x1C2;
+        // }
     } else {
         EnPeehat_Ground_SetStateReturnHome(this);
     }
@@ -864,6 +865,11 @@ void EnPeehat_SetStateExplode(EnPeehat* this) {
     EnPeehat_SetupAction(this, EnPeehat_StateExplode);
 }
 
+//u8(*predicate)(Actor*, GlobalContext*)
+u8 isLargePeahat(Actor* this, PlayState* play) {
+    return this->params < PEAHAT_TYPE_LARVA;
+}
+
 void EnPeehat_StateExplode(EnPeehat* this, PlayState* play) {
     EnBom* bomb;
     s32 pad[2];
@@ -877,9 +883,14 @@ void EnPeehat_StateExplode(EnPeehat* this, PlayState* play) {
     }
     this->animTimer--;
     if (this->animTimer == 0) {
-        Item_DropCollectibleRandom(play, &this->actor, &this->actor.world.pos, 0x40);
-        Item_DropCollectibleRandom(play, &this->actor, &this->actor.world.pos, 0x40);
-        Item_DropCollectibleRandom(play, &this->actor, &this->actor.world.pos, 0x40);
+        if (!Flags_GetCollectible(play, 1) && !Actor_FindNumberOf(play, &this->actor, ACTOR_EN_PEEHAT, ACTORCAT_ENEMY, 100000.0f, NULL, isLargePeahat)) {
+            Item_DropCollectible(play, &this->actor.world.pos, 0x100+ITEM00_HEART_PIECE);
+        } else {
+            Item_DropCollectibleRandom(play, &this->actor, &this->actor.world.pos, 0x40);
+            Item_DropCollectibleRandom(play, &this->actor, &this->actor.world.pos, 0x40);
+            Item_DropCollectibleRandom(play, &this->actor, &this->actor.world.pos, 0x40);
+        }
+
         Actor_Kill(&this->actor);
         gSaveContext.sohStats.count[COUNT_ENEMIES_DEFEATED_PEAHAT]++;
     }

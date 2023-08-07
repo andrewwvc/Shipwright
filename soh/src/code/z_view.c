@@ -343,6 +343,20 @@ s32 func_800AAA9C(View* view) {
 
     static View old_view;
 
+    if (FrameInterpolation_ShouldViewChange()) {
+        Vec3f delta = FrameInterpolation_GetViewDelta();
+        old_view.eye.x += delta.x;
+        old_view.eye.y += delta.y;
+        old_view.eye.z += delta.z;
+        old_view.lookAt.x += delta.x;
+        old_view.lookAt.y += delta.y;
+        old_view.lookAt.z += delta.z;
+    }
+
+    MtxF viewingFOld;
+    guLookAtF(viewingFOld.mf, old_view.eye.x, old_view.eye.y, old_view.eye.z, old_view.lookAt.x, old_view.lookAt.y, old_view.lookAt.z, old_view.up.x,
+             old_view.up.y, old_view.up.z);
+
     float dirx = view->eye.x - view->lookAt.x;
     float diry = view->eye.y - view->lookAt.y;
     float dirz = view->eye.z - view->lookAt.z;
@@ -452,7 +466,11 @@ s32 func_800AAA9C(View* view) {
     gSPPerspNormalize(POLY_KAL_DISP++, view->normal);
     gSPMatrix(POLY_KAL_DISP++, projection, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
-    Matrix_MtxFToMtx(viewingF.mf, viewing);
+    if (!FrameInterpolation_ShouldViewChange()) {
+        Matrix_MtxFToMtx(viewingF.mf, viewing);
+    } else {
+        Matrix_FalsifiedMtxFToMtx(viewingF.mf, viewing, viewingFOld.mf);
+    }
 
     view->viewing = *viewing;
 
@@ -480,6 +498,8 @@ s32 func_800AAA9C(View* view) {
     FrameInterpolation_RecordCloseChild();
 
     CLOSE_DISPS(gfxCtx);
+
+    FrameInterpolation_ResetViewChange();
 
     return 1;
 }

@@ -81,7 +81,7 @@ static ColliderCylinderInit sCylinderInit = {
     {
         ELEMTYPE_UNK0,
         { 0x00000000, 0x00, 0x00 },
-        { 0x000007A2, 0x00, 0x00 },
+        { 0x00000782, 0x00, 0x00 },
         TOUCH_NONE,
         BUMP_ON,
         OCELEM_ON,
@@ -183,7 +183,7 @@ void EnGe2_Destroy(Actor* thisx, PlayState* play) {
 s32 Ge2_DetectPlayerInAction(PlayState* play, EnGe2* this) {
     f32 visionScale;
 
-    visionScale = (!IS_DAY ? 0.75f : 1.5f);
+    visionScale = (!IS_DAY ? 1.0f : 1.5f);
 
     if ((250.0f * visionScale) < this->actor.xzDistToPlayer) {
         return 0;
@@ -234,7 +234,7 @@ s32 EnGe2_CheckCarpentersFreed(void) {
         }
     } 
 
-    if ((u8)(gSaveContext.eventChkInf[9] & 0xF) == 0xF) {
+    if ((u8)(gSaveContext.eventChkInf[9] & 0xF) == 0xF && LINK_IS_ADULT) {
         return 1;
     }
     return 0;
@@ -248,7 +248,7 @@ void EnGe2_CaptureClose(EnGe2* this, PlayState* play) {
     } else {
         func_8006D074(play);
 
-        if ((INV_CONTENT(ITEM_HOOKSHOT) == ITEM_NONE) || (INV_CONTENT(ITEM_LONGSHOT) == ITEM_NONE)) {
+        if ((INV_CONTENT(ITEM_HOOKSHOT) == ITEM_NONE) || (INV_CONTENT(ITEM_LONGSHOT) == ITEM_NONE) || LINK_IS_CHILD) {
             play->nextEntranceIndex = 0x1A5;
         } else if (gSaveContext.eventChkInf[12] & 0x80) {
             play->nextEntranceIndex = 0x5F8;
@@ -278,7 +278,7 @@ void EnGe2_CaptureCharge(EnGe2* this, PlayState* play) {
     } else {
         func_8006D074(play);
 
-        if ((INV_CONTENT(ITEM_HOOKSHOT) == ITEM_NONE) || (INV_CONTENT(ITEM_LONGSHOT) == ITEM_NONE)) {
+        if ((INV_CONTENT(ITEM_HOOKSHOT) == ITEM_NONE) || (INV_CONTENT(ITEM_LONGSHOT) == ITEM_NONE || LINK_IS_CHILD)) {
             play->nextEntranceIndex = 0x1A5;
         } else if (gSaveContext.eventChkInf[12] & 0x80) {
             play->nextEntranceIndex = 0x5F8;
@@ -507,6 +507,7 @@ void EnGe2_SetupCapturePlayer(EnGe2* this, PlayState* play) {
     this->stateFlags |= GE2_STATE_CAPTURING;
     this->actor.speedXZ = 0.0f;
     EnGe2_ChangeAction(this, GE2_ACTION_CAPTURETURN);
+    play->damagePlayer(play, -0x20);
     func_8002DF54(play, &this->actor, 95);
     func_80078884(NA_SE_SY_FOUND);
     Message_StartTextbox(play, 0x6000, &this->actor);
@@ -580,7 +581,7 @@ void EnGe2_Update(Actor* thisx, PlayState* play) {
 
     if ((this->stateFlags & GE2_STATE_KO) || (this->stateFlags & GE2_STATE_CAPTURING)) {
         this->actionFunc(this, play);
-    } else if (this->collider.base.acFlags & 2) {
+    } else if ((this->collider.base.acFlags & 2) || Actor_FindNearby(play,&this->actor,ACTOR_EN_GO2,ACTORCAT_NPC,100.0f)) {
         if ((this->collider.info.acHitInfo != NULL) && (this->collider.info.acHitInfo->toucher.dmgFlags & 0x80)) {
             Actor_SetColorFilter(&this->actor, 0, 120, 0, 400);
             this->actor.update = EnGe2_UpdateStunned;

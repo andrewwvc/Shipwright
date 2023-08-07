@@ -78,7 +78,7 @@ static ColliderCylinderInitType1 sCylinderInit = {
 };
 
 static u16 D_809F040C[] = {
-    0x10A0, 0x10A1, 0x10A2, 0x10CA, 0x10CB, 0x10CC, 0x10CD, 0x10CE, 0x10CF, 0x10DC, 0x10DD,
+    0x10A0, 0x10A1, 0x10A2, 0x10CA, 0x10CB, 0x10CC, 0x10CD, 0x10CE, 0x10CF, 0x10DC, 0x10DD, 0x10E0,
 };
 
 // Debug text: "sells"  { "Deku Nuts",    "Deku Sticks",        "Piece of Heart",  "Deku Seeds",
@@ -112,9 +112,11 @@ static DnsItemEntry D_809F04E0 = { 40, 1, GI_STICK_UPGRADE_20, func_809EF70C, fu
 
 static DnsItemEntry D_809F04F0 = { 40, 1, GI_NUT_UPGRADE_30, func_809EF70C, func_809EFB40 };
 
+static DnsItemEntry D_BuySecret = { 50, 0, GI_NONE, func_809EF70C, func_809EF9F8 };
+
 static DnsItemEntry* sItemEntries[] = {
     &D_809F0450, &D_809F0460, &D_809F0470, &D_809F0480, &D_809F0490, &D_809F04A0,
-    &D_809F04B0, &D_809F04C0, &D_809F04D0, &D_809F04E0, &D_809F04F0,
+    &D_809F04B0, &D_809F04C0, &D_809F04D0, &D_809F04E0, &D_809F04F0, &D_BuySecret,
 };
 
 static InitChainEntry sInitChain[] = {
@@ -397,7 +399,10 @@ void EnDns_Talk(EnDns* this, PlayState* play) {
                         break;
                     case 2:
                     case 4:
-                        Message_ContinueTextbox(play, 0x10A7);
+                        if (this->actor.params == 0xB)
+                            Message_ContinueTextbox(play, 0x10E1);
+                        else
+                            Message_ContinueTextbox(play, 0x10A7);
                         this->actionFunc = func_809EFEE8;
                         break;
                 }
@@ -442,8 +447,12 @@ void func_809EFDD0(EnDns* this, PlayState* play) {
 void func_809EFEE8(EnDns* this, PlayState* play) {
     if ((Message_GetState(&play->msgCtx) == TEXT_STATE_EVENT) && Message_ShouldAdvance(play)) {
         Message_CloseTextbox(play);
-        func_809EFDD0(this, play);
-        this->actionFunc = func_809EFF50;
+        if (this->dnsItemEntry->getItemId == GI_NONE) {
+            this->actionFunc = func_809EFF98;
+        } else {
+            func_809EFDD0(this, play);
+            this->actionFunc = func_809EFF50;
+        }
     }
 }
 

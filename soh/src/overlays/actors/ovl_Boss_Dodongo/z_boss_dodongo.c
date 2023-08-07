@@ -2,6 +2,7 @@
 #include "textures/boss_title_cards/object_kingdodongo.h"
 #include "objects/object_kingdodongo/object_kingdodongo.h"
 #include "overlays/actors/ovl_Door_Warp1/z_door_warp1.h"
+#include "overlays/actors/ovl_Bg_Ddan_Jd/z_bg_ddan_jd.h"
 #include "scenes/dungeons/ddan_boss/ddan_boss_room_1.h"
 #include "soh/frame_interpolation.h"
 #include "soh/Enhancements/boss-rush/BossRush.h"
@@ -58,6 +59,75 @@ static u8 sMaskTex32x16[32 * 16] = { { 0 } };
 static u8 sMaskTex8x8[8 * 8] = { { 0 } };
 static u8 sMaskTex8x32[8 * 32] = { { 0 } };
 static u8 sMaskTexLava[32 * 64] = { { 0 } };
+
+#define X_RIGHT -390.0f
+#define X_LEFT -1390.0f
+#define X_CENTER (( X_RIGHT + X_LEFT ) / 2)
+#define Z_TOP -3804.0f
+#define Z_BOTTOM -2804.0f
+#define Z_CENTER (( Z_TOP + Z_BOTTOM ) / 2)
+#define PILLAR_FLOOR (-1534.0f)
+#define PILLAR_BASE (-1524.0f - 140.0f)
+#define PILLAR_DIFF 200.0f
+
+static Vec3f sCornerPositions[] = {
+    { -1390.0f, 0.0f, -3804.0f },
+    { -1390.0f, 0.0f, -2804.0f },
+    { -390.0f, 0.0f, -2804.0f },
+    { -390.0f, 0.0f, -3804.0f },
+};
+
+#define NUM_PILLARS 21
+
+static BgDdanJd* sPillars[NUM_PILLARS];
+
+// static Vec3f sPillarPositions[] = {
+//                                                                 {X_CENTER-PILLAR_DIFF, PILLAR_FLOOR, Z_CENTER-2*PILLAR_DIFF}, {X_CENTER, PILLAR_FLOOR, Z_CENTER-2*PILLAR_DIFF}, {X_CENTER+PILLAR_DIFF, PILLAR_FLOOR, Z_CENTER-2*PILLAR_DIFF},
+//     {X_CENTER-2*PILLAR_DIFF, PILLAR_FLOOR, Z_CENTER-PILLAR_DIFF}, {X_CENTER-PILLAR_DIFF, PILLAR_BASE, Z_CENTER-PILLAR_DIFF}, {X_CENTER, PILLAR_BASE, Z_CENTER-PILLAR_DIFF}, {X_CENTER+PILLAR_DIFF, PILLAR_BASE, Z_CENTER-PILLAR_DIFF},       {X_CENTER+2*PILLAR_DIFF, PILLAR_FLOOR, Z_CENTER-PILLAR_DIFF},
+//     {X_CENTER-2*PILLAR_DIFF, PILLAR_FLOOR, Z_CENTER},            {X_CENTER-PILLAR_DIFF, PILLAR_BASE, Z_CENTER},             {X_CENTER, PILLAR_BASE, Z_CENTER},             {X_CENTER+PILLAR_DIFF, PILLAR_BASE, Z_CENTER},                    {X_CENTER+2*PILLAR_DIFF, PILLAR_FLOOR, Z_CENTER},
+//     {X_CENTER-2*PILLAR_DIFF, PILLAR_FLOOR, Z_CENTER+PILLAR_DIFF},{X_CENTER-PILLAR_DIFF, PILLAR_BASE, Z_CENTER+PILLAR_DIFF}, {X_CENTER, PILLAR_BASE, Z_CENTER+PILLAR_DIFF}, {X_CENTER+PILLAR_DIFF, PILLAR_BASE, Z_CENTER+PILLAR_DIFF},        {X_CENTER+2*PILLAR_DIFF, PILLAR_FLOOR, Z_CENTER+PILLAR_DIFF},
+//                                                                 {X_CENTER-PILLAR_DIFF, PILLAR_FLOOR, Z_CENTER+2*PILLAR_DIFF}, {X_CENTER, PILLAR_FLOOR, Z_CENTER+2*PILLAR_DIFF}, {X_CENTER+PILLAR_DIFF, PILLAR_FLOOR, Z_CENTER+2*PILLAR_DIFF},
+// };
+
+static Vec3f sPillarPositions[] = {
+                                                                {X_CENTER-PILLAR_DIFF, PILLAR_FLOOR+2, Z_CENTER-2*PILLAR_DIFF}, {X_CENTER, PILLAR_FLOOR-2, Z_CENTER-2*PILLAR_DIFF}, {X_CENTER+PILLAR_DIFF, PILLAR_FLOOR+2, Z_CENTER-2*PILLAR_DIFF},
+    {X_CENTER-2*PILLAR_DIFF, PILLAR_FLOOR+2, Z_CENTER-PILLAR_DIFF}, {X_CENTER-PILLAR_DIFF, PILLAR_BASE, Z_CENTER-PILLAR_DIFF}, {X_CENTER, PILLAR_BASE, Z_CENTER-PILLAR_DIFF}, {X_CENTER+PILLAR_DIFF, PILLAR_BASE, Z_CENTER-PILLAR_DIFF},       {X_CENTER+2*PILLAR_DIFF, PILLAR_FLOOR+2, Z_CENTER-PILLAR_DIFF},
+    {X_CENTER-2*PILLAR_DIFF, PILLAR_FLOOR-2, Z_CENTER},            {X_CENTER-PILLAR_DIFF, PILLAR_BASE, Z_CENTER},             {X_CENTER, PILLAR_BASE, Z_CENTER},             {X_CENTER+PILLAR_DIFF, PILLAR_BASE, Z_CENTER},                    {X_CENTER+2*PILLAR_DIFF, PILLAR_FLOOR-2, Z_CENTER},
+    {X_CENTER-2*PILLAR_DIFF, PILLAR_FLOOR+2, Z_CENTER+PILLAR_DIFF},{X_CENTER-PILLAR_DIFF, PILLAR_BASE, Z_CENTER+PILLAR_DIFF}, {X_CENTER, PILLAR_BASE, Z_CENTER+PILLAR_DIFF}, {X_CENTER+PILLAR_DIFF, PILLAR_BASE+2, Z_CENTER+PILLAR_DIFF},        {X_CENTER+2*PILLAR_DIFF, PILLAR_FLOOR+2, Z_CENTER+PILLAR_DIFF},
+                                                                {X_CENTER-PILLAR_DIFF, PILLAR_FLOOR+2, Z_CENTER+2*PILLAR_DIFF}, {X_CENTER, PILLAR_FLOOR-2, Z_CENTER+2*PILLAR_DIFF}, {X_CENTER+PILLAR_DIFF, PILLAR_FLOOR+2, Z_CENTER+2*PILLAR_DIFF},
+};
+
+static s16 sPillarTimingInit[] = {
+         100, 100, 100,
+    100, 100, 100, 100, 100,
+    100, 100, 40, 100, 100,
+    100, 100, 100, 100, 100,
+         100, 100, 100,
+};
+
+// static s16 sPillarModeInit[] = {
+//        3, 3, 3,
+//     3, 1, 0, 1, 3,
+//     3, 0, 2, 0, 3,
+//     3, 1, 0, 1, 3,
+//        3, 3, 3,
+// };
+
+// static s16 sPillarModeInit[] = {
+//        3, 3, 3,
+//     3, 3, 3, 3, 3,
+//     3, 3, 3, 3, 3,
+//     3, 3, 3, 3, 3,
+//        3, 3, 3,
+// };
+
+static s16 sPillarModeInit[] = {
+       3, 3, 3,
+    3, 4, 4, 4, 3,
+    3, 4, 4, 4, 3,
+    3, 4, 4, 4, 3,
+       3, 3, 3,
+};
 
 static InitChainEntry sInitChain[] = {
     ICHAIN_U8(targetMode, 5, ICHAIN_CONTINUE),
@@ -151,14 +221,49 @@ s32 BossDodongo_AteExplosive(BossDodongo* this, PlayState* play) {
         dz = currentExplosive->world.pos.z - this->mouthPos.z;
 
         if ((fabsf(dx) < 40.0f) && (fabsf(dy) < 40.0f) && (fabsf(dz) < 40.0f)) {
-            Actor_Kill(currentExplosive);
-            return true;
+             if (currentExplosive->id == ACTOR_EN_BOMBF) {
+                Actor_Kill(currentExplosive);
+                return true;
+             } else if (Actor_ActorAIsFacingActorB(currentExplosive,thisx, 0x4000)) {
+                 currentExplosive->shape.rot.y += 0x8000;
+             }
         }
 
         currentExplosive = currentExplosive->next;
     }
 
     return false;
+}
+
+void BossDodongo_CreatePillars(PlayState* play) {
+    for (s32 ii = 0; ii < NUM_PILLARS; ii++) {
+        s32 par = 0x0045;
+        if (sPillarModeInit[ii] == 2)
+            par = FAST_PILLAR_PARAMS;
+        else if (sPillarModeInit[ii] == 3)
+            par = STATIC_PILLAR_PARAMS;
+        else if (sPillarModeInit[ii] == 4)
+            par = RAISED_PILLAR_PARAMS;
+        Actor* act = Actor_Spawn(&play->actorCtx,play,ACTOR_BG_DDAN_JD,sPillarPositions[ii].x,sPillarPositions[ii].y,sPillarPositions[ii].z, 0.0f,0.0f,0.0f, par, false);
+        if (act) {
+            sPillars[ii] = ((BgDdanJd*)act);
+            ((BgDdanJd*)act)->idleTimer = sPillarTimingInit[ii];
+            if (sPillarModeInit[ii] == 1) {
+                ((BgDdanJd*)act)->state = 1;
+                act->world.pos.y = ((BgDdanJd*)act)->dyna.actor.home.pos.y + 140.0f;
+            } else if (sPillarModeInit[ii] == 4) {
+                act->world.pos.y = ((BgDdanJd*)act)->dyna.actor.home.pos.y + 140.0f;
+            }
+        } else {
+            sPillars[ii] = NULL;
+        }
+    }
+}
+
+void BossDodongo_DropPillars() {
+    for (int ii = 0; ii < NUM_PILLARS; ii++) {
+        sPillars[ii]->dyna.actor.params = DROP_PILLAR_PARAMS;
+    }
 }
 
 void BossDodongo_Init(Actor* thisx, PlayState* play) {
@@ -183,6 +288,8 @@ void BossDodongo_Init(Actor* thisx, PlayState* play) {
     this->colorFilterMax = 1000.0f;
     this->unk_224 = 2.0f;
     this->unk_228 = 9200.0f;
+    this->rapidFire = 1;
+    this->tempTimer = 0;
     Collider_InitJntSph(play, &this->collider);
     Collider_SetJntSph(play, &this->collider, &this->actor, &sJntSphInit, this->items);
 
@@ -195,7 +302,7 @@ void BossDodongo_Init(Actor* thisx, PlayState* play) {
         Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, ACTOR_DOOR_WARP1, -890.0f, -1523.76f,
                            -3304.0f, 0, 0, 0, WARP_DUNGEON_CHILD);
         Actor_Spawn(&play->actorCtx, play, ACTOR_BG_BREAKWALL, -890.0f, -1523.76f, -3304.0f, 0, 0, 0, 0x6000, true);
-        Actor_Spawn(&play->actorCtx, play, ACTOR_ITEM_B_HEART, -690.0f, -1523.76f, -3304.0f, 0, 0, 0, 0, true);
+        Actor_Spawn(&play->actorCtx, play, ACTOR_EN_ITEM00, -690.0f, -1523.76f, -3304.0f, 0, 0, 0, 0x1F00+(uint16_t)ITEM00_HEART_PIECE, true);
 
         for (int i = 0; i < ARRAY_COUNT(sMaskTexLava); i++) {
             sMaskTexLava[i] = 1;
@@ -204,6 +311,7 @@ void BossDodongo_Init(Actor* thisx, PlayState* play) {
         for (int i = 0; i < ARRAY_COUNT(sMaskTexLava); i++) {
             sMaskTexLava[i] = 0;
         }
+        BossDodongo_CreatePillars(play);
     }
 
     this->actor.flags &= ~ACTOR_FLAG_TARGETABLE;
@@ -495,7 +603,7 @@ void BossDodongo_SetupWalk(BossDodongo* this) {
                      Animation_GetLastFrame(&object_kingdodongo_Anim_01D934), ANIMMODE_ONCE, -10.0f);
     this->unk_1AA = 0;
     this->actionFunc = BossDodongo_Walk;
-    this->unk_1DA = 0;
+    this->unk_1DA = Rand_S16Offset(60, 100);
     this->actor.flags |= ACTOR_FLAG_TARGETABLE;
     this->unk_1E4 = 0.0f;
 }
@@ -513,13 +621,31 @@ void BossDodongo_SetupBlowFire(BossDodongo* this) {
     Animation_Change(&this->skelAnime, &object_kingdodongo_Anim_0061D4, 1.0f, 0.0f,
                      Animation_GetLastFrame(&object_kingdodongo_Anim_0061D4), ANIMMODE_ONCE, 0.0f);
     this->actionFunc = BossDodongo_BlowFire;
-    this->unk_1DA = 50;
+    this->unk_1DA = 150;
     this->unk_1AE = 0;
+
+    if (this->unk_1A2 == 0) {
+        this->unk_1A0 += 2;
+        if (this->unk_1A0 >= 4) {
+            this->unk_1A0 -= 4;
+        }
+    } else {
+        this->unk_1A0 -= 2;
+        if (this->unk_1A0 < 0) {
+            this->unk_1A0 += 4;
+        }
+    }
 }
 
 void BossDodongo_SetupInhale(BossDodongo* this) {
     this->actor.speedXZ = 0.0f;
-    Animation_Change(&this->skelAnime, &object_kingdodongo_Anim_008EEC, 1.0f, 0.0f,
+    f32 animSpd;
+    if (this->rapidFire) {
+        animSpd = 2.0f;
+    } else {
+        animSpd = 1.0f;
+    }
+    Animation_Change(&this->skelAnime, &object_kingdodongo_Anim_008EEC, animSpd, 0.0f,
                      Animation_GetLastFrame(&object_kingdodongo_Anim_008EEC), ANIMMODE_ONCE, -5.0f);
     this->actionFunc = BossDodongo_Inhale;
     this->unk_1DA = 100;
@@ -620,8 +746,12 @@ void BossDodongo_BlowFire(BossDodongo* this, PlayState* play) {
     s32 pad;
     Vec3f unusedZeroVec1 = { 0.0f, 0.0f, 0.0f };
     Vec3f unusedZeroVec2 = { 0.0f, 0.0f, 0.0f };
+    Vec3f* endCorner;
+    Vec3f* midCorner;
+    f32 xDiff, yDiff;
 
-    SkelAnime_Update(&this->skelAnime);
+    if ((this->skelAnime.curFrame < 35.0f) || (this->unk_1DA < 20))
+        SkelAnime_Update(&this->skelAnime);
 
     if (Animation_OnFrame(&this->skelAnime, 12.0f)) {
         Audio_PlayActorSound2(&this->actor, NA_SE_EN_DODO_K_CRY);
@@ -631,10 +761,46 @@ void BossDodongo_BlowFire(BossDodongo* this, PlayState* play) {
         this->unk_1C8 = 28;
     }
 
-    if ((this->skelAnime.curFrame > 17.0f) && (this->skelAnime.curFrame < 35.0f)) {
+    if ((this->skelAnime.curFrame > 17.0f) && (this->unk_1DA > 0) /*(this->skelAnime.curFrame < 35.0f)*/) {
+        s16 currRotY = this->actor.world.rot.y;
         BossDodongo_SpawnFire(this, play, this->unk_1AE);
-        this->unk_1AE++;
+        if (this->unk_1DA < 20)
+            this->unk_1AE++;
         Math_SmoothStepToF(&this->unk_244, 0.0f, 1.0f, 8.0f, 0.0f);
+
+        endCorner = &sCornerPositions[this->unk_1A0];
+        xDiff = endCorner->x - this->actor.world.pos.x;
+        yDiff = endCorner->z - this->actor.world.pos.z;
+        s16 endAngle = Math_FAtan2F(xDiff, yDiff) * (0x8000 / M_PI);
+        if (!(this->skelAnime.curFrame < 35.0f))
+            Math_SmoothStepToS(&this->actor.world.rot.y, endAngle, 5,
+                       0x100, 5);
+
+        s16 angDiff = this->actor.world.rot.y - currRotY;
+        //This section checks to see when the flame's redirection might need to change when sweeping past the opposing corner
+        if (angDiff != 0) {
+            s16 midCornerIndex;
+            if (angDiff < 0) {
+                midCornerIndex = this->unk_1A0 + 1;
+                if (midCornerIndex >= 4)
+                    midCornerIndex -= 4;
+            } else {
+                midCornerIndex = this->unk_1A0 - 1;
+                if (midCornerIndex < 0)
+                    midCornerIndex += 4;
+            }
+
+            midCorner = &sCornerPositions[midCornerIndex];
+            xDiff = midCorner->x - this->actor.world.pos.x;
+            yDiff = midCorner->z - this->actor.world.pos.z;
+            s16 midAngle = Math_FAtan2F(xDiff, yDiff) * (0x8000 / M_PI);
+
+            if (angDiff * (this->actor.world.rot.y - midAngle) >= 0) {
+                if (ABS(this->actor.world.rot.y - midAngle) < ABS(angDiff)) {
+                    this->unk_1A2 = 1 - this->unk_1A2;
+                }
+            }
+        }
     }
 
     if (this->unk_1DA == 0) {
@@ -653,9 +819,15 @@ void BossDodongo_Inhale(BossDodongo* this, PlayState* PlayState) {
     SkelAnime_Update(&this->skelAnime);
 
     if (this->unk_1DA == 0) {
+        //this->rapidFire = 0;
         BossDodongo_SetupBlowFire(this);
     } else {
         this->unk_1AC++;
+
+        if (this->rapidFire) {
+            DECR(this->unk_1DA);
+            this->unk_1AC++;
+        }
 
         if ((this->unk_1AC > 20) && (this->unk_1AC < 82) && BossDodongo_AteExplosive(this, PlayState)) {
             Audio_PlayActorSound2(&this->actor, NA_SE_EN_DODO_K_DRINK);
@@ -663,13 +835,6 @@ void BossDodongo_Inhale(BossDodongo* this, PlayState* PlayState) {
         }
     }
 }
-
-static Vec3f sCornerPositions[] = {
-    { -1390.0f, 0.0f, -3804.0f },
-    { -1390.0f, 0.0f, -2804.0f },
-    { -390.0f, 0.0f, -2804.0f },
-    { -390.0f, 0.0f, -3804.0f },
-};
 
 void BossDodongo_Walk(BossDodongo* this, PlayState* play) {
     Vec3f* sp4C;
@@ -734,7 +899,7 @@ void BossDodongo_Walk(BossDodongo* this, PlayState* play) {
     }
 
     if ((this->unk_1DA == 0) && (this->unk_1BC == 0)) {
-        if ((this->actor.xzDistToPlayer < 500.0f) && (this->unk_1A4 != 0) && !this->playerPosInRange) {
+        if (/*(this->actor.xzDistToPlayer < 500.0f) &&*/ (this->unk_1A4 != 0) && !this->playerPosInRange) {
             BossDodongo_SetupInhale(this);
             BossDodongo_SpawnFire(this, play, -1);
         }
@@ -1039,7 +1204,7 @@ void BossDodongo_Update(Actor* thisx, PlayState* play2) {
 
         CollisionCheck_SetOC(play, &play->colChkCtx, &this->collider.base);
 
-        if (this->actionFunc == BossDodongo_Roll) {
+        if (this->actionFunc == BossDodongo_Roll || this->actionFunc == BossDodongo_Inhale || this->actionFunc == BossDodongo_BlowFire) {
             CollisionCheck_SetAT(play, &play->colChkCtx, &this->collider.base);
         }
     }
@@ -1346,6 +1511,9 @@ void BossDodongo_DeathCutscene(BossDodongo* this, PlayState* play) {
             this->cameraAt.x = camera->at.x;
             this->cameraAt.y = camera->at.y;
             this->cameraAt.z = camera->at.z;
+            BossDodongo_DropPillars();
+            this->items[1].dim.modelSphere.radius = 60;
+            this->items[2].dim.modelSphere.radius = 60;
             gSaveContext.sohStats.itemTimestamp[TIMESTAMP_DEFEAT_KING_DODONGO] = GAMEPLAYSTAT_TOTAL_TIME;
             BossRush_HandleCompleteBoss(play);
             break;
@@ -1633,10 +1801,10 @@ void BossDodongo_DeathCutscene(BossDodongo* this, PlayState* play) {
             if (this->unk_1DA == 820) {
                 Audio_QueueSeqCmd(SEQ_PLAYER_BGM_MAIN << 24 | NA_BGM_BOSS_CLEAR);
                 if (!gSaveContext.isBossRush) {
-                    Actor_Spawn(
-                        &play->actorCtx, play, ACTOR_ITEM_B_HEART,
-                        Math_SinS(this->actor.shape.rot.y) * -50.0f + this->actor.world.pos.x, this->actor.world.pos.y,
-                        Math_CosS(this->actor.shape.rot.y) * -50.0f + this->actor.world.pos.z, 0, 0, 0, 0, true);
+                    Actor_Spawn(&play->actorCtx, play, ACTOR_EN_ITEM00,
+                            Math_SinS(this->actor.shape.rot.y) * -50.0f + this->actor.world.pos.x,
+                            this->actor.world.pos.y,
+                            Math_CosS(this->actor.shape.rot.y) * -50.0f + this->actor.world.pos.z, 0, 0, 0, 0x4000+0x1F00+(uint16_t)ITEM00_HEART_PIECE, true);
                 }
             }
             if (this->unk_1DA == 600) {

@@ -1,4 +1,6 @@
 #include "z_en_holl.h"
+#include "overlays/actors/ovl_Object_Kankyo/z_object_kankyo.h"
+#include "soh/frame_interpolation.h"
 
 #define FLAGS ACTOR_FLAG_UPDATE_WHILE_CULLED
 
@@ -17,6 +19,7 @@ void EnHoll_Draw(Actor* thisx, PlayState* play);
 
 void EnHoll_NextAction(EnHoll* this, PlayState* play);
 void func_80A58DD4(EnHoll* this, PlayState* play);
+void EnHoll_TeleportBack(EnHoll* this, PlayState* play);
 void func_80A59014(EnHoll* this, PlayState* play);
 void func_80A591C0(EnHoll* this, PlayState* play);
 void func_80A593A4(EnHoll* this, PlayState* play);
@@ -37,7 +40,7 @@ const ActorInit En_Holl_InitVars = {
 };
 
 static EnHollActionFunc sActionFuncs[] = {
-    func_80A58DD4, func_80A591C0, func_80A59520, func_80A59618, func_80A59014, func_80A593A4, func_80A59014,
+    func_80A58DD4, func_80A591C0, func_80A59520, func_80A59618, func_80A59014, func_80A593A4, func_80A59014, EnHoll_TeleportBack,
 };
 
 static InitChainEntry sInitChain[] = {
@@ -72,6 +75,15 @@ static f32 sHorizTriggerDists[2][4] = {
     { 100.0f, 75.0f, 50.0f, 25.0f },
 };
 
+#define SecretTransitionLength 12
+
+//WESW-ENNE-SNWWW
+static s16 sSecretTransitionOrder[SecretTransitionLength][2] = {
+    {5,0},{5,1},{0,1},{1,1}, {1,0},{0,0},{7,0},{8,1}, {7,1},{7,0},{8,0},{8,0}
+};
+
+static size_t sCurrentSecretIndex = 0;
+
 void EnHoll_SetupAction(EnHoll* this, EnHollActionFunc func) {
     this->actionFunc = func;
 }
@@ -83,9 +95,9 @@ s32 EnHoll_IsKokiriSetup8() {
 void EnHoll_ChooseAction(EnHoll* this) {
     s32 action;
 
-    action = (this->actor.params >> 6) & 7;
+    action = (this->actor.params >> 6) & 0x7;
     EnHoll_SetupAction(this, sActionFuncs[action]);
-    if (action != 0) {
+    if (action != 0 && action != 7) {
         this->actor.draw = NULL;
     } else {
         this->planeAlpha = 255;
@@ -134,6 +146,63 @@ void func_80A58DD4(EnHoll* this, PlayState* play) {
         if (absZ > sHorizTriggerDists[phi_t0][1]) {
             if (play->roomCtx.prevRoom.num >= 0 && play->roomCtx.status == 0) {
                 this->actor.room = play->transiActorCtx.list[transitionActorIdx].sides[this->side].room;
+                if (!(player->sCurrentSecretIndex < SecretTransitionLength &&
+                            sSecretTransitionOrder[player->sCurrentSecretIndex][0] == transitionActorIdx &&
+                            sSecretTransitionOrder[player->sCurrentSecretIndex][1] == this->side)) {
+                    player->sCurrentSecretIndex = 0;
+                }
+                if (player->sCurrentSecretIndex < SecretTransitionLength &&
+                            sSecretTransitionOrder[player->sCurrentSecretIndex][0] == transitionActorIdx &&
+                            sSecretTransitionOrder[player->sCurrentSecretIndex][1] == this->side) {
+                    player->sCurrentSecretIndex++;
+                    if (player->sCurrentSecretIndex == SecretTransitionLength) {
+                        func_8002F7DC(&this->actor,NA_SE_SY_CORRECT_CHIME);
+                    }
+                }
+
+                EnHoll_SwapRooms(play);
+                func_80097534(play, &play->roomCtx);
+            }
+        } else {
+            this->actor.room = play->transiActorCtx.list[transitionActorIdx].sides[this->side ^ 1].room;
+            if (play->roomCtx.prevRoom.num < 0) {
+                func_8009728C(play, &play->roomCtx, this->actor.room);
+            } else {
+                if (player->sCurrentSecretIndex == SecretTransitionLength && ((this->actor.params >> 9) & 0x1) == 1) {
+                    play->nextEntranceIndex = 32;//148;//1312;
+                    play->fadeTransition = 0x26;
+                    play->sceneLoadFlag = 0x14;
+                }
+
+                this->planeAlpha = (255.0f / (sHorizTriggerDists[phi_t0][2] - sHorizTriggerDists[phi_t0][3])) *
+                                   (absZ - sHorizTriggerDists[phi_t0][3]);
+                this->planeAlpha = CLAMP(this->planeAlpha, 0, 255);
+                if (play->roomCtx.curRoom.num != this->actor.room) {
+                    EnHoll_SwapRooms(play);
+                }
+            }
+        }
+    }
+}
+
+// Horizontal Planes
+void EnHoll_TeleportBack(EnHoll* this, PlayState* play) {
+    Player* player = GET_PLAYER(play);
+    s32 phi_t0 = ((play->sceneNum == SCENE_JYASINZOU) ? 1 : 0) & 0xFFFFFFFF;
+    Vec3f vec;
+    f32 absZ;
+    s32 transitionActorIdx;
+    f32 moveDist;
+
+    func_8002DBD0(&this->actor, &vec, &player->actor.world.pos);
+    this->side = (vec.z < 0.0f) ? 0 : 1;
+    absZ = fabsf(vec.z);
+    if (vec.y > PLANE_Y_MIN && vec.y < PLANE_Y_MAX && fabsf(vec.x) < PLANE_HALFWIDTH &&
+        absZ < sHorizTriggerDists[phi_t0][0]) {
+        transitionActorIdx = (u16)this->actor.params >> 0xA;
+        if (absZ > sHorizTriggerDists[phi_t0][1]) {
+            if (play->roomCtx.prevRoom.num >= 0 && play->roomCtx.status == 0) {
+                this->actor.room = play->transiActorCtx.list[transitionActorIdx].sides[this->side].room;
                 EnHoll_SwapRooms(play);
                 func_80097534(play, &play->roomCtx);
             }
@@ -145,9 +214,40 @@ void func_80A58DD4(EnHoll* this, PlayState* play) {
                 this->planeAlpha = (255.0f / (sHorizTriggerDists[phi_t0][2] - sHorizTriggerDists[phi_t0][3])) *
                                    (absZ - sHorizTriggerDists[phi_t0][3]);
                 this->planeAlpha = CLAMP(this->planeAlpha, 0, 255);
-                if (play->roomCtx.curRoom.num != this->actor.room) {
+
+                if (this->actor.home.rot.y < 0)
+                    moveDist = 800.0f;
+                else
+                    moveDist = -800.0f;
+                //if (player->sCurrentSecretIndex < SecretTransitionLength) {
+                    Vec3f modVec = {0.0f,0.0f,0.0f};
+                    Camera* currentCam = GET_ACTIVE_CAM(play);
+                    player->actor.world.pos.x += moveDist;
+                    player->actor.isTeleported = 1;
+                    modVec.x += moveDist;
+                    player->actor.teleportVec = modVec;
+                    FrameInterpolation_ForceViewChange(&modVec);
+                    modVec = currentCam->at;
+                    modVec.x += moveDist;
+                    Camera_SetParam(currentCam,1,&modVec);
+                    currentCam->eye.x += moveDist;
+                    currentCam->eyeNext.x += moveDist;
+                    currentCam->playerPosRot.pos.x += moveDist;
+                    // modVec.x += moveDist;
+                    // Camera_SetParam(GET_ACTIVE_CAM(play),2,&modVec);
+                    ObjectKankyo* dust = (ObjectKankyo*)Actor_Find(&play->actorCtx,ACTOR_OBJECT_KANKYO,ACTORCAT_ITEMACTION);
+                    if (dust && dust->actor.params == 0) {
+                        modVec.x = moveDist;
+                        modVec.y = 0.0f;
+                        modVec.z = 0.0f;
+                        ObjectKankyo_Warp(dust, play, modVec);
+                    }
                     EnHoll_SwapRooms(play);
-                }
+                //} else {
+                    // play->nextEntranceIndex = 32;//148;//1312;
+                    // play->fadeTransition = 0x26;
+                    // play->sceneLoadFlag = 0x14;
+                //}
             }
         }
     }

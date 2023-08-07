@@ -66,6 +66,15 @@ static s16 sRupeeTypes[] = {
     ITEM00_RUPEE_GREEN, ITEM00_RUPEE_BLUE, ITEM00_RUPEE_RED, ITEM00_RUPEE_ORANGE, ITEM00_RUPEE_PURPLE,
 };
 
+f32 galleryMultiplierValue() {
+    u16 mult = LINK_IS_CHILD ?
+                gSaveContext.galleryMultplierChild :
+                (((gSaveContext.itemGetInf[0] & 0x4000) || (CUR_UPG_VALUE(UPG_QUIVER) == 0)) ?
+                            gSaveContext.galleryMultplierAdult :
+                            INITIAL_GALLERY_MULTIPLIER);
+    return 1.5f + mult*0.1;
+}
+
 const ActorInit En_G_Switch_InitVars = {
     ACTOR_EN_G_SWITCH,
     ACTORCAT_PROP,
@@ -258,7 +267,7 @@ void EnGSwitch_SilverRupeeIdle(EnGSwitch* this, PlayState* play) {
 
     this->actor.shape.rot.y += 0x800;
     if (this->actor.xyzDistToPlayerSq < 900.0f) {
-        Rupees_ChangeBy(5);
+        Rupees_ChangeBy(0);
         sCollectedCount++;
         func_80078884(NA_SE_SY_GET_RUPY);
         this->actor.world.pos = player->actor.world.pos;
@@ -290,6 +299,7 @@ void EnGSwitch_SilverRupeeCollected(EnGSwitch* this, PlayState* play) {
 
 void EnGSwitch_GalleryRupee(EnGSwitch* this, PlayState* play) {
     EnSyatekiItm* gallery;
+    f32 multiplier = galleryMultiplierValue();
 
     this->actor.shape.rot.y += 0x3C0;
     if (this->delayTimer == 0) {
@@ -335,7 +345,7 @@ void EnGSwitch_GalleryRupee(EnGSwitch* this, PlayState* play) {
                             Math_ApproachF(&this->actor.world.pos.y, this->targetPos.y, 0.3f, 30.0f);
                         } else {
                             this->moveState = MOVE_HOME;
-                            this->waitTimer = 60;
+                            this->waitTimer = 60/multiplier;
                         }
                         break;
                     case MOVE_HOME:

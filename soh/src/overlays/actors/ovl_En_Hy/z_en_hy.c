@@ -426,7 +426,7 @@ u16 func_80A6F810(PlayState* play, Actor* thisx) {
         }
         return textId;
     }
-
+    u16 HylianMsg = GetTextID("hylian");
     switch (this->actor.params & 0x7F) {
         case ENHY_TYPE_AOB:
             if (play->sceneNum == SCENE_KAKARIKO) {
@@ -497,6 +497,22 @@ u16 func_80A6F810(PlayState* play, Actor* thisx) {
             } else if (play->sceneNum == SCENE_SPOT01) {
                 return CHECK_QUEST_ITEM(QUEST_MEDALLION_SHADOW) ? 0x5080 : 0x507F;
             } else {
+                if (gSaveContext.eventChkInf[4] & 0x20) {
+                    switch (getDayOfCycle()) {
+                        case 1:
+                            return HylianMsg+4;
+                        case 2:
+                            return HylianMsg+6;
+                        case 3:
+                            return HylianMsg+8;
+                        case 4:
+                            return HylianMsg+10;
+                        case 5:
+                            return HylianMsg+12;
+                        case 0:
+                            return HylianMsg+14;
+                    }
+                }
                 return (gSaveContext.eventChkInf[8] & 1) ? 0x7049
                                                          : ((gSaveContext.infTable[12] & 0x400) ? 0x7020 : 0x701F);
             }
@@ -506,6 +522,22 @@ u16 func_80A6F810(PlayState* play, Actor* thisx) {
             } else if (play->sceneNum == SCENE_SPOT01) {
                 return CHECK_QUEST_ITEM(QUEST_MEDALLION_SHADOW) ? 0x507C : 0x507B;
             } else {
+                if (gSaveContext.eventChkInf[4] & 0x20) {
+                    switch (getDayOfCycle()) {
+                        case 1:
+                            return HylianMsg+3;
+                        case 2:
+                            return HylianMsg+5;
+                        case 3:
+                            return HylianMsg+7;
+                        case 4:
+                            return HylianMsg+9;
+                        case 5:
+                            return HylianMsg+11;
+                        case 0:
+                            return HylianMsg+13;
+                    }
+                }
                 return (gSaveContext.eventChkInf[8] & 1) ? 0x7046
                                                          : ((gSaveContext.infTable[12] & 0x2000) ? 0x7019 : 0x7018);
             }
@@ -521,6 +553,9 @@ u16 func_80A6F810(PlayState* play, Actor* thisx) {
         case ENHY_TYPE_AHG_13:
             return 0x7055;
         case ENHY_TYPE_BOJ_14:
+        if (IS_DAY && !(play->sceneNum == SCENE_MARKET_ALLEY))
+            return HylianMsg+2;
+        else
             return 0x7089;
         case ENHY_TYPE_BJI_15:
             return 0x708A;
@@ -547,7 +582,10 @@ u16 func_80A6F810(PlayState* play, Actor* thisx) {
         case ENHY_TYPE_BJI_19:
             return 0x7120;
         case ENHY_TYPE_AHG_20:
-            return 0x7121;
+            if (IS_DAY)
+                return 0x7121;
+            else
+                return HylianMsg+0;
         default:
             return 0;
     }
@@ -556,7 +594,7 @@ u16 func_80A6F810(PlayState* play, Actor* thisx) {
 s16 func_80A70058(PlayState* play, Actor* thisx) {
     EnHy* this = (EnHy*)thisx;
     s16 beggarItems[] = { ITEM_BLUE_FIRE, ITEM_FISH, ITEM_BUG, ITEM_FAIRY };
-    s16 beggarRewards[] = { 150, 100, 50, 25 };
+    s16 beggarRewards[] = { 30, 20, 3, 3 };
 
     switch (Message_GetState(&play->msgCtx)) {
         case TEXT_STATE_NONE:

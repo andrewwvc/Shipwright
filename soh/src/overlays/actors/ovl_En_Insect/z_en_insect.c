@@ -135,7 +135,7 @@ s32 EnInsect_FoundNearbySoil(EnInsect* this, PlayState* play) {
     this->soilActor = NULL;
 
     while (currentActor != NULL) {
-        if (currentActor->id == ACTOR_OBJ_MAKEKINSUTA) {
+        if (currentActor->id == ACTOR_OBJ_MAKEKINSUTA && ObjMakekinsuta_CanReceiveInsect(currentActor)) {
             currentDistance = Math3D_Dist2DSq(this->actor.world.pos.x, this->actor.world.pos.z,
                                               currentActor->world.pos.x, currentActor->world.pos.z);
 
@@ -674,8 +674,10 @@ void func_80A7D460(EnInsect* this, PlayState* play) {
     if (sp3A == 2 && (this->unk_314 & 0x10) && !(this->unk_314 & 0x80)) {
         if (this->unk_32A >= 15) {
             if (this->soilActor != NULL) {
-                if (!(GET_GS_FLAGS(((this->soilActor->actor.params >> 8) & 0x1F) - 1) &
-                      (this->soilActor->actor.params & 0xFF))) {
+                if (this->soilActor->actor.home.rot.z ?
+                      !(gSaveContext.infTable[3] & (1 << this->soilActor->actor.params)) :
+                      (!(GET_GS_FLAGS(((this->soilActor->actor.params >> 8) & 0x1F) - 1) &
+                        (this->soilActor->actor.params & 0xFF)))) {
                     func_80078884(NA_SE_SY_TRE_BOX_APPEAR);
                 }
             }
@@ -766,8 +768,9 @@ void EnInsect_Update(Actor* thisx, PlayState* play) {
         if (Actor_HasParent(&this->actor, play)) {
             this->actor.parent = NULL;
             phi_v0 = this->actor.params & 3;
+            s16 unique = (this->actor.params & 0x10) >> 4;
 
-            if (phi_v0 == 2 || phi_v0 == 3) {
+            if (phi_v0 == 2 || phi_v0 == 3 || unique == 1) {
                 Actor_Kill(&this->actor);
             } else {
                 func_80A7CA64(this);

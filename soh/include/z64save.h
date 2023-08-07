@@ -320,6 +320,22 @@ typedef struct {
     /*        */ u16 randomizerInf[9];
     /*        */ u16 adultTradeItems;
     // #endregion
+    // #region SOH [NPC Mod]
+    /*        */ u32 savedFrameCount;
+    /*        */ u16 goronTimeStatus;
+    /*        */ s32 goronTimeDay;
+    /*        */ s32 SariaDateDay;
+    /*        */ s32 RutoDateDay;
+    /*        */ s32 MalonPlayDay;
+    /*        */ s32 MalonRideDay;
+    /*        */ u8 maxBoosts;
+    /*        */ u8 extraMagicPower;
+    /*        */ u16 galleryMultplierChild;
+    /*        */ u16 galleryMultplierAdult;
+    /*        */ s32 galleryTimeChild;
+    /*        */ s32 galleryTimeAdult;
+
+    // #endregion
 } SaveContext; // size = 0x1428
 
 typedef enum {

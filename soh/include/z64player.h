@@ -680,6 +680,20 @@ typedef struct Player {
     // #endregion
     u8 ivanFloating;
     u8 ivanDamageMultiplier;
+    // #region SOH [NPC Mod]
+    /*        */ u16 sCurrentSecretIndex;
+    // #endregion
+    // #region SOH [Combat Mod]
+                 u8         shieldRelaxTimer;
+                 u8         shieldUpTimer;
+                 u8         shieldEntry;
+                 u8         crossoverState;
+                 s16        crouchCharge;
+                 Vec3f      entryDiff;
+    // #endregion
 } Player; // size = 0xA94
 
+
+
+s32 Player_isRangedWeaponReady(PlayState* play);
 #endif

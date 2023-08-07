@@ -621,6 +621,7 @@ void func_80A0329C(EnElf* this, PlayState* play) {
     }
 
     if (Actor_HasParent(&this->actor, play)) {
+        insertSpawnResource(this->actor.entryNum, DEFAULT_RESOURCE_TIME);
         Actor_Kill(&this->actor);
         return;
     }
@@ -654,6 +655,7 @@ void func_80A0329C(EnElf* this, PlayState* play) {
                 this->unk_28C.y = 30.0f;
                 this->unk_2B4 = 0.0f;
                 this->unk_2AA = 0;
+                insertSpawnResource(this->actor.entryNum, DEFAULT_RESOURCE_TIME);
                 EnElf_SetupAction(this, func_80A03610);
                 return;
             }
@@ -1273,7 +1275,7 @@ void func_80A05040(Actor* thisx, PlayState* play) {
     if ((Message_GetState(&play->msgCtx) == TEXT_STATE_CHOICE) && Message_ShouldAdvance(play)) {
         switch (play->msgCtx.choiceIndex) {
             case 0: // yes
-                Message_ContinueTextbox(play, ElfMessage_GetSariaText(play));
+                Message_ContinueTextbox(play, ElfMessage_GetSariaText(play, 1));
                 this->actor.update = func_80A05114;
                 break;
             case 1: // no
@@ -1307,7 +1309,7 @@ void func_80A05188(Actor* thisx, PlayState* play) {
     func_80A04DE4(this, play);
 
     if ((Message_GetState(&play->msgCtx) == TEXT_STATE_EVENT) && Message_ShouldAdvance(play)) {
-        Message_ContinueTextbox(play, ElfMessage_GetSariaText(play));
+        Message_ContinueTextbox(play, ElfMessage_GetSariaText(play, 0));
         this->actor.update = func_80A05114;
     }
 

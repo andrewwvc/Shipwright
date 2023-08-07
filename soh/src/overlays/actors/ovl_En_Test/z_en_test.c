@@ -26,8 +26,8 @@ void EnTest_SetupSlashDown(EnTest* this);
 void func_80860BDC(EnTest* this);
 void EnTest_SetupIdleFromBlock(EnTest* this);
 void EnTest_SetupRecoil(EnTest* this);
-void func_80862398(EnTest* this);
-void func_80862154(EnTest* this);
+void EnTest_SetupFlinchBack(EnTest* this);
+void EnTest_SetupFlinchFront(EnTest* this);
 void EnTest_SetupStopAndBlock(EnTest* this);
 void func_808627C4(EnTest* this, PlayState* play);
 
@@ -48,8 +48,8 @@ void EnTest_Jumpslash(EnTest* this, PlayState* play);
 void EnTest_JumpUp(EnTest* this, PlayState* play);
 void EnTest_StopAndBlock(EnTest* this, PlayState* play);
 void EnTest_IdleFromBlock(EnTest* this, PlayState* play);
-void func_808621D4(EnTest* this, PlayState* play);
-void func_80862418(EnTest* this, PlayState* play);
+void EnTest_FlinchFront(EnTest* this, PlayState* play);
+void EnTest_FlinchBack(EnTest* this, PlayState* play);
 void EnTest_Stunned(EnTest* this, PlayState* play);
 void func_808628C8(EnTest* this, PlayState* play);
 void func_80862E6C(EnTest* this, PlayState* play);
@@ -189,7 +189,7 @@ static ColliderQuadInit sSwordColliderInit = {
     },
     {
         ELEMTYPE_UNK0,
-        { 0xFFCFFFFF, 0x00, 0x10 },
+        { 0xFFCFFFFF, 0x00, 0x20 },
         { 0x00000000, 0x00, 0x00 },
         TOUCH_ON | TOUCH_SFX_NORMAL | TOUCH_UNK7,
         BUMP_NONE,
@@ -407,7 +407,7 @@ void EnTest_ChooseAction(EnTest* this, PlayState* play) {
             if (this->actor.xzDistToPlayer < 110.0f) {
                 if (Rand_ZeroOne() > 0.2f) {
                     if (player->stateFlags1 & 0x10) {
-                        if (this->actor.isTargeted) {
+                        if (1 || this->actor.isTargeted) {
                             EnTest_SetupSlashDown(this);
                         } else {
                             func_808627C4(this, play);
@@ -613,8 +613,8 @@ void EnTest_WalkAndBlock(EnTest* this, PlayState* play) {
         }
 
         if (this->actor.speedXZ >= 0.0f) {
-            if (this->unk_7DE == 0) {
-                this->unk_7DE++;
+            if (this->shieldState == 0) {
+                this->shieldState++;
             }
 
             playSpeed = CLAMP_MAX(playSpeed, 2.5f);
@@ -693,7 +693,7 @@ void EnTest_WalkAndBlock(EnTest* this, PlayState* play) {
         if (this->actor.xzDistToPlayer < 110.0f) {
             if (Rand_ZeroOne() > 0.2f) {
                 if (player->stateFlags1 & 0x10) {
-                    if (this->actor.isTargeted) {
+                    if (1 || this->actor.isTargeted) {
                         EnTest_SetupSlashDown(this);
                     } else {
                         func_808627C4(this, play);
@@ -901,10 +901,10 @@ void EnTest_SetupSlashDown(EnTest* this) {
     this->unk_7C8 = 0x10;
     this->actor.speedXZ = 0.0f;
     EnTest_SetupAction(this, EnTest_SlashDown);
-    this->swordCollider.info.toucher.damage = 16;
+    this->swordCollider.info.toucher.damage = 0x20;
 
-    if (this->unk_7DE != 0) {
-        this->unk_7DE = 3;
+    if (this->shieldState != 0) {
+        this->shieldState = 3;
     }
 }
 
@@ -913,10 +913,16 @@ void EnTest_SlashDown(EnTest* this, PlayState* play) {
 
     if ((s32)this->skelAnime.curFrame < 4) {
         Math_SmoothStepToS(&this->actor.shape.rot.y, this->actor.yawTowardsPlayer, 1, 0xBB8, 0);
+        this->actor.world.rot.y = this->actor.shape.rot.y;
     }
 
     if ((s32)this->skelAnime.curFrame == 7) {
         Audio_PlayActorSound2(&this->actor, NA_SE_EN_STAL_SAKEBI);
+    }
+
+    if ((s32)this->skelAnime.curFrame < 8){
+        if (this->actor.xzDistToPlayer > 40.0f)
+            this->actor.speedXZ = 5.0f;
     }
 
     if ((this->skelAnime.curFrame > 7.0f) && (this->skelAnime.curFrame < 11.0f)) {
@@ -926,7 +932,7 @@ void EnTest_SlashDown(EnTest* this, PlayState* play) {
     }
 
     if (SkelAnime_Update(&this->skelAnime)) {
-        if ((play->gameplayFrames % 2) != 0) {
+        if ((this->actor.xzDistToPlayer > 60.0f) || Rand_ZeroOne() > 0.8f) {
             EnTest_SetupSlashDownEnd(this);
         } else {
             EnTest_SetupSlashUp(this);
@@ -948,6 +954,7 @@ void EnTest_SlashDownEnd(EnTest* this, PlayState* play) {
     if (SkelAnime_Update(&this->skelAnime)) {
         if (this->swordCollider.base.atFlags & AT_HIT) {
             this->swordCollider.base.atFlags &= ~AT_HIT;
+            Player_SetShieldRecoveryDefault(play);
             if (this->actor.params != STALFOS_TYPE_CEILING) {
                 EnTest_SetupJumpBack(this);
                 return;
@@ -978,7 +985,7 @@ void EnTest_SlashDownEnd(EnTest* this, PlayState* play) {
                 this->actor.world.rot.y = this->actor.yawTowardsPlayer;
                 EnTest_SetupJumpBack(this);
             } else if (player->stateFlags1 & 0x10) {
-                if (this->actor.isTargeted) {
+                if (1 || this->actor.isTargeted) {
                     EnTest_SetupSlashDown(this);
                 } else if ((play->gameplayFrames % 2) != 0) {
                     func_808627C4(this, play);
@@ -998,12 +1005,12 @@ void EnTest_SetupSlashUp(EnTest* this) {
     Animation_PlayOnce(&this->skelAnime, &gStalfosUpSlashAnim);
     this->swordCollider.base.atFlags &= ~AT_BOUNCED;
     this->unk_7C8 = 0x11;
-    this->swordCollider.info.toucher.damage = 16;
+    this->swordCollider.info.toucher.damage = 0x20;
     this->actor.speedXZ = 0.0f;
     EnTest_SetupAction(this, EnTest_SlashUp);
 
-    if (this->unk_7DE != 0) {
-        this->unk_7DE = 3;
+    if (this->shieldState != 0) {
+        this->shieldState = 3;
     }
 }
 
@@ -1012,6 +1019,15 @@ void EnTest_SlashUp(EnTest* this, PlayState* play) {
 
     if ((s32)this->skelAnime.curFrame == 2) {
         Audio_PlayActorSound2(&this->actor, NA_SE_EN_STAL_SAKEBI);
+    }
+
+    if ((s32)this->skelAnime.curFrame < 8){
+        if ((s32)this->skelAnime.curFrame < 5) {
+            Math_SmoothStepToS(&this->actor.shape.rot.y, this->actor.yawTowardsPlayer, 1, 0x1000, 0);
+            this->actor.world.rot.y = this->actor.shape.rot.y;
+        }
+        if (this->actor.xzDistToPlayer > 50.0f)
+            this->actor.speedXZ = 5.0f;
     }
 
     if ((this->skelAnime.curFrame > 1.0f) && (this->skelAnime.curFrame < 8.0f)) {
@@ -1032,8 +1048,8 @@ void EnTest_SetupJumpBack(EnTest* this) {
     this->timer = 5;
     EnTest_SetupAction(this, EnTest_JumpBack);
 
-    if (this->unk_7DE != 0) {
-        this->unk_7DE = 3;
+    if (this->shieldState != 0) {
+        this->shieldState = 3;
     }
 
     if (this->actor.params != STALFOS_TYPE_CEILING) {
@@ -1087,10 +1103,10 @@ void EnTest_SetupJumpslash(EnTest* this) {
     this->actor.world.rot.y = this->actor.shape.rot.y;
     this->swordCollider.base.atFlags &= ~AT_BOUNCED;
     EnTest_SetupAction(this, EnTest_Jumpslash);
-    this->swordCollider.info.toucher.damage = 32;
+    this->swordCollider.info.toucher.damage = 0x30;
 
-    if (this->unk_7DE != 0) {
-        this->unk_7DE = 3;
+    if (this->shieldState != 0) {
+        this->shieldState = 3;
     }
 }
 
@@ -1164,7 +1180,7 @@ void EnTest_SetupStopAndBlock(EnTest* this) {
     this->actor.speedXZ = 0.0f;
     this->timer = (Rand_ZeroOne() * 10.0f) + 11.0f;
     this->actor.world.rot.y = this->actor.shape.rot.y;
-    this->unk_7DE = 5;
+    this->shieldState = 5;
     EnTest_SetupAction(this, EnTest_StopAndBlock);
 }
 
@@ -1197,7 +1213,7 @@ void EnTest_IdleFromBlock(EnTest* this, PlayState* play) {
 
     if (this->skelAnime.morphWeight == 0.0f) {
         this->actor.speedXZ = 0.0f;
-        this->unk_7DE = 0;
+        this->shieldState = 0;
 
         if (!EnTest_ReactToProjectile(play, this)) {
             if (this->actor.xzDistToPlayer < 500.0f) {
@@ -1209,16 +1225,16 @@ void EnTest_IdleFromBlock(EnTest* this, PlayState* play) {
     }
 }
 
-void func_80862154(EnTest* this) {
+void EnTest_SetupFlinchFront(EnTest* this) {
     Animation_PlayOnce(&this->skelAnime, &gStalfosFlinchFromHitFrontAnim);
     Audio_PlayActorSound2(&this->actor, NA_SE_EN_STAL_DAMAGE);
     this->unk_7C8 = 8;
     this->actor.speedXZ = -2.0f;
     Actor_SetColorFilter(&this->actor, 0x4000, 0xFF, 0, 8);
-    EnTest_SetupAction(this, func_808621D4);
+    EnTest_SetupAction(this, EnTest_FlinchFront);
 }
 
-void func_808621D4(EnTest* this, PlayState* play) {
+void EnTest_FlinchFront(EnTest* this, PlayState* play) {
     Player* player = GET_PLAYER(play);
 
     Math_SmoothStepToF(&this->actor.speedXZ, 0.0f, 1.0f, 0.1f, 0.0f);
@@ -1251,16 +1267,16 @@ void func_808621D4(EnTest* this, PlayState* play) {
     }
 }
 
-void func_80862398(EnTest* this) {
+void EnTest_SetupFlinchBack(EnTest* this) {
     Animation_PlayOnce(&this->skelAnime, &gStalfosFlinchFromHitBehindAnim);
     Audio_PlayActorSound2(&this->actor, NA_SE_EN_STAL_DAMAGE);
     this->unk_7C8 = 9;
     this->actor.speedXZ = -2.0f;
     Actor_SetColorFilter(&this->actor, 0x4000, 0xFF, 0, 8);
-    EnTest_SetupAction(this, func_80862418);
+    EnTest_SetupAction(this, EnTest_FlinchBack);
 }
 
-void func_80862418(EnTest* this, PlayState* play) {
+void EnTest_FlinchBack(EnTest* this, PlayState* play) {
     Player* player = GET_PLAYER(play);
 
     Math_SmoothStepToF(&this->actor.speedXZ, 0.0f, 1.0f, 0.1f, 0.0f);
@@ -1292,7 +1308,7 @@ void func_80862418(EnTest* this, PlayState* play) {
 
 void EnTest_SetupStunned(EnTest* this) {
     this->unk_7C8 = 0xB;
-    this->unk_7DE = 0;
+    this->shieldState = 0;
     this->swordState = 0;
     this->skelAnime.playSpeed = 0.0f;
     this->actor.speedXZ = -4.0f;
@@ -1373,8 +1389,8 @@ void func_808628C8(EnTest* this, PlayState* play) {
 
     Math_SmoothStepToS(&this->actor.shape.rot.y, this->actor.yawTowardsPlayer, 1, 0xFA0, 1);
 
-    if (this->unk_7DE == 0) {
-        this->unk_7DE++;
+    if (this->shieldState == 0) {
+        this->shieldState++;
     }
 
     if (this->actor.speedXZ >= 0.0f) {
@@ -1536,7 +1552,7 @@ void func_80862E6C(EnTest* this, PlayState* play) {
 void func_80862FA8(EnTest* this, PlayState* play) {
     Animation_PlayOnce(&this->skelAnime, &gStalfosFallOverBackwardsAnim);
     Audio_PlayActorSound2(&this->actor, NA_SE_EN_STAL_DEAD);
-    this->unk_7DE = 0;
+    this->shieldState = 0;
     this->actor.flags &= ~ACTOR_FLAG_TARGETABLE;
     this->actor.colorFilterTimer = 0;
     this->actor.speedXZ = 0.0f;
@@ -1567,7 +1583,7 @@ void func_808630F0(EnTest* this, PlayState* play) {
     Audio_PlayActorSound2(&this->actor, NA_SE_EN_STAL_DEAD);
     this->unk_7C8 = 6;
     this->actor.colorFilterTimer = 0;
-    this->unk_7DE = 0;
+    this->shieldState = 0;
     this->actor.speedXZ = 0.0f;
 
     if (this->actor.params <= STALFOS_TYPE_CEILING) {
@@ -1665,7 +1681,8 @@ void EnTest_UpdateDamage(EnTest* this, PlayState* play) {
         this->bodyCollider.base.acFlags &= ~AC_HIT;
 
         if ((this->actor.colChkInfo.damageEffect != STALFOS_DMGEFF_SLING) &&
-            (this->actor.colChkInfo.damageEffect != STALFOS_DMGEFF_FIREMAGIC)) {
+            (this->actor.colChkInfo.damageEffect != STALFOS_DMGEFF_FIREMAGIC) &&
+            (this->actionFunc != EnTest_Jumpslash || (this->skelAnime.curFrame >= this->skelAnime.animLength-5.0f && this->timer == 1))) {
             this->lastDamageEffect = this->actor.colChkInfo.damageEffect;
             if (this->swordState >= 1) {
                 this->swordState = 0;
@@ -1688,13 +1705,13 @@ void EnTest_UpdateDamage(EnTest* this, PlayState* play) {
                         Enemy_StartFinishingBlow(play, &this->actor);
                         func_80862FA8(this, play);
                     } else {
-                        func_80862154(this);
+                        EnTest_SetupFlinchFront(this);
                     }
                 } else if (Actor_ApplyDamage(&this->actor) == 0) {
                     func_808630F0(this, play);
                     Enemy_StartFinishingBlow(play, &this->actor);
                 } else {
-                    func_80862398(this);
+                    EnTest_SetupFlinchBack(this);
                 }
             }
         }
@@ -1735,7 +1752,7 @@ void EnTest_Update(Actor* thisx, PlayState* play) {
 
         this->actionFunc(this, play);
 
-        switch (this->unk_7DE) {
+        switch (this->shieldState) {
             case 0:
                 break;
 
@@ -1744,7 +1761,7 @@ void EnTest_Update(Actor* thisx, PlayState* play) {
                                  Animation_GetLastFrame(&gStalfosBlockWithShieldAnim), 2, 2.0f);
                 AnimationContext_SetCopyTrue(play, this->skelAnime.limbCount, this->skelAnime.jointTable,
                                              this->upperSkelanime.jointTable, sJointCopyFlags);
-                this->unk_7DE++;
+                this->shieldState++;
                 break;
 
             case 2:
@@ -1754,7 +1771,7 @@ void EnTest_Update(Actor* thisx, PlayState* play) {
                 break;
 
             case 3:
-                this->unk_7DE++;
+                this->shieldState++;
                 this->upperSkelanime.morphWeight = 4.0f;
                 // fallthrough
             case 4:
@@ -1762,7 +1779,7 @@ void EnTest_Update(Actor* thisx, PlayState* play) {
                 this->upperSkelanime.morphWeight -= 1.0f;
 
                 if (this->upperSkelanime.morphWeight <= 0.0f) {
-                    this->unk_7DE = 0;
+                    this->shieldState = 0;
                 }
 
                 SkelAnime_InterpFrameTable(this->skelAnime.limbCount, this->upperSkelanime.jointTable,
@@ -1795,7 +1812,7 @@ void EnTest_Update(Actor* thisx, PlayState* play) {
             CollisionCheck_SetAC(play, &play->colChkCtx, &this->bodyCollider.base);
         }
 
-        if (this->unk_7DE != 0) {
+        if (this->shieldState != 0) {
             CollisionCheck_SetAC(play, &play->colChkCtx, &this->shieldCollider.base);
         }
     }
@@ -1890,7 +1907,7 @@ void EnTest_PostLimbDraw(PlayState* play, s32 limbIndex, Gfx** dList, Vec3s* rot
             this->swordState = -1;
         }
 
-    } else if ((limbIndex == STALFOS_LIMB_SHIELD) && (this->unk_7DE != 0)) {
+    } else if ((limbIndex == STALFOS_LIMB_SHIELD) && (this->shieldState != 0)) {
         Matrix_MultVec3f(&D_80864670, &sp64);
 
         this->shieldCollider.dim.pos.x = sp64.x;

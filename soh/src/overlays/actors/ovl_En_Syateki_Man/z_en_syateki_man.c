@@ -292,6 +292,13 @@ void EnSyatekiMan_StartGame(EnSyatekiMan* this, PlayState* play) {
         Message_CloseTextbox(play);
         gallery = ((EnSyatekiItm*)this->actor.parent);
         if (gallery->actor.update != NULL) {
+            if (LINK_IS_CHILD) {
+                if (gSaveContext.galleryMultplierChild > INITIAL_GALLERY_MULTIPLIER && gSaveContext.galleryTimeChild <= gSaveContext.savedFrameCount)
+                    gSaveContext.galleryMultplierChild = INITIAL_GALLERY_MULTIPLIER;
+            } else {
+                if (gSaveContext.galleryMultplierAdult > INITIAL_GALLERY_MULTIPLIER && gSaveContext.galleryTimeAdult <= gSaveContext.savedFrameCount)
+                    gSaveContext.galleryMultplierAdult = INITIAL_GALLERY_MULTIPLIER;
+            }
             if(CVarGetInteger("gCustomizeShootingGallery", 0) && CVarGetInteger("gInstantShootingGalleryWin", 0)) {
                 gallery->hitCount = 10;
                 gallery->signal = ENSYATEKI_END;
@@ -369,8 +376,14 @@ void EnSyatekiMan_EndGame(EnSyatekiMan* this, PlayState* play) {
                         } else {
                             this->getItemEntry = (GetItemEntry)GET_ITEM_NONE;
                             this->getItemId = GI_RUPEE_PURPLE;
+                            gSaveContext.galleryMultplierChild++;
+                            if (0 == gSaveContext.galleryMultplierChild)
+                                gSaveContext.galleryMultplierChild = INITIAL_GALLERY_MULTIPLIER;
+                            if (gSaveContext.galleryMultplierChild == INITIAL_GALLERY_MULTIPLIER+1)
+                                gSaveContext.galleryTimeChild = gSaveContext.savedFrameCount+DEFAULT_RESOURCE_TIME;
                         }
                     } else {
+                        s16 isRupee = 0;
                         if(gSaveContext.n64ddFlag && !Flags_GetTreasure(play, 0x1F)) {
                             this->getItemEntry = Randomizer_GetItemFromKnownCheck(RC_KAK_SHOOTING_GALLERY_REWARD, GI_QUIVER_50);
                             this->getItemId = this->getItemEntry.getItemId;
@@ -381,6 +394,7 @@ void EnSyatekiMan_EndGame(EnSyatekiMan* this, PlayState* play) {
                             switch (CUR_UPG_VALUE(UPG_QUIVER)) {
                                 case 0:
                                     this->getItemId = GI_RUPEE_PURPLE;
+                                    isRupee = 1;
                                     break;
                                 case 1:
                                     this->getItemId = GI_QUIVER_40;
@@ -392,6 +406,15 @@ void EnSyatekiMan_EndGame(EnSyatekiMan* this, PlayState* play) {
                         } else {
                             this->getItemEntry = (GetItemEntry)GET_ITEM_NONE;
                             this->getItemId = GI_RUPEE_PURPLE;
+                            isRupee = 1;
+                        }
+
+                        if (isRupee) {
+                            gSaveContext.galleryMultplierAdult++;
+                            if (0 == gSaveContext.galleryMultplierAdult)
+                                gSaveContext.galleryMultplierAdult = INITIAL_GALLERY_MULTIPLIER;
+                            if (gSaveContext.galleryMultplierAdult == INITIAL_GALLERY_MULTIPLIER+1)
+                                gSaveContext.galleryTimeAdult = gSaveContext.savedFrameCount+DEFAULT_RESOURCE_TIME;
                         }
                     }
                     if (!gSaveContext.n64ddFlag || this->getItemEntry.getItemId == GI_NONE) {

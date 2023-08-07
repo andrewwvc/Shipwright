@@ -9,12 +9,12 @@ void EnSkb_Destroy(Actor* thisx, PlayState* play);
 void EnSkb_Update(Actor* thisx, PlayState* play);
 void EnSkb_Draw(Actor* thisx, PlayState* play);
 
-void func_80AFCD60(EnSkb* this);
+void func_80AFCD60(EnSkb* this, PlayState* play);
 void func_80AFCDF8(EnSkb* this);
 void func_80AFCE5C(EnSkb* this, PlayState* play);
 void func_80AFCF48(EnSkb* this);
 void func_80AFCFF0(EnSkb* this, PlayState* play);
-void func_80AFD0A4(EnSkb* this);
+void func_80AFD0A4(EnSkb* this, PlayState* play);
 void EnSkb_Advance(EnSkb* this, PlayState* play);
 void func_80AFD33C(EnSkb* this);
 void EnSkb_SetupAttack(EnSkb* this, PlayState* play);
@@ -31,24 +31,24 @@ static ColliderJntSphElementInit sJntSphElementsInit[2] = {
     {
         {
             ELEMTYPE_UNK0,
-            { 0xFFCFFFFF, 0x00, 0x04 },
+            { 0xFFCFFFFF, 0x00, 0x08 },
             { 0x00000000, 0x00, 0x00 },
-            TOUCH_ON | TOUCH_SFX_NORMAL,
+            TOUCH_NONE | TOUCH_SFX_NORMAL,
             BUMP_NONE,
             OCELEM_NONE,
         },
-        { 15, { { 0, 0, 0 }, 10 }, 100 },
+        { 15, { { 0, 0, 0 }, 10 }, 400 },
     },
     {
         {
             ELEMTYPE_UNK0,
-            { 0x00000000, 0x00, 0x00 },
+            { 0x20000000, 0x00, 0x04 },
             { 0xFFCFFFFF, 0x00, 0x00 },
-            TOUCH_NONE,
+            TOUCH_ON,
             BUMP_ON | BUMP_HOOKABLE,
             OCELEM_ON,
         },
-        { 1, { { 0, 0, 0 }, 20 }, 100 },
+        { 1, { { 0, 0, 0 }, 20 }, 80 },
     },
 };
 
@@ -99,6 +99,10 @@ static DamageTable sDamageTable = {
     /* Hammer jump   */ DMG_ENTRY(4, 0xF),
     /* Unknown 2     */ DMG_ENTRY(0, 0x0),
 };
+
+static const f32 ATTACK_TRIGGER_DIST_MULT = 2.0;
+static const f32 SPEED_MULT = 3.0;
+static const f32 RISE_MULT = 2.0;
 
 const ActorInit En_Skb_InitVars = {
     ACTOR_EN_SKB,
@@ -169,6 +173,7 @@ void EnSkb_Init(Actor* thisx, PlayState* play) {
     this->collider.elements[1].dim.modelSphere.radius = paramOffsetArm;
     this->actor.home.pos = this->actor.world.pos;
     this->actor.floorHeight = this->actor.world.pos.y;
+    this->walkTimer = 0;
     func_80AFCDF8(this);
 }
 
@@ -189,20 +194,20 @@ void EnSkb_Destroy(Actor* thisx, PlayState* play) {
     ResourceMgr_UnregisterSkeleton(&this->skelAnime);
 }
 
-void func_80AFCD60(EnSkb* this) {
+void func_80AFCD60(EnSkb* this, PlayState* play) {
     // Don't despawn stallchildren during daytime when enemy randomizer is enabled.
     if (IS_DAY && !CVarGetInteger("gRandomizedEnemies", 0)) {
         func_80AFCF48(this);
-    } else if (Actor_IsFacingPlayer(&this->actor, 0x11C7) &&
-               (this->actor.xzDistToPlayer < (60.0f + (this->actor.params * 6.0f)))) {
+    } else if (Actor_IsFacingPlayer(&this->actor, 0x11C7) && (this->walkTimer < 1) &&
+               (this->actor.xzDistToPlayer < ATTACK_TRIGGER_DIST_MULT*(60.0f + (this->actor.params * 6.0f)))) {
         func_80AFD33C(this);
     } else {
-        func_80AFD0A4(this);
+        func_80AFD0A4(this, play);
     }
 }
 
 void func_80AFCDF8(EnSkb* this) {
-    Animation_PlayOnceSetSpeed(&this->skelAnime, &gStalchildUncurlingAnim, 1.0f);
+    Animation_PlayOnceSetSpeed(&this->skelAnime, &gStalchildUncurlingAnim, RISE_MULT);
     this->unk_280 = 0;
     this->actor.flags &= ~ACTOR_FLAG_TARGETABLE;
     Audio_PlayActorSound2(&this->actor, NA_SE_EN_RIVA_APPEAR);
@@ -222,7 +227,7 @@ void func_80AFCE5C(EnSkb* this, PlayState* play) {
         EnSkb_SpawnDebris(play, this, &this->actor.world.pos);
     }
     if ((SkelAnime_Update(&this->skelAnime) != 0) && (0.0f == this->actor.shape.yOffset)) {
-        func_80AFCD60(this);
+        func_80AFCD60(this, play);
     }
 }
 
@@ -248,12 +253,13 @@ void func_80AFCFF0(EnSkb* this, PlayState* play) {
     }
 }
 
-void func_80AFD0A4(EnSkb* this) {
-    Animation_Change(&this->skelAnime, &gStalchildWalkingAnim, 0.96000004f, 0.0f,
+void func_80AFD0A4(EnSkb* this, PlayState* play) {
+    f32 speedMod = isPlayerInSpinAttack(play) ? 1.0f : SPEED_MULT;
+    Animation_Change(&this->skelAnime, &gStalchildWalkingAnim, 0.96000004f*speedMod, 0.0f,
                      Animation_GetLastFrame(&gStalchildWalkingAnim), ANIMMODE_LOOP, -4.0f);
     this->unk_280 = 4;
     this->unk_288 = 0;
-    this->actor.speedXZ = this->actor.scale.y * 160.0f;
+    this->actor.speedXZ = this->actor.scale.y * 160.0f * speedMod;
     EnSkb_SetupAction(this, EnSkb_Advance);
 }
 
@@ -266,7 +272,7 @@ void EnSkb_Advance(EnSkb* this, PlayState* play) {
     if ((this->unk_283 != 0) && ((play->gameplayFrames & 0xF) == 0)) {
         this->unk_288 = Rand_CenteredFloat(50000.0f);
     }
-    Math_SmoothStepToS(&this->actor.shape.rot.y, (this->actor.yawTowardsPlayer + this->unk_288), 1, 0x2EE, 0);
+    Math_SmoothStepToS(&this->actor.shape.rot.y, (this->actor.yawTowardsPlayer + this->unk_288), 1, 0x760, 0);
     this->actor.world.rot.y = this->actor.shape.rot.y;
     thisKeyFrame = this->skelAnime.curFrame;
     SkelAnime_Update(&this->skelAnime);
@@ -291,8 +297,8 @@ void EnSkb_Advance(EnSkb* this, PlayState* play) {
     // Don't despawn stallchildren during daytime or when a stalchildren walks too far away from his "home" when enemy randomizer is enabled.
     if ((Math_Vec3f_DistXZ(&this->actor.home.pos, &player->actor.world.pos) > 800.0f || IS_DAY) && !CVarGetInteger("gRandomizedEnemies", 0)) {
         func_80AFCF48(this);
-    } else if (Actor_IsFacingPlayer(&this->actor, 0x11C7) &&
-               (this->actor.xzDistToPlayer < (60.0f + (this->actor.params * 6.0f)))) {
+    } else if (Actor_IsFacingPlayer(&this->actor, 0x11C7) && (this->walkTimer < 1) &&
+               (this->actor.xzDistToPlayer < ATTACK_TRIGGER_DIST_MULT*(60.0f + (this->actor.params * 6.0f)))) {
         func_80AFD33C(this);
     }
 }
@@ -312,7 +318,9 @@ void EnSkb_SetupAttack(EnSkb* this, PlayState* play) {
     frameData = this->skelAnime.curFrame;
     if (frameData == 3) {
         Audio_PlayActorSound2(&this->actor, NA_SE_EN_STALKID_ATTACK);
+        EnSkb_SpawnDebris(play, this, &this->actor.world.pos);
         this->unk_281 = 1;
+        
     } else if (frameData == 6) {
         this->unk_281 = 0;
     }
@@ -320,7 +328,9 @@ void EnSkb_SetupAttack(EnSkb* this, PlayState* play) {
         this->collider.base.atFlags &= ~6;
         func_80AFD47C(this);
     } else if (SkelAnime_Update(&this->skelAnime) != 0) {
-        func_80AFCD60(this);
+        if (Rand_ZeroOne() < 0.3333f)
+            this->walkTimer = 5;
+        func_80AFCD60(this, play);
     }
 }
 
@@ -335,7 +345,7 @@ void func_80AFD47C(EnSkb* this) {
 
 void func_80AFD508(EnSkb* this, PlayState* play) {
     if (SkelAnime_Update(&this->skelAnime) != 0) {
-        func_80AFCD60(this);
+        func_80AFCD60(this, play);
     }
 }
 
@@ -362,7 +372,7 @@ void func_80AFD59C(EnSkb* this, PlayState* play) {
         if (this->actor.colChkInfo.health == 0) {
             func_80AFD7B4(this, play);
         } else {
-            func_80AFCD60(this);
+            func_80AFCD60(this, play);
         }
     }
 }
@@ -398,7 +408,7 @@ void func_80AFD6CC(EnSkb* this, PlayState* play) {
 
         Math_SmoothStepToS(&this->actor.shape.rot.y, this->actor.yawTowardsPlayer, 1, 0x1194, 0);
         if (SkelAnime_Update(&this->skelAnime) && (this->actor.bgCheckFlags & 1)) {
-            func_80AFCD60(this);
+            func_80AFCD60(this, play);
         }
     }
 }
@@ -422,13 +432,31 @@ void func_80AFD7B4(EnSkb* this, PlayState* play) {
 void func_80AFD880(EnSkb* this, PlayState* play) {
     if (BodyBreak_SpawnParts(&this->actor, &this->bodyBreak, play, 1)) {
         if (this->actor.scale.x == 0.01f) {
-            Item_DropCollectibleRandom(play, &this->actor, &this->actor.world.pos, 0x10);
+            if (Rand_ZeroOne() < 0.6f)
+                Item_DropCollectibleRandom1(play, &this->actor, &this->actor.world.pos, 0x10, 0);
         } else if (this->actor.scale.x <= 0.015f) {
             Item_DropCollectible(play, &this->actor.world.pos, ITEM00_RUPEE_BLUE);
         } else {
-            Item_DropCollectible(play, &this->actor.world.pos, ITEM00_RUPEE_RED);
-            Item_DropCollectible(play, &this->actor.world.pos, ITEM00_RUPEE_RED);
-            Item_DropCollectible(play, &this->actor.world.pos, ITEM00_RUPEE_RED);
+            ActorEntry ae;
+            ae.id = this->actor.id;
+            ae.pos.x = 0.0f;
+            ae.pos.y = 0.0f;
+            ae.pos.z = 0.0f;
+            ae.rot.x = 0.0f;
+            ae.rot.y = 0.0f;
+            ae.rot.z = 0.0f;
+            ae.params = this->actor.params;
+            if (!isResourceUsed(play, &ae, 0)) {
+                s32 entVal = -1;
+                entVal = createTempEntry(play, &ae);
+                this->actor.entryNum = entVal;
+                for (s16 ii = 0; ii < 3; ii++) {
+                    EnItem00* item = Item_DropCollectible(play, &this->actor.world.pos, ITEM00_RUPEE_RED);
+                    if (item) {
+                        item->actor.entryNum = this->actor.entryNum;
+                    }
+                }
+            }
         }
 
         this->unk_283 |= 8;
@@ -506,9 +534,19 @@ void EnSkb_Update(Actor* thisx, PlayState* play) {
     this->actionFunc(this, play);
     this->actor.focus.pos = this->actor.world.pos;
     this->actor.focus.pos.y += (3000.0f * this->actor.scale.y);
+    DECR(this->walkTimer);
+    
     if (this->unk_281 != 0) {
-        CollisionCheck_SetAT(play, &play->colChkCtx, &this->collider.base);
+        this->collider.elements[0].info.toucherFlags |= AT_ON;
+        this->collider.elements[1].info.toucherFlags &= ~AT_ON;
+    } else {
+        this->collider.elements[0].info.toucherFlags &= ~AT_ON;
+        this->collider.elements[1].info.toucherFlags |= AT_ON;
     }
+        
+    if ((this->unk_280 != 0) && (this->unk_280 != 2) && (this->unk_280 != 6) &&
+                    ((this->actor.colorFilterTimer == 0) || ((this->actor.colorFilterParams & 0x4000) == 0)))
+        CollisionCheck_SetAT(play, &play->colChkCtx, &this->collider.base);
 
     if (this->unk_280 >= 3) {
         if ((this->actor.colorFilterTimer == 0) || ((this->actor.colorFilterParams & 0x4000) == 0)) {

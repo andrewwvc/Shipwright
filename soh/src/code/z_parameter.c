@@ -79,7 +79,7 @@ static RestrictionFlags sRestrictionFlags[] = {
     { SCENE_NAKANIWA, 0x00, 0x05, 0x54 },
     { SCENE_TURIBORI, 0x11, 0x55, 0x55 },
     { SCENE_BOWLING, 0x11, 0x55, 0x55 },
-    { SCENE_SOUKO, 0x00, 0x10, 0x15 },
+    { SCENE_SOUKO, 0x00, 0x00, 0x14 },
     { SCENE_MIHARIGOYA, 0x00, 0x10, 0x14 },
     { SCENE_MAHOUYA, 0x10, 0x15, 0x55 },
     { SCENE_TAKARAYA, 0x10, 0x15, 0x55 },
@@ -1260,7 +1260,7 @@ void func_80083108(PlayState* play) {
                               (gSaveContext.equips.buttonItems[i] <= ITEM_BOOTS_HOVER)) && // (tunics/boots) on C-buttons
                             !((gSaveContext.equips.buttonItems[i] >= ITEM_WEIRD_EGG) &&
                               (gSaveContext.equips.buttonItems[i] <= ITEM_CLAIM_CHECK))) {
-                            if ((play->sceneNum != SCENE_TAKARAYA) ||
+                            if (/*(play->sceneNum != SCENE_TAKARAYA) ||*/
                                 (gSaveContext.equips.buttonItems[i] != ITEM_LENS)) {
                                 if (gSaveContext.buttonStatus[BUTTON_STATUS_INDEX(i)] == BTN_ENABLED) {
                                     sp28 = 1;
@@ -1993,6 +1993,12 @@ u8 Item_Give(PlayState* play, u8 item) {
             Rupees_ChangeBy(500);
         }
         return Return_Item(item, MOD_NONE, ITEM_NONE);
+    } else if (item == ITEM_WALLET_KING) {
+        Inventory_ChangeUpgrade(UPG_WALLET, 3);
+        if (gSaveContext.n64ddFlag && Randomizer_GetSettingValue(RSK_FULL_WALLETS)) {
+            Rupees_ChangeBy(1000);
+        }
+        return Return_Item(item, MOD_NONE, ITEM_NONE);
     } else if (item == ITEM_STICK_UPGRADE_20) {
         if (gSaveContext.inventory.items[slot] == ITEM_NONE) {
             INV_CONTENT(ITEM_STICK) = ITEM_STICK;
@@ -2228,6 +2234,18 @@ u8 Item_Give(PlayState* play, u8 item) {
         gSaveContext.health += 0x10;
         gSaveContext.sohStats.heartContainers++;
         return Return_Item(item, MOD_NONE, ITEM_NONE);
+    } else if (item == ITEM_EXTRA_MAGIC) {
+        gSaveContext.extraMagicPower += 1;
+        gSaveContext.magicFillTarget = Inferface_CalculateMaxMagic(play);
+        gSaveContext.magicLevel = 0;
+        Magic_Fill(play);
+        return Return_Item(item, MOD_NONE, ITEM_NONE);
+    } else if (item == ITEM_EPONA_BOOST) {
+        gSaveContext.maxBoosts += 1;
+        return Return_Item(item, MOD_NONE, ITEM_NONE);
+    } else if (item == ITEM_DEFENSE_HEART) {
+        gSaveContext.inventory.defenseHearts += 1;
+        return Return_Item(item, MOD_NONE, ITEM_NONE);
     } else if (item == ITEM_HEART) {
         osSyncPrintf("回復ハート回復ハート回復ハート\n"); // "Recovery Heart"
         if (play != NULL) {
@@ -2367,7 +2385,7 @@ u16 Randomizer_Item_Give(PlayState* play, GetItemEntry giEntry) {
     slot = SLOT(item);
     if (item == RG_MAGIC_SINGLE) {
         gSaveContext.isMagicAcquired = true;
-        gSaveContext.magicFillTarget = 0x30;
+        gSaveContext.magicFillTarget = Inferface_CalculateMaxMagic(play);
         Magic_Fill(play);
         return Return_Item_Entry(giEntry, RG_NONE);
     } else if (item == RG_MAGIC_DOUBLE) {
@@ -2375,7 +2393,7 @@ u16 Randomizer_Item_Give(PlayState* play, GetItemEntry giEntry) {
             gSaveContext.isMagicAcquired = true;
         }
         gSaveContext.isDoubleMagicAcquired = true;
-        gSaveContext.magicFillTarget = 0x60;
+        gSaveContext.magicFillTarget = Inferface_CalculateMaxMagic(play);
         gSaveContext.magicLevel = 0;
         Magic_Fill(play);
         return Return_Item_Entry(giEntry, RG_NONE);
@@ -2680,6 +2698,14 @@ u8 Item_CheckObtainability(u8 item) {
     } else if ((item == ITEM_HEART_PIECE_2) || (item == ITEM_HEART_PIECE)) {
         return ITEM_NONE;
     } else if (item == ITEM_HEART_CONTAINER) {
+        return ITEM_NONE;
+    } else if (item == ITEM_EXTRA_MAGIC) {
+        return ITEM_NONE;
+    } else if (item == ITEM_EPONA_BOOST) {
+        return ITEM_NONE;
+    } else if (item == ITEM_DEFENSE_HEART) {
+        return ITEM_NONE;
+    } else if (ITEM_WALLET_KING) {
         return ITEM_NONE;
     } else if (item == ITEM_HEART) {
         return ITEM_HEART;
@@ -2994,9 +3020,15 @@ s32 Health_ChangeBy(PlayState* play, s16 healthChange) {
     // clang-format off
     if (healthChange > 0) { Audio_PlaySoundGeneral(NA_SE_SY_HP_RECOVER, &D_801333D4, 4,
                                                    &D_801333E0, &D_801333E0, &D_801333E8);
-    } else if ((gSaveContext.isDoubleDefenseAcquired != 0) && (healthChange < 0)) {
-        healthChange >>= 1;
-        osSyncPrintf("ハート減少半分！！＝%d\n", healthChange); // "Heart decrease halved!!＝%d"
+    } else if (healthChange < 0) {
+        if ((gSaveContext.isDoubleDefenseAcquired != 0) && (gSaveContext.health <= gSaveContext.inventory.defenseHearts*0x10)) {
+            healthChange >>= 1;
+            osSyncPrintf("ハート減少半分！！＝%d\n", healthChange); // "Heart decrease halved!!＝%d"
+        }
+        if (gSaveContext.nayrusLoveTimer != 0) {
+            healthChange >>= 1;
+            osSyncPrintf("ハート減少半分！！＝%d\n", healthChange); // "Heart decrease halved!!＝%d"
+        }
     }
     // clang-format on
 
@@ -3150,7 +3182,7 @@ void Inventory_ChangeAmmo(s16 item, s16 ammoChange) {
 void Magic_Fill(PlayState* play) {
     if (gSaveContext.isMagicAcquired) {
         gSaveContext.prevMagicState = gSaveContext.magicState;
-        gSaveContext.magicFillTarget = (gSaveContext.isDoubleMagicAcquired + 1) * 0x30;
+        gSaveContext.magicFillTarget = Inferface_CalculateMaxMagic(play);
         gSaveContext.magicState = 9;
     }
 }
@@ -3204,8 +3236,8 @@ s32 func_80087708(PlayState* play, s16 arg1, s16 arg2) {
             }
         case 3:
             if (gSaveContext.magicState == 0) {
-                if (gSaveContext.magic != 0) {
-                    play->interfaceCtx.unk_230 = 80;
+                if (gSaveContext.magic > arg1) {
+                    play->interfaceCtx.unk_230 = 1;
                     gSaveContext.magicState = 7;
                     return 1;
                 } else {
@@ -3245,6 +3277,14 @@ s32 func_80087708(PlayState* play, s16 arg1, s16 arg2) {
     }
 
     return 0;
+}
+
+s32 Inferface_CalculateMaxMagic() {
+    return gSaveContext.isMagicAcquired ? (0x30 + (gSaveContext.isDoubleMagicAcquired ? 0x10*(gSaveContext.extraMagicPower+1) : 0x0)) : 0x0;
+}
+
+s32 Inferface_CalculateMagicToSet() {
+    return gSaveContext.magicLevel ? Inferface_CalculateMaxMagic() : 0;
 }
 
 void Interface_UpdateMagicBar(PlayState* play) {
@@ -3289,7 +3329,7 @@ void Interface_UpdateMagicBar(PlayState* play) {
 
     switch (gSaveContext.magicState) {
         case 8:
-            temp = gSaveContext.magicLevel * 0x30;
+            temp = Inferface_CalculateMaxMagic(play);
             if (gSaveContext.magicCapacity != temp) {
                 if (gSaveContext.magicCapacity < temp) {
                     gSaveContext.magicCapacity += 8;
@@ -3519,6 +3559,7 @@ void Interface_DrawMagicBar(PlayState* play) {
     OPEN_DISPS(play->state.gfxCtx);
 
     if (gSaveContext.magicLevel != 0) {
+
         s16 X_Margins;
         s16 Y_Margins;
         if (CVarGetInteger("gMagicBarUseMargins", 0) != 0) {
@@ -4805,8 +4846,8 @@ void Interface_Draw(PlayState* play) {
     static s16 D_80125B1C[][3] = {
         { 0, 150, 0 }, { 100, 255, 0 }, { 255, 255, 255 }, { 0, 0, 0 }, { 255, 255, 255 },
     };
-    static s16 rupeeDigitsFirst[] = { 1, 0, 0, 0 };
-    static s16 rupeeDigitsCount[] = { 2, 3, 3, 3 };
+    static s16 rupeeDigitsFirst[] = { 2, 1, 1, 0 };
+    static s16 rupeeDigitsCount[] = { 2, 3, 3, 4 };
 
     // courtesy of https://github.com/TestRunnerSRL/OoT-Randomizer/blob/Dev/ASM/c/hud_colors.c
     static Color_RGB8 rupeeWalletColors[4] = {
@@ -5045,21 +5086,26 @@ void Interface_Draw(PlayState* play) {
             gDPSetCombineLERP(OVERLAY_DISP++, 0, 0, 0, PRIMITIVE, TEXEL0, 0, PRIMITIVE, 0, 0, 0, 0, PRIMITIVE, TEXEL0, 0,
                               PRIMITIVE, 0);
 
-            interfaceCtx->counterDigits[0] = interfaceCtx->counterDigits[1] = 0;
-            interfaceCtx->counterDigits[2] = gSaveContext.rupees;
+            interfaceCtx->counterDigits[0] = interfaceCtx->counterDigits[1] = interfaceCtx->counterDigits[2] = 0;
+            interfaceCtx->counterDigits[3] = gSaveContext.rupees;
 
-            if ((interfaceCtx->counterDigits[2] > 9999) || (interfaceCtx->counterDigits[2] < 0)) {
-                interfaceCtx->counterDigits[2] &= 0xDDD;
+            if ((interfaceCtx->counterDigits[3] > 9999) || (interfaceCtx->counterDigits[3] < 0)) {
+                interfaceCtx->counterDigits[3] &= 0xDDD;
             }
 
-            while (interfaceCtx->counterDigits[2] >= 100) {
+            while (interfaceCtx->counterDigits[3] >= 1000) {
                 interfaceCtx->counterDigits[0]++;
-                interfaceCtx->counterDigits[2] -= 100;
+                interfaceCtx->counterDigits[3] -= 1000;
             }
 
-            while (interfaceCtx->counterDigits[2] >= 10) {
+            while (interfaceCtx->counterDigits[3] >= 100) {
                 interfaceCtx->counterDigits[1]++;
-                interfaceCtx->counterDigits[2] -= 10;
+                interfaceCtx->counterDigits[3] -= 100;
+            }
+
+            while (interfaceCtx->counterDigits[3] >= 10) {
+                interfaceCtx->counterDigits[2]++;
+                interfaceCtx->counterDigits[3] -= 10;
             }
 
             svar2 = rupeeDigitsFirst[CUR_UPG_VALUE(UPG_WALLET)];
@@ -5472,7 +5518,7 @@ void Interface_Draw(PlayState* play) {
                             CarrotsPosX = -9999;
                         }
                     }
-                    for (svar1 = 1, svar5 = CarrotsPosX; svar1 < 7; svar1++, svar5 += 16) {
+                    for (svar1 = 1, svar5 = CarrotsPosX; svar1 < gSaveContext.maxBoosts+1; svar1++, svar5 += 16) {
                         // Carrot Color (based on availability)
                         if ((interfaceCtx->numHorseBoosts == 0) || (interfaceCtx->numHorseBoosts < svar1)) {
                             gDPSetPrimColor(OVERLAY_DISP++, 0, 0, 0, 150, 255, interfaceCtx->aAlpha);

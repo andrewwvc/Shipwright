@@ -134,6 +134,12 @@ void func_80A563BC(EnHeishi4* this, PlayState* play) {
         this->unk_2B4 = 1;
         this->actionFunc = func_80A56B40;
     } else {
+        if ((gSaveContext.goronTimeStatus & (1<<9)) == 0x0001) { //If big brother Goron has rolled past
+            u16 MiscMsg = GetTextID("misc");
+            this->actor.textId = MiscMsg+1;
+            this->actionFunc = func_80A56B40;
+            return;
+        }
         if (gSaveContext.eventChkInf[8] & 1) {
             this->actor.textId = 0x5065;
             this->actionFunc = func_80A56B40;

@@ -31,6 +31,9 @@ void func_809EE8F0(EnDivingGame* this, PlayState* play);
 void func_809EE96C(EnDivingGame* this, PlayState* play);
 void func_809EEA00(EnDivingGame* this, PlayState* play);
 void func_809EEA90(EnDivingGame* this, PlayState* play);
+void EnDivingGame_Await_Gift_Heart(EnDivingGame* this, PlayState* play);
+void EnDivingGame_Start_Gift_Heart(EnDivingGame* this, PlayState* play);
+void EnDivingGame_Finish_Gift_Heart(EnDivingGame* this, PlayState* play);
 void func_809EEAF8(EnDivingGame* this, PlayState* play);
 
 const ActorInit En_Diving_Game_InitVars = {
@@ -151,7 +154,7 @@ s32 EnDivingGame_HasMinigameFinished(EnDivingGame* this, PlayState* play) {
             // Won.
             gSaveContext.timer1State = 0;
             this->allRupeesThrown = this->state = this->phase = this->unk_2A2 = this->grabbedRupeesCounter = 0;
-            if (!(gSaveContext.eventChkInf[3] & 0x100)) {
+            if (!(gSaveContext.eventChkInf[3] & 0x100) || !(gSaveContext.eventChkInf[3] & 0x40)) {
                 this->actor.textId = 0x4055;
             } else {
                 this->actor.textId = 0x405D;
@@ -166,6 +169,8 @@ s32 EnDivingGame_HasMinigameFinished(EnDivingGame* this, PlayState* play) {
             func_8002DF54(play, NULL, 8);
             if (!(gSaveContext.eventChkInf[3] & 0x100)) {
                 this->actionFunc = func_809EE96C;
+            } else if (!(gSaveContext.eventChkInf[3] & 0x40)) {
+                this->actionFunc = EnDivingGame_Await_Gift_Heart;
             } else {
                 this->actionFunc = func_809EE048;
             }
@@ -197,6 +202,9 @@ void EnDivingGame_Talk(EnDivingGame* this, PlayState* play) {
                     case ENDIVINGGAME_STATE_AWARDPRIZE:
                         this->actionFunc = func_809EEA00;
                         break;
+                    case ENDIVINGGAME_STATE_AWARDHEART:
+                        this->actionFunc = EnDivingGame_Start_Gift_Heart;
+                        break;
                     case ENDIVINGGAME_STATE_PLAYING:
                         this->actionFunc = func_809EE8F0;
                         break;
@@ -207,6 +215,7 @@ void EnDivingGame_Talk(EnDivingGame* this, PlayState* play) {
                 this->actor.textId = Text_GetFaceReaction(play, 0x1D);
                 this->unk_292 = TEXT_STATE_DONE;
             } else {
+                u16 ZoraMsg = GetTextID("zora");
                 switch (this->state) {
                     case ENDIVINGGAME_STATE_NOTPLAYING:
                         this->unk_292 = TEXT_STATE_CHOICE;
@@ -220,6 +229,10 @@ void EnDivingGame_Talk(EnDivingGame* this, PlayState* play) {
                         break;
                     case ENDIVINGGAME_STATE_AWARDPRIZE:
                         this->actor.textId = 0x4056;
+                        this->unk_292 = TEXT_STATE_EVENT;
+                        break;
+                    case ENDIVINGGAME_STATE_AWARDHEART:
+                        this->actor.textId = ZoraMsg;
                         this->unk_292 = TEXT_STATE_EVENT;
                         break;
                     case ENDIVINGGAME_STATE_PLAYING:
@@ -479,6 +492,38 @@ void func_809EEA90(EnDivingGame* this, PlayState* play) {
     }
 }
 
+void EnDivingGame_Await_Gift_Heart(EnDivingGame* this, PlayState* play) {
+    SkelAnime_Update(&this->skelAnime);
+    if ((this->unk_292 == Message_GetState(&play->msgCtx) && Message_ShouldAdvance(play))) {
+        u16 ZoraMsg = GetTextID("zora");
+        Message_CloseTextbox(play);
+        func_8002DF54(play, NULL, 7);
+        this->actor.textId = ZoraMsg;
+        this->unk_292 = TEXT_STATE_EVENT;
+        this->state = ENDIVINGGAME_STATE_AWARDHEART;
+        this->actionFunc = EnDivingGame_Talk;
+    }
+}
+
+void EnDivingGame_Start_Gift_Heart(EnDivingGame* this, PlayState* play) {
+    SkelAnime_Update(&this->skelAnime);
+    if ((this->unk_292 == Message_GetState(&play->msgCtx) && Message_ShouldAdvance(play))) {
+        Message_CloseTextbox(play);
+        this->actor.parent = NULL;
+        func_8002F434(&this->actor, play, GI_HEART_PIECE, 90.0f, 10.0f);
+        this->actionFunc = EnDivingGame_Finish_Gift_Heart;
+    }
+}
+
+void EnDivingGame_Finish_Gift_Heart(EnDivingGame* this, PlayState* play) {
+    SkelAnime_Update(&this->skelAnime);
+    if (Actor_HasParent(&this->actor, play)) {
+        this->actionFunc = func_809EEAF8;
+    } else {
+        func_8002F434(&this->actor, play, GI_HEART_PIECE, 90.0f, 10.0f);
+    }
+}
+
 // Award the scale?
 void func_809EEAF8(EnDivingGame* this, PlayState* play) {
     SkelAnime_Update(&this->skelAnime);
@@ -486,7 +531,10 @@ void func_809EEAF8(EnDivingGame* this, PlayState* play) {
         // "Successful completion"
         osSyncPrintf(VT_FGCOL(GREEN) "☆☆☆☆☆ 正常終了 ☆☆☆☆☆ \n" VT_RST);
         this->allRupeesThrown = this->state = this->phase = this->unk_2A2 = this->grabbedRupeesCounter = 0;
-        gSaveContext.eventChkInf[3] |= 0x100;
+        if (gSaveContext.eventChkInf[3] & 0x100)
+            gSaveContext.eventChkInf[3] |= 0x40;
+        else
+            gSaveContext.eventChkInf[3] |= 0x100;
         this->actionFunc = func_809EDCB0;
     }
 }

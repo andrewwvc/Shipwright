@@ -14,6 +14,8 @@ void BgUmaJump_Destroy(Actor* thisx, PlayState* play);
 void BgUmaJump_Update(Actor* thisx, PlayState* play);
 void BgUmaJump_Draw(Actor* thisx, PlayState* play);
 
+void BgUmaJump_FallableUpdate(Actor* thisx, PlayState* play);
+
 const ActorInit Bg_Umajump_InitVars = {
     ACTOR_BG_UMAJUMP,
     ACTORCAT_PROP,
@@ -47,6 +49,8 @@ void BgUmaJump_Init(Actor* thisx, PlayState* play) {
             return;
         }
         this->dyna.actor.flags |= ACTOR_FLAG_UPDATE_WHILE_CULLED | ACTOR_FLAG_DRAW_WHILE_CULLED;
+    } else if (thisx->params == 2) {
+        thisx->update = BgUmaJump_FallableUpdate;
     }
 }
 
@@ -57,6 +61,14 @@ void BgUmaJump_Destroy(Actor* thisx, PlayState* play) {
 }
 
 void BgUmaJump_Update(Actor* thisx, PlayState* play) {
+}
+
+void BgUmaJump_FallableUpdate(Actor* thisx, PlayState* play) {
+    if (Actor_FindNearby(play,thisx,ACTOR_EN_GO2,ACTORCAT_NPC,100.0f)) {
+        if (thisx->shape.rot.x != -0x3000)
+            func_800F4190(&thisx->projectedPos,NA_SE_PL_LAND_HEAVYBOOTS);
+        thisx->shape.rot.x = -0x3000;
+    }
 }
 
 void BgUmaJump_Draw(Actor* thisx, PlayState* play) {

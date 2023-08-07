@@ -94,6 +94,7 @@ void BgDyYoseizo_Init(Actor* thisx, PlayState* play2) {
     this->vanishHeight = this->actor.world.pos.y;
     this->grownHeight = this->vanishHeight + 40.0f;
     this->actor.focus.pos = this->actor.world.pos;
+    this->giveDefenseHearts = false;
 
     if (play->sceneNum == SCENE_DAIYOUSEI_IZUMI) {
         // "Great Fairy Fountain"
@@ -112,6 +113,8 @@ void BgDyYoseizo_Init(Actor* thisx, PlayState* play2) {
 void BgDyYoseizo_Destroy(Actor* thisx, PlayState* play) {
     BgDyYoseizo* this = (BgDyYoseizo*)thisx;
     ResourceMgr_UnregisterSkeleton(&this->skelAnime);
+    if (this->giveDefenseHearts)
+        gSaveContext.inventory.defenseHearts = this->defenseHeartsTempStore;
 }
 
 static Color_RGB8 sParticlePrimColors[] = {
@@ -741,7 +744,7 @@ void BgDyYoseizo_Give_Reward(BgDyYoseizo* this, PlayState* play) {
         switch (actionIndex) {
             case FAIRY_UPGRADE_MAGIC:
                 gSaveContext.isMagicAcquired = true;
-                gSaveContext.magicFillTarget = 0x30;
+                gSaveContext.magicFillTarget = Inferface_CalculateMaxMagic();
                 Interface_ChangeAlpha(9);
                 break;
             case FAIRY_UPGRADE_DOUBLE_MAGIC:
@@ -749,7 +752,7 @@ void BgDyYoseizo_Give_Reward(BgDyYoseizo* this, PlayState* play) {
                     gSaveContext.isMagicAcquired = true;
                 }
                 gSaveContext.isDoubleMagicAcquired = true;
-                gSaveContext.magicFillTarget = 0x60;
+                gSaveContext.magicFillTarget = Inferface_CalculateMaxMagic();
                 gSaveContext.magicLevel = 0;
                 Interface_ChangeAlpha(9);
                 break;
@@ -809,12 +812,14 @@ void BgDyYoseizo_Give_Reward(BgDyYoseizo* this, PlayState* play) {
         this->item = NULL;
     }
 
-    if ((play->sceneNum == SCENE_DAIYOUSEI_IZUMI) && (play->csCtx.npcActions[0]->action == 18)) {
+    if ((play->sceneNum == SCENE_DAIYOUSEI_IZUMI) && (play->csCtx.npcActions[0]->action == 18) && !this->giveDefenseHearts) {
         this->giveDefenseHearts = true;
+        this->defenseHeartsTempStore = gSaveContext.inventory.defenseHearts; //Revert this to 20 to disable the use of defense barrier rewards
+        gSaveContext.inventory.defenseHearts = 0;
     }
 
     if (this->giveDefenseHearts) {
-        if (gSaveContext.inventory.defenseHearts < 20) {
+        if (gSaveContext.inventory.defenseHearts < this->defenseHeartsTempStore) {
             gSaveContext.inventory.defenseHearts++;
         }
     }
