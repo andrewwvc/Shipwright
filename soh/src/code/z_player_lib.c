@@ -361,7 +361,34 @@ s32 Player_IsChildWithHylianShield(Player* this) {
 }
 
 s32 Player_IsInCrouchBlock(Player* this) {
-    return ((this->stateFlags1 & PLAYER_STATE1_SHIELDING) && ((this->unk_6AE & 0xC1) == 0xC1) && (this->skelAnime.animation == &gPlayerAnim_link_normal_defense_wait));
+    return ((this->stateFlags1 & PLAYER_STATE1_SHIELDING) && ((this->unk_6AE & 0xC1) == 0xC1) &&
+        (strcmp(this->skelAnime.animation, gPlayerAnim_link_normal_defense_wait) == 0 || strcmp(this->skelAnime.animation, gPlayerAnim_link_normal_defense_wait_free) == 0));
+}
+
+s32 Player_IsRolling(Player* this) {
+    return (strcmp(this->skelAnime.animation, gPlayerAnim_link_normal_landing_roll_free) == 0 ||
+        strcmp(this->skelAnime.animation, gPlayerAnim_link_normal_landing_roll) == 0 ||
+        strcmp(this->skelAnime.animation, gPlayerAnim_link_fighter_landing_roll_long) == 0);
+}
+
+s32 Player_IsSideHopping(Player* this) {
+    return (strcmp(this->skelAnime.animation, gPlayerAnim_link_fighter_Lside_jump) == 0 ||
+        strcmp(this->skelAnime.animation, gPlayerAnim_link_fighter_Lside_jump_end) == 0 ||
+        strcmp(this->skelAnime.animation, gPlayerAnim_link_fighter_Lside_jump_endL) == 0 ||
+        strcmp(this->skelAnime.animation, gPlayerAnim_link_fighter_Rside_jump) == 0 ||
+        strcmp(this->skelAnime.animation, gPlayerAnim_link_fighter_Rside_jump_end) == 0 ||
+        strcmp(this->skelAnime.animation, gPlayerAnim_link_fighter_Rside_jump_endR) == 0);
+}
+
+s32 Player_IsBackFlipping(Player* this) {
+    return (strcmp(this->skelAnime.animation, gPlayerAnim_link_fighter_backturn_jump) == 0 ||
+        strcmp(this->skelAnime.animation, gPlayerAnim_link_fighter_backturn_jump_end) == 0 ||
+        strcmp(this->skelAnime.animation, gPlayerAnim_link_fighter_backturn_jump_endR) == 0);
+}
+
+s32 Player_IsMakingNoise(PlayState* play) {
+    Player* this = GET_PLAYER(play);
+    return func_8002DDE4(play) || Player_IsRolling(this) || Player_IsSideHopping(this) || Player_IsBackFlipping(this);
 }
 
 s32 Player_ActionToModelGroup(Player* this, s32 actionParam) {

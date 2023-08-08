@@ -11,6 +11,8 @@ void EnRd_Draw(Actor* thisx, PlayState* play);
 void func_80AE269C(EnRd* this, PlayState* play);
 void func_80AE2744(EnRd* this, PlayState* play);
 void func_80AE2970(EnRd* this, PlayState* play);
+void EnRd_SetupRiseFromGround(EnRd* this, PlayState* play);
+void EnRd_RiseFromGround(EnRd* this, PlayState* play);
 void func_80AE2A10(EnRd* this, PlayState* play);
 void func_80AE2C1C(EnRd* this, PlayState* play);
 void func_80AE2F50(EnRd* this, PlayState* play);
@@ -163,7 +165,10 @@ void EnRd_Init(Actor* thisx, PlayState* play) {
     Collider_SetCylinder(play, &this->collider, thisx, &sCylinderInit);
 
     if (thisx->params >= -2) {
-        func_80AE269C(this,play);
+        if (thisx->params == 4)
+            EnRd_SetupRiseFromGround(this,play);
+        else
+            func_80AE269C(this,play);
     } else {
         func_80AE2970(this,play);
     }
@@ -261,7 +266,7 @@ void func_80AE2744(EnRd* this, PlayState* play) {
 
         this->unk_305 = 0;
 
-        if ((this->actor.xzDistToPlayer <= HearingRange && func_8002DDE4(play)) || (this->actor.xzDistToPlayer <= SenseRange)) {//Causes the undead to only notice the player if they are making noise
+        if ((this->actor.xzDistToPlayer <= HearingRange && Player_IsMakingNoise(play)) || (this->actor.xzDistToPlayer <= SenseRange)) {//Causes the undead to only notice the player if they are making noise
             // Add a height check to redeads/gibdos freeze when Enemy Randomizer is on.
             // Without the height check, redeads/gibdos can freeze the player from insane distances in
             // vertical rooms (like the first room in Deku Tree), making these rooms nearly unplayable.
@@ -316,6 +321,26 @@ void func_80AE2A10(EnRd* this, PlayState* play) {
     }
 }
 
+void EnRd_SetupRiseFromGround(EnRd* this, PlayState* play) {
+    Animation_Change(&this->skelAnime, &gGibdoRedeadIdleAnim, 0, 0, Animation_GetLastFrame(&gGibdoRedeadIdleAnim),
+                     ANIMMODE_LOOP, -6.0f);
+    this->unk_31B = 11;
+    this->unk_30C = 6;
+    this->actor.world.pos.y = this->actor.home.pos.y - 100.0f;
+    this->actor.gravity = 0.0f;
+    this->actor.shape.yOffset = 0.0f;
+    this->actor.speedXZ = 0.0f;
+    EnRd_SetupAction(this, EnRd_RiseFromGround);
+}
+
+// Rising out of coffin
+void EnRd_RiseFromGround(EnRd* this, PlayState* play) {
+    if (Math_SmoothStepToF(&this->actor.world.pos.y, this->actor.home.pos.y, 0.5f, 10.0f, 1.0f) == 0.0f) {
+        this->actor.gravity = -3.5f;
+        func_80AE269C(this,play);
+    }
+}
+
 void func_80AE2B90(EnRd* this, PlayState* play) {
     Animation_Change(&this->skelAnime, &gGibdoRedeadWalkAnim, 1.0f, 4.0f,
                      Animation_GetLastFrame(&gGibdoRedeadWalkAnim), ANIMMODE_LOOP_INTERP, -4.0f);
@@ -344,7 +369,7 @@ void func_80AE2C1C(EnRd* this, PlayState* play) {
     }
 
     if ((ABS(sp32) < 0x2554) && (Actor_WorldDistXYZToActor(&this->actor, &player->actor) <= HearingRange)) {
-        if (!(player->stateFlags1 & 0x2C6080) && !(player->stateFlags2 & 0x80)) {//Causes the undead to only notice the player if they are making noise
+        if (!(player->stateFlags1 & 0x2C6080) && !(player->stateFlags2 & 0x80)) {
             if (this->unk_306 == 0) {
                 if (!(this->unk_312 & 0x80) && !CVarGetInteger("gNoRedeadFreeze", 0)) {
                     player->actor.freezeTimer = 40;
@@ -416,7 +441,7 @@ void func_80AE2FD0(EnRd* this, PlayState* play) {
     this->actor.world.rot.y = this->actor.shape.rot.y;
     SkelAnime_Update(&this->skelAnime);
 
-    if (!(player->stateFlags1 & 0x2C6080) && !(player->stateFlags2 & 0x80) && //Causes the undead to only notice the player if they are making noise
+    if (!(player->stateFlags1 & 0x2C6080) && !(player->stateFlags2 & 0x80) &&
         (Actor_WorldDistXYZToPoint(&player->actor, &this->actor.home.pos) < HomeRange)) {
         this->actor.targetMode = 0;
         func_80AE2B90(this, play);
