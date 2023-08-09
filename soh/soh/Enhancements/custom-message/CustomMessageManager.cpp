@@ -260,7 +260,7 @@ CustomMessage CustomMessageManager::RetrieveMessage(std::string tableID, uint16_
     CustomMessageTable messageTable = foundMessageTable->second;
     std::unordered_map<uint16_t, CustomMessage>::const_iterator foundMessage = messageTable.find(textID);
     if (foundMessage == messageTable.end()) {
-        throw(MessageNotFoundException(tableID, textID));
+        return CustomMessage("","","", TEXTBOX_TYPE_MISSING);
     }
     CustomMessage message = foundMessage->second;
     return message;

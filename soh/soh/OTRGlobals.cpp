@@ -2110,7 +2110,7 @@ extern "C" int CustomMessage_RetrieveIfExists(PlayState* play) {
                 } else {
                     textId = msgCtx->textId = substituteID;
                 }
-                if (messageEntry.GetTextBoxType() == -1) {
+                if (messageEntry.GetTextBoxType() == TEXTBOX_TYPE_MISSING) {
                     messageEntry = CustomMessageManager::Instance->RetrieveMessage(questMessageTableID, textId);
                 }
             } else {
