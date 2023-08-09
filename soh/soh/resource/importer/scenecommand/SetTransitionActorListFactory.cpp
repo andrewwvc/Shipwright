@@ -32,6 +32,7 @@ void LUS::SetTransitionActorListFactoryV0::ParseFileBinary(std::shared_ptr<Binar
     ReadCommandId(setTransitionActorList, reader);
 	
     setTransitionActorList->numTransitionActors = reader->ReadUInt32();
+    setTransitionActorList->modificationState = 0;
     setTransitionActorList->transitionActorList.reserve(setTransitionActorList->numTransitionActors);
     for (uint32_t i = 0; i < setTransitionActorList->numTransitionActors; i++) {
         TransitionActorEntry entry;

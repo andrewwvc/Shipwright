@@ -34,6 +34,7 @@ void LUS::SetActorListFactoryV0::ParseFileBinary(std::shared_ptr<BinaryReader> r
 	
     setActorList->numActors = reader->ReadUInt32();
     setActorList->actorList.reserve(setActorList->numActors);
+    setActorList->modificationState = 0;
     for (uint32_t i = 0; i < setActorList->numActors; i++) {
 	ActorEntry entry;
 

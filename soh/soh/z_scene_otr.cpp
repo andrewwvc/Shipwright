@@ -267,296 +267,287 @@ bool Scene_CommandSpawnList(PlayState* play, LUS::ISceneCommand* cmd) {
 }
 
 
-bool Scene_CommandActorList(PlayState* play, LUS::ISceneCommand* cmd) {
-    // LUS::SetActorList* cmdActor = std::static_pointer_cast<LUS::SetActorList>(cmd);
-    LUS::SetActorList* cmdActor = (LUS::SetActorList*)cmd;
-    play->numSetupActors = cmdActor->numActors;
-    play->setupActorList = (ActorEntry*)cmdActor->GetRawPointer();
-
-    return false;
-}
-
-// const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, Ship::ActorSpawnEntry>>>> sceneActorOverrides = {
-//     { 0x01, { // Dodongo's Cavern
-//         { 0x03, {
-//             { -1, 4, { ACTOR_EN_ITEM00, 4266,100,-1575, 0, -21299, 0, 0x100+(uint16_t)ITEM00_HEART_PIECE  }},
-//         } },
-//     } },
-//     { 0x02, { // Jabu Jabu's Belly
-//         { 0x0d, {
-//             //{ -1, 3, { ACTOR_EN_ITEM00, -1150, -1113, -2248, 0, 0, 0, 0x106 }},
-//         } },
-//     } },
-//     { 0x04, { // Fire Temple
-//         { 0x08, {
-//             { -1, 2, { 0xA, 1944,4681,-393, 0,24394,0, 0x07CD }},
-//         } },
-//         { 0x0A, {
-//             { -1, -1, { ACTOR_EN_ZF, -1925,2800,780, 0,24394,0, 0xFFFF }},
-//             { -1, -1, { ACTOR_EN_ZF, -1740,2800,-1060, 0,24394,0, 0xFFFF }},
-//         } },
-//     } },
-//     { 0x8, {//Well
-//         { 0x00, {
-//             { -1, 32, { ACTOR_ELF_MSG2, -627, 97, -1553,  2,0,1, (0x3F<<8)|0xB3 }},
-//             { -1, 34, { ACTOR_ELF_MSG2, -986, 59, 87,  2,0,1, (0x3F<<8)|0xB4 }},
-//             { -1, -1, { ACTOR_ELF_MSG2, 1186, 97, -1500,  2,0,1, (0x3F<<8)|0xB6 }},
-//             { -1, -1, { ACTOR_ELF_MSG2, 865, 40, 305,  2,0,1, (0x3F<<8)|0xB8 }},
-//             { -1, -1, { ACTOR_ELF_MSG2, 865, 40, 115,  2,0,1, (0x3F<<8)|0xB7 }},
-//             { -1, -1, { ACTOR_ELF_MSG2, 0, 80, -745,  2,0,1, (0x3F<<8)|0xB9 }},
-//         } },
-//         { 0x02, {
-//             { -1, -1, { ACTOR_ELF_MSG2, -2145, 10, -615,  2,0,1, (0x3F<<8)|0xB5 }},
-//         } },
-//     } },
-//     { 0x55, { // Kokiri Forest
-//         { 0x00, {//Village
-//             //{ -1, -1, { ACTOR_EN_ITEM00, 1297, 240, -553, 0, 0, 0, 0x0800+(uint16_t)ITEM00_HEART_PIECE }},
-//             //{ -1, -1, { ACTOR_EN_TEST, 70, -80, 675, 0, 0, 0, 0xFFFF }},
-//             //{ -1, -1, { ACTOR_EN_WOOD02, 0, -80, 870, 0, 0, 0, 0x0011 }},
-//             //{ -1, 72, { ACTOR_EN_ITEM00, 0, -80, 870, 0, 0, 0, 0x100+(uint16_t)ITEM00_HEART_PIECE }},
-//             //{ -1, -1, { ACTOR_EN_SA, -110, -80, 950, 0, 0, 0, 0x0}},
-//             { 0, -1, { ACTOR_OBJ_MAKEKINSUTA, -367,53,-770, 0, 0, 1, 0x0 }}, { 1, -1, { ACTOR_OBJ_MAKEKINSUTA, -367,53,-770, 0, 0, 1, 0x0 }},
-//             { 0, -1, { ACTOR_OBJ_MAKEKINSUTA, -459,55,-818, 0, 0, 1, 0x0 }}, { 1, -1, { ACTOR_OBJ_MAKEKINSUTA, -459,55,-818, 0, 0, 1, 0x0 }},
-//             { 0, -1, { ACTOR_OBJ_MAKEKINSUTA, -521,56,-773, 0, 0, 1, 0x0 }}, { 1, -1, { ACTOR_OBJ_MAKEKINSUTA, -521,56,-773, 0, 0, 1, 0x0 }},
-//             { -1, -1, { 0x77, 355,0,1095, 1, 0, 0, 0x20 }},
-//             { -1, -1, { 0x77, 860,185,-475, 2, 0, 0, 0x20 }},
-//             { -1, -1, { 0x77, -565,120,880, 3, 0, 0, 0x20 }},
-//             { -1, -1, { 0x77, 500,120,105, 4, 0, 0, 0x20 }},
-//             { -1, -1, { 0x77, -916,60,-935, 7, 0, 0, 0x20 }},
-//             //{ -1, -1, { ACTOR_EN_ITEM00, 0, -80, 870, 0, 0, 0, 0x100+(uint16_t)ITEM00_HEART_PIECE }},
-//         } },
-//         { 0x01, {//Deku Tree
-//             { -1, -1, { 0x77, 4365,-155,-2365, 5, 0, 0, 0x20 }},
-//             { -1, -1, { 0x77, 3900,-180,-190, 6, 0, 0, 0x20 }},
-//         } },
-//     } },
-//     { SCENE_LINK_HOME, {
-//         { 0x00, {
-//             //{ -1, -1, { ACTOR_EN_ITEM00, 0, 0, 0, 0, 0, 0, 0x100+(uint16_t)ITEM00_HEART_PIECE}},
-//             { -1, -1, { ACTOR_EN_SA, 100,0,1, 0,-12350,0, 0x0}},
-//             { 0, -1, { ACTOR_EN_WONDER_TALK2, -92,25,-8, 0,15350,0, 0x8000|(0x3D<<6)|0x3f /*0x8abf*/}},
-//             { 1, -1, { ACTOR_EN_WONDER_TALK2, -92,25,-8, 0,15350,0, 0x8000|(0x3D<<6)|0x3f /*0x8abf*/}},
-//             { 2, -1, { ACTOR_EN_WONDER_TALK2, -92,25,-8, 0,15350,0, 0x8000|(0x3E<<6)|0x3f /*0x8abf*/}},
-//             { 3, -1, { ACTOR_EN_WONDER_TALK2, -92,25,-8, 0,15350,0, 0x8000|(0x3E<<6)|0x3f /*0x8abf*/}},
-//         } },
-//     } },
-//     { 0x29, {//Saria's
-//         { 0x00, {
-//             //{ -1, -1, { ACTOR_EN_ITEM00, 0, 0, 0, 0, 0, 0, 0x100+(uint16_t)ITEM00_HEART_PIECE}},
-//             { -1, -1, { ACTOR_EN_WONDER_ITEM, -79,0,-151, 0,0,1, 0x1241}},
-//         } },
-//     } },
-//     { SCENE_SPOT10, { // Lost Woods
-//         { 0x5, {//Bridge
-//             { -1, -1, { ACTOR_EN_KO, -1150,-360,1152, 0,1200,0, 0xff00 }},
-//             { -1, -1, { ACTOR_OBJ_MAKEKINSUTA, -1140,-10,1208, 0, 0, 2, 0x0 }},
-//         } },
-//     } },
-//     { 0x09, { // Ice Cavern
-//         { 0x09, {
-//             //{ -1, 9, { ACTOR_EN_ITEM00, 366, 213, -2036, 0, 0, 0, 0x406 }},
-//         } },
-//     } },
-//     { SCENE_SPOT00, { // Hyrule Field
-//         { 0x00, {
-//             //{ 2, -1, { 0x77, 4870, -160, 8506, 0, 0, 0, 0x11 }}, //{ 3, -1, { 0x77, 4870, -160, 8506, 0, 0, 0, 0x11 }},
-//             { 2, -1, { 0x00A7, 116,192,6206, 0, 0, 0, 0x18a4 }}, { 3, -1, { 0x00A7, 116,192,6206, 0, 0, 0, 0x18a4 }},
-//             { 0, -1, { ACTOR_EN_GO2,  3173,-20,880,  0,-20000,0,  0x03e0 | (13<<10)}}, { 1, -1, { ACTOR_EN_GO2,  3173,-20,880,  0,-20000,0,  0x03e0 | (13<<10)}},
-//             { 2, -1, { ACTOR_EN_HORSE, 100,0,2000, 0,0,0, 0x800B} }, { 3, -1, { ACTOR_EN_HORSE, 100,0,2000, 0,0,0, 0x800B} },
-//             {2, -1, { ACTOR_EN_MB, -4010,-300,1700, 0,8104,0, 0xffff}},
-//             {3, -1, { ACTOR_EN_MB, -4010,-300,1700, 0,8104,0, 0xffff}},
-//             {2, -1, { ACTOR_EN_MB, -3157,-300,945, 0,8104,0, 0xffff}},
-//             {3, -1, { ACTOR_EN_MB, -3157,-300,945, 0,8104,0, 0xffff}},
-//             {2, -1, { ACTOR_EN_MB, -5245,-300,2000, 0,-1321,0, 0xffff}},
-//             {3, -1, { ACTOR_EN_MB, -5245,-300,2000, 0,-1321,0, 0xffff}},
-//         } },
-//     } },
-//     { SCENE_MARKET_DAY, { // Castle Town Square - Day
-//         { 0x00, {
-//             { -1, -1, { ACTOR_EN_GO2, -288,0,188, 0,0x4000,0, 0x03ed | 0x10 | (0x0<<10)}},
-//         } },
-//     } },
-//     { SCENE_MARKET_NIGHT, { // Castle Town Square - Night
-//         { 0x00, {
-//             { -1, -1, { ACTOR_EN_GO2, 298,0,234, 0,-0x4000,0, 0x03ed | 0x10 | (0x1<<10)}},
-//         } },
-//     } },
-//     { SCENE_MARKET_RUINS, { // Castle Town Square - Ruined
-//         { 0x00, {
-//             { -1, -1, { ACTOR_EN_GO2, -288,0,188, 0,0x4000,0, 0x03ed | 0x10 | (0x0<<10)}},
-//         } },
-//     } },
-//     { 0x3E, { // Grotto
-//         { 0x05, { // Octorok Grotto
-//             //{ -1, 8, { ACTOR_EN_ITEM00, 32, -129, 852, 0, 0, 0, 0x406 }},
-//         } },
-//         { 0x07, {
-//             { -1, -1, { ACTOR_EN_ITEM00, 1180,100,800, 0,0,0, 0x100+(uint16_t)ITEM00_HEART_PIECE  }},
-//         } },
-//     } },
-//     { SCENE_MALON_STABLE, { //Ranch
-//         { 0x00, {
-//             { -1, -1,  {ACTOR_EN_NIW, 0,0,0, 0,0x4000,0, 0x10}},
-//         } },
-//     } },
-//     { SCENE_SOUKO, {
-//         { 0x00, {
-//             { -1, -1, { ACTOR_BG_JYA_KANAAMI, -382,200,115, 0,-0x4000,0, 0x0 }},
-//             { -1, -1, { ACTOR_EN_A_OBJ, -430,415,0, 0,-0x4000,0, 0x8 }},
-//             { -1, -1, { ACTOR_EN_A_OBJ, -510,415,0, 0,-0x4000,0, 0x8 }},
-//             { -1, -1, { ACTOR_EN_A_OBJ, -590,415,0, 0,-0x4000,0, 0x8 }},
-//             { -1, -1, { ACTOR_EN_ITEM00, -590,495,0, 0,0,0, 0x400+(uint16_t)ITEM00_HEART_PIECE  }},
-//         } },
-//         { 0x02, {
-//             { 0, -1,  {ACTOR_EN_MA1, 1556,164,-160, 0,0,0, 0x0}}, { 1, -1,  {ACTOR_EN_MA1, 1556,164,-160, 0,0,0, 0x0}},
-//         } },
-//     } },
-//     { SCENE_SPOT20, { //Ranch
-//         { 0x00, {
-//             { 0, -1,  {ACTOR_EN_MA1, 1236,0,-2371, 0,0,0, 0x1}}, { 1, -1,  {ACTOR_EN_MA1, 1236,0,-2371, 0,0,0, 0x1}},
-//         } },
-//     } },
-//     { 0x37, {//Impa's
-//         { 0x00, {
-//             { -1, -1, { ACTOR_EN_WONDER_TALK2, 142,20,210, 0,15350,0, 0x8000|(0x3F<<6)|0x3f }},
-//             { -1, -1, { ACTOR_EN_WONDER_TALK2, 142,20,67,  0,15350,0, 0x8000|(0x40<<6)|0x3f }},
-//         } },
-//     } },
-//     { 0x52, { // Kakariko
-//         { 0x00, {
-//             //{ -1, 18, { 0x95, -18,800,1800, 0,-32768,0, 0xb140 }},
-//             { 1, 24, { ACTOR_EN_SW, 5,755,-100, 0,0,0, 0xB104 }},
-//         } },
-//     } },
-//     { SCENE_SPOT18, {//Goron City
-//         { 0x00, {
-//             { -1, -1, { ACTOR_EN_GO2, -1232,520,-1190, 0,0,0, 0x03eb | 0x10 | (0x0<<10)}},
-//         } },
-//         { 0x03, {
-//             { -1, -1, { ACTOR_EN_GO2, 1030,480,-380, 0,0,0, 0x03eb | 0x10 | (0x1<<10)}},
-//             { 2, -1, { ACTOR_EN_GO2, /*-20,-3,330,*/ 520,399,565,  0,-17295,0, /*0xffe0*/ 0x03e0 | (0x0<<10)}},
-//             { 3, -1, { ACTOR_EN_GO2, /*-20,-3,330,*/ 520,399,565,  0,-17295,0, /*0xffe0*/ 0x03e0 | (0x0<<10)}},
-//         } },
-//     } },
-//     { 0x60, {//Goron Trail
-//         { 0x00, {
-//             { 0, -1, { ACTOR_EN_GO2, /*-20,-3,330,*/ -8,3230,-4129,  0,0,0, /*0xffe0*/ 0x03e0 | (11<<10)}},
-//             { 1, -1, { ACTOR_EN_GO2, /*-20,-3,330,*/ -8,3230,-4129,  0,0,0, /*0xffe0*/ 0x03e0 | (11<<10)}},
-//             { 2, -1, { ACTOR_EN_GO2, -282,1258,-1585, 0,-4915,0, 0x03e5 | (0x1<<10)}},
-//             { 3, -1, { ACTOR_EN_GO2, -282,1258,-1585, 0,-4915,0, 0x03e5 | (0x1<<10)}},
-//             { 2, -1, { ACTOR_EN_GO2, -522,1264,-1560, 0,-4915,0, 0x03e5 | (0x2<<10)}},
-//             { 3, -1, { ACTOR_EN_GO2, -522,1264,-1560, 0,-4915,0, 0x03e5 | (0x2<<10)}},
-//             //{ 2, -1, { ACTOR_EN_GO2, /*-20,-3,330,*/ 520,399,565,  0,-17295,0, /*0xffe0*/ 0x03e0 | (0x3<<10)}},
-//             //{ 3, -1, { ACTOR_EN_GO2, /*-20,-3,330,*/ 520,399,565,  0,-17295,0, /*0xffe0*/ 0x03e0 | (0x3<<10)}},
-//         } },
-//     } },
-//     { 0x61, {//Mountian Crater
-//         { 0x01, {
-//             { 0, 34, { ACTOR_EN_SHOPNUTS, -853,769,1196, 0,0,0, 0xB}},
-//             { 1, 34, { ACTOR_EN_SHOPNUTS, -853,769,1196, 0,0,0, 0xB}},
-//         } },
-//     } },
-//     { 0x57, { // Lake Hylia
-//         { 0x00, {
-//             { -1, -1, { ACTOR_EN_RU1, -918,-1336,3560, 0,0x7FFF,0, 0xB }},
-//         } },
-//     } },
-//     { SCENE_SPOT03, { // Zora's River
-//         { 0x00, {
-//             { 0, 57, { ACTOR_EN_MS, -582,375,-438, 0,16384,0, 0xFFFF }},
-//             { 0, 60, { ACTOR_OBJ_BOMBIWA, 838,210,-194, 0,-20771,1, 0x0002 }},
-//             { 0, 62, { ACTOR_OBJ_BOMBIWA, -464,375,-558, 0,-25850,1, 0x0008 }},
-//             { 0, 63, { ACTOR_OBJ_BOMBIWA, -533,375,-594, 0,16384,1, 0x0009 }},
-//             { 0, 64, { ACTOR_OBJ_BOMBIWA, -594,375,-617, 0,0,1, 0x000A }},
-//             { 0, -1, { ACTOR_OBJ_BOMBIWA, -452,375,-480, 0,-25850,1, 0x000B }},
-//             { 1, 57, { ACTOR_EN_MS, -582,375,-438, 0,16384,0, 0xFFFF }},
-//             { 1, 60, { ACTOR_OBJ_BOMBIWA, 838,210,-194, 0,-20771,1, 0x0002 }},
-//             { 1, 62, { ACTOR_OBJ_BOMBIWA, -464,375,-558, 0,-25850,1, 0x0008 }},
-//             { 1, 63, { ACTOR_OBJ_BOMBIWA, -533,375,-594, 0,16384,1, 0x0009 }},
-//             { 1, 64, { ACTOR_OBJ_BOMBIWA, -594,375,-617, 0,0,1, 0x000A }},
-//             { 1, -1, { ACTOR_OBJ_BOMBIWA, -452,375,-480, 0,-25850,1, 0x000B }},
-//         } },
-//     } },
-//     { 0x59, { // Zora's Fountain
-//         { 0x00, {
-//             { 2, -1, { ACTOR_EN_GOROIWA, 1243,322,100, 0,-20771,1, 0x1D00 }},{ 3, -1, { ACTOR_EN_GOROIWA, 1243,322,100, 0,-20771,1, 0x1D00 }},
-//             { 2, 34, { ACTOR_BG_SPOT08_ICEBLOCK, 255,20,-285, 	0,16384,0, 0x1A }}, { 3, 34, { ACTOR_BG_SPOT08_ICEBLOCK, 255,20,-285, 	0,16384,0, 0x1A }},
-//             { 2, -1, { ACTOR_OBJ_MAKEKINSUTA, -253,32,-834, 0, 0, 3, 0x3 }}, { 2, -1, { ACTOR_OBJ_MAKEKINSUTA, 253,32,-834, 0, 0, 3, 0x3 }},
-//         } },
-//     } },
-//     { 0x5A, {//Gerudo Valley
-//         { 0x00, {
-//             { 0, 32, { ACTOR_BG_UMAJUMP, -391,-70,-98, 	-0x000,16384,0, 0x2}},
-//             { 1, 32, { ACTOR_BG_UMAJUMP, -391,-70,-98, 	-0x000,16384,0, 0x2}},
-//             { 0, -1, { ACTOR_EN_GO2,  2626,-240,447,  0,-22910,0,  0x03e0 | (12<<10)}},
-//             { 1, -1, { ACTOR_EN_GO2,  2626,-240,447,  0,-22910,0,  0x03e0 | (12<<10)}},
-//         } },
-//     } },
-//     { 0xC, { // Gerudo Rooms
-//         { 0x00, {
-//             { 0, -1, { ACTOR_OBJ_KIBAKO2, 529,0,-3556, 0,0,0, 0xFFFF }},
-//             { 1, -1, { ACTOR_OBJ_KIBAKO2, 529,0,-3556, 0,0,0, 0xFFFF }},
-//         } },
-//     } },
-//     { 0x5D, { // Gerudo Fortress
-//         { 0x00, {
-//             { 0, -1, { ACTOR_EN_NIW, 1525,834,-2020, 0,16384,0, 0xFFFF }},
-//             { 1, -1, { ACTOR_EN_NIW, 1525,834,-2020, 0,16384,0, 0xFFFF }},
-//             { 0, -1, { ACTOR_BG_UMAJUMP, 190,1103,-2915, 0x4000,880,0, 0xFFFF }},
-//             { 0, -1, { ACTOR_BG_UMAJUMP, 190,1103,-2915, 0x4000,880+0x8000,0, 0xFFFF }},
-//             { 1, -1, { ACTOR_BG_UMAJUMP, 190,1103,-2915, 0x4000,880,0, 0xFFFF }},
-//             { 1, -1, { ACTOR_BG_UMAJUMP, 190,1103,-2915, 0x4000,880+0x8000,0, 0xFFFF }},
-//             { 0, 21, { 0xA, 926,1042,-2512, 0,-16384,0, 0x7c1 }},
-//             { 1, 21, { 0xA, 926,1042,-2512, 0,-16384,0, 0x7c1 }},
-//         } },
-//     } },
-//     { SCENE_SPOT13, { //Desert Wasteland
-//         { 0x00, {
-//             { -1, 4, { ACTOR_EN_SW, 637,-393,-2536, 16384,0,0, 0xB602 }},
-//         } },
-//         { 0x01, {
-//             { -1, -1, { ACTOR_EN_HATA, 3315,-261, 2244, 0,0,0, 0xFFFF }},
-//             { -1, -1, { ACTOR_OBJ_KIBAKO2, 3460,-435,2484, 0,7100,0, 0xFFFF }},
-//             { -1, -1, { ACTOR_OBJ_KIBAKO2, 3621,-392,2847, 0,7100,0, 0xFFFF }},
-//             { -1, -1, { ACTOR_EN_NIW, 3125,-268,2459, 0,7100,0, 0xFFFF }},
-//         } },
-//     } },
-//     { SCENE_SYOTES2, {
-//         { 0x00, {
-//             //{ -1, 0, { 0x5D, 0,0, 100, 0,0,0,  0 }},
-//             { -1, -1, { ACTOR_EN_ITEM00, 0,20,380, 0,0,0, 0x100+(uint16_t)ITEM00_HEART_PIECE  }},
-//             } },
-//     } },
-//     {SCENE_BMORI1, {
-//         {0x0, {
-//             {-1, -1, {ACTOR_EN_ST, 118,510,155, 0,0,0, 0x4}}
-//         } },
-//         {0x3, {
-//             {-1, 4, {ACTOR_EN_BB, 1387,510,-1436, 0,0x4000,0, 0xffff}},
-//             {-1, -1, {ACTOR_EN_BB, 1187,463,-1436, 0,-0x4000,0, 0xffff}}
-//         } },
-//         {0x8, {
-//             {-1, -1, {ACTOR_EN_DEKUNUTS, -1288,242,-2109, 0,25009,0, 5 << 8}},
-//             {-1, -1, {ACTOR_EN_DEKUNUTS, -499,242,-2680, 0,-16512,0, 5 << 8}},
-//         } },
-//         {0x11, {
-//             {-1, -1, {ACTOR_EN_WALLMAS, 128,-779,-1658, 0,0,0, 0x0}},
-//             {-1, -1, {ACTOR_EN_WALLMAS, 128,-779,-1658, 0,0,0, 0x5 | (0x10 << 8)}},
-//             {-1, -1, {ACTOR_EN_WALLMAS, 128,-779,-1658, 0,0,0, 0x5 | (0x11 << 8)}},
-//             {-1, -1, {ACTOR_EN_WALLMAS, 128,-779,-1658, 0,0,0, 0x5 | (0x12 << 8)}},
-//         } },
-//         {0x0f, {
-//             {-1, -1, {ACTOR_EN_WALLMAS, 1830,404,-2700, 0,0,0, 0x2 | (0x20+11 << 8)}},
-//             {-1, -1, {ACTOR_EN_ST, 2069,720,-3002, 0,-32768,0, 0x5}}
-//         } },
-//     } },
-//     {SCENE_HIDAN, {
-//         {0x18, {
-//             {-1, 0, {ACTOR_EN_FD, -2928,2920,139, 0,0,0, 0x0}}
-//         } },
-//     } },
-// };
+const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, LUS::ActorEntry>>>> sceneActorOverrides = {
+    { 0x01, { // Dodongo's Cavern
+        { 0x03, {
+            { -1, 4, { ACTOR_EN_ITEM00, 4266,100,-1575, 0, -21299, 0, 0x100+(uint16_t)ITEM00_HEART_PIECE  }},
+        } },
+    } },
+    { 0x02, { // Jabu Jabu's Belly
+        { 0x0d, {
+            //{ -1, 3, { ACTOR_EN_ITEM00, -1150, -1113, -2248, 0, 0, 0, 0x106 }},
+        } },
+    } },
+    { 0x04, { // Fire Temple
+        { 0x08, {
+            { -1, 2, { 0xA, 1944,4681,-393, 0,24394,0, 0x07CD }},
+        } },
+        { 0x0A, {
+            { -1, -1, { ACTOR_EN_ZF, -1925,2800,780, 0,24394,0, 0xFFFF }},
+            { -1, -1, { ACTOR_EN_ZF, -1740,2800,-1060, 0,24394,0, 0xFFFF }},
+        } },
+    } },
+    { 0x8, {//Well
+        { 0x00, {
+            { -1, 32, { ACTOR_ELF_MSG2, -627, 97, -1553,  2,0,1, (0x3F<<8)|0xB3 }},
+            { -1, 34, { ACTOR_ELF_MSG2, -986, 59, 87,  2,0,1, (0x3F<<8)|0xB4 }},
+            { -1, -1, { ACTOR_ELF_MSG2, 1186, 97, -1500,  2,0,1, (0x3F<<8)|0xB6 }},
+            { -1, -1, { ACTOR_ELF_MSG2, 865, 40, 305,  2,0,1, (0x3F<<8)|0xB8 }},
+            { -1, -1, { ACTOR_ELF_MSG2, 865, 40, 115,  2,0,1, (0x3F<<8)|0xB7 }},
+            { -1, -1, { ACTOR_ELF_MSG2, 0, 80, -745,  2,0,1, (0x3F<<8)|0xB9 }},
+        } },
+        { 0x02, {
+            { -1, -1, { ACTOR_ELF_MSG2, -2145, 10, -615,  2,0,1, (0x3F<<8)|0xB5 }},
+        } },
+    } },
+    { 0x55, { // Kokiri Forest
+        { 0x00, {//Village
+            //{ -1, -1, { ACTOR_EN_ITEM00, 1297, 240, -553, 0, 0, 0, 0x0800+(uint16_t)ITEM00_HEART_PIECE }},
+            //{ -1, -1, { ACTOR_EN_TEST, 70, -80, 675, 0, 0, 0, 0xFFFF }},
+            //{ -1, -1, { ACTOR_EN_WOOD02, 0, -80, 870, 0, 0, 0, 0x0011 }},
+            //{ -1, 72, { ACTOR_EN_ITEM00, 0, -80, 870, 0, 0, 0, 0x100+(uint16_t)ITEM00_HEART_PIECE }},
+            //{ -1, -1, { ACTOR_EN_SA, -110, -80, 950, 0, 0, 0, 0x0}},
+            { 0, -1, { ACTOR_OBJ_MAKEKINSUTA, -367,53,-770, 0, 0, 1, 0x0 }}, { 1, -1, { ACTOR_OBJ_MAKEKINSUTA, -367,53,-770, 0, 0, 1, 0x0 }},
+            { 0, -1, { ACTOR_OBJ_MAKEKINSUTA, -459,55,-818, 0, 0, 1, 0x0 }}, { 1, -1, { ACTOR_OBJ_MAKEKINSUTA, -459,55,-818, 0, 0, 1, 0x0 }},
+            { 0, -1, { ACTOR_OBJ_MAKEKINSUTA, -521,56,-773, 0, 0, 1, 0x0 }}, { 1, -1, { ACTOR_OBJ_MAKEKINSUTA, -521,56,-773, 0, 0, 1, 0x0 }},
+            { -1, -1, { 0x77, 355,0,1095, 1, 0, 0, 0x20 }},
+            { -1, -1, { 0x77, 860,185,-475, 2, 0, 0, 0x20 }},
+            { -1, -1, { 0x77, -565,120,880, 3, 0, 0, 0x20 }},
+            { -1, -1, { 0x77, 500,120,105, 4, 0, 0, 0x20 }},
+            { -1, -1, { 0x77, -916,60,-935, 7, 0, 0, 0x20 }},
+            //{ -1, -1, { ACTOR_EN_ITEM00, 0, -80, 870, 0, 0, 0, 0x100+(uint16_t)ITEM00_HEART_PIECE }},
+        } },
+        { 0x01, {//Deku Tree
+            { -1, -1, { 0x77, 4365,-155,-2365, 5, 0, 0, 0x20 }},
+            { -1, -1, { 0x77, 3900,-180,-190, 6, 0, 0, 0x20 }},
+        } },
+    } },
+    { SCENE_LINK_HOME, {
+        { 0x00, {
+            //{ -1, -1, { ACTOR_EN_ITEM00, 0, 0, 0, 0, 0, 0, 0x100+(uint16_t)ITEM00_HEART_PIECE}},
+            { -1, -1, { ACTOR_EN_SA, 100,0,1, 0,-12350,0, 0x0}},
+            { 0, -1, { ACTOR_EN_WONDER_TALK2, -92,25,-8, 0,15350,0, 0x8000|(0x3D<<6)|0x3f /*0x8abf*/}},
+            { 1, -1, { ACTOR_EN_WONDER_TALK2, -92,25,-8, 0,15350,0, 0x8000|(0x3D<<6)|0x3f /*0x8abf*/}},
+            { 2, -1, { ACTOR_EN_WONDER_TALK2, -92,25,-8, 0,15350,0, 0x8000|(0x3E<<6)|0x3f /*0x8abf*/}},
+            { 3, -1, { ACTOR_EN_WONDER_TALK2, -92,25,-8, 0,15350,0, 0x8000|(0x3E<<6)|0x3f /*0x8abf*/}},
+        } },
+    } },
+    { 0x29, {//Saria's
+        { 0x00, {
+            //{ -1, -1, { ACTOR_EN_ITEM00, 0, 0, 0, 0, 0, 0, 0x100+(uint16_t)ITEM00_HEART_PIECE}},
+            { -1, -1, { ACTOR_EN_WONDER_ITEM, -79,0,-151, 0,0,1, 0x1241}},
+        } },
+    } },
+    { SCENE_SPOT10, { // Lost Woods
+        { 0x5, {//Bridge
+            { -1, -1, { ACTOR_EN_KO, -1150,-360,1152, 0,1200,0, 0xff00 }},
+            { -1, -1, { ACTOR_OBJ_MAKEKINSUTA, -1140,-10,1208, 0, 0, 2, 0x0 }},
+        } },
+    } },
+    { 0x09, { // Ice Cavern
+        { 0x09, {
+            //{ -1, 9, { ACTOR_EN_ITEM00, 366, 213, -2036, 0, 0, 0, 0x406 }},
+        } },
+    } },
+    { SCENE_SPOT00, { // Hyrule Field
+        { 0x00, {
+            //{ 2, -1, { 0x77, 4870, -160, 8506, 0, 0, 0, 0x11 }}, //{ 3, -1, { 0x77, 4870, -160, 8506, 0, 0, 0, 0x11 }},
+            { 2, -1, { 0x00A7, 116,192,6206, 0, 0, 0, 0x18a4 }}, { 3, -1, { 0x00A7, 116,192,6206, 0, 0, 0, 0x18a4 }},
+            { 0, -1, { ACTOR_EN_GO2,  3173,-20,880,  0,-20000,0,  0x03e0 | (13<<10)}}, { 1, -1, { ACTOR_EN_GO2,  3173,-20,880,  0,-20000,0,  0x03e0 | (13<<10)}},
+            { 2, -1, { ACTOR_EN_HORSE, 100,0,2000, 0,0,0, 0x800B} }, { 3, -1, { ACTOR_EN_HORSE, 100,0,2000, 0,0,0, 0x800B} },
+            {2, -1, { ACTOR_EN_MB, -4010,-300,1700, 0,8104,0, 0xffff}},
+            {3, -1, { ACTOR_EN_MB, -4010,-300,1700, 0,8104,0, 0xffff}},
+            {2, -1, { ACTOR_EN_MB, -3157,-300,945, 0,8104,0, 0xffff}},
+            {3, -1, { ACTOR_EN_MB, -3157,-300,945, 0,8104,0, 0xffff}},
+            {2, -1, { ACTOR_EN_MB, -5245,-300,2000, 0,-1321,0, 0xffff}},
+            {3, -1, { ACTOR_EN_MB, -5245,-300,2000, 0,-1321,0, 0xffff}},
+        } },
+    } },
+    { SCENE_MARKET_DAY, { // Castle Town Square - Day
+        { 0x00, {
+            { -1, -1, { ACTOR_EN_GO2, -288,0,188, 0,0x4000,0, 0x03ed | 0x10 | (0x0<<10)}},
+        } },
+    } },
+    { SCENE_MARKET_NIGHT, { // Castle Town Square - Night
+        { 0x00, {
+            { -1, -1, { ACTOR_EN_GO2, 298,0,234, 0,-0x4000,0, 0x03ed | 0x10 | (0x1<<10)}},
+        } },
+    } },
+    { SCENE_MARKET_RUINS, { // Castle Town Square - Ruined
+        { 0x00, {
+            { -1, -1, { ACTOR_EN_GO2, -288,0,188, 0,0x4000,0, 0x03ed | 0x10 | (0x0<<10)}},
+        } },
+    } },
+    { 0x3E, { // Grotto
+        { 0x05, { // Octorok Grotto
+            //{ -1, 8, { ACTOR_EN_ITEM00, 32, -129, 852, 0, 0, 0, 0x406 }},
+        } },
+        { 0x07, {
+            { -1, -1, { ACTOR_EN_ITEM00, 1180,100,800, 0,0,0, 0x100+(uint16_t)ITEM00_HEART_PIECE  }},
+        } },
+    } },
+    { SCENE_MALON_STABLE, { //Ranch
+        { 0x00, {
+            { -1, -1,  {ACTOR_EN_NIW, 0,0,0, 0,0x4000,0, 0x10}},
+        } },
+    } },
+    { SCENE_SOUKO, {
+        { 0x00, {
+            { -1, -1, { ACTOR_BG_JYA_KANAAMI, -382,200,115, 0,-0x4000,0, 0x0 }},
+            { -1, -1, { ACTOR_EN_A_OBJ, -430,415,0, 0,-0x4000,0, 0x8 }},
+            { -1, -1, { ACTOR_EN_A_OBJ, -510,415,0, 0,-0x4000,0, 0x8 }},
+            { -1, -1, { ACTOR_EN_A_OBJ, -590,415,0, 0,-0x4000,0, 0x8 }},
+            { -1, -1, { ACTOR_EN_ITEM00, -590,495,0, 0,0,0, 0x400+(uint16_t)ITEM00_HEART_PIECE  }},
+        } },
+        { 0x02, {
+            { 0, -1,  {ACTOR_EN_MA1, 1556,164,-160, 0,0,0, 0x0}}, { 1, -1,  {ACTOR_EN_MA1, 1556,164,-160, 0,0,0, 0x0}},
+        } },
+    } },
+    { SCENE_SPOT20, { //Ranch
+        { 0x00, {
+            { 0, -1,  {ACTOR_EN_MA1, 1236,0,-2371, 0,0,0, 0x1}}, { 1, -1,  {ACTOR_EN_MA1, 1236,0,-2371, 0,0,0, 0x1}},
+        } },
+    } },
+    { 0x37, {//Impa's
+        { 0x00, {
+            { -1, -1, { ACTOR_EN_WONDER_TALK2, 142,20,210, 0,15350,0, 0x8000|(0x3F<<6)|0x3f }},
+            { -1, -1, { ACTOR_EN_WONDER_TALK2, 142,20,67,  0,15350,0, 0x8000|(0x40<<6)|0x3f }},
+        } },
+    } },
+    { 0x52, { // Kakariko
+        { 0x00, {
+            //{ -1, 18, { 0x95, -18,800,1800, 0,-32768,0, 0xb140 }},
+            { 1, 24, { ACTOR_EN_SW, 5,755,-100, 0,0,0, 0xB104 }},
+        } },
+    } },
+    { SCENE_SPOT18, {//Goron City
+        { 0x00, {
+            { -1, -1, { ACTOR_EN_GO2, -1232,520,-1190, 0,0,0, 0x03eb | 0x10 | (0x0<<10)}},
+        } },
+        { 0x03, {
+            { -1, -1, { ACTOR_EN_GO2, 1030,480,-380, 0,0,0, 0x03eb | 0x10 | (0x1<<10)}},
+            { 2, -1, { ACTOR_EN_GO2, /*-20,-3,330,*/ 520,399,565,  0,-17295,0, /*0xffe0*/ 0x03e0 | (0x0<<10)}},
+            { 3, -1, { ACTOR_EN_GO2, /*-20,-3,330,*/ 520,399,565,  0,-17295,0, /*0xffe0*/ 0x03e0 | (0x0<<10)}},
+        } },
+    } },
+    { 0x60, {//Goron Trail
+        { 0x00, {
+            { 0, -1, { ACTOR_EN_GO2, /*-20,-3,330,*/ -8,3230,-4129,  0,0,0, /*0xffe0*/ 0x03e0 | (11<<10)}},
+            { 1, -1, { ACTOR_EN_GO2, /*-20,-3,330,*/ -8,3230,-4129,  0,0,0, /*0xffe0*/ 0x03e0 | (11<<10)}},
+            { 2, -1, { ACTOR_EN_GO2, -282,1258,-1585, 0,-4915,0, 0x03e5 | (0x1<<10)}},
+            { 3, -1, { ACTOR_EN_GO2, -282,1258,-1585, 0,-4915,0, 0x03e5 | (0x1<<10)}},
+            { 2, -1, { ACTOR_EN_GO2, -522,1264,-1560, 0,-4915,0, 0x03e5 | (0x2<<10)}},
+            { 3, -1, { ACTOR_EN_GO2, -522,1264,-1560, 0,-4915,0, 0x03e5 | (0x2<<10)}},
+            //{ 2, -1, { ACTOR_EN_GO2, /*-20,-3,330,*/ 520,399,565,  0,-17295,0, /*0xffe0*/ 0x03e0 | (0x3<<10)}},
+            //{ 3, -1, { ACTOR_EN_GO2, /*-20,-3,330,*/ 520,399,565,  0,-17295,0, /*0xffe0*/ 0x03e0 | (0x3<<10)}},
+        } },
+    } },
+    { 0x61, {//Mountian Crater
+        { 0x01, {
+            { 0, 34, { ACTOR_EN_SHOPNUTS, -853,769,1196, 0,0,0, 0xB}},
+            { 1, 34, { ACTOR_EN_SHOPNUTS, -853,769,1196, 0,0,0, 0xB}},
+        } },
+    } },
+    { 0x57, { // Lake Hylia
+        { 0x00, {
+            { -1, -1, { ACTOR_EN_RU1, -918,-1336,3560, 0,0x7FFF,0, 0xB }},
+        } },
+    } },
+    { SCENE_SPOT03, { // Zora's River
+        { 0x00, {
+            { 0, 57, { ACTOR_EN_MS, -582,375,-438, 0,16384,0, 0xFFFF }},
+            { 0, 60, { ACTOR_OBJ_BOMBIWA, 838,210,-194, 0,-20771,1, 0x0002 }},
+            { 0, 62, { ACTOR_OBJ_BOMBIWA, -464,375,-558, 0,-25850,1, 0x0008 }},
+            { 0, 63, { ACTOR_OBJ_BOMBIWA, -533,375,-594, 0,16384,1, 0x0009 }},
+            { 0, 64, { ACTOR_OBJ_BOMBIWA, -594,375,-617, 0,0,1, 0x000A }},
+            { 0, -1, { ACTOR_OBJ_BOMBIWA, -452,375,-480, 0,-25850,1, 0x000B }},
+            { 1, 57, { ACTOR_EN_MS, -582,375,-438, 0,16384,0, 0xFFFF }},
+            { 1, 60, { ACTOR_OBJ_BOMBIWA, 838,210,-194, 0,-20771,1, 0x0002 }},
+            { 1, 62, { ACTOR_OBJ_BOMBIWA, -464,375,-558, 0,-25850,1, 0x0008 }},
+            { 1, 63, { ACTOR_OBJ_BOMBIWA, -533,375,-594, 0,16384,1, 0x0009 }},
+            { 1, 64, { ACTOR_OBJ_BOMBIWA, -594,375,-617, 0,0,1, 0x000A }},
+            { 1, -1, { ACTOR_OBJ_BOMBIWA, -452,375,-480, 0,-25850,1, 0x000B }},
+        } },
+    } },
+    { 0x59, { // Zora's Fountain
+        { 0x00, {
+            { 2, -1, { ACTOR_EN_GOROIWA, 1243,322,100, 0,-20771,1, 0x1D00 }},{ 3, -1, { ACTOR_EN_GOROIWA, 1243,322,100, 0,-20771,1, 0x1D00 }},
+            { 2, 34, { ACTOR_BG_SPOT08_ICEBLOCK, 255,20,-285, 	0,16384,0, 0x1A }}, { 3, 34, { ACTOR_BG_SPOT08_ICEBLOCK, 255,20,-285, 	0,16384,0, 0x1A }},
+            { 2, -1, { ACTOR_OBJ_MAKEKINSUTA, -253,32,-834, 0, 0, 3, 0x3 }}, { 2, -1, { ACTOR_OBJ_MAKEKINSUTA, 253,32,-834, 0, 0, 3, 0x3 }},
+        } },
+    } },
+    { 0x5A, {//Gerudo Valley
+        { 0x00, {
+            { 0, 32, { ACTOR_BG_UMAJUMP, -391,-70,-98, 	-0x000,16384,0, 0x2}},
+            { 1, 32, { ACTOR_BG_UMAJUMP, -391,-70,-98, 	-0x000,16384,0, 0x2}},
+            { 0, -1, { ACTOR_EN_GO2,  2626,-240,447,  0,-22910,0,  0x03e0 | (12<<10)}},
+            { 1, -1, { ACTOR_EN_GO2,  2626,-240,447,  0,-22910,0,  0x03e0 | (12<<10)}},
+        } },
+    } },
+    { 0xC, { // Gerudo Rooms
+        { 0x00, {
+            { 0, -1, { ACTOR_OBJ_KIBAKO2, 529,0,-3556, 0,0,0, 0xFFFF }},
+            { 1, -1, { ACTOR_OBJ_KIBAKO2, 529,0,-3556, 0,0,0, 0xFFFF }},
+        } },
+    } },
+    { 0x5D, { // Gerudo Fortress
+        { 0x00, {
+            { 0, -1, { ACTOR_EN_NIW, 1525,834,-2020, 0,16384,0, 0xFFFF }},
+            { 1, -1, { ACTOR_EN_NIW, 1525,834,-2020, 0,16384,0, 0xFFFF }},
+            { 0, -1, { ACTOR_BG_UMAJUMP, 190,1103,-2915, 0x4000,880,0, 0xFFFF }},
+            { 0, -1, { ACTOR_BG_UMAJUMP, 190,1103,-2915, 0x4000,880+0x8000,0, 0xFFFF }},
+            { 1, -1, { ACTOR_BG_UMAJUMP, 190,1103,-2915, 0x4000,880,0, 0xFFFF }},
+            { 1, -1, { ACTOR_BG_UMAJUMP, 190,1103,-2915, 0x4000,880+0x8000,0, 0xFFFF }},
+            { 0, 21, { 0xA, 926,1042,-2512, 0,-16384,0, 0x7c1 }},
+            { 1, 21, { 0xA, 926,1042,-2512, 0,-16384,0, 0x7c1 }},
+        } },
+    } },
+    { SCENE_SPOT13, { //Desert Wasteland
+        { 0x00, {
+            { -1, 4, { ACTOR_EN_SW, 637,-393,-2536, 16384,0,0, 0xB602 }},
+        } },
+        { 0x01, {
+            { -1, -1, { ACTOR_EN_HATA, 3315,-261, 2244, 0,0,0, 0xFFFF }},
+            { -1, -1, { ACTOR_OBJ_KIBAKO2, 3460,-435,2484, 0,7100,0, 0xFFFF }},
+            { -1, -1, { ACTOR_OBJ_KIBAKO2, 3621,-392,2847, 0,7100,0, 0xFFFF }},
+            { -1, -1, { ACTOR_EN_NIW, 3125,-268,2459, 0,7100,0, 0xFFFF }},
+        } },
+    } },
+    { SCENE_SYOTES2, {
+        { 0x00, {
+            //{ -1, 0, { 0x5D, 0,0, 100, 0,0,0,  0 }},
+            { -1, -1, { ACTOR_EN_ITEM00, 0,20,380, 0,0,0, 0x100+(uint16_t)ITEM00_HEART_PIECE  }},
+            } },
+    } },
+    {SCENE_BMORI1, {
+        {0x0, {
+            {-1, -1, {ACTOR_EN_ST, 118,510,155, 0,0,0, 0x4}}
+        } },
+        {0x3, {
+            {-1, 4, {ACTOR_EN_BB, 1387,510,-1436, 0,0x4000,0, 0xffff}},
+            {-1, -1, {ACTOR_EN_BB, 1187,463,-1436, 0,-0x4000,0, 0xffff}}
+        } },
+        {0x8, {
+            {-1, -1, {ACTOR_EN_DEKUNUTS, -1288,242,-2109, 0,25009,0, 5 << 8}},
+            {-1, -1, {ACTOR_EN_DEKUNUTS, -499,242,-2680, 0,-16512,0, 5 << 8}},
+        } },
+        {0x11, {
+            {-1, -1, {ACTOR_EN_WALLMAS, 128,-779,-1658, 0,0,0, 0x0}},
+            {-1, -1, {ACTOR_EN_WALLMAS, 128,-779,-1658, 0,0,0, 0x5 | (0x10 << 8)}},
+            {-1, -1, {ACTOR_EN_WALLMAS, 128,-779,-1658, 0,0,0, 0x5 | (0x11 << 8)}},
+            {-1, -1, {ACTOR_EN_WALLMAS, 128,-779,-1658, 0,0,0, 0x5 | (0x12 << 8)}},
+        } },
+        {0x0f, {
+            {-1, -1, {ACTOR_EN_WALLMAS, 1830,404,-2700, 0,0,0, 0x2 | (0x20+11 << 8)}},
+            {-1, -1, {ACTOR_EN_ST, 2069,720,-3002, 0,-32768,0, 0x5}}
+        } },
+    } },
+    {SCENE_HIDAN, {
+        {0x18, {
+            {-1, 0, {ACTOR_EN_FD, -2928,2920,139, 0,0,0, 0x0}}
+        } },
+    } },
+};
 
 //Dynamic plant locations
 /*
@@ -581,6 +572,38 @@ Entity 40	 ID: 0x1ae, 	Params: 0xfc25, 	pos: -311,1500,-393, 	0,-4915,0
 
 bool isResourceRestored(auto val) {
    return val->second > gSaveContext.savedFrameCount;
+}
+
+bool Scene_CommandActorList(PlayState* play, LUS::ISceneCommand* cmd) {
+    // LUS::SetActorList* cmdActor = std::static_pointer_cast<LUS::SetActorList>(cmd);
+    LUS::SetActorList* cmdActor = (LUS::SetActorList*)cmd;
+
+    if (cmdActor->modificationState == 0) {
+        if (sceneActorOverrides.find(play->sceneNum) != sceneActorOverrides.end() &&
+                sceneActorOverrides.at(play->sceneNum).find(play->roomCtx.curRoom.num) != sceneActorOverrides.at(play->sceneNum).end()) {
+            auto& roomOverrides = sceneActorOverrides.at(play->sceneNum).at(play->roomCtx.curRoom.num);
+            for (auto& [setup, index, entry] : roomOverrides) {
+                if (setup == -1 || setup == gSaveContext.sceneSetupIndex) {
+                    if (index == -1) {
+                        cmdActor->actorList.push_back(entry);
+                    } else {
+                        cmdActor->actorList[index] = entry;
+                    }
+                }
+            }
+            //setActorList->numActors = setActorList->actorList.size();
+            //play->numSetupActors = cmdActor->entries.size();
+        }
+
+        cmdActor->modificationState = 1;
+    }
+
+    //play->numSetupActors = cmdActor->numActors;
+    play->numSetupActors = cmdActor->actorList.size();
+
+    play->setupActorList = (ActorEntry*)cmdActor->GetRawPointer();
+
+    return false;
 }
 
 // bool Scene_CommandActorList(PlayState* play, Ship::SceneCommand* cmd) {
@@ -1339,80 +1362,55 @@ bool Scene_CommandPathList(PlayState* play, LUS::ISceneCommand* cmd) {
     return false;
 }
 
+const std::map<u16,  std::vector<std::tuple<int, int, LUS::TransitionActorEntry>>> sceneTransitionActorOverrides = {
+    { 0x5B, { // Lost Woods
+        { -1, 9, { 1,255, 0,255,   ACTOR_EN_HOLL, 0,0,-400,  0, 0x3F }},
+        { -1, 10, { 1,255, 0,255,   ACTOR_EN_HOLL, 0,0, 400,  -32768, 0x3F }},
+        { -1, 11, { 0,255, 1,255,   ACTOR_EN_HOLL, 800,0, 400,  -32768, 0x3F }},
+        { -1, 12, { 1,255, 2,255,   ACTOR_EN_HOLL, 400,0, -800,  16384, 0x3F }},
+        { -1, 13, { 2,255, 3,255,   ACTOR_EN_HOLL, 1600,0, -400,  -32768, 0x3F }},
+        { -1, 14, { 7,255, 4,255,   ACTOR_EN_HOLL, 2000,0, -1600,  -16384, 0x3F }},
+        { -1, 15, { 7,255, 8,255,   ACTOR_EN_HOLL, 2000,0, -2400,  16384, 0x3F | (0x7 << 6) }},
+        { -1, 16, { 8,255, 7,255,   ACTOR_EN_HOLL, 1600,0, -2800,  0, 0x3F }},
+        { -1, 17, { 8,255, 7,255,   ACTOR_EN_HOLL, 400,0, -2400,  -16384, 0x3F | (0x7 << 6) }},
+        { -1, 18, { 7,255, 8,255,   ACTOR_EN_HOLL, 800,0, -2800,  0, 0x3F }},
+        { -1, 19, { 7,255, 8,255,   ACTOR_EN_HOLL, 800,0, -2000,  -32768, 0x3F | (0x1 << 9)}},
+    } },
+};
+
 bool Scene_CommandTransitionActorList(PlayState* play, LUS::ISceneCommand* cmd) {
     // LUS::SetTransitionActorList* cmdActor = static_pointer_cast<LUS::SetTransitionActorList>(cmd);
     LUS::SetTransitionActorList* cmdActor = (LUS::SetTransitionActorList*)cmd;
 
-    play->transiActorCtx.numActors = cmdActor->numTransitionActors;
+    if (cmdActor->modificationState == 0) {
+        if (sceneTransitionActorOverrides.find(play->sceneNum) != sceneTransitionActorOverrides.end()) {
+            auto& roomOverrides = sceneTransitionActorOverrides.at(play->sceneNum);
+            for (auto& [setup, index, entry] : roomOverrides) {
+                if (setup == -1 || setup == gSaveContext.sceneSetupIndex) {
+                    if (index == -1) {
+                        cmdActor->transitionActorList.push_back(entry);
+                    } else {
+                        if (index < cmdActor->transitionActorList.size())
+                            cmdActor->transitionActorList[index] = entry;
+                        else
+                            cmdActor->transitionActorList.emplace(cmdActor->transitionActorList.begin()+index,entry);
+                    }
+                }
+            }
+        }
+
+        cmdActor->modificationState = 1;
+    }
+
+    play->transiActorCtx.numActors = cmdActor->transitionActorList.size(); //cmdActor->numTransitionActors;
     play->transiActorCtx.list = (TransitionActorEntry*)cmdActor->GetRawPointer();
 
     return false;
 }
 
-// const std::map<u16,  std::vector<std::tuple<int, int, Ship::TransitionActorEntry>>> sceneTransitionActorOverrides = {
-//     { 0x5B, { // Lost Woods
-//         { -1, 9, { 1,255, 0,255,   ACTOR_EN_HOLL, 0,0,-400,  0, 0x3F }},
-//         { -1, 10, { 1,255, 0,255,   ACTOR_EN_HOLL, 0,0, 400,  -32768, 0x3F }},
-//         { -1, 11, { 0,255, 1,255,   ACTOR_EN_HOLL, 800,0, 400,  -32768, 0x3F }},
-//         { -1, 12, { 1,255, 2,255,   ACTOR_EN_HOLL, 400,0, -800,  16384, 0x3F }},
-//         { -1, 13, { 2,255, 3,255,   ACTOR_EN_HOLL, 1600,0, -400,  -32768, 0x3F }},
-//         { -1, 14, { 7,255, 4,255,   ACTOR_EN_HOLL, 2000,0, -1600,  -16384, 0x3F }},
-//         { -1, 15, { 7,255, 8,255,   ACTOR_EN_HOLL, 2000,0, -2400,  16384, 0x3F | (0x7 << 6) }},
-//         { -1, 16, { 8,255, 7,255,   ACTOR_EN_HOLL, 1600,0, -2800,  0, 0x3F }},
-//         { -1, 17, { 8,255, 7,255,   ACTOR_EN_HOLL, 400,0, -2400,  -16384, 0x3F | (0x7 << 6) }},
-//         { -1, 18, { 7,255, 8,255,   ACTOR_EN_HOLL, 800,0, -2800,  0, 0x3F }},
-//         { -1, 19, { 7,255, 8,255,   ACTOR_EN_HOLL, 800,0, -2000,  -32768, 0x3F | (0x1 << 9)}},
-//     } },
-// };
-
 //Keeps track of if extra transition actors have been loaded already, avoids multi loading them if this is the case
 //std::map<u16, bool> sceneTransitionLoadFlags = {
 //};
-
-// bool Scene_CommandTransitionActorList(PlayState* play, Ship::SceneCommand* cmd) {
-//     Ship::SetTransitionActorList* cmdActor = (Ship::SetTransitionActorList*)cmd;
-
-//     if (sceneTransitionActorOverrides.find(play->sceneNum) != sceneTransitionActorOverrides.end()/* && sceneTransitionLoadFlags.find(play->sceneNum) == sceneTransitionLoadFlags.end()*/) {
-//         //sceneTransitionLoadFlags.insert(std::make_pair(play->sceneNum,true));
-//         auto& roomOverrides = sceneTransitionActorOverrides.at(play->sceneNum);
-//         for (auto& [setup, index, entry] : roomOverrides) {
-//             if (setup == -1 || setup == gSaveContext.sceneSetupIndex) {
-//                 if (index == -1) {
-//                     cmdActor->entries.push_back(entry);
-//                 } else {
-//                     if (index < cmdActor->entries.size())
-//                         cmdActor->entries[index] = entry;
-//                     else
-//                         cmdActor->entries.emplace(cmdActor->entries.begin()+index,entry);
-//                 }
-//             }
-//         }
-//     }
-
-//     play->transiActorCtx.numActors = cmdActor->entries.size();
-//     play->transiActorCtx.list = (TransitionActorEntry*)malloc(cmdActor->entries.size() * sizeof(TransitionActorEntry));
-
-//     for (int i = 0; i < cmdActor->entries.size(); i++)
-//     {
-//         play->transiActorCtx.list[i].sides[0].room = cmdActor->entries[i].frontObjectRoom;
-//         play->transiActorCtx.list[i].sides[0].effects = cmdActor->entries[i].frontTransitionReaction;
-//         play->transiActorCtx.list[i].sides[1].room = cmdActor->entries[i].backObjectRoom;
-//         play->transiActorCtx.list[i].sides[1].effects = cmdActor->entries[i].backTransitionReaction;
-//         play->transiActorCtx.list[i].id = cmdActor->entries[i].actorNum;
-//         play->transiActorCtx.list[i].pos.x = cmdActor->entries[i].posX;
-//         play->transiActorCtx.list[i].pos.y = cmdActor->entries[i].posY;
-//         play->transiActorCtx.list[i].pos.z = cmdActor->entries[i].posZ;
-//         play->transiActorCtx.list[i].rotY = cmdActor->entries[i].rotY;
-//         play->transiActorCtx.list[i].params = cmdActor->entries[i].initVar;
-
-//         SPDLOG_INFO("Transition {0:d}\t ID: 0x{1:x}, \tParams: 0x{2:x}, \tpos: {3:d},{4:d},{5:d}, \trot: {6:d},\nroomF: {7:d},{8:d}\troomB: {9:d},{10:d}",
-//             i, (uint16_t)cmdActor->entries[i].actorNum, cmdActor->entries[i].initVar,
-//             cmdActor->entries[i].posX, cmdActor->entries[i].posY, cmdActor->entries[i].posZ, cmdActor->entries[i].rotY,
-//             cmdActor->entries[i].frontObjectRoom, cmdActor->entries[i].frontTransitionReaction, cmdActor->entries[i].backObjectRoom, cmdActor->entries[i].backTransitionReaction);
-//     }
-
-//     return false;
-// }
 
 // void TransitionActor_InitContext(GameState* state, TransitionActorContext* transiActorCtx) {
 //    transiActorCtx->numActors = 0;
