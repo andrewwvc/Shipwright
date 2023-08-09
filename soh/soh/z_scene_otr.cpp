@@ -38,27 +38,28 @@
 
 using json = nlohmann::json;
 
-// bool operator==(const Ship::ActorSpawnEntry& lhs, const Ship::ActorSpawnEntry& rhs)
-// {
-//     return (lhs.actorNum == rhs.actorNum)
-//     && (lhs.posX == rhs.posX)
-//     && (lhs.posY == rhs.posY)
-//     && (lhs.posZ == rhs.posZ)
-//     && (lhs.rotX == rhs.rotX)
-//     && (lhs.rotY == rhs.rotY)
-//     && (lhs.rotZ == rhs.rotZ)
-//     && (lhs.initVar == rhs.initVar);
-// }
+bool operator==(const LUS::ActorEntry& lhs, const LUS::ActorEntry& rhs)
+{
+    return (lhs.id == rhs.id)
+    && (lhs.pos.x == rhs.pos.x)
+    && (lhs.pos.y == rhs.pos.y)
+    && (lhs.pos.z == rhs.pos.z)
+    && (lhs.rot.x == rhs.rot.x)
+    && (lhs.rot.y == rhs.rot.y)
+    && (lhs.rot.z == rhs.rot.z)
+    && (lhs.params == rhs.params);
+}
 
-// void copyActorSpawn(ActorSpawnEnt& lhs, const Ship::ActorSpawnEntry& rhs) {
-//     lhs.actorNum = rhs.actorNum;
-//     lhs.posX = rhs.posX;
-//     lhs.posY = rhs.posY;
-//     lhs.posZ = rhs.posZ;
-//     lhs.rotX = rhs.rotX;
-//     lhs.rotY = rhs.rotY;
-//     lhs.rotZ = rhs.rotZ;
-// }
+void copyActorSpawn(ActorSpawnEnt& lhs, const LUS::ActorEntry& rhs) {
+    lhs.actorNum = rhs.id;
+    lhs.posX = rhs.pos.x;
+    lhs.posY = rhs.pos.y;
+    lhs.posZ = rhs.pos.z;
+    lhs.rotX = rhs.rot.x;
+    lhs.rotY = rhs.rot.y;
+    lhs.rotZ = rhs.rot.z;
+    lhs.initVar = rhs.params;
+}
 
 constexpr bool operator<(const ActorSpawnResource& lhs, const ActorSpawnResource& rhs)
 {
@@ -220,43 +221,6 @@ bool Scene_CommandSpawnList(PlayState* play, LUS::ISceneCommand* cmd) {
     // LUS::SetStartPositionList* cmdStartPos = std::static_pointer_cast<LUS::SetStartPositionList>(cmd);
     LUS::SetStartPositionList* cmdStartPos = (LUS::SetStartPositionList*)cmd;
     ActorEntry* entries = (ActorEntry*)cmdStartPos->GetRawPointer();
-// bool Scene_CommandSpawnList(PlayState* play, Ship::SceneCommand* cmd)
-// {
-//     Ship::SetStartPositionList* cmdStartPos = (Ship::SetStartPositionList*)cmd;
-
-//     ActorEntry* linkSpawnEntry = nullptr;
-
-//     if (cmdStartPos->cachedGameData != nullptr)
-//     {
-//         ActorEntry* entries = (ActorEntry*)cmdStartPos->cachedGameData;
-//         linkSpawnEntry = &entries[play->setupEntranceList[play->curSpawn].spawn];
-//     }
-//     else
-//     {
-//         ActorEntry* entries = (ActorEntry*)malloc(sizeof(ActorEntry) * cmdStartPos->entries.size());
-
-//         for (int i = 0; i < cmdStartPos->entries.size(); i++)
-//         {
-//             entries[i].id = cmdStartPos->entries[i].actorNum;
-//             entries[i].params = cmdStartPos->entries[i].initVar;
-//             entries[i].pos.x = cmdStartPos->entries[i].posX;
-//             entries[i].pos.y = cmdStartPos->entries[i].posY;
-//             entries[i].pos.z = cmdStartPos->entries[i].posZ;
-//             entries[i].rot.x = cmdStartPos->entries[i].rotX;
-//             entries[i].rot.y = cmdStartPos->entries[i].rotY;
-//             entries[i].rot.z = cmdStartPos->entries[i].rotZ;
-
-//             SPDLOG_INFO("Spawn {0:d} - ID: {1:x}, Parameters: {2:x}", i, (uint16_t)entries[i].id, (uint16_t)entries[i].params);
-//         }
-
-//         linkSpawnEntry = &entries[play->setupEntranceList[play->curSpawn].spawn];
-//         cmdStartPos->cachedGameData = entries;
-//     }
-
-//     ActorEntry* linkEntry = play->linkActorEntry = linkSpawnEntry;
-
-//     s16 linkObjectId;
-
     play->linkActorEntry = &entries[play->setupEntranceList[play->curSpawn].spawn];
     play->linkAgeOnLoad = ((void)0, gSaveContext.linkAge);
     s16 linkObjectId = gLinkObjectIds[((void)0, gSaveContext.linkAge)];
@@ -577,167 +541,127 @@ bool isResourceRestored(auto val) {
 bool Scene_CommandActorList(PlayState* play, LUS::ISceneCommand* cmd) {
     // LUS::SetActorList* cmdActor = std::static_pointer_cast<LUS::SetActorList>(cmd);
     LUS::SetActorList* cmdActor = (LUS::SetActorList*)cmd;
+    std::vector<LUS::ActorEntry> copy = cmdActor->actorList;
 
-    if (cmdActor->modificationState == 0) {
-        if (sceneActorOverrides.find(play->sceneNum) != sceneActorOverrides.end() &&
-                sceneActorOverrides.at(play->sceneNum).find(play->roomCtx.curRoom.num) != sceneActorOverrides.at(play->sceneNum).end()) {
-            auto& roomOverrides = sceneActorOverrides.at(play->sceneNum).at(play->roomCtx.curRoom.num);
-            for (auto& [setup, index, entry] : roomOverrides) {
-                if (setup == -1 || setup == gSaveContext.sceneSetupIndex) {
-                    if (index == -1) {
-                        cmdActor->actorList.push_back(entry);
-                    } else {
-                        cmdActor->actorList[index] = entry;
-                    }
+    //Handles static entry overrides
+    if (sceneActorOverrides.find(play->sceneNum) != sceneActorOverrides.end() &&
+            sceneActorOverrides.at(play->sceneNum).find(play->roomCtx.curRoom.num) != sceneActorOverrides.at(play->sceneNum).end()) {
+        auto& roomOverrides = sceneActorOverrides.at(play->sceneNum).at(play->roomCtx.curRoom.num);
+        for (auto& [setup, index, entry] : roomOverrides) {
+            if (setup == -1 || setup == gSaveContext.sceneSetupIndex) {
+                if (index == -1) {
+                    copy.push_back(entry);
+                } else {
+                    copy[index] = entry;
                 }
             }
-            //setActorList->numActors = setActorList->actorList.size();
-            //play->numSetupActors = cmdActor->entries.size();
         }
-
-        cmdActor->modificationState = 1;
     }
 
-    //play->numSetupActors = cmdActor->numActors;
-    play->numSetupActors = cmdActor->actorList.size();
+    //Handles dynamic resource persistance overrides
+    ActorEntry* entries = (ActorEntry*)malloc(copy.size() * sizeof(ActorEntry));
+    TempResourceEntries = {};
 
-    play->setupActorList = (ActorEntry*)cmdActor->GetRawPointer();
+    for (int i = 0; i < copy.size(); i++)
+    {
+        entries[i].id = copy[i].id;
+        entries[i].pos.x = copy[i].pos.x;
+        entries[i].pos.y = copy[i].pos.y;
+        entries[i].pos.z = copy[i].pos.z;
+        entries[i].rot.x = copy[i].rot.x;
+        entries[i].rot.y = copy[i].rot.y;
+        entries[i].rot.z = copy[i].rot.z;
+        entries[i].params = copy[i].params;
+
+        if (entries[i].id == ACTOR_OBJ_TSUBO) {
+            ActorSpawnResource sw;
+            sw.scene = play->sceneNum;
+            sw.room = play->roomCtx.curRoom.num;
+            copyActorSpawn(sw.entry, copy[i]);
+            sw.dirt = 0;
+            TempResourceEntries.insert({i,sw});
+            auto foundVal = UsedResources.find(sw);
+            if (foundVal != UsedResources.end() && isResourceRestored(foundVal)) {
+                entries[i].params &= 0xFFE0;
+                entries[i].params |= ITEM00_MAX;
+            }
+        } else if (entries[i].id == ACTOR_EN_WONDER_ITEM && DEKU_TREE_DEAD) {
+            ActorSpawnResource sw;
+            sw.scene = play->sceneNum;
+            sw.room = play->roomCtx.curRoom.num;
+            copyActorSpawn(sw.entry, copy[i]);
+            sw.dirt = 0;
+            TempResourceEntries.insert({i,sw});
+            auto foundVal = UsedResources.find(sw);
+            if (foundVal != UsedResources.end()) {
+                entries[i].params &= 0x07FF;
+                entries[i].params |= (0xA << 0xB);
+            }
+        } else if (entries[i].id == ACTOR_EN_ITEM00 && DEKU_TREE_DEAD) {
+            ActorSpawnResource sw;
+            sw.scene = play->sceneNum;
+            sw.room = play->roomCtx.curRoom.num;
+            copyActorSpawn(sw.entry, copy[i]);
+            sw.dirt = 0;
+            TempResourceEntries.insert({i,sw});
+            auto foundVal = UsedResources.find(sw);
+            if (foundVal != UsedResources.end()) {
+                entries[i].params &= 0xFF00;
+                entries[i].params |= ITEM00_MAX;
+            }
+        } else if (entries[i].id == ACTOR_EN_KUSA && (entries[i].params & 0x3) == 0) {
+            // ActorSpawnResource sw;
+            // sw.scene = play->sceneNum;
+            // sw.room = play->roomCtx.curRoom.num;
+            // copyActorSpawn(sw.entry, copy[i]);
+            // sw.dirt = 0;
+            // TempResourceEntries.insert({i,sw});
+            // auto foundVal = UsedResources.find(sw);
+            // if (foundVal != UsedResources.end()) {
+            //     entries[i].params &= 0xFFFC;
+            //     entries[i].params |= 3;
+            // }
+        } else if (entries[i].id == ACTOR_OBJ_KIBAKO2) {
+            ActorSpawnResource sw;
+            sw.scene = play->sceneNum;
+            sw.room = play->roomCtx.curRoom.num;
+            copyActorSpawn(sw.entry, copy[i]);
+            sw.dirt = 0;
+            TempResourceEntries.insert({i,sw});
+            auto foundVal = UsedResources.find(sw);
+            if (foundVal != UsedResources.end()) {
+                entries[i].rot.x = 0x1C;
+            }
+        } else if (entries[i].id == ACTOR_EN_SKJ) {
+            ActorSpawnResource sw;
+            sw.scene = play->sceneNum;
+            sw.room = play->roomCtx.curRoom.num;
+            copyActorSpawn(sw.entry, copy[i]);
+            sw.dirt = 0;
+            TempResourceEntries.insert({i,sw});
+            auto foundVal = UsedResources.find(sw);
+            if (foundVal != UsedResources.end()) {
+                entries[i].rot.z = 0x1;
+            }
+        } else if (entries[i].id == ACTOR_EN_COW) {
+            ActorSpawnResource sw;
+            sw.scene = play->sceneNum;
+            sw.room = play->roomCtx.curRoom.num;
+            copyActorSpawn(sw.entry, copy[i]);
+            sw.dirt = 0;
+            TempResourceEntries.insert({i,sw});
+            auto foundVal = UsedResources.find(sw);
+            if (foundVal != UsedResources.end()) {
+                entries[i].rot.z = 0x1;
+            }
+        }
+    }
+
+    play->numSetupActors = copy.size();
+    play->setupActorList = (ActorEntry*)entries;//cmdActor->GetRawPointer();
 
     return false;
 }
-
-// bool Scene_CommandActorList(PlayState* play, Ship::SceneCommand* cmd) {
-//     Ship::SetActorList* cmdActor = (Ship::SetActorList*)cmd;
-
-//     play->numSetupActors = cmdActor->numActors;
-//     //if (cmdActor->cachedGameData != nullptr)
-//     //    play->setupActorList = (ActorEntry*)cmdActor->cachedGameData;
-//     //else
-//     {
-//         if (cmdActor->cachedGameData == nullptr) {
-//             if (sceneActorOverrides.find(play->sceneNum) != sceneActorOverrides.end() &&
-//                             sceneActorOverrides.at(play->sceneNum).find(play->roomCtx.curRoom.num) != sceneActorOverrides.at(play->sceneNum).end()) {
-//                 auto& roomOverrides = sceneActorOverrides.at(play->sceneNum).at(play->roomCtx.curRoom.num);
-//                 for (auto& [setup, index, entry] : roomOverrides) {
-//                     if (setup == -1 || setup == gSaveContext.sceneSetupIndex) {
-//                         if (index == -1) {
-//                             cmdActor->entries.push_back(entry);
-//                         } else {
-//                             cmdActor->entries[index] = entry;
-//                         }
-//                     }
-//                 }
-//                 play->numSetupActors = cmdActor->entries.size();
-//             }
-//         }
-
-//         SPDLOG_INFO("Scene: 0x{0:x}, Room: 0x{1:x}, Setup: 0x{2:x}", (uint16_t)play->sceneNum, (uint16_t)play->roomCtx.curRoom.num, (uint32_t)gSaveContext.sceneSetupIndex);
-
-//         ActorEntry* entries = (ActorEntry*)malloc(cmdActor->entries.size() * sizeof(ActorEntry));
-//         TempResourceEntries = {};
-
-//         for (int i = 0; i < cmdActor->entries.size(); i++)
-//         {
-//             entries[i].id = cmdActor->entries[i].actorNum;
-//             entries[i].pos.x = cmdActor->entries[i].posX;
-//             entries[i].pos.y = cmdActor->entries[i].posY;
-//             entries[i].pos.z = cmdActor->entries[i].posZ;
-//             entries[i].rot.x = cmdActor->entries[i].rotX;
-//             entries[i].rot.y = cmdActor->entries[i].rotY;
-//             entries[i].rot.z = cmdActor->entries[i].rotZ;
-//             entries[i].params = cmdActor->entries[i].initVar;
-
-//             if (entries[i].id == ACTOR_OBJ_TSUBO) {
-//                 ActorSpawnResource sw;
-//                 sw.scene = play->sceneNum;
-//                 sw.room = play->roomCtx.curRoom.num;
-//                 copyActorSpawn(sw.entry, cmdActor->entries[i]);
-//                 sw.dirt = 0;
-//                 TempResourceEntries.insert({i,sw});
-//                 auto foundVal = UsedResources.find(sw);
-//                 if (foundVal != UsedResources.end() && isResourceRestored(foundVal)) {
-//                     entries[i].params &= 0xFFE0;
-//                     entries[i].params |= ITEM00_MAX;
-//                 }
-//             } else if (entries[i].id == ACTOR_EN_WONDER_ITEM && DEKU_TREE_DEAD) {
-//                 ActorSpawnResource sw;
-//                 sw.scene = play->sceneNum;
-//                 sw.room = play->roomCtx.curRoom.num;
-//                 copyActorSpawn(sw.entry, cmdActor->entries[i]);
-//                 sw.dirt = 0;
-//                 TempResourceEntries.insert({i,sw});
-//                 auto foundVal = UsedResources.find(sw);
-//                 if (foundVal != UsedResources.end()) {
-//                     entries[i].params &= 0x07FF;
-//                     entries[i].params |= (0xA << 0xB);
-//                 }
-//             } else if (entries[i].id == ACTOR_EN_ITEM00 && DEKU_TREE_DEAD) {
-//                 ActorSpawnResource sw;
-//                 sw.scene = play->sceneNum;
-//                 sw.room = play->roomCtx.curRoom.num;
-//                 copyActorSpawn(sw.entry, cmdActor->entries[i]);
-//                 sw.dirt = 0;
-//                 TempResourceEntries.insert({i,sw});
-//                 auto foundVal = UsedResources.find(sw);
-//                 if (foundVal != UsedResources.end()) {
-//                     entries[i].params &= 0xFF00;
-//                     entries[i].params |= ITEM00_MAX;
-//                 }
-//             } else if (entries[i].id == ACTOR_EN_KUSA && (entries[i].params & 0x3) == 0) {
-//                 // ActorSpawnResource sw;
-//                 // sw.scene = play->sceneNum;
-//                 // sw.room = play->roomCtx.curRoom.num;
-//                 // copyActorSpawn(sw.entry, cmdActor->entries[i]);
-//                 // sw.dirt = 0;
-//                 // TempResourceEntries.insert({i,sw});
-//                 // auto foundVal = UsedResources.find(sw);
-//                 // if (foundVal != UsedResources.end()) {
-//                 //     entries[i].params &= 0xFFFC;
-//                 //     entries[i].params |= 3;
-//                 // }
-//             } else if (entries[i].id == ACTOR_OBJ_KIBAKO2) {
-//                 ActorSpawnResource sw;
-//                 sw.scene = play->sceneNum;
-//                 sw.room = play->roomCtx.curRoom.num;
-//                 copyActorSpawn(sw.entry, cmdActor->entries[i]);
-//                 sw.dirt = 0;
-//                 TempResourceEntries.insert({i,sw});
-//                 auto foundVal = UsedResources.find(sw);
-//                 if (foundVal != UsedResources.end()) {
-//                     entries[i].rot.x = 0x1C;
-//                 }
-//             } else if (entries[i].id == ACTOR_EN_SKJ) {
-//                 ActorSpawnResource sw;
-//                 sw.scene = play->sceneNum;
-//                 sw.room = play->roomCtx.curRoom.num;
-//                 copyActorSpawn(sw.entry, cmdActor->entries[i]);
-//                 sw.dirt = 0;
-//                 TempResourceEntries.insert({i,sw});
-//                 auto foundVal = UsedResources.find(sw);
-//                 if (foundVal != UsedResources.end()) {
-//                     entries[i].rot.z = 0x1;
-//                 }
-//             } else if (entries[i].id == ACTOR_EN_COW) {
-//                 ActorSpawnResource sw;
-//                 sw.scene = play->sceneNum;
-//                 sw.room = play->roomCtx.curRoom.num;
-//                 copyActorSpawn(sw.entry, cmdActor->entries[i]);
-//                 sw.dirt = 0;
-//                 TempResourceEntries.insert({i,sw});
-//                 auto foundVal = UsedResources.find(sw);
-//                 if (foundVal != UsedResources.end()) {
-//                     entries[i].rot.z = 0x1;
-//                 }
-//             }
-
-//             SPDLOG_INFO("Entity {0:d}\t ID: 0x{1:x}, \tParams: 0x{2:x}, \tpos: {3:d},{4:d},{5:d}, \t{6:d},{7:d},{8:d}",
-//             i, (uint16_t)entries[i].id, (uint16_t)entries[i].params,
-//             entries[i].pos.x, entries[i].pos.y, entries[i].pos.z, entries[i].rot.x, entries[i].rot.y, entries[i].rot.z);
-//         }
-//     }
-
-//     return false;
-// }
 
 bool Scene_CommandUnused2(PlayState* play, LUS::ISceneCommand* cmd) {
     // OTRTODO: Do we need to implement this?

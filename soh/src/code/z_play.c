@@ -212,6 +212,9 @@ void Play_Destroy(GameState* thisx) {
     ZeldaArena_Cleanup();
     Fault_RemoveClient(&D_801614B8);
     disableBetaQuest();
+    if (play->setupActorList)
+        free(play->setupActorList);
+    play->setupActorList = NULL;
     gPlayState = NULL;
 }
 
@@ -476,6 +479,7 @@ void Play_Init(GameState* thisx) {
         GameInteractor_ExecuteOnExitGame(gSaveContext.fileNum);
         return;
     }
+    play->setupActorList = NULL;
 
     SystemArena_Display();
     // OTRTODO allocate double the normal amount of memory
