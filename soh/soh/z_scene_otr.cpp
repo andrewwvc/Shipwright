@@ -128,6 +128,7 @@ void from_json(const json& j, ActorSpawnResource& p) {
     j.at("rotX").get_to(p.entry.rotX);
     j.at("rotY").get_to(p.entry.rotY);
     j.at("rotZ").get_to(p.entry.rotZ);
+    j.at("initVar").get_to(p.entry.initVar);
     j.at("dirt").get_to(p.dirt);
 }
 
@@ -177,6 +178,10 @@ s32 createTempEntry(PlayState* play, ActorEntry* spawn) {
     return createTempEntryPlus(play,spawn,0);
 }
 
+bool isResourceYetToRestore(auto val) {
+   return val->second > gSaveContext.savedFrameCount;
+}
+
 s32 isResourceUsed(PlayState* play, ActorEntry* spawn, s16 dirt) {
     ActorSpawnResource sw;
     sw.scene = play->sceneNum;
@@ -191,7 +196,7 @@ s32 isResourceUsed(PlayState* play, ActorEntry* spawn, s16 dirt) {
     sw.entry.rotZ = spawn->rot.z;
     sw.dirt = dirt;
     auto foundVal = UsedResources.find(sw);
-    if (foundVal != UsedResources.end()) {
+    if (foundVal != UsedResources.end() && isResourceYetToRestore(foundVal)) {
         return 1;
     } else {
         return 0;
@@ -534,10 +539,6 @@ Entity 40	 ID: 0x1ae, 	Params: 0xfc25, 	pos: -311,1500,-393, 	0,-4915,0
 -673,1192,747
 */
 
-bool isResourceRestored(auto val) {
-   return val->second > gSaveContext.savedFrameCount;
-}
-
 bool Scene_CommandActorList(PlayState* play, LUS::ISceneCommand* cmd) {
     // LUS::SetActorList* cmdActor = std::static_pointer_cast<LUS::SetActorList>(cmd);
     LUS::SetActorList* cmdActor = (LUS::SetActorList*)cmd;
@@ -581,7 +582,7 @@ bool Scene_CommandActorList(PlayState* play, LUS::ISceneCommand* cmd) {
             sw.dirt = 0;
             TempResourceEntries.insert({i,sw});
             auto foundVal = UsedResources.find(sw);
-            if (foundVal != UsedResources.end() && isResourceRestored(foundVal)) {
+            if (foundVal != UsedResources.end() && isResourceYetToRestore(foundVal)) {
                 entries[i].params &= 0xFFE0;
                 entries[i].params |= ITEM00_MAX;
             }
@@ -593,7 +594,7 @@ bool Scene_CommandActorList(PlayState* play, LUS::ISceneCommand* cmd) {
             sw.dirt = 0;
             TempResourceEntries.insert({i,sw});
             auto foundVal = UsedResources.find(sw);
-            if (foundVal != UsedResources.end()) {
+            if (foundVal != UsedResources.end() && isResourceYetToRestore(foundVal)) {
                 entries[i].params &= 0x07FF;
                 entries[i].params |= (0xA << 0xB);
             }
@@ -605,7 +606,7 @@ bool Scene_CommandActorList(PlayState* play, LUS::ISceneCommand* cmd) {
             sw.dirt = 0;
             TempResourceEntries.insert({i,sw});
             auto foundVal = UsedResources.find(sw);
-            if (foundVal != UsedResources.end()) {
+            if (foundVal != UsedResources.end() && isResourceYetToRestore(foundVal)) {
                 entries[i].params &= 0xFF00;
                 entries[i].params |= ITEM00_MAX;
             }
@@ -629,7 +630,7 @@ bool Scene_CommandActorList(PlayState* play, LUS::ISceneCommand* cmd) {
             sw.dirt = 0;
             TempResourceEntries.insert({i,sw});
             auto foundVal = UsedResources.find(sw);
-            if (foundVal != UsedResources.end()) {
+            if (foundVal != UsedResources.end() && isResourceYetToRestore(foundVal)) {
                 entries[i].rot.x = 0x1C;
             }
         } else if (entries[i].id == ACTOR_EN_SKJ) {
@@ -640,7 +641,7 @@ bool Scene_CommandActorList(PlayState* play, LUS::ISceneCommand* cmd) {
             sw.dirt = 0;
             TempResourceEntries.insert({i,sw});
             auto foundVal = UsedResources.find(sw);
-            if (foundVal != UsedResources.end()) {
+            if (foundVal != UsedResources.end() && isResourceYetToRestore(foundVal)) {
                 entries[i].rot.z = 0x1;
             }
         } else if (entries[i].id == ACTOR_EN_COW) {
@@ -651,7 +652,7 @@ bool Scene_CommandActorList(PlayState* play, LUS::ISceneCommand* cmd) {
             sw.dirt = 0;
             TempResourceEntries.insert({i,sw});
             auto foundVal = UsedResources.find(sw);
-            if (foundVal != UsedResources.end()) {
+            if (foundVal != UsedResources.end() && isResourceYetToRestore(foundVal)) {
                 entries[i].rot.z = 0x1;
             }
         }
