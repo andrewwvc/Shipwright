@@ -167,7 +167,7 @@ class SaveManager {
     static void InitFileDebug();
 
     static void LoadPersistenceVersion1();
-    static void SavePersistence();
+    static void SavePersistence(SaveContext* saveContext, int sectionID, bool fullSave);
 
     static void LoadRandomizerVersion1();
     static void LoadRandomizerVersion2();

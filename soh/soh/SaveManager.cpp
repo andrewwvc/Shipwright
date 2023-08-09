@@ -1883,7 +1883,7 @@ void SaveManager::LoadPersistenceVersion1() {
     SaveManager::Instance->LoadData("usedResources", UsedResources, {});
 }
 
-void SaveManager::SavePersistence() {
+void SaveManager::SavePersistence(SaveContext* saveContext, int sectionID, bool fullSave) {
     SaveManager::Instance->SaveData("usedResources", UsedResources);
 }
 
