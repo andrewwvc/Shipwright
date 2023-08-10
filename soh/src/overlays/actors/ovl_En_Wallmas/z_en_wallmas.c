@@ -116,11 +116,11 @@ static InitChainEntry sInitChain[] = {
     ICHAIN_F32_DIV1000(gravity, -1500, ICHAIN_STOP),
 };
 
-const s16 InitialTime = 0x82;
-const s16 DropTime = 0x10;
-const s16 DropTimePlus = DropTime + 1;
-const f32 ScaleFactor = 0x50/DropTime;
-const s16 TakePlayerTime = 0x1E;
+#define InitialTime 0x82
+#define DropTime 0x10
+#define DropTimePlus (DropTime + 1)
+#define ScaleFactor (0x50/DropTime)
+#define TakePlayerTime 0x1E
 
 void EnWallmas_Init(Actor* thisx, PlayState* play) {
     EnWallmas* this = (EnWallmas*)thisx;
