@@ -414,9 +414,9 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, LUS::ActorEnt
             { 0, -1, { ACTOR_EN_NIW, 1525,834,-2020, 0,16384,0, static_cast<int16_t>(0xFFFF) }},
             { 1, -1, { ACTOR_EN_NIW, 1525,834,-2020, 0,16384,0, static_cast<int16_t>(0xFFFF) }},
             { 0, -1, { ACTOR_BG_UMAJUMP, 190,1103,-2915, 0x4000,880,0, static_cast<int16_t>(0xFFFF) }},
-            { 0, -1, { ACTOR_BG_UMAJUMP, 190,1103,-2915, 0x4000,880+0x8000,0, static_cast<int16_t>(0xFFFF) }},
+            { 0, -1, { ACTOR_BG_UMAJUMP, 190,1103,-2915, 0x4000,-0x7C90,0, static_cast<int16_t>(0xFFFF) }},//rot.y is 880+0x8000
             { 1, -1, { ACTOR_BG_UMAJUMP, 190,1103,-2915, 0x4000,880,0, static_cast<int16_t>(0xFFFF) }},
-            { 1, -1, { ACTOR_BG_UMAJUMP, 190,1103,-2915, 0x4000,880+0x8000,0, static_cast<int16_t>(0xFFFF) }},
+            { 1, -1, { ACTOR_BG_UMAJUMP, 190,1103,-2915, 0x4000,-0x7C90,0, static_cast<int16_t>(0xFFFF) }},//rot.y is 880+0x8000
             { 0, 21, { 0xA, 926,1042,-2512, 0,-16384,0, 0x7c1 }},
             { 1, 21, { 0xA, 926,1042,-2512, 0,-16384,0, 0x7c1 }},
         } },
@@ -608,7 +608,7 @@ bool Scene_CommandActorList(PlayState* play, LUS::ISceneCommand* cmd) {
         }
     }
 
-    play->numSetupActors = copy.size();
+    play->numSetupActors = copy.size();//Note that this only allows for max 256 actor entries
     play->setupActorList = (ActorEntry*)entries;//cmdActor->GetRawPointer();
 
     return false;
@@ -777,17 +777,17 @@ bool Scene_CommandPathList(PlayState* play, LUS::ISceneCommand* cmd) {
 
 const std::map<u16,  std::vector<std::tuple<int, int, LUS::TransitionActorEntry>>> sceneTransitionActorOverrides = {
     { 0x5B, { // Lost Woods
-        { -1, 9, { 1,255, 0,255,   ACTOR_EN_HOLL, 0,0,-400,  0, 0x3F }},
-        { -1, 10, { 1,255, 0,255,   ACTOR_EN_HOLL, 0,0, 400,  -32768, 0x3F }},
-        { -1, 11, { 0,255, 1,255,   ACTOR_EN_HOLL, 800,0, 400,  -32768, 0x3F }},
-        { -1, 12, { 1,255, 2,255,   ACTOR_EN_HOLL, 400,0, -800,  16384, 0x3F }},
-        { -1, 13, { 2,255, 3,255,   ACTOR_EN_HOLL, 1600,0, -400,  -32768, 0x3F }},
-        { -1, 14, { 7,255, 4,255,   ACTOR_EN_HOLL, 2000,0, -1600,  -16384, 0x3F }},
-        { -1, 15, { 7,255, 8,255,   ACTOR_EN_HOLL, 2000,0, -2400,  16384, 0x3F | (0x7 << 6) }},
-        { -1, 16, { 8,255, 7,255,   ACTOR_EN_HOLL, 1600,0, -2800,  0, 0x3F }},
-        { -1, 17, { 8,255, 7,255,   ACTOR_EN_HOLL, 400,0, -2400,  -16384, 0x3F | (0x7 << 6) }},
-        { -1, 18, { 7,255, 8,255,   ACTOR_EN_HOLL, 800,0, -2800,  0, 0x3F }},
-        { -1, 19, { 7,255, 8,255,   ACTOR_EN_HOLL, 800,0, -2000,  -32768, 0x3F | (0x1 << 9)}},
+        { -1, 9,  { 1,(int8_t)255, 0,(int8_t)255,   ACTOR_EN_HOLL, 0,0,-400,  0, 0x3F }},
+        { -1, 10, { 1,(int8_t)255, 0,(int8_t)255,   ACTOR_EN_HOLL, 0,0, 400,  -32768, 0x3F }},
+        { -1, 11, { 0,(int8_t)255, 1,(int8_t)255,   ACTOR_EN_HOLL, 800,0, 400,  -32768, 0x3F }},
+        { -1, 12, { 1,(int8_t)255, 2,(int8_t)255,   ACTOR_EN_HOLL, 400,0, -800,  16384, 0x3F }},
+        { -1, 13, { 2,(int8_t)255, 3,(int8_t)255,   ACTOR_EN_HOLL, 1600,0, -400,  -32768, 0x3F }},
+        { -1, 14, { 7,(int8_t)255, 4,(int8_t)255,   ACTOR_EN_HOLL, 2000,0, -1600,  -16384, 0x3F }},
+        { -1, 15, { 7,(int8_t)255, 8,(int8_t)255,   ACTOR_EN_HOLL, 2000,0, -2400,  16384, 0x3F | (0x7 << 6) }},
+        { -1, 16, { 8,(int8_t)255, 7,(int8_t)255,   ACTOR_EN_HOLL, 1600,0, -2800,  0, 0x3F }},
+        { -1, 17, { 8,(int8_t)255, 7,(int8_t)255,   ACTOR_EN_HOLL, 400,0, -2400,  -16384, 0x3F | (0x7 << 6) }},
+        { -1, 18, { 7,(int8_t)255, 8,(int8_t)255,   ACTOR_EN_HOLL, 800,0, -2800,  0, 0x3F }},
+        { -1, 19, { 7,(int8_t)255, 8,(int8_t)255,   ACTOR_EN_HOLL, 800,0, -2000,  -32768, 0x3F | (0x1 << 9)}},
     } },
 };
 
@@ -815,7 +815,7 @@ bool Scene_CommandTransitionActorList(PlayState* play, LUS::ISceneCommand* cmd) 
         cmdActor->modificationState = 1;
     }
 
-    play->transiActorCtx.numActors = cmdActor->transitionActorList.size(); //cmdActor->numTransitionActors;
+    play->transiActorCtx.numActors = cmdActor->transitionActorList.size();
     play->transiActorCtx.list = (TransitionActorEntry*)cmdActor->GetRawPointer();
 
     return false;
