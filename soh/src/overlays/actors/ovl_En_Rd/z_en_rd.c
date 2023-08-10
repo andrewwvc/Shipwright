@@ -120,10 +120,10 @@ static Vec3f D_80AE4940 = { 300.0f, 0.0f, 0.0f };
 static Vec3f D_80AE494C = { 300.0f, 0.0f, 0.0f };
 static Vec3f D_80AE4958 = { 0.25f, 0.25f, 0.25f };
 
-static const f32 HearingRange = 180.0f;
-static const f32 HomeRange = HearingRange;
-static const f32 SenseRange = 60.0f;
-static const f32 AttackRange = 45.0f;
+#define HearingRange 180.0f
+#define HomeRange HearingRange
+#define SenseRange 60.0f
+#define AttackRange 45.0f
 
 #define ENRD_DROPPED_ITEM 0x10//0x90
 

@@ -2285,9 +2285,9 @@ s32 EnRu1_DetermineDatePreScore() {
 
     if (!(gSaveContext.infTable[21] & 0x0004) || !(gSaveContext.infTable[20] & 0x7000)) {//You failed to even show up, you nonce
         score -= 1000;
-    } else if (gSaveContext.infTable[20] & 0x3000 == 0x1000) {//You showed up late
+    } else if ((gSaveContext.infTable[20] & 0x3000) == 0x1000) {//You showed up late
         score -= 200;
-    } else if (gSaveContext.infTable[20] & 0x3000 == 0x2000) {//You were early
+    } else if ((gSaveContext.infTable[20] & 0x3000) == 0x2000) {//You were early
         score -= 100;
     } else if ((gSaveContext.infTable[20] & 0x3000) == 0x0000) {//You talked to her before she noticed you
         score -= 50;
@@ -2313,11 +2313,11 @@ s32 EnRu1_DetermineDatePreScore() {
         score -= 500;
     }
 
-    if (gSaveContext.infTable[20] & 0x600 == 0x600) {//You hurt Ruto
+    if ((gSaveContext.infTable[20] & 0x600) == 0x600) {//You hurt Ruto
         score -= 300;
-    } else if (gSaveContext.infTable[20] & 0x600 == 0x400) {//You let her get scared
+    } else if ((gSaveContext.infTable[20] & 0x600) == 0x400) {//You let her get scared
         score -= 200;
-    } else if (gSaveContext.infTable[20] & 0x600 == 0x200) {//You made her unconfortable
+    } else if ((gSaveContext.infTable[20] & 0x600) == 0x200) {//You made her unconfortable
         score -= 100;
     }
 
