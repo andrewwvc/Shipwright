@@ -476,7 +476,7 @@ const static RaceInfo sMalonReturn = { 11, sMalonReturnWaypoints };
 
 static s32 sAnimSoundFrames[] = { 0, 16 };
 
-static SlalomWaypoint sSlalomGate1 = {{-803,0,5566},{-1026,0,5700}};
+static SlalomWaypoint sSlalomGate1 = {{-803,5566},{-1026,5700}};
 
 static RaceInfo* sMalonRoute;
 
