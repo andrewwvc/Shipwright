@@ -13,6 +13,7 @@ void func_80AE2744(EnRd* this, PlayState* play);
 void func_80AE2970(EnRd* this, PlayState* play);
 void EnRd_SetupRiseFromGround(EnRd* this, PlayState* play);
 void EnRd_RiseFromGround(EnRd* this, PlayState* play);
+void func_80AE2B90(EnRd* this, PlayState* play);
 void func_80AE2A10(EnRd* this, PlayState* play);
 void func_80AE2C1C(EnRd* this, PlayState* play);
 void func_80AE2F50(EnRd* this, PlayState* play);

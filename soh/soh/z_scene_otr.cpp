@@ -61,56 +61,6 @@ void copyActorSpawn(ActorSpawnEnt& lhs, const LUS::ActorEntry& rhs) {
     lhs.initVar = rhs.params;
 }
 
-constexpr bool operator<(const ActorSpawnResource& lhs, const ActorSpawnResource& rhs)
-{
-    if (lhs.scene < rhs.scene)
-        return true;
-    else if (lhs.scene > rhs.scene)
-        return false;
-    else if (lhs.room < rhs.room)
-        return true;
-    else if (lhs.room > rhs.room)
-        return false;
-    else if (lhs.entry.actorNum < rhs.entry.actorNum)
-        return true;
-    else if (lhs.entry.actorNum > rhs.entry.actorNum)
-        return false;
-    else if (lhs.entry.posX < rhs.entry.posX)
-        return true;
-    else if (lhs.entry.posX > rhs.entry.posX)
-        return false;
-    else if (lhs.entry.posY < rhs.entry.posY)
-        return true;
-    else if (lhs.entry.posY > rhs.entry.posY)
-        return false;
-    else if (lhs.entry.posZ < rhs.entry.posZ)
-        return true;
-    else if (lhs.entry.posZ > rhs.entry.posZ)
-        return false;
-    else if (lhs.entry.rotX < rhs.entry.rotX)
-        return true;
-    else if (lhs.entry.rotX > rhs.entry.rotX)
-        return false;
-    else if (lhs.entry.rotY < rhs.entry.rotY)
-        return true;
-    else if (lhs.entry.rotY > rhs.entry.rotY)
-        return false;
-    else if (lhs.entry.rotZ < rhs.entry.rotZ)
-        return true;
-    else if (lhs.entry.rotZ > rhs.entry.rotZ)
-        return false;
-    else if (lhs.entry.initVar < rhs.entry.initVar)
-        return true;
-    else if (lhs.entry.initVar > rhs.entry.initVar)
-        return false;
-    else if (lhs.dirt < rhs.dirt)
-        return true;
-    else if (lhs.dirt > rhs.dirt)
-        return false;
-
-    return false;
-}
-
 void to_json(json& j, const ActorSpawnResource& p) {
     j = json{{"scene", p.scene}, {"room", p.room}, {"actorNum", p.entry.actorNum},
         {"posX", p.entry.posX}, {"posY", p.entry.posY}, {"posZ", p.entry.posZ},
@@ -252,8 +202,8 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, LUS::ActorEnt
             { -1, 2, { 0xA, 1944,4681,-393, 0,24394,0, 0x07CD }},
         } },
         { 0x0A, {
-            { -1, -1, { ACTOR_EN_ZF, -1925,2800,780, 0,24394,0, 0xFFFF }},
-            { -1, -1, { ACTOR_EN_ZF, -1740,2800,-1060, 0,24394,0, 0xFFFF }},
+            { -1, -1, { ACTOR_EN_ZF, -1925,2800,780, 0,24394,0, static_cast<int16_t>(0xFFFF) }},
+            { -1, -1, { ACTOR_EN_ZF, -1740,2800,-1060, 0,24394,0, static_cast<int16_t>(0xFFFF) }},
         } },
     } },
     { 0x8, {//Well
@@ -295,10 +245,10 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, LUS::ActorEnt
         { 0x00, {
             //{ -1, -1, { ACTOR_EN_ITEM00, 0, 0, 0, 0, 0, 0, 0x100+(uint16_t)ITEM00_HEART_PIECE}},
             { -1, -1, { ACTOR_EN_SA, 100,0,1, 0,-12350,0, 0x0}},
-            { 0, -1, { ACTOR_EN_WONDER_TALK2, -92,25,-8, 0,15350,0, 0x8000|(0x3D<<6)|0x3f }},
-            { 1, -1, { ACTOR_EN_WONDER_TALK2, -92,25,-8, 0,15350,0, 0x8000|(0x41<<6)|0x3f }},
-            { 2, -1, { ACTOR_EN_WONDER_TALK2, -92,25,-8, 0,15350,0, 0x8000|(0x3E<<6)|0x3f }},
-            { 3, -1, { ACTOR_EN_WONDER_TALK2, -92,25,-8, 0,15350,0, 0x8000|(0x3E<<6)|0x3f }},
+            { 0, -1, { ACTOR_EN_WONDER_TALK2, -92,25,-8, 0,15350,0, static_cast<int16_t>(0x8000|(0x3D<<6)|0x3f) }},
+            { 1, -1, { ACTOR_EN_WONDER_TALK2, -92,25,-8, 0,15350,0, static_cast<int16_t>(0x8000|(0x41<<6)|0x3f) }},
+            { 2, -1, { ACTOR_EN_WONDER_TALK2, -92,25,-8, 0,15350,0, static_cast<int16_t>(0x8000|(0x3E<<6)|0x3f) }},
+            { 3, -1, { ACTOR_EN_WONDER_TALK2, -92,25,-8, 0,15350,0, static_cast<int16_t>(0x8000|(0x3E<<6)|0x3f) }},
         } },
     } },
     { 0x29, {//Saria's
@@ -309,7 +259,7 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, LUS::ActorEnt
     } },
     { SCENE_SPOT10, { // Lost Woods
         { 0x5, {//Bridge
-            { -1, -1, { ACTOR_EN_KO, -1150,-360,1152, 0,1200,0, 0xff00 }},
+            { -1, -1, { ACTOR_EN_KO, -1150,-360,1152, 0,1200,0, static_cast<int16_t>(0xff00) }},
             { -1, -1, { ACTOR_OBJ_MAKEKINSUTA, -1140,-10,1208, 0, 0, 2, 0x0 }},
         } },
     } },
@@ -323,13 +273,13 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, LUS::ActorEnt
             //{ 2, -1, { 0x77, 4870, -160, 8506, 0, 0, 0, 0x11 }}, //{ 3, -1, { 0x77, 4870, -160, 8506, 0, 0, 0, 0x11 }},
             { 2, -1, { 0x00A7, 116,192,6206, 0, 0, 0, 0x18a4 }}, { 3, -1, { 0x00A7, 116,192,6206, 0, 0, 0, 0x18a4 }},
             { 0, -1, { ACTOR_EN_GO2,  3173,-20,880,  0,-20000,0,  0x03e0 | (13<<10)}}, { 1, -1, { ACTOR_EN_GO2,  3173,-20,880,  0,-20000,0,  0x03e0 | (13<<10)}},
-            { 2, -1, { ACTOR_EN_HORSE, 100,0,2000, 0,0,0, 0x800B} }, { 3, -1, { ACTOR_EN_HORSE, 100,0,2000, 0,0,0, 0x800B} },
-            {2, -1, { ACTOR_EN_MB, -4010,-300,1700, 0,8104,0, 0xffff}},
-            {3, -1, { ACTOR_EN_MB, -4010,-300,1700, 0,8104,0, 0xffff}},
-            {2, -1, { ACTOR_EN_MB, -3157,-300,945, 0,8104,0, 0xffff}},
-            {3, -1, { ACTOR_EN_MB, -3157,-300,945, 0,8104,0, 0xffff}},
-            {2, -1, { ACTOR_EN_MB, -5245,-300,2000, 0,-1321,0, 0xffff}},
-            {3, -1, { ACTOR_EN_MB, -5245,-300,2000, 0,-1321,0, 0xffff}},
+            { 2, -1, { ACTOR_EN_HORSE, 100,0,2000, 0,0,0, static_cast<int16_t>(0x800B)} }, { 3, -1, { ACTOR_EN_HORSE, 100,0,2000, 0,0,0, static_cast<int16_t>(0x800B)}},
+            {2, -1, { ACTOR_EN_MB, -4010,-300,1700, 0,8104,0, static_cast<int16_t>(0xffff)}},
+            {3, -1, { ACTOR_EN_MB, -4010,-300,1700, 0,8104,0, static_cast<int16_t>(0xffff)}},
+            {2, -1, { ACTOR_EN_MB, -3157,-300,945, 0,8104,0, static_cast<int16_t>(0xffff)}},
+            {3, -1, { ACTOR_EN_MB, -3157,-300,945, 0,8104,0, static_cast<int16_t>(0xffff)}},
+            {2, -1, { ACTOR_EN_MB, -5245,-300,2000, 0,-1321,0, static_cast<int16_t>(0xffff)}},
+            {3, -1, { ACTOR_EN_MB, -5245,-300,2000, 0,-1321,0, static_cast<int16_t>(0xffff)}},
         } },
     } },
     { SCENE_MARKET_DAY, { // Castle Town Square - Day
@@ -379,14 +329,14 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, LUS::ActorEnt
     } },
     { 0x37, {//Impa's
         { 0x00, {
-            { -1, -1, { ACTOR_EN_WONDER_TALK2, 142,20,210, 0,15350,0, 0x8000|(0x3F<<6)|0x3f }},
-            { -1, -1, { ACTOR_EN_WONDER_TALK2, 142,20,67,  0,15350,0, 0x8000|(0x40<<6)|0x3f }},
+            { -1, -1, { ACTOR_EN_WONDER_TALK2, 142,20,210, 0,15350,0, static_cast<int16_t>(0x8000|(0x3F<<6)|0x3f) }},
+            { -1, -1, { ACTOR_EN_WONDER_TALK2, 142,20,67,  0,15350,0, static_cast<int16_t>(0x8000|(0x40<<6)|0x3f) }},
         } },
     } },
     { 0x52, { // Kakariko
         { 0x00, {
             //{ -1, 18, { 0x95, -18,800,1800, 0,-32768,0, 0xb140 }},
-            { 1, 24, { ACTOR_EN_SW, 5,755,-100, 0,0,0, 0xB104 }},
+            { 1, 24, { ACTOR_EN_SW, 5,755,-100, 0,0,0, static_cast<int16_t>(0xB104) }},
         } },
     } },
     { SCENE_SPOT18, {//Goron City
@@ -424,13 +374,13 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, LUS::ActorEnt
     } },
     { SCENE_SPOT03, { // Zora's River
         { 0x00, {
-            { 0, 57, { ACTOR_EN_MS, -582,375,-438, 0,16384,0, 0xFFFF }},
+            { 0, 57, { ACTOR_EN_MS, -582,375,-438, 0,16384,0, static_cast<int16_t>(0xFFFF) }},
             { 0, 60, { ACTOR_OBJ_BOMBIWA, 838,210,-194, 0,-20771,1, 0x0002 }},
             { 0, 62, { ACTOR_OBJ_BOMBIWA, -464,375,-558, 0,-25850,1, 0x0008 }},
             { 0, 63, { ACTOR_OBJ_BOMBIWA, -533,375,-594, 0,16384,1, 0x0009 }},
             { 0, 64, { ACTOR_OBJ_BOMBIWA, -594,375,-617, 0,0,1, 0x000A }},
             { 0, -1, { ACTOR_OBJ_BOMBIWA, -452,375,-480, 0,-25850,1, 0x000B }},
-            { 1, 57, { ACTOR_EN_MS, -582,375,-438, 0,16384,0, 0xFFFF }},
+            { 1, 57, { ACTOR_EN_MS, -582,375,-438, 0,16384,0, static_cast<int16_t>(0xFFFF) }},
             { 1, 60, { ACTOR_OBJ_BOMBIWA, 838,210,-194, 0,-20771,1, 0x0002 }},
             { 1, 62, { ACTOR_OBJ_BOMBIWA, -464,375,-558, 0,-25850,1, 0x0008 }},
             { 1, 63, { ACTOR_OBJ_BOMBIWA, -533,375,-594, 0,16384,1, 0x0009 }},
@@ -455,31 +405,31 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, LUS::ActorEnt
     } },
     { 0xC, { // Gerudo Rooms
         { 0x00, {
-            { 0, -1, { ACTOR_OBJ_KIBAKO2, 529,0,-3556, 0,0,0, 0xFFFF }},
-            { 1, -1, { ACTOR_OBJ_KIBAKO2, 529,0,-3556, 0,0,0, 0xFFFF }},
+            { 0, -1, { ACTOR_OBJ_KIBAKO2, 529,0,-3556, 0,0,0, static_cast<int16_t>(0xFFFF) }},
+            { 1, -1, { ACTOR_OBJ_KIBAKO2, 529,0,-3556, 0,0,0, static_cast<int16_t>(0xFFFF) }},
         } },
     } },
     { 0x5D, { // Gerudo Fortress
         { 0x00, {
-            { 0, -1, { ACTOR_EN_NIW, 1525,834,-2020, 0,16384,0, 0xFFFF }},
-            { 1, -1, { ACTOR_EN_NIW, 1525,834,-2020, 0,16384,0, 0xFFFF }},
-            { 0, -1, { ACTOR_BG_UMAJUMP, 190,1103,-2915, 0x4000,880,0, 0xFFFF }},
-            { 0, -1, { ACTOR_BG_UMAJUMP, 190,1103,-2915, 0x4000,880+0x8000,0, 0xFFFF }},
-            { 1, -1, { ACTOR_BG_UMAJUMP, 190,1103,-2915, 0x4000,880,0, 0xFFFF }},
-            { 1, -1, { ACTOR_BG_UMAJUMP, 190,1103,-2915, 0x4000,880+0x8000,0, 0xFFFF }},
+            { 0, -1, { ACTOR_EN_NIW, 1525,834,-2020, 0,16384,0, static_cast<int16_t>(0xFFFF) }},
+            { 1, -1, { ACTOR_EN_NIW, 1525,834,-2020, 0,16384,0, static_cast<int16_t>(0xFFFF) }},
+            { 0, -1, { ACTOR_BG_UMAJUMP, 190,1103,-2915, 0x4000,880,0, static_cast<int16_t>(0xFFFF) }},
+            { 0, -1, { ACTOR_BG_UMAJUMP, 190,1103,-2915, 0x4000,880+0x8000,0, static_cast<int16_t>(0xFFFF) }},
+            { 1, -1, { ACTOR_BG_UMAJUMP, 190,1103,-2915, 0x4000,880,0, static_cast<int16_t>(0xFFFF) }},
+            { 1, -1, { ACTOR_BG_UMAJUMP, 190,1103,-2915, 0x4000,880+0x8000,0, static_cast<int16_t>(0xFFFF) }},
             { 0, 21, { 0xA, 926,1042,-2512, 0,-16384,0, 0x7c1 }},
             { 1, 21, { 0xA, 926,1042,-2512, 0,-16384,0, 0x7c1 }},
         } },
     } },
     { SCENE_SPOT13, { //Desert Wasteland
         { 0x00, {
-            { -1, 4, { ACTOR_EN_SW, 637,-393,-2536, 16384,0,0, 0xB602 }},
+            { -1, 4, { ACTOR_EN_SW, 637,-393,-2536, 16384,0,0, static_cast<int16_t>(0xB602) }},
         } },
         { 0x01, {
-            { -1, -1, { ACTOR_EN_HATA, 3315,-261, 2244, 0,0,0, 0xFFFF }},
-            { -1, -1, { ACTOR_OBJ_KIBAKO2, 3460,-435,2484, 0,7100,0, 0xFFFF }},
-            { -1, -1, { ACTOR_OBJ_KIBAKO2, 3621,-392,2847, 0,7100,0, 0xFFFF }},
-            { -1, -1, { ACTOR_EN_NIW, 3125,-268,2459, 0,7100,0, 0xFFFF }},
+            { -1, -1, { ACTOR_EN_HATA, 3315,-261, 2244, 0,0,0, static_cast<int16_t>(0xFFFF) }},
+            { -1, -1, { ACTOR_OBJ_KIBAKO2, 3460,-435,2484, 0,7100,0, static_cast<int16_t>(0xFFFF) }},
+            { -1, -1, { ACTOR_OBJ_KIBAKO2, 3621,-392,2847, 0,7100,0, static_cast<int16_t>(0xFFFF) }},
+            { -1, -1, { ACTOR_EN_NIW, 3125,-268,2459, 0,7100,0, static_cast<int16_t>(0xFFFF) }},
         } },
     } },
     { SCENE_SYOTES2, {
@@ -493,8 +443,8 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, LUS::ActorEnt
             {-1, -1, {ACTOR_EN_ST, 118,510,155, 0,0,0, 0x4}}
         } },
         {0x3, {
-            {-1, 4, {ACTOR_EN_BB, 1387,510,-1436, 0,0x4000,0, 0xffff}},
-            {-1, -1, {ACTOR_EN_BB, 1187,463,-1436, 0,-0x4000,0, 0xffff}}
+            {-1, 4, {ACTOR_EN_BB, 1387,510,-1436, 0,0x4000,0, static_cast<int16_t>(0xffff)}},
+            {-1, -1, {ACTOR_EN_BB, 1187,463,-1436, 0,-0x4000,0, static_cast<int16_t>(0xffff)}}
         } },
         {0x8, {
             {-1, -1, {ACTOR_EN_DEKUNUTS, -1288,242,-2109, 0,25009,0, 5 << 8}},
