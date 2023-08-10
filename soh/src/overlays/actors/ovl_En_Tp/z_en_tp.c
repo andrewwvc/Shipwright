@@ -121,8 +121,8 @@ static DamageTable sDamageTable = {
     /* Unknown 2     */ DMG_ENTRY(0, TAILPASARAN_DMGEFF_NONE),
 };
 
-static const s16 RISE_SPEED = 3;
-static const s16 HEAD_WAIT_TIME = 60/RISE_SPEED;
+#define RISE_SPEED 3
+#define HEAD_WAIT_TIME (60/RISE_SPEED)
 
 static InitChainEntry sInitChain[] = {
     ICHAIN_F32(targetArrowOffset, 10, ICHAIN_STOP),
