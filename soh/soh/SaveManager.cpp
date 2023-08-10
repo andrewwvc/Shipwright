@@ -1506,6 +1506,20 @@ void SaveManager::LoadBaseVersion3() {
         SaveManager::Instance->LoadData("tempCollectFlags", gSaveContext.backupFW.tempCollectFlags);
     });
     SaveManager::Instance->LoadData("dogParams", gSaveContext.dogParams);
+
+    SaveManager::Instance->LoadData("savedFrameCount", gSaveContext.savedFrameCount);
+    SaveManager::Instance->LoadData("goronTimeStatus", gSaveContext.goronTimeStatus);
+    SaveManager::Instance->LoadData("goronTimeDay", gSaveContext.goronTimeDay);
+    SaveManager::Instance->LoadData("SariaDateDay", gSaveContext.SariaDateDay);
+    SaveManager::Instance->LoadData("RutoDateDay", gSaveContext.RutoDateDay);
+    SaveManager::Instance->LoadData("MalonPlayDay", gSaveContext.MalonPlayDay);
+    SaveManager::Instance->LoadData("MalonRideDay", gSaveContext.MalonRideDay);
+    SaveManager::Instance->LoadData("maxBoosts", gSaveContext.maxBoosts, INITIAL_BOOSTS);
+    SaveManager::Instance->LoadData("extraMagicPower", gSaveContext.extraMagicPower);
+    SaveManager::Instance->LoadData("galleryMultplierChild", gSaveContext.galleryMultplierChild, INITIAL_MULTIPLIER);
+    SaveManager::Instance->LoadData("galleryMultplierAdult", gSaveContext.galleryMultplierAdult, INITIAL_MULTIPLIER);
+    SaveManager::Instance->LoadData("galleryTimeChild", gSaveContext.galleryTimeChild);
+    SaveManager::Instance->LoadData("galleryTimeAdult", gSaveContext.galleryTimeAdult);
 }
 
 void SaveManager::LoadBaseVersion4() {

@@ -178,6 +178,9 @@ void EnFhgFire_Destroy(Actor* thisx, PlayState* play) {
     }
 }
 
+#define NUM_TRAILS 32
+#define TRAIL_ANGLE_BASE (s16)(0x8000 / NUM_TRAILS)*2
+
 void EnFhgFire_LightningStrike(EnFhgFire* this, PlayState* play) {
     Camera* camera = Play_GetCamera(play, 0);
     s16 i;
@@ -221,9 +224,6 @@ void EnFhgFire_LightningStrike(EnFhgFire* this, PlayState* play) {
         case STRIKE_TRAILS:
             this->actor.shape.rot.y =
                 Camera_GetInputDirYaw(camera) + (this->work[FHGFIRE_VARIANCE_TIMER] & 0xFF) * 0x8000;
-
-            static const s16 NUM_TRAILS = 32;
-            static const s16 TRAIL_ANGLE_BASE = (0x8000 / NUM_TRAILS)*2;
 
             Math_ApproachF(&this->fwork[FHGFIRE_SCALE], 0.0f, 1.0f, 0.2f);
             if (this->work[FHGFIRE_TIMER] == 30) {
@@ -418,7 +418,7 @@ void EnFhgFire_SpearLight(EnFhgFire* this, PlayState* play) {
     }
 }
 
-static const f32 MAX_BALL_SPEED = 24.0f;
+#define MAX_BALL_SPEED 24.0f
 
 void EnFhgFire_EnergyBall(EnFhgFire* this, PlayState* play) {
     f32 dxL;
