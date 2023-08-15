@@ -2280,6 +2280,7 @@ void func_80834594(PlayState* play, Player* this) {
 
     if (func_8008F2BC(this, this->heldItemAction) >= 0) {
         func_808328EC(this, NA_SE_IT_SWORD_PICKOUT);
+        this->unsheathing = 2;
     } else if (this->heldItemAction != PLAYER_IA_NONE) {
         func_808328EC(this, NA_SE_PL_CHANGE_ARMS);
     }
@@ -5533,7 +5534,7 @@ void func_8083BA90(PlayState* play, Player* this, s32 arg2, f32 xzVelocity, f32 
 }
 
 s32 func_8083BB20(Player* this) {
-    if (!(this->stateFlags1 & PLAYER_STATE1_SHIELDING) && (Player_GetSwordHeld(this) != 0) && (this->shieldRelaxTimer == 0)) {
+    if (!(this->stateFlags1 & PLAYER_STATE1_SHIELDING) && (Player_GetSwordHeld(this) != 0) && (this->shieldRelaxTimer == 0) && (this->unsheathing == 0)) {
         if (D_80853614 ||
             ((this->actor.category != ACTORCAT_PLAYER) && CHECK_BTN_ALL(sControlInput->press.button, BTN_B))) {
             return 1;
@@ -9916,6 +9917,7 @@ void Player_InitCommon(Player* this, PlayState* play, FlexSkeletonHeader* skelHe
     this->shieldEntry = 0;
     this->crossoverState = 0;
     this->crouchCharge = 0;
+    this->unsheathing = 0;
     this->entryDiff.x = 0.0f;
     this->entryDiff.y = 0.0f;
     this->entryDiff.z = 0.0f;
@@ -10922,6 +10924,8 @@ void Player_UpdateCommon(Player* this, PlayState* play, Input* input) {
     if (this->unk_890 != 0) {
         this->unk_890--;
     }
+
+    DECR(this->unsheathing);
 
     if (CHECK_BTN_ALL(sControlInput->cur.button, BTN_R) || (this->stateFlags1 & PLAYER_STATE1_SHIELDING)){
         if (this->shieldUpTimer < SHIELD_TIME_MAX/2)

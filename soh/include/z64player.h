@@ -688,6 +688,7 @@ typedef struct Player {
                  u8         shieldUpTimer;
                  u8         shieldEntry;
                  u8         crossoverState;
+                 u8         unsheathing;
                  s16        crouchCharge;
                  Vec3f      entryDiff;
     // #endregion
