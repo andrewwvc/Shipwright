@@ -20,6 +20,7 @@ enum PresetType {
 
 enum EnhancementPreset {
     ENHANCEMENT_PRESET_DEFAULT,
+    ENHANCEMENT_PRESET_S_EDITION,
     ENHANCEMENT_PRESET_VANILLA_PLUS,
     ENHANCEMENT_PRESET_ENHANCED,
     ENHANCEMENT_PRESET_RANDOMIZER,
@@ -460,6 +461,73 @@ const std::vector<PresetEntry> vanillaPlusPresetEntries = {
     PRESET_ENTRY_S32("gQuickPutaway", 1),
     // Skip save confirmation
     PRESET_ENTRY_S32("gSkipSaveConfirmation", 1),
+};
+
+const std::vector<PresetEntry> sEditionPresetEntries = {
+    // D-pad Support in text and file select
+    PRESET_ENTRY_S32("gDpadText", 1),
+    // Play Ocarina with D-pad
+    PRESET_ENTRY_S32("gDpadOcarina", 1),
+    // Play Ocarina with Right Stick
+    PRESET_ENTRY_S32("gRStickOcarina", 1),
+    // D-pad as Equip Items
+    PRESET_ENTRY_S32("gDpadEquips", 1),
+    // Prevent Dropped Ocarina Inputs
+    PRESET_ENTRY_S32("gDpadNoDropOcarinaInput", 1),
+    // Right Stick Aiming
+    PRESET_ENTRY_S32("gRightStickAiming", 1),
+
+    // Text Speed (1 to 5)
+    PRESET_ENTRY_S32("gTextSpeed", 2),
+    // Skip Text
+    PRESET_ENTRY_S32("gSkipText", 1),
+    // Faster Block Push (+0 to +5)
+    PRESET_ENTRY_S32("gFasterBlockPush", 2),
+    // Better Owl
+    PRESET_ENTRY_S32("gBetterOwl", 1),
+
+    // Assignable Tunics and Boots
+    PRESET_ENTRY_S32("gAssignableTunicsAndBoots", 1),
+    // Inject Item Counts in messages
+    PRESET_ENTRY_S32("gInjectItemCounts", 1),
+
+    // Dynamic Wallet Icon
+    PRESET_ENTRY_S32("gDynamicWalletIcon", 1),
+
+    // Fix L&R Pause menu
+    PRESET_ENTRY_S32("gUniformLR", 1),
+    // Fix Dungeon entrances
+    PRESET_ENTRY_S32("gFixDungeonMinimapIcon", 1),
+    // Fix Two Handed idle animations
+    PRESET_ENTRY_S32("gTwoHandedIdle", 1),
+    // Fix the Gravedigging Tour Glitch
+    PRESET_ENTRY_S32("gGravediggingTourFix", 1),
+    // Fix Deku Nut upgrade
+    PRESET_ENTRY_S32("gDekuNutUpgradeFix", 1),
+    // Fix Navi text HUD position
+    PRESET_ENTRY_S32("gNaviTextFix", 1),
+    // Extend Silver Rupee Jingle
+    PRESET_ENTRY_S32("gSilverRupeeJingleExtend", 1),
+    // Instant Putaway
+    PRESET_ENTRY_S32("gInstantPutaway", 1),
+    // Let you place Bomchus without entering FPS mode
+    PRESET_ENTRY_S32("gDisableFirstPersonChus", 1),
+    //Light arrows light up suns
+    PRESET_ENTRY_S32("gSunlightArrows", 1),
+
+    //Disable model swaps
+    PRESET_ENTRY_S32("gDisableLOD", 1),
+    //Disable draw Distance
+    PRESET_ENTRY_S32("gDisableDrawDistance", 1),
+    // Red Ganon blood
+    PRESET_ENTRY_S32("gRedGanonBlood", 1),
+    //Make paths appear without z-fighting
+    PRESET_ENTRY_S32("gSceneSpecificDirtPathFix", 1),
+    //Fix credit music timing
+    PRESET_ENTRY_S32("gCreditsFix", 1),
+    PRESET_ENTRY_S32("gFixCameraDrift", 1),
+    PRESET_ENTRY_S32("gFixCameraSwing", 1),
+    PRESET_ENTRY_S32("gAuthenticLogo", 1)
 };
 
 const std::vector<PresetEntry> enhancedPresetEntries = {
@@ -929,6 +997,11 @@ const std::map<PresetType, PresetTypeDefinition> presetTypes = {
             "Default",
             "Reset all options to their default values.",
             {},
+        } },
+        { ENHANCEMENT_PRESET_S_EDITION, {
+            "S Edition",
+            "Settings recommended for a playthrough of S Edition.",
+            sEditionPresetEntries,
         } },
         { ENHANCEMENT_PRESET_VANILLA_PLUS, {
             "Vanilla Plus",
