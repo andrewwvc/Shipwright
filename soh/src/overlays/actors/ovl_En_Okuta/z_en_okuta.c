@@ -291,7 +291,7 @@ void EnOkuta_SetupShoot(EnOkuta* this, PlayState* play) {
         Audio_PlayActorSound2(&this->actor, NA_SE_EN_OCTAROCK_JUMP);
     }
     this->randomOffset = Rand_CenteredFloat(6.0f);
-    this->randomFlag = Rand_S16Offset(0, 3);
+    this->randomFlag = 1; //Rand_S16Offset(0, 4);
     if (player->actor.speedXZ > 3.0f && this->randomFlag == 2)
         this->randomFlag = 1;
     
