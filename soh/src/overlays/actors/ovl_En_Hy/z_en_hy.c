@@ -608,6 +608,8 @@ s16 func_80A70058(PlayState* play, Actor* thisx) {
     s16 beggarItems[] = { ITEM_BLUE_FIRE, ITEM_FISH, ITEM_BUG, ITEM_FAIRY };
     s16 beggarRewards[] = { BEGGAR_REWARD_FIRE, BEGGAR_REWARD_FISH, BEGGAR_REWARD_BUG, BEGGAR_REWARD_FAIRY };
     u16 HylianMsg = GetTextID("hylian");
+    s16 npcAgeIndex = LINK_IS_CHILD ? 1 : 2;
+    s16 tradeItemToken;
 
     switch (Message_GetState(&play->msgCtx)) {
         case TEXT_STATE_NONE:
@@ -645,9 +647,14 @@ s16 func_80A70058(PlayState* play, Actor* thisx) {
                 case 0x70F1:
                 case 0x70F2:
                 case 0x70F3:
-                    Rupees_ChangeBy(beggarRewards[this->actor.textId - 0x70F0]);
+                    tradeItemToken = this->actor.textId - 0x70F0;
+                    Rupees_ChangeBy(beggarRewards[tradeItemToken]);
                     Animation_ChangeByInfo(&this->skelAnime, sAnimationInfo, ENHY_ANIM_17);
                     Player_UpdateBottleHeld(play, GET_PLAYER(play), ITEM_BOTTLE, PLAYER_IA_BOTTLE);
+                    if (tradeItemToken&1^tradeItemToken>>1&1)
+                        tradeItemToken ^= 3;//This swaps the bug and fish entries
+                    if (getDayOfCycle() == tradeItemToken + 2)
+                        gSaveContext.NPCWeekEvents[npcAgeIndex] |= (1 << tradeItemToken);
                     break;
                 case 0x7016:
                     gSaveContext.infTable[12] |= 1;
