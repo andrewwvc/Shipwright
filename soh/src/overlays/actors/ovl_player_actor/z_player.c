@@ -5249,8 +5249,8 @@ s32 func_8083B040(Player* this, PlayState* play) {
                 sp2C = this->itemAction - PLAYER_IA_LETTER_ZELDA;
                 if ((sp2C >= 0) ||
                     (sp28 = Player_ActionToBottle(this, this->itemAction) - 1,
-                     ((sp28 >= 0) && (sp28 < 6) &&
-                      ((this->itemAction > PLAYER_IA_BOTTLE_POE) ||
+                     (((sp28 >= 0) && (sp28 < 6) || (sp28 == PLAYER_IA_BOTTLE_FAIRY-PLAYER_IA_BOTTLE-1)) &&
+                      ((this->itemAction > PLAYER_IA_BOTTLE_POE && this->itemAction != PLAYER_IA_BOTTLE_FAIRY) ||//This change allows fairies to be given in exchange, but also be used as items
                        ((this->targetActor != NULL) &&
                         (((this->itemAction == PLAYER_IA_BOTTLE_POE) && (this->exchangeItemId == EXCH_ITEM_POE)) ||
                          (this->exchangeItemId == EXCH_ITEM_BLUE_FIRE))))))) {

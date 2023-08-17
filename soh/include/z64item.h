@@ -554,7 +554,8 @@ typedef enum {
     /* 0x1B */ EXCH_ITEM_POE,
     /* 0x1C */ EXCH_ITEM_BIG_POE,
     /* 0x1D */ EXCH_ITEM_LETTER_RUTO,
-    /* 0x1E */ EXCH_ITEM_MAX
+    /* 0x1E */ EXCH_ITEM_FAIRY = 35,
+    /* 0x1F */ EXCH_ITEM_MAX
 } ExchangeItemID;
 
 #endif
