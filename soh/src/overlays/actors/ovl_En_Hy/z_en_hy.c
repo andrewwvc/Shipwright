@@ -359,17 +359,23 @@ s32 EnHy_FindSkelAndHeadObjects(EnHy* this, PlayState* play) {
 
     this->objBankIndexSkel1 = Object_GetIndex(&play->objectCtx, sSkeletonInfo[skelInfoIndex1].objectId);
     if (this->objBankIndexSkel1 < 0) {
-        return false;
+        this->objBankIndexSkel1 = Object_Spawn(&play->objectCtx, sSkeletonInfo[skelInfoIndex1].objectId);
+        if (this->objBankIndexSkel1 < 0)
+            return false;
     }
 
     this->objBankIndexSkel2 = Object_GetIndex(&play->objectCtx, sSkeletonInfo[skelInfoIndex2].objectId);
     if (this->objBankIndexSkel2 < 0) {
-        return false;
+        this->objBankIndexSkel2 = Object_Spawn(&play->objectCtx, sSkeletonInfo[skelInfoIndex2].objectId);
+        if (this->objBankIndexSkel2 < 0)
+            return false;
     }
 
     this->objBankIndexHead = Object_GetIndex(&play->objectCtx, sHeadInfo[headInfoIndex].objectId);
     if (this->objBankIndexHead < 0) {
-        return false;
+        this->objBankIndexHead = Object_Spawn(&play->objectCtx, sHeadInfo[headInfoIndex].objectId);
+        if (this->objBankIndexHead < 0)
+            return false;
     }
 
     return true;
@@ -542,8 +548,14 @@ u16 func_80A6F810(PlayState* play, Actor* thisx) {
                                                          : ((gSaveContext.infTable[12] & 0x2000) ? 0x7019 : 0x7018);
             }
         case ENHY_TYPE_CNE_11:
-            return (gSaveContext.infTable[8] & 0x800) ? ((gSaveContext.infTable[12] & 0x1000) ? 0x7014 : 0x70A4)
+        {
+            u16 retval = (gSaveContext.infTable[8] & 0x800) ? ((gSaveContext.infTable[12] & 0x1000) ? 0x7014 : 0x70A4)
                                                       : 0x7014;
+            if (getDayOfCycle() == 3 && (retval == 0x7014))
+                return HylianMsg+15;
+            else
+                return retval;
+        }
         case ENHY_TYPE_BOJ_12:
             if (play->sceneNum == SCENE_SPOT01) {
                 return !IS_DAY ? 0x5084 : 0x5083;
@@ -595,6 +607,7 @@ s16 func_80A70058(PlayState* play, Actor* thisx) {
     EnHy* this = (EnHy*)thisx;
     s16 beggarItems[] = { ITEM_BLUE_FIRE, ITEM_FISH, ITEM_BUG, ITEM_FAIRY };
     s16 beggarRewards[] = { BEGGAR_REWARD_FIRE, BEGGAR_REWARD_FISH, BEGGAR_REWARD_BUG, BEGGAR_REWARD_FAIRY };
+    u16 HylianMsg = GetTextID("hylian");
 
     switch (Message_GetState(&play->msgCtx)) {
         case TEXT_STATE_NONE:
@@ -712,6 +725,9 @@ s16 func_80A70058(PlayState* play, Actor* thisx) {
                     this->actionFunc = func_80A714C4;
                     break;
             }
+            if (this->actor.textId == HylianMsg+15) {
+                gSaveContext.NPCWeekEvents[0] |= 0x1;
+            }
             return NPC_TALK_STATE_IDLE;
         case TEXT_STATE_EVENT:
             if (!Message_ShouldAdvance(play)) {
@@ -821,6 +837,10 @@ void func_80A70978(EnHy* this, PlayState* play) {
             trackingMode =
                 (this->interactInfo.talkState == NPC_TALK_STATE_IDLE) ? NPC_TRACKING_NONE : NPC_TRACKING_HEAD_AND_TORSO;
             break;
+        case ENHY_TYPE_CNE_11:
+            if (play->sceneNum == SCENE_SPOT00)
+                trackingMode = NPC_TRACKING_FULL_BODY;
+            break;
         case ENHY_TYPE_BOJ_12:
             trackingMode = NPC_TRACKING_NONE;
             break;
@@ -857,6 +877,14 @@ void func_80A70978(EnHy* this, PlayState* play) {
 
 s32 EnHy_ShouldSpawn(EnHy* this, PlayState* play) {
     switch (play->sceneNum) {
+        case SCENE_SPOT00:
+            if ((this->actor.params & 0x7F) == ENHY_TYPE_CNE_11) {
+                if (LINK_IS_CHILD && getDayOfCycle() == 3 && (gSaveContext.NPCWeekEvents[0] & 0x1)) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
         case SCENE_SPOT01:
             if (!((this->actor.params & 0x7F) == ENHY_TYPE_BOJ_9 || (this->actor.params & 0x7F) == ENHY_TYPE_BOJ_10 ||
                   (this->actor.params & 0x7F) == ENHY_TYPE_BOJ_12 || (this->actor.params & 0x7F) == ENHY_TYPE_AHG_2 ||
@@ -914,6 +942,10 @@ s32 EnHy_ShouldSpawn(EnHy* this, PlayState* play) {
             }
         default:
             switch (this->actor.params & 0x7F) {
+                case ENHY_TYPE_CNE_11:
+                    if (LINK_IS_CHILD && getDayOfCycle() == 3 && (gSaveContext.NPCWeekEvents[0] & 0x1))
+                        return false;
+                    break;
                 case ENHY_TYPE_BJI_19:
                 case ENHY_TYPE_AHG_20:
                     if (LINK_IS_ADULT) {

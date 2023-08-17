@@ -251,19 +251,19 @@ s32 EnKo_AreObjectsAvailable(EnKo* this, PlayState* play) {
             return false;
     }
 
-    this->legsObjectBankIdx = Object_GetIndex(&play->objectCtx, sSkeleton[bodyId].objectId);
-    if (this->legsObjectBankIdx < 0) {
+    this->bodyObjectBankIdx = Object_GetIndex(&play->objectCtx, sSkeleton[bodyId].objectId);
+    if (this->bodyObjectBankIdx < 0) {
         Object_Spawn(&play->objectCtx, sSkeleton[bodyId].objectId);
-        this->legsObjectBankIdx = Object_GetIndex(&play->objectCtx, sSkeleton[bodyId].objectId);
-        if (this->legsObjectBankIdx < 0)
+        this->bodyObjectBankIdx = Object_GetIndex(&play->objectCtx, sSkeleton[bodyId].objectId);
+        if (this->bodyObjectBankIdx < 0)
             return false;
     }
 
-    this->legsObjectBankIdx = Object_GetIndex(&play->objectCtx, sHead[headId].objectId);
-    if (this->legsObjectBankIdx < 0) {
+    this->headObjectBankIdx = Object_GetIndex(&play->objectCtx, sHead[headId].objectId);
+    if (this->headObjectBankIdx < 0) {
         Object_Spawn(&play->objectCtx, sHead[headId].objectId);
-        this->legsObjectBankIdx = Object_GetIndex(&play->objectCtx, sHead[headId].objectId);
-        if (this->legsObjectBankIdx < 0)
+        this->headObjectBankIdx = Object_GetIndex(&play->objectCtx, sHead[headId].objectId);
+        if (this->headObjectBankIdx < 0)
             return false;
     }
     return true;
