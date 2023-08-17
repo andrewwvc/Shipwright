@@ -326,6 +326,7 @@ typedef struct {
     /*        */ s32 goronTimeDay;
     /*        */ s32 SariaDateDay;
     /*        */ s32 RutoDateDay;
+    /*        */ u16 NPCWeekEvents[4];
     /*        */ s32 MalonPlayDay;
     /*        */ s32 MalonRideDay;
     /*        */ u8 maxBoosts;

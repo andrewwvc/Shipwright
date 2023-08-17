@@ -2117,6 +2117,7 @@ void func_80075B44(PlayState* play) {
                 gSaveContext.totalDays++;
                 gSaveContext.bgsDayCount++;
                 gSaveContext.dogIsLost = true;
+                Environment_UpdateDataOnDayChange();
                 func_80078884(NA_SE_EV_CHICKEN_CRY_M);
                 if ((Inventory_ReplaceItem(play, ITEM_WEIRD_EGG, ITEM_CHICKEN) ||
                      Inventory_HatchPocketCucco(play)) &&
@@ -2511,6 +2512,14 @@ void Environment_ClearBgsDayCount(void) {
 
 s32 Environment_GetTotalDays(void) {
     return gSaveContext.totalDays;
+}
+
+void Environment_UpdateDataOnDayChange(void) {
+    if (getDayOfCycle() == 0) {
+        for (int flag = 0; flag < ARRAY_COUNT(gSaveContext.NPCWeekEvents); flag++) {
+            gSaveContext.NPCWeekEvents[flag] = 0;
+        }
+    }
 }
 
 void Environment_ForcePlaySequence(u16 seqId) {

@@ -14,6 +14,7 @@ typedef enum {
     INF_TABLE,
     EVENT_INF,
     NPC_GORON,
+    NPC_WEEK_EVENT,
     RANDOMIZER_INF,
 } FlagTableType;
 
@@ -369,10 +370,13 @@ const std::vector<FlagTable> flagTables = {
         { 0x03, "Talked as an adult in market" },
         { 0x04, "Talked at day in market" },
         { 0x05, "Talked at night in market" },
-        { 0x06, "Obtaiend market trade piece" },
+        { 0x06, "Obtained market trade piece" },
         { 0x07, "?" },
         { 0x08, "Big Brother is in past" },
         { 0x09, "Gerudo Assult" },
+    } },
+    { "NPC Weekly Event Flags", NPC_WEEK_EVENT, 0x03, {
+
     } },
    { "Randomizer Inf Flags", RANDOMIZER_INF, 0x08, {
         { RAND_INF_DUNGEONS_DONE_DEKU_TREE, "DUNGEONS_DONE_DEKU_TREE" },

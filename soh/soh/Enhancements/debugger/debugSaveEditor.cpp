@@ -1170,6 +1170,9 @@ void DrawFlagsTab() {
                         case NPC_GORON:
                             DrawFlagTableArray16(flagTable, j, gSaveContext.goronTimeStatus);
                             break;
+                        case NPC_WEEK_EVENT:
+                            DrawFlagTableArray16(flagTable, j, gSaveContext.NPCWeekEvents[j]);
+                            break;
                         case RANDOMIZER_INF:
                             DrawFlagTableArray16(flagTable, j, gSaveContext.randomizerInf[j]);
                             break;

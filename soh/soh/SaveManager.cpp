@@ -599,6 +599,9 @@ void SaveManager::InitFileNormal() {
     gSaveContext.goronTimeDay = gSaveContext.totalDays;
     gSaveContext.SariaDateDay = 0;
     gSaveContext.RutoDateDay = 0;
+    for (int flag = 0; flag < ARRAY_COUNT(gSaveContext.NPCWeekEvents); flag++) {
+        gSaveContext.NPCWeekEvents[flag] = 0;
+    }
     gSaveContext.MalonPlayDay = 0;
     gSaveContext.MalonRideDay = 0;
     gSaveContext.maxBoosts = INITIAL_BOOSTS;
@@ -1701,6 +1704,9 @@ void SaveManager::LoadBaseVersion4() {
     SaveManager::Instance->LoadData("goronTimeDay", gSaveContext.goronTimeDay);
     SaveManager::Instance->LoadData("SariaDateDay", gSaveContext.SariaDateDay);
     SaveManager::Instance->LoadData("RutoDateDay", gSaveContext.RutoDateDay);
+    SaveManager::Instance->LoadArray("RutoWeekStatus", ARRAY_COUNT(gSaveContext.NPCWeekEvents), [](size_t i) {
+        SaveManager::Instance->LoadData("", gSaveContext.NPCWeekEvents[i]);
+    });
     SaveManager::Instance->LoadData("MalonPlayDay", gSaveContext.MalonPlayDay);
     SaveManager::Instance->LoadData("MalonRideDay", gSaveContext.MalonRideDay);
     SaveManager::Instance->LoadData("maxBoosts", gSaveContext.maxBoosts, INITIAL_BOOSTS);
@@ -1886,6 +1892,9 @@ void SaveManager::SaveBase(SaveContext* saveContext, int sectionID, bool fullSav
     SaveManager::Instance->SaveData("goronTimeStatus", saveContext->goronTimeStatus);
     SaveManager::Instance->SaveData("goronTimeDay", saveContext->goronTimeDay);
     SaveManager::Instance->SaveData("SariaDateDay", saveContext->SariaDateDay);
+    SaveManager::Instance->SaveArray("RutoWeekStatus", ARRAY_COUNT(saveContext->NPCWeekEvents), [&](size_t i) {
+        SaveManager::Instance->SaveData("", saveContext->NPCWeekEvents[i]);
+    });
     SaveManager::Instance->SaveData("RutoDateDay", saveContext->RutoDateDay);
     SaveManager::Instance->SaveData("MalonPlayDay", saveContext->MalonPlayDay);
     SaveManager::Instance->SaveData("MalonRideDay", saveContext->MalonRideDay);
