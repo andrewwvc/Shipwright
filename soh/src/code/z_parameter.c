@@ -2705,7 +2705,7 @@ u8 Item_CheckObtainability(u8 item) {
         return ITEM_NONE;
     } else if (item == ITEM_DEFENSE_HEART) {
         return ITEM_NONE;
-    } else if (ITEM_WALLET_KING) {
+    } else if (item == ITEM_WALLET_KING) {
         return ITEM_NONE;
     } else if (item == ITEM_HEART) {
         return ITEM_HEART;
