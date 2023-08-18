@@ -31,6 +31,8 @@ void func_80A710F8(EnHy* this, PlayState* play);
 void func_80A7127C(EnHy* this, PlayState* play);
 void EnHy_DoNothing(EnHy* this, PlayState* play);
 void func_80A714C4(EnHy* this, PlayState* play);
+void EnHy_GiveBeggarReward(EnHy* this, PlayState* play);
+void EnHy_ReceiveBeggarReward(EnHy* this, PlayState* play);
 
 const ActorInit En_Hy_InitVars = {
     ACTOR_EN_HY,
@@ -616,6 +618,26 @@ s16 func_80A70058(PlayState* play, Actor* thisx) {
         case TEXT_STATE_DONE_HAS_NEXT:
         case TEXT_STATE_CHOICE:
         case TEXT_STATE_DONE:
+            if (Message_ShouldAdvance(play)) {
+                switch (this->actor.textId) {
+                    case 0x70F0:
+                    case 0x70F1:
+                    case 0x70F2:
+                    case 0x70F3:
+                        tradeItemToken = this->actor.textId - 0x70F0;
+                        if (tradeItemToken&1^tradeItemToken>>1&1)
+                            tradeItemToken ^= 3;//This swaps the bug and fish entries
+                        if (getDayOfCycle() == tradeItemToken + 2)
+                            gSaveContext.NPCWeekEvents[npcAgeIndex] |= (1 << tradeItemToken);
+                        if ((gSaveContext.NPCWeekEvents[npcAgeIndex] & 0xF) == 0xF && !(gSaveContext.itemGetInf[3] & 4)) {
+                            Animation_ChangeByInfo(&this->skelAnime, sAnimationInfo, ENHY_ANIM_17);
+                            Player_UpdateBottleHeld(play, GET_PLAYER(play), ITEM_BOTTLE, PLAYER_IA_BOTTLE);
+                            this->actor.textId = HylianMsg+16;
+                            Message_ContinueTextbox(play, this->actor.textId);
+                        }
+                    break;
+                }
+            }
         case TEXT_STATE_SONG_DEMO_DONE:
         case TEXT_STATE_8:
         case TEXT_STATE_9:
@@ -651,10 +673,6 @@ s16 func_80A70058(PlayState* play, Actor* thisx) {
                     Rupees_ChangeBy(beggarRewards[tradeItemToken]);
                     Animation_ChangeByInfo(&this->skelAnime, sAnimationInfo, ENHY_ANIM_17);
                     Player_UpdateBottleHeld(play, GET_PLAYER(play), ITEM_BOTTLE, PLAYER_IA_BOTTLE);
-                    if (tradeItemToken&1^tradeItemToken>>1&1)
-                        tradeItemToken ^= 3;//This swaps the bug and fish entries
-                    if (getDayOfCycle() == tradeItemToken + 2)
-                        gSaveContext.NPCWeekEvents[npcAgeIndex] |= (1 << tradeItemToken);
                     break;
                 case 0x7016:
                     gSaveContext.infTable[12] |= 1;
@@ -734,6 +752,10 @@ s16 func_80A70058(PlayState* play, Actor* thisx) {
             }
             if (this->actor.textId == HylianMsg+15) {
                 gSaveContext.NPCWeekEvents[0] |= 0x1;
+            }
+            if (this->actor.textId == HylianMsg+16) {
+                func_80A6F7CC(this, play, GI_HEART_PIECE);
+                this->actionFunc = EnHy_GiveBeggarReward;
             }
             return NPC_TALK_STATE_IDLE;
         case TEXT_STATE_EVENT:
@@ -1179,6 +1201,25 @@ void func_80A71530(EnHy* this, PlayState* play) {
             }
         }
         this->actionFunc = func_80A7127C;
+    }
+}
+
+void EnHy_GiveBeggarReward(EnHy* this, PlayState* play) {
+    if (Actor_HasParent(&this->actor, play)) {
+        this->actionFunc = EnHy_ReceiveBeggarReward;
+    } else {
+        if (!gSaveContext.n64ddFlag || this->getItemEntry.getItemId == GI_NONE) {
+            func_8002F434(&this->actor, play, this->unkGetItemId, this->actor.xzDistToPlayer + 1.0f, fabsf(this->actor.yDistToPlayer) + 1.0f);
+        } else {
+            GiveItemEntryFromActor(&this->actor, play, this->getItemEntry, this->actor.xzDistToPlayer + 1.0f, fabsf(this->actor.yDistToPlayer) + 1.0f);
+        }
+    }
+}
+
+void EnHy_ReceiveBeggarReward(EnHy* this, PlayState* play) {
+    if ((Message_GetState(&play->msgCtx) == TEXT_STATE_DONE) && Message_ShouldAdvance(play)) {
+        gSaveContext.itemGetInf[3] |= 4;
+        this->actionFunc = EnHy_DoNothing;
     }
 }
 

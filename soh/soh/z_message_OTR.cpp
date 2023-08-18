@@ -1061,6 +1061,7 @@ extern "C" void OTRMessage_Init()
     MakeNormalMsgEng(HylianMsg+13, "You know, I'm not sure if&anyone has ever won the&Super Special Treasure Chest Game.&How do we know it's not rigged?");
     MakeNormalMsgEng(HylianMsg+14, "Surely I've never heard of&anyone winning. Shouldn't some&inspector make sure nothing&funny is going on?");
     MakeNormalMsgEng(HylianMsg+15, "Well, I do actually want to do&something about this problem, but&I'm not sure I can make the&journey to get the medicine I need.^It's embarassing to ask, but&my husband's busy, so I wonder&if anyone will escort me.");
+    MakeNormalMsgEng(HylianMsg+16, "You've been an especially&good supplier this week.&I'm satisfied enough to&give you this bonus!");
     MakeNormalMsgEng(0x70F0, "Oh, that's %cBlue Fire%w!&I'll buy it for %r"+std::to_string(BEGGAR_REWARD_FIRE)+" Rupees%w!&All sales final, OK?");
     MakeNormalMsgEng(0x70F1, "Oh, a %pFish%w!&I'll buy it for %r"+std::to_string(BEGGAR_REWARD_FISH)+" Rupees%w!&All sales final, OK?");
     MakeNormalMsgEng(0x70F2, "Oh, it's a cute little %gBug%w!&I'll buy it for %r"+std::to_string(BEGGAR_REWARD_BUG)+" Rupee%w!&All sales final, OK?");
