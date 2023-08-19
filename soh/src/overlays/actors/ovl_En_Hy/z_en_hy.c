@@ -641,6 +641,7 @@ s16 func_80A70058(PlayState* play, Actor* thisx) {
                         if (getDayOfCycle() == tradeItemToken + 2)
                             gSaveContext.NPCWeekEvents[npcAgeIndex] |= (1 << tradeItemToken);
                         if ((gSaveContext.NPCWeekEvents[npcAgeIndex] & 0xF) == 0xF && !(gSaveContext.itemGetInf[3] & 4)) {
+                            Rupees_ChangeBy(beggarRewards[this->actor.textId - 0x70F0]);
                             Animation_ChangeByInfo(&this->skelAnime, sAnimationInfo, ENHY_ANIM_17);
                             Player_UpdateBottleHeld(play, GET_PLAYER(play), ITEM_BOTTLE, PLAYER_IA_BOTTLE);
                             this->actor.textId = HylianMsg+16;

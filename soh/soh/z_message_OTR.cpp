@@ -1075,6 +1075,7 @@ extern "C" void OTRMessage_Init()
     MakeNormalMsgEng(0x70F0, "Oh, that's %cBlue Fire%w!&I'll buy it for %r"+std::to_string(BEGGAR_REWARD_FIRE)+" Rupees%w!&All sales final, OK?");
     MakeNormalMsgEng(0x70F1, "Oh, a %pFish%w!&I'll buy it for %r"+std::to_string(BEGGAR_REWARD_FISH)+" Rupees%w!&All sales final, OK?");
     MakeNormalMsgEng(0x70F2, "Oh, it's a cute little %gBug%w!&I'll buy it for %r"+std::to_string(BEGGAR_REWARD_BUG)+" Rupee%w!&All sales final, OK?");
+    MakeNormalMsgEng(0x70F3, "Oh, a darling little %cFairy%w!&I'll buy it for %r"+std::to_string(BEGGAR_REWARD_FAIRY)+" Rupees%w!&All sales final, OK?");
     MakeNormalMsgEng(0xF000, "\x08%rPiece of Heart   200 Rupees%w&Adds a quarter of a section&to your heart container.&4 together will improve your life!\t\n\x02");
     MakeNormalMsgEng(0xF001, "\x08Piece of Heart   200 Rupees&\x09\x1B&%gBuy&Don't buy%w\x02");
 
