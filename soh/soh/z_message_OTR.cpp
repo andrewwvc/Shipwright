@@ -8,6 +8,7 @@
 #include <message_data_static.h>
 #include "Enhancements/custom-message/CustomMessageManager.h"
 #include "Enhancements/custom-message/CustomMessageTypes.h"
+#include "src/overlays/actors/ovl_En_Hy/z_en_hy.h"
 
 extern "C" MessageTableEntry* sNesMessageEntryTablePtr;
 extern "C" MessageTableEntry* sGerMessageEntryTablePtr;
@@ -365,6 +366,9 @@ extern "C" void OTRMessage_Init()
 
     MakeBlueMsgEng(0x7,  "\x13\x48You got a&%rDeku Seed Bullet Bag%w.&This bag can hold up to %y"+std::to_string(CAPACITY(UPG_BULLET_BAG,2))+"%w&slingshot bullets.");
     MakeBlueMsgEng(0x6C, "\x13\x49Your %rDeku Seed Bullet Bag%w&has become bigger!&Now you can carry more bullets!&This bag can hold %y"+std::to_string(CAPACITY(UPG_BULLET_BAG,3))+"%w bullets!");
+    auto& str37 = "\x13\x00You got a %rDeku Stick%w!&On the %ySelect Item Subscreen%w,&you can set it to %y\xA7%w, %y\xA6%w or %y\xA8%w.^\x13\x00Set it to %y\xA1%w and swing it&with %y\xA1%w!^\x13\x00When you want to put it away,&stand still and press %b\x9F%w.&You can carry up to ";
+    std::string s37(std::begin(str37), std::end(str37)-1);
+    MakeBlueMsgEng(0x37,  s37+std::to_string(CAPACITY(UPG_STICKS,1))+" sticks,&but don't waste them.");
     auto& str90 = "\x13\x00Now you can pick up&many %rDeku Sticks%w!&You can carry up to %y";
     std::string s90(std::begin(str90), std::end(str90)-1);
     MakeBlueMsgEng(0x90, s90+std::to_string(CAPACITY(UPG_STICKS,2))+"%w of them!");
@@ -1044,18 +1048,21 @@ extern "C" void OTRMessage_Init()
     MakeNormalMsgEng(HylianMsg+0, "Oh, so I guess you're here&for the night trade then.^We normally don't let&kids get involved, but&you seem savy enough.");
     MakeNormalMsgEng(HylianMsg+1, "Here's our special night offers.\x0B\x02");
     MakeNormalMsgEng(HylianMsg+2, "I don't typically take&guests during the day.^That's why I lock my door,&as you'd know.^If you have business here,&please let that be known&ahead of time.");
-    MakeNormalMsgEng(HylianMsg+3, "You know, I heard there's some&shady business going on in&some of the shops around here.^Apparantly there are secret deals&being done on luxury items that&aren't being offered to the public.");
+    MakeNormalMsgEng(HylianMsg+3, "You know, I heard there's some&shady business going on in&some of the shops around here&at night.^Apparantly there are secret deals&being done on luxury items that&aren't being offered to the public.");
     MakeNormalMsgEng(HylianMsg+4, "And how would this guy know&about what he's telling me?^He thinks he's got the&dirt on everything.");
     MakeNormalMsgEng(HylianMsg+5, "You know, I heard that the&folks at Lon Lon Ranch are&having trouble getting enough milk.^Apparantly, they don't have&enough cows themselves to&provide enough supply.");
     MakeNormalMsgEng(HylianMsg+6, "I would help them, but&I can't make any milk myself!");
     MakeNormalMsgEng(HylianMsg+7, "Now there, surely there's something&they could each be used for, otherwise&why would people borrow&them in the first place?");
-    MakeNormalMsgEng(HylianMsg+8, "Useless, they're useless I tell you.^There's no way even half&the masks that the mask&shop offers have any use at all.^They are just children's toys.");
+    MakeNormalMsgEng(HylianMsg+8, "Useless, they're useless I tell you.^There's no way even half&the masks that the mask&shop offers have any use at all.^They're just children's toys!");
     MakeNormalMsgEng(HylianMsg+9, "I'm not saying that&there MUST BE one.^I'm mearly pointing out that we&cannot rule out the possible existence&of an invisible talking cucco.^There could be one somewhere&for all we know.");
     MakeNormalMsgEng(HylianMsg+10, "I can't believe&what this guy is saying.^He believes that there is&an invisible, talking cucco!&Absurd.");
     MakeNormalMsgEng(HylianMsg+11, "You know, I heard that the&girl with the red hair from&the ranch is a terrible sleeper.");
     MakeNormalMsgEng(HylianMsg+12, "I also heard.^When she stayed at the inn,&she kept me up all&night with her singing!");
     MakeNormalMsgEng(HylianMsg+13, "You know, I'm not sure if&anyone has ever won the&Super Special Treasure Chest Game.&How do we know it's not rigged?");
     MakeNormalMsgEng(HylianMsg+14, "Surely I've never heard of&anyone winning. Shouldn't some&inspector make sure nothing&funny is going on?");
+    MakeNormalMsgEng(0x70F0, "Oh, that's %cBlue Fire%w!&I'll buy it for %r"+std::to_string(BEGGAR_REWARD_FIRE)+" Rupees%w!&All sales final, OK?");
+    MakeNormalMsgEng(0x70F1, "Oh, a %pFish%w!&I'll buy it for %r"+std::to_string(BEGGAR_REWARD_FISH)+" Rupees%w!&All sales final, OK?");
+    MakeNormalMsgEng(0x70F2, "Oh, it's a cute little %gBug%w!&I'll buy it for %r"+std::to_string(BEGGAR_REWARD_BUG)+" Rupees%w!&All sales final, OK?");
     MakeNormalMsgEng(0xF000, "\x08%rPiece of Heart   200 Rupees%w&Adds a quarter of a section&to your heart container.&4 together will improve your life!\t\n\x02");
     MakeNormalMsgEng(0xF001, "\x08Piece of Heart   200 Rupees&\x09\x1B&%gBuy&Don't buy%w\x02");
 

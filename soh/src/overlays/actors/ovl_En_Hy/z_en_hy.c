@@ -594,7 +594,7 @@ u16 func_80A6F810(PlayState* play, Actor* thisx) {
 s16 func_80A70058(PlayState* play, Actor* thisx) {
     EnHy* this = (EnHy*)thisx;
     s16 beggarItems[] = { ITEM_BLUE_FIRE, ITEM_FISH, ITEM_BUG, ITEM_FAIRY };
-    s16 beggarRewards[] = { 30, 20, 3, 3 };
+    s16 beggarRewards[] = { BEGGAR_REWARD_FIRE, BEGGAR_REWARD_FISH, BEGGAR_REWARD_BUG, BEGGAR_REWARD_FAIRY };
 
     switch (Message_GetState(&play->msgCtx)) {
         case TEXT_STATE_NONE:
