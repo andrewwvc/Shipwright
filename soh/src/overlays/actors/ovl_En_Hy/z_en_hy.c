@@ -427,6 +427,7 @@ u16 func_80A6F810(PlayState* play, Actor* thisx) {
     Player* player = GET_PLAYER(play);
     EnHy* this = (EnHy*)thisx;
     u16 textId = Text_GetFaceReaction(play, (this->actor.params & 0x7F) + 37);
+    u16 retval = 0;
 
     if (textId != 0) {
         if ((this->actor.params & 0x7F) == ENHY_TYPE_BOJ_5) {
@@ -476,7 +477,17 @@ u16 func_80A6F810(PlayState* play, Actor* thisx) {
                 return 0x701A;
             }
         case ENHY_TYPE_BOJ_3:
-            return (gSaveContext.eventChkInf[8] & 1) ? ((gSaveContext.infTable[12] & 0x10) ? 0x7001 : 0x70EB) : 0x7001;
+            retval = (gSaveContext.eventChkInf[8] & 1) ? ((gSaveContext.infTable[12] & 0x10) ? 0x7001 : 0x70EB) : 0x7001;
+            if (retval == 0x70EB)
+                return retval;
+            else {
+                if (getDayOfCycle() < 2)
+                    return retval;
+                else if (getDayOfCycle() == 2)
+                    return HylianMsg+17;
+                else
+                    return HylianMsg+18;
+            }
         case ENHY_TYPE_AHG_4:
             return (gSaveContext.eventChkInf[8] & 1) ? 0x704B : ((gSaveContext.infTable[12] & 0x20) ? 0x7024 : 0x7023);
         case ENHY_TYPE_BOJ_5:
@@ -551,7 +562,7 @@ u16 func_80A6F810(PlayState* play, Actor* thisx) {
             }
         case ENHY_TYPE_CNE_11:
         {
-            u16 retval = (gSaveContext.infTable[8] & 0x800) ? ((gSaveContext.infTable[12] & 0x1000) ? 0x7014 : 0x70A4)
+            retval = (gSaveContext.infTable[8] & 0x800) ? ((gSaveContext.infTable[12] & 0x1000) ? 0x7014 : 0x70A4)
                                                       : 0x7014;
             if (getDayOfCycle() == 3 && (retval == 0x7014))
                 return HylianMsg+15;

@@ -330,8 +330,9 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, LUS::ActorEnt
     } },
     { 0x37, {//Impa's
         { 0x00, {
-            { -1, -1, { ACTOR_EN_WONDER_TALK2, 142,20,210, 0,15350,0, static_cast<int16_t>(0x8000|(0x3F<<6)|0x3f) }},
-            { -1, -1, { ACTOR_EN_WONDER_TALK2, 142,20,67,  0,15350,0, static_cast<int16_t>(0x8000|(0x40<<6)|0x3f) }},
+            { -1, -1, { ACTOR_EN_WONDER_TALK2, 142,25,210, 0,15350,0, static_cast<int16_t>(0x8000|(0x3F<<6)|0x3f) }},
+            { -1, -1, { ACTOR_EN_WONDER_TALK2, 142,25,67,  0,15350,0, static_cast<int16_t>(0x8000|(0x40<<6)|0x3f) }},
+            { -1, -1, { ACTOR_EN_WONDER_TALK2, 142,25,-85,  0,15350,0, static_cast<int16_t>(0x8000|(0xBA<<6)|0x3f) }},
         } },
     } },
     { SCENE_SPOT01, { // Kakariko

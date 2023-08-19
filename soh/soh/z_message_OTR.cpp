@@ -357,6 +357,14 @@ extern "C" void OTRMessage_Init()
           "",
           TEXTBOX_TYPE_BLUE, TEXTBOX_POS_BOTTOM)
     );
+    CustomMessageManager::Instance->CreateMessage(
+        questMessageTableID, WonderMsg+0xBA,
+        CustomMessage(
+          "Each day is associated with an&element fitting to its character.^The first, the Etherial,&heavenly radiance and feeling.&The second, %yGold%w and&solid precious metal.^The third, %rFire%w and ash.&The forth, %BEarth%w and soil.&The fifth, %bWater%w and the living ocean.&The sixth, the %cAir%w and its inhabitants.",
+          "",
+          "",
+          TEXTBOX_TYPE_BLUE, TEXTBOX_POS_MIDDLE)
+    );
 
     //Get Item Text
     MakeBlueMsgEng(0x810, "You received an Icon of Magic Power!&This will increase your magic capacity.&It looks awfully like an ordinary&magic jar though.");
@@ -1062,6 +1070,8 @@ extern "C" void OTRMessage_Init()
     MakeNormalMsgEng(HylianMsg+14, "Surely I've never heard of&anyone winning. Shouldn't some&inspector make sure nothing&funny is going on?");
     MakeNormalMsgEng(HylianMsg+15, "Well, I do actually want to do&something about this problem, but&I'm not sure I can make the&journey to get the medicine I need.^It's embarassing to ask, but&my husband's busy, so I wonder&if anyone will escort me.");
     MakeNormalMsgEng(HylianMsg+16, "You've been an especially&good supplier this week.&I'm satisfied enough to&give you this bonus!");
+    MakeNormalMsgEng(HylianMsg+17, "Traditonally, people here in this&market believed that the best day&to start business with someone&was when the moon is most %rred%w.^Now, I'm not the most superstitious&person but I know it pays to&understand a people's customs.");
+    MakeNormalMsgEng(HylianMsg+18, "Here's a tip for doing business here.&If a certain kind of item&is associated with a particular&%cday of the week%w,^it may be valued more&by people on that day.&It's a useful thing to know!");
     MakeNormalMsgEng(0x70F0, "Oh, that's %cBlue Fire%w!&I'll buy it for %r"+std::to_string(BEGGAR_REWARD_FIRE)+" Rupees%w!&All sales final, OK?");
     MakeNormalMsgEng(0x70F1, "Oh, a %pFish%w!&I'll buy it for %r"+std::to_string(BEGGAR_REWARD_FISH)+" Rupees%w!&All sales final, OK?");
     MakeNormalMsgEng(0x70F2, "Oh, it's a cute little %gBug%w!&I'll buy it for %r"+std::to_string(BEGGAR_REWARD_BUG)+" Rupee%w!&All sales final, OK?");
