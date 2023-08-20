@@ -1838,7 +1838,7 @@ void Item_DropCollectibleRandom1(PlayState* play, Actor* fromActor, Vec3f* spawn
             params = 0xD * 0x10;
             dropTableIndex = 0x0;
             dropId = ITEM00_BOMBS_A;
-        } else if (gSaveContext.rupees < 11) {
+        } else if (Rupees_GetDisplayNum() < 11) {
             params = 0xA * 0x10;
             dropTableIndex = 0x0;
             dropId = ITEM00_RUPEE_RED;

@@ -1162,6 +1162,7 @@ extern "C" void OTRMessage_Init()
     MakeNormalMsgEng(MiscMsg+2, "WHAT!?^You can actually see&and hear me, can't you?^It is of no concern to&me how you may be able to&pull off such a feat, but alas,^all I can do is bestow&apon you a fitting enough trinket,&such that you JUST BUZZ OFF&and leave me alone.");
     MakeNormalMsgEng(MiscMsg+3, "I do believe I&told you to SCRAM.");
     MakeNormalMsgEng(MiscMsg+4, "Hey, I see you're pretty&good at this. How about&trying your hand at the&Super Special Treasure Chest game?^Your choice.\x1C&%gSuper Special Game (30 Rupees)&Regular Game (10 Rupees)&Don't play%w");
+    MakeNormalMsgEng(MiscMsg+5, "Sorry. I cannot serve someone&who is already borrowing something&from someone else.\x0B\x02");
 
     u16 GerudoMsg = TextIDAllocator::Instance->allocateRange("gerudo", 10);
     MakeNormalMsgEng(GerudoMsg+0, "Heh, since you're clearly a master,&the only thing left is&to try for a perfect score,&if you can!\x0B\x02");

@@ -98,8 +98,8 @@ namespace GameInteractionEffect {
         if (!GameInteractor::IsSaveLoaded()) {
             return GameInteractionEffectQueryResult::TemporarilyNotPossible;
         } else if (
-            (parameters[0] < 0 && gSaveContext.rupees <= 0) ||
-            (parameters[0] > 0 && gSaveContext.rupees >= CUR_CAPACITY(UPG_WALLET))
+            (parameters[0] < 0 && Rupees_GetNum() <= 0) ||
+            (parameters[0] > 0 && Rupees_GetNum() >= Wallet_Capacity_Current())
         ) {
             return GameInteractionEffectQueryResult::NotPossible;
         } else {

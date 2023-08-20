@@ -897,7 +897,7 @@ u8 EnOssan_CursorLeft(EnOssan* this, u8 cursorIndex, u8 shelfSlotMax) {
 void EnOssan_TryPaybackMask(EnOssan* this, PlayState* play) {
     s16 price = sMaskPaymentPrice[this->happyMaskShopState];
 
-    if (gSaveContext.rupees < price) {
+    if (Rupees_GetNum() < price) {
         Message_ContinueTextbox(play, 0x70A8);
         this->happyMaskShopkeeperEyeIdx = 1;
         this->happyMaskShopState = OSSAN_HAPPY_STATE_ANGRY;
@@ -2169,8 +2169,13 @@ void EnOssan_InitBombchuShopkeeper(EnOssan* this, PlayState* play) {
 
 u16 EnOssan_SetupHelloDialog(EnOssan* this) {
     this->happyMaskShopState = OSSAN_HAPPY_STATE_NONE;
+    u16 MiscMsg = GetTextID("misc");
     // mask shop messages
     if (this->actor.params == OSSAN_TYPE_MASK) {
+        if (usingBorrowedWallet()) {
+            this->happyMaskShopState = OSSAN_HAPPY_STATE_ANGRY;
+            return MiscMsg+5;
+        }
         if (INV_CONTENT(ITEM_TRADE_CHILD) == ITEM_SOLD_OUT) {
             if (gSaveContext.itemGetInf[3] & 0x800) {
                 if (!(gSaveContext.eventChkInf[8] & 0x8000)) {

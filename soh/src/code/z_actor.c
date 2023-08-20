@@ -5954,7 +5954,7 @@ s32 func_800374E0(PlayState* play, Actor* actor, u16 textId) {
         case 0x2030:
         case 0x2031:
             if (msgCtx->choiceIndex == 0) {
-                if (gSaveContext.rupees >= 10) {
+                if (Rupees_GetNum() >= 10) {
                     func_80035B18(play, actor, 0x2034);
                     Rupees_ChangeBy(-10);
                 } else {

@@ -3071,9 +3071,58 @@ s32 Health_ChangeBy(PlayState* play, s16 healthChange) {
     }
 }
 
+s16 isUsingAltWallet = 0;
+s16 altWalletRupees = 0;
+
+s16 usingBorrowedWallet() {
+    return isUsingAltWallet;
+}
+
+s16 Rupees_GetNum() {
+    if (isUsingAltWallet)
+        return 0;
+    else
+        return gSaveContext.rupees;
+}
+
+s16 Rupees_GetDisplayNum() {
+    if (isUsingAltWallet)
+        return altWalletRupees;
+    else
+        return gSaveContext.rupees;
+}
+
+s16 Wallet_Upgrage_Value() {
+    if (isUsingAltWallet)
+        return 3;
+    else
+        return CUR_UPG_VALUE(UPG_WALLET);
+}
+
+s16 Wallet_Capacity_Current() {
+    if (isUsingAltWallet)
+        return CAPACITY(UPG_WALLET,3);
+    else
+        return CUR_CAPACITY(UPG_WALLET);
+}
+
+void Rupees_DirectChange(s16 rupeeChange) {
+    if (isUsingAltWallet)
+        altWalletRupees += rupeeChange;
+    else
+        gSaveContext.rupees += rupeeChange;
+}
+
+void Rupees_DirectSet(s16 rupees) {
+    if (isUsingAltWallet)
+        altWalletRupees = rupees;
+    else
+        gSaveContext.rupees = rupees;
+}
+
 void Rupees_ChangeBy(s16 rupeeChange) {
     if (gPlayState == NULL) {
-        gSaveContext.rupees += rupeeChange;
+        Rupees_DirectChange(rupeeChange);
     } else {
         gSaveContext.rupeeAccumulator += rupeeChange;
     }
@@ -3084,6 +3133,17 @@ void Rupees_ChangeBy(s16 rupeeChange) {
     if (rupeeChange < 0) {
         gSaveContext.sohStats.count[COUNT_RUPEES_SPENT] += -rupeeChange;
     }
+}
+
+void changeToNormalWallet() {
+    switchResourcePoolToNormal();
+    isUsingAltWallet = 0;
+}
+
+void changeToAltWallet() {
+    switchResourcePoolToAlternate();
+    isUsingAltWallet = 1;
+    altWalletRupees = 0;
 }
 
 void GameplayStats_UpdateAmmoUsed(s16 item, s16 ammoUsed) {
@@ -4918,7 +4978,7 @@ void Interface_Draw(PlayState* play) {
         if (fullUi) {
             // Rupee Icon
             if (CVarGetInteger("gDynamicWalletIcon", 0)) {
-                switch (CUR_UPG_VALUE(UPG_WALLET)) {
+                switch (Wallet_Upgrage_Value()) {
                     case 0:
                         if (CVarGetInteger("gCosmetics.Consumable_GreenRupee.Changed", 0)) {
                             rColor = CVarGetColor24("gCosmetics.Consumable_GreenRupee.Value", rupeeWalletColors[0]);
@@ -5075,9 +5135,9 @@ void Interface_Draw(PlayState* play) {
             // Rupee Counter
             gDPPipeSync(OVERLAY_DISP++);
 
-            if (gSaveContext.rupees == CUR_CAPACITY(UPG_WALLET)) {
+            if (Rupees_GetDisplayNum() == Wallet_Capacity_Current()) {
                 gDPSetPrimColor(OVERLAY_DISP++, 0, 0, 120, 255, 0, interfaceCtx->magicAlpha);
-            } else if (gSaveContext.rupees != 0) {
+            } else if (Rupees_GetDisplayNum() != 0) {
                 gDPSetPrimColor(OVERLAY_DISP++, 0, 0, 255, 255, 255, interfaceCtx->magicAlpha);
             } else {
                 gDPSetPrimColor(OVERLAY_DISP++, 0, 0, 100, 100, 100, interfaceCtx->magicAlpha);
@@ -5087,7 +5147,7 @@ void Interface_Draw(PlayState* play) {
                               PRIMITIVE, 0);
 
             interfaceCtx->counterDigits[0] = interfaceCtx->counterDigits[1] = interfaceCtx->counterDigits[2] = 0;
-            interfaceCtx->counterDigits[3] = gSaveContext.rupees;
+            interfaceCtx->counterDigits[3] = Rupees_GetDisplayNum();
 
             if ((interfaceCtx->counterDigits[3] > 9999) || (interfaceCtx->counterDigits[3] < 0)) {
                 interfaceCtx->counterDigits[3] &= 0xDDD;
@@ -5108,8 +5168,8 @@ void Interface_Draw(PlayState* play) {
                 interfaceCtx->counterDigits[3] -= 10;
             }
 
-            svar2 = rupeeDigitsFirst[CUR_UPG_VALUE(UPG_WALLET)];
-            svar5 = rupeeDigitsCount[CUR_UPG_VALUE(UPG_WALLET)];
+            svar2 = rupeeDigitsFirst[Wallet_Upgrage_Value()];
+            svar5 = rupeeDigitsCount[Wallet_Upgrage_Value()];
 
             // Draw Rupee Counter. Hide in Boss Rush.
             if (!gSaveContext.isBossRush) {
@@ -6324,29 +6384,29 @@ void Interface_Update(PlayState* play) {
 
     if (gSaveContext.rupeeAccumulator != 0) {
         if (gSaveContext.rupeeAccumulator > 0) {
-            if (gSaveContext.rupees < CUR_CAPACITY(UPG_WALLET)) {
+            if (Rupees_GetDisplayNum() < Wallet_Capacity_Current()) {
                 gSaveContext.rupeeAccumulator--;
-                gSaveContext.rupees++;
+                Rupees_DirectChange(1);
                 Audio_PlaySoundGeneral(NA_SE_SY_RUPY_COUNT, &D_801333D4, 4, &D_801333E0, &D_801333E0, &D_801333E8);
             } else {
                 // "Rupee Amount MAX = %d"
-                osSyncPrintf("ルピー数ＭＡＸ = %d\n", CUR_CAPACITY(UPG_WALLET));
-                gSaveContext.rupees = CUR_CAPACITY(UPG_WALLET);
+                osSyncPrintf("ルピー数ＭＡＸ = %d\n", Wallet_Capacity_Current());
+                Rupees_DirectSet(Wallet_Capacity_Current());
                 gSaveContext.rupeeAccumulator = 0;
             }
-        } else if (gSaveContext.rupees != 0) {
+        } else if (Rupees_GetDisplayNum() != 0) {
             if (gSaveContext.rupeeAccumulator <= -50) {
                 gSaveContext.rupeeAccumulator += 10;
-                gSaveContext.rupees -= 10;
+                Rupees_DirectChange(-10);
 
-                if (gSaveContext.rupees < 0) {
-                    gSaveContext.rupees = 0;
+                if (Rupees_GetDisplayNum() < 0) {
+                    Rupees_DirectSet(0);
                 }
 
                 Audio_PlaySoundGeneral(NA_SE_SY_RUPY_COUNT, &D_801333D4, 4, &D_801333E0, &D_801333E0, &D_801333E8);
             } else {
                 gSaveContext.rupeeAccumulator++;
-                gSaveContext.rupees--;
+                Rupees_DirectChange(-1);
                 Audio_PlaySoundGeneral(NA_SE_SY_RUPY_COUNT, &D_801333D4, 4, &D_801333E0, &D_801333E0, &D_801333E8);
             }
         } else {

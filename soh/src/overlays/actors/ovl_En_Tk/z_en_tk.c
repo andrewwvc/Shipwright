@@ -375,7 +375,7 @@ s16 func_80B1C5A0(PlayState* play, Actor* thisx) {
                 if (play->msgCtx.choiceIndex == 1) {
                     /* "Thanks a lot!" */
                     thisx->textId = 0x0084;
-                } else if (gSaveContext.rupees < 10) {
+                } else if (Rupees_GetNum() < 10) {
                     /* "You don't have enough Rupees!" */
                     thisx->textId = 0x0085;
                 } else {

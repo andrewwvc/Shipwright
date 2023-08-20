@@ -218,7 +218,7 @@ void EnDns_ChangeAnim(EnDns* this, u8 index) {
 /* Item give checking functions */
 
 u32 EnDns_RandomizerPurchaseableCheck(EnDns* this) {
-    if (gSaveContext.rupees < this->dnsItemEntry->itemPrice || Flags_GetRandomizerInf(this->scrubIdentity.randomizerInf)) {
+    if (Rupees_GetNum() < this->dnsItemEntry->itemPrice || Flags_GetRandomizerInf(this->scrubIdentity.randomizerInf)) {
         return 0;
     }
     return 4;
@@ -228,7 +228,7 @@ u32 func_809EF5A4(EnDns* this) {
     if ((CUR_CAPACITY(UPG_NUTS) != 0) && (AMMO(ITEM_NUT) >= CUR_CAPACITY(UPG_NUTS))) {
         return 1;
     }
-    if (gSaveContext.rupees < this->dnsItemEntry->itemPrice) {
+    if (Rupees_GetNum() < this->dnsItemEntry->itemPrice) {
         return 0;
     }
     if (Item_CheckObtainability(ITEM_NUT) == ITEM_NONE) {
@@ -241,7 +241,7 @@ u32 func_809EF658(EnDns* this) {
     if ((CUR_CAPACITY(UPG_STICKS) != 0) && (AMMO(ITEM_STICK) >= CUR_CAPACITY(UPG_STICKS))) {
         return 1;
     }
-    if (gSaveContext.rupees < this->dnsItemEntry->itemPrice) {
+    if (Rupees_GetNum() < this->dnsItemEntry->itemPrice) {
         return 0;
     }
     if (Item_CheckObtainability(ITEM_STICK) == ITEM_NONE) {
@@ -251,7 +251,7 @@ u32 func_809EF658(EnDns* this) {
 }
 
 u32 func_809EF70C(EnDns* this) {
-    if (gSaveContext.rupees < this->dnsItemEntry->itemPrice) {
+    if (Rupees_GetNum() < this->dnsItemEntry->itemPrice) {
         return 0;
     }
     return 4;
@@ -264,7 +264,7 @@ u32 func_809EF73C(EnDns* this) {
     if (AMMO(ITEM_SLINGSHOT) >= CUR_CAPACITY(UPG_BULLET_BAG)) {
         return 1;
     }
-    if (gSaveContext.rupees < this->dnsItemEntry->itemPrice) {
+    if (Rupees_GetNum() < this->dnsItemEntry->itemPrice) {
         return 0;
     }
     if (Item_CheckObtainability(ITEM_SEEDS) == ITEM_NONE) {
@@ -277,7 +277,7 @@ u32 func_809EF800(EnDns* this) {
     if (gBitFlags[4] & gSaveContext.inventory.equipment) {
         return 1;
     }
-    if (gSaveContext.rupees < this->dnsItemEntry->itemPrice) {
+    if (Rupees_GetNum() < this->dnsItemEntry->itemPrice) {
         return 0;
     }
     return 4;
@@ -290,7 +290,7 @@ u32 func_809EF854(EnDns* this) {
     if (AMMO(ITEM_BOMB) >= CUR_CAPACITY(UPG_BOMB_BAG)) {
         return 1;
     }
-    if (gSaveContext.rupees < this->dnsItemEntry->itemPrice) {
+    if (Rupees_GetNum() < this->dnsItemEntry->itemPrice) {
         return 0;
     }
     return 4;
@@ -303,7 +303,7 @@ u32 func_809EF8F4(EnDns* this) {
     if (AMMO(ITEM_BOW) >= CUR_CAPACITY(UPG_QUIVER)) {
         return 1;
     }
-    if (gSaveContext.rupees < this->dnsItemEntry->itemPrice) {
+    if (Rupees_GetNum() < this->dnsItemEntry->itemPrice) {
         return 0;
     }
     return 4;
@@ -313,7 +313,7 @@ u32 func_809EF9A4(EnDns* this) {
     if (!Inventory_HasEmptyBottle()) {
         return 1;
     }
-    if (gSaveContext.rupees < this->dnsItemEntry->itemPrice) {
+    if (Rupees_GetNum() < this->dnsItemEntry->itemPrice) {
         return 0;
     }
     return 4;

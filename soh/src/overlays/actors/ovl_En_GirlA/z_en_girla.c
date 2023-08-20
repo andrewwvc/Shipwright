@@ -478,7 +478,7 @@ s32 EnGirlA_CanBuy_Arrows(PlayState* play, EnGirlA* this) {
     if (AMMO(ITEM_BOW) >= CUR_CAPACITY(UPG_QUIVER)) {
         return CANBUY_RESULT_CANT_GET_NOW;
     }
-    if (gSaveContext.rupees < this->basePrice) {
+    if (Rupees_GetNum() < this->basePrice) {
         return CANBUY_RESULT_NEED_RUPEES;
     }
     return CANBUY_RESULT_SUCCESS;
@@ -491,7 +491,7 @@ s32 EnGirlA_CanBuy_Bombs(PlayState* play, EnGirlA* this) {
     if (AMMO(ITEM_BOMB) >= CUR_CAPACITY(UPG_BOMB_BAG)) {
         return CANBUY_RESULT_CANT_GET_NOW;
     }
-    if (gSaveContext.rupees < this->basePrice) {
+    if (Rupees_GetNum() < this->basePrice) {
         return CANBUY_RESULT_NEED_RUPEES;
     }
     return CANBUY_RESULT_SUCCESS;
@@ -501,7 +501,7 @@ s32 EnGirlA_CanBuy_DekuNuts(PlayState* play, EnGirlA* this) {
     if ((CUR_CAPACITY(UPG_NUTS) != 0) && (AMMO(ITEM_NUT) >= CUR_CAPACITY(UPG_NUTS))) {
         return CANBUY_RESULT_CANT_GET_NOW;
     }
-    if (gSaveContext.rupees < this->basePrice) {
+    if (Rupees_GetNum() < this->basePrice) {
         return CANBUY_RESULT_NEED_RUPEES;
     }
     if ((Item_CheckObtainability(ITEM_NUT) == ITEM_NONE) && !CVarGetInteger("gFastDrops", 0)) {
@@ -514,7 +514,7 @@ s32 EnGirlA_CanBuy_DekuSticks(PlayState* play, EnGirlA* this) {
     if ((CUR_CAPACITY(UPG_STICKS) != 0) && (AMMO(ITEM_STICK) >= CUR_CAPACITY(UPG_STICKS))) {
         return CANBUY_RESULT_CANT_GET_NOW;
     }
-    if (gSaveContext.rupees < this->basePrice) {
+    if (Rupees_GetNum() < this->basePrice) {
         return CANBUY_RESULT_NEED_RUPEES;
     }
     if ((Item_CheckObtainability(ITEM_STICK) == ITEM_NONE) && !CVarGetInteger("gFastDrops", 0)) {
@@ -527,7 +527,7 @@ s32 EnGirlA_CanBuy_Fish(PlayState* play, EnGirlA* this) {
     if (!Inventory_HasEmptyBottle()) {
         return CANBUY_RESULT_NEED_BOTTLE;
     }
-    if (gSaveContext.rupees < this->basePrice) {
+    if (Rupees_GetNum() < this->basePrice) {
         return CANBUY_RESULT_NEED_RUPEES;
     }
     if (Item_CheckObtainability(ITEM_FISH) == ITEM_NONE) {
@@ -540,7 +540,7 @@ s32 EnGirlA_CanBuy_RedPotion(PlayState* play, EnGirlA* this) {
     if (!Inventory_HasEmptyBottle()) {
         return CANBUY_RESULT_NEED_BOTTLE;
     }
-    if (gSaveContext.rupees < this->basePrice) {
+    if (Rupees_GetNum() < this->basePrice) {
         return CANBUY_RESULT_NEED_RUPEES;
     }
     if (Item_CheckObtainability(ITEM_POTION_RED) == ITEM_NONE) {
@@ -553,7 +553,7 @@ s32 EnGirlA_CanBuy_GreenPotion(PlayState* play, EnGirlA* this) {
     if (!Inventory_HasEmptyBottle()) {
         return CANBUY_RESULT_NEED_BOTTLE;
     }
-    if (gSaveContext.rupees < this->basePrice) {
+    if (Rupees_GetNum() < this->basePrice) {
         return CANBUY_RESULT_NEED_RUPEES;
     }
     if (Item_CheckObtainability(ITEM_POTION_GREEN) == ITEM_NONE) {
@@ -566,7 +566,7 @@ s32 EnGirlA_CanBuy_BluePotion(PlayState* play, EnGirlA* this) {
     if (!Inventory_HasEmptyBottle()) {
         return CANBUY_RESULT_NEED_BOTTLE;
     }
-    if (gSaveContext.rupees < this->basePrice) {
+    if (Rupees_GetNum() < this->basePrice) {
         return CANBUY_RESULT_NEED_RUPEES;
     }
     if (Item_CheckObtainability(ITEM_POTION_BLUE) == ITEM_NONE) {
@@ -579,7 +579,7 @@ s32 EnGirlA_CanBuy_Longsword(PlayState* play, EnGirlA* this) {
     if ((gBitFlags[2] & gSaveContext.inventory.equipment) && !(gBitFlags[3] & gSaveContext.inventory.equipment)) {
         return CANBUY_RESULT_CANT_GET_NOW;
     }
-    if (gSaveContext.rupees < this->basePrice) {
+    if (Rupees_GetNum() < this->basePrice) {
         return CANBUY_RESULT_NEED_RUPEES;
     }
     if (Item_CheckObtainability(ITEM_SWORD_BGS) == ITEM_NONE) {
@@ -592,7 +592,7 @@ s32 EnGirlA_CanBuy_HylianShield(PlayState* play, EnGirlA* this) {
     if (gBitFlags[5] & gSaveContext.inventory.equipment) {
         return CANBUY_RESULT_CANT_GET_NOW;
     }
-    if (gSaveContext.rupees < this->basePrice) {
+    if (Rupees_GetNum() < this->basePrice) {
         return CANBUY_RESULT_NEED_RUPEES;
     }
     if (Item_CheckObtainability(ITEM_SHIELD_HYLIAN) == ITEM_NONE) {
@@ -605,7 +605,7 @@ s32 EnGirlA_CanBuy_DekuShield(PlayState* play, EnGirlA* this) {
     if (gBitFlags[4] & gSaveContext.inventory.equipment) {
         return CANBUY_RESULT_CANT_GET_NOW;
     }
-    if (gSaveContext.rupees < this->basePrice) {
+    if (Rupees_GetNum() < this->basePrice) {
         return CANBUY_RESULT_NEED_RUPEES;
     }
     if (Item_CheckObtainability(ITEM_SHIELD_DEKU) == ITEM_NONE) {
@@ -622,7 +622,7 @@ s32 EnGirlA_CanBuy_GoronTunic(PlayState* play, EnGirlA* this) {
     if (gBitFlags[9] & gSaveContext.inventory.equipment) {
         return CANBUY_RESULT_CANT_GET_NOW;
     }
-    if (gSaveContext.rupees < this->basePrice) {
+    if (Rupees_GetNum() < this->basePrice) {
         return CANBUY_RESULT_NEED_RUPEES;
     }
     if (Item_CheckObtainability(ITEM_TUNIC_GORON) == ITEM_NONE) {
@@ -639,7 +639,7 @@ s32 EnGirlA_CanBuy_ZoraTunic(PlayState* play, EnGirlA* this) {
     if (gBitFlags[10] & gSaveContext.inventory.equipment) {
         return CANBUY_RESULT_CANT_GET_NOW;
     }
-    if (gSaveContext.rupees < this->basePrice) {
+    if (Rupees_GetNum() < this->basePrice) {
         return CANBUY_RESULT_NEED_RUPEES;
     }
     if (Item_CheckObtainability(ITEM_TUNIC_ZORA) == ITEM_NONE) {
@@ -652,21 +652,21 @@ s32 EnGirlA_CanBuy_Health(PlayState* play, EnGirlA* this) {
     if (gSaveContext.healthCapacity == gSaveContext.health) {
         return CANBUY_RESULT_CANT_GET_NOW;
     }
-    if (gSaveContext.rupees < this->basePrice) {
+    if (Rupees_GetNum() < this->basePrice) {
         return CANBUY_RESULT_NEED_RUPEES;
     }
     return CANBUY_RESULT_SUCCESS;
 }
 
 s32 EnGirlA_CanBuy_HeartPiece(PlayState* play, EnGirlA* this) {
-    if (gSaveContext.rupees < this->basePrice) {
+    if (Rupees_GetNum() < this->basePrice) {
         return CANBUY_RESULT_NEED_RUPEES;
     }
     return CANBUY_RESULT_SUCCESS;
 }
 
 s32 EnGirlA_CanBuy_MilkBottle(PlayState* play, EnGirlA* this) {
-    if (gSaveContext.rupees < this->basePrice) {
+    if (Rupees_GetNum() < this->basePrice) {
         return CANBUY_RESULT_NEED_RUPEES;
     }
     if (Item_CheckObtainability(ITEM_MILK_BOTTLE) == ITEM_NONE) {
@@ -676,7 +676,7 @@ s32 EnGirlA_CanBuy_MilkBottle(PlayState* play, EnGirlA* this) {
 }
 
 s32 EnGirlA_CanBuy_WeirdEgg(PlayState* play, EnGirlA* this) {
-    if (gSaveContext.rupees < this->basePrice) {
+    if (Rupees_GetNum() < this->basePrice) {
         return CANBUY_RESULT_NEED_RUPEES;
     }
     if (Item_CheckObtainability(ITEM_LETTER_ZELDA) == ITEM_NONE) {
@@ -706,7 +706,7 @@ s32 EnGirlA_CanBuy_Bombchus(PlayState* play, EnGirlA* this) {
     if (AMMO(ITEM_BOMBCHU) >= 50) {
         return CANBUY_RESULT_CANT_GET_NOW;
     }
-    if (gSaveContext.rupees < this->basePrice) {
+    if (Rupees_GetNum() < this->basePrice) {
         return CANBUY_RESULT_NEED_RUPEES;
     }
     if (Item_CheckObtainability(ITEM_BOMBCHU) == ITEM_NONE) {
@@ -719,7 +719,7 @@ s32 EnGirlA_CanBuy_DekuSeeds(PlayState* play, EnGirlA* this) {
     if (AMMO(ITEM_SLINGSHOT) >= CUR_CAPACITY(UPG_BULLET_BAG)) {
         return CANBUY_RESULT_CANT_GET_NOW;
     }
-    if (gSaveContext.rupees < this->basePrice) {
+    if (Rupees_GetNum() < this->basePrice) {
         return CANBUY_RESULT_NEED_RUPEES;
     }
     if ((Item_CheckObtainability(ITEM_SEEDS) == ITEM_NONE) && !CVarGetInteger("gFastDrops", 0)) {
@@ -736,7 +736,7 @@ s32 EnGirlA_CanBuy_BlueFire(PlayState* play, EnGirlA* this) {
     if (!Inventory_HasEmptyBottle()) {
         return CANBUY_RESULT_NEED_BOTTLE;
     }
-    if (gSaveContext.rupees < this->basePrice) {
+    if (Rupees_GetNum() < this->basePrice) {
         return CANBUY_RESULT_NEED_RUPEES;
     }
     if (Item_CheckObtainability(ITEM_BLUE_FIRE) == ITEM_NONE) {
@@ -749,7 +749,7 @@ s32 EnGirlA_CanBuy_Bugs(PlayState* play, EnGirlA* this) {
     if (!Inventory_HasEmptyBottle()) {
         return CANBUY_RESULT_NEED_BOTTLE;
     }
-    if (gSaveContext.rupees < this->basePrice) {
+    if (Rupees_GetNum() < this->basePrice) {
         return CANBUY_RESULT_NEED_RUPEES;
     }
     if (Item_CheckObtainability(ITEM_BUG) == ITEM_NONE) {
@@ -762,7 +762,7 @@ s32 EnGirlA_CanBuy_Poe(PlayState* play, EnGirlA* this) {
     if (!Inventory_HasEmptyBottle()) {
         return CANBUY_RESULT_NEED_BOTTLE;
     }
-    if (gSaveContext.rupees < this->basePrice) {
+    if (Rupees_GetNum() < this->basePrice) {
         return CANBUY_RESULT_NEED_RUPEES;
     }
     if (Item_CheckObtainability(ITEM_POE) == ITEM_NONE) {
@@ -775,7 +775,7 @@ s32 EnGirlA_CanBuy_Fairy(PlayState* play, EnGirlA* this) {
     if (!Inventory_HasEmptyBottle()) {
         return CANBUY_RESULT_NEED_BOTTLE;
     }
-    if (gSaveContext.rupees < this->basePrice) {
+    if (Rupees_GetNum() < this->basePrice) {
         return CANBUY_RESULT_NEED_RUPEES;
     }
     if (Item_CheckObtainability(ITEM_FAIRY) == ITEM_NONE) {
@@ -805,7 +805,7 @@ s32 EnGirlA_CanBuy_Randomizer(PlayState* play, EnGirlA* this) {
         return CANBUY_RESULT_CANT_GET_NOW;
     }
 
-    if (gSaveContext.rupees < shopItemIdentity.itemPrice) {
+    if (Rupees_GetNum() < shopItemIdentity.itemPrice) {
         return CANBUY_RESULT_NEED_RUPEES;
     }
 

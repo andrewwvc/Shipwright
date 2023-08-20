@@ -147,7 +147,7 @@ void func_80B17934(EnTakaraMan* this, PlayState* play) {
         if (!(gSaveContext.itemGetInf[1] & 0x800)) {
             switch (play->msgCtx.choiceIndex) {
                 case 0: // Yes
-                    if (gSaveContext.rupees >= 10) {
+                    if (Rupees_GetNum() >= 10) {
                         Message_CloseTextbox(play);
                         Rupees_ChangeBy(-10);
                         this->unk_214 = 1;
@@ -173,7 +173,7 @@ void func_80B17934(EnTakaraMan* this, PlayState* play) {
         } else {
             switch (play->msgCtx.choiceIndex) {
                 case 0: // Special
-                    if (gSaveContext.rupees >= 30) {
+                    if (Rupees_GetNum() >= 30) {
                         Message_CloseTextbox(play);
                         Rupees_ChangeBy(-30);
                         this->unk_214 = 1;
@@ -190,7 +190,7 @@ void func_80B17934(EnTakaraMan* this, PlayState* play) {
                     }
                     break;
                 case 1: // Yes
-                    if (gSaveContext.rupees >= 10) {
+                    if (Rupees_GetNum() >= 10) {
                         Message_CloseTextbox(play);
                         Rupees_ChangeBy(-10);
                         this->unk_214 = 1;

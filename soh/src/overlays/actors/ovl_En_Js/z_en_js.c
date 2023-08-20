@@ -151,7 +151,7 @@ void func_80A891C4(EnJs* this, PlayState* play) {
     if (Message_GetState(&play->msgCtx) == TEXT_STATE_CHOICE && Message_ShouldAdvance(play)) {
         switch (play->msgCtx.choiceIndex) {
             case 0: // yes
-                if (gSaveContext.rupees < 200) {
+                if (Rupees_GetNum() < 200) {
                     Message_ContinueTextbox(play, 0x6075);
                     func_80A89008(this);
                 } else {

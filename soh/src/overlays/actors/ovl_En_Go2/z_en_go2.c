@@ -981,7 +981,7 @@ s16 EnGo2_UpdateTalkStateGoronMarketBazaar(PlayState* play, EnGo2* this) {
         if (Message_ShouldAdvance(play)) {
             if (this->actor.textId == GoronMsg+23) {
                 if (play->msgCtx.choiceIndex == 0) {
-                    if (gSaveContext.rupees < 200) {
+                    if (Rupees_GetNum() < 200) {
                         this->actor.textId = GoronMsg+27;
                     } else{
                         Rupees_ChangeBy(-200);
