@@ -123,6 +123,7 @@ AudioCollection* AudioCollection::Instance;
 SpeechSynthesizer* SpeechSynthesizer::Instance;
 std::unordered_map<uint16_t, uint16_t>* textIDSubstitutionTable;
 std::map<ActorSpawnResource,int> UsedResources = {};
+std::map<ActorSpawnResource,int> AlternateResourcePool = {};
 std::map<int,ActorSpawnResource> TempResourceEntries = {};
 
 extern "C" char** cameraStrings;

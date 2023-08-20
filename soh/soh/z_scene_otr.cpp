@@ -83,13 +83,33 @@ void from_json(const json& j, ActorSpawnResource& p) {
 }
 
 extern std::map<ActorSpawnResource,int> UsedResources;
+extern std::map<ActorSpawnResource,int> AlternateResourcePool;
 extern std::map<int,ActorSpawnResource> TempResourceEntries;
+s16 usingAlternateResourcePool = 0;
+
+std::map<ActorSpawnResource,int>& currentResourcePool() {
+    if (usingAlternateResourcePool)
+        return AlternateResourcePool;
+    else
+        return UsedResources;
+
+}
+
+void switchResourcePoolToNormal() {
+    usingAlternateResourcePool = 0;
+    AlternateResourcePool = {};
+}
+
+void switchResourcePoolToAlternate() {
+    usingAlternateResourcePool = 1;
+    AlternateResourcePool = {};
+}
 
 void insertSpawnResource(int entry, int extraTime) {
     auto itt = TempResourceEntries.find(entry);
     if (itt != TempResourceEntries.end()) {
         ActorSpawnResource sw = itt->second;
-        auto existing = UsedResources.insert({sw,gSaveContext.savedFrameCount+extraTime});
+        auto existing = currentResourcePool().insert({sw,gSaveContext.savedFrameCount+extraTime});
         if (!existing.second) {
             existing.first->second = gSaveContext.savedFrameCount+extraTime;
         }
@@ -115,8 +135,8 @@ s32 createTempEntryPlus(PlayState* play, ActorEntry* spawn, s16 dirt) {
         entNum = node->first+1;
     else
         entNum = 0;
-    auto foundVal = UsedResources.find(sw);
-    if (foundVal != UsedResources.end()) {
+    auto foundVal = currentResourcePool().find(sw);
+    if (foundVal != currentResourcePool().end()) {
         return -1;
     }
     TempResourceEntries.insert({entNum, sw});
@@ -145,8 +165,8 @@ s32 isResourceUsed(PlayState* play, ActorEntry* spawn, s16 dirt) {
     sw.entry.rotY = spawn->rot.y;
     sw.entry.rotZ = spawn->rot.z;
     sw.dirt = dirt;
-    auto foundVal = UsedResources.find(sw);
-    if (foundVal != UsedResources.end() && isResourceYetToRestore(foundVal)) {
+    auto foundVal = currentResourcePool().find(sw);
+    if (foundVal != currentResourcePool().end() && isResourceYetToRestore(foundVal)) {
         return 1;
     } else {
         return 0;
@@ -533,8 +553,8 @@ bool Scene_CommandActorList(PlayState* play, LUS::ISceneCommand* cmd) {
             copyActorSpawn(sw.entry, copy[i]);
             sw.dirt = 0;
             TempResourceEntries.insert({i,sw});
-            auto foundVal = UsedResources.find(sw);
-            if (foundVal != UsedResources.end() && isResourceYetToRestore(foundVal)) {
+            auto foundVal = currentResourcePool().find(sw);
+            if (foundVal != currentResourcePool().end() && isResourceYetToRestore(foundVal)) {
                 entries[i].params &= 0xFFE0;
                 entries[i].params |= ITEM00_MAX;
             }
@@ -556,8 +576,8 @@ bool Scene_CommandActorList(PlayState* play, LUS::ISceneCommand* cmd) {
             copyActorSpawn(sw.entry, copy[i]);
             sw.dirt = 0;
             TempResourceEntries.insert({i,sw});
-            auto foundVal = UsedResources.find(sw);
-            if (foundVal != UsedResources.end() && isResourceYetToRestore(foundVal)) {
+            auto foundVal = currentResourcePool().find(sw);
+            if (foundVal != currentResourcePool().end() && isResourceYetToRestore(foundVal)) {
                 entries[i].params &= 0x07FF;
                 entries[i].params |= (0xA << 0xB);
             }
@@ -568,8 +588,8 @@ bool Scene_CommandActorList(PlayState* play, LUS::ISceneCommand* cmd) {
             copyActorSpawn(sw.entry, copy[i]);
             sw.dirt = 0;
             TempResourceEntries.insert({i,sw});
-            auto foundVal = UsedResources.find(sw);
-            if (foundVal != UsedResources.end() && isResourceYetToRestore(foundVal)) {
+            auto foundVal = currentResourcePool().find(sw);
+            if (foundVal != currentResourcePool().end() && isResourceYetToRestore(foundVal)) {
                 entries[i].params &= 0xFF00;
                 entries[i].params |= ITEM00_MAX;
             }
@@ -580,8 +600,8 @@ bool Scene_CommandActorList(PlayState* play, LUS::ISceneCommand* cmd) {
             // copyActorSpawn(sw.entry, copy[i]);
             // sw.dirt = 0;
             // TempResourceEntries.insert({i,sw});
-            // auto foundVal = UsedResources.find(sw);
-            // if (foundVal != UsedResources.end()) {
+            // auto foundVal = currentResourcePool().find(sw);
+            // if (foundVal != currentResourcePool().end()) {
             //     entries[i].params &= 0xFFFC;
             //     entries[i].params |= 3;
             // }
@@ -592,8 +612,8 @@ bool Scene_CommandActorList(PlayState* play, LUS::ISceneCommand* cmd) {
             copyActorSpawn(sw.entry, copy[i]);
             sw.dirt = 0;
             TempResourceEntries.insert({i,sw});
-            auto foundVal = UsedResources.find(sw);
-            if (foundVal != UsedResources.end() && isResourceYetToRestore(foundVal)) {
+            auto foundVal = currentResourcePool().find(sw);
+            if (foundVal != currentResourcePool().end() && isResourceYetToRestore(foundVal)) {
                 entries[i].rot.x = 0x1C;
             }
         } else if (entries[i].id == ACTOR_BG_HAKA) {
@@ -614,8 +634,8 @@ bool Scene_CommandActorList(PlayState* play, LUS::ISceneCommand* cmd) {
             copyActorSpawn(sw.entry, copy[i]);
             sw.dirt = 0;
             TempResourceEntries.insert({i,sw});
-            auto foundVal = UsedResources.find(sw);
-            if (foundVal != UsedResources.end() && isResourceYetToRestore(foundVal)) {
+            auto foundVal = currentResourcePool().find(sw);
+            if (foundVal != currentResourcePool().end() && isResourceYetToRestore(foundVal)) {
                 entries[i].rot.z = 0x1;
             }
         } else if (entries[i].id == ACTOR_EN_COW) {
@@ -625,8 +645,8 @@ bool Scene_CommandActorList(PlayState* play, LUS::ISceneCommand* cmd) {
             copyActorSpawn(sw.entry, copy[i]);
             sw.dirt = 0;
             TempResourceEntries.insert({i,sw});
-            auto foundVal = UsedResources.find(sw);
-            if (foundVal != UsedResources.end() && isResourceYetToRestore(foundVal)) {
+            auto foundVal = currentResourcePool().find(sw);
+            if (foundVal != currentResourcePool().end() && isResourceYetToRestore(foundVal)) {
                 entries[i].rot.z = 0x1;
             }
         }

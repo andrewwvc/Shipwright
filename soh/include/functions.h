@@ -936,6 +936,8 @@ void Environment_ClearBgsDayCount(void);
 s32 Environment_GetTotalDays(void);
 void Environment_UpdateDataOnDayChange(void);
 void insertSpawnResource(int entry, int extraTime);
+void switchResourcePoolToNormal();
+void switchResourcePoolToAlternate();
 void useGuardRupees(s32 num);
 s32 getGuardRupees();
 s32 createTempEntryPlus(PlayState* play, ActorEntry* spawn, s16 dirt);
