@@ -557,6 +557,14 @@ bool Scene_CommandActorList(PlayState* play, LUS::ISceneCommand* cmd) {
             if (foundVal != currentResourcePool().end() && isResourceYetToRestore(foundVal)) {
                 entries[i].params &= 0xFFE0;
                 entries[i].params |= ITEM00_MAX;
+            } else if (usingBorrowedWallet()) {
+                s16 itemID = (entries[i].params & 0xFF);
+                if (0x3 <= itemID && itemID <= 0x5)
+                    itemID = ITEM00_RUPEE_BLUE;
+                else if (0x8 <= itemID && itemID <= 0x10)
+                    itemID = ITEM00_RUPEE_BLUE;
+                entries[i].params &= 0xFF00;
+                entries[i].params |= itemID;
             }
         } else if (entries[i].id == ACTOR_EN_TUBO_TRAP) {
             ActorSpawnResource sw;
@@ -615,6 +623,14 @@ bool Scene_CommandActorList(PlayState* play, LUS::ISceneCommand* cmd) {
             auto foundVal = currentResourcePool().find(sw);
             if (foundVal != currentResourcePool().end() && isResourceYetToRestore(foundVal)) {
                 entries[i].rot.x = 0x1C;
+            } else if (usingBorrowedWallet() && (entries[i].params & 0x8000)) {
+                s16 itemID = (entries[i].rot.x & 0xFF);
+                if (0x3 <= itemID && itemID <= 0x5)
+                    itemID = ITEM00_RUPEE_BLUE;
+                else if (0x8 <= itemID && itemID <= 0x10)
+                    itemID = ITEM00_RUPEE_BLUE;
+                entries[i].rot.x &= 0xFF00;
+                entries[i].rot.x |= itemID;
             }
         } else if (entries[i].id == ACTOR_BG_HAKA) {
             ActorSpawnResource sw;
