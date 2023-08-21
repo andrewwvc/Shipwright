@@ -1347,6 +1347,10 @@ void Interface_SetSceneRestrictions(PlayState* play) {
             interfaceCtx->restrictions.dinsNayrus = (sRestrictionFlags[i].flags3 & 0x0C) >> 2;
             interfaceCtx->restrictions.all = (sRestrictionFlags[i].flags3 & 0x03) >> 0;
 
+            if (usingBorrowedWallet()) {
+                interfaceCtx->restrictions.bottles = interfaceCtx->restrictions.tradeItems = 1;
+            }
+
             osSyncPrintf(VT_FGCOL(YELLOW));
             osSyncPrintf("parameter->button_status = %x,%x,%x\n", sRestrictionFlags[i].flags1,
                          sRestrictionFlags[i].flags2, sRestrictionFlags[i].flags3);
@@ -3138,12 +3142,21 @@ void Rupees_ChangeBy(s16 rupeeChange) {
 void changeToNormalWallet() {
     switchResourcePoolToNormal();
     isUsingAltWallet = 0;
+    if (gPlayState != NULL) {
+        gPlayState->interfaceCtx.restrictions.bottles = gPlayState->interfaceCtx.restrictions.tradeItems = 0;
+    }
 }
 
 void changeToAltWallet() {
     switchResourcePoolToAlternate();
     isUsingAltWallet = 1;
     altWalletRupees = 0;
+
+    if (gPlayState != NULL) {
+        Player* link = GET_PLAYER(gPlayState);
+        link->currentMask = PLAYER_MASK_NONE;
+        gPlayState->interfaceCtx.restrictions.bottles = gPlayState->interfaceCtx.restrictions.tradeItems = 1;
+    }
 }
 
 void GameplayStats_UpdateAmmoUsed(s16 item, s16 ammoUsed) {
