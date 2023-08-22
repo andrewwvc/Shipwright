@@ -373,26 +373,68 @@ void func_808B81A0(BgSpot18Basket* this, PlayState* play) {
 
         if (this->unk_218 == 0) {
             for (i = 0; i < ARRAY_COUNT(D_808B85E4); i++) {
-                collectible = Item_DropCollectible(play, &tempVector, ITEM00_BOMBS_A);
+                ActorEntry ae;
+                s32 entVal = -1;
+                const Vec3s zeroVec = {0,0,0};
+                ae.id = ACTOR_EN_ITEM00;
+                ae.pos = zeroVec;
+                ae.rot.x = ae.rot.z = 0;
+                ae.rot.y = D_808B85E4[i];
+                ae.params = ITEM00_BOMBS_A;
+                entVal = createTempEntry(play, &ae);
+                if (entVal != -1)
+                    collectible = Item_DropCollectible(play, &tempVector, ITEM00_BOMBS_A);
+                else
+                    collectible = NULL;
                 if (collectible != NULL) {
                     collectible->actor.velocity.y = 11.0f;
                     collectible->actor.world.rot.y = D_808B85E4[i];
+                    collectible->actor.room = actor->room;
+                    collectible->actor.entryNum = entVal;
                 }
             }
         } else if (this->unk_218 == 1) {
             for (i = 0; i < ARRAY_COUNT(D_808B85E4); i++) {
-                collectible = Item_DropCollectible(play, &tempVector, ITEM00_RUPEE_GREEN);
+                ActorEntry ae;
+                s32 entVal = -1;
+                const Vec3s zeroVec = {0,0,0};
+                ae.id = ACTOR_EN_ITEM00;
+                ae.pos = zeroVec;
+                ae.rot.x = ae.rot.z = 0;
+                ae.rot.y = D_808B85E4[i];
+                ae.params = ITEM00_RUPEE_GREEN;
+                entVal = createTempEntry(play, &ae);
+                if (entVal != -1)
+                    collectible = Item_DropCollectible(play, &tempVector, ITEM00_RUPEE_GREEN);
+                else
+                    collectible = NULL;
                 if (collectible != NULL) {
                     collectible->actor.velocity.y = 11.0f;
                     collectible->actor.world.rot.y = D_808B85E4[i];
+                    collectible->actor.room = actor->room;
+                    collectible->actor.entryNum = entVal;
                 }
             }
         } else if (this->unk_218 == 2) {
             if ((this->unk_21A != 0) || Flags_GetCollectible(play, (actor->params & 0x3F))) {
-                collectible = Item_DropCollectible(play, &tempVector, ITEM00_RUPEE_PURPLE);
+                ActorEntry ae;
+                s32 entVal = -1;
+                const Vec3s zeroVec = {0,0,0};
+                ae.id = ACTOR_EN_ITEM00;
+                ae.pos = zeroVec;
+                ae.rot.x = ae.rot.z = 0;
+                ae.rot.y = D_808B85E4[1];
+                ae.params = ITEM00_RUPEE_PURPLE;
+                entVal = createTempEntry(play, &ae);
+                if (entVal != -1)
+                    collectible = Item_DropCollectible(play, &tempVector, ITEM00_RUPEE_PURPLE);
+                else
+                    collectible = NULL;
                 if (collectible != NULL) {
                     collectible->actor.velocity.y = 11.0f;
                     collectible->actor.world.rot.y = D_808B85E4[1];
+                    collectible->actor.room = actor->room;
+                    collectible->actor.entryNum = entVal;
                 }
             } else {
                 collectible =
@@ -404,16 +446,48 @@ void func_808B81A0(BgSpot18Basket* this, PlayState* play) {
                 }
             }
 
-            collectible = Item_DropCollectible(play, &tempVector, ITEM00_RUPEE_RED);
-            if (collectible != NULL) {
-                collectible->actor.velocity.y = 11.0f;
-                collectible->actor.world.rot.y = D_808B85E4[0];
+            {
+                ActorEntry ae;
+                s32 entVal = -1;
+                const Vec3s zeroVec = {0,0,0};
+                ae.id = ACTOR_EN_ITEM00;
+                ae.pos = zeroVec;
+                ae.rot.x = ae.rot.z = 0;
+                ae.rot.y = D_808B85E4[0];
+                ae.params = ITEM00_RUPEE_RED;
+                entVal = createTempEntry(play, &ae);
+                if (entVal != -1)
+                    collectible = Item_DropCollectible(play, &tempVector, ITEM00_RUPEE_RED);
+                else
+                    collectible = NULL;
+                if (collectible != NULL) {
+                    collectible->actor.velocity.y = 11.0f;
+                    collectible->actor.world.rot.y = D_808B85E4[0];
+                    collectible->actor.room = actor->room;
+                    collectible->actor.entryNum = entVal;
+                }
             }
 
-            collectible = Item_DropCollectible(play, &tempVector, ITEM00_RUPEE_BLUE);
-            if (collectible != NULL) {
-                collectible->actor.velocity.y = 11.0f;
-                collectible->actor.world.rot.y = D_808B85E4[2];
+            {
+                ActorEntry ae;
+                s32 entVal = -1;
+                const Vec3s zeroVec = {0,0,0};
+                ae.id = ACTOR_EN_ITEM00;
+                ae.pos = zeroVec;
+                ae.rot.x = ae.rot.z = 0;
+                ae.rot.y = D_808B85E4[2];
+                ae.params = ITEM00_RUPEE_BLUE;
+                entVal = createTempEntry(play, &ae);
+                if (entVal != -1)
+                    collectible = Item_DropCollectible(play, &tempVector, ITEM00_RUPEE_BLUE);
+                else
+                    collectible = NULL;
+                if (collectible != NULL) {
+                    collectible->actor.velocity.y = 11.0f;
+                    collectible->actor.world.rot.y = D_808B85E4[2];
+                    collectible->actor.room = actor->room;
+                    collectible->actor.entryNum = entVal;
+                }
             }
         }
     } else if (this->unk_216 == 2) {
