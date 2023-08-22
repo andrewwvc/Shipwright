@@ -3096,7 +3096,7 @@ s16 Rupees_GetDisplayNum() {
         return gSaveContext.rupees;
 }
 
-s16 Wallet_Upgrage_Value() {
+s16 Wallet_Upgrade_Value() {
     if (isUsingAltWallet)
         return 3;
     else
@@ -4991,7 +4991,7 @@ void Interface_Draw(PlayState* play) {
         if (fullUi) {
             // Rupee Icon
             if (CVarGetInteger("gDynamicWalletIcon", 0)) {
-                switch (Wallet_Upgrage_Value()) {
+                switch (Wallet_Upgrade_Value()) {
                     case 0:
                         if (CVarGetInteger("gCosmetics.Consumable_GreenRupee.Changed", 0)) {
                             rColor = CVarGetColor24("gCosmetics.Consumable_GreenRupee.Value", rupeeWalletColors[0]);
@@ -5181,8 +5181,8 @@ void Interface_Draw(PlayState* play) {
                 interfaceCtx->counterDigits[3] -= 10;
             }
 
-            svar2 = rupeeDigitsFirst[Wallet_Upgrage_Value()];
-            svar5 = rupeeDigitsCount[Wallet_Upgrage_Value()];
+            svar2 = rupeeDigitsFirst[Wallet_Upgrade_Value()];
+            svar5 = rupeeDigitsCount[Wallet_Upgrade_Value()];
 
             // Draw Rupee Counter. Hide in Boss Rush.
             if (!gSaveContext.isBossRush) {
