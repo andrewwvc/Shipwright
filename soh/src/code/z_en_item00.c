@@ -393,6 +393,10 @@ void EnItem00_SetObjectDependency(EnItem00* this, PlayState* play, s16 objectInd
     }
 }
 
+s16 isRupee(s16 itemVal) {
+    return (0 <= itemVal && itemVal <= 2) || itemVal == ITEM00_RUPEE_PURPLE || itemVal == ITEM00_RUPEE_ORANGE;
+}
+
 void EnItem00_Init(Actor* thisx, PlayState* play) {
     EnItem00* this = (EnItem00*)thisx;
     s32 pad;
@@ -410,7 +414,7 @@ void EnItem00_Init(Actor* thisx, PlayState* play) {
 
     this->actor.params &= 0xFF;
 
-    if (Flags_GetCollectible(play, this->collectibleFlag)) {
+    if (!(isRupee(this->actor.params) && usingBorrowedWallet()) && Flags_GetCollectible(play, this->collectibleFlag)) {
         Actor_Kill(&this->actor);
         return;
     }
