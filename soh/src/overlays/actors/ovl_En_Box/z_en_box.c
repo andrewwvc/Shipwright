@@ -506,11 +506,14 @@ void EnBox_WaitOpen(EnBox* this, PlayState* play) {
             // Chests need to have a negative getItemId in order to not immediately give their item
             // when approaching.
             if (gSaveContext.n64ddFlag) {
-                sItem.getItemId = 0 - sItem.getItemId;
-                sItem.getItemFrom = ITEM_FROM_CHEST;
-                GiveItemEntryFromActorWithFixedRange(&this->dyna.actor, play, sItem);
+                if (!usingBorrowedWallet()) {
+                    sItem.getItemId = 0 - sItem.getItemId;
+                    sItem.getItemFrom = ITEM_FROM_CHEST;
+                    GiveItemEntryFromActorWithFixedRange(&this->dyna.actor, play, sItem);
+                }
             } else {
-                func_8002F554(&this->dyna.actor, play, -(this->dyna.actor.params >> 5 & 0x7F));
+                if (!usingBorrowedWallet())
+                    func_8002F554(&this->dyna.actor, play, -(this->dyna.actor.params >> 5 & 0x7F));
             }
         }
         if (Flags_GetTreasure(play, this->dyna.actor.params & 0x1F)) {
