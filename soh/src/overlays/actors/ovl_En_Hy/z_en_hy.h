@@ -64,7 +64,7 @@ typedef struct EnHy {
 
 #define BEGGAR_REWARD_FIRE 30
 #define BEGGAR_REWARD_FISH 20
-#define BEGGAR_REWARD_BUG 3
+#define BEGGAR_REWARD_BUG 1
 #define BEGGAR_REWARD_FAIRY 3
 
 #endif
