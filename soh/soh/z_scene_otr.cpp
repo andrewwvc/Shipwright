@@ -536,6 +536,17 @@ bool Scene_CommandActorList(PlayState* play, LUS::ISceneCommand* cmd) {
                 entries[i].params &= 0xFFE0;
                 entries[i].params |= ITEM00_MAX;
             }
+        } else if (entries[i].id == ACTOR_EN_TUBO_TRAP) {
+            ActorSpawnResource sw;
+            sw.scene = play->sceneNum;
+            sw.room = play->roomCtx.curRoom.num;
+            copyActorSpawn(sw.entry, copy[i]);
+            sw.dirt = 0;
+            TempResourceEntries.insert({i,sw});
+            auto foundVal = UsedResources.find(sw);
+            if (foundVal != UsedResources.end() && isResourceYetToRestore(foundVal)) {
+                entries[i].params = 0x7FFF;
+            }
         } else if (entries[i].id == ACTOR_EN_WONDER_ITEM && DEKU_TREE_DEAD) {
             ActorSpawnResource sw;
             sw.scene = play->sceneNum;
