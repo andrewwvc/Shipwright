@@ -41,28 +41,49 @@ const ActorInit En_Ex_Ruppy_InitVars = {
     NULL,
 };
 
+static u16 guardRupeesUsedAlt = 0;
+static u16 diveRupeesUsedAlt = 0;
+
 void useGuardRupees(s32 num) {
-    gSaveContext.guardRupeesUsed += num;
+    if (usingBorrowedWallet())
+        guardRupeesUsedAlt += num;
+    else
+        gSaveContext.guardRupeesUsed += num;
 }
 
 s32 getGuardRupees() {
-    return gSaveContext.guardRupeesUsed;
+    if (usingBorrowedWallet())
+        return guardRupeesUsedAlt;
+    else
+        return gSaveContext.guardRupeesUsed;
 }
 
 void resetGuardRupees() {
-    gSaveContext.guardRupeesUsed = 0;
+    if (usingBorrowedWallet())
+        guardRupeesUsedAlt = 0;
+    else
+        gSaveContext.guardRupeesUsed = 0;
 }
 
 void useDiveRupees(s32 num) {
-    gSaveContext.diveRupeesUsed += num;
+    if (usingBorrowedWallet())
+        diveRupeesUsedAlt += num;
+    else
+        gSaveContext.diveRupeesUsed += num;
 }
 
 s32 getDiveRupees() {
-    return gSaveContext.diveRupeesUsed;
+    if (usingBorrowedWallet())
+        return diveRupeesUsedAlt;
+    else
+        return gSaveContext.diveRupeesUsed;
 }
 
 void resetDiveRupees() {
-    gSaveContext.diveRupeesUsed = 0;
+    if (usingBorrowedWallet())
+        diveRupeesUsedAlt = 0;
+    else
+        gSaveContext.diveRupeesUsed = 0;
 }
 
 void EnExRuppy_Init(Actor* thisx, PlayState* play) {

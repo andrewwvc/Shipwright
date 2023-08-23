@@ -3151,6 +3151,8 @@ void changeToAltWallet() {
     switchResourcePoolToAlternate();
     isUsingAltWallet = 1;
     altWalletRupees = 0;
+    resetGuardRupees();
+    resetDiveRupees();
 
     if (gPlayState != NULL) {
         Player* link = GET_PLAYER(gPlayState);
