@@ -607,6 +607,8 @@ void SaveManager::InitFileNormal() {
     gSaveContext.galleryMultplierAdult = INITIAL_MULTIPLIER;
     gSaveContext.galleryTimeChild = 0;
     gSaveContext.galleryTimeAdult = 0;
+    gSaveContext.guardRupeesUsed = 0;
+    gSaveContext.diveRupeesUsed = 0;
     UsedResources = {};
 
     //RANDOTODO (ADD ITEMLOCATIONS TO GSAVECONTEXT)
@@ -1707,6 +1709,8 @@ void SaveManager::LoadBaseVersion4() {
     SaveManager::Instance->LoadData("galleryMultplierAdult", gSaveContext.galleryMultplierAdult, INITIAL_MULTIPLIER);
     SaveManager::Instance->LoadData("galleryTimeChild", gSaveContext.galleryTimeChild);
     SaveManager::Instance->LoadData("galleryTimeAdult", gSaveContext.galleryTimeAdult);
+    SaveManager::Instance->LoadData("guardRupeesUsed", gSaveContext.guardRupeesUsed);
+    SaveManager::Instance->LoadData("diveRupeesUsed", gSaveContext.diveRupeesUsed);
 }
 
 void SaveManager::SaveBase(SaveContext* saveContext, int sectionID, bool fullSave) {
@@ -1878,19 +1882,21 @@ void SaveManager::SaveBase(SaveContext* saveContext, int sectionID, bool fullSav
     SaveManager::Instance->SaveData("dogParams", saveContext->dogParams);
     //SaveManager::Instance->SaveData("isMasterQuest", gSaveContext.isMasterQuest);
 
-    SaveManager::Instance->SaveData("savedFrameCount", gSaveContext.savedFrameCount);
-    SaveManager::Instance->SaveData("goronTimeStatus", gSaveContext.goronTimeStatus);
-    SaveManager::Instance->SaveData("goronTimeDay", gSaveContext.goronTimeDay);
-    SaveManager::Instance->SaveData("SariaDateDay", gSaveContext.SariaDateDay);
-    SaveManager::Instance->SaveData("RutoDateDay", gSaveContext.RutoDateDay);
-    SaveManager::Instance->SaveData("MalonPlayDay", gSaveContext.MalonPlayDay);
-    SaveManager::Instance->SaveData("MalonRideDay", gSaveContext.MalonRideDay);
-    SaveManager::Instance->SaveData("maxBoosts", gSaveContext.maxBoosts);
-    SaveManager::Instance->SaveData("extraMagicPower", gSaveContext.extraMagicPower);
-    SaveManager::Instance->SaveData("galleryMultplierChild", gSaveContext.galleryMultplierChild);
-    SaveManager::Instance->SaveData("galleryMultplierAdult", gSaveContext.galleryMultplierAdult);
-    SaveManager::Instance->SaveData("galleryTimeChild", gSaveContext.galleryTimeChild);
-    SaveManager::Instance->SaveData("galleryTimeAdult", gSaveContext.galleryTimeAdult);
+    SaveManager::Instance->SaveData("savedFrameCount", saveContext->savedFrameCount);
+    SaveManager::Instance->SaveData("goronTimeStatus", saveContext->goronTimeStatus);
+    SaveManager::Instance->SaveData("goronTimeDay", saveContext->goronTimeDay);
+    SaveManager::Instance->SaveData("SariaDateDay", saveContext->SariaDateDay);
+    SaveManager::Instance->SaveData("RutoDateDay", saveContext->RutoDateDay);
+    SaveManager::Instance->SaveData("MalonPlayDay", saveContext->MalonPlayDay);
+    SaveManager::Instance->SaveData("MalonRideDay", saveContext->MalonRideDay);
+    SaveManager::Instance->SaveData("maxBoosts", saveContext->maxBoosts);
+    SaveManager::Instance->SaveData("extraMagicPower", saveContext->extraMagicPower);
+    SaveManager::Instance->SaveData("galleryMultplierChild", saveContext->galleryMultplierChild);
+    SaveManager::Instance->SaveData("galleryMultplierAdult", saveContext->galleryMultplierAdult);
+    SaveManager::Instance->SaveData("galleryTimeChild", saveContext->galleryTimeChild);
+    SaveManager::Instance->SaveData("galleryTimeAdult", saveContext->galleryTimeAdult);
+    SaveManager::Instance->SaveData("guardRupeesUsed", saveContext->guardRupeesUsed);
+    SaveManager::Instance->SaveData("diveRupeesUsed", saveContext->diveRupeesUsed);
 }
 
 void SaveManager::LoadPersistenceVersion1() {

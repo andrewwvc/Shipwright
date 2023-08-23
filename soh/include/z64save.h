@@ -334,6 +334,8 @@ typedef struct {
     /*        */ u16 galleryMultplierAdult;
     /*        */ s32 galleryTimeChild;
     /*        */ s32 galleryTimeAdult;
+    /*        */ u16 guardRupeesUsed;
+    /*        */ u16 diveRupeesUsed;
 
     // #endregion
 } SaveContext; // size = 0x1428

@@ -41,31 +41,28 @@ const ActorInit En_Ex_Ruppy_InitVars = {
     NULL,
 };
 
-static s32 guardRupeesUsed = 0;
-static s32 diveRupeesUsed = 0;
-
 void useGuardRupees(s32 num) {
-    guardRupeesUsed += num;
+    gSaveContext.guardRupeesUsed += num;
 }
 
 s32 getGuardRupees() {
-    return guardRupeesUsed;
+    return gSaveContext.guardRupeesUsed;
 }
 
 void resetGuardRupees() {
-    guardRupeesUsed = 0;
+    gSaveContext.guardRupeesUsed = 0;
 }
 
 void useDiveRupees(s32 num) {
-    guardRupeesUsed += num;
+    gSaveContext.diveRupeesUsed += num;
 }
 
 s32 getDiveRupees() {
-    return guardRupeesUsed;
+    return gSaveContext.diveRupeesUsed;
 }
 
 void resetDiveRupees() {
-    guardRupeesUsed = 0;
+    gSaveContext.diveRupeesUsed = 0;
 }
 
 void EnExRuppy_Init(Actor* thisx, PlayState* play) {
@@ -108,7 +105,7 @@ void EnExRuppy_Init(Actor* thisx, PlayState* play) {
                 }
 
                 temp3 = Rand_ZeroFloat(temp1+getDiveRupees()*2);
-                if (((temp3 >= 0) && (temp3 < 40)) || (temp3 > 200 && temp3%3 > 0)) {
+                if (((temp3 >= 0) && (temp3 < 40)) || (temp3 > 200 && (temp3%4) > 0)) {
                     this->rupeeValue = 1;
                     this->colorIdx = 0;
                 } else if (((temp3 >= 40) && (temp3 < 170)) || (temp3 > 200)) {
