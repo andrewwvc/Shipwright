@@ -31,6 +31,7 @@ void GameOver_Update(PlayState* play) {
             gSaveContext.timer1State = 0;
             gSaveContext.timer2State = 0;
             gSaveContext.eventInf[1] &= ~1;
+            changeToNormalWallet();
 
             // search inventory for spoiling items and revert if necessary
             if (!(gSaveContext.n64ddFlag && Randomizer_GetSettingValue(RSK_SHUFFLE_ADULT_TRADE))) {

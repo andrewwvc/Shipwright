@@ -3142,9 +3142,6 @@ void Rupees_ChangeBy(s16 rupeeChange) {
 void changeToNormalWallet() {
     switchResourcePoolToNormal();
     isUsingAltWallet = 0;
-    if (gPlayState != NULL) {
-        gPlayState->interfaceCtx.restrictions.bottles = gPlayState->interfaceCtx.restrictions.tradeItems = 0;
-    }
 }
 
 void changeToAltWallet() {
