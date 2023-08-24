@@ -619,13 +619,14 @@ s32 Player_GetStrength(void) {
 u8 Player_GetMask(PlayState* play) {
     Player* this = GET_PLAYER(play);
 
-    return this->currentMask;
+    return this ? this->currentMask : PLAYER_MASK_NONE;
 }
 
 Player* Player_UnsetMask(PlayState* play) {
     Player* this = GET_PLAYER(play);
 
-    this->currentMask = PLAYER_MASK_NONE;
+    if (this)
+        this->currentMask = PLAYER_MASK_NONE;
 
     return this;
 }

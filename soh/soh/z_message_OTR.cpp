@@ -1163,6 +1163,15 @@ extern "C" void OTRMessage_Init()
     MakeNormalMsgEng(MiscMsg+3, "I do believe I&told you to SCRAM.");
     MakeNormalMsgEng(MiscMsg+4, "Hey, I see you're pretty&good at this. How about&trying your hand at the&Super Special Treasure Chest game?^Your choice.\x1C&%gSuper Special Game (30 Rupees)&Regular Game (10 Rupees)&Don't play%w");
     MakeNormalMsgEng(MiscMsg+5, "Sorry. I cannot serve someone&who is already borrowing something&from someone else.\x0B\x02");
+    //MakeBlueMsgEng(MiscMsg+6, "It seems your time is up!\x0B\x02");
+    CustomMessageManager::Instance->CreateMessage(
+        questMessageTableID, MiscMsg+6,
+        CustomMessage(
+          "It seems your time is up!\x0B\x02",
+          "",
+          "",
+          TEXTBOX_TYPE_BLUE, TEXTBOX_POS_TOP)
+    );
 
     u16 GerudoMsg = TextIDAllocator::Instance->allocateRange("gerudo", 10);
     MakeNormalMsgEng(GerudoMsg+0, "Heh, since you're clearly a master,&the only thing left is&to try for a perfect score,&if you can!\x0B\x02");

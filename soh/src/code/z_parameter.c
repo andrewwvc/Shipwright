@@ -3155,8 +3155,7 @@ void changeToAltWallet() {
     resetDiveRupees();
 
     if (gPlayState != NULL) {
-        Player* link = GET_PLAYER(gPlayState);
-        link->currentMask = PLAYER_MASK_NONE;
+        Player_UnsetMask(gPlayState);
         gPlayState->interfaceCtx.restrictions.bottles = gPlayState->interfaceCtx.restrictions.tradeItems = 1;
     }
 }
@@ -5670,6 +5669,7 @@ void Interface_Draw(PlayState* play) {
             play->sceneLoadFlag = 0x14;
             play->fadeTransition = 3;
             gSaveContext.timer2State = 0;
+            changeToNormalWallet();
 
             if ((gSaveContext.equips.buttonItems[0] != ITEM_SWORD_KOKIRI) &&
                 (gSaveContext.equips.buttonItems[0] != ITEM_SWORD_MASTER) &&
@@ -5967,7 +5967,11 @@ void Interface_Draw(PlayState* play) {
                                                 D_8015FFE6 = 40;
                                                 gSaveContext.timer2State = 5;
                                                 gSaveContext.cutsceneIndex = 0;
-                                                Message_StartTextbox(play, 0x71B0, NULL);
+                                                if (usingBorrowedWallet()) {
+                                                    s16 MiscMsg = GetTextID("misc");
+                                                    Message_StartTextbox(play, MiscMsg+6, NULL);
+                                                } else
+                                                    Message_StartTextbox(play, 0x71B0, NULL);
                                                 func_8002DF54(play, NULL, 8);
                                             } else {
                                                 D_8015FFE6 = 40;
