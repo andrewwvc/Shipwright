@@ -1385,7 +1385,8 @@ void EnSkj_TurnPlayer(EnSkj* this, Player* player) {
 void EnSkj_SetupWaitForOcarina(EnSkj* this, PlayState* play) {
     Player* player = GET_PLAYER(play);
 
-    if (EnSkj_RangeCheck(player, this)) {
+
+    if (!usingBorrowedWallet() && EnSkj_RangeCheck(player, this)) {
         sOcarinaMinigameSkullKids[SKULL_KID_LEFT].skullkid->playerInRange = true;
         sOcarinaMinigameSkullKids[SKULL_KID_RIGHT].skullkid->playerInRange = true;
 
@@ -1405,15 +1406,17 @@ void EnSkj_SetupWaitForOcarina(EnSkj* this, PlayState* play) {
 void EnSkj_WaitForOcarina(EnSkj* this, PlayState* play) {
     Player* player = GET_PLAYER(play);
 
-    if (player->stateFlags2 & 0x1000000) {
-        player->stateFlags2 |= 0x2000000;
-        func_800F5BF0(NATURE_ID_KOKIRI_REGION);
-        EnSkj_TurnPlayer(this, player);
-        player->unk_6A8 = &this->actor;
-        Message_StartTextbox(play, 0x10BE, &this->actor);
-        this->actionFunc = EnSkj_StartOcarinaMinigame;
-    } else if (EnSkj_RangeCheck(player, this)) {
-        player->stateFlags2 |= 0x800000;
+    if (!usingBorrowedWallet()) {
+        if (player->stateFlags2 & 0x1000000) {
+            player->stateFlags2 |= 0x2000000;
+            func_800F5BF0(NATURE_ID_KOKIRI_REGION);
+            EnSkj_TurnPlayer(this, player);
+            player->unk_6A8 = &this->actor;
+            Message_StartTextbox(play, 0x10BE, &this->actor);
+            this->actionFunc = EnSkj_StartOcarinaMinigame;
+        } else if (EnSkj_RangeCheck(player, this)) {
+            player->stateFlags2 |= 0x800000;
+        }
     }
 }
 
