@@ -961,7 +961,7 @@ void EnFr_SetReward(EnFr* this, PlayState* play) {
                 this->reward = this->getItemEntry.getItemId;
             }
         } else {
-            this->reward = GI_RUPEE_BLUE;
+            this->reward = GI_NONE;
         }
     } else if (songIndex == FROG_STORMS) {
         if (!(gSaveContext.eventChkInf[13] & sSongIndex[songIndex])) {
@@ -973,7 +973,7 @@ void EnFr_SetReward(EnFr* this, PlayState* play) {
                 this->reward = this->getItemEntry.getItemId;
             }
         } else {
-            this->reward = GI_RUPEE_BLUE;
+            this->reward = GI_NONE;
         }
     } else if (songIndex == FROG_CHOIR_SONG) {
         if (!(gSaveContext.eventChkInf[13] & sSongIndex[songIndex])) {
@@ -985,7 +985,7 @@ void EnFr_SetReward(EnFr* this, PlayState* play) {
                 this->reward = this->getItemEntry.getItemId;
             }
         } else {
-            this->reward = GI_RUPEE_PURPLE;
+            this->reward = GI_RUPEE_BLUE;
         }
     }
 }
