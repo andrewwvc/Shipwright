@@ -280,9 +280,10 @@ void EnSth_GivePlayerItem(EnSth* this, PlayState* play) {
         }
         getItemId = getItemEntry.getItemId;
     } else {
-        switch (this->actor.params) {
-            case 1:
-            case 3:
+        switch (getItemId) {
+            case GI_WALLET_ADULT:
+            case GI_WALLET_GIANT:
+            case GI_WALLET_KING:
                 switch (CUR_UPG_VALUE(UPG_WALLET)) {
                     case 0:
                         getItemId = GI_WALLET_ADULT;
@@ -290,6 +291,10 @@ void EnSth_GivePlayerItem(EnSth* this, PlayState* play) {
 
                     case 1:
                         getItemId = GI_WALLET_GIANT;
+                        break;
+
+                    case 2:
+                        getItemId = GI_WALLET_KING;
                         break;
                 }
                 break;

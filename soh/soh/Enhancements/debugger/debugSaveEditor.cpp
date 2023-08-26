@@ -1346,6 +1346,9 @@ void DrawEquipmentTab() {
     if (gSaveContext.n64ddFlag && OTRGlobals::Instance->gRandomizer->GetRandoSettingValue(RSK_SHOPSANITY) > RO_SHOPSANITY_ZERO_ITEMS) {
         const std::string walletName = "Tycoon ("+std::to_string(CAPACITY(UPG_WALLET,3))+")";
         walletNamesImpl.push_back(walletName);
+    } else {
+        const std::string walletName = "King's ("+std::to_string(CAPACITY(UPG_WALLET,3))+")";
+        walletNamesImpl.push_back(walletName);
     }
     // copy it to const value for display in ImGui.
     const std::vector<std::string> walletNames = walletNamesImpl;
