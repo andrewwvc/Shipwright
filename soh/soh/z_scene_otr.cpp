@@ -594,6 +594,17 @@ bool Scene_CommandActorList(PlayState* play, LUS::ISceneCommand* cmd) {
             if (foundVal != UsedResources.end() && isResourceYetToRestore(foundVal)) {
                 entries[i].rot.x = 0x1C;
             }
+        } else if (entries[i].id == ACTOR_BG_HAKA) {
+            ActorSpawnResource sw;
+            sw.scene = play->sceneNum;
+            sw.room = play->roomCtx.curRoom.num;
+            copyActorSpawn(sw.entry, copy[i]);
+            sw.dirt = 0;
+            TempResourceEntries.insert({i,sw});
+            auto foundVal = UsedResources.find(sw);
+            if (foundVal != UsedResources.end() && isResourceYetToRestore(foundVal)) {
+                entries[i].rot.z = 1;
+            }
         } else if (entries[i].id == ACTOR_EN_SKJ) {
             ActorSpawnResource sw;
             sw.scene = play->sceneNum;

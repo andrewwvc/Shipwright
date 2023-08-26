@@ -209,6 +209,7 @@ void EnPoh_Init(Actor* thisx, PlayState* play) {
     Collider_InitCylinder(play, &this->colliderCyl);
     Collider_SetCylinder(play, &this->colliderCyl, &this->actor, &sCylinderInit);
     CollisionCheck_SetInfo(&this->actor.colChkInfo, &sDamageTable, &sColChkInfoInit);
+    this->actor.shape.rot.z = this->actor.world.rot.z = 0;
     this->opacity = 0;
     this->waveTimer = PHASE_LENGTH;
     this->visibilityTimer = Rand_S16Offset(700, 300);
@@ -229,6 +230,8 @@ void EnPoh_Init(Actor* thisx, PlayState* play) {
             collectible = Item_DropCollectible(play, &this->actor.world.pos, 0x4000 | ITEM00_RUPEE_BLUE);
             if (collectible != NULL) {
                 collectible->actor.speedXZ = 0.0f;
+                if (this->actor.home.rot.z != 0)
+                    collectible->actor.entryNum = this->actor.home.rot.z-1;//Grave stores the entry number in rot.z and adds 1
             }
         }
     } else if (this->actor.params == EN_POH_FLAT) {

@@ -43,6 +43,8 @@ void BgHaka_Init(Actor* thisx, PlayState* play) {
     s32 pad;
     CollisionHeader* colHeader = NULL;
 
+    thisx->world.rot.z = thisx->shape.rot.z = 0;
+
     Actor_ProcessInitChain(&this->dyna.actor, sInitChain);
     DynaPolyActor_Init(&this->dyna, DPM_UNK);
     CollisionHeader_GetVirtual(&gGravestoneCol, &colHeader);
@@ -117,9 +119,12 @@ void func_8087B938(BgHaka* this, PlayState* play) {
         if (this->dyna.actor.params == 1) {
             func_80078884(NA_SE_SY_CORRECT_CHIME);
         } else if (!IS_DAY && play->sceneNum == SCENE_SPOT02) {
-            Actor_Spawn(&play->actorCtx, play, ACTOR_EN_POH, this->dyna.actor.home.pos.x,
-                        this->dyna.actor.home.pos.y, this->dyna.actor.home.pos.z, 0, this->dyna.actor.shape.rot.y, 0,
-                        1, true);
+            Actor* poh = Actor_Spawn(&play->actorCtx, play, ACTOR_EN_POH, this->dyna.actor.home.pos.x,
+                        this->dyna.actor.home.pos.y, this->dyna.actor.home.pos.z, 0, this->dyna.actor.shape.rot.y, this->dyna.actor.entryNum+1,
+                        this->dyna.actor.home.rot.z ? 0 : 1, true);
+            if (poh) {
+                poh->entryNum = this->dyna.actor.entryNum;//This is technically redundant
+            }
         }
 
         // un tss un tss
