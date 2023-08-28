@@ -157,6 +157,21 @@ extern "C" void createFishString(int num)
     }
 }
 
+static std::string msgRupeeScoreStr = "The most you've ever made is:&%r"+std::to_string(0)+" rupees%w.^What do you say?&\x1B&%gYes&No%w\x02";
+
+extern "C" void createRupeeScoreString(int score)
+{
+    u16 CursedFamilyMsg = TextIDAllocator::Instance->getId("cursedfamily");
+    msgRupeeScoreStr = "The most you've ever made is:&%r"+std::to_string(gSaveContext.rupeeCollectionScore)+" rupees%w.^What do you say?&\x1B&%gYes&No%w\x02";
+    CustomMessageManager::Instance->ReplaceMessage(
+    questMessageTableID, CursedFamilyMsg+5,
+    CustomMessage(
+      msgRupeeScoreStr,
+      "",
+      "",
+      TEXTBOX_TYPE_BLACK, TEXTBOX_POS_BOTTOM));
+}
+
 extern "C" void OTRMessage_Init()
 {
     // OTRTODO: Added a lot of null checks here so that we don't malloc the table multiple times causing a memory leak.
@@ -1155,6 +1170,9 @@ extern "C" void OTRMessage_Init()
     MakeNormalMsgEng(CursedFamilyMsg+0, "Our father may be telling you&that he has no need for&any help, but please^ignore his politeness.&I may have more rewards&for you yet!");
     MakeNormalMsgEng(CursedFamilyMsg+1, "I'm happy to have given&what I can, please keep&destroying the curse!");
     MakeNormalMsgEng(CursedFamilyMsg+2, "You've done such good work!&Please accept this reward!\x0B\x02");
+    MakeNormalMsgEng(CursedFamilyMsg+3, "I can tell that you possess a&noble soul. How about this challenge,&let us see how much money&you can make within the time given.^For this period, I will let&you borrow my prized wallet,&on the condition that you give&it back when the time is up.^You will also not be allowed&to spend any money out of it,&only to put it in.^Make enough money and you may&see what it's like to be rich.\x0B\x02");
+    MakeNormalMsgEng(CursedFamilyMsg+4, "Are you done then?&\x1B&%gYes&No%w\x02");
+    MakeNormalMsgEng(CursedFamilyMsg+5, "The most you've ever made is:&%r"+std::to_string(0)+" rupees%w.^What do you say?&\x1B&%gYes&No%w\x02");
 
     u16 MiscMsg = TextIDAllocator::Instance->allocateRange("misc", 20);
     MakeNormalMsgEng(MiscMsg+0, "Mooooo! I feel really great&like I'm about to produce&something amazing!&Hang on!\x0B\x02");

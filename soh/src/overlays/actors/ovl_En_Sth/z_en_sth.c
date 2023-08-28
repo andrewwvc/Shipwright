@@ -80,7 +80,7 @@ static EnSthActionFunc sRewardObtainedWaitActions[6] = {
 };
 
 static u16 sEventFlags[6] = {
-    0x0000, 0x0400, 0x0800, 0x1000, 0x2000, 0x4000,
+    0x8000, 0x0400, 0x0800, 0x1000, 0x2000, 0x4000,
 };
 
 static s16 sGetItemIds[6] = {
@@ -166,7 +166,7 @@ void EnSth_SetupAfterObjectLoaded(EnSth* this, PlayState* play) {
 
     this->eventFlag = sEventFlags[this->actor.params];
     params = &this->actor.params;
-    if ((gSaveContext.eventChkInf[13] & this->eventFlag) && ((gSaveContext.inventory.gsTokens < (this->actor.params * 10)+50) || (gSaveContext.eventChkInf[12] & this->eventFlag))) {
+    if ((gSaveContext.eventChkInf[13] & this->eventFlag) && ((gSaveContext.inventory.gsTokens < (this->actor.params * 10)+50) || (gSaveContext.eventChkInf[12] & this->eventFlag) || !this->actor.params)) {
         EnSth_SetupAction(this, sRewardObtainedWaitActions[*params]);
     } else {
         EnSth_SetupAction(this, EnSth_RewardUnobtainedWait);
@@ -221,6 +221,39 @@ void EnSth_LookAtPlayer(EnSth* this, PlayState* play) {
 }
 
 void EnSth_RewardObtainedTalk(EnSth* this, PlayState* play) {
+    u16 CursedFamilyMsg = GetTextID("cursedfamily");
+    u8 msgState = Message_GetState(&play->msgCtx);
+    u8 msgShouldAdvance = Message_ShouldAdvance(play);
+    if (this->actor.params == 0) {
+        if ((msgState == TEXT_STATE_EVENT) && msgShouldAdvance) {
+            if (this->actor.textId == CursedFamilyMsg+3) {
+                createRupeeScoreString(gSaveContext.rupeeCollectionScore);
+                this->actor.textId = CursedFamilyMsg+5;
+                Message_ContinueTextbox(play,this->actor.textId);
+                return;
+            }
+        } else if ((msgState == TEXT_STATE_CHOICE) && msgShouldAdvance) {
+            if (this->actor.textId == CursedFamilyMsg+4) {
+                if (play->msgCtx.choiceIndex == 0 && gSaveContext.timer2State != 0) {
+                    RupeeQuest_PrepareEnd();
+                    changeToNormalWallet();
+                    gSaveContext.timer2State = 0;
+                    EnSth_SetupAction(this, EnSth_ParentRewardObtainedWait);
+                    return;
+                }
+            } else if (this->actor.textId == CursedFamilyMsg+5) {
+                if (play->msgCtx.choiceIndex == 0) {
+                    changeToAltWallet();
+                    func_80088AA0(600);
+                    EnSth_SetupAction(this, EnSth_ParentRewardObtainedWait);
+                    return;
+                } else {
+                    EnSth_SetupAction(this, EnSth_ParentRewardObtainedWait);
+                    return;
+                }
+            }
+        }
+    }
     if (Actor_TextboxIsClosing(&this->actor, play)) {
         if (this->actor.params == 0) {
             EnSth_SetupAction(this, EnSth_ParentRewardObtainedWait);
@@ -235,10 +268,15 @@ void EnSth_RewardObtainedTalk(EnSth* this, PlayState* play) {
 }
 
 void EnSth_ParentRewardObtainedWait(EnSth* this, PlayState* play) {
+    u16 CursedFamilyMsg = GetTextID("cursedfamily");
     if (Actor_ProcessTalkRequest(&this->actor, play)) {
+        createRupeeScoreString(gSaveContext.rupeeCollectionScore);
         EnSth_SetupAction(this, EnSth_RewardObtainedTalk);
     } else {
-        this->actor.textId = 0x23;
+        if (usingBorrowedWallet())
+            this->actor.textId = CursedFamilyMsg+4;
+        else
+            this->actor.textId = CursedFamilyMsg+3;
         if (this->actor.xzDistToPlayer < 100.0f) {
             func_8002F2CC(&this->actor, play, 100.0f);
         }

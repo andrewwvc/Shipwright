@@ -28,6 +28,7 @@ void GameOver_Update(PlayState* play) {
         case GAMEOVER_DEATH_START:
             Message_CloseTextbox(play);
 
+            RupeeQuest_PrepareEnd();
             gSaveContext.timer1State = 0;
             gSaveContext.timer2State = 0;
             gSaveContext.eventInf[1] &= ~1;

@@ -357,6 +357,7 @@ extern uintptr_t clearMtx;
 extern "C" Mtx gMtxClear;
 extern "C" MtxF gMtxFClear;
 extern "C" void createFishString(int num);
+extern "C" void createRupeeScoreString(int score);
 extern "C" void OTRMessage_Init();
 extern "C" void AudioMgr_CreateNextAudioBuffer(s16* samples, u32 num_samples);
 extern "C" void AudioPlayer_Play(const uint8_t* buf, uint32_t len);

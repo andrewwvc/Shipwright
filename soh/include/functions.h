@@ -1095,6 +1095,7 @@ s16 Rupees_GetNum(void);
 s16 Wallet_Capacity_Current(void);
 void changeToNormalWallet(void);
 void changeToAltWallet(void);
+void RupeeQuest_PrepareEnd();
 void Rupees_ChangeBy(s16 rupeeChange);
 void Inventory_ChangeAmmo(s16 item, s16 ammoChange);
 void Magic_Fill(PlayState* play);

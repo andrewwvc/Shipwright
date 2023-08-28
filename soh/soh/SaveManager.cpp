@@ -612,6 +612,7 @@ void SaveManager::InitFileNormal() {
     gSaveContext.galleryTimeAdult = 0;
     gSaveContext.guardRupeesUsed = 0;
     gSaveContext.diveRupeesUsed = 0;
+    gSaveContext.rupeeCollectionScore = 0;
     UsedResources = {};
 
     //RANDOTODO (ADD ITEMLOCATIONS TO GSAVECONTEXT)
@@ -1717,6 +1718,7 @@ void SaveManager::LoadBaseVersion4() {
     SaveManager::Instance->LoadData("galleryTimeAdult", gSaveContext.galleryTimeAdult);
     SaveManager::Instance->LoadData("guardRupeesUsed", gSaveContext.guardRupeesUsed);
     SaveManager::Instance->LoadData("diveRupeesUsed", gSaveContext.diveRupeesUsed);
+    SaveManager::Instance->LoadData("rupeeCollectionScore", gSaveContext.rupeeCollectionScore);
 }
 
 void SaveManager::SaveBase(SaveContext* saveContext, int sectionID, bool fullSave) {
@@ -1906,6 +1908,7 @@ void SaveManager::SaveBase(SaveContext* saveContext, int sectionID, bool fullSav
     SaveManager::Instance->SaveData("galleryTimeAdult", saveContext->galleryTimeAdult);
     SaveManager::Instance->SaveData("guardRupeesUsed", saveContext->guardRupeesUsed);
     SaveManager::Instance->SaveData("diveRupeesUsed", saveContext->diveRupeesUsed);
+    SaveManager::Instance->SaveData("rupeeCollectionScore", saveContext->rupeeCollectionScore);
 }
 
 void SaveManager::LoadPersistenceVersion1() {

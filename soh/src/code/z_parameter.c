@@ -3141,11 +3141,15 @@ void Rupees_ChangeBy(s16 rupeeChange) {
 
 void changeToNormalWallet() {
     switchResourcePoolToNormal();
+    Rupees_DirectChange(gSaveContext.rupeeAccumulator);
+    gSaveContext.rupeeAccumulator = 0;
     isUsingAltWallet = 0;
 }
 
 void changeToAltWallet() {
     switchResourcePoolToAlternate();
+    Rupees_DirectChange(gSaveContext.rupeeAccumulator);
+    gSaveContext.rupeeAccumulator = 0;
     isUsingAltWallet = 1;
     altWalletRupees = 0;
     resetGuardRupees();
@@ -3154,6 +3158,17 @@ void changeToAltWallet() {
     if (gPlayState != NULL) {
         Player_UnsetMask(gPlayState);
         gPlayState->interfaceCtx.restrictions.bottles = gPlayState->interfaceCtx.restrictions.tradeItems = 1;
+    }
+}
+
+void RupeeQuest_PrepareEnd() {
+    if (usingBorrowedWallet()) {
+        Rupees_DirectChange(gSaveContext.rupeeAccumulator);
+        gSaveContext.rupeeAccumulator = 0;
+        s16 score = Rupees_GetDisplayNum();
+        if (score > gSaveContext.rupeeCollectionScore)
+            gSaveContext.rupeeCollectionScore = score;
+        createRupeeScoreString(gSaveContext.rupeeCollectionScore);
     }
 }
 
@@ -5667,6 +5682,7 @@ void Interface_Draw(PlayState* play) {
             gSaveContext.cutsceneIndex = 0;
             play->sceneLoadFlag = 0x14;
             play->fadeTransition = 3;
+            RupeeQuest_PrepareEnd();
             gSaveContext.timer2State = 0;
             changeToNormalWallet();
 

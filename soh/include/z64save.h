@@ -337,6 +337,7 @@ typedef struct {
     /*        */ s32 galleryTimeAdult;
     /*        */ u16 guardRupeesUsed;
     /*        */ u16 diveRupeesUsed;
+    /*        */ s16 rupeeCollectionScore;
 
     // #endregion
 } SaveContext; // size = 0x1428
