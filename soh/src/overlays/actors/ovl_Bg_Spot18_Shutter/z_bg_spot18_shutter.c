@@ -48,7 +48,7 @@ void BgSpot18Shutter_Init(Actor* thisx, PlayState* play) {
 
     if (param == 0) {
         if (LINK_AGE_IN_YEARS == YEARS_ADULT) {
-            if (gSaveContext.infTable[16] & 0x200) {
+            if (true) {
                 this->actionFunc = func_808B95AC;
                 this->dyna.actor.world.pos.y += 180.0f;
             } else {

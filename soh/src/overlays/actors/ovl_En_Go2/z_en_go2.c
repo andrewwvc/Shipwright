@@ -733,7 +733,7 @@ u16 EnGo2_GetTextIdGoronCityLink(PlayState* play, EnGo2* this) {
 
     if (CHECK_QUEST_ITEM(QUEST_MEDALLION_FIRE)) {
         return gSaveContext.infTable[16] & 0x8000 ? 0x3042 : 0x3041;
-    } else if (CHECK_OWNED_EQUIP(EQUIP_TUNIC, 1)) {
+    } else if (gSaveContext.infTable[16] & 0x200) {
         return gSaveContext.infTable[16] & 0x4000 ? 0x3038 : 0x3037;
     } else if (gSaveContext.infTable[16] & 0x1000) {
         this->unk_20C = 0;
@@ -750,9 +750,10 @@ s16 EnGo2_UpdateTalkStateGoronCityLink(PlayState* play, EnGo2* this) {
             switch (this->actor.textId) {
                 case 0x3036:
                     if (!gSaveContext.n64ddFlag) {
-                        EnGo2_GetItem(this, play, GI_TUNIC_GORON);
-                        this->actionFunc = EnGo2_SetupGetItem;
-                        return NPC_TALK_STATE_ACTION;
+                        //EnGo2_GetItem(this, play, GI_TUNIC_GORON);
+                        //this->actionFunc = EnGo2_SetupGetItem;
+                        gSaveContext.infTable[16] |= 0x200;
+                        return NPC_TALK_STATE_IDLE;
                     } else {
                         if (Flags_GetTreasure(play, 0x1F)) {
                             return NPC_TALK_STATE_IDLE;
@@ -2541,7 +2542,6 @@ void EnGo2_SetGetItem(EnGo2* this, PlayState* play) {
                 EnGo2_GetItemAnimation(this, play);
                 return;
             case GI_TUNIC_GORON:
-                gSaveContext.infTable[16] |= 0x200;
                 EnGo2_GetItemAnimation(this, play);
                 return;
             case GI_SWORD_BGS:

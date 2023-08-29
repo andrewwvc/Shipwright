@@ -1030,6 +1030,7 @@ extern "C" void OTRMessage_Init()
 
     u16 GoronMsg = TextIDAllocator::Instance->allocateRange("goron", 40);
 
+    MakeNormalMsgEng(0x3038, "I know it's around here somewhere&we just need to find it!&I'm sure I heard Dad say it&involved pulling something...");
     MakeNormalMsgEng(GoronMsg+0, "Ahhh, this is the best&spot to take a nice bath.&So warm and relaxing...");
     MakeNormalMsgEng(GoronMsg+1, "Oh, this stone at least&is warm enough to rest on.&So I'll just keep napping...");
     MakeNormalMsgEng(GoronMsg+2, "Ohh, how did I stuff that up?");
