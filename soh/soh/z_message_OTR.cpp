@@ -1190,6 +1190,14 @@ extern "C" void OTRMessage_Init()
           "",
           TEXTBOX_TYPE_BLUE, TEXTBOX_POS_TOP)
     );
+    CustomMessageManager::Instance->CreateMessage(
+        questMessageTableID, MiscMsg+7,
+        CustomMessage(
+          "Oh no! The %rheat%w is spoiling your item!\x0B\x02",
+          "",
+          "",
+          TEXTBOX_TYPE_BLUE, TEXTBOX_POS_TOP)
+    );
 
     u16 GerudoMsg = TextIDAllocator::Instance->allocateRange("gerudo", 10);
     MakeNormalMsgEng(GerudoMsg+0, "Heh, since you're clearly a master,&the only thing left is&to try for a perfect score,&if you can!\x0B\x02");

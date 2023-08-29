@@ -496,7 +496,7 @@ void EnKz_SetupGetItem(EnKz* this, PlayState* play) {
 void EnKz_StartTimer(EnKz* this, PlayState* play) {
     if ((Message_GetState(&play->msgCtx) == TEXT_STATE_DONE) && Message_ShouldAdvance(play)) {
         if (INV_CONTENT(ITEM_TRADE_ADULT) == ITEM_FROG && !gSaveContext.n64ddFlag) {
-            func_80088AA0(180); // start timer2 with 3 minutes
+            func_80088AA0(120); // start timer2 with 2 minutes
             gSaveContext.eventInf[1] &= ~1;
         }
         this->interactInfo.talkState = NPC_TALK_STATE_IDLE;

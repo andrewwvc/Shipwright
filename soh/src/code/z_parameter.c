@@ -5971,6 +5971,14 @@ void Interface_Draw(PlayState* play) {
                         if (D_8015FFE4 == 0) {
                             D_8015FFE4 = 20;
                             if (gSaveContext.timer2State == 4) {
+                                if (play->roomCtx.curRoom.behaviorType2 == ROOM_BEHAVIOR_TYPE2_3 && gSaveContext.timer2Value > 5) {
+                                    for (svar1 = 0; svar1 < ARRAY_COUNT(gSpoilingItems); svar1++) {
+                                        if (INV_CONTENT(ITEM_TRADE_ADULT) == gSpoilingItems[svar1]) {
+                                            s16 MiscMsg = GetTextID("misc");
+                                            gSaveContext.timer2Value = 5;
+                                        }
+                                    }
+                                }
                                 gSaveContext.timer2Value--;
                                 osSyncPrintf("TOTAL_EVENT_TM=%d\n", gSaveContext.timer2Value);
 
@@ -5980,14 +5988,17 @@ void Interface_Draw(PlayState* play) {
                                             (play->sceneNum != SCENE_GANON_FINAL) &&
                                             (play->sceneNum != SCENE_GANON_SONOGO) &&
                                             (play->sceneNum != SCENE_GANONTIKA_SONOGO))) {
+                                        s16 MiscMsg = GetTextID("misc");
                                         D_8015FFE6 = 40;
                                         gSaveContext.timer2State = 5;
                                         gSaveContext.cutsceneIndex = 0;
                                         if (usingBorrowedWallet()) {
-                                            s16 MiscMsg = GetTextID("misc");
                                             Message_StartTextbox(play, MiscMsg+6, NULL);
-                                        } else
+                                        } else if (play->sceneNum == SCENE_SPOT17) {
+                                            Message_StartTextbox(play, MiscMsg+7, NULL);
+                                        } else {
                                             Message_StartTextbox(play, 0x71B0, NULL);
+                                        }
                                         func_8002DF54(play, NULL, 8);
                                     } else {
                                         D_8015FFE6 = 40;

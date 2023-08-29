@@ -97,7 +97,7 @@ void func_80AACA94(EnMk* this, PlayState* play) {
         this->actor.parent = NULL;
         this->actionFunc = func_80AACA40;
         if (!gSaveContext.n64ddFlag) {
-            func_80088AA0(240);
+            func_80088AA0(170);
             gSaveContext.eventInf[1] &= ~1;
         }
     } else {
