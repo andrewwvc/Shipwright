@@ -1135,6 +1135,7 @@ extern "C" void OTRMessage_Init()
     MakeNormalMsgEng(ZoraMsg+18, "Ruto sure is a strange&and wild girl.^And some days she's even stranger&and wilder than usual.^It's unfitting for a princess,&but I guess girls her&age will be that way.");
     MakeNormalMsgEng(ZoraMsg+19, "The water that comes directly from&Zora's Fountain is incredibly fresh.^As long as there's nothing tainting it,&it should be the purest water&in all the land.");
     MakeNormalMsgEng(ZoraMsg+20, "Apparantly, we Zoras have an&affinity for the Moon unique&to all the races in Hyrule.^I can't say I feel much for it&myself though, even if others might.");
+    MakeNormalMsgEng(ZoraMsg+21, "Ohhh, I'm revived...&Was it you who saved me?&Don't be so nervous!^I...well I wanted to give&you a %bZora tunic%w to aid you&with breathing under water.^But there seems to be nothing&I can do about that right now.&So all I can do is ask you to&listen to my troubles.");
 
     u16 RutoMsg = TextIDAllocator::Instance->allocateRange("ruto", 30);
 

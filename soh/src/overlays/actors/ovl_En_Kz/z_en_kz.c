@@ -126,6 +126,7 @@ u16 EnKz_GetText(PlayState* play, Actor* thisx) {
 s16 func_80A9C6C0(PlayState* play, Actor* thisx) {
     EnKz* this = (EnKz*)thisx;
     s16 ret = NPC_TALK_STATE_TALKING;
+    u16 ZoraMsg = GetTextID("zora");
 
     switch (Message_GetState(&play->msgCtx)) {
         case TEXT_STATE_DONE:
@@ -141,6 +142,9 @@ s16 func_80A9C6C0(PlayState* play, Actor* thisx) {
                 case 0x401F:
                     gSaveContext.infTable[19] |= 0x200;
                     break;
+            }
+            if (this->actor.textId == ZoraMsg+21) {
+                gSaveContext.infTable[19] |= 0x200;
             }
             break;
         case TEXT_STATE_DONE_FADING:
@@ -241,6 +245,7 @@ s32 func_80A9C95C(PlayState* play, EnKz* this, s16* talkState, f32 unkf, NpcGetT
 
 void func_80A9CB18(EnKz* this, PlayState* play) {
     Player* player = GET_PLAYER(play);
+    u16 ZoraMsg = GetTextID("zora");
 
     if (func_80A9C95C(play, this, &this->interactInfo.talkState, 340.0f, EnKz_GetText, func_80A9C6C0)) {
         if (((gSaveContext.n64ddFlag && LINK_IS_CHILD) || this->actor.textId == 0x401A) && !(gSaveContext.eventChkInf[3] & 8)) {
@@ -272,9 +277,9 @@ void func_80A9CB18(EnKz* this, PlayState* play) {
                 player->actor.textId = this->actor.textId;
             } else {
                 if (!gSaveContext.n64ddFlag) {
-                    this->actor.textId = CHECK_OWNED_EQUIP(EQUIP_TUNIC, 2) ? 0x401F : 0x4012;
+                    this->actor.textId = CHECK_OWNED_EQUIP(EQUIP_TUNIC, 2) ? ZoraMsg+21 : ZoraMsg+21;
                 } else {
-                    this->actor.textId = 0x4012;
+                    this->actor.textId = ZoraMsg+21;
                 }
 
                 player->actor.textId = this->actor.textId;
