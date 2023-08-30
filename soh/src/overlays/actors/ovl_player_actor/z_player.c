@@ -13635,6 +13635,11 @@ void func_8084EFC0(Player* this, PlayState* play) {
         BottleDropInfo* dropInfo = &D_80854A28[this->itemAction - PLAYER_IA_BOTTLE_FISH];
         s16 parameters = dropInfo->actorParams;
 
+        if (dropInfo->actorId == ACTOR_EN_ICE_HONO && play->roomCtx.curRoom.behaviorType2 == ROOM_BEHAVIOR_TYPE2_3) {
+            if (gSaveContext.timer1State != 0)
+                gSaveContext.timer1Value = 16*20;
+        }
+
         //Changes the insect spawn to a special drop if you're in Mido's place and it's full of bugs
         if (dropInfo->actorId == ACTOR_EN_INSECT && play->sceneNum == SCENE_KOKIRI_HOME4 && gSaveContext.infTable[3] & 1)
             Actor_Spawn(&play->actorCtx, play, dropInfo->actorId,
