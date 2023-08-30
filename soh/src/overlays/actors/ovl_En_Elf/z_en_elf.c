@@ -644,7 +644,7 @@ void func_80A0329C(EnElf* this, PlayState* play) {
                 }
                 else
                 {
-                    Health_ChangeBy(play, 128);
+                    Health_ChangeBy(play, 0x60);
                 }
                 if (this->fairyFlags & FAIRY_FLAG_BIG) {
                     Magic_Fill(play);

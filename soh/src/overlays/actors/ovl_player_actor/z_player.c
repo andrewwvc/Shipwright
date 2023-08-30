@@ -8632,7 +8632,7 @@ void func_80843AE8(PlayState* play, Player* this) {
                         gSaveContext.healthAccumulator = CVarGetInteger("gFairyReviveHealth", 20) * 16;
                     }
                 } else {
-                    gSaveContext.healthAccumulator = 0x140;
+                    gSaveContext.healthAccumulator = 0x30;
                 }
                 this->unk_850 = -1;
             }
@@ -13606,7 +13606,7 @@ void func_8084EED8(Player* this, PlayState* play) {
                 gSaveContext.healthAccumulator = CVarGetInteger("gFairyHealth", 8) * 16;
             }
         } else {
-            gSaveContext.healthAccumulator = 0x140;
+            gSaveContext.healthAccumulator = 0x60;
         }
     }
 }
