@@ -186,6 +186,7 @@ void func_80A56544(EnHeishi4* this, PlayState* play) {
 
 void func_80A56614(EnHeishi4* this, PlayState* play) {
     s16 reactionOffset;
+    u16 MiscMsg = GetTextID("misc");
 
     reactionOffset = this->type - 4;
     this->unk_2B4 = 0;
@@ -209,6 +210,9 @@ void func_80A56614(EnHeishi4* this, PlayState* play) {
         }
     } else if (play->sceneNum != SCENE_MARKET_NIGHT) {
         if (IS_DAY) {
+        if (LINK_IS_CHILD && (getDayOfCycle() == 3 && (gSaveContext.NPCWeekEvents[0] & 0x1) && !(gSaveContext.NPCWeekEvents[0] & 0x2)))
+            this->actor.textId = MiscMsg+8;
+        else
             this->actor.textId = 0x7002;
         } else {
             this->actor.textId = 0x7003;

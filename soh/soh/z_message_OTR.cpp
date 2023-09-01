@@ -1088,6 +1088,11 @@ extern "C" void OTRMessage_Init()
     MakeNormalMsgEng(HylianMsg+16, "You've been an especially&good supplier this week.&I'm satisfied enough to&give you this bonus!");
     MakeNormalMsgEng(HylianMsg+17, "Traditonally, people here in this&market believed that the best day&to start business with someone&was when the moon is most %rred%w.^Now, I'm not the most superstitious&person but I know it pays to&understand a people's customs.");
     MakeNormalMsgEng(HylianMsg+18, "Here's a tip for doing business here.&If a certain kind of item&is associated with a particular&%cday of the week%w,^it may be valued more&by people on that day.&It's a useful thing to know!");
+    MakeNormalMsgEng(HylianMsg+19, "We'll I guess I'll be&setting off.^It's hard to walk like&this, but I'm hoping to&make it to Kakariko.^It would be nice to&get there this time.");
+    MakeNormalMsgEng(HylianMsg+20, "I'm glad I could make it here.&It's such a good thing you&were there to help too.^Oh, well I wanted to get&my ointments here, but the shop I'd&normally get them from doesn't seem&to be opening up at all.");
+    MakeNormalMsgEng(HylianMsg+21, "I don't know what to do.&It's a good thing I have&a friend who lives at this house.^So at least I should be able&to stay here in the meanwhile.^I have been wondering what&her son has been getting up to.^Anyway, I probably won't be back&in town until there's a wagon&train arranged to go back.^And that won't be until&next week, I'm afraid.");
+    MakeNormalMsgEng(HylianMsg+22, "The woman in the yellow dress&left here a while back.^I hope things go well for her.");
+    MakeNormalMsgEng(HylianMsg+23, "It's gotten too late,&I'd better head back.");
     MakeNormalMsgEng(0x70F0, "Oh, that's %cBlue Fire%w!&I'll buy it for %r"+std::to_string(BEGGAR_REWARD_FIRE)+" Rupees%w!&All sales final, OK?");
     MakeNormalMsgEng(0x70F1, "Oh, a %pFish%w!&I'll buy it for %r"+std::to_string(BEGGAR_REWARD_FISH)+" Rupees%w!&All sales final, OK?");
     MakeNormalMsgEng(0x70F2, "Oh, it's a cute little %gBug%w!&I'll buy it for %r"+std::to_string(BEGGAR_REWARD_BUG)+" Rupee%w!&All sales final, OK?");
@@ -1200,6 +1205,7 @@ extern "C" void OTRMessage_Init()
           "",
           TEXTBOX_TYPE_BLUE, TEXTBOX_POS_TOP)
     );
+    MakeNormalMsgEng(MiscMsg+8, "I'm not sure I want you&to worry, but I've had some&concerns about the lady who's&been waiting outside the gate.^She seems to be afraid to leave.&I would help her, but my&duty is to stand guard here.");
 
     u16 GerudoMsg = TextIDAllocator::Instance->allocateRange("gerudo", 10);
     MakeNormalMsgEng(GerudoMsg+0, "Heh, since you're clearly a master,&the only thing left is&to try for a perfect score,&if you can!\x0B\x02");

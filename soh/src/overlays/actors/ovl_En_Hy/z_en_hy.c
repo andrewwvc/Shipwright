@@ -30,6 +30,7 @@ void func_80A712C0(EnHy* this, PlayState* play);
 void func_80A710F8(EnHy* this, PlayState* play);
 void func_80A7127C(EnHy* this, PlayState* play);
 void EnHy_DoNothing(EnHy* this, PlayState* play);
+void EnHy_WalkAlong(EnHy* this, PlayState* play);
 void func_80A714C4(EnHy* this, PlayState* play);
 void EnHy_GiveBeggarReward(EnHy* this, PlayState* play);
 void EnHy_ReceiveBeggarReward(EnHy* this, PlayState* play);
@@ -423,11 +424,16 @@ void func_80A6F7CC(EnHy* this, PlayState* play, s32 getItemId) {
                   fabsf(this->actor.yDistToPlayer) + 1.0f);
 }
 
+s8 isItchiWoman(Actor* self, PlayState* play) {
+    return (self->params & 0x7F) == ENHY_TYPE_CNE_11;
+}
+
 u16 func_80A6F810(PlayState* play, Actor* thisx) {
     Player* player = GET_PLAYER(play);
     EnHy* this = (EnHy*)thisx;
     u16 textId = Text_GetFaceReaction(play, (this->actor.params & 0x7F) + 37);
     u16 retval = 0;
+    Actor* foundPerson = NULL;
 
     if (textId != 0) {
         if ((this->actor.params & 0x7F) == ENHY_TYPE_BOJ_5) {
@@ -489,7 +495,12 @@ u16 func_80A6F810(PlayState* play, Actor* thisx) {
                     return HylianMsg+18;
             }
         case ENHY_TYPE_AHG_4:
-            return (gSaveContext.eventChkInf[8] & 1) ? 0x704B : ((gSaveContext.infTable[12] & 0x20) ? 0x7024 : 0x7023);
+            Actor_FindNumberOf(play,&this->actor,ACTOR_EN_HY,ACTORCAT_NPC,500.0f,&foundPerson,isItchiWoman);
+            //if (LINK_IS_CHILD && ((getDayOfCycle() == 3 && (gSaveContext.NPCWeekEvents[0] & 0x1)) || (gSaveContext.NPCWeekEvents[0] & 0x2)))
+            if (foundPerson == NULL && (gSaveContext.infTable[12] & 0x20))
+                return HylianMsg+22;
+            else
+                return (gSaveContext.eventChkInf[8] & 1) ? 0x704B : ((gSaveContext.infTable[12] & 0x20) ? 0x7024 : 0x7023);
         case ENHY_TYPE_BOJ_5:
             player->exchangeItemId = EXCH_ITEM_BLUE_FIRE;
             return 0x700C;
@@ -562,12 +573,24 @@ u16 func_80A6F810(PlayState* play, Actor* thisx) {
             }
         case ENHY_TYPE_CNE_11:
         {
-            retval = (gSaveContext.infTable[8] & 0x800) ? ((gSaveContext.infTable[12] & 0x1000) ? 0x7014 : 0x70A4)
-                                                      : 0x7014;
-            if (getDayOfCycle() == 3 && (retval == 0x7014))
-                return HylianMsg+15;
-            else
-                return retval;
+            if (play->sceneNum == SCENE_SPOT00) {
+                if (getDayOfCycle() == 3 && (gSaveContext.NPCWeekEvents[0] & 0x1))
+                    return HylianMsg+19;
+                else
+                    return HylianMsg+23;
+            } else if (play->sceneNum == SCENE_SPOT01) {
+                if (gSaveContext.NPCWeekEvents[0] & 0x4)
+                    return HylianMsg+21;
+                else
+                    return HylianMsg+20;
+            } else {
+                retval = (gSaveContext.infTable[8] & 0x800) ? ((gSaveContext.infTable[12] & 0x1000) ? 0x7014 : 0x70A4)
+                                                        : 0x7014;
+                if (getDayOfCycle() == 3 && (retval == 0x7014))
+                    return HylianMsg+15;
+                else
+                    return retval;
+            }
         }
         case ENHY_TYPE_BOJ_12:
             if (play->sceneNum == SCENE_SPOT01) {
@@ -764,11 +787,19 @@ s16 func_80A70058(PlayState* play, Actor* thisx) {
             }
             if (this->actor.textId == HylianMsg+15) {
                 gSaveContext.NPCWeekEvents[0] |= 0x1;
-            }
-            if (this->actor.textId == HylianMsg+16) {
+            } else if (this->actor.textId == HylianMsg+16) {
                 func_80A6F7CC(this, play, GI_HEART_PIECE);
                 this->actionFunc = EnHy_GiveBeggarReward;
+            } else if (this->actor.textId == HylianMsg+19) {
+                this->actor.minVelocityY = -4.0f;
+                this->actor.gravity = -1.0f;
+                this->actionFunc = EnHy_WalkAlong;
+            } else if (this->actor.textId == HylianMsg+20) {
+                gSaveContext.NPCWeekEvents[0] |= 0x4;
+            } else if (this->actor.textId == HylianMsg+23) {
+                gSaveContext.NPCWeekEvents[0] &= ~0x1;
             }
+
             return NPC_TALK_STATE_IDLE;
         case TEXT_STATE_EVENT:
             if (!Message_ShouldAdvance(play)) {
@@ -882,8 +913,12 @@ void func_80A70978(EnHy* this, PlayState* play) {
                 (this->interactInfo.talkState == NPC_TALK_STATE_IDLE) ? NPC_TRACKING_NONE : NPC_TRACKING_HEAD_AND_TORSO;
             break;
         case ENHY_TYPE_CNE_11:
-            if (play->sceneNum == SCENE_SPOT00)
-                trackingMode = NPC_TRACKING_FULL_BODY;
+            if (play->sceneNum == SCENE_SPOT00) {
+                trackingMode =
+                    (this->actionFunc == EnHy_WalkAlong)? NPC_TRACKING_NONE : NPC_TRACKING_FULL_BODY;
+            } else {
+                trackingMode = NPC_TRACKING_HEAD_AND_TORSO;
+            }
             break;
         case ENHY_TYPE_BOJ_12:
             trackingMode = NPC_TRACKING_NONE;
@@ -923,7 +958,7 @@ s32 EnHy_ShouldSpawn(EnHy* this, PlayState* play) {
     switch (play->sceneNum) {
         case SCENE_SPOT00:
             if ((this->actor.params & 0x7F) == ENHY_TYPE_CNE_11) {
-                if (LINK_IS_CHILD && getDayOfCycle() == 3 && (gSaveContext.NPCWeekEvents[0] & 0x1)) {
+                if (LINK_IS_CHILD && getDayOfCycle() == 3 && (gSaveContext.NPCWeekEvents[0] & 0x1) && !(gSaveContext.NPCWeekEvents[0] & 0x2)) {
                     return true;
                 } else {
                     return false;
@@ -934,8 +969,8 @@ s32 EnHy_ShouldSpawn(EnHy* this, PlayState* play) {
                   (this->actor.params & 0x7F) == ENHY_TYPE_BOJ_12 || (this->actor.params & 0x7F) == ENHY_TYPE_AHG_2 ||
                   (this->actor.params & 0x7F) == ENHY_TYPE_BJI_7)) {
                 return true;
-            } else if (!LINK_IS_ADULT) {
-                return true;
+            } else if ((this->actor.params & 0x7F) == ENHY_TYPE_CNE_11) {
+                return (LINK_IS_CHILD && (gSaveContext.NPCWeekEvents[0] & 0x2));
             } else if ((this->actor.params & 0x7F) != ENHY_TYPE_BOJ_12 && IS_NIGHT) {
                 return false;
             } else {
@@ -987,7 +1022,7 @@ s32 EnHy_ShouldSpawn(EnHy* this, PlayState* play) {
         default:
             switch (this->actor.params & 0x7F) {
                 case ENHY_TYPE_CNE_11:
-                    if (LINK_IS_CHILD && getDayOfCycle() == 3 && (gSaveContext.NPCWeekEvents[0] & 0x1))
+                    if (LINK_IS_CHILD && ((getDayOfCycle() == 3 && (gSaveContext.NPCWeekEvents[0] & 0x1)) || (gSaveContext.NPCWeekEvents[0] & 0x2)))
                         return false;
                     break;
                 case ENHY_TYPE_BJI_19:
@@ -999,6 +1034,9 @@ s32 EnHy_ShouldSpawn(EnHy* this, PlayState* play) {
             return true;
     }
 }
+
+static const Vec3s path1points[] = {{0,0,1700}, {35,0,2060}, {1200,0,2245}, {1550,0,1850}, {1565,0,1235}, {1840,0,920}, {2024,0,730}, {2483, 0, 530}, {3105,-20, 727}, {3365,-20,610}, {3850,280,175}, {4280, 420, 440}};
+static Path path1 = {ARRAY_COUNT(path1points), &path1points};
 
 void EnHy_Init(Actor* thisx, PlayState* play) {
     EnHy* this = (EnHy*)thisx;
@@ -1086,8 +1124,16 @@ void EnHy_InitImpl(EnHy* this, PlayState* play) {
             case ENHY_TYPE_BOJ_5:
             case ENHY_TYPE_BOJ_9:
             case ENHY_TYPE_BOJ_10:
-            case ENHY_TYPE_CNE_11:
             case ENHY_TYPE_BOJ_12:
+                this->actionFunc = EnHy_DoNothing;
+                break;
+            case ENHY_TYPE_CNE_11:
+
+                if (play->sceneNum == SCENE_SPOT00) {
+                    this->path = &path1;
+                    this->waypoint = 1;
+                }
+
                 this->actionFunc = EnHy_DoNothing;
                 break;
             default:
@@ -1132,6 +1178,30 @@ void func_80A7127C(EnHy* this, PlayState* play) {
 }
 
 void EnHy_DoNothing(EnHy* this, PlayState* play) {
+}
+
+void EnHy_WalkAlong(EnHy* this, PlayState* play) {
+    if (this->waypoint != 0)
+        this->actor.speedXZ = 2.0f;
+    else
+        this->actor.speedXZ = 0.0f;
+
+    s16 yaw;
+    f32 distSq;
+
+    distSq = Path_OrientAndGetDistSq(&this->actor, this->path, this->waypoint, &yaw);
+    Math_SmoothStepToS(&this->actor.world.rot.y, yaw, 10, 1000, 1);
+    Math_SmoothStepToS(&this->actor.shape.rot.y, this->actor.world.rot.y, 2, 0x0200, 1);
+
+    if ((distSq > 0.0f) && (distSq < 1000.0f)) {
+        this->waypoint++;
+        if (this->waypoint > (this->path->count - 1)) {
+            this->waypoint = 0;
+            Actor_Kill(&this->actor);
+            if (this->path == &path1)
+                gSaveContext.NPCWeekEvents[0] |= 2;
+        }
+    }
 }
 
 void func_80A712C0(EnHy* this, PlayState* play) {

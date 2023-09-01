@@ -300,7 +300,7 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, LUS::ActorEnt
             {3, -1, { ACTOR_EN_MB, -3157,-300,945, 0,8104,0, static_cast<int16_t>(0xffff)}},
             {2, -1, { ACTOR_EN_MB, -5245,-300,2000, 0,-1321,0, static_cast<int16_t>(0xffff)}},
             {3, -1, { ACTOR_EN_MB, -5245,-300,2000, 0,-1321,0, static_cast<int16_t>(0xffff)}},
-            { -1, -1, { ACTOR_EN_HY, 0,0,1700, 0,0x000,0, 0x78B}},
+            { 0, -1, { ACTOR_EN_HY, 0,0,1700, 0,0x000,0, 0x78B}}, { 1, -1, { ACTOR_EN_HY, 0,0,1700, 0,0x000,0, 0x78B}},
         } },
     } },
     { SCENE_MARKET_DAY, { // Castle Town Square - Day
@@ -359,6 +359,7 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, LUS::ActorEnt
         { 0x00, {
             //{ -1, 18, { 0x95, -18,800,1800, 0,-32768,0, 0xb140 }},
             { 1, 24, { ACTOR_EN_SW, 5,755,-100, 0,0,0, static_cast<int16_t>(0xB104) }},
+            { 0, -1, { ACTOR_EN_HY, -250,320,-400, 0,0x7000,0, 0x78B}}, { 1, -1, { ACTOR_EN_HY, -250,320,-400, 0,0x7000,0, 0x78B}},
         } },
     } },
     { SCENE_SPOT18, {//Goron City
