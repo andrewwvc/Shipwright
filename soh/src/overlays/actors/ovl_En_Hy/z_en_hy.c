@@ -424,8 +424,12 @@ void func_80A6F7CC(EnHy* this, PlayState* play, s32 getItemId) {
                   fabsf(this->actor.yDistToPlayer) + 1.0f);
 }
 
-s8 isItchiWoman(Actor* self, PlayState* play) {
+s8 isItchyWoman(Actor* self, PlayState* play) {
     return (self->params & 0x7F) == ENHY_TYPE_CNE_11;
+}
+
+s8 isItchyWomanVulnerable(Actor* self) {
+    return ((EnHy*)self)->actionFunc == EnHy_WalkAlong;
 }
 
 u16 func_80A6F810(PlayState* play, Actor* thisx) {
@@ -495,7 +499,7 @@ u16 func_80A6F810(PlayState* play, Actor* thisx) {
                     return HylianMsg+18;
             }
         case ENHY_TYPE_AHG_4:
-            Actor_FindNumberOf(play,&this->actor,ACTOR_EN_HY,ACTORCAT_NPC,500.0f,&foundPerson,isItchiWoman);
+            Actor_FindNumberOf(play,&this->actor,ACTOR_EN_HY,ACTORCAT_NPC,500.0f,&foundPerson,isItchyWoman);
             //if (LINK_IS_CHILD && ((getDayOfCycle() == 3 && (gSaveContext.NPCWeekEvents[0] & 0x1)) || (gSaveContext.NPCWeekEvents[0] & 0x2)))
             if (foundPerson == NULL && (gSaveContext.infTable[12] & 0x20))
                 return HylianMsg+22;

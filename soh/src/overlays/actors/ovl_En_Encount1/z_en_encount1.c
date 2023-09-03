@@ -1,6 +1,8 @@
 #include "z_en_encount1.h"
 #include "vt.h"
 #include "overlays/actors/ovl_En_Tite/z_en_tite.h"
+#include "overlays/actors/ovl_En_Skb/z_en_skb.h"
+#include "overlays/actors/ovl_En_Hy/z_en_hy.h"
 
 #define FLAGS (ACTOR_FLAG_UPDATE_WHILE_CULLED | ACTOR_FLAG_NO_LOCKON)
 
@@ -249,11 +251,20 @@ void EnEncount1_SpawnStalchildOrWolfos(EnEncount1* this, PlayState* play) {
     int8_t enemyCount = play->actorCtx.actorLists[ACTORCAT_ENEMY].length;
     if ((this->curNumSpawn < this->maxCurSpawns && this->totalNumSpawn < this->maxTotalSpawns) || 
             (CVarGetInteger("gRandomizedEnemies", 0) && enemyCount < 15)) {
+        Actor* YellowWoman = NULL;
+        Actor* spawnedActor = NULL;
         while ((this->curNumSpawn < this->maxCurSpawns && this->totalNumSpawn < this->maxTotalSpawns) || 
                 (CVarGetInteger("gRandomizedEnemies", 0) && enemyCount < 15)) {
             if (play->sceneNum == SCENE_SPOT00) {
-                if ((player->unk_89E == 0) || (player->actor.floorBgId != BGCHECK_SCENE) ||
-                    !(player->actor.bgCheckFlags & 1) || (player->stateFlags1 & 0x08000000)) {
+                Actor_FindNumberOf(play, player, ACTOR_EN_HY, ACTORCAT_NPC, 10000, &YellowWoman, isItchyWoman);
+                if (YellowWoman) {
+                    u16 groundSurface = SurfaceType_GetSfx(&play->colCtx, YellowWoman->floorPoly, YellowWoman->floorBgId);
+                    if (!isItchyWomanVulnerable(YellowWoman) || (groundSurface) == 0)
+                        YellowWoman = NULL;
+                }
+
+                if (!YellowWoman && ((player->unk_89E == 0) || (player->actor.floorBgId != BGCHECK_SCENE) ||
+                    !(player->actor.bgCheckFlags & 1) || (player->stateFlags1 & 0x08000000))) {
 
                     this->fieldSpawnTimer = 60;
                     break;
@@ -266,22 +277,36 @@ void EnEncount1_SpawnStalchildOrWolfos(EnEncount1* this, PlayState* play) {
                     break;
                 }
 
-                spawnDist = Rand_CenteredFloat(40.0f) + 200.0f;
-                spawnAngle = player->actor.shape.rot.y;
-                if (this->curNumSpawn != 0) {
-                    spawnAngle = -spawnAngle;
-                    spawnDist = Rand_CenteredFloat(40.0f) + 100.0f;
+                if (YellowWoman) {
+                    spawnDist = Rand_CenteredFloat(40.0f) + 200.0f;
+                    spawnAngle = YellowWoman->shape.rot.y + 0x4000;
+                    if (this->curNumSpawn != 0) {
+                        spawnAngle = -spawnAngle;
+                        spawnDist = Rand_CenteredFloat(20.0f) + 200.0f;
+                    }
+                    spawnPos.x =
+                        YellowWoman->world.pos.x + (Math_SinS(spawnAngle) * spawnDist) + Rand_CenteredFloat(40.0f);
+                    spawnPos.y = YellowWoman->floorHeight + 120.0f;
+                    spawnPos.z =
+                        YellowWoman->world.pos.z + (Math_CosS(spawnAngle) * spawnDist) + Rand_CenteredFloat(40.0f);
+                } else {
+                    spawnDist = Rand_CenteredFloat(40.0f) + 200.0f;
+                    spawnAngle = player->actor.shape.rot.y;
+                    if (this->curNumSpawn != 0) {
+                        spawnAngle = -spawnAngle;
+                        spawnDist = Rand_CenteredFloat(40.0f) + 100.0f;
+                    }
+                    spawnPos.x =
+                        player->actor.world.pos.x + (Math_SinS(spawnAngle) * spawnDist) + Rand_CenteredFloat(40.0f);
+                    spawnPos.y = player->actor.floorHeight + 120.0f;
+                    spawnPos.z =
+                        player->actor.world.pos.z + (Math_CosS(spawnAngle) * spawnDist) + Rand_CenteredFloat(40.0f);
                 }
-                spawnPos.x =
-                    player->actor.world.pos.x + (Math_SinS(spawnAngle) * spawnDist) + Rand_CenteredFloat(40.0f);
-                spawnPos.y = player->actor.floorHeight + 120.0f;
-                spawnPos.z =
-                    player->actor.world.pos.z + (Math_CosS(spawnAngle) * spawnDist) + Rand_CenteredFloat(40.0f);
                 floorY = BgCheck_EntityRaycastFloor4(&play->colCtx, &floorPoly, &bgId, &this->actor, &spawnPos);
                 if (floorY <= BGCHECK_Y_MIN) {
                     break;
                 }
-                if ((player->actor.yDistToWater != BGCHECK_Y_MIN) &&
+                if ((player->actor.yDistToWater != BGCHECK_Y_MIN) && !YellowWoman &&
                     (floorY < (player->actor.world.pos.y + player->actor.yDistToWater))) {//The original minus sign here seems to have been a mistake
                     break;
                 }
@@ -303,14 +328,19 @@ void EnEncount1_SpawnStalchildOrWolfos(EnEncount1* this, PlayState* play) {
                 }
                 this->killCount++;
             }
-            if (Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, spawnId, spawnPos.x, spawnPos.y,
-                                   spawnPos.z, 0, 0, 0, spawnParams) != NULL) {
+            if ((spawnedActor = Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, spawnId, spawnPos.x, spawnPos.y,
+                                   spawnPos.z, 0, 0, 0, spawnParams)) != NULL) {
                 this->curNumSpawn++;
                 if (this->curNumSpawn >= this->maxCurSpawns) {
                     this->fieldSpawnTimer = 100;
                 }
                 if (play->sceneNum != SCENE_SPOT00) {
                     this->totalNumSpawn++;
+                } else {
+                    if (YellowWoman && this->spawnType == SPAWNER_STALCHILDREN) {
+                        ((EnSkb*)spawnedActor)->altTarget = YellowWoman;
+                        ((EnSkb*)spawnedActor)->closenessBias = 1;
+                    }
                 }
             } else {
                 // "Cannot spawn!"

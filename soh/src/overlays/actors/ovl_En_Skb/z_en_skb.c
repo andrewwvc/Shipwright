@@ -174,6 +174,12 @@ void EnSkb_Init(Actor* thisx, PlayState* play) {
     this->actor.home.pos = this->actor.world.pos;
     this->actor.floorHeight = this->actor.world.pos.y;
     this->walkTimer = 0;
+    this->altTarget = NULL; //Actor_FindNearby(play,thisx,ACTOR_EN_WOOD02,ACTORCAT_PROP,800.0f);
+    if (!this->altTarget)
+        this->altTarget = GET_PLAYER(play);
+    this->closenessBias = 1 + Rand_ZeroOne()*1.9f;
+    this->distToTarget = 1000;
+    this->yawToTarget = 0;
     func_80AFCDF8(this);
 }
 
@@ -198,8 +204,8 @@ void func_80AFCD60(EnSkb* this, PlayState* play) {
     // Don't despawn stallchildren during daytime when enemy randomizer is enabled.
     if (IS_DAY && !CVarGetInteger("gRandomizedEnemies", 0)) {
         func_80AFCF48(this);
-    } else if (Actor_IsFacingPlayer(&this->actor, 0x11C7) && (this->walkTimer < 1) &&
-               (this->actor.xzDistToPlayer < ATTACK_TRIGGER_DIST_MULT*(60.0f + (this->actor.params * 6.0f)))) {
+    } else if ((this->altTarget && Actor_ActorAIsFacingActorB(&this->actor, this->altTarget, 0x11C7)) && (this->walkTimer < 1) &&
+               (this->altTarget && this->distToTarget < this->closenessBias*(60.0f + (this->actor.params * 6.0f)))) {
         func_80AFD33C(this);
     } else {
         func_80AFD0A4(this, play);
@@ -216,8 +222,8 @@ void func_80AFCDF8(EnSkb* this) {
 
 void func_80AFCE5C(EnSkb* this, PlayState* play) {
     if (this->skelAnime.curFrame < 4.0f) {
-        this->actor.world.rot.y = this->actor.yawTowardsPlayer;
-        this->actor.shape.rot.y = this->actor.yawTowardsPlayer;
+        this->actor.world.rot.y = this->yawToTarget;
+        this->actor.shape.rot.y = this->yawToTarget;
     } else {
         this->actor.flags |= ACTOR_FLAG_TARGETABLE;
     }
@@ -254,7 +260,7 @@ void func_80AFCFF0(EnSkb* this, PlayState* play) {
 }
 
 void func_80AFD0A4(EnSkb* this, PlayState* play) {
-    f32 speedMod = isPlayerInSpinAttack(play) ? 1.0f : SPEED_MULT;
+    f32 speedMod = (isPlayerInSpinAttack(play) || (this->altTarget != GET_PLAYER(play))) ? 1.0f : SPEED_MULT;
     Animation_Change(&this->skelAnime, &gStalchildWalkingAnim, 0.96000004f*speedMod, 0.0f,
                      Animation_GetLastFrame(&gStalchildWalkingAnim), ANIMMODE_LOOP, -4.0f);
     this->unk_280 = 4;
@@ -272,7 +278,7 @@ void EnSkb_Advance(EnSkb* this, PlayState* play) {
     if ((this->unk_283 != 0) && ((play->gameplayFrames & 0xF) == 0)) {
         this->unk_288 = Rand_CenteredFloat(50000.0f);
     }
-    Math_SmoothStepToS(&this->actor.shape.rot.y, (this->actor.yawTowardsPlayer + this->unk_288), 1, 0x760, 0);
+    Math_SmoothStepToS(&this->actor.shape.rot.y, (this->yawToTarget + this->unk_288), 1, 0x760, 0);
     this->actor.world.rot.y = this->actor.shape.rot.y;
     thisKeyFrame = this->skelAnime.curFrame;
     SkelAnime_Update(&this->skelAnime);
@@ -295,10 +301,10 @@ void EnSkb_Advance(EnSkb* this, PlayState* play) {
         }
     }
     // Don't despawn stallchildren during daytime or when a stalchildren walks too far away from his "home" when enemy randomizer is enabled.
-    if ((Math_Vec3f_DistXZ(&this->actor.home.pos, &player->actor.world.pos) > 800.0f || IS_DAY) && !CVarGetInteger("gRandomizedEnemies", 0)) {
+    if ((this->altTarget && Math_Vec3f_DistXZ(&this->actor.home.pos, &this->altTarget->world.pos) > 800.0f) || (Math_Vec3f_DistXZ(&this->actor.home.pos, &player->actor.world.pos) > 800.0f || IS_DAY) && !CVarGetInteger("gRandomizedEnemies", 0)) {
         func_80AFCF48(this);
-    } else if (Actor_IsFacingPlayer(&this->actor, 0x11C7) && (this->walkTimer < 1) &&
-               (this->actor.xzDistToPlayer < ATTACK_TRIGGER_DIST_MULT*(60.0f + (this->actor.params * 6.0f)))) {
+    } else if ((this->altTarget && Actor_ActorAIsFacingActorB(&this->actor, this->altTarget, 0x11C7))  && (this->walkTimer < 1) &&
+                (this->altTarget && this->distToTarget < this->closenessBias*(60.0f + (this->actor.params * 6.0f)))) {
         func_80AFD33C(this);
     }
 }
@@ -382,7 +388,7 @@ void func_80AFD644(EnSkb* this) {
     if (this->actor.bgCheckFlags & 1) {
         this->actor.speedXZ = -4.0f;
     }
-    this->actor.world.rot.y = this->actor.yawTowardsPlayer;
+    this->actor.world.rot.y = this->yawToTarget;
     Audio_PlayActorSound2(&this->actor, NA_SE_EN_STALKID_DAMAGE);
     this->unk_280 = 2;
     EnSkb_SetupAction(this, func_80AFD6CC);
@@ -406,7 +412,7 @@ void func_80AFD6CC(EnSkb* this, PlayState* play) {
             }
         }
 
-        Math_SmoothStepToS(&this->actor.shape.rot.y, this->actor.yawTowardsPlayer, 1, 0x1194, 0);
+        Math_SmoothStepToS(&this->actor.shape.rot.y, this->yawToTarget, 1, 0x1194, 0);
         if (SkelAnime_Update(&this->skelAnime) && (this->actor.bgCheckFlags & 1)) {
             func_80AFCD60(this, play);
         }
@@ -415,8 +421,8 @@ void func_80AFD6CC(EnSkb* this, PlayState* play) {
 
 void func_80AFD7B4(EnSkb* this, PlayState* play) {
     Animation_MorphToPlayOnce(&this->skelAnime, &gStalchildDyingAnim, -4.0f);
-    this->actor.shape.rot.y = this->actor.yawTowardsPlayer;
-    this->actor.world.rot.y = this->actor.yawTowardsPlayer;
+    this->actor.shape.rot.y = this->yawToTarget;
+    this->actor.world.rot.y = this->yawToTarget;
     if (this->actor.bgCheckFlags & 1) {
         this->actor.speedXZ = -6.0f;
     }
@@ -527,6 +533,14 @@ void func_80AFD968(EnSkb* this, PlayState* play) {
 void EnSkb_Update(Actor* thisx, PlayState* play) {
     EnSkb* this = (EnSkb*)thisx;
     s32 pad;
+
+    if (this->altTarget) {
+        this->distToTarget = Actor_WorldDistXZToActor(thisx, this->altTarget);
+        this->yawToTarget = Actor_WorldYawTowardActor(thisx, this->altTarget);
+    } else {
+        this->distToTarget = this->actor.xzDistToPlayer;
+        this->yawToTarget = this->actor.yawTowardsPlayer;
+    }
 
     func_80AFD968(this, play);
     Actor_MoveForward(&this->actor);

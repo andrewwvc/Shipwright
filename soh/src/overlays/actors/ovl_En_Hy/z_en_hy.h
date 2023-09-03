@@ -67,4 +67,7 @@ typedef struct EnHy {
 #define BEGGAR_REWARD_BUG 1
 #define BEGGAR_REWARD_FAIRY 3
 
+s8 isItchyWoman(Actor* self, PlayState* play);
+s8 isItchyWomanVulnerable(Actor* self);
+
 #endif

@@ -23,6 +23,10 @@ typedef struct EnSkb {
     /* 0x02A4 */ ColliderJntSph collider;
     /* 0x02C4 */ ColliderJntSphElement colliderItem[2];
     /*        */ s16 walkTimer;
+    /*        */ s8 closenessBias;
+    /*        */ Actor* altTarget;
+    /*        */ f32 distToTarget;
+    /*        */ f32 yawToTarget;
 } EnSkb; // size = 0x0344
 
 #endif
