@@ -282,7 +282,7 @@ void EnEncount1_SpawnStalchildOrWolfos(EnEncount1* this, PlayState* play) {
                     break;
                 }
                 if ((player->actor.yDistToWater != BGCHECK_Y_MIN) &&
-                    (floorY < (player->actor.world.pos.y - player->actor.yDistToWater))) {
+                    (floorY < (player->actor.world.pos.y + player->actor.yDistToWater))) {//The original minus sign here seems to have been a mistake
                     break;
                 }
                 spawnPos.y = floorY;
