@@ -31,6 +31,7 @@ void func_80A710F8(EnHy* this, PlayState* play);
 void func_80A7127C(EnHy* this, PlayState* play);
 void EnHy_DoNothing(EnHy* this, PlayState* play);
 void EnHy_WalkAlong(EnHy* this, PlayState* play);
+void EnHy_BeSulking(EnHy* this, PlayState* play);
 void func_80A714C4(EnHy* this, PlayState* play);
 void EnHy_GiveBeggarReward(EnHy* this, PlayState* play);
 void EnHy_ReceiveBeggarReward(EnHy* this, PlayState* play);
@@ -578,10 +579,14 @@ u16 func_80A6F810(PlayState* play, Actor* thisx) {
         case ENHY_TYPE_CNE_11:
         {
             if (play->sceneNum == SCENE_SPOT00) {
-                if (getDayOfCycle() == 3 && (gSaveContext.NPCWeekEvents[0] & 0x1))
-                    return HylianMsg+19;
-                else
+                if (getDayOfCycle() == 3 && (gSaveContext.NPCWeekEvents[0] & 0x1)) {
+                    if (this->actionFunc != EnHy_BeSulking)
+                        return HylianMsg+19;
+                    else
+                        return HylianMsg+24;
+                } else {
                     return HylianMsg+23;
+                }
             } else if (play->sceneNum == SCENE_SPOT01) {
                 if (gSaveContext.NPCWeekEvents[0] & 0x4)
                     return HylianMsg+21;
@@ -797,6 +802,7 @@ s16 func_80A70058(PlayState* play, Actor* thisx) {
             } else if (this->actor.textId == HylianMsg+19) {
                 this->actor.minVelocityY = -4.0f;
                 this->actor.gravity = -1.0f;
+                //this->collider.base.
                 this->actionFunc = EnHy_WalkAlong;
             } else if (this->actor.textId == HylianMsg+20) {
                 gSaveContext.NPCWeekEvents[0] |= 0x4;
@@ -858,6 +864,9 @@ void EnHy_UpdateCollider(EnHy* this, PlayState* play) {
     pos.z += sColliderInfo[this->actor.params & 0x7F].offset.z;
     this->collider.dim.pos = pos;
     CollisionCheck_SetOC(play, &play->colChkCtx, &this->collider.base);
+    if (this->actionFunc == EnHy_WalkAlong && (this->actor.colorFilterTimer == 0)) {
+        CollisionCheck_SetAC(play, &play->colChkCtx, &this->collider.base);
+    }
 }
 
 void func_80A70834(EnHy* this, PlayState* play) {
@@ -971,7 +980,7 @@ s32 EnHy_ShouldSpawn(EnHy* this, PlayState* play) {
         case SCENE_SPOT01:
             if (!((this->actor.params & 0x7F) == ENHY_TYPE_BOJ_9 || (this->actor.params & 0x7F) == ENHY_TYPE_BOJ_10 ||
                   (this->actor.params & 0x7F) == ENHY_TYPE_BOJ_12 || (this->actor.params & 0x7F) == ENHY_TYPE_AHG_2 ||
-                  (this->actor.params & 0x7F) == ENHY_TYPE_BJI_7)) {
+                  (this->actor.params & 0x7F) == ENHY_TYPE_BJI_7 || (this->actor.params & 0x7F) == ENHY_TYPE_CNE_11)) {
                 return true;
             } else if ((this->actor.params & 0x7F) == ENHY_TYPE_CNE_11) {
                 return (LINK_IS_CHILD && (gSaveContext.NPCWeekEvents[0] & 0x2));
@@ -1136,6 +1145,11 @@ void EnHy_InitImpl(EnHy* this, PlayState* play) {
                 if (play->sceneNum == SCENE_SPOT00) {
                     this->path = &path1;
                     this->waypoint = 1;
+                    this->actor.colChkInfo.health = 4;
+                    this->collider.info.bumperFlags = BUMP_ON;
+                    this->collider.info.bumper.dmgFlags = 0x00FFFFF;
+                    this->collider.base.colType = COLTYPE_HIT7;
+                    this->collider.base.acFlags = AC_ON | AC_TYPE_ENEMY;
                 }
 
                 this->actionFunc = EnHy_DoNothing;
@@ -1184,9 +1198,12 @@ void func_80A7127C(EnHy* this, PlayState* play) {
 void EnHy_DoNothing(EnHy* this, PlayState* play) {
 }
 
+void EnHy_BeSulking(EnHy* this, PlayState* play) {
+}
+
 void EnHy_WalkAlong(EnHy* this, PlayState* play) {
     if (this->waypoint != 0)
-        this->actor.speedXZ = 2.0f;
+        this->actor.speedXZ = 1.0f;
     else
         this->actor.speedXZ = 0.0f;
 
@@ -1197,13 +1214,29 @@ void EnHy_WalkAlong(EnHy* this, PlayState* play) {
     Math_SmoothStepToS(&this->actor.world.rot.y, yaw, 10, 1000, 1);
     Math_SmoothStepToS(&this->actor.shape.rot.y, this->actor.world.rot.y, 2, 0x0200, 1);
 
+    if (!(getDayOfCycle() == 3) || !(gSaveContext.NPCWeekEvents[0] & 0x1)) {
+        this->actionFunc = EnHy_BeSulking;
+        this->actor.speedXZ = 0.0f;
+    }
+
     if ((distSq > 0.0f) && (distSq < 1000.0f)) {
         this->waypoint++;
+        if (this->waypoint > (this->path->count - 2) && this->path == &path1)
+                gSaveContext.NPCWeekEvents[0] |= 2;
         if (this->waypoint > (this->path->count - 1)) {
             this->waypoint = 0;
             Actor_Kill(&this->actor);
-            if (this->path == &path1)
-                gSaveContext.NPCWeekEvents[0] |= 2;
+        }
+    }
+
+    if ((this->collider.base.acFlags & AC_HIT) != 0) {
+        this->collider.base.acFlags &= ~AC_HIT;
+        DECR(this->actor.colChkInfo.health);
+        Actor_SetColorFilter(&this->actor, 0x4000, 0xFF, 0, 8);
+        Audio_PlayActorSound2(&this->actor, NA_SE_VO_Z0_HURRY);
+        if (this->actor.colChkInfo.health <= 0) {
+            this->actionFunc = EnHy_BeSulking;
+            this->actor.speedXZ = 0.0f;
         }
     }
 }

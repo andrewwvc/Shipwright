@@ -1093,6 +1093,7 @@ extern "C" void OTRMessage_Init()
     MakeNormalMsgEng(HylianMsg+21, "I don't know what to do.&It's a good thing I have&a friend who lives at this house.^So at least I should be able&to stay here in the meanwhile.^I have been wondering what&her son has been getting up to.^Anyway, I probably won't be back&in town until there's a wagon&train arranged to go back.^And that won't be until&next week, I'm afraid.");
     MakeNormalMsgEng(HylianMsg+22, "The woman in the yellow dress&left here a while back.^I hope things go well for her.");
     MakeNormalMsgEng(HylianMsg+23, "It's gotten too late,&I'd better head back.");
+    MakeNormalMsgEng(HylianMsg+24, "Oh, I can't go&on like this.");
     MakeNormalMsgEng(0x70F0, "Oh, that's %cBlue Fire%w!&I'll buy it for %r"+std::to_string(BEGGAR_REWARD_FIRE)+" Rupees%w!&All sales final, OK?");
     MakeNormalMsgEng(0x70F1, "Oh, a %pFish%w!&I'll buy it for %r"+std::to_string(BEGGAR_REWARD_FISH)+" Rupees%w!&All sales final, OK?");
     MakeNormalMsgEng(0x70F2, "Oh, it's a cute little %gBug%w!&I'll buy it for %r"+std::to_string(BEGGAR_REWARD_BUG)+" Rupee%w!&All sales final, OK?");

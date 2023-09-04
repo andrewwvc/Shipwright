@@ -232,7 +232,7 @@ void EnEncount1_SpawnStalchildOrWolfos(EnEncount1* this, PlayState* play) {
             this->outOfRangeTimer++;
             return;
         }
-    } else if (IS_DAY || (Player_GetMask(play) == PLAYER_MASK_BUNNY)) {
+    } else if (IS_DAY) {
         this->killCount = 0;
         return;
     }
@@ -264,7 +264,7 @@ void EnEncount1_SpawnStalchildOrWolfos(EnEncount1* this, PlayState* play) {
                 }
 
                 if (!YellowWoman && ((player->unk_89E == 0) || (player->actor.floorBgId != BGCHECK_SCENE) ||
-                    !(player->actor.bgCheckFlags & 1) || (player->stateFlags1 & 0x08000000))) {
+                    !(player->actor.bgCheckFlags & 1) || (player->stateFlags1 & 0x08000000) || (Player_GetMask(play) == PLAYER_MASK_BUNNY))) {
 
                     this->fieldSpawnTimer = 60;
                     break;
