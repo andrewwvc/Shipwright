@@ -483,8 +483,8 @@ void func_80AFD968(EnSkb* this, PlayState* play) {
         this->unk_281 = 0;
         func_80AFD7B4(this, play);
     } else if (this->unk_280 >= 3) {
-        if ((this->collider.base.acFlags & 2) != 0) {
-            this->collider.base.acFlags &= ~2;
+        if ((this->collider.base.acFlags & AC_HIT) != 0) {
+            this->collider.base.acFlags &= ~AC_HIT;
             if (this->actor.colChkInfo.damageEffect != 6) {
                 this->unk_282 = this->actor.colChkInfo.damageEffect;
                 Actor_SetDropFlag(&this->actor, &this->collider.elements[1].info, 1);
@@ -551,11 +551,11 @@ void EnSkb_Update(Actor* thisx, PlayState* play) {
     DECR(this->walkTimer);
     
     if (this->unk_281 != 0) {
-        this->collider.elements[0].info.toucherFlags |= AT_ON;
-        this->collider.elements[1].info.toucherFlags &= ~AT_ON;
+        this->collider.elements[0].info.toucherFlags |= TOUCH_ON;
+        this->collider.elements[1].info.toucherFlags &= ~TOUCH_ON;
     } else {
-        this->collider.elements[0].info.toucherFlags &= ~AT_ON;
-        this->collider.elements[1].info.toucherFlags |= AT_ON;
+        this->collider.elements[0].info.toucherFlags &= ~TOUCH_ON;
+        this->collider.elements[1].info.toucherFlags |= TOUCH_ON;
     }
         
     if ((this->unk_280 != 0) && (this->unk_280 != 2) && (this->unk_280 != 6) &&
