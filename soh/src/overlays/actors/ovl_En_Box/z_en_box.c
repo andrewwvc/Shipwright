@@ -31,6 +31,8 @@ when set, gets cleared next EnBox_Update call and clip to the floor
 */
 #define ENBOX_MOVE_STICK_TO_GROUND (1 << 4)
 
+#define ENBOX_ITEM_ID ((this->dyna.actor.params >> 5 & 0x7F) | ((this->dyna.actor.home.rot.z & 0x0F00) >> 1))
+
 typedef enum {
     ENBOX_STATE_0, // waiting for player near / player available / player ? (IDLE)
     ENBOX_STATE_1, // used only temporarily, maybe "player is ready" ?
@@ -131,7 +133,7 @@ void EnBox_Init(Actor* thisx, PlayState* play2) {
     this->iceSmokeTimer = 0;
     this->unk_1FB = ENBOX_STATE_0;
     this->dyna.actor.gravity = -5.5f;
-    this->switchFlag = this->dyna.actor.world.rot.z;
+    this->switchFlag = (this->dyna.actor.world.rot.z & 0xFF);
     this->dyna.actor.minVelocityY = -50.0f;
 
     if (play) {} // helps the compiler store play2 into s1
@@ -186,7 +188,8 @@ void EnBox_Init(Actor* thisx, PlayState* play2) {
     }
 
     this->dyna.actor.world.rot.y += 0x8000;
-    this->dyna.actor.home.rot.z = this->dyna.actor.world.rot.z = this->dyna.actor.shape.rot.z = 0;
+    //this->dyna.actor.home.rot.z =
+    this->dyna.actor.world.rot.z = this->dyna.actor.shape.rot.z = 0;
 
     SkelAnime_Init(play, &this->skelanime, &gTreasureChestSkel, anim, this->jointTable, this->morphTable, 5);
     Animation_Change(&this->skelanime, anim, 1.5f, animFrameStart, endFrame, ANIMMODE_ONCE, 0.0f);
@@ -194,7 +197,7 @@ void EnBox_Init(Actor* thisx, PlayState* play2) {
     if (gSaveContext.n64ddFlag) {
         this->getItemEntry = Randomizer_GetItemFromActor(this->dyna.actor.id, play->sceneNum, this->dyna.actor.params, this->dyna.actor.params >> 5 & 0x7F);
     } else {
-        this->getItemEntry = ItemTable_RetrieveEntry(MOD_NONE, this->dyna.actor.params >> 5 & 0x7F);
+        this->getItemEntry = ItemTable_RetrieveEntry(MOD_NONE, ENBOX_ITEM_ID);
     }
 
     EnBox_UpdateSizeAndTexture(this, play);
@@ -513,7 +516,7 @@ void EnBox_WaitOpen(EnBox* this, PlayState* play) {
                 }
             } else {
                 if (!usingBorrowedWallet())
-                    func_8002F554(&this->dyna.actor, play, -(this->dyna.actor.params >> 5 & 0x7F));
+                    func_8002F554(&this->dyna.actor, play, -(ENBOX_ITEM_ID));
             }
         }
         if (Flags_GetTreasure(play, this->dyna.actor.params & 0x1F)) {
