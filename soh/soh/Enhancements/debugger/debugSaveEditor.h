@@ -168,6 +168,7 @@ const std::vector<FlagTable> flagTables = {
         { 0xCC, "Obtained Skulltula 8th Reward" },
         { 0xCD, "Obtained Wallet Reward 3" },
         { 0xCE, "Obtained Skulltula 10th Reward" },
+        { 0xCf, "Obtained Skulltula Father's Reward 2" },
         { 0xDA, "Obtained Wallet Reward 1" },
         { 0xDB, "Obtained Stone of Agony" },
         { 0xDC, "Obtained Wallet Reward 2" },

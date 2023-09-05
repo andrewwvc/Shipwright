@@ -1181,6 +1181,7 @@ extern "C" void OTRMessage_Init()
     MakeNormalMsgEng(CursedFamilyMsg+3, "I can tell that you possess a&noble soul. How about this challenge,&let us see how much money&you can make within the time given.^For this period, I will let&you borrow my prized wallet,&on the condition that you give&it back when the time is up.^You will also not be allowed&to spend any money out of it,&only to put it in.^Make enough money and you may&see what it's like to be rich.\x0B\x02");
     MakeNormalMsgEng(CursedFamilyMsg+4, "Are you done then?&\x1B&%gYes&No%w\x02");
     MakeNormalMsgEng(CursedFamilyMsg+5, "The most you've ever made is:&%r"+std::to_string(0)+" rupees%w.^What do you say?&\x1B&%gYes&No%w\x02");
+    MakeNormalMsgEng(CursedFamilyMsg+6, "It looks like you understand&something about how to&keep yourself rich.^Here's something fitting for&a budding aristocrat.\x0B\x02");
 
     u16 MiscMsg = TextIDAllocator::Instance->allocateRange("misc", 20);
     MakeNormalMsgEng(MiscMsg+0, "Mooooo! I feel really great&like I'm about to produce&something amazing!&Hang on!\x0B\x02");

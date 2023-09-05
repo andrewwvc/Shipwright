@@ -5682,6 +5682,8 @@ void Interface_Draw(PlayState* play) {
             gSaveContext.cutsceneIndex = 0;
             play->sceneLoadFlag = 0x14;
             play->fadeTransition = 3;
+            if (usingBorrowedWallet())
+                play->nextEntranceIndex = 1360;
             RupeeQuest_PrepareEnd();
             gSaveContext.timer2State = 0;
             changeToNormalWallet();

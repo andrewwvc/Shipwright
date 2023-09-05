@@ -21,6 +21,7 @@ void EnSth_WaitForObjectLoaded(EnSth* this, PlayState* play);
 void EnSth_ParentRewardObtainedWait(EnSth* this, PlayState* play);
 void EnSth_RewardUnobtainedWait(EnSth* this, PlayState* play);
 void EnSth_ChildRewardObtainedWait(EnSth* this, PlayState* play);
+void EnSth_GiveReward(EnSth* this, PlayState* play);
 
 const ActorInit En_Sth_InitVars = {
     ACTOR_EN_STH,
@@ -88,7 +89,7 @@ static s16 sGetItemIds[6] = {
 };
 
 static s16 sGetItemIds2[6] = {
-    GI_RUPEE_GOLD, GI_HEART_PIECE, GI_EXTRA_MAGIC, GI_DEFENSE_HEART, GI_WALLET_KING, GI_HEART_PIECE,
+    GI_DEFENSE_HEART, GI_HEART_PIECE, GI_EXTRA_MAGIC, GI_DEFENSE_HEART, GI_WALLET_KING, GI_HEART_PIECE,
 };
 
 static Vec3f D_80B0B49C = { 700.0f, 400.0f, 0.0f };
@@ -231,6 +232,11 @@ void EnSth_RewardObtainedTalk(EnSth* this, PlayState* play) {
                 this->actor.textId = CursedFamilyMsg+5;
                 Message_ContinueTextbox(play,this->actor.textId);
                 return;
+            } else if (this->actor.textId == CursedFamilyMsg+6) {
+                Message_CloseTextbox(play);
+                EnSth_SetupAction(this, EnSth_GiveReward);
+                EnSth_GivePlayerItem(this, play);
+                return;
             }
         } else if ((msgState == TEXT_STATE_CHOICE) && msgShouldAdvance) {
             if (this->actor.textId == CursedFamilyMsg+4) {
@@ -275,8 +281,10 @@ void EnSth_ParentRewardObtainedWait(EnSth* this, PlayState* play) {
     } else {
         if (usingBorrowedWallet())
             this->actor.textId = CursedFamilyMsg+4;
-        else
+        else if ((gSaveContext.eventChkInf[12] & this->eventFlag) || (gSaveContext.rupeeCollectionScore < 1000))
             this->actor.textId = CursedFamilyMsg+3;
+        else
+            this->actor.textId = CursedFamilyMsg+6;
         if (this->actor.xzDistToPlayer < 100.0f) {
             func_8002F2CC(&this->actor, play, 100.0f);
         }
