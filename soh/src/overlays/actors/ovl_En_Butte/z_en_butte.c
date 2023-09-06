@@ -341,10 +341,10 @@ void EnButte_FollowLink(EnButte* this, PlayState* play) {
     if (!((player->heldItemAction == PLAYER_IA_STICK) && (fabsf(player->actor.speedXZ) < 1.8f) &&
           (this->swordDownTimer <= 0) && (distSqFromHome < SQ(320.0f)))) {
         EnButte_SetupFlyAround(this);
-    } else if (distSqFromHome > SQ(240.0f)) {
+    } else if (distSqFromHome < SQ(240.0f)) {
         distSqFromSword = Math3D_Dist2DSq(player->meleeWeaponInfo[0].tip.x, player->meleeWeaponInfo[0].tip.z,
                                           this->actor.world.pos.x, this->actor.world.pos.z);
-        if (distSqFromSword < SQ(60.0f)) {
+        if (distSqFromSword < SQ(10.0f)) {
             EnButte_SetupTransformIntoFairy(this);
         }
     }
@@ -366,7 +366,7 @@ void EnButte_TransformIntoFairy(EnButte* this, PlayState* play) {
         SoundSource_PlaySfxAtFixedWorldPos(play, &this->actor.world.pos, 60, NA_SE_EV_BUTTERFRY_TO_FAIRY);
     } else if (this->timer == 4) {
         Actor_Spawn(&play->actorCtx, play, ACTOR_EN_ELF, this->actor.focus.pos.x, this->actor.focus.pos.y,
-                    this->actor.focus.pos.z, 0, this->actor.shape.rot.y, 0, FAIRY_HEAL_TIMED, true);
+                    this->actor.focus.pos.z, 0, this->actor.shape.rot.y, 0, FAIRY_HEAL_BIG, true);
         this->drawSkelAnime = false;
     } else if (this->timer <= 0) {
         EnButte_SetupWaitToDie(this);
