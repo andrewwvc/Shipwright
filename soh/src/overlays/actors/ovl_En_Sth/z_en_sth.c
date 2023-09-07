@@ -22,6 +22,7 @@ void EnSth_ParentRewardObtainedWait(EnSth* this, PlayState* play);
 void EnSth_RewardUnobtainedWait(EnSth* this, PlayState* play);
 void EnSth_ChildRewardObtainedWait(EnSth* this, PlayState* play);
 void EnSth_GiveReward(EnSth* this, PlayState* play);
+void EnSth_GivePlayerItem(EnSth* this, PlayState* play);
 
 const ActorInit En_Sth_InitVars = {
     ACTOR_EN_STH,
