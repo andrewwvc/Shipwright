@@ -598,6 +598,19 @@ void func_80A03148(EnElf* this, Vec3f* arg1, f32 arg2, f32 arg3, f32 arg4) {
     func_8002D7EC(&this->actor);
 }
 
+void Elf_GiveDefense(EnElf* this, PlayState* play) {
+    if (Actor_HasParent(&this->actor, play)) {
+        gSaveContext.spiritDefenseHeartsGiven++;
+        this->actionFunc = func_80A03610;
+    } else {
+        func_8002F434(&this->actor, play, GI_DEFENSE_HEART, 100.0f, 50.0f);
+    }
+}
+
+u8 isGivingDefense(Actor* thisx, PlayState* play) {
+    return ((EnElf*)thisx)->actionFunc == Elf_GiveDefense;
+}
+
 void func_80A0329C(EnElf* this, PlayState* play) {
     Player* refActor = GET_PLAYER(play);
     s32 pad;
@@ -621,7 +634,10 @@ void func_80A0329C(EnElf* this, PlayState* play) {
     }
 
     if (Actor_HasParent(&this->actor, play)) {
-        insertSpawnResource(this->actor.entryNum, DEFAULT_RESOURCE_TIME);
+        if (this->fairyFlags & FAIRY_FLAG_BIG)
+            insertCollectionResource(this->actor.entryNum, DEFAULT_RESOURCE_TIME);
+        else
+            insertSpawnResource(this->actor.entryNum, DEFAULT_RESOURCE_TIME);
         Actor_Kill(&this->actor);
         return;
     }
@@ -655,8 +671,18 @@ void func_80A0329C(EnElf* this, PlayState* play) {
                 this->unk_28C.y = 30.0f;
                 this->unk_2B4 = 0.0f;
                 this->unk_2AA = 0;
-                insertSpawnResource(this->actor.entryNum, DEFAULT_RESOURCE_TIME);
-                EnElf_SetupAction(this, func_80A03610);
+                if (this->fairyFlags & FAIRY_FLAG_BIG)
+                    insertCollectionResource(this->actor.entryNum, DEFAULT_RESOURCE_TIME);
+                else
+                    insertSpawnResource(this->actor.entryNum, DEFAULT_RESOURCE_TIME);
+
+                if ((gSaveContext.spiritDefenseHeartsGiven+1)*10 <= countCollection() &&
+                        Actor_FindNumberOf(play,&this->actor,ACTOR_EN_ELF,ACTORCAT_ITEMACTION, 500.0f, NULL, isGivingDefense) < 1) {
+                    func_8002F434(&this->actor, play, GI_DEFENSE_HEART, 100.0f, 50.0f);
+                    EnElf_SetupAction(this, Elf_GiveDefense);
+                } else {
+                    EnElf_SetupAction(this, func_80A03610);
+                }
                 return;
             }
         }

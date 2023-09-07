@@ -147,6 +147,7 @@ void func_80A4E470(EnGs* this, PlayState* play) {
         s16 actorParams = 0;
         s32 entVal = -1;
         ActorEntry ae;
+        s8 resourceUsed, resourceCollected;
 
         ae.id = this->actor.id;
         ae.pos.x = round(this->actor.home.pos.x);
@@ -167,7 +168,9 @@ void func_80A4E470(EnGs* this, PlayState* play) {
                 }
             }
         }
-        if (isResourceUsed(play, &ae, actorParams)) {
+        resourceUsed = isResourceUsed(play, &ae, actorParams);
+        resourceCollected = isResourceCollected(play, &ae, actorParams);
+        if (resourceUsed && resourceCollected) {
             this->unk_19D = 0;
             return;
         }
@@ -188,23 +191,27 @@ void func_80A4E470(EnGs* this, PlayState* play) {
                     (play->msgCtx.unk_E3F2 == OCARINA_SONG_LULLABY) ||
                     (play->msgCtx.unk_E3F2 == OCARINA_SONG_SUNS) ||
                     (play->msgCtx.unk_E3F2 == OCARINA_SONG_TIME)) {
-                    fairy = Actor_Spawn(&play->actorCtx, play, ACTOR_EN_ELF, this->actor.world.pos.x,
-                                this->actor.world.pos.y + 40.0f, this->actor.world.pos.z, 0, 0, 0, FAIRY_HEAL_TIMED, true);
-                    Audio_PlayActorSound2(&this->actor, NA_SE_EV_BUTTERFRY_TO_FAIRY);
+                    if (!resourceUsed) {
+                        fairy = Actor_Spawn(&play->actorCtx, play, ACTOR_EN_ELF, this->actor.world.pos.x,
+                                    this->actor.world.pos.y + 40.0f, this->actor.world.pos.z, 0, 0, 0, FAIRY_HEAL_TIMED, true);
+                        Audio_PlayActorSound2(&this->actor, NA_SE_EV_BUTTERFRY_TO_FAIRY);
+                    }
                 } else if (play->msgCtx.unk_E3F2 == OCARINA_SONG_STORMS) {
-                    fairy = Actor_Spawn(&play->actorCtx, play, ACTOR_EN_ELF, this->actor.world.pos.x,
-                                this->actor.world.pos.y + 40.0f, this->actor.world.pos.z, 0, 0, 0, FAIRY_HEAL_BIG, true);
-                    Audio_PlayActorSound2(&this->actor, NA_SE_EV_BUTTERFRY_TO_FAIRY);
+                    if (!resourceCollected) {
+                        fairy = Actor_Spawn(&play->actorCtx, play, ACTOR_EN_ELF, this->actor.world.pos.x,
+                                    this->actor.world.pos.y + 40.0f, this->actor.world.pos.z, 0, 0, 0, FAIRY_HEAL_BIG, true);
+                        Audio_PlayActorSound2(&this->actor, NA_SE_EV_BUTTERFRY_TO_FAIRY);
+                    }
                 }
                 this->unk_19D = 0;
-                Flags_SetSwitch(play, (this->actor.params >> 8) & 0x3F);
-                if (play->sceneNum == SCENE_KAKUSIANA) {
-                    entVal = createTempEntryPlus(play, &ae, actorParams);
-                } else {
-                    entVal = createTempEntry(play, &ae);
-                }
-                this->actor.entryNum = entVal;
                 if (fairy != NULL) {
+                    Flags_SetSwitch(play, (this->actor.params >> 8) & 0x3F);
+                    if (play->sceneNum == SCENE_KAKUSIANA) {
+                        entVal = createTempEntryPlusUnk(play, &ae, actorParams);
+                    } else {
+                        entVal = createTempEntryPlusUnk(play, &ae, 0);
+                    }
+                    this->actor.entryNum = entVal;
                     fairy->entryNum = entVal;
                 }
             } else if (play->msgCtx.ocarinaMode == OCARINA_MODE_01) {

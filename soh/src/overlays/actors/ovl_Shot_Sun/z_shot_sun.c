@@ -86,10 +86,22 @@ void ShotSun_Destroy(Actor* thisx, PlayState* play) {
 void ShotSun_SpawnFairy(ShotSun* this, PlayState* play) {
     s32 params = this->actor.params & 0xFF;
     s32 fairyType;
+    Actor *fairy;
 
     if (this->timer > 0) {
         this->timer--;
     } else {
+        s16 actorParams = 0;
+        s32 entVal = -1;
+        ActorEntry ae;
+        Actor* fairy = NULL;
+
+        ae.id = this->actor.id;
+        ae.pos.x = round(this->actor.home.pos.x);
+        ae.pos.y = round(this->actor.home.pos.y);
+        ae.pos.z = round(this->actor.home.pos.z);
+        ae.rot = this->actor.home.rot;
+        ae.params = 0;//this->actor.params;
         switch (params) {
             case 0x40:
                 fairyType = FAIRY_HEAL_BIG;
@@ -100,8 +112,15 @@ void ShotSun_SpawnFairy(ShotSun* this, PlayState* play) {
         }
 
         //! @bug fairyType may be uninitialized
-        Actor_Spawn(&play->actorCtx, play, ACTOR_EN_ELF, this->actor.home.pos.x, this->actor.home.pos.y,
-                    this->actor.home.pos.z, 0, 0, 0, fairyType, true);
+        if (!isResourceCollected(play, &ae, actorParams))
+            fairy = Actor_Spawn(&play->actorCtx, play, ACTOR_EN_ELF, this->actor.home.pos.x, this->actor.home.pos.y,
+                    this->actor.home.pos.z, 0, 0, 0, FAIRY_HEAL_BIG, true);
+
+        if (fairy != NULL) {
+            entVal = createTempEntryPlusUnk(play, &ae, 0);
+            this->actor.entryNum = entVal;
+            fairy->entryNum = entVal;
+        }
 
         Actor_Kill(&this->actor);
     }

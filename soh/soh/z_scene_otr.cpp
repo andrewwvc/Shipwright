@@ -86,6 +86,7 @@ extern std::map<ActorSpawnResource,int> UsedResources;
 extern std::map<ActorSpawnResource,int> AlternateResourcePool;
 extern std::map<int,ActorSpawnResource> TempResourceEntries;
 s16 usingAlternateResourcePool = 0;
+extern std::map<ActorSpawnResource,int> UsedPinkSpirits;
 
 std::map<ActorSpawnResource,int>& currentResourcePool() {
     if (usingAlternateResourcePool)
@@ -114,6 +115,21 @@ void insertSpawnResource(int entry, int extraTime) {
             existing.first->second = gSaveContext.savedFrameCount+extraTime;
         }
     }
+}
+
+void insertCollectionResource(int entry, int extraTime) {
+    auto itt = TempResourceEntries.find(entry);
+    if (itt != TempResourceEntries.end()) {
+        ActorSpawnResource sw = itt->second;
+        auto existing = UsedPinkSpirits.insert({sw,0});
+        if (!existing.second) {
+            existing.first->second = 0;
+        }
+    }
+}
+
+s32 countCollection() {
+    return UsedPinkSpirits.size();
 }
 
 s32 createTempEntryPlus(PlayState* play, ActorEntry* spawn, s16 dirt) {
@@ -148,6 +164,29 @@ s32 createTempEntry(PlayState* play, ActorEntry* spawn) {
     return createTempEntryPlus(play,spawn,0);
 }
 
+s32 createTempEntryPlusUnk(PlayState* play, ActorEntry* spawn, s16 dirt) {
+    ActorSpawnResource sw;
+    sw.scene = play->sceneNum;
+    sw.room = play->roomCtx.curRoom.num;
+    sw.entry.actorNum = spawn->id;
+    sw.entry.initVar = spawn->params;
+    sw.entry.posX = spawn->pos.x;
+    sw.entry.posY = spawn->pos.y;
+    sw.entry.posZ = spawn->pos.z;
+    sw.entry.rotX = spawn->rot.x;
+    sw.entry.rotY = spawn->rot.y;
+    sw.entry.rotZ = spawn->rot.z;
+    sw.dirt = dirt;
+    int entNum;
+    auto node = TempResourceEntries.rbegin();
+    if (node != TempResourceEntries.rend())
+        entNum = node->first+1;
+    else
+        entNum = 0;
+    TempResourceEntries.insert({entNum, sw});
+    return entNum;
+}
+
 bool isResourceYetToRestore(auto val) {
    return val->second > gSaveContext.savedFrameCount;
 }
@@ -167,6 +206,27 @@ s32 isResourceUsed(PlayState* play, ActorEntry* spawn, s16 dirt) {
     sw.dirt = dirt;
     auto foundVal = currentResourcePool().find(sw);
     if (foundVal != currentResourcePool().end() && isResourceYetToRestore(foundVal)) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+s32 isResourceCollected(PlayState* play, ActorEntry* spawn, s16 dirt) {
+    ActorSpawnResource sw;
+    sw.scene = play->sceneNum;
+    sw.room = play->roomCtx.curRoom.num;
+    sw.entry.actorNum = spawn->id;
+    sw.entry.initVar = spawn->params;
+    sw.entry.posX = spawn->pos.x;
+    sw.entry.posY = spawn->pos.y;
+    sw.entry.posZ = spawn->pos.z;
+    sw.entry.rotX = spawn->rot.x;
+    sw.entry.rotY = spawn->rot.y;
+    sw.entry.rotZ = spawn->rot.z;
+    sw.dirt = dirt;
+    auto foundVal = UsedPinkSpirits.find(sw);
+    if (foundVal != UsedPinkSpirits.end()) {
         return 1;
     } else {
         return 0;

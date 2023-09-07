@@ -125,6 +125,7 @@ std::unordered_map<uint16_t, uint16_t>* textIDSubstitutionTable;
 std::map<ActorSpawnResource,int> UsedResources = {};
 std::map<ActorSpawnResource,int> AlternateResourcePool = {};
 std::map<int,ActorSpawnResource> TempResourceEntries = {};
+std::map<ActorSpawnResource,int> UsedPinkSpirits = {};
 
 extern "C" char** cameraStrings;
 std::vector<std::shared_ptr<std::string>> cameraStdStrings;

@@ -18,6 +18,7 @@
 
 extern "C" SaveContext gSaveContext;
 extern std::map<ActorSpawnResource,int> UsedResources;
+extern std::map<ActorSpawnResource,int> UsedPinkSpirits;
 
 using namespace std::string_literals;
 
@@ -613,7 +614,9 @@ void SaveManager::InitFileNormal() {
     gSaveContext.guardRupeesUsed = 0;
     gSaveContext.diveRupeesUsed = 0;
     gSaveContext.rupeeCollectionScore = 0;
+    gSaveContext.spiritDefenseHeartsGiven = 0;
     UsedResources = {};
+    UsedPinkSpirits = {};
 
     //RANDOTODO (ADD ITEMLOCATIONS TO GSAVECONTEXT)
 }
@@ -1719,6 +1722,8 @@ void SaveManager::LoadBaseVersion4() {
     SaveManager::Instance->LoadData("guardRupeesUsed", gSaveContext.guardRupeesUsed);
     SaveManager::Instance->LoadData("diveRupeesUsed", gSaveContext.diveRupeesUsed);
     SaveManager::Instance->LoadData("rupeeCollectionScore", gSaveContext.rupeeCollectionScore);
+    SaveManager::Instance->LoadData("spiritDefenseHeartsGiven", gSaveContext.spiritDefenseHeartsGiven);
+    SaveManager::Instance->LoadData("UsedPinkSpirits", UsedPinkSpirits, {});
 }
 
 void SaveManager::SaveBase(SaveContext* saveContext, int sectionID, bool fullSave) {
@@ -1909,6 +1914,8 @@ void SaveManager::SaveBase(SaveContext* saveContext, int sectionID, bool fullSav
     SaveManager::Instance->SaveData("guardRupeesUsed", saveContext->guardRupeesUsed);
     SaveManager::Instance->SaveData("diveRupeesUsed", saveContext->diveRupeesUsed);
     SaveManager::Instance->SaveData("rupeeCollectionScore", saveContext->rupeeCollectionScore);
+    SaveManager::Instance->SaveData("spiritDefenseHeartsGiven", gSaveContext.spiritDefenseHeartsGiven);
+    SaveManager::Instance->SaveData("UsedPinkSpirits", UsedPinkSpirits);
 }
 
 void SaveManager::LoadPersistenceVersion1() {
