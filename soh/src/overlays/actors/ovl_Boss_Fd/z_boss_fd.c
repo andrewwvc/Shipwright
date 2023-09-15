@@ -198,6 +198,9 @@ void BossFd_Init(Actor* thisx, PlayState* play) {
     if (this->introState == BFD_CS_NONE) {
         Audio_QueueSeqCmd(SEQ_PLAYER_BGM_MAIN << 24 | NA_BGM_FIRE_BOSS);
     }
+    this->flameCircle = NULL;
+    this->flameWall[0] = NULL;
+    this->flameWall[1] = NULL;
 
     this->actor.world.pos.x = this->actor.world.pos.z = 0.0f;
     this->actor.world.pos.y = -200.0f;
@@ -242,6 +245,12 @@ void BossFd_Destroy(Actor* thisx, PlayState* play) {
     SkelAnime_Free(&this->skelAnimeRightArm, play);
     SkelAnime_Free(&this->skelAnimeLeftArm, play);
     Collider_DestroyJntSph(play, &this->collider);
+    if (this->flameCircle)
+        Actor_Kill(this->flameCircle);
+    if (this->flameWall[0])
+        Actor_Kill(this->flameWall[0]);
+    if (this->flameWall[1])
+        Actor_Kill(this->flameWall[1]);
 }
 
 s32 BossFd_IsFacingLink(BossFd* this) {
@@ -550,6 +559,9 @@ void BossFd_Fly(BossFd* this, PlayState* play) {
                     this->actionFunc = BossFd_Wait;
                     this->handoffSignal = FD2_SIGNAL_GROUND;
                     gSaveContext.eventChkInf[7] |= 8;
+                    this->flameCircle = Actor_Spawn(&play->actorCtx,play, ACTOR_BG_HIDAN_CURTAIN, 0,-100,0, 0,0,0, 0x0 | (9 << 0xC), false);
+                    this->flameWall[0] = Actor_Spawn(&play->actorCtx,play, ACTOR_BG_HIDAN_FIREWALL, 840,0,320, 0,0x4000,0, 0x0, false);
+                    this->flameWall[1] = Actor_Spawn(&play->actorCtx,play, ACTOR_BG_HIDAN_FIREWALL, 840,0,500, 0,0x4000,0, 0x0, false);
                 }
                 break;
         }
@@ -737,6 +749,12 @@ void BossFd_Fly(BossFd* this, PlayState* play) {
             if (this->timers[1] == 0) {
                 this->work[BFD_ACTION_STATE] = BOSSFD_SKIN_BURN;
                 this->timers[0] = 30;
+                if (this->flameCircle)
+                    Actor_Kill(this->flameCircle);
+                if (this->flameWall[0])
+                    Actor_Kill(this->flameWall[0]);
+                if (this->flameWall[1])
+                    Actor_Kill(this->flameWall[1]);
             }
             break;
         case BOSSFD_SKIN_BURN:
