@@ -1320,9 +1320,12 @@ void BossFd_CollisionCheck(BossFd* this, PlayState* play) {
     }
 }
 
+#define MAX_ROCK_DIST 200.0f
+
 void BossFd_Update(Actor* thisx, PlayState* play) {
     s32 pad;
     BossFd* this = (BossFd*)thisx;
+    Player* player = GET_PLAYER(play);
     f32 headGlow;
     f32 rManeGlow;
     f32 lManeGlow;
@@ -1379,10 +1382,16 @@ void BossFd_Update(Actor* thisx, PlayState* play) {
 
     if (this->work[BFD_ROCK_TIMER] != 0) {
         this->work[BFD_ROCK_TIMER]--;
-        if ((this->work[BFD_ROCK_TIMER] % 16) == 0) {
+        if ((this->work[BFD_ROCK_TIMER] % 10) == 0) {
+            f32 xRand = MAX_ROCK_DIST*2;
+            f32 zRand = MAX_ROCK_DIST*2;
+            while (SQ(xRand)+SQ(zRand) > SQ(MAX_ROCK_DIST)) {
+                xRand = Rand_CenteredFloat(MAX_ROCK_DIST*2);
+                zRand = Rand_CenteredFloat(MAX_ROCK_DIST*2);
+            }
             EnVbBall* bossFdRock = (EnVbBall*)Actor_SpawnAsChild(
-                &play->actorCtx, &this->actor, play, ACTOR_EN_VB_BALL, this->actor.world.pos.x, 1000.0f,
-                this->actor.world.pos.z, 0, 0, (s16)Rand_ZeroFloat(50.0f) + 130, 100);
+                &play->actorCtx, &this->actor, play, ACTOR_EN_VB_BALL, player->actor.world.pos.x+xRand, 1000.0f,
+                player->actor.world.pos.z+zRand, 0, 0, (s16)Rand_ZeroFloat(50.0f) + 130, 100);
 
             if (bossFdRock != NULL) {
                 for (i = 0; i < 10; i++) {
@@ -1495,7 +1504,7 @@ void BossFd_UpdateEffects(BossFd* this, PlayState* play) {
                 diff.x = player->actor.world.pos.x - effect->pos.x;
                 diff.y = player->actor.world.pos.y + 30.0f - effect->pos.y;
                 diff.z = player->actor.world.pos.z - effect->pos.z;
-                if ((this->timers[3] == 0) && (sqrtf(SQ(diff.x) + SQ(diff.y) + SQ(diff.z)) < 20.0f)) {
+                if ((this->timers[3] == 0) && (SQ(diff.x) + SQ(diff.y) + SQ(diff.z) < SQ(30.0f))) {
                     this->timers[3] = 50;
                     func_8002F6D4(play, NULL, 5.0f, effect->kbAngle, 0.0f, 0x30);
                     if (player->isBurning == false) {
@@ -1510,7 +1519,10 @@ void BossFd_UpdateEffects(BossFd* this, PlayState* play) {
                         effect->scale += effect->vFdFxScaleMod;
                         effect->vFdFxScaleMod += 0.08f;
                     }
-                    if ((effect->pos.y <= (effect->vFdFxYStop + 130.0f)) || (effect->timer1 >= 10)) {
+                    if (effect->pos.y <= (effect->vFdFxYStop + 100.0f)) {
+                        effect->velocity.y = 0.0f;
+                    }
+                    if ((effect->timer1 >= 30)) {
                         effect->accel.y = 5.0f;
                         effect->timer2++;
                         effect->velocity.y = 0.0f;

@@ -163,6 +163,9 @@ void EnVbBall_UpdateBones(EnVbBall* this, PlayState* play) {
     }
 }
 
+#define ROCK_DIST_HIGH 13.0f
+#define ROCK_DIST_LOW 10.0f
+
 void EnVbBall_Update(Actor* thisx, PlayState* play2) {
     PlayState* play = play2;
     EnVbBall* this = (EnVbBall*)thisx;
@@ -178,13 +181,18 @@ void EnVbBall_Update(Actor* thisx, PlayState* play2) {
     }
     this->actor.shape.rot.x += (s16)this->xRotVel;
     this->actor.shape.rot.y += (s16)this->yRotVel;
-    this->actor.velocity.y += -1.0f;
-    this->actor.gravity = -1.0f;
+    if (this->actor.home.pos.y < 150.0f) {
+        this->actor.velocity.y += -1.0f;
+        this->actor.gravity = -1.0f;
+    } else {
+        this->actor.velocity.y += -3.0f;
+        this->actor.gravity = -3.0f;
+    }
     func_8002D7EC(&this->actor);
     if (this->actor.params >= 200) {
         EnVbBall_UpdateBones(this, play);
     } else {
-        Math_ApproachF(&this->shadowOpacity, 175.0f, 1.0f, 40.0f);
+        Math_ApproachF(&this->shadowOpacity, 250.0f, 1.0f, 40.0f);
         radius = this->actor.scale.y * 1700.0f;
         this->actor.world.pos.y -= radius;
         Actor_UpdateBgCheckInfo(play, &this->actor, 50.0f, 50.0f, 100.0f, 4);
@@ -206,13 +214,21 @@ void EnVbBall_Update(Actor* thisx, PlayState* play2) {
                     f32 xRotVel;
 
                     if (this->actor.params == 100) {
-                        spawnOffset.x = Rand_CenteredFloat(13.0f);
+                        spawnOffset.x = ROCK_DIST_HIGH;
+                        spawnOffset.z = ROCK_DIST_HIGH;
+                        while (SQ(spawnOffset.x)+SQ(spawnOffset.z) > SQ(ROCK_DIST_HIGH*0.5f)) {
+                            spawnOffset.x = Rand_CenteredFloat(ROCK_DIST_HIGH);
+                            spawnOffset.z = Rand_CenteredFloat(ROCK_DIST_HIGH);
+                        }
                         spawnOffset.y = Rand_ZeroFloat(5.0f) + 6.0f;
-                        spawnOffset.z = Rand_CenteredFloat(13);
                     } else {
-                        spawnOffset.x = Rand_CenteredFloat(10.0f);
+                        spawnOffset.x = ROCK_DIST_LOW;
+                        spawnOffset.z = ROCK_DIST_LOW;
+                        while (SQ(spawnOffset.x)+SQ(spawnOffset.z) > SQ(ROCK_DIST_LOW*0.5f)) {
+                            spawnOffset.x = Rand_CenteredFloat(ROCK_DIST_LOW);
+                            spawnOffset.z = Rand_CenteredFloat(ROCK_DIST_LOW);
+                        }
                         spawnOffset.y = Rand_ZeroFloat(3.0f) + 4.0f;
-                        spawnOffset.z = Rand_CenteredFloat(10.0f);
                     }
                     newActor = (EnVbBall*)Actor_SpawnAsChild(&play->actorCtx, &this->actor, play,
                                                              ACTOR_EN_VB_BALL, this->actor.world.pos.x + spawnOffset.x,
@@ -314,7 +330,7 @@ void EnVbBall_Draw(Actor* thisx, PlayState* play) {
         Gfx_SetupDL_44Xlu(play->state.gfxCtx);
 
         gDPSetPrimColor(POLY_XLU_DISP++, 0, 0, 0, 0, 0, (s8)this->shadowOpacity);
-        Matrix_Translate(this->actor.world.pos.x, 100.0f, this->actor.world.pos.z, MTXMODE_NEW);
+        Matrix_Translate(this->actor.world.pos.x, (this->actor.floorHeight < 0.0f) ? -85.0f : 100.0f, this->actor.world.pos.z, MTXMODE_NEW);
         Matrix_Scale(this->shadowSize, 1.0f, this->shadowSize, MTXMODE_APPLY);
         gSPMatrix(POLY_XLU_DISP++, MATRIX_NEWMTX(play->state.gfxCtx),
                   G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
