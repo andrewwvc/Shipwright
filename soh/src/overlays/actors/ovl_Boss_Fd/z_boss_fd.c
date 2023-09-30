@@ -138,7 +138,7 @@ void BossFd_SpawnFireBreath(BossFdEffect* effect, Vec3f* position, Vec3f* veloci
             effect->pos.z -= effect->velocity.z;
             effect->vFdFxScaleMod = 0.0f;
             effect->alpha = alpha;
-            effect->vFdFxYStop = Rand_ZeroFloat(10.0f);
+            effect->vFdFxYStop = Rand_ZeroFloat(5.0f);
             effect->timer2 = 0;
             effect->scale = scale / 400.0f;
             effect->kbAngle = kbAngle;
@@ -293,6 +293,8 @@ void BossFd_Fly(BossFd* this, PlayState* play) {
     f32 temp_x;
     f32 temp_z;
     f32 temp;
+    Vec3f vectorToTarget;
+    s16 chaseTimeMax = 150;
 
     SkelAnime_Update(&this->skelAnimeHead);
     SkelAnime_Update(&this->skelAnimeRightArm);
@@ -607,9 +609,12 @@ void BossFd_Fly(BossFd* this, PlayState* play) {
                         this->work[BFD_FLY_COUNT]++;
                         if (this->work[BFD_FLY_COUNT] & 1) {
                             this->work[BFD_ACTION_STATE] = BOSSFD_FLY_CHASE;
-                            this->timers[0] = 300;
+                            this->chaseState = 0;
+                            this->chaseTimer = 100;
+                            this->timers[0] = 500;
                             this->fwork[BFD_TURN_RATE_MAX] = 900.0f;
                             this->fwork[BFD_TARGET_Y_OFFSET] = 300.0f;
+                            this->fwork[BFD_FLY_WOBBLE_AMP] = 0.0f;
                             this->work[BFD_UNK_234] = this->work[BFD_UNK_236] = 0;
                         } else {
                             this->work[BFD_ACTION_STATE] = BOSSFD_FLY_CEILING;
@@ -707,21 +712,74 @@ void BossFd_Fly(BossFd* this, PlayState* play) {
             }
             break;
         case BOSSFD_FLY_CHASE:
+            DECR(this->chaseTimer);
             this->actor.flags |= ACTOR_FLAG_PLAY_HIT_SFX;
             temp_y = Math_SinS(this->work[BFD_MOVE_TIMER] * 2396.0f) * 30.0f + this->fwork[BFD_TARGET_Y_OFFSET];
-            this->targetPosition.x = player->actor.world.pos.x;
-            this->targetPosition.y = player->actor.world.pos.y + temp_y + 30.0f;
-            this->targetPosition.z = player->actor.world.pos.z;
-            this->fwork[BFD_FLY_WOBBLE_AMP] = 0.0f;
-            if (((this->timers[0] % 64) == 0) && (this->timers[0] < 450)) {
+            if (this->chaseState == 1) {
+                Vec3f directionVec = {0.0f, 0.0f, 0.0f};
+                directionVec.x = Math_SinS(this->actor.world.rot.y);
+                directionVec.z = Math_CosS(this->actor.world.rot.y);
+                this->fwork[BFD_FLY_SPEED] = 4;
+                this->targetPosition.x = player->actor.world.pos.x;
+                this->targetPosition.y = player->actor.world.pos.y + temp_y + 30.0f;
+                this->targetPosition.z = player->actor.world.pos.z;
+                vectorToTarget.x = this->targetPosition.x - this->actor.world.pos.x;
+                vectorToTarget.y = this->targetPosition.y - this->actor.world.pos.y;
+                vectorToTarget.z = this->targetPosition.z - this->actor.world.pos.z;
+                f32 sqXZDist = (SQ(vectorToTarget.x) + SQ(vectorToTarget.z));
+                if ((this->chaseTimer < chaseTimeMax-50) && ((sqXZDist < SQ(150.0f)) ||
+                        (sqXZDist < SQ(400.0f) && (vectorToTarget.x*directionVec.x + vectorToTarget.z*directionVec.z < 0)) ||
+                        (this->chaseTimer == 0) ||
+                        ((this->actor.world.pos.x*directionVec.x + this->actor.world.pos.z*directionVec.z > 0.2f) && SQ(this->actor.world.pos.x)+SQ(this->actor.world.pos.z) > 150.0f))) {
+                    //update to flymode
+                    this->chaseTimer = 1 + 50*Rand_S16Offset(2,1);
+                    this->chaseState = 0;
+                }
+            } else {
+                Vec3f directionVec = {0.0f, 0.0f, 0.0f};
+                directionVec.x = Math_SinS(this->actor.world.rot.y);
+                directionVec.z = Math_CosS(this->actor.world.rot.y);
+                this->fwork[BFD_FLY_SPEED] = 8;
+                vectorToTarget.x = this->targetPosition.x - this->actor.world.pos.x;
+                vectorToTarget.y = this->targetPosition.y - this->actor.world.pos.y;
+                vectorToTarget.z = this->targetPosition.z - this->actor.world.pos.z;
+                if (this->chaseTimer == 0) {
+                    this->chaseState = 1;
+                    this->chaseTimer = chaseTimeMax;
+                } else if ((this->chaseTimer % 50) == 0 || ((SQ(vectorToTarget.x) + SQ(vectorToTarget.z)) < SQ(50.0f)) ||
+                                        (vectorToTarget.x*directionVec.x + vectorToTarget.z*directionVec.z < 0)) {
+                    Vec3f posVec;
+                    posVec.x = this->actor.world.pos.x;
+                    posVec.y = 0.0f;
+                    posVec.z = this->actor.world.pos.z;
+                    Vec3f crossOrientation;
+                    Math3D_Vec3f_Cross(&posVec, &directionVec, &crossOrientation);
+                    s8 sign = (crossOrientation.y > 0) ? 1 : -1;
+                    s16 randAngle = ( (s16)(Math_FAtan2F(this->actor.world.pos.x, this->actor.world.pos.z)*(0x8000/M_PI)) + (s16)(sign*Rand_ZeroFloat(M_PI/2)*(0x8000/M_PI)) );
+                    f32 centralDistance = 650.0f + (this->actor.xzDistToPlayer < 300.0f ? (300.0f - this->actor.xzDistToPlayer) : 0.0f);
+                    f32 targetCircleX = Math_SinS(randAngle) * centralDistance;
+                    f32 targetCircleZ = Math_CosS(randAngle) * centralDistance;
+
+                    this->targetPosition.x = (targetCircleX);
+                    this->targetPosition.y = Rand_ZeroFloat(150.0f) + 150.0f;
+                    this->targetPosition.z = (targetCircleZ);
+                    vectorToTarget.x = this->targetPosition.x - this->actor.world.pos.x;
+                    vectorToTarget.y = this->targetPosition.y - this->actor.world.pos.y;
+                    vectorToTarget.z = this->targetPosition.z - this->actor.world.pos.z;
+                }
+            }
+            this->fwork[BFD_FLY_WOBBLE_AMP] = 150.0f;
+            if (((this->timers[0] % 60) == 0) && (this->timers[0] < 450)) {
                 this->work[BFD_ROAR_TIMER] = 40;
                 if (BossFd_IsFacingLink(this)) {
                     this->fireBreathTimer = 20;
                 }
             }
-            if ((this->work[BFD_DAMAGE_FLASH_TIMER] != 0) || (this->timers[0] == 0) ||
+
+            if (/*(this->work[BFD_DAMAGE_FLASH_TIMER] != 0) ||*/ (this->timers[0] == 0) ||
                 (player->actor.world.pos.y < 70.0f)) {
                 this->work[BFD_ACTION_STATE] = BOSSFD_FLY_MAIN;
+                this->fwork[BFD_FLY_SPEED] = 8;
                 this->timers[0] = 0;
                 this->work[BFD_START_ATTACK] = false;
             } else {
@@ -1085,6 +1143,7 @@ void BossFd_Wait(BossFd* this, PlayState* play) {
 static Vec3f sFireAudioVec = { 0.0f, 0.0f, 50.0f };
 
 void BossFd_Effects(BossFd* this, PlayState* play) {
+    Player* player = GET_PLAYER(play);
     static Color_RGBA8 colorYellow = { 255, 255, 0, 255 };
     static Color_RGBA8 colorRed = { 255, 10, 0, 255 };
     s16 breathOpacity = 0;
@@ -1244,20 +1303,28 @@ void BossFd_Effects(BossFd* this, PlayState* play) {
     if (breathOpacity != 0) {
         f32 spawnAngleX;
         f32 spawnAngleY;
+        f32 dx, dy, dz;
         Vec3f spawnSpeed2 = { 0.0f, 0.0f, 0.0f };
         Vec3f spawnVel2;
         Vec3f spawnAccel2 = { 0.0f, 0.0f, 0.0f };
         Vec3f spawnPos2;
+        f32 pitchToTarget;
 
         this->fogMode = 2;
-        spawnSpeed2.z = 30.0f;
+        spawnSpeed2.z = (this->work[BFD_ACTION_STATE] == BOSSFD_FLY_CHASE) ? 20.0f : 30.0f;
 
         Audio_PlaySoundGeneral(NA_SE_EN_VALVAISA_FIRE - SFX_FLAG, &sFireAudioVec, 4, &D_801333E0, &D_801333E0,
                                &D_801333E8);
         spawnPos2 = this->headPos;
 
+        dx = player->actor.world.pos.x - this->actor.world.pos.x;
+        dy = player->actor.world.pos.y - this->actor.world.pos.y;
+        dz = player->actor.world.pos.z - this->actor.world.pos.z;
+        pitchToTarget = (M_PI/64)-Math_FAtan2F(dy, sqrtf(SQ(dx) + SQ(dz)));
         spawnAngleY = (this->actor.world.rot.y / (f32)0x8000) * M_PI;
         spawnAngleX = (((-this->actor.world.rot.x) / (f32)0x8000) * M_PI) + 0.3f;
+        if (this->work[BFD_ACTION_STATE] == BOSSFD_FLY_CHASE && pitchToTarget > spawnAngleX)
+            spawnAngleX = pitchToTarget;
         Matrix_RotateY(spawnAngleY, MTXMODE_NEW);
         Matrix_RotateX(spawnAngleX, MTXMODE_APPLY);
         Matrix_MultVec3f(&spawnSpeed2, &spawnVel2);
@@ -1519,10 +1586,10 @@ void BossFd_UpdateEffects(BossFd* this, PlayState* play) {
                         effect->scale += effect->vFdFxScaleMod;
                         effect->vFdFxScaleMod += 0.08f;
                     }
-                    if (effect->pos.y <= (effect->vFdFxYStop + 100.0f)) {
+                    if (effect->pos.y <= (effect->vFdFxYStop + 105.0f)) {
                         effect->velocity.y = 0.0f;
                     }
-                    if ((effect->timer1 >= 30)) {
+                    if ((effect->timer1 >= 40)) {
                         effect->accel.y = 5.0f;
                         effect->timer2++;
                         effect->velocity.y = 0.0f;
