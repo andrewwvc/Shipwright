@@ -645,6 +645,8 @@ void BossFd_Fly(BossFd* this, PlayState* play) {
         case BOSSFD_EMERGE:
             if ((this->timers[0] == 0) && (sqrtf(SQ(dx) + SQ(dy) + SQ(dz)) < 100.0f)) {
                 this->actor.world.pos = this->targetPosition;
+                this->actor.isTeleported = 1;
+                this->actor.teleportVec = this->actor.world.pos;
                 this->work[BFD_ACTION_STATE] = BOSSFD_FLY_MAIN;
                 this->actor.world.rot.x = 0x4000;
                 this->targetPosition.y = sHoleLocations[this->holeIndex].y + 200.0f;
@@ -1122,6 +1124,8 @@ void BossFd_Wait(BossFd* this, PlayState* play) {
         this->targetPosition.y = sHoleLocations[this->holeIndex].y - 200.0f;
         this->targetPosition.z = sHoleLocations[this->holeIndex].z;
         this->actor.world.pos = this->targetPosition;
+        this->actor.isTeleported = 1;
+        this->actor.teleportVec = this->actor.world.pos;
 
         this->timers[0] = 10;
         this->work[BFD_ACTION_STATE] = BOSSFD_EMERGE;
@@ -1135,6 +1139,8 @@ void BossFd_Wait(BossFd* this, PlayState* play) {
         this->targetPosition.y = sHoleLocations[1].y - 200.0f;
         this->targetPosition.z = sHoleLocations[1].z;
         this->actor.world.pos = this->targetPosition;
+        this->actor.isTeleported = 1;
+        this->actor.teleportVec = this->actor.world.pos;
         this->timers[0] = 10;
         this->work[BFD_ACTION_STATE] = BOSSFD_EMERGE;
     }
