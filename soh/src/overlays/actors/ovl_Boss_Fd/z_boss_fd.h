@@ -185,7 +185,9 @@ typedef struct BossFd {
     /*        */ s16 chaseTimer;
     /*        */ s16 chaseMode;
     /*        */ s16 chaseAngleSpecial;
+    /*        */ s8 chaseAngleDir;
     /*        */ s16 modeTimer;
+    /*        */ s16 flameStatus;
     /*        */ Actor* flameCircle;
     /*        */ Actor* flameWall[2];
 } BossFd; // size = 0x43A0
