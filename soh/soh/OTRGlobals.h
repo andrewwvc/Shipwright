@@ -20,6 +20,7 @@
 
 const std::string customMessageTableID = "BaseGameOverrides";
 const std::string questMessageTableID = "QuestOverrides";
+const std::string appShortName = "soh";
 
 class OTRGlobals
 {
