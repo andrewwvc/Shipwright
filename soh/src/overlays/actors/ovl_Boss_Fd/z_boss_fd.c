@@ -733,16 +733,17 @@ void BossFd_Fly(BossFd* this, PlayState* play) {
                     this->chaseState = 1;
                     this->chaseTimer = chaseTimeMax;
                     this->chaseAngleDir = this->actor.yawTowardsPlayer - this->actor.world.rot.y > 0;
-                    if (Rand_ZeroOne() > 0.333333f) {
-                        if (Rand_ZeroOne() > 0.5f) {
+                    if (Rand_ZeroOne() > 0.45f) {
+                        if (Rand_ZeroOne() > 0.4f) {
                             this->chaseMode = 0;
                             this->chaseAngleSpecial = this->actor.world.rot.y;
                             this->modeTimer = 50;
                             this->flameStatus = 20;
                         } else {
                             this->chaseMode = 1;
-                            this->chaseAngleSpecial = this->actor.yawTowardsPlayer+(this->actor.yawTowardsPlayer - this->actor.world.rot.y > 0 ? 0x1A00 : -0x1A00);
+                            this->chaseAngleSpecial = this->actor.yawTowardsPlayer+(this->actor.yawTowardsPlayer - this->actor.world.rot.y > 0 ? 0x2000 : -0x2000);
                             this->modeTimer = 50;
+                            this->fireBreathTimer = 0;
                         }
                     } else {
                         this->chaseMode = 2;
@@ -777,22 +778,25 @@ void BossFd_Fly(BossFd* this, PlayState* play) {
                 directionVec.z = Math_CosS(this->actor.world.rot.y);
                 if (this->chaseMode == 0) {
                     this->fwork[BFD_FLY_SPEED] = 6;
-                    this->fwork[BFD_TURN_RATE_MAX] = 300.0f;
+                    this->fwork[BFD_TURN_RATE_MAX] = 350.0f;
+                    this->fwork[BFD_TURN_RATE] = 350.0f;
                 } else if (this->chaseMode == 1) {
                     this->fwork[BFD_FLY_SPEED] = 6;
                     this->fwork[BFD_TURN_RATE_MAX] = 1800.0f;
+                    this->fwork[BFD_TURN_RATE] = 1800.0f;
                 } else if (this->chaseMode == 2) {
                     this->fwork[BFD_FLY_SPEED] = 4;
                     this->fwork[BFD_TURN_RATE_MAX] = 900.0f;
+                    this->fwork[BFD_TURN_RATE] = 900.0f;
                 }
-                if (this->chaseMode != 1) {
+                if (this->chaseMode == 0) {
                     this->targetPosition.x = player->actor.world.pos.x;
                     this->targetPosition.y = player->actor.world.pos.y + temp_y + 30.0f;
                     this->targetPosition.z = player->actor.world.pos.z;
                     vectorToTarget.x = this->targetPosition.x - this->actor.world.pos.x;
                     vectorToTarget.y = this->targetPosition.y - this->actor.world.pos.y;
                     vectorToTarget.z = this->targetPosition.z - this->actor.world.pos.z;
-                } else {
+                } else if (this->chaseMode == 1) {
                     Vec3f directionVec2 = {0.0f, 0.0f, 0.0f};
                     directionVec2.x = Math_SinS(this->chaseAngleSpecial)*200;
                     directionVec2.z = Math_CosS(this->chaseAngleSpecial)*200;
@@ -802,7 +806,19 @@ void BossFd_Fly(BossFd* this, PlayState* play) {
                     vectorToTarget.x = this->targetPosition.x - this->actor.world.pos.x;
                     vectorToTarget.y = this->targetPosition.y - this->actor.world.pos.y;
                     vectorToTarget.z = this->targetPosition.z - this->actor.world.pos.z;
+                } else {
+                    Vec3f directionVec2 = {0.0f, 0.0f, 0.0f};
+                    s16 modDirection =  this->actor.yawTowardsPlayer + (s16)(0x2000*Math_SinS(((this->timers[0]%60)/30.0f)*0x8000));
+                    directionVec2.x = Math_SinS(modDirection)*200;
+                    directionVec2.z = Math_CosS(modDirection)*200;
+                    this->targetPosition.x = this->actor.world.pos.x+directionVec2.x;
+                    this->targetPosition.y = player->actor.world.pos.y + temp_y + 30.0f;
+                    this->targetPosition.z = this->actor.world.pos.z+directionVec2.z;
+                    vectorToTarget.x = this->targetPosition.x - this->actor.world.pos.x;
+                    vectorToTarget.y = this->targetPosition.y - this->actor.world.pos.y;
+                    vectorToTarget.z = this->targetPosition.z - this->actor.world.pos.z;
                 }
+
                 f32 sqXZDist = (SQ(vectorToTarget.x) + SQ(vectorToTarget.z));
                 if (this->chaseMode != 1) {
                     if (this->chaseMode < 1) {
@@ -824,6 +840,7 @@ void BossFd_Fly(BossFd* this, PlayState* play) {
                         this->chaseState = 0;
                         this->chaseMode = 0;
                         this->flameStatus = 0;
+                        this->fireBreathTimer = 0;
                     } else if ((this->modeTimer == 0) || ABS(this->actor.world.rot.y - this->chaseAngleSpecial) < 0x600) {
                         this->chaseMode = 0;
                         this->chaseAngleSpecial = this->actor.world.rot.y;
@@ -834,12 +851,12 @@ void BossFd_Fly(BossFd* this, PlayState* play) {
                 }
             }
 
-            if (this->chaseMode != 2)
+            //if (this->chaseMode != 2)
                 this->fwork[BFD_FLY_WOBBLE_AMP] = 0.0f;
-            else
-                this->fwork[BFD_FLY_WOBBLE_AMP] = 150.0f;
+            //else
+                //this->fwork[BFD_FLY_WOBBLE_AMP] = 150.0f;
 
-            if (((this->timers[0] % (this->chaseMode==2 ? 60 : 20)) == 0) && (this->timers[0] < 450)) {
+            if ((this->chaseState == 1) && (this->chaseMode != 1) && ((this->timers[0] % (this->chaseMode==2 ? 60 : 20)) == 0) && (this->timers[0] < 450)) {
                 this->work[BFD_ROAR_TIMER] = 40;
                 if (BossFd_IsFacingLink(this)) {
                     this->fireBreathTimer = 20;
