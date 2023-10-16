@@ -138,7 +138,7 @@ void BossFd_SpawnFireBreath(BossFdEffect* effect, Vec3f* position, Vec3f* veloci
             effect->pos.z -= effect->velocity.z;
             effect->vFdFxScaleMod = 0.0f;
             effect->alpha = alpha;
-            effect->vFdFxYStop = Rand_ZeroFloat(10.0f);
+            effect->vFdFxYStop = Rand_ZeroFloat(5.0f);
             effect->timer2 = 0;
             effect->scale = scale / 400.0f;
             effect->kbAngle = kbAngle;
@@ -198,6 +198,11 @@ void BossFd_Init(Actor* thisx, PlayState* play) {
     if (this->introState == BFD_CS_NONE) {
         Audio_QueueSeqCmd(SEQ_PLAYER_BGM_MAIN << 24 | NA_BGM_FIRE_BOSS);
     }
+    this->flameStatus = 0;
+    this->chaseAngleDir = 0;
+    this->flameCircle = NULL;
+    this->flameWall[0] = NULL;
+    this->flameWall[1] = NULL;
 
     this->actor.world.pos.x = this->actor.world.pos.z = 0.0f;
     this->actor.world.pos.y = -200.0f;
@@ -242,6 +247,12 @@ void BossFd_Destroy(Actor* thisx, PlayState* play) {
     SkelAnime_Free(&this->skelAnimeRightArm, play);
     SkelAnime_Free(&this->skelAnimeLeftArm, play);
     Collider_DestroyJntSph(play, &this->collider);
+    if (this->flameCircle)
+        Actor_Kill(this->flameCircle);
+    if (this->flameWall[0])
+        Actor_Kill(this->flameWall[0]);
+    if (this->flameWall[1])
+        Actor_Kill(this->flameWall[1]);
 }
 
 s32 BossFd_IsFacingLink(BossFd* this) {
@@ -284,6 +295,8 @@ void BossFd_Fly(BossFd* this, PlayState* play) {
     f32 temp_x;
     f32 temp_z;
     f32 temp;
+    Vec3f vectorToTarget;
+    s16 chaseTimeMax = 150;
 
     SkelAnime_Update(&this->skelAnimeHead);
     SkelAnime_Update(&this->skelAnimeRightArm);
@@ -550,6 +563,9 @@ void BossFd_Fly(BossFd* this, PlayState* play) {
                     this->actionFunc = BossFd_Wait;
                     this->handoffSignal = FD2_SIGNAL_GROUND;
                     gSaveContext.eventChkInf[7] |= 8;
+                    this->flameCircle = Actor_Spawn(&play->actorCtx,play, ACTOR_BG_HIDAN_CURTAIN, 0,-100,0, 0,0,0, 0x0 | (9 << 0xC), false);
+                    this->flameWall[0] = Actor_Spawn(&play->actorCtx,play, ACTOR_BG_HIDAN_FIREWALL, 840,0,320, 0,0x4000,0, 0x0, false);
+                    this->flameWall[1] = Actor_Spawn(&play->actorCtx,play, ACTOR_BG_HIDAN_FIREWALL, 840,0,500, 0,0x4000,0, 0x0, false);
                 }
                 break;
         }
@@ -595,9 +611,12 @@ void BossFd_Fly(BossFd* this, PlayState* play) {
                         this->work[BFD_FLY_COUNT]++;
                         if (this->work[BFD_FLY_COUNT] & 1) {
                             this->work[BFD_ACTION_STATE] = BOSSFD_FLY_CHASE;
-                            this->timers[0] = 300;
+                            this->chaseState = 0;
+                            this->chaseTimer = 100;
+                            this->timers[0] = 500;
                             this->fwork[BFD_TURN_RATE_MAX] = 900.0f;
                             this->fwork[BFD_TARGET_Y_OFFSET] = 300.0f;
+                            this->fwork[BFD_FLY_WOBBLE_AMP] = 0.0f;
                             this->work[BFD_UNK_234] = this->work[BFD_UNK_236] = 0;
                         } else {
                             this->work[BFD_ACTION_STATE] = BOSSFD_FLY_CEILING;
@@ -628,6 +647,8 @@ void BossFd_Fly(BossFd* this, PlayState* play) {
         case BOSSFD_EMERGE:
             if ((this->timers[0] == 0) && (sqrtf(SQ(dx) + SQ(dy) + SQ(dz)) < 100.0f)) {
                 this->actor.world.pos = this->targetPosition;
+                this->actor.isTeleported = 1;
+                this->actor.teleportVec = this->actor.world.pos;
                 this->work[BFD_ACTION_STATE] = BOSSFD_FLY_MAIN;
                 this->actor.world.rot.x = 0x4000;
                 this->targetPosition.y = sHoleLocations[this->holeIndex].y + 200.0f;
@@ -695,23 +716,160 @@ void BossFd_Fly(BossFd* this, PlayState* play) {
             }
             break;
         case BOSSFD_FLY_CHASE:
+            DECR(this->chaseTimer);
+            DECR(this->modeTimer);
             this->actor.flags |= ACTOR_FLAG_PLAY_HIT_SFX;
             temp_y = Math_SinS(this->work[BFD_MOVE_TIMER] * 2396.0f) * 30.0f + this->fwork[BFD_TARGET_Y_OFFSET];
-            this->targetPosition.x = player->actor.world.pos.x;
-            this->targetPosition.y = player->actor.world.pos.y + temp_y + 30.0f;
-            this->targetPosition.z = player->actor.world.pos.z;
-            this->fwork[BFD_FLY_WOBBLE_AMP] = 0.0f;
-            if (((this->timers[0] % 64) == 0) && (this->timers[0] < 450)) {
+            if (this->chaseState == 0) {
+                Vec3f directionVec = {0.0f, 0.0f, 0.0f};
+                directionVec.x = Math_SinS(this->actor.world.rot.y);
+                directionVec.z = Math_CosS(this->actor.world.rot.y);
+                this->fwork[BFD_FLY_SPEED] = 8;
+                this->fwork[BFD_TURN_RATE_MAX] = 900.0f;
+                vectorToTarget.x = this->targetPosition.x - this->actor.world.pos.x;
+                vectorToTarget.y = this->targetPosition.y - this->actor.world.pos.y;
+                vectorToTarget.z = this->targetPosition.z - this->actor.world.pos.z;
+                if (this->chaseTimer == 0) {
+                    this->chaseState = 1;
+                    this->chaseTimer = chaseTimeMax;
+                    this->chaseAngleDir = this->actor.yawTowardsPlayer - this->actor.world.rot.y > 0;
+                    if (Rand_ZeroOne() > 0.45f) {
+                        if (Rand_ZeroOne() > 0.4f) {
+                            this->chaseMode = 0;
+                            this->chaseAngleSpecial = this->actor.world.rot.y;
+                            this->modeTimer = 50;
+                            this->flameStatus = 20;
+                        } else {
+                            this->chaseMode = 1;
+                            this->chaseAngleSpecial = this->actor.yawTowardsPlayer+(this->actor.yawTowardsPlayer - this->actor.world.rot.y > 0 ? 0x2000 : -0x2000);
+                            this->modeTimer = 50;
+                            this->fireBreathTimer = 0;
+                        }
+                    } else {
+                        this->chaseMode = 2;
+                        this->chaseAngleSpecial = this->actor.world.rot.y;
+                        this->modeTimer = 100;
+                        this->flameStatus = 0;
+                    }
+                } else if ((this->chaseTimer % 50) == 0 || ((SQ(vectorToTarget.x) + SQ(vectorToTarget.z)) < SQ(50.0f)) ||
+                                        (vectorToTarget.x*directionVec.x + vectorToTarget.z*directionVec.z < 0)) {
+                    Vec3f posVec;
+                    posVec.x = this->actor.world.pos.x;
+                    posVec.y = 0.0f;
+                    posVec.z = this->actor.world.pos.z;
+                    Vec3f crossOrientation;
+                    Math3D_Vec3f_Cross(&posVec, &directionVec, &crossOrientation);
+                    s8 sign = (crossOrientation.y > 0) ? 1 : -1;
+                    s16 randAngle = ( (s16)(Math_FAtan2F(this->actor.world.pos.x, this->actor.world.pos.z)*(0x8000/M_PI)) + (s16)(sign*Rand_ZeroFloat(M_PI/2)*(0x8000/M_PI)) );
+                    f32 centralDistance = 650.0f + (this->actor.xzDistToPlayer < 300.0f ? (300.0f - this->actor.xzDistToPlayer) : 0.0f);
+                    f32 targetCircleX = Math_SinS(randAngle) * centralDistance;
+                    f32 targetCircleZ = Math_CosS(randAngle) * centralDistance;
+
+                    this->targetPosition.x = (targetCircleX);
+                    this->targetPosition.y = Rand_ZeroFloat(150.0f) + 150.0f;
+                    this->targetPosition.z = (targetCircleZ);
+                    vectorToTarget.x = this->targetPosition.x - this->actor.world.pos.x;
+                    vectorToTarget.y = this->targetPosition.y - this->actor.world.pos.y;
+                    vectorToTarget.z = this->targetPosition.z - this->actor.world.pos.z;
+                }
+            } else {
+                Vec3f directionVec = {0.0f, 0.0f, 0.0f};
+                directionVec.x = Math_SinS(this->actor.world.rot.y);
+                directionVec.z = Math_CosS(this->actor.world.rot.y);
+                if (this->chaseMode == 0) {
+                    this->fwork[BFD_FLY_SPEED] = 6;
+                    this->fwork[BFD_TURN_RATE_MAX] = 350.0f;
+                    this->fwork[BFD_TURN_RATE] = 350.0f;
+                } else if (this->chaseMode == 1) {
+                    this->fwork[BFD_FLY_SPEED] = 6;
+                    this->fwork[BFD_TURN_RATE_MAX] = 1800.0f;
+                    this->fwork[BFD_TURN_RATE] = 1800.0f;
+                } else if (this->chaseMode == 2) {
+                    this->fwork[BFD_FLY_SPEED] = 4;
+                    this->fwork[BFD_TURN_RATE_MAX] = 900.0f;
+                    this->fwork[BFD_TURN_RATE] = 900.0f;
+                }
+                if (this->chaseMode == 0) {
+                    this->targetPosition.x = player->actor.world.pos.x;
+                    this->targetPosition.y = player->actor.world.pos.y + temp_y + 30.0f;
+                    this->targetPosition.z = player->actor.world.pos.z;
+                    vectorToTarget.x = this->targetPosition.x - this->actor.world.pos.x;
+                    vectorToTarget.y = this->targetPosition.y - this->actor.world.pos.y;
+                    vectorToTarget.z = this->targetPosition.z - this->actor.world.pos.z;
+                } else if (this->chaseMode == 1) {
+                    Vec3f directionVec2 = {0.0f, 0.0f, 0.0f};
+                    directionVec2.x = Math_SinS(this->chaseAngleSpecial)*200;
+                    directionVec2.z = Math_CosS(this->chaseAngleSpecial)*200;
+                    this->targetPosition.x = this->actor.world.pos.x+directionVec2.x;
+                    this->targetPosition.y = player->actor.world.pos.y + temp_y + 30.0f;
+                    this->targetPosition.z = this->actor.world.pos.z+directionVec2.z;
+                    vectorToTarget.x = this->targetPosition.x - this->actor.world.pos.x;
+                    vectorToTarget.y = this->targetPosition.y - this->actor.world.pos.y;
+                    vectorToTarget.z = this->targetPosition.z - this->actor.world.pos.z;
+                } else {
+                    Vec3f directionVec2 = {0.0f, 0.0f, 0.0f};
+                    s16 modDirection =  this->actor.yawTowardsPlayer + (s16)(0x2000*Math_SinS(((this->timers[0]%60)/30.0f)*0x8000));
+                    directionVec2.x = Math_SinS(modDirection)*200;
+                    directionVec2.z = Math_CosS(modDirection)*200;
+                    this->targetPosition.x = this->actor.world.pos.x+directionVec2.x;
+                    this->targetPosition.y = player->actor.world.pos.y + temp_y + 30.0f;
+                    this->targetPosition.z = this->actor.world.pos.z+directionVec2.z;
+                    vectorToTarget.x = this->targetPosition.x - this->actor.world.pos.x;
+                    vectorToTarget.y = this->targetPosition.y - this->actor.world.pos.y;
+                    vectorToTarget.z = this->targetPosition.z - this->actor.world.pos.z;
+                }
+
+                f32 sqXZDist = (SQ(vectorToTarget.x) + SQ(vectorToTarget.z));
+                if (this->chaseMode != 1) {
+                    if (this->chaseMode < 1) {
+                        DECR(this->flameStatus);
+                    }
+                    if ((this->chaseTimer < chaseTimeMax-50) && ((sqXZDist < SQ(150.0f)) ||
+                            (sqXZDist < SQ(400.0f) && (vectorToTarget.x*directionVec.x + vectorToTarget.z*directionVec.z < 0)) ||
+                            (this->chaseTimer == 0) ||
+                            ((this->actor.world.pos.x*directionVec.x + this->actor.world.pos.z*directionVec.z > 0.2f) && SQ(this->actor.world.pos.x)+SQ(this->actor.world.pos.z) > 150.0f))) {
+                        //update to flymode
+                        this->chaseTimer = 1 + 50*Rand_S16Offset(2,1);
+                        this->chaseState = 0;
+                        this->chaseMode = 0;
+                    }
+                } else {
+                    if ((this->chaseTimer == 0)) {
+                        //update to flymode
+                        this->chaseTimer = 1 + 50*Rand_S16Offset(2,1);
+                        this->chaseState = 0;
+                        this->chaseMode = 0;
+                        this->flameStatus = 0;
+                        this->fireBreathTimer = 0;
+                    } else if ((this->modeTimer == 0) || ABS(this->actor.world.rot.y - this->chaseAngleSpecial) < 0x600) {
+                        this->chaseMode = 0;
+                        this->chaseAngleSpecial = this->actor.world.rot.y;
+                        this->chaseAngleDir = this->actor.yawTowardsPlayer - this->actor.world.rot.y > 0;
+                        this->modeTimer = 50;
+                        this->flameStatus = 20;
+                    }
+                }
+            }
+
+            //if (this->chaseMode != 2)
+                this->fwork[BFD_FLY_WOBBLE_AMP] = 0.0f;
+            //else
+                //this->fwork[BFD_FLY_WOBBLE_AMP] = 150.0f;
+
+            if ((this->chaseState == 1) && (this->chaseMode != 1) && ((this->timers[0] % (this->chaseMode==2 ? 60 : 20)) == 0) && (this->timers[0] < 450)) {
                 this->work[BFD_ROAR_TIMER] = 40;
                 if (BossFd_IsFacingLink(this)) {
                     this->fireBreathTimer = 20;
                 }
             }
-            if ((this->work[BFD_DAMAGE_FLASH_TIMER] != 0) || (this->timers[0] == 0) ||
+
+            if ((this->timers[0] == 0) ||
                 (player->actor.world.pos.y < 70.0f)) {
                 this->work[BFD_ACTION_STATE] = BOSSFD_FLY_MAIN;
+                this->fwork[BFD_FLY_SPEED] = 8;
                 this->timers[0] = 0;
                 this->work[BFD_START_ATTACK] = false;
+                this->fireBreathTimer = 0;
             } else {
                 Math_ApproachF(&this->fwork[BFD_TARGET_Y_OFFSET], 50.0, 1.0f, 2.0f);
             }
@@ -737,6 +895,12 @@ void BossFd_Fly(BossFd* this, PlayState* play) {
             if (this->timers[1] == 0) {
                 this->work[BFD_ACTION_STATE] = BOSSFD_SKIN_BURN;
                 this->timers[0] = 30;
+                if (this->flameCircle)
+                    Actor_Kill(this->flameCircle);
+                if (this->flameWall[0])
+                    Actor_Kill(this->flameWall[0]);
+                if (this->flameWall[1])
+                    Actor_Kill(this->flameWall[1]);
             }
             break;
         case BOSSFD_SKIN_BURN:
@@ -1046,6 +1210,8 @@ void BossFd_Wait(BossFd* this, PlayState* play) {
         this->targetPosition.y = sHoleLocations[this->holeIndex].y - 200.0f;
         this->targetPosition.z = sHoleLocations[this->holeIndex].z;
         this->actor.world.pos = this->targetPosition;
+        this->actor.isTeleported = 1;
+        this->actor.teleportVec = this->actor.world.pos;
 
         this->timers[0] = 10;
         this->work[BFD_ACTION_STATE] = BOSSFD_EMERGE;
@@ -1059,6 +1225,8 @@ void BossFd_Wait(BossFd* this, PlayState* play) {
         this->targetPosition.y = sHoleLocations[1].y - 200.0f;
         this->targetPosition.z = sHoleLocations[1].z;
         this->actor.world.pos = this->targetPosition;
+        this->actor.isTeleported = 1;
+        this->actor.teleportVec = this->actor.world.pos;
         this->timers[0] = 10;
         this->work[BFD_ACTION_STATE] = BOSSFD_EMERGE;
     }
@@ -1067,6 +1235,7 @@ void BossFd_Wait(BossFd* this, PlayState* play) {
 static Vec3f sFireAudioVec = { 0.0f, 0.0f, 50.0f };
 
 void BossFd_Effects(BossFd* this, PlayState* play) {
+    Player* player = GET_PLAYER(play);
     static Color_RGBA8 colorYellow = { 255, 255, 0, 255 };
     static Color_RGBA8 colorRed = { 255, 10, 0, 255 };
     s16 breathOpacity = 0;
@@ -1226,20 +1395,36 @@ void BossFd_Effects(BossFd* this, PlayState* play) {
     if (breathOpacity != 0) {
         f32 spawnAngleX;
         f32 spawnAngleY;
+        f32 dx, dy, dz;
         Vec3f spawnSpeed2 = { 0.0f, 0.0f, 0.0f };
         Vec3f spawnVel2;
         Vec3f spawnAccel2 = { 0.0f, 0.0f, 0.0f };
         Vec3f spawnPos2;
+        f32 pitchToTarget;
+        s16 angleMod;
 
         this->fogMode = 2;
-        spawnSpeed2.z = 30.0f;
+        spawnSpeed2.z = (this->work[BFD_ACTION_STATE] == BOSSFD_FLY_CHASE) ? 20.0f : 30.0f;
 
         Audio_PlaySoundGeneral(NA_SE_EN_VALVAISA_FIRE - SFX_FLAG, &sFireAudioVec, 4, &D_801333E0, &D_801333E0,
                                &D_801333E8);
         spawnPos2 = this->headPos;
 
-        spawnAngleY = (this->actor.world.rot.y / (f32)0x8000) * M_PI;
+        dx = player->actor.world.pos.x - this->actor.world.pos.x;
+        dy = player->actor.world.pos.y - this->actor.world.pos.y;
+        dz = player->actor.world.pos.z - this->actor.world.pos.z;
+        pitchToTarget = (M_PI/64)-Math_FAtan2F(dy, sqrtf(SQ(dx) + SQ(dz)));
+        if (this->work[BFD_ACTION_STATE] != BOSSFD_FLY_CHASE || this->chaseMode == 2) {
+            angleMod = 0;
+        } else {
+            angleMod = this->actor.yawTowardsPlayer-this->actor.world.rot.y;
+            if (ABS(angleMod) > 0x600 || this->flameStatus != 0)
+                angleMod = (0x0A00-(0x0A00*2/20)*this->flameStatus)*((this->flameStatus != 0) ? this->chaseAngleDir : (angleMod > 0 ? 1 : -1));
+        }
+        spawnAngleY = ((this->actor.world.rot.y + angleMod) / (f32)0x8000) * M_PI;
         spawnAngleX = (((-this->actor.world.rot.x) / (f32)0x8000) * M_PI) + 0.3f;
+        if (this->work[BFD_ACTION_STATE] == BOSSFD_FLY_CHASE && pitchToTarget > spawnAngleX)
+            spawnAngleX = pitchToTarget;
         Matrix_RotateY(spawnAngleY, MTXMODE_NEW);
         Matrix_RotateX(spawnAngleX, MTXMODE_APPLY);
         Matrix_MultVec3f(&spawnSpeed2, &spawnVel2);
@@ -1302,9 +1487,12 @@ void BossFd_CollisionCheck(BossFd* this, PlayState* play) {
     }
 }
 
+#define MAX_ROCK_DIST 200.0f
+
 void BossFd_Update(Actor* thisx, PlayState* play) {
     s32 pad;
     BossFd* this = (BossFd*)thisx;
+    Player* player = GET_PLAYER(play);
     f32 headGlow;
     f32 rManeGlow;
     f32 lManeGlow;
@@ -1361,10 +1549,16 @@ void BossFd_Update(Actor* thisx, PlayState* play) {
 
     if (this->work[BFD_ROCK_TIMER] != 0) {
         this->work[BFD_ROCK_TIMER]--;
-        if ((this->work[BFD_ROCK_TIMER] % 16) == 0) {
+        if ((this->work[BFD_ROCK_TIMER] % 10) == 0) {
+            f32 xRand = MAX_ROCK_DIST*2;
+            f32 zRand = MAX_ROCK_DIST*2;
+            while (SQ(xRand)+SQ(zRand) > SQ(MAX_ROCK_DIST)) {
+                xRand = Rand_CenteredFloat(MAX_ROCK_DIST*2);
+                zRand = Rand_CenteredFloat(MAX_ROCK_DIST*2);
+            }
             EnVbBall* bossFdRock = (EnVbBall*)Actor_SpawnAsChild(
-                &play->actorCtx, &this->actor, play, ACTOR_EN_VB_BALL, this->actor.world.pos.x, 1000.0f,
-                this->actor.world.pos.z, 0, 0, (s16)Rand_ZeroFloat(50.0f) + 130, 100);
+                &play->actorCtx, &this->actor, play, ACTOR_EN_VB_BALL, player->actor.world.pos.x+xRand, 1000.0f,
+                player->actor.world.pos.z+zRand, 0, 0, (s16)Rand_ZeroFloat(50.0f) + 130, 100);
 
             if (bossFdRock != NULL) {
                 for (i = 0; i < 10; i++) {
@@ -1477,9 +1671,21 @@ void BossFd_UpdateEffects(BossFd* this, PlayState* play) {
                 diff.x = player->actor.world.pos.x - effect->pos.x;
                 diff.y = player->actor.world.pos.y + 30.0f - effect->pos.y;
                 diff.z = player->actor.world.pos.z - effect->pos.z;
-                if ((this->timers[3] == 0) && (sqrtf(SQ(diff.x) + SQ(diff.y) + SQ(diff.z)) < 20.0f)) {
+                if ((this->timers[3] == 0) && (SQ(diff.x) + SQ(diff.y) + SQ(diff.z) < SQ(30.0f))) {
                     this->timers[3] = 50;
-                    func_8002F6D4(play, NULL, 5.0f, effect->kbAngle, 0.0f, 0x30);
+                    s8 prevPlayerInvincibilityTimer = player->invincibilityTimer;
+                    if (player->invincibilityTimer < 0) {
+                        if (player->invincibilityTimer <= -40) {
+                            player->invincibilityTimer = 0;
+                        } else {
+                            player->invincibilityTimer = 0;
+                            play->damagePlayer(play, -0x30);
+                        }
+                    } else {
+                        play->damagePlayer(play, -0x30);
+                    }
+                    func_8002F6D4(play, NULL, 5.0f, effect->kbAngle, 0.0f, 0x0);
+                    player->invincibilityTimer = prevPlayerInvincibilityTimer;
                     if (player->isBurning == false) {
                         for (i2 = 0; i2 < ARRAY_COUNT(player->flameTimers); i2++) {
                             player->flameTimers[i2] = Rand_S16Offset(0, 200);
@@ -1492,7 +1698,10 @@ void BossFd_UpdateEffects(BossFd* this, PlayState* play) {
                         effect->scale += effect->vFdFxScaleMod;
                         effect->vFdFxScaleMod += 0.08f;
                     }
-                    if ((effect->pos.y <= (effect->vFdFxYStop + 130.0f)) || (effect->timer1 >= 10)) {
+                    if (effect->pos.y <= (effect->vFdFxYStop + 105.0f)) {
+                        effect->velocity.y = 0.0f;
+                    }
+                    if ((effect->timer1 >= 40)) {
                         effect->accel.y = 5.0f;
                         effect->timer2++;
                         effect->velocity.y = 0.0f;

@@ -22,6 +22,10 @@ void BgHidanCurtain_TurnOn(BgHidanCurtain* this, PlayState* play);
 void BgHidanCurtain_TurnOff(BgHidanCurtain* this, PlayState* play);
 void BgHidanCurtain_WaitForTimer(BgHidanCurtain* this, PlayState* play);
 void BgHidanCurtain_WaitForSlugPower(BgHidanCurtain* this, PlayState* play);
+void BgHidanCurtain_WaitForDragonPower(BgHidanCurtain* this, PlayState* play);
+
+#define NORMAL_LIMIT -650.0f
+#define LOWER_LIMIT -1000.0f
 
 typedef struct {
     /* 0x00 */ s16 radius;
@@ -53,7 +57,7 @@ static ColliderCylinderInit sCylinderInit = {
 
 static CollisionCheckInfoInit sCcInfoInit = { 1, 80, 100, MASS_IMMOVABLE };
 
-static BgHidanCurtainParams sHCParams[] = { { 81, 144, 0.090f, 144.0f, 5.0f }, { 46, 88, 0.055f, 88.0f, 3.0f } };
+static BgHidanCurtainParams sHCParams[] = { { 81, 144, 0.090f, 144.0f, 5.0f }, { 46, 88, 0.055f, 88.0f, 3.0f }, { 500, 180, 0.65f, 200.0f, 10.0f } };
 
 const ActorInit Bg_Hidan_Curtain_InitVars = {
     ACTOR_BG_HIDAN_CURTAIN,
@@ -76,7 +80,7 @@ void BgHidanCurtain_Init(Actor* thisx, PlayState* play) {
     osSyncPrintf("Curtain (arg_data 0x%04x)\n", this->actor.params);
     Actor_SetFocus(&this->actor, 20.0f);
     this->type = (thisx->params >> 0xC) & 0xF;
-    if (this->type > 8) {
+    if (this->type > 9) {
         // "Type is not set"
         osSyncPrintf("Error : object のタイプが設定されていない(%s %d)(arg_data 0x%04x)\n", __FILE__,
                      __LINE__, this->actor.params);
@@ -85,6 +89,10 @@ void BgHidanCurtain_Init(Actor* thisx, PlayState* play) {
     }
 
     this->size = ((this->type == 2) || (this->type == 4) || (this->type == 8)) ? 1 : 0;
+    if (this->type == 9) {
+        this->size = 2;
+    }
+
     hcParams = &sHCParams[this->size];
     this->treasureFlag = (thisx->params >> 6) & 0x3F;
     thisx->params &= 0x3F;
@@ -104,6 +112,10 @@ void BgHidanCurtain_Init(Actor* thisx, PlayState* play) {
     this->collider.dim.height = hcParams->height;
     Collider_UpdateCylinder(&this->actor, &this->collider);
     CollisionCheck_SetInfo(&thisx->colChkInfo, NULL, &sCcInfoInit);
+    if (this->type == 9) {
+        this->collider.info.toucher.damage = 0x20;
+        this->actor.world.pos.y =  -100.0f+NORMAL_LIMIT;
+    }
     if (this->type == 0) {
         this->actionFunc = BgHidanCurtain_WaitForClear;
     } else if (this->type <= 6) {
@@ -111,8 +123,10 @@ void BgHidanCurtain_Init(Actor* thisx, PlayState* play) {
         if ((this->type == 4) || (this->type == 5)) {
             this->actor.world.pos.y = this->actor.home.pos.y - hcParams->riseDist;
         }
-    } else {
+    } else if (this->type < 9) {
         this->actionFunc = BgHidanCurtain_WaitForSlugPower;
+    } else {
+        this->actionFunc = BgHidanCurtain_WaitForDragonPower;
     }
     if (((this->type == 1) && Flags_GetTreasure(play, this->treasureFlag)) ||
         (((this->type == 0) || (this->type == 6)) && Flags_GetClear(play, this->actor.room))) {
@@ -228,8 +242,40 @@ void BgHidanCurtain_WaitForSlugPower(BgHidanCurtain* this, PlayState* play) {
     this->collider.dim.pos.z = this->actor.world.pos.z;
 }
 
+void BgHidanCurtain_WaitForDragonPower(BgHidanCurtain* this, PlayState* play) {
+    Player* player = GET_PLAYER(play);
+    Actor* par = this->actor.parent;
+    //if (!par) {
+    //    this->actionFunc = BgHidanCurtain_WaitForSlugCease;
+    //    return;
+    //}
+
+    static Vec3f home = {0.0f, -100.0f, 0.0f};
+    this->actor.home.pos = home;
+    this->actor.world.pos.x = this->actor.home.pos.x;
+    this->actor.world.pos.z = this->actor.home.pos.z;
+
+   if (player->actor.world.pos.y > 0.0f && !((player->stateFlags1 & 0x2000) || (player->stateFlags1 & PLAYER_STATE1_CLIMBING_LADDER)))
+        Math_StepToF(&this->actor.world.pos.y, this->actor.home.pos.y+NORMAL_LIMIT, sHCParams[this->size].riseSpeed);
+   else if (player->actor.world.pos.y < 0.0f)
+       Math_StepToF(&this->actor.world.pos.y, this->actor.home.pos.y+LOWER_LIMIT, sHCParams[this->size].riseSpeed);
+
+    this->collider.dim.pos.x = this->actor.home.pos.x;
+    this->collider.dim.pos.y = this->actor.home.pos.y;
+    this->collider.dim.pos.z = this->actor.home.pos.z;
+
+    if (player->actor.floorHeight < 0.0f && player->actor.world.pos.y > 90.0f && !((player->stateFlags1 & 0x2000) || (player->stateFlags1 & PLAYER_STATE1_CLIMBING_LADDER))) {
+        this->collider.dim.radius = sHCParams[this->size].radius+150;
+        this->collider.dim.height = sHCParams[this->size].height+100;
+    } else {
+        this->collider.dim.radius = sHCParams[this->size].radius;
+        this->collider.dim.height = sHCParams[this->size].height;
+    }
+}
+
 void BgHidanCurtain_Update(Actor* thisx, PlayState* play2) {
     PlayState* play = play2;
+    Player* player = GET_PLAYER(play);
     BgHidanCurtain* this = (BgHidanCurtain*)thisx;
     BgHidanCurtainParams* hcParams = &sHCParams[this->size];
     f32 riseProgress;
@@ -251,10 +297,18 @@ void BgHidanCurtain_Update(Actor* thisx, PlayState* play2) {
         if ((this->type == 4) || (this->type == 5)) {
             this->actor.world.pos.y = (2.0f * this->actor.home.pos.y) - hcParams->riseDist - this->actor.world.pos.y;
         }
-        riseProgress = (hcParams->riseDist - (this->actor.home.pos.y - this->actor.world.pos.y)) / hcParams->riseDist;
+        if (this->type != 9) {
+            riseProgress = (hcParams->riseDist - (this->actor.home.pos.y - this->actor.world.pos.y)) / hcParams->riseDist;
+        } else {
+            if (player->actor.world.pos.y > 100.0f && !((player->stateFlags1 & 0x2000) || (player->stateFlags1 & PLAYER_STATE1_CLIMBING_LADDER)))
+                riseProgress = 1;
+            else
+                riseProgress = (this->actor.world.pos.y - (this->actor.home.pos.y+LOWER_LIMIT)) / (NORMAL_LIMIT-LOWER_LIMIT);//1.0f;
+        }
         this->alpha = 255.0f * riseProgress;
         if (this->alpha > 50) {
-            this->collider.dim.height = hcParams->height * riseProgress;
+            if ((this->type != 9) || !(player->actor.floorHeight < 0.0f && player->actor.world.pos.y > 100.0f && !((player->stateFlags1 & 0x2000) || (player->stateFlags1 & PLAYER_STATE1_CLIMBING_LADDER))))
+                this->collider.dim.height = hcParams->height * riseProgress;
             CollisionCheck_SetAT(play, &play->colChkCtx, &this->collider.base);
             CollisionCheck_SetOC(play, &play->colChkCtx, &this->collider.base);
             if (gSaveContext.sceneSetupIndex <= 3) {

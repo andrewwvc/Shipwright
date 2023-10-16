@@ -6,6 +6,7 @@
 #include "soh/Enhancements/enhancementTypes.h"
 #include "soh/Enhancements/randomizer/3drando/random.hpp"
 #include "soh/Enhancements/cosmetics/authenticGfxPatches.h"
+#include "src/overlays/actors/ovl_Boss_Fd/z_boss_fd.h"
 
 extern "C" {
 #include <z64.h>
@@ -456,7 +457,10 @@ void RegisterHyperBosses() {
              gSaveContext.bossRushOptions[BR_OPTIONS_HYPERBOSSES] == BR_CHOICE_HYPERBOSSES_YES);
 
         // Don't apply during cutscenes because it causes weird behaviour and/or crashes on some bosses.
-        if (hyperBossesActive && isBossActor && !Player_InBlockingCsMode(gPlayState, player)) {
+        if ((hyperBossesActive || (actor->id == ACTOR_BOSS_FD &&
+                                    (((BossFd*)actor)->work[BFD_ACTION_STATE] == BOSSFD_FLY_CHASE ||
+                                                (((BossFd*)actor)->work[BFD_ACTION_STATE] == BOSSFD_FLY_HOLE && (((BossFd*)actor)->work[BFD_FLY_COUNT] & 1)))) ||
+                (actor->id == ACTOR_BOSS_FD2)) && isBossActor && !Player_InBlockingCsMode(gPlayState, player)) {
             // Barinade needs to be updated in sequence to avoid unintended behaviour.
             if (actor->id == ACTOR_BOSS_VA) {
                 // params -1 is BOSSVA_BODY
