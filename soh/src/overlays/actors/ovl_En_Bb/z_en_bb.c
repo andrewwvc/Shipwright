@@ -262,12 +262,14 @@ Actor* EnBb_FindExplosive(PlayState* play, EnBb* this, f32 range) {
     return NULL;
 }
 
+#define LENGTH_EXT 3
+
 void EnBb_SpawnFlameTrail(PlayState* play, EnBb* this, s16 startAtZero) {
     EnBb* now = this;
     EnBb* next;
     s32 i;
 
-    for (i = 0; i < 5; i++) {
+    for (i = 0; i < 5*LENGTH_EXT; i++) {
         next = (EnBb*)Actor_Spawn(&play->actorCtx, play, ACTOR_EN_BB, this->actor.world.pos.x,
                                   this->actor.world.pos.y, this->actor.world.pos.z, 0, 0, 0, 0, true);
         if (next != NULL) {
@@ -276,9 +278,9 @@ void EnBb_SpawnFlameTrail(PlayState* play, EnBb* this, s16 startAtZero) {
             next->targetActor = &this->actor;
             next->vTrailIdx = i + 1;
             next->actor.scale.x = 1.0f;
-            next->vTrailMaxAlpha = next->flamePrimAlpha = 255 - (i * 40);
-            next->flameScaleY = next->actor.scale.y = 0.8f - (i * 0.075f);
-            next->flameScaleX = next->actor.scale.z = 1.0f - (i * 0.094f);
+            next->vTrailMaxAlpha = next->flamePrimAlpha = 255 - (i * 40/LENGTH_EXT);
+            next->flameScaleY = next->actor.scale.y = 0.8f - (i * 0.075f/LENGTH_EXT);
+            next->flameScaleX = next->actor.scale.z = 1.0f - (i * 0.094f/LENGTH_EXT);
             if (startAtZero) {
                 next->flamePrimAlpha = 0;
                 next->flameScaleY = next->flameScaleX = 0.0f;
@@ -355,6 +357,7 @@ void EnBb_Init(Actor* thisx, PlayState* play) {
                 thisx->colChkInfo.damageTable = &sDamageTableRed;
                 this->flameEnvColor.r = 255;
                 this->collider.elements[0].info.toucher.effect = 1;
+                thisx->world.pos.y += 50.0f;
                 EnBb_SetupRed(play, this);
                 break;
             case ENBB_WHITE:
@@ -395,6 +398,11 @@ void EnBb_Init(Actor* thisx, PlayState* play) {
         thisx->focus.pos = thisx->world.pos;
     } else {
         EnBb_SetupFlameTrail(this);
+        this->collider.elements[0].info.toucherFlags = TOUCH_ON;
+        this->collider.elements[0].info.toucher.dmgFlags = 0x20000000;
+        this->collider.elements[0].info.toucher.damage = 0x10;
+        this->collider.elements[0].info.toucher.effect = 1;
+        Actor_SetScale(thisx, 0.03f);
     }
     this->collider.elements[0].dim.worldSphere.radius =
         this->collider.elements[0].dim.modelSphere.radius * this->collider.elements[0].dim.scale;
@@ -787,6 +795,7 @@ void EnBb_SetupRed(PlayState* play, EnBb* this) {
         this->actor.bgCheckFlags &= ~1;
         this->actor.flags &= ~ACTOR_FLAG_TARGETABLE;
     }
+    this->bobPhase = 0;
     this->action = BB_RED;
     EnBb_SetupAction(this, EnBb_Red);
 }
@@ -821,12 +830,13 @@ void EnBb_Red(EnBb* this, PlayState* play) {
                 this->moveMode = BBMOVE_NORMAL;
                 this->actor.flags |= ACTOR_FLAG_TARGETABLE;
             }
-            this->bobPhase += Rand_ZeroOne();
+
             Math_SmoothStepToF(&this->flameScaleY, 80.0f, 1.0f, 10.0f, 0.0f);
             Math_SmoothStepToF(&this->flameScaleX, 100.0f, 1.0f, 10.0f, 0.0f);
             if (this->actor.bgCheckFlags & 8) {
-                yawDiff = this->actor.world.rot.y - this->actor.wallYaw;
+                s16 yawDiff = this->actor.world.rot.y - this->actor.wallYaw;
                 if (ABS(yawDiff) > 0x4000) {
+                    this->bobPhase = 0;
                     this->actor.world.rot.y =
                         this->actor.wallYaw + this->actor.wallYaw - this->actor.world.rot.y - 0x8000;
                 }
@@ -841,10 +851,15 @@ void EnBb_Red(EnBb* this, PlayState* play) {
                     this->actor.flags &= ~ACTOR_FLAG_TARGETABLE;
                 } else {
                     this->actor.velocity.y *= -1.06f;
-                    if (this->actor.velocity.y > 13.0f) {
-                        this->actor.velocity.y = 13.0f;
+                    if (this->actor.velocity.y > 10.0f) {
+                        this->actor.velocity.y = 8.0f;
+                    } else if (this->actor.velocity.y < 6.0f) {
+                        this->actor.velocity.y = 6.0f;
                     }
-                    this->actor.world.rot.y = Math_SinF(this->bobPhase) * 65535.0f;
+                    if (ABS(yawDiff) > 0x4000 && this->bobPhase < 3.5f) {
+                        this->actor.world.rot.y += (yawDiff > 0) ? 0x4000 : -0x4000;
+                        this->bobPhase = this->bobPhase + 1;
+                    }
                 }
                 this->actor.bgCheckFlags &= ~1;
             }
@@ -1278,7 +1293,7 @@ void EnBb_Update(Actor* thisx, PlayState* play2) {
             this->actor.world.pos.y + (this->actor.shape.yOffset * this->actor.scale.y);
         this->collider.elements->dim.worldSphere.center.z = this->actor.world.pos.z;
 
-        if ((this->action > BB_KILL) && ((this->actor.speedXZ != 0.0f) || (this->action == BB_GREEN))) {
+        if ((this->action > BB_KILL) && ((this->actor.speedXZ != 0.0f) || (this->action == BB_GREEN) || (this->action == BB_FLAME_TRAIL))) {
             CollisionCheck_SetAT(play, &play->colChkCtx, &this->collider.base);
         }
         if ((this->action > BB_FLAME_TRAIL) &&
