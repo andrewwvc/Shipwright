@@ -10927,7 +10927,7 @@ void Player_UpdateCommon(Player* this, PlayState* play, Input* input) {
 
     DECR(this->unsheathing);
 
-    if (CHECK_BTN_ALL(sControlInput->cur.button, BTN_R) || (this->stateFlags1 & PLAYER_STATE1_SHIELDING)){
+    if (this->stateFlags1 & PLAYER_STATE1_SHIELDING) {
         if (this->shieldUpTimer < SHIELD_TIME_MAX/2)
             this->shieldUpTimer++;
         if (this->shieldRelaxTimer <= SHIELD_TIME_MAX && this->func_82C != func_80843188
