@@ -265,6 +265,7 @@ typedef enum {
     /* 0x18 */ ITEM00_TUNIC_GORON,
     /* 0x19 */ ITEM00_BOMBS_SPECIAL,
     /* 0x20 */ ITEM00_BOMBCHU,
+    /* 0x21 */ ITEM00_DEFENSE_HEART,
                ITEM00_MAX,
 } Item00Type;
 

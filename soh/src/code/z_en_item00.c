@@ -451,6 +451,12 @@ void EnItem00_Init(Actor* thisx, PlayState* play) {
             Actor_SetScale(&this->actor, 0.02f);
             this->scale = 0.02f;
             break;
+        case ITEM00_DEFENSE_HEART:
+            yOffset = 830.0f;
+            this->unk_158 = 0;
+            Actor_SetScale(&this->actor, 0.02f);
+            this->scale = 0.02f;
+            break;
         case ITEM00_ARROWS_SINGLE:
         case ITEM00_ARROWS_SMALL:
         case ITEM00_ARROWS_MEDIUM:
@@ -587,6 +593,7 @@ void EnItem00_Init(Actor* thisx, PlayState* play) {
             break;
         case ITEM00_HEART_PIECE:
         case ITEM00_HEART_CONTAINER:
+        case ITEM00_DEFENSE_HEART:
         case ITEM00_SHIELD_DEKU:
         case ITEM00_SHIELD_HYLIAN:
         case ITEM00_TUNIC_ZORA:
@@ -622,7 +629,7 @@ void func_8001DFC8(EnItem00* this, PlayState* play) {
 
     if (!CVarGetInteger("gNewDrops", 0)){
         if ((this->actor.params <= ITEM00_RUPEE_RED) || ((this->actor.params == ITEM00_HEART) && (this->unk_15A < 0)) ||
-            (this->actor.params == ITEM00_HEART_PIECE)) {
+            (this->actor.params == ITEM00_HEART_PIECE) || (this->actor.params == ITEM00_DEFENSE_HEART)) {
             this->actor.shape.rot.y += 960;
         } else {
             if ((this->actor.params >= ITEM00_SHIELD_DEKU) && (this->actor.params != ITEM00_BOMBS_SPECIAL) &&
@@ -660,14 +667,14 @@ void func_8001DFC8(EnItem00* this, PlayState* play) {
 
     if (this->unk_154 == 0) {
         if ((this->actor.params != ITEM00_SMALL_KEY) && (this->actor.params != ITEM00_HEART_PIECE) &&
-            (this->actor.params != ITEM00_HEART_CONTAINER)) {
+            (this->actor.params != ITEM00_HEART_CONTAINER) && (this->actor.params  != ITEM00_DEFENSE_HEART)) {
             this->unk_154 = -1;
         }
     }
 
     if (this->unk_15A == 0) {
         if ((this->actor.params != ITEM00_SMALL_KEY) && (this->actor.params != ITEM00_HEART_PIECE) &&
-            (this->actor.params != ITEM00_HEART_CONTAINER)) {
+            (this->actor.params != ITEM00_HEART_CONTAINER) && (this->actor.params  != ITEM00_DEFENSE_HEART)) {
             Actor_Kill(&this->actor);
         }
     }
@@ -964,6 +971,9 @@ void EnItem00_Update(Actor* thisx, PlayState* play) {
         case ITEM00_HEART_CONTAINER:
             getItemId = GI_HEART_CONTAINER;
             break;
+        case ITEM00_DEFENSE_HEART:
+            getItemId = GI_DEFENSE_HEART;
+            break;
         case ITEM00_MAGIC_LARGE:
             getItemId = GI_MAGIC_LARGE;
             break;
@@ -1005,6 +1015,7 @@ void EnItem00_Update(Actor* thisx, PlayState* play) {
     switch (*params) {
         case ITEM00_HEART_PIECE:
         case ITEM00_HEART_CONTAINER:
+        case ITEM00_DEFENSE_HEART:
         case ITEM00_SMALL_KEY:
         case ITEM00_SHIELD_DEKU:
         case ITEM00_SHIELD_HYLIAN:
@@ -1139,6 +1150,7 @@ void EnItem00_Draw(Actor* thisx, PlayState* play) {
                     EnItem00_DrawHeartPiece(this, play);
                 }
                 break;
+            case ITEM00_DEFENSE_HEART:
             case ITEM00_HEART_CONTAINER:
                 EnItem00_DrawHeartContainer(this, play);
                 break;
@@ -1715,7 +1727,8 @@ EnItem00* Item_DropCollectible(PlayState* play, Vec3f* spawnPos, s16 params) {
                 spawnedActor->unk_15A = 220;
                 if ((spawnedActor->actor.params != ITEM00_SMALL_KEY) &&
                     (spawnedActor->actor.params != ITEM00_HEART_PIECE) &&
-                    (spawnedActor->actor.params != ITEM00_HEART_CONTAINER)) {
+                    (spawnedActor->actor.params != ITEM00_HEART_CONTAINER) &&
+                    (spawnedActor->actor.params != ITEM00_DEFENSE_HEART)) {
                     spawnedActor->actor.room = -1;
                 }
                 spawnedActor->actor.flags |= ACTOR_FLAG_UPDATE_WHILE_CULLED;
@@ -1873,7 +1886,8 @@ void Item_DropCollectibleRandom1(PlayState* play, Actor* fromActor, Vec3f* spawn
                         spawnedActor->actor.flags |= ACTOR_FLAG_UPDATE_WHILE_CULLED;
                         if ((spawnedActor->actor.params != ITEM00_SMALL_KEY) &&
                             (spawnedActor->actor.params != ITEM00_HEART_PIECE) &&
-                            (spawnedActor->actor.params != ITEM00_HEART_CONTAINER)) {
+                            (spawnedActor->actor.params != ITEM00_HEART_CONTAINER) &&
+                            (spawnedActor->actor.params != ITEM00_DEFENSE_HEART)) {
                             spawnedActor->actor.room = -1;
                         }
                         spawnedActor->unk_15A = 220;

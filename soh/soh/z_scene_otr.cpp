@@ -299,6 +299,11 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, LUS::ActorEnt
             { -1, -1, { ACTOR_ELF_MSG2, -2145, 10, -615,  2,0,1, (0x3F<<8)|0xB5 }},
         } },
     } },
+    { 0xD, {//Ganon's Castle
+        { 0x10, {
+            { -1, -1, { ACTOR_EN_ITEM00, 0, -240, 770, 0,0,0, 0x100+(uint16_t)ITEM00_DEFENSE_HEART  }},
+        } },
+    } },
     { 0x55, { // Kokiri Forest
         { 0x00, {//Village
             //{ -1, -1, { ACTOR_EN_ITEM00, 1297, 240, -553, 0, 0, 0, 0x0800+(uint16_t)ITEM00_HEART_PIECE }},
