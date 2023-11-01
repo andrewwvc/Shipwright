@@ -107,7 +107,7 @@ static ColliderCylinderInitType1 sCylinderInit3 = {
     },
     {
         ELEMTYPE_UNK0,
-        { 0x20000000, 0x02, 0x08 },
+        { 0x20000000, 0x02, 0x10 },
         { 0x00000000, 0x00, 0x00 },
         TOUCH_ON | TOUCH_SFX_NORMAL,
         BUMP_NONE,
@@ -170,14 +170,16 @@ void EnFz_Init(Actor* thisx, PlayState* play) {
     Collider_InitCylinder(play, &this->collider2);
     Collider_SetCylinderType1(play, &this->collider2, &this->actor, &sCylinderInit2);
 
-    Collider_InitCylinder(play, &this->collider3);
-    Collider_SetCylinderType1(play, &this->collider3, &this->actor, &sCylinderInit3);
+    for (s32 ii = 0; ii < ARRAY_COUNT(this->collider3); ii++) {
+        Collider_InitCylinder(play, &this->collider3[ii]);
+        Collider_SetCylinderType1(play, &this->collider3[ii], &this->actor, &sCylinderInit3);
+    }
 
     Actor_SetScale(&this->actor, 0.008f);
     this->actor.colChkInfo.mass = MASS_IMMOVABLE;
     this->actor.flags &= ~ACTOR_FLAG_TARGETABLE;
     this->unusedTimer1 = 0;
-    this->unusedCounter = 0;
+    this->usedCounter = this->actor.yawTowardsPlayer-this->actor.shape.rot.y > 0 ? 1 : -1;
     this->updateBgInfo = true;
     this->isMoving = false;
     this->isFreezing = false;
@@ -209,7 +211,8 @@ void EnFz_Destroy(Actor* thisx, PlayState* play) {
 
     Collider_DestroyCylinder(play, &this->collider1);
     Collider_DestroyCylinder(play, &this->collider2);
-    Collider_DestroyCylinder(play, &this->collider3);
+    for (s32 ii = 0; ii < ARRAY_COUNT(this->collider3); ii++)
+        Collider_DestroyCylinder(play, &this->collider3[ii]);
 }
 
 void EnFz_UpdateTargetPos(EnFz* this, PlayState* play) {
@@ -354,7 +357,6 @@ void EnFz_ApplyDamage(EnFz* this, PlayState* play) {
                         vec.y = this->actor.world.pos.y;
                         vec.z = this->actor.world.pos.z;
                         EnFz_Damaged(this, play, &vec, 10, 0.0f);
-                        this->unusedCounter++;
                     } else {
                         Audio_PlayActorSound2(&this->actor, NA_SE_EN_FREEZAD_DEAD);
                         Audio_PlayActorSound2(&this->actor, NA_SE_EV_ICE_BROKEN);
@@ -382,6 +384,19 @@ void EnFz_ApplyDamage(EnFz* this, PlayState* play) {
 
 void EnFz_SetYawTowardsPlayer(EnFz* this) {
     Math_SmoothStepToS(&this->actor.shape.rot.y, this->actor.yawTowardsPlayer, 10, 2000, 0);
+    this->actor.world.rot.y = this->actor.shape.rot.y;
+}
+
+void EnFz_SweepAim(EnFz* this) {
+    s8 sign = (s16)(this->actor.yawTowardsPlayer-this->actor.shape.rot.y) > 0 ? 1 : -1;
+    if (this->usedCounter == sign) {
+        this->usedCounter = -sign;
+        this->unusedTimer1 = 0;
+    } else {
+        this->unusedTimer1++;
+    }
+
+    this->actor.shape.rot.y += (s16)(0x200*Math_CosF((this->unusedTimer1 > 10 ? 10 : this->unusedTimer1)*M_PI/10)*this->usedCounter);
     this->actor.world.rot.y = this->actor.shape.rot.y;
 }
 
@@ -413,22 +428,31 @@ void EnFz_SetupWait(EnFz* this) {
     this->actor.world.pos.x = this->posOrigin.x;
     this->actor.world.pos.y = this->posOrigin.y;
     this->actor.world.pos.z = this->posOrigin.z;
+    this->actor.world.rot.y = (s16)(Rand_Centered()*2*0x8000);
+    this->speedXZ = Rand_ZeroOne()*4.0f;
+    this->isMoving = true;
 }
 
 void EnFz_Wait(EnFz* this, PlayState* play) {
-    if ((this->timer == 0) && (this->actor.xzDistToPlayer < 400.0f)) {
+    if (this->timer == 0) {
+        this->speedXZ = 0;
+    }
+
+    if ((this->timer == 0) && (this->actor.xzDistToPlayer < 520.0f)) {
         EnFz_SetupAppear(this);
     }
 }
 
 void EnFz_SetupAppear(EnFz* this) {
     this->state = 2;
-    this->timer = 20;
+    this->timer = 10;
     this->unusedNum2 = 4000;
     this->actionFunc = EnFz_Appear;
 }
 
 void EnFz_Appear(EnFz* this, PlayState* play) {
+    EnFz_SetYawTowardsPlayer(this);
+
     if (this->timer == 0) {
         this->envAlpha += 8;
         if (this->envAlpha > 255) {
@@ -443,7 +467,7 @@ void EnFz_Appear(EnFz* this, PlayState* play) {
 
 void EnFz_SetupAimForMove(EnFz* this) {
     this->state = 1;
-    this->timer = 40;
+    this->timer = 10;
     this->updateBgInfo = true;
     this->isFreezing = true;
     this->actor.flags |= ACTOR_FLAG_TARGETABLE;
@@ -462,20 +486,20 @@ void EnFz_AimForMove(EnFz* this, PlayState* play) {
 void EnFz_SetupMoveTowardsPlayer(EnFz* this) {
     this->state = 1;
     this->isMoving = true;
-    this->timer = 100;
+    this->timer = Rand_S16Offset(50, 100);
     this->actionFunc = EnFz_MoveTowardsPlayer;
     this->speedXZ = 4.0f;
 }
 
 void EnFz_MoveTowardsPlayer(EnFz* this, PlayState* play) {
-    if ((this->timer == 0) || !this->isMoving) {
+    if ((this->timer == 0) || !this->isMoving || (this->actor.xyzDistToPlayerSq < SQ(230.0f) && ABS((s16)(this->actor.shape.rot.y - this->actor.yawTowardsPlayer)) < 0x4000)) {
         EnFz_SetupAimForFreeze(this);
     }
 }
 
 void EnFz_SetupAimForFreeze(EnFz* this) {
     this->state = 1;
-    this->timer = 40;
+    this->timer = 4;
     this->actionFunc = EnFz_AimForFreeze;
     this->speedXZ = 0.0f;
     this->actor.speedXZ = 0.0f;
@@ -504,6 +528,7 @@ void EnFz_BlowSmoke(EnFz* this, PlayState* play) {
     u8 isTimerMod8;
     s16 primAlpha;
 
+    EnFz_SweepAim(this);
     if (this->timer == 0) {
         EnFz_SetupDisappear(this);
     } else if (this->timer >= 11) {
@@ -615,13 +640,14 @@ void EnFz_BlowSmokeStationary(EnFz* this, PlayState* play) {
     u8 isTimerMod8;
     s16 primAlpha;
 
-    if (this->counter & 0xC0) {
+    if (this->counter & 0x40) {
         EnFz_SetYawTowardsPlayer(this);
         EnFz_UpdateTargetPos(this, play);
     } else {
         isTimerMod8 = false;
         primAlpha = 150;
         func_8002F974(&this->actor, NA_SE_EN_FREEZAD_BREATH - SFX_FLAG);
+        EnFz_SweepAim(this);
 
         if ((this->counter & 0x3F) >= 48) {
             primAlpha = 630 - ((this->counter & 0x3F) * 10);
@@ -668,10 +694,6 @@ void EnFz_Update(Actor* thisx, PlayState* play) {
     s32 pad;
 
     this->counter++;
-
-    if (this->unusedTimer1 != 0) {
-        this->unusedTimer1--;
-    }
 
     if (this->timer != 0) {
         this->timer--;
@@ -793,10 +815,10 @@ void EnFz_SpawnIceSmokeFreeze(EnFz* this, Vec3f* pos, Vec3f* velocity, Vec3f* ac
 
 void EnFz_UpdateIceSmoke(EnFz* this, PlayState* play) {
     EnFzEffectSsIceSmoke* iceSmoke = this->iceSmoke;
-    s16 i;
+    s16 ii;
     Vec3f pos;
 
-    for (i = 0; i < ARRAY_COUNT(this->iceSmoke); i++) {
+    for (ii = 0; ii < ARRAY_COUNT(this->iceSmoke); ii++) {
         if (iceSmoke->type) {
             iceSmoke->pos.x += iceSmoke->velocity.x;
             iceSmoke->pos.y += iceSmoke->velocity.y;
@@ -835,11 +857,11 @@ void EnFz_UpdateIceSmoke(EnFz* this, PlayState* play) {
                     }
                 }
 
-                if ((this->unusedTimer2 == 0) && (iceSmoke->primAlpha >= 101) && iceSmoke->isTimerMod8) {
-                    this->collider3.dim.pos.x = (s16)iceSmoke->pos.x;
-                    this->collider3.dim.pos.y = (s16)iceSmoke->pos.y;
-                    this->collider3.dim.pos.z = (s16)iceSmoke->pos.z;
-                    CollisionCheck_SetAT(play, &play->colChkCtx, &this->collider3.base);
+                if ((iceSmoke->primAlpha >= 20)) {
+                    this->collider3[ii].dim.pos.x = (s16)iceSmoke->pos.x;
+                    this->collider3[ii].dim.pos.y = (s16)iceSmoke->pos.y;
+                    this->collider3[ii].dim.pos.z = (s16)iceSmoke->pos.z;
+                    CollisionCheck_SetAT(play, &play->colChkCtx, &this->collider3[ii].base);
                 }
 
                 pos.x = iceSmoke->pos.x;
