@@ -2197,7 +2197,7 @@ void EnXc_InitTempleOfTime(EnXc* this, PlayState* play) {
             play->csCtx.segment = SEGMENTED_TO_VIRTUAL(gTempleOfTimeFirstAdultCs);
             gSaveContext.cutsceneTrigger = 1;
             func_80B3EBF0(this, play);
-        } else if ((!(gSaveContext.eventChkInf[5] & 0x20) && (gSaveContext.eventChkInf[4] & 0x100) &&
+        } else if ((!(gSaveContext.eventChkInf[5] & 0x20) && (gSaveContext.eventChkInf[4] & 0x700) && //Allows any of the first 3 rescued sages to let you use the pedestal
                     !gSaveContext.n64ddFlag) ||
                    (!(gSaveContext.eventChkInf[5] & 0x20) && CHECK_QUEST_ITEM(QUEST_MEDALLION_FOREST) &&
                     gSaveContext.n64ddFlag)) {
