@@ -148,6 +148,8 @@ u16 ElfMessage_GetTextFromMsgs(ElfMessage* msg) {
     }
 }
 
+#define NO_ADULT_SPECIAL_MSG 5
+
 u16 ElfMessage_GetSariaText(PlayState* play, s8 status) {
     Player* player = GET_PLAYER(play);
     ElfMessage* msgs;
@@ -217,7 +219,33 @@ u16 ElfMessage_GetSariaText(PlayState* play, s8 status) {
             return 0x0160; // Special text about Saria preferring to talk to you face-to-face
         }
     } else {
+        u16 msg1 = ElfMessage_GetTextFromMsgs(sAdultSariaMsgs);
+        u16 randInt = Rand_S16Offset(0, 3);
+        s16 messageNumbers[NO_ADULT_SPECIAL_MSG];
+        s32 ii = 0;
         msgs = sAdultSariaMsgs;
+        // for (s32 ii = 0; ii < NO_ADULT_SPECIAL_MSG; ii++) {
+
+        // }
+        if (CHECK_QUEST_ITEM(QUEST_MEDALLION_LIGHT))
+            messageNumbers[ii++] = 0;
+        if (CHECK_QUEST_ITEM(QUEST_MEDALLION_FIRE))
+            messageNumbers[ii++] = 1;
+        if (CHECK_QUEST_ITEM(QUEST_MEDALLION_WATER))
+            messageNumbers[ii++] = 2;
+        if (CHECK_QUEST_ITEM(QUEST_MEDALLION_SHADOW))
+            messageNumbers[ii++] = 3;
+        if (CHECK_QUEST_ITEM(QUEST_MEDALLION_SPIRIT))
+            messageNumbers[ii++] = 4;
+
+        if ((!(msg1 == 0x16C) && status == 0) || randInt) {
+            if (msg1 >= 0x16B && ii > 0) {
+                randInt = Rand_S16Offset(0, ii);
+                if (randInt >= ii)
+                    randInt = ii-1;
+                return SariaMsg+30+messageNumbers[randInt];
+            }
+        }
     }
 
     return ElfMessage_GetTextFromMsgs(msgs);

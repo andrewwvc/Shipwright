@@ -452,7 +452,7 @@ extern "C" void OTRMessage_Init()
     MakeNormalMsgEng(0x10E0,"\x12\x38\x82""All right! You win! In return,&I'll tell you a secret&if you pay me %r50 rupees%w!\x07\x10\xA3");
     MakeNormalMsgEng(0x10E1,"\x12\x38\x80""OK, there is path to a place&hidden in the woods that is&revealed in %bthree%w parts,&of %bfour%w directions each!^The order of the parts is&something you will have&to work out yourself!^But I can say that there&is a final hidden direction,&and that is %gSouth%w!\x0B\x02");
 
-    u16 SariaMsg = TextIDAllocator::Instance->allocateRange("saria", 40);
+    u16 SariaMsg = TextIDAllocator::Instance->allocateRange("saria", 50);
     CustomMessageManager::Instance->CreateMessage(
         questMessageTableID, SariaMsg,
         CustomMessage(
@@ -694,6 +694,46 @@ extern "C" void OTRMessage_Init()
           "",
           "",
           TEXTBOX_TYPE_BLACK, TEXTBOX_POS_BOTTOM)
+    );
+    CustomMessageManager::Instance->CreateMessage(
+        questMessageTableID, SariaMsg+30,
+        CustomMessage(
+          "Raru has shown me much wisdom and&helped me understand what it means&to be here, serving everyone.^I don't really know how long&he's realy been here,&but I suspect somehow^that he may be as ancient&as the Great Deku Tree.\x0B\x02",
+          "",
+          "",
+          TEXTBOX_TYPE_BLUE, TEXTBOX_POS_BOTTOM)
+    );
+    CustomMessageManager::Instance->CreateMessage(
+        questMessageTableID, SariaMsg+31,
+        CustomMessage(
+          "I'm happy I could finaly meet&Mr. Darunia. He has such striking&strength and fierce determination,^and yet he's still every bit&as jolly and full of humor&as I expected him to be.^It's an honor to be in&his company as a sage.^Make sure you tell us how&his son is doing anyway!\x0B\x02",
+          "",
+          "",
+          TEXTBOX_TYPE_BLUE, TEXTBOX_POS_BOTTOM)
+    );
+    CustomMessageManager::Instance->CreateMessage(
+        questMessageTableID, SariaMsg+32,
+        CustomMessage(
+          "I was struck with so much&surprise to see Princess Ruto&awakened as a sage.^I'd always hoped to see her&some day, so it's so exciting&for me to be aquainted with&her in person, even here.\x0B\x02",
+          "",
+          "",
+          TEXTBOX_TYPE_BLUE, TEXTBOX_POS_BOTTOM)
+    );
+    CustomMessageManager::Instance->CreateMessage(
+        questMessageTableID, SariaMsg+33,
+        CustomMessage(
+          "Impa has told me a lot about things.&From speaking with her, I believe&that I understand now how much^Princess Zelda has had to face&and how brave she has been&for all she's been through.\x0B\x02",
+          "",
+          "",
+          TEXTBOX_TYPE_BLUE, TEXTBOX_POS_BOTTOM)
+    );
+    CustomMessageManager::Instance->CreateMessage(
+        questMessageTableID, SariaMsg+34,
+        CustomMessage(
+          "I'd heard tales of a far away&desert many times long ago,&but I never expected to&meet anyone from there.^Nabooru is a proud woman now&doing her part to help Hyrule&and I'm glad to accept her as&part of the circle of sages.\x0B\x02",
+          "",
+          "",
+          TEXTBOX_TYPE_BLUE, TEXTBOX_POS_BOTTOM)
     );
 
 
