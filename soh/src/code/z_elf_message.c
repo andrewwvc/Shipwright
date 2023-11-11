@@ -220,7 +220,7 @@ u16 ElfMessage_GetSariaText(PlayState* play, s8 status) {
         }
     } else {
         u16 msg1 = ElfMessage_GetTextFromMsgs(sAdultSariaMsgs);
-        u16 randInt = Rand_S16Offset(0, 3);
+        s16 randInt = Rand_S16Offset(0, 3);
         s16 messageNumbers[NO_ADULT_SPECIAL_MSG];
         s32 ii = 0;
         msgs = sAdultSariaMsgs;
@@ -251,10 +251,87 @@ u16 ElfMessage_GetSariaText(PlayState* play, s8 status) {
     return ElfMessage_GetTextFromMsgs(msgs);
 }
 
+#define NO_FAIRY_SPECIAL_MSG_MAX 10
+
 u16 ElfMessage_GetCUpText(PlayState* play) {
     if (play->cUpElfMsgs == NULL) {
         return 0;
     } else {
-        return ElfMessage_GetTextFromMsgs(play->cUpElfMsgs);
+        u16 tempMsg = ElfMessage_GetTextFromMsgs(play->cUpElfMsgs);
+        s16 randInt;
+        u16 messageNumbers[NO_FAIRY_SPECIAL_MSG_MAX];
+
+        if (0x150 <= tempMsg && tempMsg <= 0x153) {
+            s32 ii = 0;
+            s16 bootsObtainedIron = ((gBitFlags[ITEM_BOOTS_IRON - ITEM_BOOTS_KOKIRI] << gEquipShifts[EQUIP_BOOTS]) & gSaveContext.inventory.equipment);
+            messageNumbers[ii++] = 0x015D;//Navi reminder about Sheik's message
+            if (!CHECK_QUEST_ITEM(QUEST_MEDALLION_FOREST))
+                messageNumbers[ii++] = 0x150;
+            if (!CHECK_QUEST_ITEM(QUEST_MEDALLION_FIRE))
+                messageNumbers[ii++] = 0x151;
+            if (!bootsObtainedIron)
+                messageNumbers[ii++] = 0x152;
+            else if (!CHECK_QUEST_ITEM(QUEST_MEDALLION_WATER))
+                messageNumbers[ii++] = 0x153;
+
+            if (ii > 0) {
+                randInt = Rand_S16Offset(0, ii);
+                tempMsg = messageNumbers[randInt];
+            }
+
+            return tempMsg;
+        }
+
+        if (0x154 <= tempMsg && tempMsg <= 0x15A) {
+            s32 ii = 0;
+            messageNumbers[ii++] = 0x015D;//Navi reminder about Sheik's message
+            if (!(gSaveContext.eventChkInf[0xA]&(1<<0xA)))
+                messageNumbers[ii++] = 0x154;
+            else if (INV_CONTENT(ITEM_LENS) == ITEM_NONE)
+                messageNumbers[ii++] = 0x155;
+            else if (!CHECK_QUEST_ITEM(QUEST_MEDALLION_SHADOW))
+                messageNumbers[ii++] = 0x157;
+
+            if (!CHECK_QUEST_ITEM(ITEM_SONG_REQUIEM - ITEM_SONG_MINUET + QUEST_SONG_MINUET))
+                messageNumbers[ii++] = 0x158;
+            else if (CUR_UPG_VALUE(UPG_STRENGTH) < 2)
+                messageNumbers[ii++] = 0x156;
+            else if (!CHECK_QUEST_ITEM(QUEST_MEDALLION_SPIRIT))
+                messageNumbers[ii++] = 0x15A;
+
+            if (ii > 0) {
+                randInt = Rand_S16Offset(0, ii);
+                tempMsg = messageNumbers[randInt];
+            }
+
+            return tempMsg;
+        }
+
+        /*if (0x145 <= tempMsg && tempMsg <= 0x14A) {
+            s32 ii = 0;
+            if (!CHECK_QUEST_ITEM(ITEM_SONG_SARIA - ITEM_SONG_MINUET + QUEST_SONG_MINUET)) {
+                messageNumbers[ii++] = 0x145;
+                messageNumbers[ii++] = 0x146;
+            } else if (CUR_UPG_VALUE(UPG_STRENGTH) < 1)
+                messageNumbers[ii++] = 0x146;
+            else if (!(gSaveContext.eventChkInf[2]&(1<<5)))
+                messageNumbers[ii++] = 0x147;
+            else if (!gSaveContext.isMagicAcquired)
+                messageNumbers[ii++] = 0x148;
+
+            if (!(gSaveContext.eventChkInf[3]&(1<<3)))
+                messageNumbers[ii++] = 0x149;
+            else if (!(gSaveContext.eventChkInf[3]&(1<<7)))
+                messageNumbers[ii++] = 0x14A;
+
+            if (ii > 0) {
+                randInt = Rand_S16Offset(0, ii);
+                tempMsg = messageNumbers[randInt];
+            }
+
+            return tempMsg;
+        }*/
+
+        return tempMsg;
     }
 }

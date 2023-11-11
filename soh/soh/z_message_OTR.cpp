@@ -418,6 +418,9 @@ extern "C" void OTRMessage_Init()
     MakeBlueMsgEng(0x0635, "%wIron Knuckle&%cBeware of the incredibly strong axe!&You may need to use different dodges&depending on how they attack!");
     MakeBlueMsgEng(EnemyMsg+0, "%wIron Knuckle&%cBeware of the incredibly strong axe!&You may need to use different dodges&depending on how they attack!^%cYou're an adult now, so if you're&%w\xA4 Targeting%c, hold %w\xA3%c in order to let&high swings pass over your head.");
 
+    //Navi Quest Text
+    MakeBlueMsgEng(0x015D, "%cRemember what Sheik said about&the temples of the %wSages%c.^%cOne in a deep forest...&One on a high mountain...&One under a vast lake...^%cOne within the house of the dead...&One inside a goddess of the sand...");
+
     //Great Fairy Text
     MakeNormalMsgEng(0xE8, "Your magic power has been&enhanced! Now you can gain even&more Magic Capacity!^Collecting %gIcons of Magic%w&will allow for greater enhancement!");
     MakeNormalMsgEng(0xE9, "Your defensive power has been&enhanced! Damage inflicted by &enemies will be reduced by half.^But this only applies to&hearts protected by any&%rHeart Barriers%w you have collected.");
