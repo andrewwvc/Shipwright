@@ -3581,7 +3581,7 @@ void KaleidoScope_Update(PlayState* play)
             pauseCtx->tradeQuestLocation = 0xFF;
 
             i = INV_CONTENT(ITEM_TRADE_ADULT);
-            if (LINK_AGE_IN_YEARS == YEARS_ADULT) {
+            /*if (LINK_AGE_IN_YEARS == YEARS_ADULT) {
                 if ((i <= ITEM_POCKET_CUCCO) || (i == ITEM_ODD_MUSHROOM)) {
                     pauseCtx->tradeQuestLocation = 8;
                 }
@@ -3603,7 +3603,7 @@ void KaleidoScope_Update(PlayState* play)
                 if ((i == ITEM_CLAIM_CHECK) && (gSaveContext.bgsFlag == 0)) {
                     pauseCtx->tradeQuestLocation = 7;
                 }
-            }
+            }*/
 
             KaleidoScope_ResetTradeSelect();
 
