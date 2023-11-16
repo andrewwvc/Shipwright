@@ -3255,6 +3255,7 @@ void KaleidoScope_Update(PlayState* play)
         }
     }
 
+    Interface_SetPauseCUpDisplay(0);
     switch (pauseCtx->state) {
         case 3:
             for (int buttonIndex = 0; buttonIndex < ARRAY_COUNT(gSaveContext.buttonStatus); buttonIndex++) {
@@ -3671,6 +3672,8 @@ void KaleidoScope_Update(PlayState* play)
                         Interface_ChangeAlpha(50);
                         pauseCtx->unk_1EC = 0;
                         pauseCtx->state = 7;
+                    } else if (pauseCtx->pageIndex == PAUSE_QUEST) {
+                        goto handle_navi;
                     }
                     break;
 
@@ -3770,10 +3773,35 @@ void KaleidoScope_Update(PlayState* play)
                         Interface_ChangeAlpha(50);
                         pauseCtx->unk_1EC = 0;
                         pauseCtx->state = 7;
+                    } else {
+                        goto handle_navi;
                     }
                     break;
 
                 case 9:
+                    break;
+
+                case 10:
+                    Interface_SetPauseCUpDisplay(100);
+                    if (play->msgCtx.msgMode == MSGMODE_NONE) {
+                        Interface_SetDoAction(play, DO_ACTION_DECIDE);
+                        Interface_LoadActionLabelB(play, DO_ACTION_SAVE);
+                        pauseCtx->unk_1E4 = 0;
+                    }
+                    break;
+
+                case 11:
+                handle_navi:
+                    {
+                        u16 msg = ElfMessage_GetCUpText(play);
+                        if (msg != 0 && msg != 0x015F) {
+                            Interface_SetPauseCUpDisplay(255);
+                            if (CHECK_BTN_ALL(input->press.button, BTN_CUP)) {
+                                Message_StartTextbox(play, msg, NULL);
+                                pauseCtx->unk_1E4 = 10;
+                            }
+                        }
+                    }
                     break;
 
                 default:

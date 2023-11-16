@@ -1322,6 +1322,7 @@ void Play_Update(PlayState* play) {
                 }
 
                 KaleidoScopeCall_Update(play);
+                Message_Update(play);
             } else if (play->gameOverCtx.state != GAMEOVER_INACTIVE) {
                 if (1 && HREG(63)) {
                     LOG_NUM("1", 1);
