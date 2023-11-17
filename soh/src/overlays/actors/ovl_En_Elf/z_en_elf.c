@@ -1352,7 +1352,7 @@ void func_80A05208(Actor* thisx, PlayState* play) {
     if ((Message_GetState(&play->msgCtx) == TEXT_STATE_CHOICE) && Message_ShouldAdvance(play)) {
         switch (play->msgCtx.choiceIndex) {
             case 0: // yes
-                naviCUpText = ElfMessage_GetCUpText(play);
+                naviCUpText = ElfMessage_GetSpecialNaviText(play);
 
                 if (naviCUpText != 0) {
                     Message_ContinueTextbox(play, naviCUpText);
@@ -1412,11 +1412,14 @@ void func_80A053F0(Actor* thisx, PlayState* play) {
 
     if (player->naviTextId == 0) {
         if (player->unk_664 == NULL) {
-            if (((gSaveContext.naviTimer >= 600) && (gSaveContext.naviTimer <= 3000)) || (nREG(89) != 0)) {
-                player->naviTextId = ElfMessage_GetCUpText(play);
+            u16 txtTemp = ElfMessage_GetCUpText(play);
+            if (((gSaveContext.naviTimer >= 600) && (gSaveContext.naviTimer <= 3000) && (txtTemp < 0x0142)) || ((txtTemp >= 0x0142) && !(gSaveContext.eventChkInf[1] & 0x8000)) || (nREG(89) != 0)) {
+                player->naviTextId = txtTemp;
 
                 if (player->naviTextId == 0x15F) {
                     player->naviTextId = 0;
+                } else if (player->naviTextId >= 0x0142) {
+                    player->naviTextId = 0x015E;
                 }
             }
         }
@@ -1429,7 +1432,7 @@ void func_80A053F0(Actor* thisx, PlayState* play) {
         func_800F4524(&D_801333D4, NA_SE_VO_SK_LAUGH, 0x20);
         thisx->focus.pos = thisx->world.pos;
 
-        if (thisx->textId == ElfMessage_GetCUpText(play)) {
+        if (thisx->textId == ElfMessage_GetCUpText(play)) {//This will not be true if the msg is 0x0142 or beyond, and this is intentional
             this->fairyFlags |= 0x80;
             gSaveContext.naviTimer = 3001;
         }

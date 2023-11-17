@@ -3793,10 +3793,12 @@ void KaleidoScope_Update(PlayState* play)
                 case 11:
                 handle_navi:
                     {
-                        u16 msg = ElfMessage_GetCUpText(play);
+                        u16 msg = ElfMessage_GetSpecialNaviText(play);
                         if (msg != 0 && msg != 0x015F) {
                             Interface_SetPauseCUpDisplay(255);
                             if (CHECK_BTN_ALL(input->press.button, BTN_CUP)) {
+                                if ((gSaveContext.eventChkInf[0] & 0x200) || CHECK_QUEST_ITEM(QUEST_KOKIRI_EMERALD))
+                                    gSaveContext.eventChkInf[1] |= 0x8000;
                                 Message_StartTextbox(play, msg, NULL);
                                 pauseCtx->unk_1E4 = 10;
                             }

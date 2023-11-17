@@ -866,6 +866,7 @@ void SoundSource_UpdateAll(PlayState* play);
 void SoundSource_PlaySfxAtFixedWorldPos(PlayState* play, Vec3f* pos, s32 duration, u16 sfxId);
 u16 ElfMessage_GetSariaText(PlayState* play, s8 status);
 u16 ElfMessage_GetCUpText(PlayState* play);
+u16 ElfMessage_GetSpecialNaviText(PlayState* play);
 u16 Text_GetFaceReaction(PlayState* play, u32 reactionSet);
 void Flags_UnsetAllEnv(PlayState* play);
 void Flags_SetEnv(PlayState* play, s16 flag);

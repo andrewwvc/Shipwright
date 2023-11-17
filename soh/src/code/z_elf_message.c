@@ -257,6 +257,14 @@ u16 ElfMessage_GetCUpText(PlayState* play) {
     if (play->cUpElfMsgs == NULL) {
         return 0;
     } else {
+        return ElfMessage_GetTextFromMsgs(play->cUpElfMsgs);
+    }
+}
+
+u16 ElfMessage_GetSpecialNaviText(PlayState* play) {
+    if (play->cUpElfMsgs == NULL) {
+        return 0;
+    } else {
         u16 tempMsg = ElfMessage_GetTextFromMsgs(play->cUpElfMsgs);
         s16 randInt;
         u16 messageNumbers[NO_FAIRY_SPECIAL_MSG_MAX];

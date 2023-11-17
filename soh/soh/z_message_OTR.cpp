@@ -420,6 +420,7 @@ extern "C" void OTRMessage_Init()
 
     //Navi Quest Text
     MakeBlueMsgEng(0x015D, "%cRemember what Sheik said about&the temples of the %wSages%c.^%cOne in a deep forest...&One on a high mountain...&One under a vast lake...^%cOne within the house of the dead...&One inside a goddess of the sand...");
+    MakeBlueMsgEng(0x015E, "%cIf we're going to respect the&wishes of the Great Deku Tree&we need to start on a journey&beyond the forest.^%cIt might be tough, but you&can ask me for advice on the&%wQuest Status Subscreen%c with %y\xA5%c&and I'll try to help you.");
 
     //Great Fairy Text
     MakeNormalMsgEng(0xE8, "Your magic power has been&enhanced! Now you can gain even&more Magic Capacity!^Collecting %gIcons of Magic%w&will allow for greater enhancement!");
