@@ -1353,6 +1353,7 @@ void func_80A05208(Actor* thisx, PlayState* play) {
         switch (play->msgCtx.choiceIndex) {
             case 0: // yes
                 naviCUpText = ElfMessage_GetSpecialNaviText(play);
+                ElfMessage_SelectSpecialNaviText(play);
 
                 if (naviCUpText != 0) {
                     Message_ContinueTextbox(play, naviCUpText);

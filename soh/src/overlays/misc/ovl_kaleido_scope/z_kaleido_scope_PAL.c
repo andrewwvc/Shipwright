@@ -3801,6 +3801,7 @@ void KaleidoScope_Update(PlayState* play)
                                     gSaveContext.eventChkInf[1] |= 0x8000;
                                 Message_StartTextbox(play, msg, NULL);
                                 pauseCtx->unk_1E4 = 10;
+                                ElfMessage_SelectSpecialNaviText(play);
                             }
                         }
                     }

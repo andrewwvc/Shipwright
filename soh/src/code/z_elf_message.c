@@ -253,6 +253,36 @@ u16 ElfMessage_GetSariaText(PlayState* play, s8 status) {
 
 #define NO_FAIRY_SPECIAL_MSG_MAX 10
 
+u16 sMessagePersistance[NO_FAIRY_SPECIAL_MSG_MAX];
+s16 sMessagePersistanceLength = 0;
+s16 sMessagePersistanceCurrent = 0;
+
+void ElfMessage_SetPersistantElfMessages(u16 *msgArray, s16 length) {
+    sMessagePersistanceLength = length;
+    for (s16 ii = 0; ii < sMessagePersistanceLength; ii++) {
+        sMessagePersistance[ii] = msgArray[ii];
+    }
+    sMessagePersistanceCurrent = 0;
+}
+
+void ElfMessage_SetPersistantElfCurrent(s16 currentVal) {
+    sMessagePersistanceCurrent = currentVal;
+}
+
+void ElfMessage_ResetPersistantElfMessages() {
+    ElfMessage_SetPersistantElfMessages(NULL, 0);
+}
+
+s16 ElfMessage_ComparePersistantElfMessages(u16 *msgArray, s16 length) {
+    if (sMessagePersistanceLength != length)
+        return 0;
+    for (s16 ii = 0; ii < sMessagePersistanceLength; ii++) {
+        if (sMessagePersistance[ii] != msgArray[ii])
+            return 0;
+    }
+    return 1;
+}
+
 u16 ElfMessage_GetCUpText(PlayState* play) {
     if (play->cUpElfMsgs == NULL) {
         return 0;
@@ -263,6 +293,9 @@ u16 ElfMessage_GetCUpText(PlayState* play) {
 
 u16 ElfMessage_GetSpecialNaviText(PlayState* play) {
     if (play->cUpElfMsgs == NULL) {
+        u16 messageNumbers[NO_FAIRY_SPECIAL_MSG_MAX];
+        messageNumbers[0] = 0;
+        ElfMessage_SetPersistantElfMessages(messageNumbers, 1);
         return 0;
     } else {
         u16 tempMsg = ElfMessage_GetTextFromMsgs(play->cUpElfMsgs);
@@ -283,8 +316,11 @@ u16 ElfMessage_GetSpecialNaviText(PlayState* play) {
                 messageNumbers[ii++] = 0x153;
 
             if (ii > 0) {
-                randInt = Rand_S16Offset(0, ii);
-                tempMsg = messageNumbers[randInt];
+                if (!ElfMessage_ComparePersistantElfMessages(messageNumbers, ii)){
+                    ElfMessage_SetPersistantElfMessages(messageNumbers, ii);
+                    sMessagePersistanceCurrent = Rand_S16Offset(0, ii);
+                }
+                tempMsg = messageNumbers[sMessagePersistanceCurrent];
             }
 
             return tempMsg;
@@ -308,8 +344,11 @@ u16 ElfMessage_GetSpecialNaviText(PlayState* play) {
                 messageNumbers[ii++] = 0x15A;
 
             if (ii > 0) {
-                randInt = Rand_S16Offset(0, ii);
-                tempMsg = messageNumbers[randInt];
+                if (!ElfMessage_ComparePersistantElfMessages(messageNumbers, ii)) {
+                    ElfMessage_SetPersistantElfMessages(messageNumbers, ii);
+                    sMessagePersistanceCurrent = Rand_S16Offset(0, ii);
+                }
+                tempMsg = messageNumbers[sMessagePersistanceCurrent];
             }
 
             return tempMsg;
@@ -340,6 +379,16 @@ u16 ElfMessage_GetSpecialNaviText(PlayState* play) {
             return tempMsg;
         }*/
 
+        messageNumbers[0] = tempMsg;
+        ElfMessage_SetPersistantElfMessages(messageNumbers, 1);
         return tempMsg;
     }
+}
+
+u16 ElfMessage_SelectSpecialNaviText(PlayState* play) {
+    if (sMessagePersistanceLength == 0)
+        ElfMessage_GetSpecialNaviText(play);
+    if (++sMessagePersistanceCurrent >= sMessagePersistanceLength)
+        sMessagePersistanceCurrent = 0;
+    return sMessagePersistance[sMessagePersistanceCurrent];
 }

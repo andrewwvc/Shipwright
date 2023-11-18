@@ -32,6 +32,7 @@ void GameOver_Update(PlayState* play) {
             gSaveContext.timer1State = 0;
             gSaveContext.timer2State = 0;
             gSaveContext.eventInf[1] &= ~1;
+            ElfMessage_ResetPersistantElfMessages();
             changeToNormalWallet();
 
             // search inventory for spoiling items and revert if necessary
