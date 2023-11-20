@@ -6,6 +6,7 @@
 
 #include "z_en_test.h"
 #include "objects/object_sk2/object_sk2.h"
+#include "objects/gameplay_keep/gameplay_keep.h"
 
 #define FLAGS (ACTOR_FLAG_TARGETABLE | ACTOR_FLAG_HOSTILE | ACTOR_FLAG_UPDATE_WHILE_CULLED)
 
@@ -600,6 +601,8 @@ static InitChainEntry sInitChain[] = {
     ICHAIN_F32_DIV1000(gravity, -1500, ICHAIN_STOP),
 };
 
+#define FLAME_SWORD_PARAM 8
+
 void EnTest_SetupAction(EnTest* this, EnTestActionFunc actionFunc) {
     this->actionFunc = actionFunc;
 }
@@ -631,6 +634,13 @@ void EnTest_Init(Actor* thisx, PlayState* play) {
 
     Collider_InitQuad(play, &this->swordCollider);
     Collider_SetQuad(play, &this->swordCollider, &this->actor, &sSwordColliderInit);
+    if (ABS(this->actor.params) & FLAME_SWORD_PARAM) {
+        if (this->actor.params > 0)
+            this->actor.params -= FLAME_SWORD_PARAM;
+        else
+            this->actor.params += FLAME_SWORD_PARAM;
+        this->swordCollider.info.toucher.dmgFlags = 0x20000000;
+    }
 
     this->actor.colChkInfo.mass = MASS_HEAVY;
     this->actor.colChkInfo.health = 10;
@@ -2275,6 +2285,30 @@ s32 EnTest_OverrideLimbDraw(PlayState* play, s32 limbIndex, Gfx** dList, Vec3f* 
                        255);
 
         CLOSE_DISPS(play->state.gfxCtx);
+    } else if (limbIndex == STALFOS_LIMB_SWORD) {
+        if (this->swordCollider.info.toucher.dmgFlags == 0x20000000) {
+            this->flameTimer++;
+            OPEN_DISPS(play->state.gfxCtx);
+            Gfx_SetupDL_25Xlu(play->state.gfxCtx);
+            gSPSegment(
+                POLY_XLU_DISP++, 0x08,
+                Gfx_TwoTexScroll(play->state.gfxCtx, 0, 0, 0, 32, 64, 1, 0, (this->flameTimer * -20) & 511, 32, 128));
+            gDPSetPrimColor(POLY_XLU_DISP++, 0x80, 0x80, 0, 170, 255, 255);
+            gDPSetEnvColor(POLY_XLU_DISP++, 0, 0, 255, 0);
+            Matrix_Push();
+                Matrix_RotateZ(M_PI, MTXMODE_APPLY);
+                Matrix_Translate(-2000.0f, -700.0f, 100.0f, MTXMODE_APPLY);
+                Matrix_Scale(0.65f, 0.1f, 1.0f, MTXMODE_APPLY);
+                gSPMatrix(POLY_XLU_DISP++, MATRIX_NEWMTX(play->state.gfxCtx),
+                        G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+                gSPDisplayList(POLY_XLU_DISP++, gEffFire1DL);
+                Matrix_Translate(0, 0, -200.0f, MTXMODE_APPLY);
+                gSPMatrix(POLY_XLU_DISP++, MATRIX_NEWMTX(play->state.gfxCtx),
+                        G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+                gSPDisplayList(POLY_XLU_DISP++, gEffFire1DL);
+            Matrix_Pop();
+            CLOSE_DISPS(play->state.gfxCtx);
+        }
     }
 
     if ((this->actor.params == STALFOS_TYPE_INVISIBLE) && !CHECK_FLAG_ALL(this->actor.flags, ACTOR_FLAG_LENS)) {
