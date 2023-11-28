@@ -91,6 +91,7 @@ typedef struct EnTest {
     /* 0x7DE */ u8 shieldState;
     /* 0x7E0 */ s16 iceTimer;
     /* 0x7E0 */ s16 flameTimer;
+    /* 0x7E0 */ s16 variant;
     /* 0x7E2 */ u8 lastDamageEffect;
     /* 0x7E4 */ s32 unk_7E4;
     /* 0x7E8 */ s32 timer;
