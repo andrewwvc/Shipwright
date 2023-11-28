@@ -442,6 +442,11 @@ s32 isPlayerInHorizontalSlash(PlayState* play) {
     return isPlayerInBasicHorizontalSlash(play) || isPlayerInSpinAttack(play);
 }
 
+s32 isPlayerInJumpAttack(PlayState* play) {
+    Player* player = GET_PLAYER(play);
+    return player->meleeWeaponAnimation >= PLAYER_MWA_FLIPSLASH_START && player->meleeWeaponAnimation <= PLAYER_MWA_JUMPSLASH_FINISH;
+}
+
 s32 isPlayerInVerticalSlash(PlayState* play) {
     Player* player = GET_PLAYER(play);
     if (player->swordState == 0)
@@ -1296,7 +1301,7 @@ void func_80090604(PlayState* play, Player* this, ColliderQuad* collider, Vec3f*
         COLTYPE_METAL,
     };
 
-    if (this->stateFlags1 & 0x400000) {
+    if (this->stateFlags1 & PLAYER_STATE1_SHIELDING) {
         collider->info.toucher.dmgFlags = 0x00100000;
         collider->info.bumper.dmgFlags  = 0xDFCFFFFF;
     }
@@ -1305,7 +1310,7 @@ void func_80090604(PlayState* play, Player* this, ColliderQuad* collider, Vec3f*
         collider->info.bumper.dmgFlags  = 0x00100000;
     }
 
-    if (this->stateFlags1 & 0x400000 || (this->unk_664 != NULL && (this->swordState == 0))) {
+    if ((this->stateFlags1 & PLAYER_STATE1_SHIELDING) || (this->unk_664 != NULL && (this->swordState == 0))) {
         Vec3f quadDest[4];
 
         this->shieldQuad.base.colType = shieldColTypes[this->currentShield];
@@ -1690,7 +1695,7 @@ void func_80090D20(PlayState* play, s32 limbIndex, Gfx** dList, Vec3s* rot, void
 
             CLOSE_DISPS(play->state.gfxCtx);
         } else if ((this->actor.scale.y >= 0.0f) && ((this->rightHandType == 10) ||
-                    (Player_HoldsTwoHandedWeapon(this) && (this->stateFlags1 & 0x400000) && this->shieldRelaxTimer <= 6))) {
+                    (Player_HoldsTwoHandedWeapon(this) && (this->stateFlags1 & PLAYER_STATE1_SHIELDING) && this->shieldRelaxTimer <= 6))) {
             Matrix_Get(&this->shieldMf);
             Player* player = GET_PLAYER(play);
             func_80090604(play, this, &this->shieldQuad, Player_HoldsTwoHandedWeapon(this) ? D_BigSword : (this == player) ? D_80126154 : originalShield1);
