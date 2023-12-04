@@ -1288,6 +1288,18 @@ s32 Player_isRangedWeaponReady(PlayState* play) {
                 this->skelAnime2.animation == &gPlayerAnim_link_bow_bow_ready || this->skelAnime2.animation == &gPlayerAnim_link_bow_bow_shoot_next);
 }
 
+s32 Player_isInSwordAnimation(PlayState* play) {
+    Player* this = GET_PLAYER(play);
+    s16 ret = 0;
+
+    for (s32 ii = 0; ii < ARRAY_COUNT(D_80854190); ii++) {
+        if (this->skelAnime.animation == D_80854190[ii].unk_00 || this->skelAnime.animation == D_80854190[ii].unk_04 || this->skelAnime.animation == D_80854190[ii].unk_08)
+            return 1;
+    }
+
+    return ret;
+}
+
 // return type can't be void due to regalloc in func_8084FCAC
 s32 func_80832210(Player* this) {
     this->actor.speedXZ = 0.0f;
