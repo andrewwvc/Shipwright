@@ -904,6 +904,13 @@ void EnTest_SetupAction(EnTest* this, EnTestActionFunc actionFunc) {
     this->actionFunc = actionFunc;
 }
 
+void EnTest_SetDirectionIndicator(EnTest* this, s16 index) {
+    EffectBlure* blur = Effect_GetByIndex(this->effectIndicatorIndex[index]);
+    blur->p1StartColor.r = blur->p1EndColor.r = blur->p2StartColor.r = blur->p2EndColor.r = 140;
+    blur->p1StartColor.g = blur->p1EndColor.g = blur->p2StartColor.g = blur->p2EndColor.g = 0;
+    blur->p1StartColor.b = blur->p1EndColor.b = blur->p2StartColor.b = blur->p2EndColor.b = 200;
+}
+
 void EnTest_Init(Actor* thisx, PlayState* play) {
     EffectBlureInit1 slashBlure;
     EnTest* this = (EnTest*)thisx;
@@ -973,6 +980,11 @@ void EnTest_Init(Actor* thisx, PlayState* play) {
     slashBlure.calcMode = 2;
 
     Effect_Add(play, &this->effectIndex, EFFECT_BLURE1, 0, 0, &slashBlure);
+    slashBlure.elemDuration = 8;
+    Effect_Add(play, &this->effectIndicatorIndex[0], EFFECT_BLURE1, 0, 0, &slashBlure);
+    Effect_Add(play, &this->effectIndicatorIndex[1], EFFECT_BLURE1, 0, 0, &slashBlure);
+    EnTest_SetDirectionIndicator(this, 0);
+    EnTest_SetDirectionIndicator(this, 1);
 
     if (this->actor.params != STALFOS_TYPE_CEILING) {
         EnTest_SetupWaitGround(this);
@@ -994,6 +1006,8 @@ void EnTest_Destroy(Actor* thisx, PlayState* play) {
     }
 
     Effect_Delete(play, this->effectIndex);
+    Effect_Delete(play, this->effectIndicatorIndex[0]);
+    Effect_Delete(play, this->effectIndicatorIndex[1]);
     Collider_DestroyCylinder(play, &this->shieldCollider);
     Collider_DestroyCylinder(play, &this->bodyCollider);
     Collider_DestroyQuad(play, &this->swordCollider);
@@ -1603,6 +1617,27 @@ void EnTest_SlashDown(EnTest* this, PlayState* play) {
     if ((s32)this->skelAnime.curFrame < 8){
         if (this->actor.xzDistToPlayer > 40.0f)
             this->actor.speedXZ = 5.0f;
+
+        if (IS_ELITE) {
+            Vec3f circ;
+            Vec3f center = this->actor.world.pos;
+            EffectBlure* eb1 = Effect_GetByIndex(this->effectIndicatorIndex[0]);
+            EffectBlure* eb2 = Effect_GetByIndex(this->effectIndicatorIndex[1]);
+            f32 sin1 = Math_SinS((s16)(this->skelAnime.curFrame*0x2000))*40;
+            f32 cos1 = Math_CosS((s16)(this->skelAnime.curFrame*0x2000))*40;
+            center.y += 50.0f;
+
+            circ = center;
+            circ.z += sin1;
+            circ.x += cos1;
+            EffectBlure_AddVertex(eb1, &circ, &center);
+
+            center.y -= 10;
+            circ = center;
+            circ.z -= sin1;
+            circ.x -= cos1;
+            EffectBlure_AddVertex(eb2, &circ, &center);
+        }
     }
 
     if ((this->skelAnime.curFrame > 7.0f) && (this->skelAnime.curFrame < 11.0f)) {
@@ -1827,6 +1862,32 @@ void EnTest_SpinAttack(EnTest* this, PlayState* play) {
         if ((s32)this->skelAnime.curFrame < 5) {
             Math_SmoothStepToS(&this->actor.shape.rot.y, this->actor.yawTowardsPlayer, 1, 0x1000, 0);
             this->actor.world.rot.y = this->actor.shape.rot.y;
+        }
+
+        if (IS_ELITE) {
+            Vec3f circ;
+            Vec3f center = this->actor.world.pos;
+            EffectBlure* eb1 = Effect_GetByIndex(this->effectIndicatorIndex[0]);
+            EffectBlure* eb2 = Effect_GetByIndex(this->effectIndicatorIndex[1]);
+            f32 sin1 = Math_SinS((s16)(this->skelAnime.curFrame*0x2000))*40;
+            f32 cos1 = Math_CosS((s16)(this->skelAnime.curFrame*0x2000))*40;
+            f32 sin2 = Math_SinS(this->actor.shape.rot.y);
+            f32 cos2 = Math_CosS(this->actor.shape.rot.y);
+            center.y += 50.0f;
+
+            circ = center;
+            circ.z += sin1*cos2;
+            circ.x += sin1*sin2;
+            circ.y += cos1;
+            EffectBlure_AddVertex(eb1, &circ, &center);
+
+            center.z += 10*sin2;
+            center.x += 10*cos2;
+            circ = center;
+            circ.z -= sin1*cos2;
+            circ.x -= sin1*sin2;
+            circ.y -= cos1;
+            EffectBlure_AddVertex(eb2, &circ, &center);
         }
     }
 
