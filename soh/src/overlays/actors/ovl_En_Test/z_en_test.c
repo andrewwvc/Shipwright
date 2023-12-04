@@ -18,9 +18,11 @@ void EnTest_Draw(Actor* thisx, PlayState* play);
 void EnTest_SetupWaitGround(EnTest* this);
 void EnTest_SetupWaitAbove(EnTest* this);
 void EnTest_SetupJumpBack(EnTest* this);
+void EnTest_SetupShieldBash(EnTest* this);
 void EnTest_SetupSlashDownEnd(EnTest* this);
 void EnTest_SetupSlashUp(EnTest* this);
 void EnTest_SetupJumpslash(EnTest* this);
+void EnTest_SetupCrossoverJump(EnTest* this);
 void EnTest_SetupWalkAndBlock(EnTest* this);
 void func_80860EC0(EnTest* this);
 void EnTest_SetupSlashDown(EnTest* this);
@@ -45,6 +47,7 @@ void EnTest_WalkAndBlock(EnTest* this, PlayState* play);
 void func_80860C24(EnTest* this, PlayState* play);
 void func_80860F84(EnTest* this, PlayState* play);
 void EnTest_SlashDown(EnTest* this, PlayState* play);
+void EnTest_ShieldBash(EnTest* this, PlayState* play);
 void EnTest_SlashDownEnd(EnTest* this, PlayState* play);
 void EnTest_Thrust(EnTest* this, PlayState* play);
 void EnTest_Crouch(EnTest* this, PlayState* play);
@@ -52,6 +55,7 @@ void EnTest_SpinAttack(EnTest* this, PlayState* play);
 void EnTest_SlashUp(EnTest* this, PlayState* play);
 void EnTest_JumpBack(EnTest* this, PlayState* play);
 void EnTest_Jumpslash(EnTest* this, PlayState* play);
+void EnTest_CrossoverJump(EnTest* this, PlayState* play);
 void EnTest_JumpUp(EnTest* this, PlayState* play);
 void EnTest_StopAndBlock(EnTest* this, PlayState* play);
 void EnTest_IdleFromBlock(EnTest* this, PlayState* play);
@@ -874,7 +878,12 @@ static InitChainEntry sInitChain[] = {
 #define FLAME_SWORD_PARAM 8
 #define ELITE_PARAM 16
 #define DARK_PARAM 32
-#define IS_ELITE true
+#define IS_ELITE 1
+
+#define VULNERABLE_IN_JUMP (this->skelAnime.curFrame >= this->skelAnime.animLength-5.0f && this->timer == 1)
+#define IS_FULL_SHIELDING ((this->actionFunc == EnTest_Jumpslash && !VULNERABLE_IN_JUMP) || IS_ELITE && (this->actionFunc == EnTest_SlashDown || this->actionFunc == EnTest_SlashDownEnd || this->actionFunc == EnTest_SlashUp ||this->actionFunc == EnTest_SpinAttack || this->actionFunc == EnTest_Thrust))
+#define IS_VULNERABLE ((this->actionFunc == EnTest_SlashDown && isPlayerInHorizontalAttack(play)) || (this->actionFunc == EnTest_SlashDownEnd && isPlayerInHorizontalAttack(play)) || (this->actionFunc == EnTest_SlashUp && isPlayerInHorizontalAttack(play)) ||\
+                        (this->actionFunc == EnTest_SpinAttack && isPlayerInVerticalAttack(play)) || (this->actionFunc == EnTest_Crouch && isPlayerInJumpAttack(play)))
 
 void EnTest_SetupAction(EnTest* this, EnTestActionFunc actionFunc) {
     this->actionFunc = actionFunc;
@@ -1555,10 +1564,13 @@ void EnTest_SetupSlashDown(EnTest* this) {
     EnTest_SetupAction(this, EnTest_SlashDown);
     this->swordCollider.info.toucher.damage = 0x20;
 
-    // if (this->shieldState != 0) {
-    //     this->shieldState = 3;
-    // }
-    this->shieldState = 5;
+    if (IS_ELITE) {
+        this->shieldState = 5;
+    } else {
+        if (this->shieldState != 0) {
+            this->shieldState = 3;
+        }
+    }
 }
 
 void EnTest_SlashDown(EnTest* this, PlayState* play) {
@@ -1593,6 +1605,42 @@ void EnTest_SlashDown(EnTest* this, PlayState* play) {
     }
 }
 
+void EnTest_SetupShieldBash(EnTest* this) {
+    Animation_PlayOnce(&this->skelAnime, &gStalfosDownSlashAnim);
+    Audio_StopSfxByPosAndId(&this->actor.projectedPos, NA_SE_EN_STAL_WARAU);
+    this->skelAnime.playSpeed = 2.0f;
+    this->swordCollider.base.atFlags &= ~AT_BOUNCED;
+    this->unk_7C8 = 0x10;
+    this->actor.speedXZ = 0.0f;
+    EnTest_SetupAction(this, EnTest_ShieldBash);
+    this->swordCollider.info.toucher.damage = 0x10;
+    this->shieldState = 1;
+}
+
+void EnTest_ShieldBash(EnTest* this, PlayState* play) {
+    this->actor.speedXZ = 0.0f;
+
+    if ((s32)this->skelAnime.curFrame < 4) {
+        Math_SmoothStepToS(&this->actor.shape.rot.y, this->actor.yawTowardsPlayer, 1, 0xBB8, 0);
+        this->actor.world.rot.y = this->actor.shape.rot.y;
+    }
+
+    if ((s32)this->skelAnime.curFrame == 7) {
+        Audio_PlayActorSound2(&this->actor, NA_SE_EN_STAL_SAKEBI);
+    }
+
+    if ((this->skelAnime.curFrame > 7.0f) && (this->skelAnime.curFrame < 11.0f)) {
+        this->swordState = 1;
+    } else {
+        this->swordState = 0;
+    }
+
+    if (SkelAnime_Update(&this->skelAnime)) {
+        this->skelAnime.playSpeed = 1.0f;
+        EnTest_SetupSlashDownEnd(this);
+    }
+}
+
 void EnTest_SetupSlashDownEnd(EnTest* this) {
     Animation_PlayOnce(&this->skelAnime, &gStalfosRecoverFromDownSlashAnim);
     this->unk_7C8 = 0x12;
@@ -1605,9 +1653,9 @@ void EnTest_SlashDownEnd(EnTest* this, PlayState* play) {
     s16 yawDiff;
 
     if (SkelAnime_Update(&this->skelAnime)) {
-        if (this->swordCollider.base.atFlags & AT_HIT) {
-            this->swordCollider.base.atFlags &= ~AT_HIT;
-            Player_SetShieldRecoveryDefault(play);
+        if (this->hitTracker) {
+            this->hitTracker = 0;
+            //Player_SetShieldRecoveryDefault(play);
             if (this->actor.params != STALFOS_TYPE_CEILING) {
                 EnTest_SetupJumpBack(this);
                 return;
@@ -1662,10 +1710,13 @@ void EnTest_SetupSlashUp(EnTest* this) {
     this->actor.speedXZ = 0.0f;
     EnTest_SetupAction(this, EnTest_SlashUp);
 
-    // if (this->shieldState != 0) {
-    //     this->shieldState = 3;
-    // }
-    this->shieldState = 5;
+    if (IS_ELITE) {
+        this->shieldState = 5;
+    } else {
+        if (this->shieldState != 0) {
+            this->shieldState = 3;
+        }
+    }
 }
 
 void EnTest_SlashUp(EnTest* this, PlayState* play) {
@@ -1740,10 +1791,13 @@ void EnTest_SetupSpinAttack(EnTest* this) {
     this->timer = 0;
     EnTest_SetupAction(this, EnTest_SpinAttack);
 
-    // if (this->shieldState != 0) {
-    //     this->shieldState = 3;
-    // }
-    this->shieldState = 5;
+    if (IS_ELITE) {
+        this->shieldState = 5;
+    } else {
+        if (this->shieldState != 0) {
+            this->shieldState = 3;
+        }
+    }
 }
 
 void EnTest_SpinAttack(EnTest* this, PlayState* play) {
@@ -1791,9 +1845,6 @@ void EnTest_SetupCrouch(EnTest* this) {
     this->timer = 0;
     EnTest_SetupAction(this, EnTest_Crouch);
 
-    // if (this->shieldState != 0) {
-    //     this->shieldState = 3;
-    // }
     this->shieldState = 5;
 }
 
@@ -1892,9 +1943,10 @@ void EnTest_SetupJumpslash(EnTest* this) {
     EnTest_SetupAction(this, EnTest_Jumpslash);
     this->swordCollider.info.toucher.damage = 0x20;
 
-    if (this->shieldState != 0) {
-        this->shieldState = 3;
-    }
+    // if (this->shieldState != 0) {
+    //     this->shieldState = 3;
+    // }
+    this->shieldState = 5;
 }
 
 void EnTest_Jumpslash(EnTest* this, PlayState* play) {
@@ -1953,6 +2005,74 @@ void EnTest_Jumpslash(EnTest* this, PlayState* play) {
         this->actor.world.pos.y = this->actor.floorHeight;
         this->actor.velocity.y = 0.0f;
         this->actor.speedXZ = 0.0f;
+    }
+}
+
+void EnTest_SetupCrossoverJump(EnTest* this) {
+    Animation_PlayOnce(&this->skelAnime, &gStalfosJumpAnim);
+    Audio_StopSfxByPosAndId(&this->actor.projectedPos, NA_SE_EN_STAL_WARAU);
+    this->timer = 0;
+    this->unk_7C8 = 0x17;
+    this->actor.velocity.y = 18.0f;
+    this->actor.speedXZ = 10.0f;
+    Audio_PlayActorSound2(&this->actor, NA_SE_EN_STAL_JUMP);
+    this->actor.world.rot.y = this->actor.shape.rot.y;
+    this->swordCollider.base.atFlags &= ~AT_BOUNCED;
+    EnTest_SetupAction(this, EnTest_CrossoverJump);
+    this->swordCollider.info.toucher.damage = 0x20;
+
+    if (this->shieldState != 0) {
+        this->shieldState = 3;
+    }
+}
+
+void EnTest_CrossoverJump(EnTest* this, PlayState* play) {
+    Player* player = GET_PLAYER(play);
+    this->actor.gravity = -2.5f;
+    if ((this->timer == 0) && this->skelAnime.curFrame <= (this->skelAnime.endFrame - 0.0f)) {
+        Vec3f curPos;
+        Vec3f newVecToPlayer;
+        curPos = this->actor.world.pos;
+        curPos.x += Math_SinS(this->actor.world.rot.y) * 100.0f;
+        curPos.z += Math_CosS(this->actor.world.rot.y) * 100.0f;
+        newVecToPlayer.x = player->actor.world.pos.x - curPos.x;
+        newVecToPlayer.z = player->actor.world.pos.z - curPos.z;
+        Math_SmoothStepToS(&this->actor.shape.rot.y, Math_Atan2S(newVecToPlayer.z, newVecToPlayer.x), 1, 0x2000, 1);
+    } else {
+        Math_SmoothStepToS(&this->actor.shape.rot.y, this->actor.yawTowardsPlayer, 1, 0x1000, 1);
+    }
+
+    if (SkelAnime_Update(&this->skelAnime)) {
+        if (this->timer < 3) {
+            this->timer++;
+            //this->actor.shape.rot.y = this->actor.yawTowardsPlayer;
+            if (this->timer == 3) {
+                Animation_PlayOnce(&this->skelAnime, &gStalfosJumpSlash2Anim);
+                this->swordState = 1;
+                this->actor.speedXZ = 6.0f;
+                Audio_PlayActorSound2(&this->actor, NA_SE_EN_STAL_SAKEBI);
+                Audio_PlayActorSound2(&this->actor, NA_SE_EN_STAL_JUMP);
+            }
+        } else {
+            this->actor.speedXZ = 0.0f;
+            this->actor.world.rot.y = this->actor.shape.rot.y;
+            EnTest_SetupIdle(this);
+        }
+    }
+
+    if ((this->timer != 0) && (this->skelAnime.curFrame >= 5.0f)) {
+        this->swordState = 0;
+    }
+
+    if (this->actor.world.pos.y <= this->actor.floorHeight) {
+        if (this->actor.speedXZ != 0.0f) {
+            Audio_PlayActorSound2(&this->actor, NA_SE_EN_DODO_M_GND);
+        }
+
+        this->actor.world.pos.y = this->actor.floorHeight;
+        this->actor.velocity.y = 0.0f;
+        this->actor.speedXZ = 0.0f;
+        //this->actor.world.rot.y = this->actor.shape.rot.y;
     }
 }
 
@@ -2431,6 +2551,8 @@ void EnTest_SetupRecoil(EnTest* this) {
     this->skelAnime.playSpeed = -1.0f;
     this->skelAnime.startFrame = this->skelAnime.curFrame;
     this->skelAnime.endFrame = 0.0f;
+    if (this->actionFunc == EnTest_CrossoverJump)
+        this->actor.world.rot.y = this->actor.shape.rot.y;
     EnTest_SetupAction(this, EnTest_Recoil);
 }
 
@@ -2494,12 +2616,10 @@ void EnTest_UpdateDamage(EnTest* this, PlayState* play) {
     }
 
     if (bounced && ((!IS_ELITE && (this->unk_7C8 != 0x10 && this->unk_7C8 != 0x11)) ||
-                    (IS_ELITE &&
-                    !((this->actionFunc == EnTest_SlashDown && isPlayerInVerticalAttack(play)) || (this->actionFunc == EnTest_SlashUp && isPlayerInVerticalAttack(play)) ||
-                        (this->actionFunc == EnTest_SpinAttack && isPlayerInHorizontalAttack(play)) || (this->actionFunc == EnTest_Crouch && isPlayerInJumpAttack(play)))))) {
+                    (IS_ELITE && !IS_VULNERABLE))) {
         this->bodyCollider.base.acFlags &= ~AC_HIT;
         if ((this->actionFunc == EnTest_Crouch))
-            player->linearVelocity = 0.0f;//Prevents Link from moving out of range of the crouching attack when his attack bounces, assumes this collission is handled after the player's
+            player->linearVelocity = 0.0f;//Prevents Link from moving out of range of the crouching attack when his attack bounces, assumes this collision is handled after the player's
 
         if (this->unk_7C8 >= 0xA) {
             this->actor.speedXZ = -4.0f;
@@ -2509,7 +2629,7 @@ void EnTest_UpdateDamage(EnTest* this, PlayState* play) {
 
         if ((this->actor.colChkInfo.damageEffect != STALFOS_DMGEFF_SLING) &&
             (this->actor.colChkInfo.damageEffect != STALFOS_DMGEFF_FIREMAGIC) &&
-            (this->actionFunc != EnTest_Jumpslash || (this->skelAnime.curFrame >= this->skelAnime.animLength-5.0f && this->timer == 1))) {
+            (this->actionFunc != EnTest_Jumpslash || VULNERABLE_IN_JUMP)) {
             this->lastDamageEffect = this->actor.colChkInfo.damageEffect;
             if (this->swordState >= 1) {
                 this->swordState = 0;
@@ -2547,6 +2667,7 @@ void EnTest_UpdateDamage(EnTest* this, PlayState* play) {
 
 void EnTest_Update(Actor* thisx, PlayState* play) {
     EnTest* this = (EnTest*)thisx;
+    Player* player = GET_PLAYER(play);
     f32 oldWeight;
     u32 floorProperty;
     s32 pad;
@@ -2577,6 +2698,7 @@ void EnTest_Update(Actor* thisx, PlayState* play) {
             }
         }
 
+        this->actor.gravity = -1.5f;
         this->actionFunc(this, play);
 
         switch (this->shieldState) {
@@ -2634,32 +2756,67 @@ void EnTest_Update(Actor* thisx, PlayState* play) {
     if ((this->actor.colChkInfo.health > 0) || (this->actor.colorFilterTimer != 0)) {
         CollisionCheck_SetOC(play, &play->colChkCtx, &this->bodyCollider.base);
 
-        if ((this->unk_7C8 >= 0xA) &&
+        s16 inFullShield = IS_FULL_SHIELDING;
+
+        if ((this->unk_7C8 >= 0xA) && (IS_VULNERABLE || !inFullShield) &&
             ((this->actor.colorFilterTimer == 0) || (!(this->actor.colorFilterParams & 0x4000)))) {
             CollisionCheck_SetAC(play, &play->colChkCtx, &this->bodyCollider.base);
         }
 
-        if (this->shieldState != 0) {
+        if(inFullShield) {
+            this->shieldCollider.dim.pos.x = this->actor.world.pos.x;
+            this->shieldCollider.dim.pos.y = this->actor.world.pos.y + 55.0f;
+            this->shieldCollider.dim.pos.z = this->actor.world.pos.z;
+            this->shieldCollider.dim.radius = 25.0f;
+        }
+
+        if (this->shieldState != 0 && !IS_VULNERABLE) {
             CollisionCheck_SetAC(play, &play->colChkCtx, &this->shieldCollider.base);
         }
     }
 
     if (this->swordState >= 1) {
         if (!(this->swordCollider.base.atFlags & AT_BOUNCED)) {
-            if (this->swordCollider.info.toucher.dmgFlags != 0x20000000) {
+            if (!(this->variant & FLAME_SWORD_PARAM)) {
                 if (this->actionFunc == EnTest_Thrust)
                     this->swordCollider.info.toucher.dmgFlags = 0xFFDFFFFF;
                 else if (this->actionFunc == EnTest_SpinAttack)
                     this->swordCollider.info.toucher.dmgFlags = 0x00100000;
                 else
                     this->swordCollider.info.toucher.dmgFlags = 0xFFCFFFFF;
+
+                s16 angleToPlayer = this->actor.yawTowardsPlayer - this->actor.shape.rot.y;
+                if (angleToPlayer == (s16)0x8000)
+                    angleToPlayer = (s16)0x7FFF;
+                angleToPlayer = ABS(angleToPlayer);
+                s16 playerAngleDifference = player->actor.shape.rot.y - this->actor.shape.rot.y;
+                if (playerAngleDifference == (s16)0x8000)
+                    playerAngleDifference = (s16)0x7FFF;
+                playerAngleDifference = ABS(playerAngleDifference);
+
+                //Make sword attack unblockable if behind player.
+                //or using shield bash
+                if ((angleToPlayer < 0x4000 && playerAngleDifference < 0x4000 && !Player_IsChildWithHylianShield(player)) ||
+                    (this->actionFunc == EnTest_ShieldBash)) {
+                    this->swordCollider.info.toucher.dmgFlags = 0x20000000;
+                }
             }
+
+            if ((this->swordCollider.base.atFlags & AT_HIT))
+                Player_SetShieldRecoveryDefault(play);
 
             CollisionCheck_SetAT(play, &play->colChkCtx, &this->swordCollider.base);
         } else {
             this->swordCollider.base.atFlags &= ~AT_BOUNCED;
+            if (this->actionFunc == EnTest_SpinAttack)
+                Player_SetShieldRecoveryDefault(play);
             EnTest_SetupRecoil(this);
         }
+    }
+
+    if (this->swordCollider.base.atFlags & AT_HIT) {
+        this->swordCollider.base.atFlags &= ~AT_HIT;
+        this->hitTracker = 1;
     }
 
     if (this->actor.params == STALFOS_TYPE_INVISIBLE) {
@@ -2690,7 +2847,7 @@ s32 EnTest_OverrideLimbDraw(PlayState* play, s32 limbIndex, Gfx** dList, Vec3f* 
 
         CLOSE_DISPS(play->state.gfxCtx);
     } else if (limbIndex == STALFOS_LIMB_SWORD) {
-        if (this->swordCollider.info.toucher.dmgFlags == 0x20000000) {
+        if (this->variant & FLAME_SWORD_PARAM) {
             this->flameTimer++;
             OPEN_DISPS(play->state.gfxCtx);
             Gfx_SetupDL_25Xlu(play->state.gfxCtx);
@@ -2722,15 +2879,17 @@ s32 EnTest_OverrideLimbDraw(PlayState* play, s32 limbIndex, Gfx** dList, Vec3f* 
     return false;
 }
 
+#define SWORD_EXTENSION_LENGTH 7000.0f
+
 void EnTest_PostLimbDraw(PlayState* play, s32 limbIndex, Gfx** dList, Vec3s* rot, void* thisx) {
     static Vec3f unused1 = { 1100.0f, -700.0f, 0.0f };
     static Vec3f D_80864658 = { 300.0f, 0.0f, 0.0f };
-    static Vec3f D_80864664 = { 3400.0f, 0.0f, 0.0f };
+    static Vec3f D_80864664 = { SWORD_EXTENSION_LENGTH, 0.0f, 0.0f };
     static Vec3f D_80864670 = { 0.0f, 0.0f, 0.0f };
-    static Vec3f D_8086467C = { 7000.0f, 1000.0f, 0.0f };
+    static Vec3f D_8086467C = { SWORD_EXTENSION_LENGTH, 1000.0f, 0.0f };
     static Vec3f D_80864688 = { -2000.0f, -1000.0f, 0.0f };
     static Vec3f D_80864694 = { -2000.0f, 1000.0f, 0.0f };
-    static Vec3f D_808646A0 = { 7000.0f, -3000.0f, 0.0f };
+    static Vec3f D_808646A0 = { SWORD_EXTENSION_LENGTH, -3000.0f, 0.0f };
     static Vec3f unused2 = { -3000.0f, 1900.0f, 800.0f };
     static Vec3f unused3 = { -3000.0f, -1100.0f, 800.0f };
     static Vec3f unused4 = { 1900.0f, 1900.0f, 800.0f };
@@ -2768,11 +2927,14 @@ void EnTest_PostLimbDraw(PlayState* play, s32 limbIndex, Gfx** dList, Vec3s* rot
         }
 
     } else if ((limbIndex == STALFOS_LIMB_SHIELD) && (this->shieldState != 0)) {
-        Matrix_MultVec3f(&D_80864670, &sp64);
+        if (!IS_FULL_SHIELDING) {
+            Matrix_MultVec3f(&D_80864670, &sp64);
 
-        this->shieldCollider.dim.pos.x = sp64.x;
-        this->shieldCollider.dim.pos.y = sp64.y;
-        this->shieldCollider.dim.pos.z = sp64.z;
+            this->shieldCollider.dim.pos.x = sp64.x;
+            this->shieldCollider.dim.pos.y = sp64.y;
+            this->shieldCollider.dim.pos.z = sp64.z;
+            this->shieldCollider.dim.radius = 20.0f;
+        }
     } else {
         Actor_SetFeetPos(&this->actor, limbIndex, STALFOS_LIMB_FOOT_L, &D_80864658, STALFOS_LIMB_ANKLE_R, &D_80864658);
 
