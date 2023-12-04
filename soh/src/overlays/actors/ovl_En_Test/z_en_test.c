@@ -1815,7 +1815,7 @@ void EnTest_SpinAttack(EnTest* this, PlayState* play) {
         }
     }
 
-    if ((this->skelAnime.curFrame > 3.0f) && (this->timer >= 0) && (player->invincibilityTimer == 0)) {
+    if ((this->skelAnime.curFrame > 3.0f) && (this->timer >= 0)) {
         this->swordState = 1;
     } else {
         this->swordState = 0;

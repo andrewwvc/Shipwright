@@ -1310,7 +1310,7 @@ void func_80090604(PlayState* play, Player* this, ColliderQuad* collider, Vec3f*
         collider->info.bumper.dmgFlags  = 0x00100000;
     }
 
-    if ((this->stateFlags1 & PLAYER_STATE1_SHIELDING) || (this->unk_664 != NULL && !Player_isInSwordAnimation(play))) {
+    if ((this->stateFlags1 & PLAYER_STATE1_SHIELDING) || (this->unk_664 != NULL && !Player_isInSwordAnimation(play) && (this->invincibilityTimer == 0))) {
         Vec3f quadDest[4];
 
         this->shieldQuad.base.colType = shieldColTypes[this->currentShield];
