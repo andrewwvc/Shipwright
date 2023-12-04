@@ -92,7 +92,7 @@ typedef enum {
 
 typedef enum {
     ENZF_HIGH = 0,
-    ENFZ_SIDE = 1
+    ENZF_SIDE = 1
 } EnZfStance;
 
 typedef struct EnZf {

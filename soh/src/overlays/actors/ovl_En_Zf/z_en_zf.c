@@ -1576,7 +1576,7 @@ void EnZf_Slash(EnZf* this, PlayState* play) {
                         func_80B483E4(this, play);
                     } else if (player->stateFlags1 & 0x6010) {
                         if (EnZf_CanAttackSlash(play, this)) {
-                            // if (this->stance == ENFZ_SIDE && Rand_ZeroOne() > 0.5f) {
+                            // if (this->stance == ENZF_SIDE && Rand_ZeroOne() > 0.5f) {
                             //     EnZf_SwitchStance(this);
                             // }
                             EnZf_SetupSlash(this);
@@ -1584,7 +1584,7 @@ void EnZf_Slash(EnZf* this, PlayState* play) {
                             func_80B483E4(this, play);
                         }
                     } else if (EnZf_CanAttackSlash(play, this)) {
-                        // if (this->stance == ENFZ_SIDE && Rand_ZeroOne() > 0.5f) {
+                        // if (this->stance == ENZF_SIDE && Rand_ZeroOne() > 0.5f) {
                         //     EnZf_SwitchStance(this);
                         // }
                         EnZf_SetupSlash(this);
@@ -1607,7 +1607,7 @@ void EnZf_SetupRecoilFromBlockedSlash(EnZf* this) {
     else
         Animation_Change(&this->skelAnime, &gZfLizalfosSkelGzfsliceanimAnim, -1.0f, frame, 0.0f, ANIMMODE_ONCE, 0.0f);
     this->action = ENZF_ACTION_RECOIL_FROM_BLOCKED_SLASH;
-    if (this->stance == ENFZ_SIDE && Rand_ZeroOne() > 0.5f) {
+    if (this->stance == ENZF_SIDE && Rand_ZeroOne() > 0.5f) {
         EnZf_SwitchStance(this);
     }
     EnZf_SetupAction(this, EnZf_RecoilFromBlockedSlash);
@@ -2653,7 +2653,7 @@ void EnZf_Update(Actor* thisx, PlayState* play) {
     this->swordCollider.info.toucher.dmgFlags = this->stance ? 0x00100000 : 0xFFCFFFFF;
     if ((this->action == ENZF_ACTION_SLASH) && (this->skelAnime.curFrame >= 14.0f) &&
         (this->skelAnime.curFrame <= 20.0f)) {
-        if ((this->stance == ENFZ_SIDE && this->swordCollider.base.atFlags & AT_BOUNCED) ||
+        if ((this->stance == ENZF_SIDE && this->swordCollider.base.atFlags & AT_BOUNCED) ||
                     this->swordCollider.base.atFlags & AT_HIT)
             Player_SetShieldRecoveryDefault(play);
         if (!(this->swordCollider.base.atFlags & AT_BOUNCED) && !(this->swordCollider.base.acFlags & AC_HIT)) {
@@ -2732,7 +2732,7 @@ s32 EnZf_OverrideLimbDraw(PlayState* play, s32 limbIndex, Gfx** dList, Vec3f* po
         case ENZF_LIMB_UPPER_BODY_ROOT:
             if (LINK_IS_CHILD || Player_IsInCrouchBlock(player))
                 rot->z += 0x0800;
-            if (this->action == ENZF_ACTION_SLASH && this->stance == ENFZ_SIDE) {
+            if (this->action == ENZF_ACTION_SLASH && this->stance == ENZF_SIDE) {
                 rot->x -= (this->skelAnime.curFrame/this->skelAnime.animLength)*0x1000;
             }
             break;
