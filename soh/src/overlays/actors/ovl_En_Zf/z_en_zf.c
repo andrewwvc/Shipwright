@@ -1524,6 +1524,17 @@ void EnZf_SetupSlash(EnZf* this) {
        this->skelAnime.playSpeed = 2.0f;
    }
 
+    EffectBlure* blur = Effect_GetByIndex(this->blureIndex);
+    if (this->stance == ENZF_SIDE) {
+        blur->p1StartColor.r = blur->p1EndColor.r = blur->p2StartColor.r = blur->p2EndColor.r = 255;
+        blur->p1StartColor.g = blur->p1EndColor.g = blur->p2StartColor.g = blur->p2EndColor.g = 170;
+        blur->p1StartColor.b = blur->p1EndColor.b = blur->p2StartColor.b = blur->p2EndColor.b = 0;
+    } else {
+        blur->p1StartColor.r = blur->p1EndColor.r = blur->p2StartColor.r = blur->p2EndColor.r = 255;
+        blur->p1StartColor.g = blur->p1EndColor.g = blur->p2StartColor.g = blur->p2EndColor.g = 255;
+        blur->p1StartColor.b = blur->p1EndColor.b = blur->p2StartColor.b = blur->p2EndColor.b = 255;
+    }
+
     this->swordCollider.base.atFlags &= ~AT_BOUNCED;
     this->action = ENZF_ACTION_SLASH;
     Audio_PlayActorSound2(&this->actor, NA_SE_EN_RIZA_CRY);
