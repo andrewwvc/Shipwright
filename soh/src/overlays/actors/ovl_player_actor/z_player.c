@@ -8371,7 +8371,7 @@ s32 func_80842DF4(PlayState* play, Player* this) {
 
         if (temp1) {
             if (this->meleeWeaponAnimation < 0x18) {
-                Actor* at = this->meleeWeaponQuads[temp1 ? 1 : 0].base.at;
+                Actor* at = this->meleeWeaponQuads[(this->meleeWeaponQuads[1].base.atFlags & AT_HIT) ? 1 : 0].base.at;
 
                 if ((at != NULL) && (at->id != ACTOR_EN_KANBAN)) {
                     func_80832630(play);
