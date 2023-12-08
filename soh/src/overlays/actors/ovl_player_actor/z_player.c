@@ -10953,17 +10953,15 @@ void Player_UpdateCommon(Player* this, PlayState* play, Input* input) {
         }
     }
     else {
-       if (this->shieldUpTimer > 0) {
-           this->shieldEntry = SHIELD_TIME_MAX;
-           this->shieldUpTimer = 0;
+        if (this->shieldUpTimer > 0) {
+            this->shieldEntry = SHIELD_TIME_MAX;
+            this->shieldUpTimer = 0;
         }
-        //Shield timer state is preserved through a roll, to balance stab out of roll
-        //if (this->func_674 != func_80844708) {
-            if (this->shieldRelaxTimer > 0)
-                this->shieldRelaxTimer--;
-            if (this->shieldEntry > 0)
-                this->shieldEntry--;
-        //}
+
+        if (this->shieldRelaxTimer > 0)
+            this->shieldRelaxTimer--;
+        if (this->shieldEntry > 0)
+            this->shieldEntry--;
     }
 
     func_808473D4(play, this);
