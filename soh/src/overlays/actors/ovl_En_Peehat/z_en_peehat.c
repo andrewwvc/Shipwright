@@ -129,6 +129,8 @@ typedef enum {
     /* 15 */ PEAHAT_DMG_EFF_NUT = 15
 } DamageEffect;
 
+#define DINS_FIRE_DAMAGE 3
+
 static DamageTable sDamageTable = {
     /* Deku nut      */ DMG_ENTRY(0, PEAHAT_DMG_EFF_NUT),
     /* Deku stick    */ DMG_ENTRY(2, PEAHAT_DMG_EFF_ATTACK),
@@ -147,7 +149,7 @@ static DamageTable sDamageTable = {
     /* Unk arrow 1   */ DMG_ENTRY(2, PEAHAT_DMG_EFF_ATTACK),
     /* Unk arrow 2   */ DMG_ENTRY(2, PEAHAT_DMG_EFF_ATTACK),
     /* Unk arrow 3   */ DMG_ENTRY(2, PEAHAT_DMG_EFF_ATTACK),
-    /* Fire magic    */ DMG_ENTRY(3, PEAHAT_DMG_EFF_FIRE),
+    /* Fire magic    */ DMG_ENTRY(DINS_FIRE_DAMAGE, PEAHAT_DMG_EFF_FIRE),
     /* Ice magic     */ DMG_ENTRY(0, PEAHAT_DMG_EFF_LIGHT_ICE_ARROW),
     /* Light magic   */ DMG_ENTRY(0, PEAHAT_DMG_EFF_LIGHT_ICE_ARROW),
     /* Shield        */ DMG_ENTRY(0, PEAHAT_DMG_EFF_ATTACK),
@@ -916,6 +918,9 @@ void EnPeehat_Adult_CollisionCheck(EnPeehat* this, PlayState* play) {
             }
             return;
         } else {
+            if (this->actor.colChkInfo.damageEffect == PEAHAT_DMG_EFF_FIRE && this->actor.colChkInfo.damage > DINS_FIRE_DAMAGE) {
+                this->actor.colChkInfo.damage = DINS_FIRE_DAMAGE;//This is a hack fix for Din's fire doing extra damage when actor frames aren't updating
+            }
             Actor_ApplyDamage(&this->actor);
             Actor_SetColorFilter(&this->actor, 0x4000, 255, 0, 8);
             Audio_PlayActorSound2(&this->actor, NA_SE_EN_PIHAT_DAMAGE);
