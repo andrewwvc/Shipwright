@@ -1310,7 +1310,9 @@ void func_80090604(PlayState* play, Player* this, ColliderQuad* collider, Vec3f*
         collider->info.bumper.dmgFlags  = 0x00100000;
     }
 
-    if ((this->stateFlags1 & PLAYER_STATE1_SHIELDING) || (this->unk_664 != NULL && !Player_isInSwordAnimation(play) && (this->invincibilityTimer == 0))) {
+    s16 stepVal = IN_SUB_STEP_MOTION;
+
+    if ((this->stateFlags1 & PLAYER_STATE1_SHIELDING) || (this->unk_664 != NULL && !Player_isInSwordAnimation(play) && !Player_isInReboundAnimation(play) && stepVal && (!this->stepTracking) && (this->invincibilityTimer == 0))) {
         Vec3f quadDest[4];
 
         this->shieldQuad.base.colType = shieldColTypes[this->currentShield];
@@ -1320,6 +1322,7 @@ void func_80090604(PlayState* play, Player* this, ColliderQuad* collider, Vec3f*
         Matrix_MultVec3f(&quadSrc[2], &quadDest[2]);
         Matrix_MultVec3f(&quadSrc[3], &quadDest[3]);
         Collider_SetQuadVertices(collider, &quadDest[0], &quadDest[1], &quadDest[2], &quadDest[3]);
+        this->cylinder.base.ocFlags1 |= OC1_FIRM;
 
         CollisionCheck_SetAC(play, &play->colChkCtx, &collider->base);
         CollisionCheck_SetAT(play, &play->colChkCtx, &collider->base);

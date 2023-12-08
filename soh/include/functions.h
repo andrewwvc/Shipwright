@@ -1118,6 +1118,8 @@ s32 Player_IsBackFlipping(Player* this);
 s32 Player_IsMakingNoise(PlayState* play);
 s32 Player_ActionToModelGroup(Player* player, s32 actionParam);
 s32 Player_isInSwordAnimation(PlayState* play);
+s32 Player_isInsideRSlashAnimation(PlayState* play);
+s32 Player_isInReboundAnimation(PlayState* play);
 s32 isPlayerInBasicHorizontalSlash(PlayState* play);
 s32 isPlayerInBasicVerticalSlash(PlayState* play);
 s32 isPlayerInSpinAttack(PlayState* play);

@@ -1588,6 +1588,7 @@ void EnTest_SetupSlashDown(EnTest* this) {
     Animation_PlayOnce(&this->skelAnime, &gStalfosDownSlashAnim);
     Audio_StopSfxByPosAndId(&this->actor.projectedPos, NA_SE_EN_STAL_WARAU);
     this->swordCollider.base.atFlags &= ~AT_BOUNCED;
+    this->swordCollider.base.atFlags &= ~AT_WEAK;
     this->unk_7C8 = 0x10;
     this->actor.speedXZ = 0.0f;
     EnTest_SetupAction(this, EnTest_SlashDown);
@@ -1660,6 +1661,7 @@ void EnTest_SetupShieldBash(EnTest* this) {
     Audio_StopSfxByPosAndId(&this->actor.projectedPos, NA_SE_EN_STAL_WARAU);
     this->skelAnime.playSpeed = 2.0f;
     this->swordCollider.base.atFlags &= ~AT_BOUNCED;
+    this->swordCollider.base.atFlags &= ~AT_WEAK;
     this->unk_7C8 = 0x10;
     this->actor.speedXZ = 0.0f;
     EnTest_SetupAction(this, EnTest_ShieldBash);
@@ -1755,6 +1757,7 @@ void EnTest_SlashDownEnd(EnTest* this, PlayState* play) {
 void EnTest_SetupSlashUp(EnTest* this) {
     Animation_PlayOnce(&this->skelAnime, &gStalfosUpSlashAnim);
     this->swordCollider.base.atFlags &= ~AT_BOUNCED;
+    this->swordCollider.base.atFlags &= ~AT_WEAK;
     this->unk_7C8 = 0x11;
     this->swordCollider.info.toucher.damage = 0x20;
     this->actor.speedXZ = 0.0f;
@@ -1799,6 +1802,7 @@ void EnTest_SlashUp(EnTest* this, PlayState* play) {
 void EnTest_SetupThrust(EnTest* this) {
     Animation_PlayOnce(&this->skelAnime, &gStalfosStabAnim);
     this->swordCollider.base.atFlags &= ~AT_BOUNCED;
+    this->swordCollider.base.atFlags |= AT_WEAK;
     this->unk_7C8 = 0x11;
     this->swordCollider.info.toucher.damage = 0x20;
     this->actor.speedXZ = 0.0f;
@@ -1835,6 +1839,7 @@ void EnTest_Thrust(EnTest* this, PlayState* play) {
 void EnTest_SetupSpinAttack(EnTest* this) {
     Animation_PlayOnce(&this->skelAnime, &gStalfosSpinAttackAnim);
     this->swordCollider.base.atFlags &= ~AT_BOUNCED;
+    this->swordCollider.base.atFlags &= ~AT_WEAK;
     this->unk_7C8 = 0x11;
     this->swordCollider.info.toucher.damage = 0x20;
     this->actor.speedXZ = 0.0f;
@@ -1915,6 +1920,7 @@ void EnTest_SpinAttack(EnTest* this, PlayState* play) {
 void EnTest_SetupCrouch(EnTest* this) {
     Animation_PlayOnce(&this->skelAnime, &gStalfosCrouchAndSlashAnimAnim);
     this->swordCollider.base.atFlags &= ~AT_BOUNCED;
+    this->swordCollider.base.atFlags &= ~AT_WEAK;
     this->unk_7C8 = 0x11;
     this->swordCollider.info.toucher.damage = 0x20;
     this->actor.speedXZ = 0.0f;
@@ -2016,6 +2022,7 @@ void EnTest_SetupJumpslash(EnTest* this) {
     Audio_PlayActorSound2(&this->actor, NA_SE_EN_STAL_JUMP);
     this->actor.world.rot.y = this->actor.shape.rot.y;
     this->swordCollider.base.atFlags &= ~AT_BOUNCED;
+    this->swordCollider.base.atFlags &= ~AT_WEAK;
     EnTest_SetupAction(this, EnTest_Jumpslash);
     this->swordCollider.info.toucher.damage = 0x20;
 
@@ -2094,6 +2101,7 @@ void EnTest_SetupCrossoverJump(EnTest* this) {
     Audio_PlayActorSound2(&this->actor, NA_SE_EN_STAL_JUMP);
     this->actor.world.rot.y = this->actor.shape.rot.y;
     this->swordCollider.base.atFlags &= ~AT_BOUNCED;
+    this->swordCollider.base.atFlags &= ~AT_WEAK;
     EnTest_SetupAction(this, EnTest_CrossoverJump);
     this->swordCollider.info.toucher.damage = 0x20;
 

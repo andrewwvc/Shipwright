@@ -280,6 +280,7 @@ typedef enum {
 #define AT_TYPE_ENEMY (1 << 4) // Has enemy-aligned damage
 #define AT_TYPE_OTHER (1 << 5) // Has non-aligned damage
 #define AT_SELF (1 << 6) // Can have AT collisions with colliders attached to the same actor
+#define AT_WEAK (1 << 7) // This property causes collisions with an AC with the OC1_FIRM property to be treated as it AC_HARD
 #define AT_TYPE_ALL (AT_TYPE_PLAYER | AT_TYPE_ENEMY | AT_TYPE_OTHER) // Has all three damage alignments
 
 #define AC_NONE 0 // No flags set. Cannot have AC collisions when set as AC
@@ -300,6 +301,7 @@ typedef enum {
 #define OC1_TYPE_PLAYER (1 << 3) // Can have OC collisions with OC type player
 #define OC1_TYPE_1 (1 << 4) // Can have OC collisions with OC type 1
 #define OC1_TYPE_2 (1 << 5) // Can have OC collisions with OC type 2
+#define OC1_FIRM (1 << 6) // Causes AT_WEAK attacks to bounce of as if the collider was AC_HARD
 #define OC1_TYPE_ALL (OC1_TYPE_PLAYER | OC1_TYPE_1 | OC1_TYPE_2) // Can have collisions with all three OC types
 
 #define OC2_NONE 0 // No flags set. Has no OC type

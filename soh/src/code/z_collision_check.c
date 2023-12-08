@@ -1724,7 +1724,8 @@ void CollisionCheck_SetBounce(Collider* at, Collider* ac) {
  */
 s32 CollisionCheck_SetATvsAC(PlayState* play, Collider* at, ColliderInfo* atInfo, Vec3f* atPos, Collider* ac,
                              ColliderInfo* acInfo, Vec3f* acPos, Vec3f* hitPos) {
-    if (ac->acFlags & AC_HARD && at->actor != NULL && ac->actor != NULL) {
+    s16 fragileCollision = ((ac->ocFlags1 & OC1_FIRM)  && (at->atFlags & AT_WEAK));
+    if (((ac->acFlags & AC_HARD) || fragileCollision) && at->actor != NULL && ac->actor != NULL) {
         CollisionCheck_SetBounce(at, ac);
     }
     if (!(acInfo->bumperFlags & BUMP_NO_AT_INFO)) {
@@ -1750,7 +1751,12 @@ s32 CollisionCheck_SetATvsAC(PlayState* play, Collider* at, ColliderInfo* atInfo
     acInfo->bumper.hitPos.z = hitPos->z;
     if (!(atInfo->toucherFlags & TOUCH_AT_HITMARK) && ac->colType != COLTYPE_METAL && ac->colType != COLTYPE_WOOD &&
         ac->colType != COLTYPE_HARD) {
-        acInfo->bumperFlags |= BUMP_DRAW_HITMARK;
+        if (fragileCollision) {
+            EffectSsHitMark_SpawnFixedScale(play, EFFECT_HITMARK_METAL, hitPos);
+            CollisionCheck_SpawnShieldParticlesMetalSound(play, hitPos, &ac->actor->projectedPos);
+        } else {
+            acInfo->bumperFlags |= BUMP_DRAW_HITMARK;
+        }
     } else {
         CollisionCheck_HitEffects(play, at, atInfo, ac, acInfo, hitPos);
         atInfo->toucherFlags |= TOUCH_DREW_HITMARK;
@@ -3042,7 +3048,7 @@ void CollisionCheck_ApplyDamage(PlayState* play, CollisionCheckContext* colChkCt
         damage = tbl->table[i] & 0xF;
         collider->actor->colChkInfo.damageEffect = tbl->table[i] >> 4 & 0xF;
     }
-    if (!(collider->acFlags & AC_HARD)) {
+    if (!(collider->acFlags & AC_HARD) && !((collider->ocFlags1 & OC1_FIRM) && (info->acHit != NULL) && (info->acHit->atFlags & AT_WEAK))) {
         collider->actor->colChkInfo.damage += damage;
     }
 
