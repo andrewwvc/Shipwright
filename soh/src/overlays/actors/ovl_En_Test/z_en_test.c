@@ -881,7 +881,7 @@ static InitChainEntry sInitChain[] = {
 #define IS_ELITE 1
 
 #define VULNERABLE_IN_JUMP (this->skelAnime.curFrame >= this->skelAnime.animLength-5.0f && this->timer == 1)
-#define IS_FULL_SHIELDING ((this->actionFunc == EnTest_Jumpslash && !VULNERABLE_IN_JUMP) || IS_ELITE && (this->actionFunc == EnTest_SlashDown || this->actionFunc == EnTest_SlashDownEnd || this->actionFunc == EnTest_SlashUp ||this->actionFunc == EnTest_SpinAttack || this->actionFunc == EnTest_Thrust))
+#define IS_FULL_SHIELDING ((this->actionFunc == EnTest_Jumpslash && !VULNERABLE_IN_JUMP) || IS_ELITE && (this->actionFunc == EnTest_SlashDown || this->actionFunc == EnTest_SlashDownEnd || this->actionFunc == EnTest_SlashUp ||this->actionFunc == EnTest_SpinAttack))
 #define IS_VULNERABLE ((this->actionFunc == EnTest_SlashDown && isPlayerInHorizontalAttack(play)) || (this->actionFunc == EnTest_SlashDownEnd && isPlayerInHorizontalAttack(play)) || (this->actionFunc == EnTest_SlashUp && isPlayerInHorizontalAttack(play)) ||\
                         (this->actionFunc == EnTest_SpinAttack && isPlayerInVerticalAttack(play)) || (this->actionFunc == EnTest_Crouch && isPlayerInJumpAttack(play)))
 
@@ -1606,8 +1606,8 @@ void EnTest_SetupSlashDown(EnTest* this) {
 void EnTest_SlashDown(EnTest* this, PlayState* play) {
     this->actor.speedXZ = 0.0f;
 
-    if ((s32)this->skelAnime.curFrame < 4) {
-        Math_SmoothStepToS(&this->actor.shape.rot.y, this->actor.yawTowardsPlayer, 1, 0xBB8, 0);
+    if ((s32)this->skelAnime.curFrame < 7) {
+        Math_SmoothStepToS(&this->actor.shape.rot.y, this->actor.yawTowardsPlayer, 1, 0x600, 0);
         this->actor.world.rot.y = this->actor.shape.rot.y;
     }
 
@@ -1818,6 +1818,11 @@ void EnTest_Thrust(EnTest* this, PlayState* play) {
 
     if ((s32)this->skelAnime.curFrame == 2) {
         Audio_PlayActorSound2(&this->actor, NA_SE_EN_STAL_SAKEBI);
+    }
+
+    if ((s32)this->skelAnime.curFrame < 1) {
+        Math_SmoothStepToS(&this->actor.shape.rot.y, this->actor.yawTowardsPlayer, 1, 0x0600, 0);
+        this->actor.world.rot.y = this->actor.shape.rot.y;
     }
 
     if ((s32)this->skelAnime.curFrame < 8){
@@ -2702,10 +2707,10 @@ void EnTest_UpdateDamage(EnTest* this, PlayState* play) {
     if (bounced && ((!IS_ELITE && (this->unk_7C8 != 0x10 && this->unk_7C8 != 0x11)) ||
                     (IS_ELITE && !IS_VULNERABLE))) {
         this->bodyCollider.base.acFlags &= ~AC_HIT;
-        if ((this->actionFunc == EnTest_Crouch))
+        if ((this->unk_7C8 == 0x10 || this->unk_7C8 == 0x11))
             player->linearVelocity = 0.0f;//Prevents Link from moving out of range of the crouching attack when his attack bounces, assumes this collision is handled after the player's
 
-        if (this->unk_7C8 >= 0xA) {
+        if (this->unk_7C8 >= 0xA && (this->shieldCollider.info.acHitInfo->toucher.dmgFlags & (DMG_RANGED|DMG_HAMMER))) {
             this->actor.speedXZ = -4.0f;
         }
     } else if (this->bodyCollider.base.acFlags & AC_HIT) {
@@ -2963,7 +2968,7 @@ s32 EnTest_OverrideLimbDraw(PlayState* play, s32 limbIndex, Gfx** dList, Vec3f* 
     return false;
 }
 
-#define SWORD_EXTENSION_LENGTH 7000.0f
+#define SWORD_EXTENSION_LENGTH 6000.0f
 
 void EnTest_PostLimbDraw(PlayState* play, s32 limbIndex, Gfx** dList, Vec3s* rot, void* thisx) {
     static Vec3f unused1 = { 1100.0f, -700.0f, 0.0f };
