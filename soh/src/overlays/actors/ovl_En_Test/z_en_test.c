@@ -1161,7 +1161,8 @@ void EnTest_WaitAbove(EnTest* this, PlayState* play) {
 
     if ((this->actor.xzDistToPlayer < 200.0f) && (ABS(this->actor.yDistToPlayer) < 450.0f)) {
         EnTest_SetupAction(this, EnTest_Fall);
-        this->actor.flags |= ACTOR_FLAG_TARGETABLE;
+        if (!(this->variant & DARK_PARAM))
+            this->actor.flags |= ACTOR_FLAG_TARGETABLE;
         this->actor.shape.rot.y = this->actor.world.rot.y = this->actor.yawTowardsPlayer;
         Actor_SetScale(&this->actor, 0.015f);
     }
@@ -2010,8 +2011,9 @@ void EnTest_JumpBack(EnTest* this, PlayState* play) {
                     this->timer = (Rand_ZeroOne() * 5.0f) + 5.0f;
                 }
             }
-            this->actor.flags |= ACTOR_FLAG_TARGETABLE;
         }
+        if (!(this->variant & DARK_PARAM))
+            this->actor.flags |= ACTOR_FLAG_TARGETABLE;
     } else if (this->skelAnime.curFrame == (this->skelAnime.endFrame - 4.0f)) {
         Audio_PlayActorSound2(&this->actor, NA_SE_EN_DODO_M_GND);
     }
@@ -2559,7 +2561,8 @@ void func_80862E6C(EnTest* this, PlayState* play) {
             }
 
             this->actor.child = NULL;
-            this->actor.flags |= ACTOR_FLAG_TARGETABLE;
+            if (!(this->variant & DARK_PARAM))
+                this->actor.flags |= ACTOR_FLAG_TARGETABLE;
             EnTest_SetupJumpBack(this);
         } else if ((this->actor.params == STALFOS_TYPE_5) &&
                    !Actor_FindNearby(play, &this->actor, ACTOR_EN_TEST, ACTORCAT_ENEMY, 8000.0f)) {
@@ -2910,7 +2913,8 @@ void EnTest_Update(Actor* thisx, PlayState* play) {
 
     if (this->actor.params == STALFOS_TYPE_INVISIBLE) {
         if (play->actorCtx.lensActive) {
-            this->actor.flags |= ACTOR_FLAG_TARGETABLE | ACTOR_FLAG_LENS;
+            if (!(this->variant & DARK_PARAM))
+                this->actor.flags |= ACTOR_FLAG_TARGETABLE | ACTOR_FLAG_LENS;
             this->actor.shape.shadowDraw = ActorShadow_DrawFeet;
         } else {
             this->actor.flags &= ~(ACTOR_FLAG_TARGETABLE | ACTOR_FLAG_LENS);
