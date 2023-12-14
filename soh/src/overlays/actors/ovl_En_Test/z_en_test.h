@@ -5,6 +5,7 @@
 #include "global.h"
 
 struct EnTest;
+struct StalfosHitInfoStorage;
 
 typedef void (*EnTestActionFunc)(struct EnTest*, PlayState*);
 
@@ -73,6 +74,21 @@ typedef enum {
     /* 0x3D */ STALFOS_LIMB_MAX
 } StalfosLimb;
 
+#define STORAGE_FRAMES 5
+
+
+#define STALFOS_WAS_HIT 1
+#define STALFOS_WAS_STUNNED 2
+
+
+typedef struct StalfosHitInfoStorage {
+    s16 hitStatus;
+    EnTestActionFunc action;
+    EnTestActionFunc prevAttackMove;
+    s16 timeElapsedFromPrevMove;
+    u8 unk_7C8_state;
+} StalfosHitInfoStorage;
+
 typedef struct EnTest {
     /* 0x000 */ Actor actor;
     /* 0x14C */ Vec3s bodyPartsPos[10];
@@ -104,6 +120,11 @@ typedef struct EnTest {
     /* 0x810 */ ColliderCylinder bodyCollider;
     /* 0x85C */ ColliderQuad swordCollider;
     /* 0x8DC */ ColliderCylinder shieldCollider;
+
+                f32 distStack[STORAGE_FRAMES];
+                s16 attackStack[STORAGE_FRAMES];//0 = neutral, 1=horizontal, 2=vertical, 3=jump, 4 signifies hammer blow
+                StalfosHitInfoStorage hitStorage[STORAGE_FRAMES];
+                s8 attackFlag;
 } EnTest; // size = 0x928
 
 typedef enum {

@@ -37,6 +37,8 @@ void EnTest_SetupFlinchBack(EnTest* this);
 void EnTest_SetupFlinchFront(EnTest* this);
 void EnTest_SetupStopAndBlock(EnTest* this);
 void func_808627C4(EnTest* this, PlayState* play);
+void EnTest_SetupAI(Actor* thisx, PlayState* play);
+void EnTest_UpdateAI(Actor* thisx, PlayState* play);
 
 void EnTest_WaitGround(EnTest* this, PlayState* play);
 void EnTest_WaitAbove(EnTest* this, PlayState* play);
@@ -1133,6 +1135,7 @@ void EnTest_WaitGround(EnTest* this, PlayState* play) {
 
     if ((this->timer == 0) && (ABS(this->actor.yDistToPlayer) < 150.0f)) {
         this->unk_7C8 = 3;
+        EnTest_SetupAI(this,play);
         EnTest_SetupAction(this, EnTest_Rise);
         this->actor.world.rot.y = this->actor.yawTowardsPlayer;
         this->actor.shape.rot.y = this->actor.yawTowardsPlayer;
@@ -1163,6 +1166,7 @@ void EnTest_WaitAbove(EnTest* this, PlayState* play) {
     this->actor.world.pos.y = this->actor.home.pos.y + 150.0f;
 
     if ((this->actor.xzDistToPlayer < 200.0f) && (ABS(this->actor.yDistToPlayer) < 450.0f)) {
+        EnTest_SetupAI(this,play);
         EnTest_SetupAction(this, EnTest_Fall);
         if (!(this->variant & DARK_PARAM))
             this->actor.flags |= ACTOR_FLAG_TARGETABLE;
@@ -2768,6 +2772,54 @@ void EnTest_UpdateDamage(EnTest* this, PlayState* play) {
     }
 }
 
+void EnTest_SetupAI(Actor* thisx, PlayState* play) {
+    EnTest* this = (EnTest*)thisx;
+    Player* player = GET_PLAYER(play);
+
+    for (s16 ii = 0; ii < ARRAY_COUNT(this->distStack); ii++){
+        this->distStack[ii] = this->actor.xzDistToPlayer;
+        this->attackStack[ii] = 0;
+        this->hitStorage[ii].action = this->actionFunc;
+        this->hitStorage[ii].hitStatus = 0;
+        this->hitStorage[ii].prevAttackMove = this->actionFunc;
+        this->hitStorage[ii].unk_7C8_state = this->unk_7C8;
+        this->hitStorage[ii].timeElapsedFromPrevMove = 0;
+    }
+    this->attackFlag = 0;
+}
+
+void EnTest_UpdateAI(Actor* thisx, PlayState* play) {
+    EnTest* this = (EnTest*)thisx;
+    Player* player = GET_PLAYER(play);
+    s16 finalElem = ARRAY_COUNT(this->distStack)-1;
+
+    for (s16 ii = 0; ii < finalElem; ii++){
+        this->distStack[ii] = this->distStack[ii+1];
+    }
+    this->distStack[finalElem] = this->actor.xzDistToPlayer;
+
+    if (this->actor.xzDistToPlayer < 110.0f || this->attackFlag != 0) {
+        if (this->attackFlag == 0 && player->swordState != 0) {
+            for (s16 ii = 0; ii < finalElem; ii++){
+                this->attackStack[ii] = this->distStack[ii+1];
+            }
+
+            this->attackStack[finalElem] = 0;
+            if (isPlayerInHorizontalAttack(play))
+                this->attackStack[finalElem] |= 1;
+            else if (isPlayerInJumpAttack(play))
+                this->attackStack[finalElem] |= 3;
+            else if (isPlayerInVerticalAttack(play))
+                this->attackStack[finalElem] |= 2;
+
+            if (player->meleeWeaponAnimation == PLAYER_MWA_HAMMER_SIDE || player->meleeWeaponAnimation == PLAYER_MWA_HAMMER_FORWARD)
+                this->attackStack[finalElem] |= 4;
+        }
+
+        this->attackFlag = player->swordState;
+    }
+}
+
 void EnTest_Update(Actor* thisx, PlayState* play) {
     EnTest* this = (EnTest*)thisx;
     Player* player = GET_PLAYER(play);
@@ -2932,6 +2984,9 @@ void EnTest_Update(Actor* thisx, PlayState* play) {
             this->actor.shape.shadowDraw = NULL;
         }
     }
+
+    //Update AI
+    EnTest_UpdateAI(thisx, play);
 }
 
 s32 EnTest_OverrideLimbDraw(PlayState* play, s32 limbIndex, Gfx** dList, Vec3f* pos, Vec3s* rot, void* thisx) {
