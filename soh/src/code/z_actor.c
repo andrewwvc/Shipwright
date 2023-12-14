@@ -1566,6 +1566,9 @@ s32 Actor_ActorBIsFacingActorA(Actor* actorA, Actor* actorB, s16 maxAngle) {
  * The maximum angle difference that qualifies as "facing" is specified by `maxAngle`.
  */
 s32 Actor_IsFacingPlayer(Actor* actor, s16 maxAngle) {
+    if (maxAngle <= 0)
+        return false;
+
     s16 yawDiff = actor->yawTowardsPlayer - actor->shape.rot.y;
 
     if (yawDiff == SHRT_MIN)//This is important, as otherwise overflow will cause an actor facing directly away from the player to count as facing towards
