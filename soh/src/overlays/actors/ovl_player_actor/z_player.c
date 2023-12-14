@@ -10919,6 +10919,13 @@ void Player_SetShieldRecoveryDefault(PlayState* play) {
     player->crouchCharge = 0;
 }
 
+void Player_SetShieldRecovery(PlayState* play, u16 frames) {
+    Player* player = GET_PLAYER(play);
+
+    player->shieldRelaxTimer = frames;
+    player->crouchCharge = 0;
+}
+
 void Player_UpdateCommon(Player* this, PlayState* play, Input* input) {
     s32 pad;
 
