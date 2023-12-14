@@ -102,6 +102,7 @@ typedef struct EnTest {
     /* 0x7CC */ EnTestActionFunc actionFunc;
     /* 0x7D0 */ Vec3s headRot;
     /* 0x7D6 */ Vec3s headRotOffset;
+                f32 selectDist;
     /* 0x7DC */ u8 unk_7DC;
     /* 0x7DD */ char unk_7DD[0x1];
     /* 0x7DE */ u8 shieldState;
@@ -111,6 +112,9 @@ typedef struct EnTest {
     /* 0x7E2 */ u8 lastDamageEffect;
     /* 0x7E4 */ s32 unk_7E4;
     /* 0x7E8 */ s32 timer;
+                s16 stepTimer;
+                s8 stopStatus;
+                s16 AIGoal;
     /* 0x7EC */ f32 unk_7EC;
     /* 0x7F0 */ BodyBreak bodyBreak;
     /* 0x808 */ s8 swordState;

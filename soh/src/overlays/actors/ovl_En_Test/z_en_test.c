@@ -16,6 +16,7 @@ void EnTest_Destroy(Actor* thisx, PlayState* play);
 void EnTest_Update(Actor* thisx, PlayState* play);
 void EnTest_Draw(Actor* thisx, PlayState* play);
 
+void EnTest_ChooseActionElite(EnTest* this, PlayState* play);
 void EnTest_SetupWaitGround(EnTest* this);
 void EnTest_SetupWaitAbove(EnTest* this);
 void EnTest_SetupJumpBack(EnTest* this);
@@ -25,6 +26,7 @@ void EnTest_SetupSlashUp(EnTest* this);
 void EnTest_SetupJumpslash(EnTest* this);
 void EnTest_SetupCrossoverJump(EnTest* this);
 void EnTest_SetupWalkAndBlock(EnTest* this);
+void EnTest_SetupSidestepElite(EnTest* this, PlayState* play);
 void func_80860EC0(EnTest* this);
 void EnTest_SetupSlashDown(EnTest* this);
 void EnTest_SetupThrust(EnTest* this);
@@ -32,10 +34,12 @@ void EnTest_SetupCrouch(EnTest* this);
 void EnTest_SetupSpinAttack(EnTest* this);
 void func_80860BDC(EnTest* this);
 void EnTest_SetupIdleFromBlock(EnTest* this);
+void EnTest_IdleFromBlockElite(EnTest* this, PlayState* play);
 void EnTest_SetupRecoil(EnTest* this);
 void EnTest_SetupFlinchBack(EnTest* this);
 void EnTest_SetupFlinchFront(EnTest* this);
 void EnTest_SetupStopAndBlock(EnTest* this);
+void EnTest_SetupStop(EnTest* this);
 void func_808627C4(EnTest* this, PlayState* play);
 void EnTest_SetupAI(Actor* thisx, PlayState* play);
 void EnTest_UpdateAI(Actor* thisx, PlayState* play);
@@ -47,6 +51,8 @@ void EnTest_Land(EnTest* this, PlayState* play);
 void EnTest_Rise(EnTest* this, PlayState* play);
 void EnTest_Idle(EnTest* this, PlayState* play);
 void EnTest_WalkAndBlock(EnTest* this, PlayState* play);
+void EnTest_WalkAndBlockElite(EnTest* this, PlayState* play);
+void EnTest_SidestepElite(EnTest* this, PlayState* play);
 void func_80860C24(EnTest* this, PlayState* play);
 void func_80860F84(EnTest* this, PlayState* play);
 void EnTest_SlashDown(EnTest* this, PlayState* play);
@@ -1054,6 +1060,10 @@ void EnTest_ChooseRandomAction(EnTest* this, PlayState* play) {
 }
 
 void EnTest_ChooseAction(EnTest* this, PlayState* play) {
+    if (IS_ELITE) {
+        EnTest_ChooseActionElite(this, play);
+        return;
+    }
     s32 pad;
     Player* player = GET_PLAYER(play);
     s16 yawDiff = player->actor.shape.rot.y - this->actor.shape.rot.y;
@@ -1117,6 +1127,94 @@ void EnTest_ChooseAction(EnTest* this, PlayState* play) {
         }
     } else {
         EnTest_ChooseRandomAction(this, play);
+    }
+}
+
+void EnTest_ChooseActionElite(EnTest* this, PlayState* play) {
+    s32 pad;
+    Player* player = GET_PLAYER(play);
+    s16 yawDiff = player->actor.shape.rot.y - this->actor.shape.rot.y;
+    s16 orientationToPlayer = this->actor.yawTowardsPlayer - this->actor.shape.rot.y;
+    if (orientationToPlayer == SHRT_MIN)
+        orientationToPlayer = SHRT_MAX;
+     orientationToPlayer = ABS((s16)(orientationToPlayer));
+
+    if (yawDiff == SHRT_MIN)
+        yawDiff = SHRT_MAX;
+    yawDiff = ABS(yawDiff);
+
+    if (orientationToPlayer < 0x2880) {
+        if (yawDiff <= 0x3E80) {
+            if (this->actor.xzDistToPlayer < 110.0f) {
+                if (Rand_ZeroOne() > 0.10f || (this->actor.isTargeted && Rand_ZeroOne() > 0.1111111f)) {
+                        EnTest_SetupSlashDown(this);
+                        return;
+                }
+            }
+            if (this->actor.xzDistToPlayer < 130.0f) {
+                if (Rand_ZeroOne() > 0.10f || (!this->actor.isTargeted && Rand_ZeroOne() > 0.1111111f)) {
+                    //EnTest_SetupSpinAttack(this);
+                    EnTest_SetupStop(this);
+                    return;
+                }
+            }
+
+            if (this->actor.xzDistToPlayer < 200.0f) {
+                if (Rand_ZeroOne() > 0.10f || (!this->actor.isTargeted && Rand_ZeroOne() > 0.1111111f)) {
+                    EnTest_SetupThrust(this);
+                    return;
+                }
+            }
+
+            EnTest_SetupWalkAndBlock(this);
+            return;
+        }
+
+        if (this->actor.xzDistToPlayer < 140.0f) {
+            if (Rand_ZeroOne() > 0.5f) {
+                //EnTest_SetupSpinAttack(this);
+                EnTest_SetupStop(this);
+                return;
+            }
+        }
+
+        switch ((u32)(Rand_ZeroOne() * 10.0f)) {
+            case 0:
+            case 3:
+            case 7:
+                EnTest_SetupStop(this);
+                break;
+
+            case 1:
+            case 5:
+            case 6:
+            case 8:
+                EnTest_SetupSidestepElite(this, play);
+                break;
+
+            case 2:
+            case 4:
+            case 9:
+                this->actor.world.rot.y = this->actor.yawTowardsPlayer;
+                EnTest_SetupJumpBack(this);
+                break;
+        }
+    } else if (orientationToPlayer > 0x4E80) {
+            if ((Rand_Centered() >= 0)) {
+                this->actor.world.rot.y = this->actor.yawTowardsPlayer;
+                EnTest_SetupJumpBack(this);
+            } else if ((this->actor.xzDistToPlayer < 220.0f) && (this->actor.xzDistToPlayer > 170.0f)) {
+                if (Actor_IsFacingPlayer(&this->actor, 0x71C) && !Actor_IsTargeted(play, &this->actor)) {
+                    EnTest_SetupJumpslash(this);
+                }
+            } else {
+                EnTest_SetupWalkAndBlock(this);
+            }
+    } else {
+        //EnTest_SetupSpinAttack(this);
+        //EnTest_SetupWalkAndBlock(this);
+        //EnTest_SetupStop(this);//This setups up a potential spin attack
+        EnTest_SetupSidestepElite(this, play);
     }
 }
 
@@ -1262,7 +1360,23 @@ void EnTest_SetupWalkAndBlock(EnTest* this) {
     this->timer = (s16)(Rand_ZeroOne() * 5.0f);
     this->unk_7C8 = 0xD;
     this->actor.world.rot.y = this->actor.shape.rot.y;
-    EnTest_SetupAction(this, EnTest_WalkAndBlock);
+    this->selectDist = 95.0f;
+    this->stepTimer = (s16)(Rand_ZeroOne() * 5.0f);
+    this->AIGoal = 0;
+    EnTest_SetupAction(this, IS_ELITE ? EnTest_WalkAndBlockElite : EnTest_WalkAndBlock);
+}
+
+void EnTest_SetupWalkBack(EnTest* this, f32 dist) {
+    Animation_Change(&this->upperSkelanime, &gStalfosBlockWithShieldAnim, 2.0f, 0.0f,
+                     Animation_GetLastFrame(&gStalfosBlockWithShieldAnim), 2, 2.0f);
+    Animation_PlayLoop(&this->skelAnime, &gStalfosSlowAdvanceAnim);
+    this->timer = (s16)(Rand_ZeroOne() * 5.0f);
+    this->unk_7C8 = 0xD;
+    this->actor.world.rot.y = this->actor.shape.rot.y;
+    this->selectDist = dist;
+    this->stepTimer = (s16)(Rand_ZeroOne() * 5.0f);
+    this->AIGoal = 1;
+    EnTest_SetupAction(this, EnTest_WalkAndBlockElite);
 }
 
 void EnTest_WalkAndBlock(EnTest* this, PlayState* play) {
@@ -1404,11 +1518,276 @@ void EnTest_WalkAndBlock(EnTest* this, PlayState* play) {
     }
 }
 
+void EnTest_WalkAndBlockElite(EnTest* this, PlayState* play) {
+    s32 pad;
+    f32 checkDist = 0.0f;
+    s32 pad1;
+    s32 prevFrame;
+    s32 temp_f16;
+    f32 playSpeed;
+    Player* player = GET_PLAYER(play);
+    s32 absPlaySpeed;
+    s16 yawDiff;
+
+    lusprintf("__FILE__",__LINE__,0, "XZDist: %f, Select Dist: %f", this->actor.xzDistToPlayer, this->selectDist);
+
+    if (!EnTest_ReactToProjectile(play, this)) {
+        this->timer++;
+
+        if (this->actor.xzDistToPlayer <= (-20.0f + this->selectDist)) {
+            Math_SmoothStepToF(&this->actor.speedXZ, -5.0f, 1.0f, 1.2f, 0.0f);
+        } else if (this->actor.xzDistToPlayer > (20.0f + this->selectDist)) {
+            Math_SmoothStepToF(&this->actor.speedXZ, 5.0f, 1.0f, 1.2f, 0.0f);
+        }
+
+        if (this->actor.speedXZ >= 5.0f) {
+            this->actor.speedXZ = 5.0f;
+        } else if (this->actor.speedXZ < -5.0f) {
+            this->actor.speedXZ = -5.0f;
+        }
+
+        if (!Actor_TestFloorInDirection(&this->actor, play, this->actor.speedXZ, this->actor.world.rot.y)) {
+            this->actor.speedXZ *= -1.0f;
+        }
+
+        if (ABS(this->actor.speedXZ) < 3.0f) {
+            Animation_Change(&this->skelAnime, &gStalfosSlowAdvanceAnim, 0.0f, this->skelAnime.curFrame,
+                             Animation_GetLastFrame(&gStalfosSlowAdvanceAnim), 0, -6.0f);
+            playSpeed = this->actor.speedXZ * 10.0f;
+        } else {
+            Animation_Change(&this->skelAnime, &gStalfosFastAdvanceAnim, 0.0f, this->skelAnime.curFrame,
+                             Animation_GetLastFrame(&gStalfosFastAdvanceAnim), 0, -4.0f);
+            playSpeed = this->actor.speedXZ * 10.0f * 0.02f;
+        }
+
+        if (this->shieldState == 0) {
+            this->shieldState++;
+        }
+
+        if (this->actor.speedXZ >= 0.0f) {
+            playSpeed = CLAMP_MAX(playSpeed, 2.5f);
+            this->skelAnime.playSpeed = playSpeed;
+        } else {
+            playSpeed = CLAMP_MIN(playSpeed, -2.5f);
+            this->skelAnime.playSpeed = playSpeed;
+        }
+
+        yawDiff = player->actor.shape.rot.y - this->actor.shape.rot.y;
+
+        if ((this->actor.xzDistToPlayer < 100.0f) && (player->swordState != 0)) {
+            if (ABS(yawDiff) >= 0x1F40 || yawDiff == SHRT_MIN) {
+                this->actor.shape.rot.y = this->actor.world.rot.y = this->actor.yawTowardsPlayer;
+
+                if ((Rand_ZeroOne() > 0.7f) && (player->meleeWeaponAnimation == PLAYER_MWA_RIGHT_SLASH_1H)) {
+                    EnTest_SetupJumpBack(this);
+                } else {
+                    EnTest_SetupStopAndBlock(this);
+                }
+
+                return;
+            }
+        }
+
+        prevFrame = this->skelAnime.curFrame;
+        SkelAnime_Update(&this->skelAnime);
+
+        absPlaySpeed = (f32)ABS(this->skelAnime.playSpeed);
+        temp_f16 = this->skelAnime.curFrame - absPlaySpeed;
+
+        if ((s32)this->skelAnime.curFrame != prevFrame) {
+            s32 temp_v0_2 = absPlaySpeed + prevFrame;
+
+            if (((temp_v0_2 > 1) && (temp_f16 <= 0)) || ((temp_f16 < 7) && (temp_v0_2 >= 8))) {
+                Audio_PlayActorSound2(&this->actor, NA_SE_EN_STAL_WALK);
+            }
+        }
+
+        if ((this->timer % 32) == 0) {
+            Audio_PlayActorSound2(&this->actor, NA_SE_EN_STAL_WARAU);
+            this->timer += (s16)(Rand_ZeroOne() * 5.0f);
+        }
+
+        if ((this->actor.xzDistToPlayer < 220.0f) && (this->actor.xzDistToPlayer > 160.0f) &&
+            (Actor_IsFacingPlayer(&this->actor, 0x71C))) {
+            if (Rand_ZeroOne() < 0.05f) {
+                EnTest_SetupJumpslash(this);
+                return;
+            }
+        }
+
+        if (Rand_ZeroOne() < 0.4f) {
+            this->actor.shape.rot.y = this->actor.world.rot.y = this->actor.yawTowardsPlayer;
+        }
+
+        if (!Actor_IsFacingPlayer(&this->actor, 0x11C7)) {
+            EnTest_SetupIdle(this);
+            this->timer = (Rand_ZeroOne() * 10.0f) + 10.0f;
+            return;
+        }
+
+        if (this->selectDist-10.0f < this->actor.xzDistToPlayer && this->actor.xzDistToPlayer < this->selectDist+10.0f) {
+            this->selectDist = 95.0f + Rand_ZeroOne()*100.0f;
+            if (this->selectDist > 120.0f) {
+                this->AIGoal = 1;
+            } else {
+                this->AIGoal = 0;
+            }
+        }
+
+        if (this->actor.xzDistToPlayer < 110.0f && this->AIGoal == 0) {
+            if (Rand_ZeroOne() > 0.33f) {
+                EnTest_SetupSlashDown(this);
+            } else if  (Rand_ZeroOne() > 0.6f) {
+                EnTest_SetupStop(this);
+            } else {
+                EnTest_SetupSidestepElite(this, play);
+            }
+        }
+        // else if (Rand_ZeroOne() < 0.1f) {
+        //     this->actor.speedXZ = 5.0f;
+        // }
+    }
+}
+
+// a variation of sidestep
+void EnTest_SetupSidestepElite(EnTest* this, PlayState* play) {
+    if (Actor_OtherIsTargeted(play, &this->actor)) {
+        func_80860EC0(this);
+        return;
+    }
+
+    Animation_MorphToLoop(&this->skelAnime, &gStalfosSidestepAnim, -2.0f);
+    Math_SmoothStepToS(&this->actor.shape.rot.y, this->actor.yawTowardsPlayer, 1, 0xFA0, 1);
+    this->actor.speedXZ = (Rand_Centered() >= 0) ? -4.0f : 4.0f;
+    this->actor.world.rot.y = this->actor.shape.rot.y + 0x3FFF;
+    this->timer = (Rand_ZeroOne() * 20.0f) + 20.0f;
+    this->unk_7C8 = 0x18;
+    this->selectDist = 95.0f;
+    EnTest_SetupAction(this, EnTest_SidestepElite);
+    this->unk_7EC = 0.0f;
+}
+
+// a variation of sidestep
+void EnTest_SidestepElite(EnTest* this, PlayState* play) {
+    s32 pad;
+    Player* player = GET_PLAYER(play);
+    s32 pad1;
+    s32 prevFrame;
+    s32 temp_f16;
+    s32 pad2;
+    f32 checkDist = 0.0f;
+    s16 newYaw;
+    f32 absPlaySpeed;
+
+    Math_SmoothStepToS(&this->actor.shape.rot.y, this->actor.yawTowardsPlayer, 1, 0xFA0, 1);
+
+    if (this->shieldState == 0 || this->shieldState == 5) {
+        this->shieldState = 1;
+    }
+
+    if (this->actor.speedXZ >= 0.0f) {
+        if (this->actor.speedXZ < 6.0f) {
+            this->actor.speedXZ += 0.125f;
+        } else {
+            this->actor.speedXZ = 6.0f;
+        }
+    } else {
+        if (this->actor.speedXZ > -6.0f) {
+            this->actor.speedXZ -= 0.125f;
+        } else {
+            this->actor.speedXZ = -6.0f;
+        }
+    }
+
+    if ((this->actor.bgCheckFlags & 8) ||
+        (!Actor_TestFloorInDirection(&this->actor, play, this->actor.speedXZ, this->actor.shape.rot.y + 0x3FFF))) {
+        if (this->actor.bgCheckFlags & 8) {
+            if (this->actor.speedXZ >= 0.0f) {
+                newYaw = (this->actor.shape.rot.y + 0x3FFF);
+            } else {
+                newYaw = (this->actor.shape.rot.y - 0x3FFF);
+            }
+
+            newYaw = this->actor.wallYaw - newYaw;
+        } else {
+            this->actor.speedXZ *= -0.8f;
+            newYaw = 0;
+        }
+
+        if (ABS(newYaw) > 0x4000) {
+            this->actor.speedXZ *= -0.8f;
+
+            if (this->actor.speedXZ < 0.0f) {
+                this->actor.speedXZ -= 0.5f;
+            } else {
+                this->actor.speedXZ += 0.5f;
+            }
+        }
+    }
+
+    this->actor.world.rot.y = this->actor.shape.rot.y + 0x3FFF;
+
+    if (this->actor.xzDistToPlayer <= (-15.0f + this->selectDist)) {
+        Math_SmoothStepToF(&this->unk_7EC, -2.5f, 1.0f, 0.8f, 0.0f);
+    } else if (this->actor.xzDistToPlayer > (15.0f + this->selectDist)) {
+        Math_SmoothStepToF(&this->unk_7EC, 2.5f, 1.0f, 0.8f, 0.0f);
+    } else {
+        Math_SmoothStepToF(&this->unk_7EC, 0.0f, 1.0f, 6.65f, 0.0f);
+    }
+
+    if (this->unk_7EC != 0.0f) {
+        this->actor.world.pos.x += (Math_SinS(this->actor.shape.rot.y) * this->unk_7EC);
+        this->actor.world.pos.z += (Math_CosS(this->actor.shape.rot.y) * this->unk_7EC);
+    }
+
+    this->skelAnime.playSpeed = this->actor.speedXZ * 0.5f;
+    prevFrame = this->skelAnime.curFrame;
+    SkelAnime_Update(&this->skelAnime);
+
+    temp_f16 = this->skelAnime.curFrame - ABS(this->skelAnime.playSpeed);
+    absPlaySpeed = ABS(this->skelAnime.playSpeed);
+
+    if ((this->timer % 32) == 0) {
+        Audio_PlayActorSound2(&this->actor, NA_SE_EN_STAL_WARAU);
+    }
+    if ((s32)this->skelAnime.curFrame != prevFrame) {
+        s32 temp_v0_2 = (s32)absPlaySpeed + prevFrame;
+
+        if (((temp_v0_2 > 1) && (temp_f16 <= 0)) || ((temp_f16 < 7) && (temp_v0_2 >= 8))) {
+            Audio_PlayActorSound2(&this->actor, NA_SE_EN_STAL_WALK);
+        }
+    }
+
+    if (this->timer == 0) {
+        if (Actor_OtherIsTargeted(play, &this->actor)) {
+            EnTest_SetupIdle(this);
+        } else if (Actor_IsTargeted(play, &this->actor)) {
+            if (!EnTest_ReactToProjectile(play, this)) {
+                EnTest_ChooseActionElite(this, play);
+            }
+        } else if (player->heldItemAction != PLAYER_IA_NONE) {
+            if (Rand_Centered() >= 0) {
+                EnTest_SetupIdle(this);
+            } else {
+                EnTest_SetupWalkAndBlock(this);
+            }
+        } else {
+            EnTest_SetupWalkAndBlock(this);
+        }
+
+    } else {
+        this->timer--;
+    }
+}
+
 // a variation of sidestep
 void func_80860BDC(EnTest* this) {
     Animation_PlayLoop(&this->skelAnime, &gStalfosSidestepAnim);
     this->unk_7C8 = 0xE;
-    EnTest_SetupAction(this, func_80860C24);
+    if (IS_ELITE)
+        EnTest_SetupAction(this, EnTest_SidestepElite);
+    else
+        EnTest_SetupAction(this, func_80860C24);
 }
 
 // a variation of sidestep
@@ -1420,6 +1799,10 @@ void func_80860C24(EnTest* this, PlayState* play) {
     s32 temp1;
     s32 temp2;
     s32 absPlaySpeed;
+
+    if (IS_ELITE) {
+        EnTest_SetupSidestepElite(this, play);
+    }
 
     if (!EnTest_ReactToProjectile(play, this)) {
         yawDiff = this->actor.yawTowardsPlayer;
@@ -1480,7 +1863,10 @@ void func_80860EC0(EnTest* this) {
     this->timer = (s16)((Rand_ZeroOne() * 15.0f) + 25.0f);
     this->unk_7EC = 0.0f;
     this->actor.world.rot.y = this->actor.shape.rot.y;
-    EnTest_SetupAction(this, func_80860F84);
+    if (IS_ELITE)
+        EnTest_SetupAction(this, EnTest_SidestepElite);
+    else
+        EnTest_SetupAction(this, func_80860F84);
 }
 
 // a variation of sidestep
@@ -2217,6 +2603,21 @@ void EnTest_SetupStopAndBlock(EnTest* this) {
     this->timer = (Rand_ZeroOne() * 10.0f) + 11.0f;
     this->actor.world.rot.y = this->actor.shape.rot.y;
     this->shieldState = 5;
+    this->stopStatus = 1;
+    EnTest_SetupAction(this, EnTest_StopAndBlock);
+}
+
+//This exists to allow the Stalfos to temporarily stop freely (as opposed to stopping to directly guard an attack),
+//in order to set up special attacks (like the spin attack, which might also be done out of idle)
+void EnTest_SetupStop(EnTest* this) {
+    Animation_Change(&this->skelAnime, &gStalfosBlockWithShieldAnim, 2.0f, 0.0f,
+                     Animation_GetLastFrame(&gStalfosBlockWithShieldAnim), 2, 2.0f);
+    this->unk_7C8 = 0x15;
+    this->actor.speedXZ = 0.0f;
+    this->timer = 6.0f;
+    this->actor.world.rot.y = this->actor.shape.rot.y;
+    this->shieldState = 5;
+    this->stopStatus = 0;
     EnTest_SetupAction(this, EnTest_StopAndBlock);
 }
 
@@ -2230,17 +2631,41 @@ void EnTest_StopAndBlock(EnTest* this, PlayState* play) {
         EnTest_SetupJumpBack(this);
     }
 
-    if (this->timer == 0) {
+    if (!IS_ELITE) {
         EnTest_SetupIdleFromBlock(this);
+        return;
+    }
+
+    if (this->timer == 0) {
+        if (this->actor.xzDistToPlayer < 130.0f) {
+            if (this->actor.xzDistToPlayer < 60.0f)
+                EnTest_SetupShieldBash(this);
+            else if (this->actor.xzDistToPlayer < 100.0f && Rand_ZeroOne() < 0.3f)
+                EnTest_SetupSlashDown(this);
+            else
+                EnTest_SetupSpinAttack(this);
+        } else
+            EnTest_SetupIdleFromBlockElite(this);
     } else {
         this->timer--;
+        if (!this->stopStatus) {
+            if (Rand_ZeroOne() < 0.1) {
+               EnTest_SetupWalkBack(this, 170.0f);
+            }
+            // else if (Rand_ZeroOne() < 0.1) {
+            //     EnTest_SetupSlashDown(this);
+            // }
+        }
     }
 }
 
 void EnTest_SetupIdleFromBlock(EnTest* this) {
     Animation_MorphToLoop(&this->skelAnime, &gStalfosMiddleGuardAnim, -4.0f);
     this->unk_7C8 = 0x16;
-    EnTest_SetupAction(this, EnTest_IdleFromBlock);
+    if (IS_ELITE)
+        EnTest_SetupAction(this, EnTest_IdleFromBlockElite);
+    else
+        EnTest_SetupAction(this, EnTest_IdleFromBlock);
 }
 
 void EnTest_IdleFromBlock(EnTest* this, PlayState* play) {
@@ -2256,6 +2681,30 @@ void EnTest_IdleFromBlock(EnTest* this, PlayState* play) {
                 EnTest_ChooseAction(this, play);
             } else {
                 func_808627C4(this, play);
+            }
+        }
+    }
+}
+
+void EnTest_SetupIdleFromBlockElite(EnTest* this) {
+    Animation_MorphToLoop(&this->skelAnime, &gStalfosMiddleGuardAnim, -4.0f);
+    this->unk_7C8 = 0x16;
+    EnTest_SetupAction(this, EnTest_IdleFromBlockElite);
+}
+
+void EnTest_IdleFromBlockElite(EnTest* this, PlayState* play) {
+    Math_SmoothStepToF(&this->actor.speedXZ, 0.0f, 1.0f, 1.5f, 0.0f);
+    SkelAnime_Update(&this->skelAnime);
+
+    if (this->skelAnime.morphWeight == 0.0f) {
+        this->actor.speedXZ = 0.0f;
+        this->shieldState = 0;
+
+        if (!EnTest_ReactToProjectile(play, this)) {
+            if (this->actor.xzDistToPlayer < 500.0f) {
+                EnTest_ChooseActionElite(this, play);
+            } else {
+                EnTest_SetupSidestepElite(this, play);
             }
         }
     }
@@ -2296,7 +2745,7 @@ void EnTest_FlinchFront(EnTest* this, PlayState* play) {
                    (player->meleeWeaponAnimation != 0x11)) {
             EnTest_SetupJumpBack(this);
         } else {
-            EnTest_SetupStopAndBlock(this);
+            EnTest_SetupStop(this);
         }
 
         this->unk_7C8 = 8;
@@ -2335,7 +2784,7 @@ void EnTest_FlinchBack(EnTest* this, PlayState* play) {
                    (player->meleeWeaponAnimation != 0x11)) {
             EnTest_SetupJumpBack(this);
         } else {
-            EnTest_SetupStopAndBlock(this);
+            EnTest_SetupStop(this);
         }
 
         this->unk_7C8 = 8;
@@ -2407,7 +2856,10 @@ void func_808627C4(EnTest* this, PlayState* play) {
     this->actor.world.rot.y = this->actor.shape.rot.y + 0x3FFF;
     this->timer = (Rand_ZeroOne() * 20.0f) + 20.0f;
     this->unk_7C8 = 0x18;
-    EnTest_SetupAction(this, func_808628C8);
+    if (IS_ELITE)
+        EnTest_SetupAction(this, EnTest_SidestepElite);
+    else
+        EnTest_SetupAction(this, func_808628C8);
     this->unk_7EC = 0.0f;
 }
 
@@ -3179,7 +3631,10 @@ void func_80864158(EnTest* this, f32 xzSpeed) {
     this->actor.world.rot.y = this->actor.shape.rot.y + 0x3FFF;
     this->timer = (Rand_ZeroOne() * 20.0f) + 15.0f;
     this->unk_7C8 = 0x18;
-    EnTest_SetupAction(this, func_808628C8);
+    if (IS_ELITE)
+        EnTest_SetupAction(this, EnTest_SidestepElite);
+    else
+        EnTest_SetupAction(this, func_808628C8);
 }
 
 /**
