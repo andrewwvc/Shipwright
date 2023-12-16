@@ -428,6 +428,12 @@ extern "C" void OTRMessage_Init()
     MakeNormalMsgEng(0xE8, "Your magic power has been&enhanced! Now you can gain even&more Magic Capacity!^Collecting %gIcons of Magic%w&will allow for greater enhancement!");
     MakeNormalMsgEng(0xE9, "Your defensive power has been&enhanced! Damage inflicted by &enemies will be reduced by half.^But this only applies to&hearts protected by any&%rHeart Barriers%w you have collected.");
 
+    //Sheik Text
+    MakeNormalMsgEng(0x700F, "To find and save the sages,&you need another skill...&Head to Kakariko Village!^Then you may be able to&protect those you care about.");
+    MakeNormalMsgEng(0x7010, "It looks like you have the&skills you need...^To find the people who are to&awaken as Sages, seek out those&in whom you have seen deep virtue.^Once a new Sage has been found&and awoken, you may return your&sword here and become a child&again, for a time...^But until a young sage is here&to restore this power, you must&carry that sword as your burden.");
+    MakeNormalMsgEng(0x7074, "You destroyed the wicked&creatures that haunted the temple&and awakened the Sage...^But there are still other Sages&who need your help.^In order to awaken all the other&Sages, you must become even&more powerful.^You must travel through&forests...^over mountains...^under water...^and even through time...");
+    MakeNormalMsgEng(0x707A, "However, so long as the evil power&in each temple remains, the Sages&cannot hear their awakening call&from the Sacred Realm...^Unfortunately, equipped as you&currently are, you cannot yet&enter any temple...^But, if you believe what I'm saying,&you should head to %rKakariko&Village%w...^Do you understand,&\x0F?");
+
     u16 StoneMsg = TextIDAllocator::Instance->allocateRange("stone", 64);
 
     MakeBlueMsgEng(0x405, "They say that one part of&the secret directions&to a lost place is:^West&East&South&West");//Medigoron Crater Text
