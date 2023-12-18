@@ -3839,6 +3839,53 @@ static LinkAnimationHeader* D_808544B0[] = {
     &gPlayerAnim_link_normal_back_hit,   &gPlayerAnim_link_anchor_back_hitR,
 };
 
+void Player_ForceStun(PlayState* play, Player* this, s32 arg2, f32 arg3, f32 arg4, s16 knockbackAngle, s32 invTimer) {
+    LinkAnimationHeader* sp2C = NULL;
+    LinkAnimationHeader** sp28;
+
+    this->unk_890 = 0;
+
+    knockbackAngle -= this->actor.shape.rot.y;
+
+    sp28 = D_808544B0;
+
+    func_80835C58(play, this, func_8084370C, 0);
+    func_80833C3C(this);
+
+    // if (this->actor.colChkInfo.damage < 5) {
+    //     func_8083264C(this, 120, 20, 10, 0);
+    // } else {
+    func_8083264C(this, 180, 20, 100, 0);
+    this->linearVelocity = 23.0f;
+    sp28 += 4;
+    // }
+
+    if (ABS(knockbackAngle) <= 0x4000) {
+        sp28 += 2;
+    }
+
+    if (func_8008E9C4(this)) {
+        sp28 += 1;
+    }
+
+    sp2C = *sp28;
+
+    this->actor.shape.rot.y += knockbackAngle;
+    this->currentYaw = this->actor.shape.rot.y;
+    this->actor.world.rot.y = this->actor.shape.rot.y;
+    if (ABS(knockbackAngle) > 0x4000) {
+        this->actor.shape.rot.y += 0x8000;
+    }
+
+    func_80832564(play, this);
+
+    this->stateFlags1 |= PLAYER_STATE1_DAMAGED;
+
+    if (sp2C != NULL) {
+        func_808322D0(play, this, sp2C);
+    }
+}
+
 void func_80837C0C(PlayState* play, Player* this, s32 arg2, f32 arg3, f32 arg4, s16 arg5, s32 arg6) {
     LinkAnimationHeader* sp2C = NULL;
     LinkAnimationHeader** sp28;
@@ -4217,6 +4264,11 @@ s32 func_808382DC(Player* this, PlayState* play) {
                 }
 
                 return 0;
+            }
+
+            if (Player_isInSwordAnimation(play) && (this->shieldRelaxTimer != 0) && (this->invincibilityTimer > 0)) {
+                Player_ForceStun(play, this, 0, 4.0f, 5.0f, this->actor.shape.rot.y, this->invincibilityTimer);
+                return 1;
             }
 
             if ((this->unk_A87 != 0) || (this->invincibilityTimer > 0) || (this->stateFlags1 & PLAYER_STATE1_DAMAGED) ||
@@ -11373,6 +11425,7 @@ void Player_Update(Actor* thisx, PlayState* play) {
     s32 pad;
     Input sp44;
     Actor* dog;
+    s16 check = Player_isInSwordAnimation(play) && this->shieldRelaxTimer != 0;
 
     osSyncPrintf("LinkPos: {%d,%d,%d},",(s16)this->actor.world.pos.x,(s16)this->actor.world.pos.y,(s16)this->actor.world.pos.z);
     osSyncPrintf("interfaceMode: %d",(u16)play->interfaceCtx.unk_1EE);
