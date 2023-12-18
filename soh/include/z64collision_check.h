@@ -302,6 +302,7 @@ typedef enum {
 #define OC1_TYPE_1 (1 << 4) // Can have OC collisions with OC type 1
 #define OC1_TYPE_2 (1 << 5) // Can have OC collisions with OC type 2
 #define OC1_FIRM (1 << 6) // Causes AT_WEAK attacks to bounce of as if the collider was AC_HARD
+#define OC1_DOMINANT (1 << 7) // Causes TOUCH_NEAREST attacks to treat this collider as being unconditionally closer
 #define OC1_TYPE_ALL (OC1_TYPE_PLAYER | OC1_TYPE_1 | OC1_TYPE_2) // Can have collisions with all three OC types
 
 #define OC2_NONE 0 // No flags set. Has no OC type

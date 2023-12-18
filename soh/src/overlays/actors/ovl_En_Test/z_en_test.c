@@ -799,7 +799,7 @@ static ColliderCylinderInit sShieldColliderInit = {
         COLTYPE_METAL,
         AT_NONE,
         AC_ON | AC_HARD | AC_TYPE_PLAYER,
-        OC1_NONE,
+        OC1_DOMINANT,
         OC2_NONE,
         COLSHAPE_CYLINDER,
     },
