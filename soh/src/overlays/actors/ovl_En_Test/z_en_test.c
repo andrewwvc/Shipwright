@@ -1145,7 +1145,7 @@ void EnTest_ChooseActionElite(EnTest* this, PlayState* play) {
 
     if (orientationToPlayer < 0x2880) {
         if (yawDiff <= 0x3E80) {
-            if (this->actor.xzDistToPlayer < 110.0f) {
+            if (this->actor.xzDistToPlayer < 110.0f && (Rand_ZeroOne() < 0.25)) {
                 if (Rand_ZeroOne() > 0.10f || (this->actor.isTargeted && Rand_ZeroOne() > 0.1111111f)) {
                         EnTest_SetupSlashDown(this);
                         return;
@@ -1534,10 +1534,10 @@ void EnTest_WalkAndBlockElite(EnTest* this, PlayState* play) {
     if (!EnTest_ReactToProjectile(play, this)) {
         this->timer++;
 
-        if (this->actor.xzDistToPlayer <= (-20.0f + this->selectDist)) {
-            Math_SmoothStepToF(&this->actor.speedXZ, -5.0f, 1.0f, 1.2f, 0.0f);
-        } else if (this->actor.xzDistToPlayer > (20.0f + this->selectDist)) {
-            Math_SmoothStepToF(&this->actor.speedXZ, 5.0f, 1.0f, 1.2f, 0.0f);
+        if (this->actor.xzDistToPlayer <= (-15.0f + this->selectDist)) {
+            Math_SmoothStepToF(&this->actor.speedXZ, -5.0f, 1.0f, 1.6f, 0.0f);
+        } else if (this->actor.xzDistToPlayer > (15.0f + this->selectDist)) {
+            Math_SmoothStepToF(&this->actor.speedXZ, 5.0f, 1.0f, 1.6f, 0.0f);
         }
 
         if (this->actor.speedXZ >= 5.0f) {
@@ -1634,6 +1634,11 @@ void EnTest_WalkAndBlockElite(EnTest* this, PlayState* play) {
             }
         }
 
+        if (120.0f < this->actor.xzDistToPlayer && this->actor.xzDistToPlayer < 220.0f && player->swordState != 0) {
+            EnTest_SetupThrust(this);
+            return;
+        }
+
         if (this->actor.xzDistToPlayer < 110.0f && this->AIGoal == 0) {
             if (Rand_ZeroOne() > 0.33f) {
                 EnTest_SetupSlashDown(this);
@@ -1660,7 +1665,7 @@ void EnTest_SetupSidestepElite(EnTest* this, PlayState* play) {
     Math_SmoothStepToS(&this->actor.shape.rot.y, this->actor.yawTowardsPlayer, 1, 0xFA0, 1);
     this->actor.speedXZ = (Rand_Centered() >= 0) ? -4.0f : 4.0f;
     this->actor.world.rot.y = this->actor.shape.rot.y + 0x3FFF;
-    this->timer = (Rand_ZeroOne() * 20.0f) + 20.0f;
+    this->timer = (Rand_ZeroOne() * 20.0f);// + 20.0f;
     this->unk_7C8 = 0x18;
     this->selectDist = 95.0f;
     EnTest_SetupAction(this, EnTest_SidestepElite);
@@ -2388,10 +2393,21 @@ void EnTest_JumpBack(EnTest* this, PlayState* play) {
         if (!EnTest_ReactToProjectile(play, this)) {
             if (this->actor.xzDistToPlayer <= 100.0f) {
                 if (Actor_IsFacingPlayer(&this->actor, 0x1555)) {
-                    EnTest_SetupSlashDown(this);
+                    if (IS_ELITE) {
+                        if (Rand_ZeroOne() > 0.5f)
+                            EnTest_SetupSlashDown(this);
+                        else
+                            EnTest_SetupStop(this);
+                    } else {
+                        EnTest_SetupSlashDown(this);
+                    }
                 } else {
-                    EnTest_SetupIdle(this);
-                    this->timer = (Rand_ZeroOne() * 5.0f) + 5.0f;
+                    if (IS_ELITE) {
+                        EnTest_SetupStop(this);
+                    } else {
+                        EnTest_SetupIdle(this);
+                        this->timer = (Rand_ZeroOne() * 5.0f) + 5.0f;
+                    }
                 }
             } else {
                 if ((this->actor.xzDistToPlayer <= 220.0f) && Actor_IsFacingPlayer(&this->actor, 0xE38) && (!IS_ELITE || (this->actor.xzDistToPlayer >= 150.0f && Rand_ZeroOne() > 0.6))) {
@@ -2614,7 +2630,7 @@ void EnTest_SetupStop(EnTest* this) {
                      Animation_GetLastFrame(&gStalfosBlockWithShieldAnim), 2, 2.0f);
     this->unk_7C8 = 0x15;
     this->actor.speedXZ = 0.0f;
-    this->timer = 6.0f;
+    this->timer = 4;
     this->actor.world.rot.y = this->actor.shape.rot.y;
     this->shieldState = 5;
     this->stopStatus = 0;
@@ -2637,10 +2653,10 @@ void EnTest_StopAndBlock(EnTest* this, PlayState* play) {
     }
 
     if (this->timer == 0) {
-        if (this->actor.xzDistToPlayer < 130.0f) {
+        if (this->actor.xzDistToPlayer < 140.0f) {
             if (this->actor.xzDistToPlayer < 60.0f)
                 EnTest_SetupShieldBash(this);
-            else if (this->actor.xzDistToPlayer < 100.0f && Rand_ZeroOne() < 0.3f)
+            else if (this->actor.xzDistToPlayer < 100.0f && Rand_ZeroOne() < 0.2f)
                 EnTest_SetupSlashDown(this);
             else
                 EnTest_SetupSpinAttack(this);
@@ -2649,7 +2665,7 @@ void EnTest_StopAndBlock(EnTest* this, PlayState* play) {
     } else {
         this->timer--;
         if (!this->stopStatus) {
-            if (Rand_ZeroOne() < 0.1) {
+            if (Rand_ZeroOne() < 0.04) {
                EnTest_SetupWalkBack(this, 170.0f);
             }
             // else if (Rand_ZeroOne() < 0.1) {
@@ -3383,6 +3399,12 @@ void EnTest_Update(Actor* thisx, PlayState* play) {
     }
 
     if (!(this->swordCollider.base.atFlags & AT_BOUNCED)) {
+        if ((this->swordCollider.base.atFlags & AT_HIT)) {
+            Player_SetShieldRecoveryDefault(play);
+            if (Player_isInSwordAnimation(play))
+                func_80837C0C(play, player, 0, 4.0f, 5.0f, this->actor.shape.rot.y, 20);
+        }
+
         if (this->swordState >= 1) {
             if (!(this->variant & FLAME_SWORD_PARAM)) {
                 if (this->actionFunc == EnTest_Thrust)
@@ -3411,9 +3433,6 @@ void EnTest_Update(Actor* thisx, PlayState* play) {
 
             CollisionCheck_SetAT(play, &play->colChkCtx, &this->swordCollider.base);
         }
-
-        if ((this->swordCollider.base.atFlags & AT_HIT))
-            Player_SetShieldRecoveryDefault(play);
     } else {
         this->swordCollider.base.atFlags &= ~AT_BOUNCED;
         if (this->actionFunc == EnTest_SpinAttack)

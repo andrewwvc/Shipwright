@@ -80,6 +80,12 @@ typedef enum {
 #define STALFOS_WAS_HIT 1
 #define STALFOS_WAS_STUNNED 2
 
+#define STALFOS_GOAL_ATTACK 0
+#define STALFOS_GOAL_DEFEND 1
+#define STALFOS_GOAL_EVADE_TO_SPIN 2
+#define STALFOS_GOAL_AIM_STAB 3
+#define STALFOS_GOAL_COUNTER 4
+#define STALFOS_GOAL_BODY_CHECK 5
 
 typedef struct StalfosHitInfoStorage {
     s16 hitStatus;
