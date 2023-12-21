@@ -2011,6 +2011,10 @@ void func_80860F84(EnTest* this, PlayState* play) {
 }
 
 void EnTest_SetupSlashDown(EnTest* this) {
+    // if (this->actor.xzDistToPlayer < 100.0f && EnTest_WillCrossoverLand(this,play)) {
+    //     EnTest_SetupCrossoverJump(this);
+    //     return;
+    // }
     Animation_PlayOnce(&this->skelAnime, &gStalfosDownSlashAnim);
     Audio_StopSfxByPosAndId(&this->actor.projectedPos, NA_SE_EN_STAL_WARAU);
     this->swordCollider.base.atFlags &= ~AT_BOUNCED;
@@ -2539,6 +2543,10 @@ void EnTest_Jumpslash(EnTest* this, PlayState* play) {
     }
 }
 
+s16 EnTest_WillCrossoverLand(EnTest* this, PlayState* play) {
+    return Actor_TestFloorInDirection(&this->actor, play, 195.0f, this->actor.shape.rot.y);
+}
+
 void EnTest_SetupCrossoverJump(EnTest* this) {
     Animation_PlayOnce(&this->skelAnime, &gStalfosJumpAnim);
     Audio_StopSfxByPosAndId(&this->actor.projectedPos, NA_SE_EN_STAL_WARAU);
@@ -2547,6 +2555,7 @@ void EnTest_SetupCrossoverJump(EnTest* this) {
     this->actor.velocity.y = 18.0f;
     this->actor.speedXZ = 10.0f;
     Audio_PlayActorSound2(&this->actor, NA_SE_EN_STAL_JUMP);
+    Math_SmoothStepToS(&this->actor.shape.rot.y, this->actor.yawTowardsPlayer, 1, 0x600, 1);
     this->actor.world.rot.y = this->actor.shape.rot.y;
     this->swordCollider.base.atFlags &= ~AT_BOUNCED;
     this->swordCollider.base.atFlags &= ~AT_WEAK;
