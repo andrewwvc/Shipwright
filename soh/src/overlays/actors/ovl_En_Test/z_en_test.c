@@ -19,7 +19,7 @@ void EnTest_Draw(Actor* thisx, PlayState* play);
 void EnTest_ChooseActionElite(EnTest* this, PlayState* play);
 void EnTest_SetupWaitGround(EnTest* this);
 void EnTest_SetupWaitAbove(EnTest* this);
-void EnTest_SetupJumpBack(EnTest* this);
+s16 EnTest_SetupJumpBack(EnTest* this, PlayState* play);
 void EnTest_SetupShieldBash(EnTest* this);
 void EnTest_SetupSlashDownEnd(EnTest* this);
 void EnTest_SetupSlashUp(EnTest* this);
@@ -919,6 +919,7 @@ static InitChainEntry sInitChain[] = {
 #define IS_FULL_SHIELDING ((this->actionFunc == EnTest_Jumpslash && !VULNERABLE_IN_JUMP) || IS_ELITE && (this->actionFunc == EnTest_SlashDown || this->actionFunc == EnTest_SlashDownEnd || this->actionFunc == EnTest_SlashUp ||this->actionFunc == EnTest_SpinAttack))
 #define IS_VULNERABLE ((this->actionFunc == EnTest_SlashDown && isPlayerInHorizontalAttack(play)) || (this->actionFunc == EnTest_SlashDownEnd && isPlayerInHorizontalAttack(play)) || (this->actionFunc == EnTest_SlashUp && isPlayerInHorizontalAttack(play)) ||\
                         (this->actionFunc == EnTest_SpinAttack && isPlayerInVerticalAttack(play)) || (this->actionFunc == EnTest_Crouch && isPlayerInJumpAttack(play)))
+#define CAN_LONG_BACKJUMP ((this->actor.params != STALFOS_TYPE_CEILING) || IS_ELITE)
 
 void EnTest_SetupAction(EnTest* this, EnTestActionFunc actionFunc) {
     EffectBlure* blur = Effect_GetByIndex(this->effectIndex);
@@ -1098,6 +1099,7 @@ void EnTest_ChooseAction(EnTest* this, PlayState* play) {
     s32 pad;
     Player* player = GET_PLAYER(play);
     s16 yawDiff = player->actor.shape.rot.y - this->actor.shape.rot.y;
+    s8 actionSelected = 1;
 
     if (yawDiff == SHRT_MIN)
         yawDiff = SHRT_MAX;
@@ -1123,7 +1125,7 @@ void EnTest_ChooseAction(EnTest* this, PlayState* play) {
             case 9:
                 if (this->actor.params != STALFOS_TYPE_CEILING) {
                     this->actor.world.rot.y = this->actor.yawTowardsPlayer;
-                    EnTest_SetupJumpBack(this);
+                    actionSelected = EnTest_SetupJumpBack(this, play);
                 }
                 break;
         }
@@ -1131,7 +1133,7 @@ void EnTest_ChooseAction(EnTest* this, PlayState* play) {
         if (ABS((s16)(this->actor.yawTowardsPlayer - this->actor.shape.rot.y)) > 0x3E80) {
             if ((Rand_Centered() >= 0) && (this->actor.params != STALFOS_TYPE_CEILING)) {
                 this->actor.world.rot.y = this->actor.yawTowardsPlayer;
-                EnTest_SetupJumpBack(this);
+                EnTest_SetupJumpBack(this, play);
             } else if ((this->actor.xzDistToPlayer < 220.0f) && (this->actor.xzDistToPlayer > 170.0f)) {
                 if (Actor_IsFacingPlayer(&this->actor, 0x71C) && !Actor_IsTargeted(play, &this->actor)) {
                     EnTest_SetupJumpslash(this);
@@ -1157,6 +1159,10 @@ void EnTest_ChooseAction(EnTest* this, PlayState* play) {
             }
         }
     } else {
+        EnTest_ChooseRandomAction(this, play);
+    }
+
+    if (!actionSelected) {
         EnTest_ChooseRandomAction(this, play);
     }
 }
@@ -1227,19 +1233,23 @@ void EnTest_ChooseActionElite(EnTest* this, PlayState* play) {
             case 4:
             case 9:
                 this->actor.world.rot.y = this->actor.yawTowardsPlayer;
-                EnTest_SetupJumpBack(this);
+                if (!EnTest_SetupJumpBack(this, play))
+                    EnTest_SetupSidestepElite(this, play);
                 break;
         }
     } else if (orientationToPlayer > 0x4E80) {
-            if ((Rand_Centered() >= 0)) {
-                this->actor.world.rot.y = this->actor.yawTowardsPlayer;
-                EnTest_SetupJumpBack(this);
-            } else if ((this->actor.xzDistToPlayer < 220.0f) && (this->actor.xzDistToPlayer > 170.0f)) {
-                if (Actor_IsFacingPlayer(&this->actor, 0x71C) && !Actor_IsTargeted(play, &this->actor)) {
-                    EnTest_SetupJumpslash(this);
-                }
+            s16 tempRot = this->actor.world.rot.y;
+            this->actor.world.rot.y = this->actor.yawTowardsPlayer;
+            if ((Rand_Centered() >= 0) && EnTest_SetupJumpBack(this, play)) {
             } else {
-                EnTest_SetupWalkAndBlock(this);
+                this->actor.world.rot.y = tempRot;
+                if ((this->actor.xzDistToPlayer < 220.0f) && (this->actor.xzDistToPlayer > 170.0f)) {
+                    if (Actor_IsFacingPlayer(&this->actor, 0x71C) && !Actor_IsTargeted(play, &this->actor)) {
+                        EnTest_SetupJumpslash(this);
+                    }
+                } else {
+                    EnTest_SetupWalkAndBlock(this);
+                }
             }
     } else {
         //EnTest_SetupSpinAttack(this);
@@ -1326,8 +1336,7 @@ void EnTest_Idle(EnTest* this, PlayState* play) {
             if ((player->swordState != 0) && (ABS(yawDiff) >= 0x1F40)) {
                 this->actor.shape.rot.y = this->actor.world.rot.y = this->actor.yawTowardsPlayer;
 
-                if (Rand_ZeroOne() > 0.7f && player->meleeWeaponAnimation != 0x11) {
-                    EnTest_SetupJumpBack(this);
+                if (Rand_ZeroOne() > 0.7f && player->meleeWeaponAnimation != 0x11 && EnTest_SetupJumpBack(this, play)) {
                 } else {
                     func_808627C4(this, play);
                 }
@@ -1473,8 +1482,7 @@ void EnTest_WalkAndBlock(EnTest* this, PlayState* play) {
             if (ABS(yawDiff) >= 0x1F40 || yawDiff == SHRT_MIN) {
                 this->actor.shape.rot.y = this->actor.world.rot.y = this->actor.yawTowardsPlayer;
 
-                if ((Rand_ZeroOne() > 0.7f) && (player->meleeWeaponAnimation != 0x11)) {
-                    EnTest_SetupJumpBack(this);
+                if ((Rand_ZeroOne() > 0.7f) && (player->meleeWeaponAnimation != 0x11) && EnTest_SetupJumpBack(this, play)) {
                 } else {
                     EnTest_SetupStopAndBlock(this);
                 }
@@ -1579,6 +1587,16 @@ void EnTest_WalkAndBlockElite(EnTest* this, PlayState* play) {
 
         if (!Actor_TestFloorInDirection(&this->actor, play, this->actor.speedXZ, this->actor.world.rot.y)) {
             this->actor.speedXZ *= -1.0f;
+            if (this->actor.speedXZ > 0)
+                this->selectDist = 95.0f;
+        }
+
+        if (((this->actor.bgCheckFlags & 8) && (this->actor.speedXZ < 0.0f)) /*|| ((this->timer % 16) && (Rand_ZeroOne() > 0.95f))*/) {
+            this->actor.speedXZ *= -1.0f;
+            if (this->AIGoal == STALFOS_GOAL_DEFEND)
+                this->AIGoal = STALFOS_GOAL_ATTACK;
+            // EnTest_SetupSidestepElite(this, play);
+            // return;
         }
 
         if (ABS(this->actor.speedXZ) < 3.0f) {
@@ -1609,8 +1627,7 @@ void EnTest_WalkAndBlockElite(EnTest* this, PlayState* play) {
             if (ABS(yawDiff) >= 0x1F40 || yawDiff == SHRT_MIN) {
                 this->actor.shape.rot.y = this->actor.world.rot.y = this->actor.yawTowardsPlayer;
 
-                if ((Rand_ZeroOne() > 0.7f) && (player->meleeWeaponAnimation == PLAYER_MWA_RIGHT_SLASH_1H)) {
-                    EnTest_SetupJumpBack(this);
+                if ((Rand_ZeroOne() > 0.7f) && (player->meleeWeaponAnimation == PLAYER_MWA_RIGHT_SLASH_1H) && EnTest_SetupJumpBack(this, play)) {
                 } else {
                     EnTest_SetupStopAndBlock(this);
                 }
@@ -2139,8 +2156,7 @@ void EnTest_SlashDownEnd(EnTest* this, PlayState* play) {
         if (this->hitTracker) {
             this->hitTracker = 0;
             //Player_SetShieldRecoveryDefault(play);
-            if (this->actor.params != STALFOS_TYPE_CEILING) {
-                EnTest_SetupJumpBack(this);
+            if (CAN_LONG_BACKJUMP && EnTest_SetupJumpBack(this, play)) {
                 return;
             }
         }
@@ -2154,8 +2170,7 @@ void EnTest_SlashDownEnd(EnTest* this, PlayState* play) {
         this->actor.world.rot.y = Actor_WorldYawTowardActor(&this->actor, &player->actor);
 
         if (Rand_ZeroOne() > 0.7f) {
-            if (this->actor.params != STALFOS_TYPE_CEILING) {
-                EnTest_SetupJumpBack(this);
+            if (CAN_LONG_BACKJUMP && EnTest_SetupJumpBack(this, play)) {
                 return;
             }
         }
@@ -2163,21 +2178,23 @@ void EnTest_SlashDownEnd(EnTest* this, PlayState* play) {
         yawDiff = player->actor.shape.rot.y - this->actor.shape.rot.y;
 
         if (ABS(yawDiff) <= 0x2710) {
+            s16 tempRot = this->actor.world.rot.y;
             yawDiff = this->actor.yawTowardsPlayer - this->actor.shape.rot.y;
-
-            if ((ABS(yawDiff) > 0x3E80) && (this->actor.params != STALFOS_TYPE_CEILING)) {
-                this->actor.world.rot.y = this->actor.yawTowardsPlayer;
-                EnTest_SetupJumpBack(this);
-            } else if (player->stateFlags1 & 0x10) {
-                if (1 || this->actor.isTargeted) {
-                    EnTest_SetupSlashDown(this);
-                } else if (Rand_Centered() >= 0) {
-                    func_808627C4(this, play);
-                } else {
-                    EnTest_SetupJumpBack(this);
-                }
+            this->actor.world.rot.y = this->actor.yawTowardsPlayer;
+            if ((ABS(yawDiff) > 0x3E80) && (CAN_LONG_BACKJUMP) && EnTest_SetupJumpBack(this, play)) {
             } else {
-                EnTest_SetupSlashDown(this);
+                this->actor.world.rot.y = tempRot;
+                // if (player->stateFlags1 & 0x10) {
+                //     if (1 || this->actor.isTargeted) {
+                //         EnTest_SetupSlashDown(this);
+                //     } else if (Rand_Centered() >= 0) {
+                //         func_808627C4(this, play);
+                //     } else {
+                //         EnTest_SetupJumpBack(this, play);
+                //     }
+                // } else {
+                    EnTest_SetupSlashDown(this);
+                //}
             }
         } else {
             func_808627C4(this, play);
@@ -2234,7 +2251,7 @@ void EnTest_SetupThrust(EnTest* this) {
     Animation_PlayOnce(&this->skelAnime, &gStalfosStabAnim);
     this->swordCollider.base.atFlags &= ~AT_BOUNCED;
     this->swordCollider.base.atFlags |= AT_WEAK;
-    this->unk_7C8 = 0x11;
+    this->unk_7C8 = 0x10;
     this->swordCollider.info.toucher.damage = 0x20;
     this->actor.speedXZ = 0.0f;
     EnTest_SetupAction(this, EnTest_Thrust);
@@ -2397,7 +2414,22 @@ void EnTest_Crouch(EnTest* this, PlayState* play) {
     }
 }
 
-void EnTest_SetupJumpBack(EnTest* this) {
+//#define WILL_LONG_BACKJUMP ((this->actor.params != STALFOS_TYPE_CEILING) || IS_ELITE)
+
+s16 EnTest_WillJumpbackLand(EnTest* this, PlayState* play) {
+    return Actor_TestFloorInDirection(&this->actor, play, (this->actor.params != STALFOS_TYPE_CEILING) ? -165.0f : -105.0f, this->actor.shape.rot.y);
+}
+
+s16 EnTest_SetupJumpBack(EnTest* this, PlayState* play) {
+    if (IS_ELITE && ((this->actor.flags & ACTOR_FLAG_TARGETABLE) || (this->variant & DARK_PARAM)) && (Player_isInSwordAnimation(play) || Rand_ZeroOne() > 0.6f)) {
+        EnTest_SetupCrouch(this);
+        return 1;
+    }
+
+    if (!EnTest_WillJumpbackLand(this, play)){
+        return 0;
+    }
+
     Animation_PlayOnce(&this->skelAnime, &gStalfosJumpBackwardsAnim);
     Audio_PlayActorSound2(&this->actor, NA_SE_EN_STAL_JUMP);
     this->unk_7C8 = 0x14;
@@ -2413,6 +2445,7 @@ void EnTest_SetupJumpBack(EnTest* this) {
     } else {
         this->actor.speedXZ = -7.0f;
     }
+    return 1;
 }
 
 void EnTest_JumpBack(EnTest* this, PlayState* play) {
@@ -2680,11 +2713,11 @@ void EnTest_SetupStop(EnTest* this) {
 void EnTest_StopAndBlock(EnTest* this, PlayState* play) {
     Math_SmoothStepToF(&this->actor.speedXZ, 0.0f, 1.0f, 0.5f, 0.0f);
     SkelAnime_Update(&this->skelAnime);
-
+    s16 tempRot = this->actor.world.rot.y;
+    this->actor.world.rot.y = this->actor.yawTowardsPlayer;
     if ((ABS((s16)(this->actor.yawTowardsPlayer - this->actor.shape.rot.y)) > 0x3E80) &&
-        (this->actor.params != STALFOS_TYPE_CEILING) && (Rand_Centered() >= 0)) {
-        this->actor.world.rot.y = this->actor.yawTowardsPlayer;
-        EnTest_SetupJumpBack(this);
+        (CAN_LONG_BACKJUMP) && (Rand_Centered() >= 0) && EnTest_SetupJumpBack(this, play)) {
+        return;
     }
     this->actor.world.rot.y = tempRot;
 
@@ -2811,9 +2844,8 @@ void EnTest_FlinchFront(EnTest* this, PlayState* play) {
         if ((this->actor.bgCheckFlags & 8) && ((ABS((s16)(this->actor.wallYaw - this->actor.shape.rot.y)) < 0x38A4) &&
                                                (this->actor.xzDistToPlayer < 80.0f))) {
             EnTest_SetupJumpUp(this);
-        } else if ((Rand_ZeroOne() > 0.7f) && (this->actor.params != STALFOS_TYPE_CEILING) &&
-                   (player->meleeWeaponAnimation != 0x11)) {
-            EnTest_SetupJumpBack(this);
+        } else if ((Rand_ZeroOne() > 0.7f) && (CAN_LONG_BACKJUMP) &&
+                   (player->meleeWeaponAnimation != 0x11) && EnTest_SetupJumpBack(this, play)) {
         } else {
             EnTest_SetupStop(this);
         }
@@ -2854,9 +2886,8 @@ void EnTest_FlinchBack(EnTest* this, PlayState* play) {
         if ((this->actor.bgCheckFlags & 8) && ((ABS((s16)(this->actor.wallYaw - this->actor.shape.rot.y)) < 0x38A4) &&
                                                (this->actor.xzDistToPlayer < 80.0f))) {
             EnTest_SetupJumpUp(this);
-        } else if ((Rand_ZeroOne() > 0.7f) && (this->actor.params != STALFOS_TYPE_CEILING) &&
-                   (player->meleeWeaponAnimation != 0x11)) {
-            EnTest_SetupJumpBack(this);
+        } else if ((Rand_ZeroOne() > 0.7f) && (CAN_LONG_BACKJUMP) &&
+                   (player->meleeWeaponAnimation != 0x11) && EnTest_SetupJumpBack(this, play)) {
         } else {
             EnTest_SetupStop(this);
         }
@@ -2901,8 +2932,7 @@ void EnTest_Stunned(EnTest* this, PlayState* play) {
                 ((ABS((s16)(this->actor.wallYaw - this->actor.shape.rot.y)) < 0x38A4) &&
                  (this->actor.xzDistToPlayer < 80.0f))) {
                 EnTest_SetupJumpUp(this);
-            } else if ((Rand_ZeroOne() > 0.7f) && (player->meleeWeaponAnimation != 0x11)) {
-                EnTest_SetupJumpBack(this);
+            } else if ((Rand_ZeroOne() > 0.7f) && (player->meleeWeaponAnimation != 0x11) && EnTest_SetupJumpBack(this, play)) {
             } else {
                 EnTest_SetupStopAndBlock(this);
             }
@@ -3097,7 +3127,8 @@ void func_80862E6C(EnTest* this, PlayState* play) {
             this->actor.child = NULL;
             if (!(this->variant & DARK_PARAM))
                 this->actor.flags |= ACTOR_FLAG_TARGETABLE;
-            EnTest_SetupJumpBack(this);
+            if (!EnTest_SetupJumpBack(this, play))
+                EnTest_SetupIdle(this);
         } else if ((this->actor.params == STALFOS_TYPE_5) &&
                    !Actor_FindNearby(play, &this->actor, ACTOR_EN_TEST, ACTORCAT_ENEMY, 8000.0f)) {
             Item_DropCollectibleRandom(play, &this->actor, &this->actor.world.pos, 0xD0);
@@ -3187,8 +3218,7 @@ void EnTest_Recoil(EnTest* this, PlayState* play) {
         if (Rand_ZeroOne() > 0.7f) {
             EnTest_SetupIdle(this);
             this->timer = (Rand_ZeroOne() * 5.0f) + 5.0f;
-        } else if ((Rand_Centered() >= 0) && ((this->actor.params != STALFOS_TYPE_CEILING))) {//NOTE:Alter this to tune jumpbacks
-            EnTest_SetupJumpBack(this);
+        } else if ((Rand_Centered() >= 0) && ((CAN_LONG_BACKJUMP)) && EnTest_SetupJumpBack(this, play)) {//NOTE:Alter this to tune jumpbacks
         } else {
             func_808627C4(this, play);
         }
@@ -3203,7 +3233,7 @@ void EnTest_Rise(EnTest* this, PlayState* play) {
         this->actor.world.pos.y = this->actor.home.pos.y - 3.5f;
     } else {
         this->actor.world.pos.y = this->actor.home.pos.y;
-        EnTest_SetupJumpBack(this);
+        EnTest_SetupJumpBack(this, play);
     }
 }
 
@@ -3752,8 +3782,7 @@ s32 EnTest_ReactToProjectile(PlayState* play, EnTest* this) {
                 EnTest_SetupJumpUp(this);
             } else if (ABS(yawToProjectile) < 0x2000) {
                 EnTest_SetupStopAndBlock(this);
-            } else if (ABS(yawToProjectile) < 0x6000) {
-                EnTest_SetupJumpBack(this);
+            } else if (ABS(yawToProjectile) < 0x6000 && EnTest_SetupJumpBack(this, play)) {
             } else {
                 EnTest_SetupJumpUp(this);
             }
@@ -3789,8 +3818,7 @@ s32 EnTest_ReactToProjectile(PlayState* play, EnTest* this) {
                 directionFlag = true;
             }
 
-            if (directionFlag) {
-                EnTest_SetupJumpBack(this);
+            if (directionFlag && EnTest_SetupJumpBack(this, play)) {
             } else {
                 EnTest_SetupJumpUp(this);
             }
