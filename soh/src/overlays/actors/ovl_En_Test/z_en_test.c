@@ -911,6 +911,11 @@ void EnTest_SetupAction(EnTest* this, EnTestActionFunc actionFunc) {
     }
 
     this->actionFunc = actionFunc;
+    //lusprintf("__FILE__",__LINE__,0, "Action Func: %p unk_7C8: %d", actionFunc, this->unk_7C8);
+}
+
+s16 EnTest_FreeAction(u8 state) {
+    return state == Idle || state == Walk || state == Sidestep || state == Stop;
 }
 
 void EnTest_SetDirectionIndicator(EnTest* this, s16 index) {
@@ -2646,26 +2651,36 @@ void EnTest_StopAndBlock(EnTest* this, PlayState* play) {
         this->actor.world.rot.y = this->actor.yawTowardsPlayer;
         EnTest_SetupJumpBack(this);
     }
-
-    if (!IS_ELITE) {
-        EnTest_SetupIdleFromBlock(this);
-        return;
-    }
+    this->actor.world.rot.y = tempRot;
 
     if (this->timer == 0) {
-        if (this->actor.xzDistToPlayer < 140.0f) {
+        if (!IS_ELITE) {
+            EnTest_SetupIdleFromBlock(this);
+            return;
+        }
+
+        if (this->actor.xzDistToPlayer < 130.0f) {
+            if (this->AIGoal == STALFOS_GOAL_DIRECT_SPIN) {
+                EnTest_SetupSpinAttack(this);
+                this->AIGoal = STALFOS_GOAL_DEFEND;
+                return;
+            }
             if (this->actor.xzDistToPlayer < 60.0f)
                 EnTest_SetupShieldBash(this);
-            else if (this->actor.xzDistToPlayer < 100.0f && Rand_ZeroOne() < 0.2f)
+            else if (this->actor.xzDistToPlayer < 105.0f && Rand_ZeroOne() < 0.2f)
                 EnTest_SetupSlashDown(this);
             else
                 EnTest_SetupSpinAttack(this);
-        } else
-            EnTest_SetupIdleFromBlockElite(this);
+        } else {
+            if (Rand_ZeroOne() < 0.9)
+                EnTest_SetupIdleFromBlockElite(this);
+            else
+                EnTest_SetupSidestepElite(this, play);
+        }
     } else {
         this->timer--;
         if (!this->stopStatus) {
-            if (Rand_ZeroOne() < 0.04) {
+            if (Rand_ZeroOne() < 0.05) {
                EnTest_SetupWalkBack(this, 170.0f);
             }
             // else if (Rand_ZeroOne() < 0.1) {
@@ -3467,6 +3482,15 @@ void EnTest_Update(Actor* thisx, PlayState* play) {
 
     //Update AI
     EnTest_UpdateAI(thisx, play);
+
+    //Handle interrupting actions
+    if (EnTest_FreeAction(this->unk_7C8)) {
+        if ((!(player->stateFlags1 & 0x10) || player->shieldRelaxTimer > 10) && ((Rand_ZeroOne() < 0.08f) || (!Player_IsFacingActor(&this->actor, 0x2000, play) && (Rand_ZeroOne() < 0.08f)))) {
+            this->AIGoal = STALFOS_GOAL_DIRECT_SPIN;
+            EnTest_SetupStop(this);
+            //Possibly add indirect spin goal
+        }
+    }
 }
 
 s32 EnTest_OverrideLimbDraw(PlayState* play, s32 limbIndex, Gfx** dList, Vec3f* pos, Vec3s* rot, void* thisx) {
