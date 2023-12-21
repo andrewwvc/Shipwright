@@ -2662,19 +2662,24 @@ void EnZf_Update(Actor* thisx, PlayState* play) {
     }
 
     this->swordCollider.info.toucher.dmgFlags = this->stance ? 0x00100000 : 0xFFCFFFFF;
+    if ((this->stance == ENZF_SIDE && (this->swordCollider.base.atFlags & AT_BOUNCED)) ||
+                (this->swordCollider.base.atFlags & AT_HIT)) {
+        Player_SetShieldRecoveryDefault(play);
+        if (Player_isInSwordAnimation(play) && !(this->swordCollider.base.atFlags & AT_BOUNCED))
+            func_80837C0C(play, player, 0, 4.0f, 5.0f, this->actor.shape.rot.y, 20);
+    }
     if ((this->action == ENZF_ACTION_SLASH) && (this->skelAnime.curFrame >= 14.0f) &&
         (this->skelAnime.curFrame <= 20.0f)) {
-        if ((this->stance == ENZF_SIDE && this->swordCollider.base.atFlags & AT_BOUNCED) ||
-                    this->swordCollider.base.atFlags & AT_HIT)
-            Player_SetShieldRecoveryDefault(play);
         if (!(this->swordCollider.base.atFlags & AT_BOUNCED) && !(this->swordCollider.base.acFlags & AC_HIT)) {
             CollisionCheck_SetAT(play, &play->colChkCtx, &this->swordCollider.base);
         } else {
-            this->swordCollider.base.atFlags &= ~AT_BOUNCED;
-            this->swordCollider.base.acFlags &= ~AC_HIT;
             EnZf_SetupRecoilFromBlockedSlash(this);
         }
     }
+    s16 check = Player_isInSwordAnimation(play) && player->shieldRelaxTimer != 0;
+    this->swordCollider.base.atFlags &= ~AT_BOUNCED;
+    this->swordCollider.base.acFlags &= ~AC_HIT;
+    this->swordCollider.base.atFlags &= ~AT_HIT;
 
     s16 angleToPlayer = this->actor.yawTowardsPlayer - this->actor.shape.rot.y;
     if (angleToPlayer == (s16)0x8000)
