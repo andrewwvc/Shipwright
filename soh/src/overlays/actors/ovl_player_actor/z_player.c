@@ -3398,7 +3398,7 @@ void func_80836BEC(Player* this, PlayState* play) {
                     case 1:
                     case 2:
                     case 3:
-                    if (CHECK_BTN_ALL(sControlInput->cur.button, BTN_R) || !(this->swordState == 0))
+                    if (CHECK_BTN_ALL(sControlInput->cur.button, BTN_R) || (Player_isInSwordAnimation(play)))
                         this->crossoverState |= 2;
 
                     if (this->entryDiff.x*(this->unk_664->world.pos.x-this->actor.world.pos.x) +
