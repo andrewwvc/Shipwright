@@ -913,7 +913,7 @@ static InitChainEntry sInitChain[] = {
 #define FLAME_SWORD_PARAM 8
 #define ELITE_PARAM 16
 #define DARK_PARAM 32
-#define IS_ELITE 1
+#define IS_ELITE (this->variant & ELITE_PARAM)
 
 #define VULNERABLE_IN_JUMP (this->skelAnime.curFrame >= this->skelAnime.animLength-5.0f && this->timer == 1)
 #define IS_FULL_SHIELDING ((this->actionFunc == EnTest_Jumpslash && !VULNERABLE_IN_JUMP) || IS_ELITE && (this->actionFunc == EnTest_SlashDown || this->actionFunc == EnTest_SlashDownEnd || this->actionFunc == EnTest_SlashUp ||this->actionFunc == EnTest_SpinAttack))
