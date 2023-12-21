@@ -36,8 +36,8 @@ void func_80860BDC(EnTest* this);
 void EnTest_SetupIdleFromBlock(EnTest* this);
 void EnTest_IdleFromBlockElite(EnTest* this, PlayState* play);
 void EnTest_SetupRecoil(EnTest* this);
-void EnTest_SetupFlinchBack(EnTest* this);
-void EnTest_SetupFlinchFront(EnTest* this);
+void EnTest_SetupFlinchBack(EnTest* this, s16 augDuration);
+void EnTest_SetupFlinchFront(EnTest* this, s16 augDuration);
 void EnTest_SetupStopAndBlock(EnTest* this);
 void EnTest_SetupStop(EnTest* this);
 void func_808627C4(EnTest* this, PlayState* play);
@@ -2726,12 +2726,16 @@ void EnTest_IdleFromBlockElite(EnTest* this, PlayState* play) {
     }
 }
 
-void EnTest_SetupFlinchFront(EnTest* this) {
+void EnTest_SetupFlinchFront(EnTest* this, s16 augDuration) {
     Animation_PlayOnce(&this->skelAnime, &gStalfosFlinchFromHitFrontAnim);
     Audio_PlayActorSound2(&this->actor, NA_SE_EN_STAL_DAMAGE);
     this->unk_7C8 = 8;
+    if (this->shieldState != 0) {
+        this->shieldState = 3;
+    }
     this->actor.speedXZ = -2.0f;
-    Actor_SetColorFilter(&this->actor, 0x4000, 0xFF, 0, 8);
+    this->skelAnime.playSpeed /= augDuration;
+    Actor_SetColorFilter(&this->actor, 0x4000, 0xFF, 0, 8*augDuration);
     EnTest_SetupAction(this, EnTest_FlinchFront);
 }
 
@@ -2753,7 +2757,7 @@ void EnTest_FlinchFront(EnTest* this, PlayState* play) {
         }
     }
 
-    if (player->swordState != 0) {
+    if (player->swordState != 0 && (player->meleeWeaponAnimation != PLAYER_MWA_JUMPSLASH_START && player->meleeWeaponAnimation != PLAYER_MWA_JUMPSLASH_FINISH)) {
         if ((this->actor.bgCheckFlags & 8) && ((ABS((s16)(this->actor.wallYaw - this->actor.shape.rot.y)) < 0x38A4) &&
                                                (this->actor.xzDistToPlayer < 80.0f))) {
             EnTest_SetupJumpUp(this);
@@ -2768,12 +2772,16 @@ void EnTest_FlinchFront(EnTest* this, PlayState* play) {
     }
 }
 
-void EnTest_SetupFlinchBack(EnTest* this) {
+void EnTest_SetupFlinchBack(EnTest* this, s16 augDuration) {
     Animation_PlayOnce(&this->skelAnime, &gStalfosFlinchFromHitBehindAnim);
     Audio_PlayActorSound2(&this->actor, NA_SE_EN_STAL_DAMAGE);
     this->unk_7C8 = 9;
+    if (this->shieldState != 0) {
+        this->shieldState = 3;
+    }
     this->actor.speedXZ = -2.0f;
-    Actor_SetColorFilter(&this->actor, 0x4000, 0xFF, 0, 8);
+    this->skelAnime.playSpeed /= augDuration;
+    Actor_SetColorFilter(&this->actor, 0x4000, 0xFF, 0, augDuration*8);
     EnTest_SetupAction(this, EnTest_FlinchBack);
 }
 
@@ -2792,7 +2800,7 @@ void EnTest_FlinchBack(EnTest* this, PlayState* play) {
         }
     }
 
-    if (player->swordState != 0) {
+    if (player->swordState != 0 && (player->meleeWeaponAnimation != PLAYER_MWA_JUMPSLASH_START && player->meleeWeaponAnimation != PLAYER_MWA_JUMPSLASH_FINISH)) {
         if ((this->actor.bgCheckFlags & 8) && ((ABS((s16)(this->actor.wallYaw - this->actor.shape.rot.y)) < 0x38A4) &&
                                                (this->actor.xzDistToPlayer < 80.0f))) {
             EnTest_SetupJumpUp(this);
@@ -3207,9 +3215,9 @@ void EnTest_UpdateDamage(EnTest* this, PlayState* play) {
         if ((this->actor.colChkInfo.damageEffect != STALFOS_DMGEFF_SLING) &&
             (this->actor.colChkInfo.damageEffect != STALFOS_DMGEFF_FIREMAGIC) &&
             (this->actionFunc != EnTest_Jumpslash || VULNERABLE_IN_JUMP)) {
-            this->lastDamageEffect = this->actor.colChkInfo.damageEffect;
-            if (this->swordState >= 1) {
-                this->swordState = 0;
+                this->lastDamageEffect = this->actor.colChkInfo.damageEffect;
+                if (this->swordState >= 1) {
+                    this->swordState = 0;
             }
             this->unk_7DC = player->unk_845;
             this->actor.world.rot.y = this->actor.yawTowardsPlayer;
@@ -3222,18 +3230,19 @@ void EnTest_UpdateDamage(EnTest* this, PlayState* play) {
                     EnTest_SetupStunned(this);
                 }
             } else {
+                s16 augDuration = 1;//((this->bodyCollider.info.acHitInfo != NULL) && (this->bodyCollider.info.acHitInfo->toucher.dmgFlags & DMG_JUMP_SLASH)) ? 2 : 1;
                 if (Actor_IsFacingPlayer(&this->actor, 0x4000)) {
                     if (Actor_ApplyDamage(&this->actor) == 0) {
                         Enemy_StartFinishingBlow(play, &this->actor);
                         func_80862FA8(this, play);
                     } else {
-                        EnTest_SetupFlinchFront(this);
+                        EnTest_SetupFlinchFront(this, augDuration);
                     }
                 } else if (Actor_ApplyDamage(&this->actor) == 0) {
                     func_808630F0(this, play);
                     Enemy_StartFinishingBlow(play, &this->actor);
                 } else {
-                    EnTest_SetupFlinchBack(this);
+                    EnTest_SetupFlinchBack(this, augDuration);
                 }
             }
         }
