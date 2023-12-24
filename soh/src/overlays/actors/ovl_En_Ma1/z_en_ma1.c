@@ -568,6 +568,8 @@ void EnMa1_DoSomething(EnMa1* this, PlayState* play) {
     if (gSaveContext.n64ddFlag) {
         this->actor.home.pos.z = this->actor.world.pos.z;
     }
+
+    lusprintf("ma1.c", __LINE__, 0, "In DoSomething");
 }
 
 void EnMa1_Update(Actor* thisx, PlayState* play) {
@@ -582,7 +584,9 @@ void EnMa1_Update(Actor* thisx, PlayState* play) {
     if (this->actionFunc != EnMa1_DoNothing) {
         Npc_UpdateTalking(play, &this->actor, &this->interactInfo.talkState, (f32)this->collider.dim.radius + 30.0f,
                           EnMa1_GetText, func_80AA0778);
+                          lusprintf("ma1.c", __LINE__, 0, "Updating talking...");
     }
+    lusprintf("ma1.c", __LINE__, 0, "state: %d, text: 0x%x, anim: %i, params: 0x%x", this->interactInfo.talkState, thisx->textId, (this->skelAnime.animation == &gMalonChildIdleAnim), this->actor.params);
     func_80AA0B74(this);
     func_80AA0AF4(this, play);
 }
