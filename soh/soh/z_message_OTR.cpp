@@ -1049,9 +1049,9 @@ extern "C" void OTRMessage_Init()
     MakeNormalMsgEng(HylianMsg+0, "Oh, so I guess you're here&for the night trade then.^We normally don't let&kids get involved, but&you seem savy enough.");
     MakeNormalMsgEng(HylianMsg+1, "Here's our special night offers.\x0B\x02");
     MakeNormalMsgEng(HylianMsg+2, "I don't typically take&guests during the day.^That's why I lock my door,&as you'd know.^If you have business here,&please let that be known&ahead of time.");
-    MakeNormalMsgEng(HylianMsg+3, "You know, I heard there's some&shady business going on in&some of the shops around here&at night.^Apparantly there are secret deals&being done on luxury items that&aren't being offered to the public.");
+    MakeNormalMsgEng(HylianMsg+3, "You know, I heard there's some&shady business going on in&some of the shops around here&at night.^Apparently there are secret deals&being done on luxury items that&aren't being offered to the public.");
     MakeNormalMsgEng(HylianMsg+4, "And how would this guy know&about what he's telling me?^He thinks he's got the&dirt on everything.");
-    MakeNormalMsgEng(HylianMsg+5, "You know, I heard that the&folks at Lon Lon Ranch are&having trouble getting enough milk.^Apparantly, they don't have&enough cows themselves to&provide enough supply.");
+    MakeNormalMsgEng(HylianMsg+5, "You know, I heard that the&folks at Lon Lon Ranch are&having trouble getting enough milk.^Apparently, they don't have&enough cows themselves to&provide enough supply.");
     MakeNormalMsgEng(HylianMsg+6, "I would help them, but&I can't make any milk myself!");
     MakeNormalMsgEng(HylianMsg+7, "Now there, surely there's something&they could each be used for, otherwise&why would people borrow&them in the first place?");
     MakeNormalMsgEng(HylianMsg+8, "Useless, they're useless I tell you.^There's no way even half&the masks that the mask&shop offers have any use at all.^They're just children's toys!");
@@ -1074,7 +1074,7 @@ extern "C" void OTRMessage_Init()
     MakeNormalMsgEng(RanchMsg+2, "Well, I did want to play,&but there are all these&mean birds flying around.^There's no way I can go&out there like this now.");
     MakeNormalMsgEng(RanchMsg+3, "Oh, you're getting them.&They still don't seem&to be going away though.");
     MakeNormalMsgEng(RanchMsg+4, "Oh, you're pretty good at this.&Those birds just keep comming,&but I guess I feel safer&knowing you're here.^Maybe we should call it a night.");
-    MakeNormalMsgEng(RanchMsg+5, "Oh, I guess you here to defend&us against those pesky birds.^I'll be waiting then.");
+    MakeNormalMsgEng(RanchMsg+5, "Oh, I guess you're here to defend&us against those pesky birds.^I'll be waiting then.");
     MakeNormalMsgEng(RanchMsg+6, "\x08Hey! Let's set off.&Try following me.\016<\x02");
     MakeNormalMsgEng(RanchMsg+7, "\x08Oh, I see Epona isn't&with you yet!\016<\x02");
     MakeNormalMsgEng(RanchMsg+8, "You seem to really have a knack&for understanding horses.^Hey, fairy boy, remember the times&when we used to stay up all&night and play around the ranch?^It barely feels that long ago,&doesn't it?^Say, why don't you come&riding with me sometime?^You up for it?&\x1B&%gYes&Sorry, I'm busy.%w\x02");
@@ -1093,11 +1093,11 @@ extern "C" void OTRMessage_Init()
     MakeNormalMsgEng(ZoraMsg+3, "I heard Ruto was treated very&roughly the last time she went out.^I would hope our princess would&deserve far more dignified&treatment from anyone.");
     MakeNormalMsgEng(ZoraMsg+4, "I heard Ruto had some scary&encounters on that night.&I hope that doens't happen to our princess again.");
     MakeNormalMsgEng(ZoraMsg+5, "I heard Ruto was made quite&unconfortable on her night away.&I would hope anyone in her company&would treat her with good courtesy.");
-    MakeNormalMsgEng(ZoraMsg+6, "Apparantly, Ruto's boyfriend&just abandoned her,&leaving her completely alone!^How unthinkable!");
-    MakeNormalMsgEng(ZoraMsg+7, "Apparantly, whoever was&supposed to meet Ruto&just never showed up at all!^How unbelievable!");
-    MakeNormalMsgEng(ZoraMsg+8, "There was apparantly something&unexpected that happend&which bothered Ruto the&last time she went out.^I can't say I'm aware of what&that was in particular though.");
-    MakeNormalMsgEng(ZoraMsg+9, "You know what I heard.&Apparantly, Ruto's date&showed up far ahead of time.^Almost like he was excessively&desperate for her.");
-    MakeNormalMsgEng(ZoraMsg+10, "You know what I heard.&Apparantly, Ruto's date&showed up incredibly late.^Like he had no regard&for her whatsoever!");
+    MakeNormalMsgEng(ZoraMsg+6, "Apparently, Ruto's boyfriend&just abandoned her,&leaving her completely alone!^How unthinkable!");
+    MakeNormalMsgEng(ZoraMsg+7, "Apparently, whoever was&supposed to meet Ruto&just never showed up at all!^How unbelievable!");
+    MakeNormalMsgEng(ZoraMsg+8, "There was apparently something&unexpected that happend&which bothered Ruto the&last time she went out.^I can't say I'm aware of what&that was in particular though.");
+    MakeNormalMsgEng(ZoraMsg+9, "You know what I heard.&Apparently, Ruto's date&showed up far ahead of time.^Almost like he was excessively&desperate for her.");
+    MakeNormalMsgEng(ZoraMsg+10, "You know what I heard.&Apparently, Ruto's date&showed up incredibly late.^Like he had no regard&for her whatsoever!");
     MakeNormalMsgEng(ZoraMsg+11, "I heard the boy Ruto met&was acting very strange&when she showed up.^Like he was just hanging around&at first, silently watching her.^Creepy.");
     MakeNormalMsgEng(ZoraMsg+12, "Those who cannot give their&partner a propper seeing&off deserve no respect.");
     MakeNormalMsgEng(ZoraMsg+13, "Oh, so there is a Zora girl here,&none other than the&Royal Princess Ruto.^Glad to see you're keeping her safe...");
@@ -1107,7 +1107,7 @@ extern "C" void OTRMessage_Init()
     MakeNormalMsgEng(ZoraMsg+17, "I heard the boy Ruto met&was acting very strange&when she showed up.^Like he wouldn't even talk&to her even after she'd&greeted him.^Creepy.");
     MakeNormalMsgEng(ZoraMsg+18, "Ruto sure is a strange&and wild girl.^And some days she's even stranger&and wilder than usual.^It's unfitting for a princess,&but I guess girls her&age will be that way.");
     MakeNormalMsgEng(ZoraMsg+19, "The water that comes directly from&Zora's Fountain is incredibly fresh.^As long as there's nothing tainting it,&it should be the purest water&in all the land.");
-    MakeNormalMsgEng(ZoraMsg+20, "Apparantly, we Zoras have an&affinity for the Moon unique&to all the races in Hyrule.^I can't say I feel much for it&myself though, even if others might.");
+    MakeNormalMsgEng(ZoraMsg+20, "Apparently, we Zoras have an&affinity for the Moon unique&to all the races in Hyrule.^I can't say I feel much for it&myself though, even if others might.");
 
     u16 RutoMsg = TextIDAllocator::Instance->allocateRange("ruto", 30);
 
