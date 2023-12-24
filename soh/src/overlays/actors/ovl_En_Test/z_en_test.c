@@ -2129,7 +2129,7 @@ void EnTest_ShieldBash(EnTest* this, PlayState* play) {
         Audio_PlayActorSound2(&this->actor, NA_SE_EN_STAL_SAKEBI);
     }
 
-    if ((this->skelAnime.curFrame > 7.0f) && (this->skelAnime.curFrame < 11.0f)) {
+    if ((this->skelAnime.curFrame >= 6.0f) && (this->skelAnime.curFrame < 11.0f)) {
         this->swordState = 1;
     } else {
         this->swordState = 0;
@@ -3618,6 +3618,10 @@ void EnTest_PostLimbDraw(PlayState* play, s32 limbIndex, Gfx** dList, Vec3s* rot
     static Vec3f D_80864688 = { -2000.0f, -1000.0f, 0.0f };
     static Vec3f D_80864694 = { -2000.0f, 1000.0f, 0.0f };
     static Vec3f D_808646A0 = { SWORD_EXTENSION_LENGTH, -3000.0f, 0.0f };
+    static Vec3f ShieldB1 =  { 2000.0f, 0.0f, 0.0f };
+    static Vec3f ShieldB2 = { 0.0f, 2000.0f, 0000.0f };
+    static Vec3f ShieldB3 = { 0, -2000.0f, 0000.0f };
+    static Vec3f ShieldB4 = { -2000, 0.0f, 0.0f };
     static Vec3f unused2 = { -3000.0f, 1900.0f, 800.0f };
     static Vec3f unused3 = { -3000.0f, -1100.0f, 800.0f };
     static Vec3f unused4 = { 1900.0f, 1900.0f, 800.0f };
@@ -3634,14 +3638,16 @@ void EnTest_PostLimbDraw(PlayState* play, s32 limbIndex, Gfx** dList, Vec3s* rot
     BodyBreak_SetInfo(&this->bodyBreak, limbIndex, 0, 60, 60, dList, BODYBREAK_OBJECT_DEFAULT);
 
     if (limbIndex == STALFOS_LIMB_SWORD) {
-        Matrix_MultVec3f(&D_80864694, &this->swordCollider.dim.quad[0]);
-        Matrix_MultVec3f(&D_80864688, &this->swordCollider.dim.quad[1]);
-        Matrix_MultVec3f(&D_8086467C, &this->swordCollider.dim.quad[2]);
-        Matrix_MultVec3f(&D_808646A0, &this->swordCollider.dim.quad[3]);
+        if (this->actionFunc != EnTest_ShieldBash) {
+            Matrix_MultVec3f(&D_80864694, &this->swordCollider.dim.quad[0]);
+            Matrix_MultVec3f(&D_80864688, &this->swordCollider.dim.quad[1]);
+            Matrix_MultVec3f(&D_8086467C, &this->swordCollider.dim.quad[2]);
+            Matrix_MultVec3f(&D_808646A0, &this->swordCollider.dim.quad[3]);
 
-        Collider_SetQuadVertices(&this->swordCollider, &this->swordCollider.dim.quad[0],
-                                 &this->swordCollider.dim.quad[1], &this->swordCollider.dim.quad[2],
-                                 &this->swordCollider.dim.quad[3]);
+            Collider_SetQuadVertices(&this->swordCollider, &this->swordCollider.dim.quad[0],
+                                    &this->swordCollider.dim.quad[1], &this->swordCollider.dim.quad[2],
+                                    &this->swordCollider.dim.quad[3]);
+        }
 
         Matrix_MultVec3f(&D_80864664, &sp70);
         Matrix_MultVec3f(&D_80864670, &sp64);
@@ -3654,14 +3660,25 @@ void EnTest_PostLimbDraw(PlayState* play, s32 limbIndex, Gfx** dList, Vec3s* rot
             this->swordState = -1;
         }
 
-    } else if ((limbIndex == STALFOS_LIMB_SHIELD) && (this->shieldState != 0)) {
-        if (!IS_FULL_SHIELDING) {
+    } else if ((limbIndex == STALFOS_LIMB_SHIELD)) {
+        if (!IS_FULL_SHIELDING && (this->shieldState != 0)) {
             Matrix_MultVec3f(&D_80864670, &sp64);
 
             this->shieldCollider.dim.pos.x = sp64.x;
             this->shieldCollider.dim.pos.y = sp64.y;
             this->shieldCollider.dim.pos.z = sp64.z;
-            this->shieldCollider.dim.radius = 20.0f;
+            this->shieldCollider.dim.radius = 25.0f;
+        }
+    } else if (limbIndex == STALFOS_LIMB_HEAD_ROOT) {
+        if (this->actionFunc == EnTest_ShieldBash) {
+            Matrix_MultVec3f(&ShieldB1, &this->swordCollider.dim.quad[0]);
+            Matrix_MultVec3f(&ShieldB2, &this->swordCollider.dim.quad[1]);
+            Matrix_MultVec3f(&ShieldB3, &this->swordCollider.dim.quad[2]);
+            Matrix_MultVec3f(&ShieldB4, &this->swordCollider.dim.quad[3]);
+
+            Collider_SetQuadVertices(&this->swordCollider, &this->swordCollider.dim.quad[0],
+                                    &this->swordCollider.dim.quad[1], &this->swordCollider.dim.quad[2],
+                                    &this->swordCollider.dim.quad[3]);
         }
     } else {
         Actor_SetFeetPos(&this->actor, limbIndex, STALFOS_LIMB_FOOT_L, &D_80864658, STALFOS_LIMB_ANKLE_R, &D_80864658);
