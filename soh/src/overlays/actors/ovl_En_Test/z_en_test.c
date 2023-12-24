@@ -916,7 +916,7 @@ static InitChainEntry sInitChain[] = {
 #define IS_ELITE (this->variant & ELITE_PARAM)
 
 #define VULNERABLE_IN_JUMP (this->skelAnime.curFrame >= this->skelAnime.animLength-5.0f && this->timer == 1)
-#define IS_FULL_SHIELDING ((this->actionFunc == EnTest_Jumpslash && !VULNERABLE_IN_JUMP) || IS_ELITE && (this->actionFunc == EnTest_SlashDown || this->actionFunc == EnTest_SlashDownEnd || this->actionFunc == EnTest_SlashUp ||this->actionFunc == EnTest_SpinAttack))
+#define IS_FULL_SHIELDING ((this->actionFunc == EnTest_Jumpslash && !VULNERABLE_IN_JUMP) || IS_ELITE && (this->actionFunc == EnTest_SlashDown || this->actionFunc == EnTest_SlashDownEnd || this->actionFunc == EnTest_SlashUp || this->actionFunc == EnTest_SpinAttack || this->actionFunc == EnTest_Crouch))
 #define IS_VULNERABLE ((this->actionFunc == EnTest_SlashDown && isPlayerInHorizontalAttack(play)) || (this->actionFunc == EnTest_SlashDownEnd && isPlayerInHorizontalAttack(play)) || (this->actionFunc == EnTest_SlashUp && isPlayerInHorizontalAttack(play)) ||\
                         (this->actionFunc == EnTest_SpinAttack && isPlayerInVerticalAttack(play)) || (this->actionFunc == EnTest_Crouch && isPlayerInJumpAttack(play)))
 #define CAN_LONG_BACKJUMP ((this->actor.params != STALFOS_TYPE_CEILING) || IS_ELITE)
@@ -1609,8 +1609,8 @@ void EnTest_WalkAndBlockElite(EnTest* this, PlayState* play) {
             playSpeed = this->actor.speedXZ * 10.0f * 0.02f;
         }
 
-        if (this->shieldState == 0) {
-            this->shieldState++;
+        if (this->shieldState == 0 || this->shieldState == 5) {
+            this->shieldState = 1;
         }
 
         if (this->actor.speedXZ >= 0.0f) {
@@ -1715,6 +1715,9 @@ void EnTest_SetupSidestepElite(EnTest* this, PlayState* play) {
     this->actor.world.rot.y = this->actor.shape.rot.y + 0x3FFF;
     this->timer = (Rand_ZeroOne() * 20.0f);// + 20.0f;
     this->unk_7C8 = 0x18;
+    if (this->shieldState == 0 || this->shieldState == 5) {
+        this->shieldState = 1;
+    }
     this->selectDist = 95.0f;
     EnTest_SetupAction(this, EnTest_SidestepElite);
     this->unk_7EC = 0.0f;
@@ -2691,7 +2694,8 @@ void EnTest_SetupStopAndBlock(EnTest* this) {
     this->actor.speedXZ = 0.0f;
     this->timer = (Rand_ZeroOne() * 10.0f) + 11.0f;
     this->actor.world.rot.y = this->actor.shape.rot.y;
-    this->shieldState = 5;
+    if (this->shieldState != 2)
+        this->shieldState = 5;
     this->stopStatus = 1;
     EnTest_SetupAction(this, EnTest_StopAndBlock);
 }
@@ -2705,7 +2709,8 @@ void EnTest_SetupStop(EnTest* this) {
     this->actor.speedXZ = 0.0f;
     this->timer = 4;
     this->actor.world.rot.y = this->actor.shape.rot.y;
-    this->shieldState = 5;
+    if (this->shieldState != 2)
+        this->shieldState = 5;
     this->stopStatus = 0;
     EnTest_SetupAction(this, EnTest_StopAndBlock);
 }
@@ -3272,6 +3277,12 @@ void EnTest_UpdateDamage(EnTest* this, PlayState* play) {
     if (this->shieldCollider.base.acFlags & AC_BOUNCED) {
         bounced = 1;
         this->shieldCollider.base.acFlags &= ~AC_BOUNCED;
+    }
+
+    if (Actor_IsFacingPlayer(&this->actor, 0x2000)) {
+        this->shieldCollider.base.ocFlags1 |= OC1_DOMINANT;
+    } else {
+        this->shieldCollider.base.ocFlags1 &= ~OC1_DOMINANT;
     }
 
     if (bounced && ((!IS_ELITE && (this->unk_7C8 != 0x10 && this->unk_7C8 != 0x11)) ||
