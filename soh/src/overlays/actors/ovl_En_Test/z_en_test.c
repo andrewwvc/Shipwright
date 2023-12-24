@@ -24,7 +24,7 @@ void EnTest_SetupShieldBash(EnTest* this);
 void EnTest_SetupSlashDownEnd(EnTest* this);
 void EnTest_SetupSlashUp(EnTest* this);
 void EnTest_SetupJumpslash(EnTest* this);
-void EnTest_SetupCrossoverJump(EnTest* this);
+s16 EnTest_SetupCrossoverJump(EnTest* this, PlayState* play);
 void EnTest_SetupWalkAndBlock(EnTest* this);
 void EnTest_SetupSidestepElite(EnTest* this, PlayState* play);
 void func_80860EC0(EnTest* this);
@@ -2424,8 +2424,12 @@ s16 EnTest_WillJumpbackLand(EnTest* this, PlayState* play) {
 }
 
 s16 EnTest_SetupJumpBack(EnTest* this, PlayState* play) {
+    Player *player = GET_PLAYER(play);
     if (IS_ELITE && ((this->actor.flags & ACTOR_FLAG_TARGETABLE) || (this->variant & DARK_PARAM)) && (Player_isInSwordAnimation(play) || Rand_ZeroOne() > 0.6f)) {
-        EnTest_SetupCrouch(this);
+        if (player->swordState >= PLAYER_MWA_STAB_1H && PLAYER_MWA_STAB_COMBO_2H <= player->swordState) {
+            return EnTest_SetupCrossoverJump(this,play);
+        } else
+            EnTest_SetupCrouch(this);
         return 1;
     }
 
@@ -2583,7 +2587,9 @@ s16 EnTest_WillCrossoverLand(EnTest* this, PlayState* play) {
     return Actor_TestFloorInDirection(&this->actor, play, 195.0f, this->actor.shape.rot.y);
 }
 
-void EnTest_SetupCrossoverJump(EnTest* this) {
+s16 EnTest_SetupCrossoverJump(EnTest* this, PlayState* play) {
+    if (!(EnTest_WillCrossoverLand(this, play) && Actor_IsFacingPlayer(&this->actor, 0xA00)))
+        return 0;
     Animation_PlayOnce(&this->skelAnime, &gStalfosJumpAnim);
     Audio_StopSfxByPosAndId(&this->actor.projectedPos, NA_SE_EN_STAL_WARAU);
     this->timer = 0;
@@ -2601,6 +2607,8 @@ void EnTest_SetupCrossoverJump(EnTest* this) {
     if (this->shieldState != 0) {
         this->shieldState = 3;
     }
+
+    return 1;
 }
 
 void EnTest_CrossoverJump(EnTest* this, PlayState* play) {
