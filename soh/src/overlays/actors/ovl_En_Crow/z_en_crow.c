@@ -115,6 +115,8 @@ u32 EnCrow_ExportDeathCountBig() {
     return sDeathCountBig;
 }
 
+#define MALON_DEFENSE_CONDITIONS ((gSaveContext.eventChkInf[2] & 0x0100) && sDeathCountBig && (play->sceneNum == SCENE_SPOT20))
+
 void EnCrow_Init(Actor* thisx, PlayState* play) {
     EnCrow* this = (EnCrow*)thisx;
 
@@ -372,7 +374,7 @@ void EnCrow_Die(EnCrow* this, PlayState* play) {
             sDeathCountBig++;
             Item_DropCollectible(play, &this->actor.world.pos, ITEM00_RUPEE_RED);
         }
-        if (!CVarGetInteger("gRandomizedEnemies", 0)) {
+        if (!CVarGetInteger("gRandomizedEnemies", 0) && !MALON_DEFENSE_CONDITIONS) {
             EnCrow_SetupRespawn(this);
         } else {
             Actor_Kill(this);
@@ -467,6 +469,10 @@ void EnCrow_Update(Actor* thisx, PlayState* play) {
         Actor_UpdateBgCheckInfo(play, &this->actor, 12.0f * scale, 25.0f * scale, 50.0f * scale, 7);
     } else {
         height = 0.0f;
+    }
+
+    if (MALON_DEFENSE_CONDITIONS && (this->actionFunc != EnCrow_Die)) {
+        EnCrow_SetupDie(this);
     }
 
     this->collider.elements[0].dim.worldSphere.center.x = this->actor.world.pos.x;

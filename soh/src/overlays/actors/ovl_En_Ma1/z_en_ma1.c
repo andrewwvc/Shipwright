@@ -396,6 +396,11 @@ void func_80AA0D88(EnMa1* this, PlayState* play) {
         }
     }
 
+    if (this->questFlags == 0 && EnCrow_ExportDeathCountBig()) {
+        this->questFlags = 1;
+        func_80078884(NA_SE_SY_CORRECT_CHIME);
+    }
+
     // We want to Kill Malon's Actor outside of randomizer when Talon is freed. In Randomizer we don't kill Malon's
     // Actor here, otherwise if we wake up Talon first and then get her check she will spontaneously
     // disappear.
