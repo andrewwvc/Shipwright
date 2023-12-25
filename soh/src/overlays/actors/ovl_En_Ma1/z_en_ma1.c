@@ -359,7 +359,7 @@ void EnMa1_Init(Actor* thisx, PlayState* play) {
    // 2. We are Randomized and have not obtained Malon's Weird Egg Check.
    // 3. We are not Randomized and have obtained Epona's Song
     if (!(gSaveContext.eventChkInf[1] & 0x10) || (gSaveContext.n64ddFlag && !Randomizer_ObtainedMalonHCReward()) || (CHECK_QUEST_ITEM(QUEST_SONG_EPONA) && !gSaveContext.n64ddFlag) ||
-        (gSaveContext.n64ddFlag && Flags_GetTreasure(play, 0x1F))) {
+        (gSaveContext.n64ddFlag && Flags_GetTreasure(play, 0x1F)) || (thisx->params == 0x1)) {
         this->actionFunc = func_80AA0D88;
         EnMa1_ChangeAnim(this, ENMA1_ANIM_2);
     // If none of the above conditions were true, set Malon up to teach Epona's Song.
