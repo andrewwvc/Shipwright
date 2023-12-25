@@ -193,7 +193,7 @@ s16 func_80AA0778(PlayState* play, Actor* thisx) {
                     ret = NPC_TALK_STATE_ACTION;
                     break;
                 default:
-                    if (thisx->textId == RanchMsg+0) {
+                    if (thisx->textId == RanchMsg+0 || thisx->textId == RanchMsg+5) {
                         gSaveContext.eventChkInf[2] |= 0x0100;//Set to go outside at night
                         gSaveContext.MalonPlayDay = gSaveContext.totalDays;
                     } else if (thisx->textId == RanchMsg+2) {
@@ -560,6 +560,14 @@ void EnMa1_DoNothing(EnMa1* this, PlayState* play) {
 }
 
 void EnMa1_DoSomething(EnMa1* this, PlayState* play) {
+    if (this->interactInfo.talkState == NPC_TALK_STATE_IDLE) {
+        if (this->skelAnime.animation != &gMalonChildIdleAnim) {
+            EnMa1_ChangeAnim(this, ENMA1_ANIM_1);
+        }
+    }
+    if (gSaveContext.n64ddFlag) {
+        this->actor.home.pos.z = this->actor.world.pos.z;
+    }
 }
 
 void EnMa1_Update(Actor* thisx, PlayState* play) {
