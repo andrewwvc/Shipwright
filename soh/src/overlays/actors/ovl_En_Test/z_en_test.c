@@ -3637,10 +3637,10 @@ void EnTest_PostLimbDraw(PlayState* play, s32 limbIndex, Gfx** dList, Vec3s* rot
     static Vec3f D_80864688 = { -2000.0f, -1000.0f, 0.0f };
     static Vec3f D_80864694 = { -2000.0f, 1000.0f, 0.0f };
     static Vec3f D_808646A0 = { SWORD_EXTENSION_LENGTH, -3000.0f, 0.0f };
-    static Vec3f ShieldB1 =  { 2000.0f, 0.0f, 0.0f };
-    static Vec3f ShieldB2 = { 0.0f, 2000.0f, 0000.0f };
-    static Vec3f ShieldB3 = { 0, -2000.0f, 0000.0f };
-    static Vec3f ShieldB4 = { -2000, 0.0f, 0.0f };
+    static Vec3f ShieldB1 =  { 4500.0f, 700.0f, 0.0f };
+    static Vec3f ShieldB2 = { 2000.0f, 700.0f, 2000.0f };
+    static Vec3f ShieldB3 = { 2000, 700.0f, -2000.0f };
+    static Vec3f ShieldB4 = { 0, 700.0f, 0.0f };
     static Vec3f unused2 = { -3000.0f, 1900.0f, 800.0f };
     static Vec3f unused3 = { -3000.0f, -1100.0f, 800.0f };
     static Vec3f unused4 = { 1900.0f, 1900.0f, 800.0f };
@@ -3688,7 +3688,7 @@ void EnTest_PostLimbDraw(PlayState* play, s32 limbIndex, Gfx** dList, Vec3s* rot
             this->shieldCollider.dim.pos.z = sp64.z;
             this->shieldCollider.dim.radius = 25.0f;
         }
-    } else if (limbIndex == STALFOS_LIMB_HEAD_ROOT) {
+    } else if (limbIndex == STALFOS_LIMB_CHEST) {
         if (this->actionFunc == EnTest_ShieldBash) {
             Matrix_MultVec3f(&ShieldB1, &this->swordCollider.dim.quad[0]);
             Matrix_MultVec3f(&ShieldB2, &this->swordCollider.dim.quad[1]);
