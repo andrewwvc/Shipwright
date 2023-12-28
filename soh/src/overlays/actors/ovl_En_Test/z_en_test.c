@@ -34,7 +34,7 @@ void EnTest_SetupCrouch(EnTest* this);
 void EnTest_SetupSpinAttack(EnTest* this);
 void func_80860BDC(EnTest* this);
 void EnTest_SetupIdleFromBlock(EnTest* this);
-void EnTest_IdleFromBlockElite(EnTest* this, PlayState* play);
+void EnTest_SetupIdleFromBlockElite(EnTest* this);
 void EnTest_SetupRecoil(EnTest* this);
 void EnTest_SetupFlinchBack(EnTest* this, s16 augDuration);
 void EnTest_SetupFlinchFront(EnTest* this, s16 augDuration);
@@ -68,6 +68,7 @@ void EnTest_CrossoverJump(EnTest* this, PlayState* play);
 void EnTest_JumpUp(EnTest* this, PlayState* play);
 void EnTest_StopAndBlock(EnTest* this, PlayState* play);
 void EnTest_IdleFromBlock(EnTest* this, PlayState* play);
+void EnTest_IdleFromBlockElite(EnTest* this, PlayState* play);
 void EnTest_FlinchFront(EnTest* this, PlayState* play);
 void EnTest_FlinchBack(EnTest* this, PlayState* play);
 void EnTest_Stunned(EnTest* this, PlayState* play);
@@ -918,9 +919,9 @@ static InitChainEntry sInitChain[] = {
 #define DAMAGE_MULT ((this->variant & POWERFUL_PARAM) ? 2 : 1)
 
 #define VULNERABLE_IN_JUMP (this->skelAnime.curFrame >= this->skelAnime.animLength-5.0f && this->timer == 1)
-#define IS_FULL_SHIELDING ((this->actionFunc == EnTest_Jumpslash && !VULNERABLE_IN_JUMP) || IS_ELITE && (this->actionFunc == EnTest_SlashDown || this->actionFunc == EnTest_SlashDownEnd || this->actionFunc == EnTest_SlashUp || this->actionFunc == EnTest_SpinAttack || this->actionFunc == EnTest_Crouch))
-#define IS_VULNERABLE ((this->actionFunc == EnTest_SlashDown && isPlayerInHorizontalAttack(play)) || (this->actionFunc == EnTest_SlashDownEnd && isPlayerInHorizontalAttack(play)) || (this->actionFunc == EnTest_SlashUp && isPlayerInHorizontalAttack(play)) ||\
-                        (this->actionFunc == EnTest_SpinAttack && isPlayerInVerticalAttack(play)) || (this->actionFunc == EnTest_Crouch && isPlayerInJumpAttack(play)))
+#define IS_FULL_SHIELDING ((this->actionFunc == EnTest_Jumpslash && !VULNERABLE_IN_JUMP) || IS_ELITE && (this->actionFunc == EnTest_SlashDown || this->actionFunc == EnTest_SlashDownEnd || this->actionFunc == EnTest_SlashUp || this->actionFunc == EnTest_SpinAttack || (this->actionFunc == EnTest_Crouch && Actor_IsFacingPlayer(&this->actor, 0x1A00))))
+#define IS_VULNERABLE ((this->actionFunc == EnTest_SlashDown && isPlayerInHorizontalAttack(play)) || (this->actionFunc == EnTest_SlashDownEnd && (isPlayerInHorizontalAttack(play) /*|| isPlayerInStab(play)*/)) || (this->actionFunc == EnTest_SlashUp && isPlayerInHorizontalAttack(play)) ||\
+                        (this->actionFunc == EnTest_SpinAttack && isPlayerInVerticalAttack(play)) || (this->actionFunc == EnTest_Crouch && (isPlayerInJumpAttack(play) || (player->heldItemAction == PLAYER_IA_HAMMER))))
 #define CAN_LONG_BACKJUMP ((this->actor.params != STALFOS_TYPE_CEILING) || IS_ELITE)
 
 void EnTest_SetupAction(EnTest* this, EnTestActionFunc actionFunc) {
@@ -1075,14 +1076,14 @@ void EnTest_ChooseRandomAction(EnTest* this, PlayState* play) {
     switch ((u32)(Rand_ZeroOne() * 10.0f)) {
         case 0:
         case 1:
-        case 5:
-        case 6:
             if ((this->actor.xzDistToPlayer < 220.0f) && (this->actor.xzDistToPlayer > 170.0f) &&
                 Actor_IsFacingPlayer(&this->actor, 0x71C) && Actor_IsTargeted(play, &this->actor)) {
                 EnTest_SetupJumpslash(this);
                 break;
             }
             // fallthrough
+        case 5:
+        case 6:
         case 8:
             EnTest_SetupWalkAndBlock(this);
             break;
@@ -1093,7 +1094,7 @@ void EnTest_ChooseRandomAction(EnTest* this, PlayState* play) {
             func_808627C4(this, play);
             break;
 
-        case 2:
+
         case 9:
         case 10:
             EnTest_SetupStopAndBlock(this);
@@ -1117,20 +1118,22 @@ void EnTest_ChooseAction(EnTest* this, PlayState* play) {
 
     if (yawDiff >= 0x61A8) {
         switch ((u32)(Rand_ZeroOne() * 10.0f)) {
-            case 0:
             case 3:
             case 7:
                 EnTest_SetupStopAndBlock(this);
                 break;
 
+            case 0:
             case 1:
             case 5:
             case 6:
+            EnTest_SetupWalkAndBlock(this);
+                break;
+            case 2:
             case 8:
                 func_808627C4(this, play);
                 break;
 
-            case 2:
             case 4:
             case 9:
                 if (this->actor.params != STALFOS_TYPE_CEILING) {
@@ -1153,7 +1156,7 @@ void EnTest_ChooseAction(EnTest* this, PlayState* play) {
             }
         } else {
             if (this->actor.xzDistToPlayer < 110.0f) {
-                if (Rand_ZeroOne() > 0.2f) {
+                if (Rand_ZeroOne() > 0.3f) {
                     if (player->stateFlags1 & 0x10) {
                         if (1 || this->actor.isTargeted) {
                             EnTest_SetupSlashDown(this);
@@ -1175,6 +1178,35 @@ void EnTest_ChooseAction(EnTest* this, PlayState* play) {
     if (!actionSelected) {
         EnTest_ChooseRandomAction(this, play);
     }
+}
+
+s16 EnTest_SelectAttackElite(EnTest* this, PlayState* play) {
+    if (this->actor.xzDistToPlayer < 125.0f && (Rand_ZeroOne() < 0.35)) {
+        EnTest_SetupSpinAttack(this);
+            return 1;
+    }
+    if (this->actor.xzDistToPlayer < 110.0f && (Rand_ZeroOne() < 0.35)) {
+        EnTest_SetupSlashDown(this);
+            return 1;
+    }
+    if (this->actor.xzDistToPlayer < 130.0f && Actor_IsFacingPlayer(&this->actor, 0xC00) && (Rand_ZeroOne() < 0.50)) {
+        if (EnTest_SetupCrossoverJump(this,play))
+            return 1;
+    }
+    if (this->actor.xzDistToPlayer < 120.0f) {
+        EnTest_SetupCrouch(this);
+        return 1;
+    }
+    if (this->actor.xzDistToPlayer < 160.0f && Actor_IsFacingPlayer(&this->actor, 0xA00)) {
+        EnTest_SetupThrust(this);
+            return 1;
+    }
+    if (this->actor.xzDistToPlayer > 160.0f && this->actor.xzDistToPlayer < 220.0f) {
+        EnTest_SetupJumpslash(this);
+            return 1;
+    }
+
+     return 0;
 }
 
 void EnTest_ChooseActionElite(EnTest* this, PlayState* play) {
@@ -1354,6 +1386,11 @@ void EnTest_Idle(EnTest* this, PlayState* play) {
             }
         }
 
+        if (this->hitTracker != 0) {
+            this->hitTracker = 0;
+            this->timer = 0;
+        }
+
         if (this->timer != 0) {
             this->timer--;
         } else {
@@ -1523,7 +1560,7 @@ void EnTest_WalkAndBlock(EnTest* this, PlayState* play) {
         if ((this->actor.xzDistToPlayer < 220.0f) && (this->actor.xzDistToPlayer > 160.0f) &&
             (Actor_IsFacingPlayer(&this->actor, 0x71C))) {
             if (Actor_IsTargeted(play, &this->actor)) {
-                if (Rand_ZeroOne() < 0.1f) {
+                if (Rand_ZeroOne() < 0.05f) {
                     EnTest_SetupJumpslash(this);
                     return;
                 }
@@ -1552,7 +1589,7 @@ void EnTest_WalkAndBlock(EnTest* this, PlayState* play) {
         }
 
         if (this->actor.xzDistToPlayer < 110.0f) {
-            if (Rand_ZeroOne() > 0.2f) {
+            if (Rand_ZeroOne() > 0.3f) {
                 if (player->stateFlags1 & 0x10) {
                     EnTest_SetupSlashDown(this);
                 } else {
@@ -1563,6 +1600,10 @@ void EnTest_WalkAndBlock(EnTest* this, PlayState* play) {
             }
         } else if (Rand_ZeroOne() < 0.1f) {
             this->actor.speedXZ = 5.0f;
+        }
+
+        if (this->actor.xzDistToPlayer < 135.0f && (Rand_ZeroOne() < 0.08f)) {
+            func_808627C4(this, play);
         }
     }
 }
@@ -1578,7 +1619,7 @@ void EnTest_WalkAndBlockElite(EnTest* this, PlayState* play) {
     s32 absPlaySpeed;
     s16 yawDiff;
 
-    lusprintf("__FILE__",__LINE__,0, "XZDist: %f, Select Dist: %f", this->actor.xzDistToPlayer, this->selectDist);
+    //lusprintf("__FILE__",__LINE__,0, "XZDist: %f, Select Dist: %f", this->actor.xzDistToPlayer, this->selectDist);
 
     if (!EnTest_ReactToProjectile(play, this)) {
         this->timer++;
@@ -1603,8 +1644,10 @@ void EnTest_WalkAndBlockElite(EnTest* this, PlayState* play) {
 
         if (((this->actor.bgCheckFlags & 8) && (this->actor.speedXZ < 0.0f)) /*|| ((this->timer % 16) && (Rand_ZeroOne() > 0.95f))*/) {
             this->actor.speedXZ *= -1.0f;
-            if (this->AIGoal == STALFOS_GOAL_DEFEND)
+            if (this->AIGoal == STALFOS_GOAL_DEFEND) {
                 this->AIGoal = STALFOS_GOAL_ATTACK;
+                this->selectDist = 95.0f;
+            }
             // EnTest_SetupSidestepElite(this, play);
             // return;
         }
@@ -1825,17 +1868,9 @@ void EnTest_SidestepElite(EnTest* this, PlayState* play) {
     }
 
     if (this->timer == 0) {
-        if (Actor_OtherIsTargeted(play, &this->actor)) {
-            EnTest_SetupIdle(this);
-        } else if (Actor_IsTargeted(play, &this->actor)) {
+        if (Actor_IsTargeted(play, &this->actor)) {
             if (!EnTest_ReactToProjectile(play, this)) {
                 EnTest_ChooseActionElite(this, play);
-            }
-        } else if (player->heldItemAction != PLAYER_IA_NONE) {
-            if (Rand_Centered() >= 0) {
-                EnTest_SetupIdle(this);
-            } else {
-                EnTest_SetupWalkAndBlock(this);
             }
         } else {
             EnTest_SetupWalkAndBlock(this);
@@ -2194,7 +2229,7 @@ void EnTest_SlashDownEnd(EnTest* this, PlayState* play) {
             s16 tempRot = this->actor.world.rot.y;
             yawDiff = this->actor.yawTowardsPlayer - this->actor.shape.rot.y;
             this->actor.world.rot.y = this->actor.yawTowardsPlayer;
-            if ((ABS(yawDiff) > 0x3E80) && (CAN_LONG_BACKJUMP) && EnTest_SetupJumpBack(this, play)) {
+            if ((!Actor_IsFacingPlayer(&this->actor, 0x1000)) && (CAN_LONG_BACKJUMP) && EnTest_SetupJumpBack(this, play)) {
             } else {
                 this->actor.world.rot.y = tempRot;
                 // if (player->stateFlags1 & 0x10) {
@@ -2435,7 +2470,7 @@ s16 EnTest_WillJumpbackLand(EnTest* this, PlayState* play) {
 
 s16 EnTest_SetupJumpBack(EnTest* this, PlayState* play) {
     Player *player = GET_PLAYER(play);
-    if (IS_ELITE && ((this->actor.flags & ACTOR_FLAG_TARGETABLE) || (this->variant & DARK_PARAM)) && (Player_isInSwordAnimation(play) || Rand_ZeroOne() > 0.6f)) {
+    if (IS_ELITE && ((this->actor.flags & ACTOR_FLAG_TARGETABLE) || (this->variant & DARK_PARAM)) && (this->actor.xzDistToPlayer < 130.0f && Actor_IsFacingPlayer(&this->actor, 0xC00)) && (Player_isInSwordAnimation(play) || Rand_ZeroOne() > 0.6f)) {
         if (player->swordState >= PLAYER_MWA_STAB_1H && PLAYER_MWA_STAB_COMBO_2H <= player->swordState) {
             return EnTest_SetupCrossoverJump(this,play);
         } else
@@ -2710,7 +2745,10 @@ void EnTest_SetupStopAndBlock(EnTest* this) {
                      Animation_GetLastFrame(&gStalfosBlockWithShieldAnim), 2, 2.0f);
     this->unk_7C8 = 0x15;
     this->actor.speedXZ = 0.0f;
-    this->timer = (Rand_ZeroOne() * 10.0f) + 11.0f;
+    if (IS_ELITE)
+        this->timer = (Rand_ZeroOne() * 3.0f) + 10.0f;
+    else
+        this->timer = (Rand_ZeroOne() * 10.0f) + 11.0f;
     this->actor.world.rot.y = this->actor.shape.rot.y;
     if (this->shieldState != 2)
         this->shieldState = 5;
@@ -2748,6 +2786,11 @@ void EnTest_StopAndBlock(EnTest* this, PlayState* play) {
         if (!IS_ELITE) {
             EnTest_SetupIdleFromBlock(this);
             return;
+        }
+
+        if (this->stopStatus && Rand_ZeroOne() < 0.8) {
+            if (EnTest_SelectAttackElite(this,play))
+                return;
         }
 
         if (this->actor.xzDistToPlayer < 130.0f) {
@@ -3094,7 +3137,7 @@ void func_808628C8(EnTest* this, PlayState* play) {
                 EnTest_ChooseAction(this, play);
             }
         } else if (player->heldItemAction != PLAYER_IA_NONE) {
-            if (Rand_Centered() >= 0) {
+            if (Rand_Centered() >= 0.3f) {
                 EnTest_SetupIdle(this);
             } else {
                 EnTest_SetupWalkAndBlock(this);
@@ -3285,6 +3328,8 @@ void EnTest_UpdateHeadRot(EnTest* this, PlayState* play) {
     this->headRot.y = CLAMP(this->headRot.y, -0x382F, 0x382F);
 }
 
+#define IN_ATTACK_OR_IDLE ((this->unk_7C8 == HighAttack || this->unk_7C8 == UpAttack || this->unk_7C8 == EndAttack || this->unk_7C8 == JumpAttack || this->unk_7C8 == Idle))
+
 void EnTest_UpdateDamage(EnTest* this, PlayState* play) {
     Player* player = GET_PLAYER(play);
     s32 bounced = 0;
@@ -3295,9 +3340,14 @@ void EnTest_UpdateDamage(EnTest* this, PlayState* play) {
     if (this->shieldCollider.base.acFlags & AC_BOUNCED) {
         bounced = 1;
         this->shieldCollider.base.acFlags &= ~AC_BOUNCED;
+        this->blockTrackingTimer = 0;
     }
 
-    if (Actor_IsFacingPlayer(&this->actor, 0x2000)) {
+    //lusprintf("z_en_test",__LINE__,0, "HitTracker: %i", this->hitTracker);
+    if (!IN_ATTACK_OR_IDLE)
+        this->hitTracker = 0;
+
+    if (Actor_IsFacingPlayer(&this->actor, 0x1A00)) {
         this->shieldCollider.base.ocFlags1 |= OC1_DOMINANT;
     } else {
         this->shieldCollider.base.ocFlags1 &= ~OC1_DOMINANT;
@@ -3306,17 +3356,19 @@ void EnTest_UpdateDamage(EnTest* this, PlayState* play) {
     if (bounced && ((!IS_ELITE && (this->unk_7C8 != 0x10 && this->unk_7C8 != 0x11)) ||
                     (IS_ELITE && !IS_VULNERABLE))) {
         this->bodyCollider.base.acFlags &= ~AC_HIT;
-        if ((this->unk_7C8 == 0x10 || this->unk_7C8 == 0x11)) {
-            if (this->shieldCollider.info.acHitInfo->toucher.dmgFlags & (DMG_SWORD|DMG_HAMMER))
-                player->linearVelocity = 0.0f;//Prevents Link from moving out of range of the crouching attack when his attack bounces, assumes this collision is handled after the player's
-
+        if (IN_ATTACK_OR_IDLE) {
             if (isStunning && (this->shieldCollider.info.acHitInfo->toucher.dmgFlags | DMG_DEKU_NUT)) {
                 EnTest_SetupStunned(this);
             }
         }
 
-        if (this->unk_7C8 >= 0xA && (this->shieldCollider.info.acHitInfo->toucher.dmgFlags & (DMG_RANGED|DMG_HAMMER))) {
+        if (this->shieldCollider.info.acHitInfo->toucher.dmgFlags & (DMG_SWORD|DMG_HAMMER))
+            player->linearVelocity = 0.0f;//Prevents Link from moving out of range of attacks when his attack bounces, assumes this collision is handled after the player's
+
+        if (this->unk_7C8 >= 0xA && (this->shieldCollider.info.acHitInfo->toucher.dmgFlags & DMG_RANGED)) {
             this->actor.speedXZ = -4.0f;
+        } else if (this->shieldCollider.info.acHitInfo->toucher.dmgFlags & DMG_HAMMER) {
+            this->actor.speedXZ = -8.0f;
         }
     } else if (this->bodyCollider.base.acFlags & AC_HIT) {
         this->bodyCollider.base.acFlags &= ~AC_HIT;
@@ -3413,6 +3465,9 @@ void EnTest_Update(Actor* thisx, PlayState* play) {
     u32 floorProperty;
     s32 pad;
 
+    this->blockTrackingTimer++;
+    if (this->blockTrackingTimer >= 0x7FFF)
+        this->blockTrackingTimer = 0x800;
     EnTest_UpdateDamage(this, play);
 
     if (this->actor.colChkInfo.damageEffect != STALFOS_DMGEFF_FIREMAGIC) {
@@ -3499,7 +3554,7 @@ void EnTest_Update(Actor* thisx, PlayState* play) {
 
         s16 inFullShield = IS_FULL_SHIELDING;
 
-        if ((this->unk_7C8 >= 0xA) && (IS_VULNERABLE || !inFullShield) &&
+        if ((this->unk_7C8 >= 0xA) && (IS_VULNERABLE || !inFullShield || !(this->shieldCollider.base.ocFlags1 & OC1_DOMINANT)) &&
             ((this->actor.colorFilterTimer == 0) || (!(this->actor.colorFilterParams & 0x4000)))) {
             CollisionCheck_SetAC(play, &play->colChkCtx, &this->bodyCollider.base);
         }
@@ -3511,13 +3566,14 @@ void EnTest_Update(Actor* thisx, PlayState* play) {
             this->shieldCollider.dim.radius = 25.0f;
         }
 
-        if (this->shieldState != 0 && !IS_VULNERABLE) {
+        if (this->shieldState != 0 && !IS_VULNERABLE && (this->shieldCollider.base.ocFlags1 & OC1_DOMINANT)) {
             CollisionCheck_SetAC(play, &play->colChkCtx, &this->shieldCollider.base);
         }
     }
 
     if (!(this->swordCollider.base.atFlags & AT_BOUNCED)) {
         if ((this->swordCollider.base.atFlags & AT_HIT)) {
+            this->hitTracker = 1;
             Player_SetShieldRecoveryDefault(play);
             if (Player_isInSwordAnimation(play))
                 func_80837C0C(play, player, 0, 4.0f, 5.0f, this->actor.shape.rot.y, 20);
@@ -3542,9 +3598,7 @@ void EnTest_Update(Actor* thisx, PlayState* play) {
                 playerAngleDifference = ABS(playerAngleDifference);
 
                 //Make sword attack unblockable if behind player.
-                //or using shield bash
-                if ((angleToPlayer < 0x4000 && playerAngleDifference < 0x4000 && !Player_IsChildWithHylianShield(player)) ||
-                    (this->actionFunc == EnTest_ShieldBash)) {
+                if ((angleToPlayer < 0x4000 && playerAngleDifference < 0x4000 && !Player_IsChildWithHylianShield(player))) {
                     this->swordCollider.info.toucher.dmgFlags = 0x20000000;
                 }
             }
@@ -3560,7 +3614,6 @@ void EnTest_Update(Actor* thisx, PlayState* play) {
 
     if (this->swordCollider.base.atFlags & AT_HIT) {
         this->swordCollider.base.atFlags &= ~AT_HIT;
-        this->hitTracker = 1;
     }
 
     if (this->actor.params == STALFOS_TYPE_INVISIBLE) {
@@ -3578,11 +3631,29 @@ void EnTest_Update(Actor* thisx, PlayState* play) {
     EnTest_UpdateAI(thisx, play);
 
     //Handle interrupting actions
-    if (EnTest_FreeAction(this->unk_7C8)) {
-        if ((!(player->stateFlags1 & 0x10) || player->shieldRelaxTimer > 10) && ((Rand_ZeroOne() < 0.08f) || (!Player_IsFacingActor(&this->actor, 0x2000, play) && (Rand_ZeroOne() < 0.08f)))) {
+    if (IS_ELITE && EnTest_FreeAction(this->unk_7C8)) {
+        if ((!(player->stateFlags1 & 0x10) || (player->shieldRelaxTimer > 10) || (!(player->cylinder.base.ocFlags1 & OC1_FIRM) && Rand_ZeroOne() < 0.25f)) &&
+                    (this->actor.xzDistToPlayer < 125.0f) && ((Rand_ZeroOne() < 0.08f) || (!Player_IsFacingActor(&this->actor, 0x2000, play) && (Rand_ZeroOne() < 0.08f)))) {
             this->AIGoal = STALFOS_GOAL_DIRECT_SPIN;
             EnTest_SetupStop(this);
             //Possibly add indirect spin goal
+            return;
+        }
+        if (this->blockTrackingTimer == 10 && Rand_ZeroOne() < 0.7f) {
+            if (EnTest_SelectAttackElite(this,play))
+                return;
+        }
+        if (Actor_IsTargeted(play, &this->actor) && Rand_ZeroOne() < 0.2f) {
+            f32 relAng = player->linearVelocity*Math_SinS(player->actor.shape.rot.y-player->actor.world.rot.y);
+            f32 subStepSpeed = ABS(relAng);
+            f32 majorStepSpeed = player->linearVelocity*Math_CosS(player->actor.shape.rot.y-player->actor.world.rot.y);
+            if ((PLAYER_MAX_SIDESTEP_SHIELD_SPEED < subStepSpeed) && (subStepSpeed < 3.0f) && (this->actor.xzDistToPlayer < 200.0f) &&
+                        (majorStepSpeed < -2.5f) && Actor_IsFacingPlayer(&this->actor, 0x1500) && !(player->stateFlags1 & PLAYER_STATE1_SHIELDING) &&
+                        !Actor_GetProjectileActor(play, &this->actor, 600.0f)) {
+                this->actor.shape.rot.y = this->actor.world.rot.y = this->actor.yawTowardsPlayer + 0x480*relAng;
+                EnTest_SetupThrust(this);
+                return;
+            }
         }
     }
 }
