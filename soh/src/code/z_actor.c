@@ -3959,18 +3959,21 @@ s32 Actor_IsTargeted(PlayState* play, Actor* actor) {
     }
 }
 
+s32 Actor_OtherIsTargetedPlaceholder(PlayState* play, Actor* actor) {
+    return false;
+}
+
 /**
  * Returns true if the player is targeting an actor other than the provided actor
  */
 s32 Actor_OtherIsTargeted(PlayState* play, Actor* actor) {
-    return false;
-    /*Player* player = GET_PLAYER(play);
+    Player* player = GET_PLAYER(play);
 
     if ((player->stateFlags1 & 0x10) && !actor->isTargeted) {
         return true;
     } else {
         return false;
-    }*/
+    }
 }
 
 f32 func_80033AEC(Vec3f* arg0, Vec3f* arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5) {

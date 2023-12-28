@@ -851,7 +851,7 @@ s32 EnZf_CanAttack1(PlayState* play, EnZf* this, s32 timeToHit) {
             return true;
         }
     } else {
-        if (!Actor_OtherIsTargeted(play, &this->actor)) {
+        if (!Actor_OtherIsTargetedPlaceholder(play, &this->actor)) {
             return true;
         }
         if (this->actor.params == ENZF_TYPE_DINOLFOS) {
@@ -1170,7 +1170,7 @@ void EnZf_ApproachPlayer(EnZf* this, PlayState* play) {
             }
         }
 
-        if (Actor_OtherIsTargeted(play, &this->actor)) {
+        if (Actor_OtherIsTargetedPlaceholder(play, &this->actor)) {
             sp40 = 100.0f;
         }
 
@@ -1455,7 +1455,7 @@ void func_80B463E4(EnZf* this, PlayState* play) {
             }
         }
 
-        if (Actor_OtherIsTargeted(play, &this->actor)) {
+        if (Actor_OtherIsTargetedPlaceholder(play, &this->actor)) {
             baseRange = 100.0f;
         }
 
@@ -2339,7 +2339,7 @@ void EnZf_CircleAroundPlayer(EnZf* this, PlayState* play) {
 
     this->actor.world.rot.y = this->actor.shape.rot.y + 0x4000;
 
-    if (Actor_OtherIsTargeted(play, &this->actor)) {
+    if (Actor_OtherIsTargetedPlaceholder(play, &this->actor)) {
         baseRange = 100.0f;
     }
 
