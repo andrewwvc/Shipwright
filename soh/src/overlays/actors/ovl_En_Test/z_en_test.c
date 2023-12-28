@@ -913,7 +913,9 @@ static InitChainEntry sInitChain[] = {
 #define FLAME_SWORD_PARAM 8
 #define ELITE_PARAM 16
 #define DARK_PARAM 32
+#define POWERFUL_PARAM 64
 #define IS_ELITE (this->variant & ELITE_PARAM)
+#define DAMAGE_MULT ((this->variant & POWERFUL_PARAM) ? 2 : 1)
 
 #define VULNERABLE_IN_JUMP (this->skelAnime.curFrame >= this->skelAnime.animLength-5.0f && this->timer == 1)
 #define IS_FULL_SHIELDING ((this->actionFunc == EnTest_Jumpslash && !VULNERABLE_IN_JUMP) || IS_ELITE && (this->actionFunc == EnTest_SlashDown || this->actionFunc == EnTest_SlashDownEnd || this->actionFunc == EnTest_SlashUp || this->actionFunc == EnTest_SpinAttack || this->actionFunc == EnTest_Crouch))
@@ -1002,6 +1004,14 @@ void EnTest_Init(Actor* thisx, PlayState* play) {
         else
             this->actor.params += DARK_PARAM;
         this->variant |= DARK_PARAM;
+    }
+
+    if (ABS(this->actor.params) & POWERFUL_PARAM) {
+        if (this->actor.params > 0)
+            this->actor.params -= POWERFUL_PARAM;
+        else
+            this->actor.params += POWERFUL_PARAM;
+        this->variant |= POWERFUL_PARAM;
     }
 
     this->actor.colChkInfo.mass = MASS_HEAVY;
@@ -2042,7 +2052,7 @@ void EnTest_SetupSlashDown(EnTest* this) {
     this->unk_7C8 = 0x10;
     this->actor.speedXZ = 0.0f;
     EnTest_SetupAction(this, EnTest_SlashDown);
-    this->swordCollider.info.toucher.damage = 0x20;
+    this->swordCollider.info.toucher.damage = 0x10*DAMAGE_MULT;
 
     if (IS_ELITE) {
         this->shieldState = 5;
@@ -2210,7 +2220,7 @@ void EnTest_SetupSlashUp(EnTest* this) {
     this->swordCollider.base.atFlags &= ~AT_BOUNCED;
     this->swordCollider.base.atFlags &= ~AT_WEAK;
     this->unk_7C8 = 0x11;
-    this->swordCollider.info.toucher.damage = 0x20;
+    this->swordCollider.info.toucher.damage = 0x10*DAMAGE_MULT;
     this->actor.speedXZ = 0.0f;
     EnTest_SetupAction(this, EnTest_SlashUp);
 
@@ -2255,7 +2265,7 @@ void EnTest_SetupThrust(EnTest* this) {
     this->swordCollider.base.atFlags &= ~AT_BOUNCED;
     this->swordCollider.base.atFlags |= AT_WEAK;
     this->unk_7C8 = 0x10;
-    this->swordCollider.info.toucher.damage = 0x20;
+    this->swordCollider.info.toucher.damage = 0x10*DAMAGE_MULT;
     this->actor.speedXZ = 0.0f;
     EnTest_SetupAction(this, EnTest_Thrust);
 
@@ -2297,7 +2307,7 @@ void EnTest_SetupSpinAttack(EnTest* this) {
     this->swordCollider.base.atFlags &= ~AT_BOUNCED;
     this->swordCollider.base.atFlags &= ~AT_WEAK;
     this->unk_7C8 = 0x11;
-    this->swordCollider.info.toucher.damage = 0x20;
+    this->swordCollider.info.toucher.damage = 0x10*DAMAGE_MULT;
     this->actor.speedXZ = 0.0f;
     this->timer = 0;
     EnTest_SetupAction(this, EnTest_SpinAttack);
@@ -2378,7 +2388,7 @@ void EnTest_SetupCrouch(EnTest* this) {
     this->swordCollider.base.atFlags &= ~AT_BOUNCED;
     this->swordCollider.base.atFlags &= ~AT_WEAK;
     this->unk_7C8 = 0x11;
-    this->swordCollider.info.toucher.damage = 0x20;
+    this->swordCollider.info.toucher.damage = 0x10*DAMAGE_MULT;
     this->actor.speedXZ = 0.0f;
     this->timer = 0;
     EnTest_SetupAction(this, EnTest_Crouch);
@@ -2516,7 +2526,7 @@ void EnTest_SetupJumpslash(EnTest* this) {
     this->swordCollider.base.atFlags &= ~AT_BOUNCED;
     this->swordCollider.base.atFlags &= ~AT_WEAK;
     EnTest_SetupAction(this, EnTest_Jumpslash);
-    this->swordCollider.info.toucher.damage = 0x20;
+    this->swordCollider.info.toucher.damage = 0x10*DAMAGE_MULT;
 
     // if (this->shieldState != 0) {
     //     this->shieldState = 3;
@@ -2602,7 +2612,7 @@ s16 EnTest_SetupCrossoverJump(EnTest* this, PlayState* play) {
     this->swordCollider.base.atFlags &= ~AT_BOUNCED;
     this->swordCollider.base.atFlags &= ~AT_WEAK;
     EnTest_SetupAction(this, EnTest_CrossoverJump);
-    this->swordCollider.info.toucher.damage = 0x20;
+    this->swordCollider.info.toucher.damage = 0x10*DAMAGE_MULT;
 
     if (this->shieldState != 0) {
         this->shieldState = 3;
