@@ -1757,11 +1757,6 @@ void EnTest_WalkAndBlockElite(EnTest* this, PlayState* play) {
 
 // a variation of sidestep
 void EnTest_SetupSidestepElite(EnTest* this, PlayState* play) {
-    if (Actor_OtherIsTargeted(play, &this->actor)) {
-        func_80860EC0(this);
-        return;
-    }
-
     Animation_MorphToLoop(&this->skelAnime, &gStalfosSidestepAnim, -2.0f);
     Math_SmoothStepToS(&this->actor.shape.rot.y, this->actor.yawTowardsPlayer, 1, 0xFA0, 1);
     this->actor.speedXZ = (Rand_Centered() >= 0) ? -4.0f : 4.0f;
