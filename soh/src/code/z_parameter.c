@@ -2128,8 +2128,8 @@ u8 Item_Give(PlayState* play, u8 item) {
             AMMO(ITEM_BOMBCHU) = 10;
         } else {
             AMMO(ITEM_BOMBCHU) += 10;
-            if (AMMO(ITEM_BOMBCHU) > 50) {
-                AMMO(ITEM_BOMBCHU) = 50;
+            if (AMMO(ITEM_BOMBCHU) > MAX_BOMBCHU_CAPACITY) {
+                AMMO(ITEM_BOMBCHU) = MAX_BOMBCHU_CAPACITY;
             }
         }
         return Return_Item(item, MOD_NONE, ITEM_NONE);
@@ -2139,8 +2139,8 @@ u8 Item_Give(PlayState* play, u8 item) {
             AMMO(ITEM_BOMBCHU) += sAmmoRefillCounts[item - ITEM_BOMBCHUS_5 + 8];
         } else {
             AMMO(ITEM_BOMBCHU) += sAmmoRefillCounts[item - ITEM_BOMBCHUS_5 + 8];
-            if (AMMO(ITEM_BOMBCHU) > 50) {
-                AMMO(ITEM_BOMBCHU) = 50;
+            if (AMMO(ITEM_BOMBCHU) > MAX_BOMBCHU_CAPACITY) {
+                AMMO(ITEM_BOMBCHU) = MAX_BOMBCHU_CAPACITY;
             }
         }
         return Return_Item(item, MOD_NONE, ITEM_NONE);
@@ -2596,8 +2596,8 @@ u16 Randomizer_Item_Give(PlayState* play, GetItemEntry giEntry) {
             AMMO(ITEM_BOMBCHU) = 20;
         } else {
             AMMO(ITEM_BOMBCHU) += AMMO(ITEM_BOMBCHU) < 5 ? 10 : 5;
-            if (AMMO(ITEM_BOMBCHU) > 50) {
-                AMMO(ITEM_BOMBCHU) = 50;
+            if (AMMO(ITEM_BOMBCHU) > MAX_BOMBCHU_CAPACITY) {
+                AMMO(ITEM_BOMBCHU) = MAX_BOMBCHU_CAPACITY;
             }
         }
         return Return_Item_Entry(giEntry, RG_NONE);
@@ -3226,8 +3226,8 @@ void Inventory_ChangeAmmo(s16 item, s16 ammoChange) {
     } else if (item == ITEM_BOMBCHU) {
         AMMO(ITEM_BOMBCHU) += ammoChange;
 
-        if (AMMO(ITEM_BOMBCHU) >= 50) {
-            AMMO(ITEM_BOMBCHU) = 50;
+        if (AMMO(ITEM_BOMBCHU) >= MAX_BOMBCHU_CAPACITY) {
+            AMMO(ITEM_BOMBCHU) = MAX_BOMBCHU_CAPACITY;
         } else if (AMMO(ITEM_BOMBCHU) < 0) {
             AMMO(ITEM_BOMBCHU) = 0;
         }
@@ -4777,7 +4777,7 @@ void Interface_DrawAmmoCount(PlayState* play, s16 button, s16 alpha) {
                    ((i == ITEM_BOMB) && (AMMO(i) == CUR_CAPACITY(UPG_BOMB_BAG))) ||
                    ((i == ITEM_SLINGSHOT) && (AMMO(i) == CUR_CAPACITY(UPG_BULLET_BAG))) ||
                    ((i == ITEM_STICK) && (AMMO(i) == CUR_CAPACITY(UPG_STICKS))) ||
-                   ((i == ITEM_NUT) && (AMMO(i) == CUR_CAPACITY(UPG_NUTS))) || ((i == ITEM_BOMBCHU) && (ammo == 50)) ||
+                   ((i == ITEM_NUT) && (AMMO(i) == CUR_CAPACITY(UPG_NUTS))) || ((i == ITEM_BOMBCHU) && (ammo == MAX_BOMBCHU_CAPACITY)) ||
                    ((i == ITEM_BEAN) && (ammo == 15))) {
             gDPSetPrimColor(OVERLAY_DISP++, 0, 0, 120, 255, 0, alpha);
         }

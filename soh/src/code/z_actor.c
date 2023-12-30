@@ -1566,6 +1566,9 @@ s32 Actor_ActorBIsFacingActorA(Actor* actorA, Actor* actorB, s16 maxAngle) {
  * The maximum angle difference that qualifies as "facing" is specified by `maxAngle`.
  */
 s32 Actor_IsFacingPlayer(Actor* actor, s16 maxAngle) {
+    if (maxAngle <= 0)
+        return false;
+
     s16 yawDiff = actor->yawTowardsPlayer - actor->shape.rot.y;
 
     if (yawDiff == SHRT_MIN)//This is important, as otherwise overflow will cause an actor facing directly away from the player to count as facing towards
@@ -3956,18 +3959,35 @@ s32 Actor_IsTargeted(PlayState* play, Actor* actor) {
     }
 }
 
+s32 Actor_OtherIsTargetedPlaceholder(PlayState* play, Actor* actor) {
+    return false;
+}
+
 /**
  * Returns true if the player is targeting an actor other than the provided actor
  */
 s32 Actor_OtherIsTargeted(PlayState* play, Actor* actor) {
-    return false;
-    /*Player* player = GET_PLAYER(play);
+    Player* player = GET_PLAYER(play);
 
     if ((player->stateFlags1 & 0x10) && !actor->isTargeted) {
         return true;
     } else {
         return false;
-    }*/
+    }
+}
+
+/**
+ * Returns true if the player is targeting an actor other than the provided actor AND
+ * that actor is of the same type as the provided one
+ */
+s32 Actor_SameIsTargeted(PlayState* play, Actor* actor) {
+    Player* player = GET_PLAYER(play);
+
+    if ((player->stateFlags1 & 0x10) && !actor->isTargeted && player->unk_664 && (actor->id == player->unk_664->id)) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 f32 func_80033AEC(Vec3f* arg0, Vec3f* arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5) {

@@ -691,10 +691,13 @@ typedef struct Player {
                  u8         unsheathing;
                  s16        crouchCharge;
                  Vec3f      entryDiff;
+                 s16        stepTracking;
     // #endregion
 } Player; // size = 0xA94
 
-
+#define PLAYER_MAX_SIDESTEP_SHIELD_SPEED 1.5f
+#define SUB_STEP_SPEED ABS(this->linearVelocity*Math_SinS(this->actor.shape.rot.y-this->actor.world.rot.y))
+#define IN_SUB_STEP_MOTION (SUB_STEP_SPEED < PLAYER_MAX_SIDESTEP_SHIELD_SPEED)
 
 s32 Player_isRangedWeaponReady(PlayState* play);
 #endif

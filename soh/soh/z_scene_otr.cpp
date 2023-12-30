@@ -286,6 +286,22 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, LUS::ActorEnt
             { -1, -1, { ACTOR_EN_ZF, -1740,2800,-1060, 0,24394,0, static_cast<int16_t>(0xFFFF) }},
         } },
     } },
+    { 0x07, { // Shadow Temple
+        { 0x08, {
+            { -1, 0, { ACTOR_EN_ST, 4591,-380,59, 0,-16202,0, 0x9}},
+            { -1, 1, { ACTOR_EN_ST, 4706,-424,259, 0,16384,0, 0x9}},
+            { -1, 2, { ACTOR_EN_ST, 4262,-564,257, 0,16384,0, 0x9}},
+            { -1, 3, { ACTOR_EN_ST, 4591,-600,920, 0,-32768,0, 0x9}},
+            { -1, -1, { ACTOR_EN_BB, 4252,-983,828, 0,0,0, 0xFF}},
+        } },
+        { 0x06, {
+            { -1, -1, { ACTOR_EN_FIREFLY, 3560,-365,-742, 0,-32768,0, 0x4}},
+            { -1, -1, { ACTOR_EN_FIREFLY, 3560,-365,-1105, 0,-10700,0, 0x4}},
+            { -1, -1, { ACTOR_EN_FIREFLY, 3090,-365,-742, 0,-17000,0, 0x4}},
+            { -1, -1, { ACTOR_EN_FIREFLY, 3090,-365,-1105, 0,0,0, 0x4}},
+            //{ -1, -1, { ACTOR_EN_POH, 3020,-500,-970, 0,0,0, 0x0}}
+        } },
+    } },
     { 0x8, {//Well
         { 0x00, {
             { -1, 32, { ACTOR_ELF_MSG2, -627, 97, -1553,  2,0,1, (0x3F<<8)|0xB3 }},
@@ -583,15 +599,17 @@ bool Scene_CommandActorList(PlayState* play, LUS::ISceneCommand* cmd) {
     std::vector<LUS::ActorEntry> copy = cmdActor->actorList;
 
     //Handles static entry overrides
-    if (sceneActorOverrides.find(play->sceneNum) != sceneActorOverrides.end() &&
-            sceneActorOverrides.at(play->sceneNum).find(play->roomCtx.curRoom.num) != sceneActorOverrides.at(play->sceneNum).end()) {
-        auto& roomOverrides = sceneActorOverrides.at(play->sceneNum).at(play->roomCtx.curRoom.num);
-        for (auto& [setup, index, entry] : roomOverrides) {
-            if (setup == -1 || setup == gSaveContext.sceneSetupIndex) {
-                if (index == -1) {
-                    copy.push_back(entry);
-                } else {
-                    copy[index] = entry;
+    if (!(IsGameMasterQuest() && ((play->sceneNum >= 0 && play->sceneNum <= 9) || play->sceneNum == 11 || play->sceneNum == 13))) {
+        if (sceneActorOverrides.find(play->sceneNum) != sceneActorOverrides.end() &&
+                sceneActorOverrides.at(play->sceneNum).find(play->roomCtx.curRoom.num) != sceneActorOverrides.at(play->sceneNum).end()) {
+            auto& roomOverrides = sceneActorOverrides.at(play->sceneNum).at(play->roomCtx.curRoom.num);
+            for (auto& [setup, index, entry] : roomOverrides) {
+                if (setup == -1 || setup == gSaveContext.sceneSetupIndex) {
+                    if (index == -1) {
+                        copy.push_back(entry);
+                    } else {
+                        copy[index] = entry;
+                    }
                 }
             }
         }

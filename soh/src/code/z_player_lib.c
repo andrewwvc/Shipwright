@@ -442,6 +442,11 @@ s32 isPlayerInHorizontalSlash(PlayState* play) {
     return isPlayerInBasicHorizontalSlash(play) || isPlayerInSpinAttack(play);
 }
 
+s32 isPlayerInJumpAttack(PlayState* play) {
+    Player* player = GET_PLAYER(play);
+    return player->meleeWeaponAnimation >= PLAYER_MWA_FLIPSLASH_START && player->meleeWeaponAnimation <= PLAYER_MWA_JUMPSLASH_FINISH;
+}
+
 s32 isPlayerInVerticalSlash(PlayState* play) {
     Player* player = GET_PLAYER(play);
     if (player->swordState == 0)
@@ -702,7 +707,7 @@ s32 Player_GetSwordHeld(Player* this) {
 }
 
 s32 Player_HoldsTwoHandedWeapon(Player* this) {
-    if ((this->heldItemAction >= PLAYER_IA_SWORD_BGS) && (this->heldItemAction <= PLAYER_IA_HAMMER)) {
+    if ((this->heldItemAction >= PLAYER_IA_SWORD_BGS) && (this->heldItemAction <= PLAYER_IA_BOW_0E)) {
         return 1;
     } else {
         return 0;
@@ -1297,7 +1302,7 @@ void func_80090604(PlayState* play, Player* this, ColliderQuad* collider, Vec3f*
         COLTYPE_METAL,
     };
 
-    if (this->stateFlags1 & 0x400000) {
+    if (this->stateFlags1 & PLAYER_STATE1_SHIELDING) {
         collider->info.toucher.dmgFlags = 0x00100000;
         collider->info.bumper.dmgFlags  = 0xDFCFFFFF;
     }
@@ -1306,7 +1311,9 @@ void func_80090604(PlayState* play, Player* this, ColliderQuad* collider, Vec3f*
         collider->info.bumper.dmgFlags  = 0x00100000;
     }
 
-    if (this->stateFlags1 & 0x400000 || (this->unk_664 != NULL && (this->swordState == 0))) {
+    s16 stepVal = IN_SUB_STEP_MOTION;
+
+    if ((this->stateFlags1 & PLAYER_STATE1_SHIELDING) || (this->unk_664 != NULL && !Player_isInSwordAnimation(play) && !Player_isInReboundAnimation(play) && stepVal && (!this->stepTracking) && (this->invincibilityTimer == 0))) {
         Vec3f quadDest[4];
 
         this->shieldQuad.base.colType = shieldColTypes[this->currentShield];
@@ -1316,6 +1323,7 @@ void func_80090604(PlayState* play, Player* this, ColliderQuad* collider, Vec3f*
         Matrix_MultVec3f(&quadSrc[2], &quadDest[2]);
         Matrix_MultVec3f(&quadSrc[3], &quadDest[3]);
         Collider_SetQuadVertices(collider, &quadDest[0], &quadDest[1], &quadDest[2], &quadDest[3]);
+        this->cylinder.base.ocFlags1 |= OC1_FIRM;
 
         CollisionCheck_SetAC(play, &play->colChkCtx, &collider->base);
         CollisionCheck_SetAT(play, &play->colChkCtx, &collider->base);
@@ -1691,7 +1699,7 @@ void func_80090D20(PlayState* play, s32 limbIndex, Gfx** dList, Vec3s* rot, void
 
             CLOSE_DISPS(play->state.gfxCtx);
         } else if ((this->actor.scale.y >= 0.0f) && ((this->rightHandType == 10) ||
-                    (Player_HoldsTwoHandedWeapon(this) && (this->stateFlags1 & 0x400000) && this->shieldRelaxTimer <= 6))) {
+                    (Player_HoldsTwoHandedWeapon(this) && (this->stateFlags1 & PLAYER_STATE1_SHIELDING) && this->shieldRelaxTimer <= 6))) {
             Matrix_Get(&this->shieldMf);
             Player* player = GET_PLAYER(play);
             func_80090604(play, this, &this->shieldQuad, Player_HoldsTwoHandedWeapon(this) ? D_BigSword : (this == player) ? D_80126154 : originalShield1);

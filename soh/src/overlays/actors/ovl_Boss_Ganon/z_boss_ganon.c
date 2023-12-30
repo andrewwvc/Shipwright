@@ -2046,6 +2046,10 @@ void BossGanon_SetupChargeBigMagic(BossGanon* this, PlayState* play) {
     this->fwork[GDF_CENTER_POS] = 100.0f;
     this->unk_1AA = Rand_ZeroFloat(20000.0f);
     this->unk_1AC = 0;
+    if (this->numBigChargeSeries < 0)
+        this->numBigChargeSeries = 0;
+    else
+        this->numBigChargeSeries++;
     this->actionFunc = BossGanon_ChargeBigMagic;
 }
 
@@ -2292,13 +2296,17 @@ void BossGanon_Wait(BossGanon* this, PlayState* play) {
 
             if ((s8)this->actor.colChkInfo.health >= 20) {
                 BossGanon_SetupChargeLightBall(this, play);
-            } else if (Rand_ZeroOne() >= 0.5f) {
+            } else if ((this->numBigChargeSeries <= -3) || (Rand_ZeroOne() >= 0.5f && this->numBigChargeSeries < 3)) {
                 if ((Rand_ZeroOne() >= 0.5f) || (this->actor.xzDistToPlayer > 350.0f)) {
                     BossGanon_SetupChargeBigMagic(this, play);
                 } else {
                     BossGanon_SetupPoundFloor(this, play);
                 }
             } else {
+                if (this->numBigChargeSeries > 0)
+                    this->numBigChargeSeries = 0;
+                else
+                    this->numBigChargeSeries--;
                 BossGanon_SetupChargeLightBall(this, play);
             }
         }
@@ -2772,7 +2780,7 @@ void BossGanon_UpdateDamage(BossGanon* this, PlayState* play) {
         this->collider.base.acFlags &= ~2;
         acHitInfo = this->collider.info.acHitInfo;
 
-        if ((this->actionFunc == BossGanon_HitByLightBall) || (this->actionFunc == BossGanon_ChargeBigMagic)) {
+        if (this->actionFunc == BossGanon_HitByLightBall) {
             if (acHitInfo->toucher.dmgFlags & 0x2000) {
                 BossGanon_SetupVulnerable(this, play);
                 this->timers[2] = 0;

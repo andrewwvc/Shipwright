@@ -282,7 +282,7 @@ void BossDodongo_Init(Actor* thisx, PlayState* play) {
     Animation_PlayLoop(&this->skelAnime, &object_kingdodongo_Anim_00F0D8);
     this->unk_1F8 = 1.0f;
     BossDodongo_SetupIntroCutscene(this, play);
-    this->health = 12;
+    this->health = 24;
     this->colorFilterMin = 995.0f;
     this->actor.colChkInfo.mass = MASS_IMMOVABLE;
     this->colorFilterMax = 1000.0f;
@@ -698,7 +698,7 @@ void BossDodongo_Explode(BossDodongo* this, PlayState* play) {
         Audio_PlayActorSound2(&this->actor, NA_SE_IT_BOMB_EXPLOSION);
         Audio_PlayActorSound2(&this->actor, NA_SE_EN_DODO_K_DAMAGE);
         func_80033E88(&this->actor, play, 4, 10);
-        this->health -= 2;
+        this->health -= 4;
 
         // make sure not to die from the bomb explosion
         if (this->health <= 0) {
@@ -806,6 +806,19 @@ void BossDodongo_BlowFire(BossDodongo* this, PlayState* play) {
     if (this->unk_1DA == 0) {
         BossDodongo_SetupRoll(this);
     }
+}
+
+void BossDodongo_DelayInhale(BossDodongo* this, s16 reduction) {
+    s16 reductionLimiter = reduction;
+    this->skelAnime.curFrame -= reduction;
+    if (this->skelAnime.curFrame <= 0)
+        this->skelAnime.curFrame = 0;
+    this->unk_1AC -= reduction;
+    if (this->unk_1AC <= 0) {
+        reductionLimiter = reduction+this->unk_1AC;
+        this->unk_1AC = 0;
+    }
+    this->unk_1DA += reductionLimiter;
 }
 
 void BossDodongo_Inhale(BossDodongo* this, PlayState* PlayState) {
@@ -1440,11 +1453,25 @@ void BossDodongo_UpdateDamage(BossDodongo* this, PlayState* play) {
                     item1 = this->collider.elements[i].info.acHitInfo;
                     item2 = item1;
 
-                    if ((item2->toucher.dmgFlags & 0x10) || (item2->toucher.dmgFlags & 4)) {
+                    if ((item2->toucher.dmgFlags & DMG_DEKU_NUT)) {
                         this->collider.elements[i].info.bumperFlags &= ~2;
                         this->unk_1C0 = 2;
                         BossDodongo_SetupWalk(this);
                         this->unk_1DA = 0x32;
+                        return;
+                    }
+
+                    if ((item2->toucher.dmgFlags & DMG_BOOMERANG)) {
+                        this->collider.elements[i].info.bumperFlags &= ~2;
+                        this->unk_1C0 = 4;
+                        BossDodongo_DelayInhale(this, 45);
+                        return;
+                    }
+
+                    if ((item2->toucher.dmgFlags & DMG_SLINGSHOT)) {
+                        this->collider.elements[i].info.bumperFlags &= ~2;
+                        this->unk_1C0 = 2;
+                        BossDodongo_DelayInhale(this, 18);
                         return;
                     }
                 }

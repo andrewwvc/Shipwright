@@ -24,12 +24,14 @@ typedef struct {
                  u32 epoch;
 } EnFzEffectSsIceSmoke; // size = 0x3C
 
+#define ICE_SMOKE_NUM 40
+
 typedef struct EnFz {
     /* 0x0000 */ Actor actor;
     /* 0x014C */ EnFzActionFunc actionFunc;
     /* 0x0150 */ ColliderCylinder collider1;
     /* 0x019C */ ColliderCylinder collider2;
-    /* 0x01E8 */ ColliderCylinder collider3;
+    /* 0x01E8 */ ColliderCylinder collider3[ICE_SMOKE_NUM];
     /* 0x0234 */ Vec3f posOrigin; // Spawn position for moving freezard
     /* 0x0240 */ s16 counter; // A perpetual counter
     /* 0x0242 */ s16 unusedTimer1; 
@@ -37,7 +39,7 @@ typedef struct EnFz {
     /* 0x0246 */ u8 updateBgInfo; // Always true in every instance
     /* 0x0247 */ u8 isMoving; // Freezard is moving in xz plane
     /* 0x0248 */ u8 isFreezing; // Freezard shooting ice projectiles that can freeze Link
-    /* 0x0249 */ u8 unusedCounter; // Incremented when Freezard takes damage
+    /* 0x0249 */ s8 usedCounter;
     /* 0x024C */ f32 iceSmokeFreezingSpawnHeight; // Height for Ice Smoke Spawn, only when freezing
     /* 0x0250 */ f32 unusedFloat; // Set to 135.0f
     /* 0x0254 */ f32 speedXZ; // Set to 4.0f when moving
@@ -50,7 +52,7 @@ typedef struct EnFz {
     /* 0x0263 */ u8 unusedTimer2; // Timer
     /* 0x0264 */ Vec3f wallHitPos; // Position contact was made with a wall
     /* 0x0270 */ f32 distToTargetSq;
-    /* 0x0274 */ EnFzEffectSsIceSmoke iceSmoke[40];
+    /* 0x0274 */ EnFzEffectSsIceSmoke iceSmoke[ICE_SMOKE_NUM];
 } EnFz; // size = 0x0BD4
 
 #endif

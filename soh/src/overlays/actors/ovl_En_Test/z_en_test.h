@@ -5,6 +5,7 @@
 #include "global.h"
 
 struct EnTest;
+struct StalfosHitInfoStorage;
 
 typedef void (*EnTestActionFunc)(struct EnTest*, PlayState*);
 
@@ -73,6 +74,28 @@ typedef enum {
     /* 0x3D */ STALFOS_LIMB_MAX
 } StalfosLimb;
 
+#define STORAGE_FRAMES 5
+
+
+#define STALFOS_WAS_HIT 1
+#define STALFOS_WAS_STUNNED 2
+
+#define STALFOS_GOAL_ATTACK 0
+#define STALFOS_GOAL_DEFEND 1
+#define STALFOS_GOAL_EVADE_TO_SPIN 2
+#define STALFOS_GOAL_AIM_STAB 3
+#define STALFOS_GOAL_COUNTER 4
+#define STALFOS_GOAL_BODY_CHECK 5
+#define STALFOS_GOAL_DIRECT_SPIN 6
+
+typedef struct StalfosHitInfoStorage {
+    s16 hitStatus;
+    EnTestActionFunc action;
+    EnTestActionFunc prevAttackMove;
+    s16 timeElapsedFromPrevMove;
+    u8 unk_7C8_state;
+} StalfosHitInfoStorage;
+
 typedef struct EnTest {
     /* 0x000 */ Actor actor;
     /* 0x14C */ Vec3s bodyPartsPos[10];
@@ -86,20 +109,35 @@ typedef struct EnTest {
     /* 0x7CC */ EnTestActionFunc actionFunc;
     /* 0x7D0 */ Vec3s headRot;
     /* 0x7D6 */ Vec3s headRotOffset;
+                f32 selectDist;
     /* 0x7DC */ u8 unk_7DC;
     /* 0x7DD */ char unk_7DD[0x1];
     /* 0x7DE */ u8 shieldState;
     /* 0x7E0 */ s16 iceTimer;
+    /* 0x7E0 */ s16 flameTimer;
+    /* 0x7E0 */ s16 variant;
     /* 0x7E2 */ u8 lastDamageEffect;
     /* 0x7E4 */ s32 unk_7E4;
     /* 0x7E8 */ s32 timer;
+                s16 stepTimer;
+                s8 stopStatus;
+                s16 AIGoal;
     /* 0x7EC */ f32 unk_7EC;
     /* 0x7F0 */ BodyBreak bodyBreak;
     /* 0x808 */ s8 swordState;
+    /* 0x808 */ s8 hitTracker;
+    /* 0x808 */ s16 blockTrackingTimer;
+    /*       */ s8 actAsSecond;
     /* 0x80C */ s32 effectIndex;
+    /* 0x80C */ s32 effectIndicatorIndex[2];
     /* 0x810 */ ColliderCylinder bodyCollider;
     /* 0x85C */ ColliderQuad swordCollider;
     /* 0x8DC */ ColliderCylinder shieldCollider;
+
+                f32 distStack[STORAGE_FRAMES];
+                s16 attackStack[STORAGE_FRAMES];//0 = neutral, 1=horizontal, 2=vertical, 3=jump, 4 signifies hammer blow
+                StalfosHitInfoStorage hitStorage[STORAGE_FRAMES];
+                s8 attackFlag;
 } EnTest; // size = 0x928
 
 typedef enum {

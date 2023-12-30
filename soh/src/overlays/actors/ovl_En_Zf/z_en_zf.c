@@ -851,7 +851,7 @@ s32 EnZf_CanAttack1(PlayState* play, EnZf* this, s32 timeToHit) {
             return true;
         }
     } else {
-        if (!Actor_OtherIsTargeted(play, &this->actor)) {
+        if (!Actor_OtherIsTargetedPlaceholder(play, &this->actor)) {
             return true;
         }
         if (this->actor.params == ENZF_TYPE_DINOLFOS) {
@@ -1170,7 +1170,7 @@ void EnZf_ApproachPlayer(EnZf* this, PlayState* play) {
             }
         }
 
-        if (Actor_OtherIsTargeted(play, &this->actor)) {
+        if (Actor_OtherIsTargetedPlaceholder(play, &this->actor)) {
             sp40 = 100.0f;
         }
 
@@ -1455,7 +1455,7 @@ void func_80B463E4(EnZf* this, PlayState* play) {
             }
         }
 
-        if (Actor_OtherIsTargeted(play, &this->actor)) {
+        if (Actor_OtherIsTargetedPlaceholder(play, &this->actor)) {
             baseRange = 100.0f;
         }
 
@@ -1524,6 +1524,17 @@ void EnZf_SetupSlash(EnZf* this) {
        this->skelAnime.playSpeed = 2.0f;
    }
 
+    EffectBlure* blur = Effect_GetByIndex(this->blureIndex);
+    if (this->stance == ENZF_SIDE) {
+        blur->p1StartColor.r = blur->p1EndColor.r = blur->p2StartColor.r = blur->p2EndColor.r = 255;
+        blur->p1StartColor.g = blur->p1EndColor.g = blur->p2StartColor.g = blur->p2EndColor.g = 170;
+        blur->p1StartColor.b = blur->p1EndColor.b = blur->p2StartColor.b = blur->p2EndColor.b = 0;
+    } else {
+        blur->p1StartColor.r = blur->p1EndColor.r = blur->p2StartColor.r = blur->p2EndColor.r = 255;
+        blur->p1StartColor.g = blur->p1EndColor.g = blur->p2StartColor.g = blur->p2EndColor.g = 255;
+        blur->p1StartColor.b = blur->p1EndColor.b = blur->p2StartColor.b = blur->p2EndColor.b = 255;
+    }
+
     this->swordCollider.base.atFlags &= ~AT_BOUNCED;
     this->action = ENZF_ACTION_SLASH;
     Audio_PlayActorSound2(&this->actor, NA_SE_EN_RIZA_CRY);
@@ -1576,7 +1587,7 @@ void EnZf_Slash(EnZf* this, PlayState* play) {
                         func_80B483E4(this, play);
                     } else if (player->stateFlags1 & 0x6010) {
                         if (EnZf_CanAttackSlash(play, this)) {
-                            // if (this->stance == ENFZ_SIDE && Rand_ZeroOne() > 0.5f) {
+                            // if (this->stance == ENZF_SIDE && Rand_ZeroOne() > 0.5f) {
                             //     EnZf_SwitchStance(this);
                             // }
                             EnZf_SetupSlash(this);
@@ -1584,7 +1595,7 @@ void EnZf_Slash(EnZf* this, PlayState* play) {
                             func_80B483E4(this, play);
                         }
                     } else if (EnZf_CanAttackSlash(play, this)) {
-                        // if (this->stance == ENFZ_SIDE && Rand_ZeroOne() > 0.5f) {
+                        // if (this->stance == ENZF_SIDE && Rand_ZeroOne() > 0.5f) {
                         //     EnZf_SwitchStance(this);
                         // }
                         EnZf_SetupSlash(this);
@@ -1607,7 +1618,7 @@ void EnZf_SetupRecoilFromBlockedSlash(EnZf* this) {
     else
         Animation_Change(&this->skelAnime, &gZfLizalfosSkelGzfsliceanimAnim, -1.0f, frame, 0.0f, ANIMMODE_ONCE, 0.0f);
     this->action = ENZF_ACTION_RECOIL_FROM_BLOCKED_SLASH;
-    if (this->stance == ENFZ_SIDE && Rand_ZeroOne() > 0.5f) {
+    if (this->stance == ENZF_SIDE && Rand_ZeroOne() > 0.5f) {
         EnZf_SwitchStance(this);
     }
     EnZf_SetupAction(this, EnZf_RecoilFromBlockedSlash);
@@ -2328,7 +2339,7 @@ void EnZf_CircleAroundPlayer(EnZf* this, PlayState* play) {
 
     this->actor.world.rot.y = this->actor.shape.rot.y + 0x4000;
 
-    if (Actor_OtherIsTargeted(play, &this->actor)) {
+    if (Actor_OtherIsTargetedPlaceholder(play, &this->actor)) {
         baseRange = 100.0f;
     }
 
@@ -2651,19 +2662,24 @@ void EnZf_Update(Actor* thisx, PlayState* play) {
     }
 
     this->swordCollider.info.toucher.dmgFlags = this->stance ? 0x00100000 : 0xFFCFFFFF;
+    if ((this->stance == ENZF_SIDE && (this->swordCollider.base.atFlags & AT_BOUNCED)) ||
+                (this->swordCollider.base.atFlags & AT_HIT)) {
+        Player_SetShieldRecoveryDefault(play);
+        if (Player_isInSwordAnimation(play) && !(this->swordCollider.base.atFlags & AT_BOUNCED))
+            func_80837C0C(play, player, 0, 4.0f, 5.0f, this->actor.shape.rot.y, 20);
+    }
     if ((this->action == ENZF_ACTION_SLASH) && (this->skelAnime.curFrame >= 14.0f) &&
         (this->skelAnime.curFrame <= 20.0f)) {
-        if ((this->stance == ENFZ_SIDE && this->swordCollider.base.atFlags & AT_BOUNCED) ||
-                    this->swordCollider.base.atFlags & AT_HIT)
-            Player_SetShieldRecoveryDefault(play);
         if (!(this->swordCollider.base.atFlags & AT_BOUNCED) && !(this->swordCollider.base.acFlags & AC_HIT)) {
             CollisionCheck_SetAT(play, &play->colChkCtx, &this->swordCollider.base);
         } else {
-            this->swordCollider.base.atFlags &= ~AT_BOUNCED;
-            this->swordCollider.base.acFlags &= ~AC_HIT;
             EnZf_SetupRecoilFromBlockedSlash(this);
         }
     }
+    s16 check = Player_isInSwordAnimation(play) && player->shieldRelaxTimer != 0;
+    this->swordCollider.base.atFlags &= ~AT_BOUNCED;
+    this->swordCollider.base.acFlags &= ~AC_HIT;
+    this->swordCollider.base.atFlags &= ~AT_HIT;
 
     s16 angleToPlayer = this->actor.yawTowardsPlayer - this->actor.shape.rot.y;
     if (angleToPlayer == (s16)0x8000)
@@ -2732,7 +2748,7 @@ s32 EnZf_OverrideLimbDraw(PlayState* play, s32 limbIndex, Gfx** dList, Vec3f* po
         case ENZF_LIMB_UPPER_BODY_ROOT:
             if (LINK_IS_CHILD || Player_IsInCrouchBlock(player))
                 rot->z += 0x0800;
-            if (this->action == ENZF_ACTION_SLASH && this->stance == ENFZ_SIDE) {
+            if (this->action == ENZF_ACTION_SLASH && this->stance == ENZF_SIDE) {
                 rot->x -= (this->skelAnime.curFrame/this->skelAnime.animLength)*0x1000;
             }
             break;

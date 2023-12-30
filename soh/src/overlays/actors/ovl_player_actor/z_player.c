@@ -1288,6 +1288,30 @@ s32 Player_isRangedWeaponReady(PlayState* play) {
                 this->skelAnime2.animation == &gPlayerAnim_link_bow_bow_ready || this->skelAnime2.animation == &gPlayerAnim_link_bow_bow_shoot_next);
 }
 
+s32 Player_isInSwordAnimation(PlayState* play) {
+    Player* this = GET_PLAYER(play);
+    s16 ret = 0;
+
+    for (s32 ii = 0; ii < ARRAY_COUNT(D_80854190); ii++) {
+        if (this->skelAnime.animation == D_80854190[ii].unk_00 || this->skelAnime.animation == D_80854190[ii].unk_04 || this->skelAnime.animation == D_80854190[ii].unk_08)
+            return 1;
+    }
+
+    return ret;
+}
+
+s32 Player_isInsideRSlashAnimation(PlayState* play) {
+    Player* this = GET_PLAYER(play);
+    s16 ret = 0;
+
+    for (s32 ii = PLAYER_MWA_RIGHT_SLASH_1H; ii < PLAYER_MWA_LEFT_SLASH_1H; ii++) {
+        if (this->skelAnime.animation == D_80854190[ii].unk_00 || this->skelAnime.animation == D_80854190[ii].unk_04 || this->skelAnime.animation == D_80854190[ii].unk_08)
+            return 1;
+    }
+
+    return ret;
+}
+
 // return type can't be void due to regalloc in func_8084FCAC
 s32 func_80832210(Player* this) {
     this->actor.speedXZ = 0.0f;
@@ -3374,7 +3398,7 @@ void func_80836BEC(Player* this, PlayState* play) {
                     case 1:
                     case 2:
                     case 3:
-                    if (CHECK_BTN_ALL(sControlInput->cur.button, BTN_R) || !(this->swordState == 0))
+                    if (CHECK_BTN_ALL(sControlInput->cur.button, BTN_R) || (Player_isInSwordAnimation(play)))
                         this->crossoverState |= 2;
 
                     if (this->entryDiff.x*(this->unk_664->world.pos.x-this->actor.world.pos.x) +
@@ -3815,6 +3839,53 @@ static LinkAnimationHeader* D_808544B0[] = {
     &gPlayerAnim_link_normal_back_hit,   &gPlayerAnim_link_anchor_back_hitR,
 };
 
+void Player_ForceStun(PlayState* play, Player* this, s32 arg2, f32 arg3, f32 arg4, s16 knockbackAngle, s32 invTimer) {
+    LinkAnimationHeader* sp2C = NULL;
+    LinkAnimationHeader** sp28;
+
+    this->unk_890 = 0;
+
+    knockbackAngle -= this->actor.shape.rot.y;
+
+    sp28 = D_808544B0;
+
+    func_80835C58(play, this, func_8084370C, 0);
+    func_80833C3C(this);
+
+    // if (this->actor.colChkInfo.damage < 5) {
+    //     func_8083264C(this, 120, 20, 10, 0);
+    // } else {
+    func_8083264C(this, 180, 20, 100, 0);
+    this->linearVelocity = 23.0f;
+    sp28 += 4;
+    // }
+
+    if (ABS(knockbackAngle) <= 0x4000) {
+        sp28 += 2;
+    }
+
+    if (func_8008E9C4(this)) {
+        sp28 += 1;
+    }
+
+    sp2C = *sp28;
+
+    this->actor.shape.rot.y += knockbackAngle;
+    this->currentYaw = this->actor.shape.rot.y;
+    this->actor.world.rot.y = this->actor.shape.rot.y;
+    if (ABS(knockbackAngle) > 0x4000) {
+        this->actor.shape.rot.y += 0x8000;
+    }
+
+    func_80832564(play, this);
+
+    this->stateFlags1 |= PLAYER_STATE1_DAMAGED;
+
+    if (sp2C != NULL) {
+        func_808322D0(play, this, sp2C);
+    }
+}
+
 void func_80837C0C(PlayState* play, Player* this, s32 arg2, f32 arg3, f32 arg4, s16 arg5, s32 arg6) {
     LinkAnimationHeader* sp2C = NULL;
     LinkAnimationHeader** sp28;
@@ -4137,12 +4208,13 @@ s32 func_808382DC(Player* this, PlayState* play) {
             func_80837C0C(play, this, sp5C[this->unk_8A1 - 1], this->unk_8A4, this->unk_8A8, this->unk_8A2, 20);
         } else {
             sp64 = (this->shieldQuad.base.acFlags & AC_BOUNCED) != 0;
+            s16 isFragileBounce = (this->cylinder.base.acFlags & AC_BOUNCED) != 0;
 
             //! @bug The second set of conditions here seems intended as a way for Link to "block" hits by rolling.
             // However, `Collider.atFlags` is a byte so the flag check at the end is incorrect and cannot work.
             // Additionally, `Collider.atHit` can never be set while already colliding as AC, so it's also bugged.
             // This behavior was later fixed in MM, most likely by removing both the `atHit` and `atFlags` checks.
-            if (sp64 || ((this->invincibilityTimer < 0) && (this->cylinder.base.acFlags & AC_HIT) &&
+            if (sp64 || isFragileBounce || ((this->invincibilityTimer < 0) && (this->cylinder.base.acFlags & AC_HIT) &&
                          (this->cylinder.info.atHit != NULL) && (this->cylinder.info.atHit->atFlags & 0x20000000))) {
 
                 if (this->shieldRelaxTimer <= 6 && !Player_HoldsTwoHandedWeapon(this))
@@ -4192,6 +4264,11 @@ s32 func_808382DC(Player* this, PlayState* play) {
                 }
 
                 return 0;
+            }
+
+            if (Player_isInSwordAnimation(play) && (this->shieldRelaxTimer != 0) && (this->invincibilityTimer > 0)) {
+                Player_ForceStun(play, this, 0, 4.0f, 5.0f, this->actor.shape.rot.y, this->invincibilityTimer);
+                return 1;
             }
 
             if ((this->unk_A87 != 0) || (this->invincibilityTimer > 0) || (this->stateFlags1 & PLAYER_STATE1_DAMAGED) ||
@@ -8269,6 +8346,11 @@ static LinkAnimationHeader* D_808545CC[] = {
     &gPlayerAnim_link_fighter_rebound_longR,
 };
 
+s32 Player_isInReboundAnimation(PlayState* play) {
+    Player* this = GET_PLAYER(play);
+    return (func_808505DC == this->func_674);
+}
+
 void func_80842D20(PlayState* play, Player* this) {
     s32 pad;
     s32 sp28;
@@ -8359,7 +8441,7 @@ s32 func_80842DF4(PlayState* play, Player* this) {
 
         if (temp1) {
             if (this->meleeWeaponAnimation < 0x18) {
-                Actor* at = this->meleeWeaponQuads[temp1 ? 1 : 0].base.at;
+                Actor* at = this->meleeWeaponQuads[(this->meleeWeaponQuads[1].base.atFlags & AT_HIT) ? 1 : 0].base.at;
 
                 if ((at != NULL) && (at->id != ACTOR_EN_KANBAN)) {
                     func_80832630(play);
@@ -9921,6 +10003,7 @@ void Player_InitCommon(Player* this, PlayState* play, FlexSkeletonHeader* skelHe
     this->entryDiff.x = 0.0f;
     this->entryDiff.y = 0.0f;
     this->entryDiff.z = 0.0f;
+    this->stepTracking = 0;
 }
 
 static void (*D_80854738[])(PlayState* play, Player* this) = {
@@ -10888,6 +10971,13 @@ void Player_SetShieldRecoveryDefault(PlayState* play) {
     player->crouchCharge = 0;
 }
 
+void Player_SetShieldRecovery(PlayState* play, u16 frames) {
+    Player* player = GET_PLAYER(play);
+
+    player->shieldRelaxTimer = frames;
+    player->crouchCharge = 0;
+}
+
 void Player_UpdateCommon(Player* this, PlayState* play, Input* input) {
     s32 pad;
 
@@ -10927,6 +11017,11 @@ void Player_UpdateCommon(Player* this, PlayState* play, Input* input) {
 
     DECR(this->unsheathing);
 
+    if (Player_isInsideRSlashAnimation(play))
+        this->stepTracking = 3;
+    else
+        DECR(this->stepTracking);
+
     if (this->stateFlags1 & PLAYER_STATE1_SHIELDING) {
         if (this->shieldUpTimer < SHIELD_TIME_MAX/2)
             this->shieldUpTimer++;
@@ -10941,17 +11036,15 @@ void Player_UpdateCommon(Player* this, PlayState* play, Input* input) {
         }
     }
     else {
-       if (this->shieldUpTimer > 0) {
-           this->shieldEntry = SHIELD_TIME_MAX;
-           this->shieldUpTimer = 0;
+        if (this->shieldUpTimer > 0) {
+            this->shieldEntry = SHIELD_TIME_MAX;
+            this->shieldUpTimer = 0;
         }
-        //Shield timer state is preserved through a roll, to balance stab out of roll
-        //if (this->func_674 != func_80844708) {
-            if (this->shieldRelaxTimer > 0)
-                this->shieldRelaxTimer--;
-            if (this->shieldEntry > 0)
-                this->shieldEntry--;
-        //}
+
+        if (this->shieldRelaxTimer > 0)
+            this->shieldRelaxTimer--;
+        if (this->shieldEntry > 0)
+            this->shieldEntry--;
     }
 
     func_808473D4(play, this);
@@ -11332,6 +11425,7 @@ void Player_Update(Actor* thisx, PlayState* play) {
     s32 pad;
     Input sp44;
     Actor* dog;
+    s16 check = Player_isInSwordAnimation(play) && this->shieldRelaxTimer != 0;
 
     osSyncPrintf("LinkPos: {%d,%d,%d},",(s16)this->actor.world.pos.x,(s16)this->actor.world.pos.y,(s16)this->actor.world.pos.z);
     osSyncPrintf("interfaceMode: %d",(u16)play->interfaceCtx.unk_1EE);
@@ -11475,6 +11569,7 @@ void Player_DrawGameplay(PlayState* play, Player* this, s32 lod, Gfx* cullDList,
     gSPSegment(POLY_OPA_DISP++, 0x0C, cullDList);
     gSPSegment(POLY_XLU_DISP++, 0x0C, cullDList);
 
+    this->cylinder.base.ocFlags1 &= ~OC1_FIRM;
     func_8008F470(play, this->skelAnime.skeleton, this->skelAnime.jointTable, this->skelAnime.dListCount, lod,
                   this->currentTunic, this->currentBoots, this->actor.shape.face, overrideLimbDraw, func_80090D20,
                   this);
@@ -14168,6 +14263,7 @@ void func_808502D0(Player* this, PlayState* play) {
     }
 }
 
+//Sword rebound state
 void func_808505DC(Player* this, PlayState* play) {
     LinkAnimation_Update(play, &this->skelAnime);
     func_8083721C(this);
