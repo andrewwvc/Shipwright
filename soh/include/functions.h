@@ -515,6 +515,7 @@ void Actor_SetTextWithPrefix(PlayState* play, Actor* actor, s16 textIdLower);
 s16 Actor_TestFloorInDirection(Actor* actor, PlayState* play, f32 distance, s16 angle);
 s32 Actor_IsTargeted(PlayState* play, Actor* actor);
 s32 Actor_OtherIsTargeted(PlayState* play, Actor* actor);
+s32 Actor_SameIsTargeted(PlayState* play, Actor* actor);
 f32 func_80033AEC(Vec3f* arg0, Vec3f* arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5);
 void func_80033C30(Vec3f* arg0, Vec3f* arg1, u8 alpha, PlayState* play);
 void func_80033DB8(PlayState* play, s16 arg1, s16 arg2);
