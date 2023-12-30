@@ -127,6 +127,7 @@ typedef struct EnTest {
     /* 0x808 */ s8 swordState;
     /* 0x808 */ s8 hitTracker;
     /* 0x808 */ s16 blockTrackingTimer;
+    /*       */ s8 actAsSecond;
     /* 0x80C */ s32 effectIndex;
     /* 0x80C */ s32 effectIndicatorIndex[2];
     /* 0x810 */ ColliderCylinder bodyCollider;

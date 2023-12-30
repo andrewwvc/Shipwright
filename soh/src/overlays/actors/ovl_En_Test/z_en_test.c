@@ -100,7 +100,7 @@ enum {
     HighAttack = 0x10,
     UpAttack = 0x11,
     EndAttack = 0x12,
-    Recall = 0x13,
+    Recoil = 0x13,
     DodgeBack = 0x14,
     Stop = 0x15,
     AfterStop = 0x16,
@@ -915,7 +915,7 @@ static InitChainEntry sInitChain[] = {
 #define ELITE_PARAM 16
 #define DARK_PARAM 32
 #define POWERFUL_PARAM 64
-#define IS_ELITE (this->variant & ELITE_PARAM)
+#define IS_ELITE ((this->variant & ELITE_PARAM) || !this->actAsSecond)
 #define DAMAGE_MULT ((this->variant & POWERFUL_PARAM) ? 2 : 1)
 
 #define VULNERABLE_IN_JUMP (this->skelAnime.curFrame >= this->skelAnime.animLength-5.0f && this->timer == 1)
@@ -1898,6 +1898,7 @@ void func_80860C24(EnTest* this, PlayState* play) {
 
     if (IS_ELITE) {
         EnTest_SetupSidestepElite(this, play);
+        return;
     }
 
     if (!EnTest_ReactToProjectile(play, this)) {
@@ -2463,9 +2464,9 @@ s16 EnTest_WillJumpbackLand(EnTest* this, PlayState* play) {
     return Actor_TestFloorInDirection(&this->actor, play, (this->actor.params != STALFOS_TYPE_CEILING) ? -165.0f : -105.0f, this->actor.shape.rot.y);
 }
 
-s16 EnTest_SetupJumpBack(EnTest* this, PlayState* play) {
+s16 EnTest_SetupJumpBackExtended(EnTest* this, PlayState* play, s16 forced) {
     Player *player = GET_PLAYER(play);
-    if (IS_ELITE && ((this->actor.flags & ACTOR_FLAG_TARGETABLE) || (this->variant & DARK_PARAM)) && (this->actor.xzDistToPlayer < 130.0f && Actor_IsFacingPlayer(&this->actor, 0xC00)) && (Player_isInSwordAnimation(play) || Rand_ZeroOne() > 0.6f)) {
+    if (!forced && IS_ELITE && ((this->actor.flags & ACTOR_FLAG_TARGETABLE) || (this->variant & DARK_PARAM)) && (this->actor.xzDistToPlayer < 130.0f && Actor_IsFacingPlayer(&this->actor, 0xC00)) && (Player_isInSwordAnimation(play) || Rand_ZeroOne() > 0.6f)) {
         if (player->swordState >= PLAYER_MWA_STAB_1H && PLAYER_MWA_STAB_COMBO_2H <= player->swordState) {
             return EnTest_SetupCrossoverJump(this,play);
         } else
@@ -2473,7 +2474,7 @@ s16 EnTest_SetupJumpBack(EnTest* this, PlayState* play) {
         return 1;
     }
 
-    if (!EnTest_WillJumpbackLand(this, play)){
+    if (!forced && !EnTest_WillJumpbackLand(this, play)){
         return 0;
     }
 
@@ -2493,6 +2494,14 @@ s16 EnTest_SetupJumpBack(EnTest* this, PlayState* play) {
         this->actor.speedXZ = -7.0f;
     }
     return 1;
+}
+
+s16 EnTest_SetupJumpBack(EnTest* this, PlayState* play) {
+    return EnTest_SetupJumpBackExtended(this, play, 0);
+}
+
+s16 EnTest_SetupJumpBackForced(EnTest* this, PlayState* play) {
+    return EnTest_SetupJumpBackExtended(this, play, 1);
 }
 
 void EnTest_JumpBack(EnTest* this, PlayState* play) {
@@ -3294,7 +3303,9 @@ void EnTest_Rise(EnTest* this, PlayState* play) {
         this->actor.world.pos.y = this->actor.home.pos.y - 3.5f;
     } else {
         this->actor.world.pos.y = this->actor.home.pos.y;
-        EnTest_SetupJumpBack(this, play);
+        if (!EnTest_SetupJumpBackForced(this, play)) {
+            EnTest_SetupWalkAndBlock(this);
+        }
     }
 }
 
@@ -3459,7 +3470,16 @@ void EnTest_Update(Actor* thisx, PlayState* play) {
     f32 oldWeight;
     u32 floorProperty;
     s32 pad;
+    s8 tempAct = this->actAsSecond;
 
+    this->actAsSecond = Actor_SameIsTargeted(play, &this->actor);
+    if (this->actAsSecond && !tempAct) {//If the actor was playing the part of an Elite on the previous frame, but is now a secondary
+        if (this->unk_7C8 == Walk && this->actionFunc == EnTest_WalkAndBlockElite) {
+            EnTest_SetupWalkBack(this, 200.0f);
+        } else if (this->unk_7C8 == Sidestep && this->actionFunc == EnTest_SidestepElite) {
+            func_808627C4(this, play);
+        }
+    }
     this->blockTrackingTimer++;
     if (this->blockTrackingTimer >= 0x7FFF)
         this->blockTrackingTimer = 0x800;
