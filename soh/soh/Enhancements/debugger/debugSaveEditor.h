@@ -38,6 +38,7 @@ const std::vector<FlagTable> flagTables = {
         { 0x09, "Used Deku Tree Blue Warp" },
         { 0x0A, "Played Saria's Song for Mido as Adult" },
         { 0x0C, "Met Deku Tree" },
+        { 0x0E, "Spoke to the Know-It-All-Brothers about shields" },
         { 0x0F, "Spoke to Mido about Saria's whereabouts" },
         { 0x10, "Spoke to Child Malon at Castle or Market" },
         { 0x11, "Spoke to Ingo at Ranch before Talon returns" },

@@ -306,6 +306,8 @@ u16 ElfMessage_GetSpecialNaviText(PlayState* play) {
             s32 ii = 0;
             s16 bootsObtainedIron = ((gBitFlags[ITEM_BOOTS_IRON - ITEM_BOOTS_KOKIRI] << gEquipShifts[EQUIP_BOOTS]) & gSaveContext.inventory.equipment);
             messageNumbers[ii++] = 0x015D;//Navi reminder about Sheik's message
+            if (!(gSaveContext.eventChkInf[0] & 0x4000) && LINK_IS_CHILD)
+                messageNumbers[ii++] = 0x010B;//Reminder to talk to Know-it-All bros.
             if (!CHECK_QUEST_ITEM(QUEST_MEDALLION_FOREST))
                 messageNumbers[ii++] = 0x150;
             if (!CHECK_QUEST_ITEM(QUEST_MEDALLION_FIRE))
@@ -314,6 +316,8 @@ u16 ElfMessage_GetSpecialNaviText(PlayState* play) {
                 messageNumbers[ii++] = 0x152;
             else if (!CHECK_QUEST_ITEM(QUEST_MEDALLION_WATER))
                 messageNumbers[ii++] = 0x153;
+            if (!CHECK_QUEST_ITEM(QUEST_MEDALLION_FOREST) && !CHECK_QUEST_ITEM(QUEST_MEDALLION_FIRE) && !CHECK_QUEST_ITEM(QUEST_MEDALLION_WATER))
+                messageNumbers[ii++] = 0x010A;
 
             if (ii > 0) {
                 if (!ElfMessage_ComparePersistantElfMessages(messageNumbers, ii)){
@@ -329,6 +333,8 @@ u16 ElfMessage_GetSpecialNaviText(PlayState* play) {
         if (0x154 <= tempMsg && tempMsg <= 0x15A) {
             s32 ii = 0;
             messageNumbers[ii++] = 0x015D;//Navi reminder about Sheik's message
+            if (!(gSaveContext.eventChkInf[0] & 0x4000) && LINK_IS_CHILD)
+                messageNumbers[ii++] = 0x010B;//Reminder to talk to Know-it-All bros.
             if (!(gSaveContext.eventChkInf[0xA]&(1<<0xA)))
                 messageNumbers[ii++] = 0x154;
             else if (INV_CONTENT(ITEM_LENS) == ITEM_NONE)
@@ -354,8 +360,10 @@ u16 ElfMessage_GetSpecialNaviText(PlayState* play) {
             return tempMsg;
         }
 
-        /*if (0x145 <= tempMsg && tempMsg <= 0x14A) {
+        if (0x145 <= tempMsg && tempMsg <= 0x14A) {
             s32 ii = 0;
+            if (!(gSaveContext.eventChkInf[0] & 0x4000))
+                messageNumbers[ii++] = 0x010B;
             if (!CHECK_QUEST_ITEM(ITEM_SONG_SARIA - ITEM_SONG_MINUET + QUEST_SONG_MINUET)) {
                 messageNumbers[ii++] = 0x145;
                 messageNumbers[ii++] = 0x146;
@@ -365,19 +373,36 @@ u16 ElfMessage_GetSpecialNaviText(PlayState* play) {
                 messageNumbers[ii++] = 0x147;
             else if (!gSaveContext.isMagicAcquired)
                 messageNumbers[ii++] = 0x148;
-
-            if (!(gSaveContext.eventChkInf[3]&(1<<3)))
+            else if (!(gSaveContext.eventChkInf[3]&(1<<3)))
                 messageNumbers[ii++] = 0x149;
-            else if (!(gSaveContext.eventChkInf[3]&(1<<7)))
+
+            if ((gSaveContext.eventChkInf[3]&(1<<3)) && !(gSaveContext.eventChkInf[3]&(1<<7)))
                 messageNumbers[ii++] = 0x14A;
 
             if (ii > 0) {
-                randInt = Rand_S16Offset(0, ii);
-                tempMsg = messageNumbers[randInt];
+                if (!ElfMessage_ComparePersistantElfMessages(messageNumbers, ii)) {
+                    ElfMessage_SetPersistantElfMessages(messageNumbers, ii);
+                    sMessagePersistanceCurrent = Rand_S16Offset(0, ii);
+                }
+                tempMsg = messageNumbers[sMessagePersistanceCurrent];
             }
 
             return tempMsg;
-        }*/
+        } else if (0x14B <= tempMsg && LINK_IS_CHILD) {
+            s32 ii = 0;
+            if (!(gSaveContext.eventChkInf[0] & 0x4000))
+                messageNumbers[ii++] = 0x010B;
+            messageNumbers[ii++] = tempMsg;
+            if (ii > 0) {
+                if (!ElfMessage_ComparePersistantElfMessages(messageNumbers, ii)) {
+                    ElfMessage_SetPersistantElfMessages(messageNumbers, ii);
+                    sMessagePersistanceCurrent = Rand_S16Offset(0, ii);
+                }
+                tempMsg = messageNumbers[sMessagePersistanceCurrent];
+            }
+
+            return tempMsg;
+        }
 
         messageNumbers[0] = tempMsg;
         ElfMessage_SetPersistantElfMessages(messageNumbers, 1);

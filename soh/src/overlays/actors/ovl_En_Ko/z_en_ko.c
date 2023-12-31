@@ -667,6 +667,8 @@ s16 func_80A97738(PlayState* play, Actor* thisx) {
                 gSaveContext.infTable[3] |= 1 << 14;
             } else if (this->actor.textId == KokiriMsg+32) {
                 gSaveContext.infTable[27] |= 1 << 1;
+            } else if (this->actor.textId == KokiriMsg+38) {
+                gSaveContext.eventChkInf[0] |= 0x4000;
             }
             return NPC_TALK_STATE_IDLE;
         case TEXT_STATE_DONE_FADING:
