@@ -15,6 +15,7 @@
 #define GE1_STATE_GIVE_QUIVER (1 << 1)
 #define GE1_STATE_IDLE_ANIM (1 << 2)
 #define GE1_STATE_STOP_FIDGET (1 << 3)
+#define GE1_STATE_GIVE_CARROT (1 << 4)
 
 typedef enum {
     /* 00 */ GE1_HAIR_BOB,
@@ -577,7 +578,7 @@ void EnGe1_WaitTillItemGiven_Archery(EnGe1* this, PlayState* play) {
         } else {
             if (!(gSaveContext.infTable[25] & 1))
                 gSaveContext.infTable[25] |= 1;
-            else
+            else if ((this->stateFlags & GE1_STATE_GIVE_CARROT))
                 gSaveContext.infTable[24] |= 1;
         }
     } else {
@@ -598,7 +599,10 @@ void EnGe1_WaitTillItemGiven_Archery(EnGe1* this, PlayState* play) {
             }
         } else {
             if (!gSaveContext.n64ddFlag) {
-                getItemId = GI_HEART_PIECE;
+                if (this->stateFlags & GE1_STATE_GIVE_CARROT)
+                    getItemId = GI_EPONA_BOOST;
+                else
+                    getItemId = GI_HEART_PIECE;
             } else {
                 getItemEntry = Randomizer_GetItemFromKnownCheck(RC_GF_HBA_1000_POINTS, GI_HEART_PIECE);
                 getItemId = getItemEntry.getItemId;
@@ -639,7 +643,10 @@ void EnGe1_BeginGiveItem_Archery(EnGe1* this, PlayState* play) {
         }
     } else {
         if (!gSaveContext.n64ddFlag) {
-            getItemId = GI_HEART_PIECE;
+            if (this->stateFlags & GE1_STATE_GIVE_CARROT)
+                getItemId = GI_EPONA_BOOST;
+            else
+                getItemId = GI_HEART_PIECE;
         } else {
             getItemEntry = Randomizer_GetItemFromKnownCheck(RC_GF_HBA_1000_POINTS, GI_HEART_PIECE);
             getItemId = getItemEntry.getItemId;
@@ -749,6 +756,7 @@ void EnGe1_TalkAfterGame_Archery(EnGe1* this, PlayState* play) {
         this->actor.textId = 0x6046;
         this->actionFunc = EnGe1_TalkWinPrize_Archery;
         this->stateFlags &= ~GE1_STATE_GIVE_QUIVER;
+        this->stateFlags &= ~GE1_STATE_GIVE_CARROT;
     } else if (gSaveContext.minigameScore < 1500) {
         this->actor.textId = 0x6047;
         this->actionFunc = EnGe1_TalkNoPrize_Archery;
@@ -756,6 +764,7 @@ void EnGe1_TalkAfterGame_Archery(EnGe1* this, PlayState* play) {
         this->actor.textId = 0x6044;
         this->actionFunc = EnGe1_TalkWinPrize_Archery;
         this->stateFlags |= GE1_STATE_GIVE_QUIVER;
+        this->stateFlags &= ~GE1_STATE_GIVE_CARROT;
     } else if (gSaveContext.minigameScore < 2000) {
         this->actor.textId = 0x6047;
         this->actionFunc = EnGe1_TalkNoPrize_Archery;
@@ -763,6 +772,7 @@ void EnGe1_TalkAfterGame_Archery(EnGe1* this, PlayState* play) {
         this->actor.textId = 0x6046;
         this->actionFunc = EnGe1_TalkWinPrize_Archery;
         this->stateFlags &= ~GE1_STATE_GIVE_QUIVER;
+        this->stateFlags |= GE1_STATE_GIVE_CARROT;
     } else {
         this->actor.textId = 0x6047;
         this->actionFunc = EnGe1_TalkNoPrize_Archery;

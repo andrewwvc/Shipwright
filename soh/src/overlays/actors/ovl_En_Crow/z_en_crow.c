@@ -372,7 +372,10 @@ void EnCrow_Die(EnCrow* this, PlayState* play) {
             Item_DropCollectibleRandom(play, &this->actor, &this->actor.world.pos, 0);
         } else {
             sDeathCountBig++;
-            Item_DropCollectible(play, &this->actor.world.pos, ITEM00_RUPEE_RED);
+            if (MALON_DEFENSE_CONDITIONS && (sDeathCountBig == 1) && !Flags_GetCollectible(play,1))
+                Item_DropCollectible(play, &this->actor.world.pos, 0x100+ITEM00_HEART_PIECE);
+            else
+                Item_DropCollectible(play, &this->actor.world.pos, ITEM00_RUPEE_RED);
         }
         if (!CVarGetInteger("gRandomizedEnemies", 0) && !MALON_DEFENSE_CONDITIONS) {
             EnCrow_SetupRespawn(this);

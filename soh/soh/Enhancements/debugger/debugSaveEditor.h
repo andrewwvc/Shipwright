@@ -323,6 +323,7 @@ const std::vector<FlagTable> flagTables = {
         { 0x176, "Spoke to Blue Carpenter in Tent" },
         { 0x178, "Spoke to Green Carpenter in Tent" },
         { 0x17F, "Running Man Suggested a Race" },
+        { 0x180, "Obtained Gerudo Archery Carrot" },
         { 0x190, "Obtained Gerudo Archery Piece of  Heart" },
         { 0x191, "Obtained Dog Lady's Piece of Heart" },
         { 0x192, "Obtained Deku Stick Upgrade (Lost Woods)" },
