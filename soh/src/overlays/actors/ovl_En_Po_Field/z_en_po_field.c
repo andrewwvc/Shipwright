@@ -106,7 +106,7 @@ static DamageTable sDamageTable = {
     /* Fire arrow    */ DMG_ENTRY(2, 0x0),
     /* Ice arrow     */ DMG_ENTRY(2, 0x0),
     /* Light arrow   */ DMG_ENTRY(2, 0x0),
-    /* Unk arrow 1   */ DMG_ENTRY(2, 0x0),
+    /* Unk arrow 1   */ DMG_ENTRY(4, 0x0),
     /* Unk arrow 2   */ DMG_ENTRY(2, 0x0),
     /* Unk arrow 3   */ DMG_ENTRY(2, 0x0),
     /* Fire magic    */ DMG_ENTRY(0, 0x0),
@@ -421,6 +421,7 @@ void EnPoField_WaitForSpawn(EnPoField* this, PlayState* play) {
                     }
                 } else if (player->stateFlags1 & 0x800000 || Rand_ZeroOne() < 0.4f) {
                     this->actor.params = EN_PO_FIELD_BIG;
+                    this->actor.colChkInfo.health = 8;
                     this->spawnFlagIndex = i;
                     spawnDist = 480.0f;
                 } else {
