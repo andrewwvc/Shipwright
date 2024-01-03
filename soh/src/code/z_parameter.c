@@ -5629,6 +5629,8 @@ void Interface_Draw(PlayState* play) {
                         } else if (CVarGetInteger("gCarrotsPosType", 0) == 4) {//Hidden
                             CarrotsPosX = -9999;
                         }
+                    } else {
+                        CarrotsPosX -= (gSaveContext.maxBoosts-6)*8;
                     }
                     for (svar1 = 1, svar5 = CarrotsPosX; svar1 < gSaveContext.maxBoosts+1; svar1++, svar5 += 16) {
                         // Carrot Color (based on availability)

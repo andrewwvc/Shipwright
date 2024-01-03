@@ -438,6 +438,14 @@ void DrawInfoTab() {
     ImGui::SliderScalar("Magic", ImGuiDataType_S8, &gSaveContext.magic, &magicMin, &magicMax);
     UIWidgets::InsertHelpHoverText("Current magic. 48 units per magic level");
 
+    const uint16_t boostMin = 6;
+    const uint16_t boostGreatestMax = 16;
+    int8_t boostNum = gSaveContext.maxBoosts;
+    if (ImGui::SliderScalar("Boost Carrots", ImGuiDataType_U8, &boostNum,&boostMin,&boostGreatestMax)) {
+        gSaveContext.maxBoosts = boostNum;
+    }
+    UIWidgets::InsertHelpHoverText("Number of stamina boosts available to Epona");
+
     ImGui::InputScalar("Rupees", ImGuiDataType_S16, &gSaveContext.rupees);
     UIWidgets::InsertHelpHoverText("Current rupees");
 
