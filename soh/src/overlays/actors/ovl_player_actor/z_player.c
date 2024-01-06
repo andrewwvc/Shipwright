@@ -11698,14 +11698,16 @@ void Player_Draw(Actor* thisx, PlayState* play2) {
         func_80093C80(play);
         Gfx_SetupDL_25Xlu(play->state.gfxCtx);
 
-        if (this->invincibilityTimer > 0) {
-            this->unk_88F += CLAMP(50 - this->invincibilityTimer, 8, 40);
-            POLY_OPA_DISP =
-                Gfx_SetFog2(POLY_OPA_DISP, 255, 0, 0, 0, 0, 4000 - (s32)(Math_CosS(this->unk_88F * 256) * 2000.0f));
-        }
-        if (this->shieldRelaxTimer > 0) {
-            POLY_OPA_DISP =
-                Gfx_SetFog2(POLY_OPA_DISP, 0, 0, 255, 0, 0, 4000 - (2000/SHIELD_TIME_MAX)*this->shieldRelaxTimer);
+        if (play->sceneNum != 35 && play->sceneNum != 37) {//Prevents stones from changing color in ToT exterior
+            if (this->invincibilityTimer > 0) {
+                this->unk_88F += CLAMP(50 - this->invincibilityTimer, 8, 40);
+                POLY_OPA_DISP =
+                    Gfx_SetFog2(POLY_OPA_DISP, 255, 0, 0, 0, 0, 4000 - (s32)(Math_CosS(this->unk_88F * 256) * 2000.0f));
+            }
+            if (this->shieldRelaxTimer > 0) {
+                POLY_OPA_DISP =
+                    Gfx_SetFog2(POLY_OPA_DISP, 0, 0, 255, 0, 0, 4000 - (2000/SHIELD_TIME_MAX)*this->shieldRelaxTimer);
+            }
         }
 
         func_8002EBCC(&this->actor, play, 0);
@@ -11751,7 +11753,7 @@ void Player_Draw(Actor* thisx, PlayState* play2) {
 
         Player_DrawGameplay(play, this, lod, gCullBackDList, overrideLimbDraw);
 
-        if (this->invincibilityTimer > 0 || this->shieldRelaxTimer > 0) {
+        if ((play->sceneNum != 35 && play->sceneNum != 37) && (this->invincibilityTimer > 0 || this->shieldRelaxTimer > 0)) {
             POLY_OPA_DISP = Play_SetFog(play, POLY_OPA_DISP);
         }
 
