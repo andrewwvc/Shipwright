@@ -138,6 +138,31 @@ void EnBox_Init(Actor* thisx, PlayState* play2) {
 
     if (play) {} // helps the compiler store play2 into s1
 
+    if (gSaveContext.n64ddFlag) {
+        this->getItemEntry = Randomizer_GetItemFromActor(this->dyna.actor.id, play->sceneNum, this->dyna.actor.params, this->dyna.actor.params >> 5 & 0x7F);
+    } else {
+        this->getItemEntry = ItemTable_RetrieveEntry(MOD_NONE, ENBOX_ITEM_ID);
+    }
+
+    if (this->getItemEntry.itemId == ITEM_COMPASS || this->getItemEntry.itemId == ITEM_DUNGEON_MAP) {
+        switch (this->type) {
+            case ENBOX_TYPE_BIG_DEFAULT:
+            case ENBOX_TYPE_DECORATED_BIG:
+                this->type = ENBOX_TYPE_SMALL;
+                break;
+            case ENBOX_TYPE_ROOM_CLEAR_BIG:
+                this->type = ENBOX_TYPE_ROOM_CLEAR_SMALL;
+                break;
+            case ENBOX_TYPE_SWITCH_FLAG_BIG:
+            case ENBOX_TYPE_SWITCH_FLAG_FALL_BIG:
+                this->type = ENBOX_TYPE_SWITCH_FLAG_FALL_SMALL;
+                break;
+            case ENBOX_TYPE_4:
+                this->type = ENBOX_TYPE_6;
+                break;
+        }
+    }
+
     if (Flags_GetTreasure(play, this->dyna.actor.params & 0x1F)) {
         this->alpha = 255;
         this->iceSmokeTimer = 100;
@@ -193,12 +218,6 @@ void EnBox_Init(Actor* thisx, PlayState* play2) {
 
     SkelAnime_Init(play, &this->skelanime, &gTreasureChestSkel, anim, this->jointTable, this->morphTable, 5);
     Animation_Change(&this->skelanime, anim, 1.5f, animFrameStart, endFrame, ANIMMODE_ONCE, 0.0f);
-
-    if (gSaveContext.n64ddFlag) {
-        this->getItemEntry = Randomizer_GetItemFromActor(this->dyna.actor.id, play->sceneNum, this->dyna.actor.params, this->dyna.actor.params >> 5 & 0x7F);
-    } else {
-        this->getItemEntry = ItemTable_RetrieveEntry(MOD_NONE, ENBOX_ITEM_ID);
-    }
 
     EnBox_UpdateSizeAndTexture(this, play);
     // For SOH we spawn a chest actor instead of rendering the object from scratch for forest boss
