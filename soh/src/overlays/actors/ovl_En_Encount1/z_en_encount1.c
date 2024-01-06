@@ -256,7 +256,7 @@ void EnEncount1_SpawnStalchildOrWolfos(EnEncount1* this, PlayState* play) {
         while ((this->curNumSpawn < this->maxCurSpawns && this->totalNumSpawn < this->maxTotalSpawns) || 
                 (CVarGetInteger("gRandomizedEnemies", 0) && enemyCount < 15)) {
             if (play->sceneNum == SCENE_SPOT00) {
-                Actor_FindNumberOf(play, player, ACTOR_EN_HY, ACTORCAT_NPC, 10000, &YellowWoman, isItchyWoman);
+                Actor_FindNumberOf(play, player, ACTOR_EN_HY, ACTORCAT_NPC, 100000, &YellowWoman, isItchyWoman);
                 if (YellowWoman) {
                     u16 groundSurface = SurfaceType_GetSfx(&play->colCtx, YellowWoman->floorPoly, YellowWoman->floorBgId);
                     if (!isItchyWomanVulnerable(YellowWoman) || (groundSurface) == 0)
@@ -279,7 +279,7 @@ void EnEncount1_SpawnStalchildOrWolfos(EnEncount1* this, PlayState* play) {
 
                 if (YellowWoman) {
                     spawnDist = Rand_CenteredFloat(40.0f) + 200.0f;
-                    spawnAngle = YellowWoman->shape.rot.y + 0x4000;
+                    spawnAngle = YellowWoman->shape.rot.y + Rand_S16Offset(0x0,0x4000);
                     if (this->curNumSpawn != 0) {
                         spawnAngle = -spawnAngle;
                         spawnDist = Rand_CenteredFloat(20.0f) + 200.0f;

@@ -301,7 +301,7 @@ void EnSkb_Advance(EnSkb* this, PlayState* play) {
         }
     }
     // Don't despawn stallchildren during daytime or when a stalchildren walks too far away from his "home" when enemy randomizer is enabled.
-    if ((this->altTarget && Math_Vec3f_DistXZ(&this->actor.home.pos, &this->altTarget->world.pos) > 800.0f) || (Math_Vec3f_DistXZ(&this->actor.home.pos, &player->actor.world.pos) > 800.0f || IS_DAY) && !CVarGetInteger("gRandomizedEnemies", 0)) {
+    if ((this->altTarget && Math_Vec3f_DistXZ(&this->actor.home.pos, &this->altTarget->world.pos) > 800.0f) || (!this->altTarget && (Math_Vec3f_DistXZ(&this->actor.home.pos, &player->actor.world.pos) > 800.0f || IS_DAY) && !CVarGetInteger("gRandomizedEnemies", 0))) {
         func_80AFCF48(this);
     } else if ((this->altTarget && Actor_ActorAIsFacingActorB(&this->actor, this->altTarget, 0x11C7))  && (this->walkTimer < 1) &&
                 (this->altTarget && this->distToTarget < this->closenessBias*(60.0f + (this->actor.params * 6.0f)))) {

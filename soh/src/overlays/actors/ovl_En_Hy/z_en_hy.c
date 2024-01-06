@@ -1201,6 +1201,9 @@ void func_80A7127C(EnHy* this, PlayState* play) {
 }
 
 void EnHy_DoNothing(EnHy* this, PlayState* play) {
+    //This is effectingly supposed to be a 'dummy op' that doesn't affect gameplay but forces
+    //the compiler to not omit this function
+    this->actor.home.pos.y = this->actor.world.pos.y;
 }
 
 void EnHy_BeSulking(EnHy* this, PlayState* play) {
