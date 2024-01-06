@@ -174,6 +174,7 @@ extern "C" void createRupeeScoreString(int score)
 
 extern "C" void OTRMessage_Init()
 {
+    TextIDAllocator::Instance->reset();
     // OTRTODO: Added a lot of null checks here so that we don't malloc the table multiple times causing a memory leak.
     // We really ought to fix the implementation such that we aren't malloc'ing new tables.
     // Once we fix the implementation, remove these NULL checks.
