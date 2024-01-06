@@ -22,6 +22,7 @@
 #include "overlays/effects/ovl_Effect_Ss_Fhg_Flash/z_eff_ss_fhg_flash.h"
 #include "objects/gameplay_keep/gameplay_keep.h"
 #include "objects/object_link_child/object_link_child.h"
+#include "objects/object_tw/object_tw.h"
 #include "textures/icon_item_24_static/icon_item_24_static.h"
 #include <soh/Enhancements/custom-message/CustomMessageTypes.h>
 #include "soh/Enhancements/item-tables/ItemTableTypes.h"
@@ -29,6 +30,8 @@
 #include "soh/Enhancements/randomizer/randomizer_entrance.h"
 #include <overlays/actors/ovl_En_Partner/z_en_partner.h>
 #include "soh/Enhancements/enhancementTypes.h"
+
+#define RESIDUAL_SHIELD_ACTIVE ((this->cylinder.base.ocFlags1 & OC1_FIRM) && (this->shieldQuad.info.bumper.dmgFlags == 0x00100000) && (this->stateFlags1 & PLAYER_STATE1_ENEMY_TARGET) && !(this->actor.flags & ACTOR_FLAG_PLAYER_TALKED_TO))
 
 typedef enum {
     /* 0x00 */ KNOB_ANIM_ADULT_L,
@@ -11768,6 +11771,22 @@ void Player_Draw(Actor* thisx, PlayState* play2) {
 
         if (this->unk_862 > 0) {
             Player_DrawGetItem(play, this);
+        }
+
+        if (RESIDUAL_SHIELD_ACTIVE) {
+            Matrix_Push();
+            Matrix_Mult(&this->shieldMf, MTXMODE_NEW);
+            Matrix_RotateX(M_PI / 2.0f, MTXMODE_APPLY);
+            gSPMatrix(POLY_XLU_DISP++, MATRIX_NEWMTX(play->state.gfxCtx),
+                      G_MTX_LOAD | G_MTX_MODELVIEW | G_MTX_NOPUSH);
+            gDPSetEnvColor(POLY_XLU_DISP++, 225, 255, 255, 255);
+            gSPDisplayList(POLY_XLU_DISP++, SEGMENTED_TO_VIRTUAL(object_tw_DL_01E3A0));
+            gSPSegment(POLY_XLU_DISP++, 8,
+                        Gfx_TwoTexScroll(play->state.gfxCtx, 0, 0, 0,
+                                        0x20, 0x40, 1, 0, 0, 0x20, 0x20));
+            gDPSetPrimColor(POLY_XLU_DISP++, 0, 0, 175, 205, 195, 255);
+            gSPDisplayList(POLY_XLU_DISP++, SEGMENTED_TO_VIRTUAL(object_tw_DL_01E2C0));
+            Matrix_Pop();
         }
     }
 
