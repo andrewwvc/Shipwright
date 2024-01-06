@@ -2817,13 +2817,15 @@ void EnTest_StopAndBlock(EnTest* this, PlayState* play) {
         }
     } else {
         this->timer--;
-        if (!this->stopStatus) {
-            if (Rand_ZeroOne() < 0.05) {
-               EnTest_SetupWalkBack(this, 170.0f);
+        if (IS_ELITE) {
+            if (!this->stopStatus) {
+                if (Rand_ZeroOne() < 0.05) {
+                EnTest_SetupWalkBack(this, 170.0f);
+                }
+                // else if (Rand_ZeroOne() < 0.1) {
+                //     EnTest_SetupSlashDown(this);
+                // }
             }
-            // else if (Rand_ZeroOne() < 0.1) {
-            //     EnTest_SetupSlashDown(this);
-            // }
         }
     }
 }
@@ -3475,7 +3477,7 @@ void EnTest_Update(Actor* thisx, PlayState* play) {
     this->actAsSecond = Actor_SameIsTargeted(play, &this->actor);
     if (this->actAsSecond && !tempAct) {//If the actor was playing the part of an Elite on the previous frame, but is now a secondary
         if (this->unk_7C8 == Walk && this->actionFunc == EnTest_WalkAndBlockElite) {
-            EnTest_SetupWalkBack(this, 200.0f);
+            EnTest_SetupWalkAndBlock(this);
         } else if (this->unk_7C8 == Sidestep && this->actionFunc == EnTest_SidestepElite) {
             func_808627C4(this, play);
         }
