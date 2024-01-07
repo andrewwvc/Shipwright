@@ -976,7 +976,7 @@ s32 EnHy_ShouldSpawn(EnHy* this, PlayState* play) {
     switch (play->sceneNum) {
         case SCENE_SPOT00:
             if ((this->actor.params & 0x7F) == ENHY_TYPE_CNE_11) {
-                if (LINK_IS_CHILD && getDayOfCycle() == 3 && (gSaveContext.NPCWeekEvents[0] & 0x1) && !(gSaveContext.NPCWeekEvents[0] & 0x2)) {
+                if (LINK_IS_CHILD && (getDayOfCycle() == 3) && (gSaveContext.NPCWeekEvents[0] & 0x1) && !(gSaveContext.NPCWeekEvents[0] & 0x2)) {
                     return true;
                 } else {
                     return false;
@@ -1061,10 +1061,12 @@ void EnHy_Init(Actor* thisx, PlayState* play) {
 
     if ((this->actor.params & 0x7F) >= ENHY_TYPE_MAX || !EnHy_FindOsAnimeObject(this, play) ||
         !EnHy_FindSkelAndHeadObjects(this, play)) {
+        lusprintf("z_en_hy.c", __LINE__, 0, "HyActor type object not found!");
         Actor_Kill(&this->actor);
     }
 
     if (!EnHy_ShouldSpawn(this, play)) {
+        lusprintf("z_en_hy.c", __LINE__, 0, "HyActor killed before spawn!");
         Actor_Kill(&this->actor);
     }
 
@@ -1158,8 +1160,10 @@ void EnHy_InitImpl(EnHy* this, PlayState* play) {
                 }
 
                 this->actionFunc = EnHy_DoNothing;
+                lusprintf("z_en_hy.c", __LINE__, 0, "HyActor CNE_11 spawned! Path: %p, waypoint: %i", this->path, this->waypoint);
                 break;
             default:
+                lusprintf("z_en_hy.c", __LINE__, 0, "HyActor killed during spawn!");
                 Actor_Kill(&this->actor);
                 break;
         }
@@ -1203,10 +1207,17 @@ void func_80A7127C(EnHy* this, PlayState* play) {
 void EnHy_DoNothing(EnHy* this, PlayState* play) {
     //This is effectingly supposed to be a 'dummy op' that doesn't affect gameplay but forces
     //the compiler to not omit this function
-    this->actor.home.pos.y = this->actor.world.pos.y;
+    if (gSaveContext.n64ddFlag) {
+        this->actor.home.pos.y = this->actor.world.pos.y;
+    }
 }
 
 void EnHy_BeSulking(EnHy* this, PlayState* play) {
+    //This is effectingly supposed to be a 'dummy op' that doesn't affect gameplay but forces
+    //the compiler to not omit this function
+    if (gSaveContext.n64ddFlag && (gSaveContext.NPCWeekEvents[0] & 0x1)) {
+        this->actor.home.pos.x = this->actor.world.pos.x;
+    }
 }
 
 void EnHy_WalkAlong(EnHy* this, PlayState* play) {
@@ -1233,6 +1244,7 @@ void EnHy_WalkAlong(EnHy* this, PlayState* play) {
                 gSaveContext.NPCWeekEvents[0] |= 2;
         if (this->waypoint > (this->path->count - 1)) {
             this->waypoint = 0;
+            lusprintf("z_en_hy.c", __LINE__, 0, "HyActor killed due to waypoint being reaached!");
             Actor_Kill(&this->actor);
         }
     }
