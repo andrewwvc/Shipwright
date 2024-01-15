@@ -30,6 +30,8 @@
 #include <overlays/actors/ovl_En_Partner/z_en_partner.h>
 #include "soh/Enhancements/enhancementTypes.h"
 
+#define UNDERWATER_SPEED_MODIFIER 0.5f
+
 typedef enum {
     /* 0x00 */ KNOB_ANIM_ADULT_L,
     /* 0x01 */ KNOB_ANIM_CHILD_L,
@@ -2994,7 +2996,9 @@ void func_80835F44(PlayState* play, Player* this, s32 item) {
 
         if ((actionParam == PLAYER_IA_NONE) || !(this->stateFlags1 & PLAYER_STATE1_IN_WATER) ||
             ((this->actor.bgCheckFlags & 1) &&
-             ((actionParam == PLAYER_IA_HOOKSHOT) || (actionParam == PLAYER_IA_LONGSHOT))) ||
+             ((actionParam == PLAYER_IA_HOOKSHOT) || (actionParam == PLAYER_IA_LONGSHOT) ||
+             (UNDERWATER_FREE_EQUIP_USE &&
+               ((Player_ActionToSword(actionParam) != 0) || (actionParam == PLAYER_IA_HAMMER))))) ||
             ((actionParam >= PLAYER_IA_SHIELD_DEKU) && (actionParam <= PLAYER_IA_BOOTS_HOVER))) {
 
             if ((play->bombchuBowlingStatus == 0) &&
@@ -3746,7 +3750,10 @@ void func_80837948(PlayState* play, Player* this, s32 arg2) {
 
     this->meleeWeaponAnimation = arg2;
 
-    func_808322D0(play, this, D_80854190[arg2].unk_00);//PlayOnceSetSpeed
+    if (this->stateFlags1 & PLAYER_STATE1_IN_WATER)
+        LinkAnimation_PlayOnceSetSpeedInterp(play, &this->skelAnime, D_80854190[arg2].unk_00, UNDERWATER_SPEED_MODIFIER*2.0f/3.0f);
+    else
+        func_808322D0(play, this, D_80854190[arg2].unk_00);//PlayOnceSetSpeed
     if ((arg2 != 16) && (arg2 != 17)) {
         func_80832F54(play, this, 0x209);
     }
@@ -14230,7 +14237,13 @@ void func_808502D0(Player* this, PlayState* play) {
                     sp3C = &gPlayerAnim_link_fighter_power_jump_kiru_end;
                 }
 
-                func_8083A098(this, sp3C, play);//Allow the next state to follow
+                if (this->stateFlags1 & PLAYER_STATE1_IN_WATER) {
+                    func_8083A060(this, play);
+                    LinkAnimation_PlayOnceSetSpeedInterp(play, &this->skelAnime, sp3C, UNDERWATER_SPEED_MODIFIER*D_808535E8);
+                    //func_8083328C(play, this, anim);//PlayOnceSetSpeed
+                } else {
+                    func_8083A098(this, sp3C, play);//Allow the next state to follow
+                }
 
                 this->skelAnime.moveFlags = sp43;
                 this->stateFlags3 |= PLAYER_STATE3_FINISHED_ATTACKING;

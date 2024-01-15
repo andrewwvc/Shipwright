@@ -331,4 +331,8 @@ extern GraphicsContext* __gfxCtx;
 #define TREASURE_GAME_SMALL_KEY_MAX 6
 // #endregion
 
+// #region SOH [S-Edition]
+#define UNDERWATER_FREE_EQUIP_USE 1
+// #endregion
+
 #endif

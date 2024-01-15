@@ -933,11 +933,17 @@ void func_80083108(PlayState* play) {
                 gSaveContext.buttonStatus[3] = gSaveContext.buttonStatus[5] = gSaveContext.buttonStatus[6] =
                 gSaveContext.buttonStatus[7] = gSaveContext.buttonStatus[8] = BTN_DISABLED;
             } else if ((func_8008F2F8(play) >= 2) && (func_8008F2F8(play) < 5)) {
-                if (gSaveContext.buttonStatus[0] != BTN_DISABLED) {
-                    sp28 = 1;
+                if (UNDERWATER_FREE_EQUIP_USE && (func_8008F2F8(play) == 2)) {
+                    if (gSaveContext.buttonStatus[0] == BTN_DISABLED) {
+                        sp28 = 1;
+                    }
+                    gSaveContext.buttonStatus[0] = BTN_ENABLED;
+                } else {
+                    if (gSaveContext.buttonStatus[0] != BTN_DISABLED) {
+                        sp28 = 1;
+                    }
+                    gSaveContext.buttonStatus[0] = BTN_DISABLED;
                 }
-
-                gSaveContext.buttonStatus[0] = BTN_DISABLED;
 
                 for (i = 1; i < ARRAY_COUNT(gSaveContext.equips.buttonItems); i++) {
                     if ((gSaveContext.equips.buttonItems[i] >= ITEM_SHIELD_DEKU) &&
@@ -950,7 +956,8 @@ void func_80083108(PlayState* play) {
                         gSaveContext.buttonStatus[BUTTON_STATUS_INDEX(i)] = BTN_ENABLED;
                     } else if (func_8008F2F8(play) == 2) {
                         if ((gSaveContext.equips.buttonItems[i] != ITEM_HOOKSHOT) &&
-                            (gSaveContext.equips.buttonItems[i] != ITEM_LONGSHOT)) {
+                            (gSaveContext.equips.buttonItems[i] != ITEM_LONGSHOT) &&
+                             (UNDERWATER_FREE_EQUIP_USE && gSaveContext.equips.buttonItems[i] != ITEM_HAMMER)) {
                             if (gSaveContext.buttonStatus[BUTTON_STATUS_INDEX(i)] == BTN_ENABLED) {
                                 sp28 = 1;
                             }
