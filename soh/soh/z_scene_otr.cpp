@@ -375,6 +375,8 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, LUS::ActorEnt
             { 3, -1, { ACTOR_EN_GO2, -522,1264,-1560, 0,-4915,0, 0x03e5 | (0x2<<10)}},
             //{ 2, -1, { ACTOR_EN_GO2, /*-20,-3,330,*/ 520,399,565,  0,-17295,0, /*0xffe0*/ 0x03e0 | (0x3<<10)}},
             //{ 3, -1, { ACTOR_EN_GO2, /*-20,-3,330,*/ 520,399,565,  0,-17295,0, /*0xffe0*/ 0x03e0 | (0x3<<10)}},
+            //This should fix the issue with the large rock covering the cavern appearing in cutscenes
+            { 5, 6, { ACTOR_BG_SPOT16_BOMBSTONE, -1679,684,-690, 0,0,0, (0x4<<8) | 0xFF}},
         } },
     } },
     { 0x61, {//Mountian Crater
