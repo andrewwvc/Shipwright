@@ -30,7 +30,7 @@
 #include <overlays/actors/ovl_En_Partner/z_en_partner.h>
 #include "soh/Enhancements/enhancementTypes.h"
 
-#define UNDERWATER_SPEED_MODIFIER 0.5f
+#define UNDERWATER_SPEED_MODIFIER (1.0/3.0)
 
 typedef enum {
     /* 0x00 */ KNOB_ANIM_ADULT_L,
@@ -3603,7 +3603,7 @@ void func_80837530(PlayState* play, Player* this, s32 arg2) {
 
     this->stateFlags1 |= PLAYER_STATE1_CHARGING_SPIN_ATTACK;
 
-    if (this->actor.category == ACTORCAT_PLAYER) {
+    if (this->actor.category == ACTORCAT_PLAYER && !(this->stateFlags1 & PLAYER_STATE1_IN_WATER)) {
         Actor_Spawn(&play->actorCtx, play, ACTOR_EN_M_THUNDER, this->bodyPartsPos[PLAYER_BODYPART_WAIST].x,
                     this->bodyPartsPos[PLAYER_BODYPART_WAIST].y, this->bodyPartsPos[PLAYER_BODYPART_WAIST].z, 0, 0, 0,
                     Player_GetSwordHeld(this) | arg2, true);
@@ -6714,7 +6714,7 @@ s32 func_8083E5A8(Player* this, PlayState* play) {
                 this->getItemEntry = (GetItemEntry)GET_ITEM_NONE;
             }
         } else if (CHECK_BTN_ALL(sControlInput->press.button, BTN_A) && !(this->stateFlags1 & PLAYER_STATE1_ITEM_OVER_HEAD) &&
-                   !(this->stateFlags2 & PLAYER_STATE2_UNDERWATER)) {
+                   (UNDERWATER_FREE_EQUIP_USE || !(this->stateFlags2 & PLAYER_STATE2_UNDERWATER))) {
             if (this->getItemId != GI_NONE) {
                 GetItemEntry giEntry;
                 if (this->getItemEntry.objectId == OBJECT_INVALID) {
