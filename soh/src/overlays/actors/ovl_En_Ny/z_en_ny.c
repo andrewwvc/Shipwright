@@ -46,7 +46,7 @@ static ColliderJntSphElementInit sJntSphElementsInit[1] = {
     {
         {
             ELEMTYPE_UNK0,
-            { 0xFFCFFFFF, 0x04, 0x10 },
+            { DMG_HAMMER_SWING, 0x04, 0x10 },
             { 0xFFCFFFFF, 0x00, 0x00 },
             TOUCH_ON | TOUCH_SFX_NORMAL,
             BUMP_ON,
@@ -133,14 +133,18 @@ void EnNy_Init(Actor* thisx, PlayState* play) {
     this->unk_1D8 = 0;
     this->unk_1E8 = 0.0f;
     this->unk_1E0 = 0.25f;
-    if (this->actor.params == 0) {
+    if (this->actor.params != -1) {
         // "New initials"
         osSyncPrintf("ニュウ イニシャル[ %d ] ！！\n", this->actor.params);
         this->actor.colChkInfo.mass = 0;
         this->unk_1D4 = 0;
         this->unk_1D8 = 0xFF;
-        this->unk_1E0 = 1.0f;
-        func_80ABCDBC(this);
+        if (this->actor.params == 0) {
+            this->unk_1E0 = 1.0f;
+            func_80ABCDBC(this);
+        } else if (this->actor.params == 1) {
+            func_80ABCE38(this);
+        }
     } else {
         // This mode is unused in the final game
         // "Dummy new initials"
@@ -198,7 +202,7 @@ void func_80ABCE38(EnNy* this) {
 }
 
 void func_80ABCE50(EnNy* this, PlayState* play) {
-    if (this->actor.xyzDistToPlayerSq <= 25600.0f || !DECR(this->stoneTimer)) {
+    if (this->actor.xyzDistToPlayerSq <= 25600.0f || (!DECR(this->stoneTimer) && this->actor.xyzDistToPlayerSq <= SQ(2000.0f))) {
         func_80ABCD94(this);
     }
 }

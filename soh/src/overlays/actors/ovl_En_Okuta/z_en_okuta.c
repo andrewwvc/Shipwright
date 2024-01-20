@@ -111,7 +111,9 @@ static DamageTable sDamageTable = {
 };
 
 const static f32 ROCK_SPEED = 20.0f;
-#define IS_OCTO (this->actor.params != 0x10)
+#define IS_OCTO (!(this->actor.params & 0x10))
+#define SPIKE_SHOT (this->actor.params & 0x08)
+#define DAMAGE_MULT (this->actor.params & 0xE0)
 #define SPEED_MULT 2
 #define DIST_MULT 6
 #define ROCK_SPEED (10.0f*SPEED_MULT)
@@ -146,6 +148,9 @@ void EnOkuta_Init(Actor* thisx, PlayState* play) {
         if ((this->numShots == 0xFF) || (this->numShots == 0)) {
             this->numShots = 1;
         }
+        if (SPIKE_SHOT) {
+            this->collider.info.bumper.dmgFlags = (DMG_HAMMER_SWING | DMG_HAMMER_JUMP | DMG_ARROW_ICE | DMG_ARROW_LIGHT);
+        }
         thisx->floorHeight =
             BgCheck_EntityRaycastFloor4(&play->colCtx, &thisx->floorPoly, &sp30, thisx, &thisx->world.pos);
         //! @bug calls WaterBox_GetSurfaceImpl directly
@@ -164,6 +169,7 @@ void EnOkuta_Init(Actor* thisx, PlayState* play) {
         Collider_InitCylinder(play, &this->collider);
         Collider_SetCylinder(play, &this->collider, thisx, &sProjectileColliderInit);
         Actor_ChangeCategory(play, &play->actorCtx, thisx, ACTORCAT_PROP);
+        this->collider.info.toucher.damage *= (DAMAGE_MULT >> 5)+1+LINK_IS_ADULT;
         this->timer = 30;
         thisx->shape.rot.y = 0;
         this->actionFunc = EnOkuta_ProjectileFly;
@@ -266,7 +272,8 @@ void EnOkuta_SetupWaitToAppear(EnOkuta* this) {
 void EnOkuta_SetupAppear(EnOkuta* this, PlayState* play) {
     this->actor.draw = EnOkuta_Draw;
     this->actor.shape.rot.y = this->actor.yawTowardsPlayer;
-    //this->actor.flags |= ACTOR_FLAG_TARGETABLE;
+    if (SPIKE_SHOT)
+        this->actor.flags |= ACTOR_FLAG_TARGETABLE;
     Animation_PlayOnce(&this->skelAnime, &gOctorokAppearAnim);
     EnOkuta_SpawnBubbles(this, play);
     this->actionFunc = EnOkuta_Appear;
@@ -338,7 +345,7 @@ void EnOkuta_SpawnProjectile(EnOkuta* this, PlayState* play) {
     pos.y = this->actor.world.pos.y - 6.0f;
     pos.z = this->actor.world.pos.z + (25.0f * cos);
     if (Actor_Spawn(&play->actorCtx, play, ACTOR_EN_OKUTA, pos.x, pos.y, pos.z, this->actor.shape.rot.x,
-                    this->actor.shape.rot.y, this->actor.shape.rot.z, 0x10, true) != NULL) {
+                    this->actor.shape.rot.y, this->actor.shape.rot.z, 0x10 | DAMAGE_MULT | (SPIKE_SHOT), true) != NULL) {
         pos.x = this->actor.world.pos.x + (40.0f * sin);
         pos.z = this->actor.world.pos.z + (40.0f * cos);
         pos.y = this->actor.world.pos.y;
@@ -562,11 +569,19 @@ void EnOkuta_ProjectileFly(EnOkuta* this, PlayState* play) {
             this->collider.base.atFlags & AT_HIT && this->collider.base.atFlags & AT_TYPE_ENEMY &&
             this->collider.base.atFlags & AT_BOUNCED) {
             this->collider.base.atFlags &= ~(AT_HIT | AT_BOUNCED | AT_TYPE_ENEMY);
-            this->collider.base.atFlags |= AT_TYPE_PLAYER;
-            this->collider.info.toucher.dmgFlags = 2;
-            Matrix_MtxFToYXZRotS(&player->shieldMf, &sp40, 0);
-            this->actor.world.rot.y = sp40.y + 0x8000;
-            this->timer = 30;
+            if (SPIKE_SHOT) {
+                Actor_Kill(&this->actor);
+                SoundSource_PlaySfxAtFixedWorldPos(play, &this->actor.world.pos, 20, NA_SE_EN_OCTAROCK_ROCK);
+                Actor_Spawn(&play->actorCtx, play, ACTOR_EN_NY,
+                            this->actor.world.pos.x, this->actor.world.pos.y, this->actor.world.pos.z,
+                            this->actor.world.rot.x, this->actor.world.rot.y, this->actor.world.rot.z, 0x1, 0);
+            } else {
+                this->collider.base.atFlags |= AT_TYPE_PLAYER;
+                this->collider.info.toucher.dmgFlags = 2;
+                Matrix_MtxFToYXZRotS(&player->shieldMf, &sp40, 0);
+                this->actor.world.rot.y = sp40.y + 0x8000;
+                this->timer = 30;
+            }
         } else {
             pos.x = this->actor.world.pos.x;
             pos.y = this->actor.world.pos.y + 11.0f;
