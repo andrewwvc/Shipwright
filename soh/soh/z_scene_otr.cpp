@@ -206,6 +206,12 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, LUS::ActorEnt
             { -1, -1, { ACTOR_EN_ZF, -1740,2800,-1060, 0,24394,0, static_cast<int16_t>(0xFFFF) }},
         } },
     } },
+    { 0x05, { // Water Temple
+        { 0x00, {
+            { -1, -1, { ACTOR_EN_OKUTA, -500, 720, -700, 0,24394,0, (2<<8) }},
+            { -1, -1, { ACTOR_EN_OKUTA, 100, 720, -700, 0,24394,0, (2<<8) }},
+        } },
+    } },
     { 0x07, { // Shadow Temple
         { 0x08, {
             { -1, 0, { ACTOR_EN_ST, 4591,-380,59, 0,-16202,0, 0x9}},
