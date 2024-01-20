@@ -559,8 +559,8 @@ bool Scene_CommandActorList(PlayState* play, LUS::ISceneCommand* cmd) {
             TempResourceEntries.insert({i,sw});
             auto foundVal = UsedResources.find(sw);
             if (foundVal != UsedResources.end() && isResourceYetToRestore(foundVal)) {
-                entries[i].params &= 0xFFE0;
-                entries[i].params |= ITEM00_MAX;
+                entries[i].params &= 0xFF1F;
+                entries[i].params |= 0x20;
             }
         } else if (entries[i].id == ACTOR_EN_TUBO_TRAP) {
             ActorSpawnResource sw;
