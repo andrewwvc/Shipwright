@@ -394,6 +394,8 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, LUS::ActorEnt
     { 0x57, { // Lake Hylia
         { 0x00, {
             { -1, -1, { ACTOR_EN_RU1, -918,-1336,3560, 0,0x7FFF,0, 0xB }},
+            { 2, -1, { ACTOR_EN_NY, -215,-2147,6194, 0,0x7FFF,0, 0x1 }}, { 3, -1, { ACTOR_EN_NY, -215,-2147,6194, 0,0x7FFF,0, 0x1 }},
+            { 2, -1, { ACTOR_EN_NY, -1877,-2089,6120, 0,0x0,0, 0x1 }}, { 3, -1, { ACTOR_EN_NY, -1877,-2089,6120, 0,0x0,0, 0x1 }},
         } },
     } },
     { SCENE_SPOT03, { // Zora's River
