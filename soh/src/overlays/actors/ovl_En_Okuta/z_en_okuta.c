@@ -150,6 +150,7 @@ void EnOkuta_Init(Actor* thisx, PlayState* play) {
         }
         if (SPIKE_SHOT) {
             this->collider.info.bumper.dmgFlags = (DMG_HAMMER_SWING | DMG_HAMMER_JUMP | DMG_ARROW_ICE | DMG_ARROW_LIGHT);
+            this->actor.naviEnemyId = ENEMY_MSG+1;
         }
         thisx->floorHeight =
             BgCheck_EntityRaycastFloor4(&play->colCtx, &thisx->floorPoly, &sp30, thisx, &thisx->world.pos);

@@ -384,7 +384,7 @@ extern "C" void OTRMessage_Init()
     MakeBlueMsgEng(0x5E, "\x13\x56You got an Adult's Wallet!&Adults are allowed to carry a&lot of money. Now you can hold&up to %y"+std::to_string(CAPACITY(UPG_WALLET,1))+" Rupees%w.");
     MakeBlueMsgEng(0x5F, "\x13\x57You got a Giant's Wallet!&What a huge wallet!&Now you can carry up to %y"+std::to_string(CAPACITY(UPG_WALLET,2))+" Rupees%w.");
 
-    u16 EnemyMsg = 0x065D;
+    u16 EnemyMsg = NAVI_ENEMY_CUSTOM_ID;
     //Navi Enemy Text
     MakeBlueMsgEng(0x0601, "%wGohma&%cIt's one of the parasitic monsters&inside the Deku Tree! Watch the %weye%c&carefully.^%cDifferent colors may show when it&is vulnerable to different attack types!");
     MakeBlueMsgEng(0x060C, "%wKing Dodongo&%cThis is a huge Dodongo that loves&eating %wfresh%c bomb flowers! Give it a&jolt, and finish it with your %wsword%c!");
@@ -396,6 +396,7 @@ extern "C" void OTRMessage_Init()
     MakeBlueMsgEng(0x062F, "%wDead Hand&%c\x0F, just try to stay calm...");
     MakeBlueMsgEng(0x0635, "%wIron Knuckle&%cBeware of the incredibly strong axe!&You may need to use different dodges&depending on how they attack!");
     MakeBlueMsgEng(EnemyMsg+0, "%wIron Knuckle&%cBeware of the incredibly strong axe!&You may need to use different dodges&depending on how they attack!^%cYou're an adult now, so if you're&%w\xA4 Targeting%c, hold %w\xA3%c in order to let&high swings pass over your head.");
+    MakeBlueMsgEng(EnemyMsg+1, "%wOctospike&%cThese ones spit out something&interesting!");
 
     //Great Fairy Text
     MakeNormalMsgEng(0xE8, "Your magic power has been&enhanced! Now you can gain even&more Magic Capacity!^Collecting %gIcons of Magic%w&will allow for greater enhancement!");
