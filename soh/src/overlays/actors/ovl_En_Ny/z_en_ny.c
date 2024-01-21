@@ -202,7 +202,7 @@ void func_80ABCE38(EnNy* this) {
 }
 
 void func_80ABCE50(EnNy* this, PlayState* play) {
-    if (this->actor.xyzDistToPlayerSq <= 25600.0f || (!DECR(this->stoneTimer) && this->actor.xyzDistToPlayerSq <= SQ(2000.0f))) {
+    if (this->actor.xyzDistToPlayerSq <= 25600.0f || (!DECR(this->stoneTimer) && (ABS(this->actor.yDistToPlayer) <= 400.0f) && (this->actor.xyzDistToPlayerSq <= SQ(1800.0f)))) {
         func_80ABCD94(this);
     }
 }
