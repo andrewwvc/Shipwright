@@ -1648,6 +1648,7 @@ void DrawPlayerTab() {
 
         ImGui::InputScalar("Gravity", ImGuiDataType_Float, &player->actor.gravity);
         UIWidgets::InsertHelpHoverText("Rate at which Link falls. Default -4.0f");
+        DrawGroupWithBorder([&]() {ImGui::Text("Scene: %i, Room: %i, Setup: %i", gPlayState->sceneNum, gPlayState->roomCtx.curRoom.num, gSaveContext.sceneSetupIndex);});
 
         if (ImGui::BeginCombo("Link Age on Load", gPlayState->linkAgeOnLoad == 0 ? "Adult" : "Child")) {
             if (ImGui::Selectable("Adult")) {

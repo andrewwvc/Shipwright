@@ -85,10 +85,31 @@ static InitChainEntry sInitChain[] = {
 
 void ObjTsubo_SpawnCollectible(ObjTsubo* this, PlayState* play) {
     s16 dropParams = this->actor.params & 0x1F;
+    s16 collectibleFlag = (((this->actor.params >> 9) & 0x3F) << 8);
+    s16 collectedFlag = ((this->actor.params & 0x20) >> 5);
+    s16 lowSpawnFlag = ((this->actor.params & 0x40) >> 6);
+
+    if (collectedFlag) {
+        s16 isSetToMax = 1;
+        if (lowSpawnFlag) {
+            isSetToMax = 0;
+            collectibleFlag = 0;
+            if (ITEM00_ARROWS_SMALL <= dropParams && dropParams <= ITEM00_ARROWS_LARGE && (AMMO(ITEM_BOW) == 0)) {
+                dropParams = ITEM00_ARROWS_SMALL;
+            } else {
+                isSetToMax = 1;
+                collectibleFlag = (((this->actor.params >> 9) & 0x3F) << 8);
+            }
+        }
+
+        if (isSetToMax) {
+            dropParams = ITEM00_MAX;
+        }
+    }
 
     if ((dropParams >= ITEM00_RUPEE_GREEN) && (dropParams <= ITEM00_BOMBS_SPECIAL)) {
         EnItem00* item = Item_DropCollectible(play, &this->actor.world.pos,
-                             (dropParams | (((this->actor.params >> 9) & 0x3F) << 8)));
+                             (dropParams | collectibleFlag));
         if (item) {
             item->actor.entryNum = this->actor.entryNum;
         }

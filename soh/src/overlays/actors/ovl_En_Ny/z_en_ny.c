@@ -2,7 +2,7 @@
 #include "objects/object_ny/object_ny.h"
 #include "soh/frame_interpolation.h"
 
-#define FLAGS (ACTOR_FLAG_TARGETABLE | ACTOR_FLAG_HOSTILE)
+#define FLAGS (ACTOR_FLAG_TARGETABLE | ACTOR_FLAG_HOSTILE | ACTOR_FLAG_ALWAYS_THROWN)
 
 void EnNy_Init(Actor* thisx, PlayState* play);
 void EnNy_Destroy(Actor* thisx, PlayState* play);
@@ -15,11 +15,16 @@ void EnNy_Die(EnNy* this, PlayState* play);
 void func_80ABCD40(EnNy* this);
 void func_80ABCDBC(EnNy* this);
 void EnNy_TurnToStone(EnNy* this, PlayState* play);
+void EnNy_LiftedUp(EnNy* this, PlayState* play);
+void EnNy_Thrown(EnNy* this, PlayState* play);
 void func_80ABD11C(EnNy* this, PlayState* play);
 void func_80ABCE50(EnNy* this, PlayState* play);
 void func_80ABCE90(EnNy* this, PlayState* play);
 void func_80ABCEEC(EnNy* this, PlayState* play);
+void EnNy_SetupLiftedUp(EnNy* this);
+void EnNy_SetupThrown(EnNy* this);
 void EnNy_UpdateDeath(Actor* thisx, PlayState* PlayState);
+void EnNy_SetupDeath(EnNy* this);
 void EnNy_SetupDie(EnNy* this, PlayState* play);
 void EnNy_DrawDeathEffect(Actor* thisx, PlayState* PlayState);
 void func_80ABD3B8(EnNy* this, f32, f32);
@@ -41,7 +46,7 @@ static ColliderJntSphElementInit sJntSphElementsInit[1] = {
     {
         {
             ELEMTYPE_UNK0,
-            { 0xFFCFFFFF, 0x04, 0x08 },
+            { DMG_HAMMER_SWING, 0x04, 0x10 },
             { 0xFFCFFFFF, 0x00, 0x00 },
             TOUCH_ON | TOUCH_SFX_NORMAL,
             BUMP_ON,
@@ -70,15 +75,15 @@ static DamageTable sDamageTable = {
     /* Slingshot     */ DMG_ENTRY(0, 0x0),
     /* Explosive     */ DMG_ENTRY(2, 0xF),
     /* Boomerang     */ DMG_ENTRY(0, 0x0),
-    /* Normal arrow  */ DMG_ENTRY(2, 0xF),
+    /* Normal arrow  */ DMG_ENTRY(2, 0x1),
     /* Hammer swing  */ DMG_ENTRY(2, 0xF),
     /* Hookshot      */ DMG_ENTRY(2, 0x1),
     /* Kokiri sword  */ DMG_ENTRY(0, 0x0),
-    /* Master sword  */ DMG_ENTRY(2, 0xF),
-    /* Giant's Knife */ DMG_ENTRY(4, 0xF),
+    /* Master sword  */ DMG_ENTRY(2, 0x1),
+    /* Giant's Knife */ DMG_ENTRY(4, 0x1),
     /* Fire arrow    */ DMG_ENTRY(4, 0x2),
-    /* Ice arrow     */ DMG_ENTRY(2, 0xF),
-    /* Light arrow   */ DMG_ENTRY(2, 0xF),
+    /* Ice arrow     */ DMG_ENTRY(2, 0x1),
+    /* Light arrow   */ DMG_ENTRY(2, 0x1),
     /* Unk arrow 1   */ DMG_ENTRY(4, 0xE),
     /* Unk arrow 2   */ DMG_ENTRY(0, 0x0),
     /* Unk arrow 3   */ DMG_ENTRY(0, 0x0),
@@ -88,14 +93,14 @@ static DamageTable sDamageTable = {
     /* Shield        */ DMG_ENTRY(0, 0x0),
     /* Mirror Ray    */ DMG_ENTRY(0, 0x0),
     /* Kokiri spin   */ DMG_ENTRY(0, 0x0),
-    /* Giant spin    */ DMG_ENTRY(4, 0xF),
-    /* Master spin   */ DMG_ENTRY(2, 0xF),
+    /* Giant spin    */ DMG_ENTRY(4, 0x1),
+    /* Master spin   */ DMG_ENTRY(2, 0x1),
     /* Kokiri jump   */ DMG_ENTRY(0, 0x0),
-    /* Giant jump    */ DMG_ENTRY(8, 0xF),
-    /* Master jump   */ DMG_ENTRY(4, 0xF),
+    /* Giant jump    */ DMG_ENTRY(8, 0x1),
+    /* Master jump   */ DMG_ENTRY(4, 0x1),
     /* Unknown 1     */ DMG_ENTRY(0, 0x0),
     /* Unblockable   */ DMG_ENTRY(0, 0x0),
-    /* Hammer jump   */ DMG_ENTRY(0, 0x0),
+    /* Hammer jump   */ DMG_ENTRY(0, 0xF),
     /* Unknown 2     */ DMG_ENTRY(0, 0x0),
 };
 
@@ -128,14 +133,18 @@ void EnNy_Init(Actor* thisx, PlayState* play) {
     this->unk_1D8 = 0;
     this->unk_1E8 = 0.0f;
     this->unk_1E0 = 0.25f;
-    if (this->actor.params == 0) {
+    if (this->actor.params != -1) {
         // "New initials"
         osSyncPrintf("ニュウ イニシャル[ %d ] ！！\n", this->actor.params);
         this->actor.colChkInfo.mass = 0;
         this->unk_1D4 = 0;
         this->unk_1D8 = 0xFF;
-        this->unk_1E0 = 1.0f;
-        func_80ABCDBC(this);
+        if (this->actor.params == 0) {
+            this->unk_1E0 = 1.0f;
+            func_80ABCDBC(this);
+        } else if (this->actor.params == 1) {
+            func_80ABCE38(this);
+        }
     } else {
         // This mode is unused in the final game
         // "Dummy new initials"
@@ -160,6 +169,7 @@ void func_80ABCD40(EnNy* this) {
 }
 
 void func_80ABCD84(EnNy* this) {
+    this->stoneTimer = 200;
     this->actionFunc = func_80ABCE50;
 }
 
@@ -173,9 +183,10 @@ void func_80ABCDAC(EnNy* this) {
 }
 
 void func_80ABCDBC(EnNy* this) {
-    this->unk_1F4 = 0.0f;
+    this->unk_1F4 = 2000.0f;
     func_80ABCD40(this);
     this->stoneTimer = 180;
+    this->wavePhase = (s16)(Rand_Centered()*0xFFFE*2);
     this->actionFunc = EnNy_Move;
 }
 
@@ -191,7 +202,7 @@ void func_80ABCE38(EnNy* this) {
 }
 
 void func_80ABCE50(EnNy* this, PlayState* play) {
-    if (this->actor.xyzDistToPlayerSq <= 25600.0f) {
+    if (this->actor.xyzDistToPlayerSq <= 25600.0f || (!DECR(this->stoneTimer) && (ABS(this->actor.yDistToPlayer) <= 400.0f) && (this->actor.xyzDistToPlayerSq <= SQ(1800.0f)))) {
         func_80ABCD94(this);
     }
 }
@@ -233,14 +244,20 @@ void EnNy_Move(EnNy* this, PlayState* play) {
     func_80ABCD40(this);
     stoneTimer = this->stoneTimer;
     this->stoneTimer--;
-    if ((stoneTimer <= 0) || (this->hitPlayer != false)) {
+    if ((stoneTimer <= 0)) {
         EnNy_SetupTurnToStone(this);
+    } else if (this->hitPlayer != false) {
+        this->actor.shape.rot.y = 0x7FFF+this->actor.yawTowardsPlayer+this->actor.yawTowardsPlayer-this->actor.shape.rot.y;
+        this->actor.world.rot.y = this->actor.shape.rot.y;
+        this->unk_1F4 = 1000.0f;
+        this->actor.speedXZ = 6.0f;
     } else {
-        Math_SmoothStepToS(&this->actor.shape.rot.y, this->actor.yawTowardsPlayer, 0xA, this->unk_1F4, 0);
-        Math_ApproachF(&this->unk_1F4, 2000.0f, 1.0f, 100.0f);
+        Math_SmoothStepToS(&this->actor.shape.rot.y, this->actor.yawTowardsPlayer+(s16)(0x1500*Math_SinS(this->wavePhase)), 0xA, this->unk_1F4, 0);
+        Math_ApproachF(&this->unk_1F4, 4000.0f, 1.0f, 100.0f);
+        this->wavePhase += 0x140*this->unk_1E8;
         this->actor.world.rot.y = this->actor.shape.rot.y;
         yawDiff = Math_FAtan2F(this->actor.yDistToPlayer, this->actor.xzDistToPlayer);
-        this->actor.speedXZ = fabsf(cosf(yawDiff) * this->unk_1E8);
+        this->actor.speedXZ = 2.0f*fabsf(cosf(yawDiff) * this->unk_1E8);
         if (this->unk_1F0 < this->actor.yDistToWater) {
             this->unk_1EC = sinf(yawDiff) * this->unk_1E8;
         }
@@ -271,21 +288,87 @@ void func_80ABD11C(EnNy* this, PlayState* play) {
     s32 phi_v0;
     s32 phi_v1;
 
-    phi_v0 = this->unk_1D4;
-    phi_v0 += 0x40;
-    phi_v1 = this->unk_1D8;
-    phi_v1 -= 0x40;
-    if (phi_v0 >= 0xFF) {
-        phi_v0 = 0xFF;
-        phi_v1 = 0;
-        if (this->stoneTimer != 0) {
-            this->stoneTimer--;
-        } else {
-            func_80ABCD84(this);
+    if (Actor_HasParent(&this->actor, play)) {
+        EnNy_SetupLiftedUp(this);
+    } else {
+        phi_v0 = this->unk_1D4;
+        phi_v0 += 0x40;
+        phi_v1 = this->unk_1D8;
+        phi_v1 -= 0x40;
+        if (phi_v0 >= 0xFF) {
+            phi_v0 = 0xFF;
+            phi_v1 = 0;
+            if (this->stoneTimer != 0) {
+                this->stoneTimer--;
+            } else {
+                func_80ABCD84(this);
+            }
+        }
+        this->unk_1D4 = phi_v0;
+        this->unk_1D8 = phi_v1;
+
+        if (this->actor.xzDistToPlayer < 100.0f) {
+            s16 temp_v0 = this->actor.yawTowardsPlayer - GET_PLAYER(play)->actor.world.rot.y;
+            phi_v1 = ABS(temp_v0);
+            if (phi_v1 >= 0x5556) {
+                // GI_NONE in this case allows the player to lift the actor
+                func_8002F434(&this->actor, play, GI_NONE, 30.0f, 30.0f);
+            }
         }
     }
-    this->unk_1D4 = phi_v0;
-    this->unk_1D8 = phi_v1;
+}
+
+void EnNy_SetupLiftedUp(EnNy* this) {
+    this->actionFunc = EnNy_LiftedUp;
+    this->actor.room = -1;
+    this->unk_1E8 = 0.0f;
+    this->actor.gravity = 0.0f;
+    this->actor.shape.rot.x = 0.0f;
+    func_8002F7DC(&this->actor, NA_SE_PL_PULL_UP_ROCK);
+    this->actor.flags |= ACTOR_FLAG_UPDATE_WHILE_CULLED;
+    this->actor.flags &= ~ACTOR_FLAG_TARGETABLE;
+}
+
+void EnNy_LiftedUp(EnNy* this, PlayState* play) {
+    if (Actor_HasNoParent(&this->actor, play)) {
+        this->actor.room = play->roomCtx.curRoom.num;
+        this->actor.flags |= ACTOR_FLAG_TARGETABLE;
+        if (this->actor.yDistToWater < 0.0f)
+            this->actor.velocity.y = 6.0f;
+        else
+            this->actor.velocity.y = 4.0f;
+        EnNy_SetupThrown(this);
+        //func_80ABCE38(this);
+        func_8002D7EC(&this->actor);
+        //Actor_UpdateBgCheckInfo(play, &this->actor, 5.0f, 15.0f, 0.0f, 0x85);
+    }
+}
+
+void EnNy_SetupThrown(EnNy* this) {
+    this->collider.base.atFlags &= ~(AT_HIT | AT_BOUNCED | AT_TYPE_ENEMY);
+    this->collider.base.atFlags |= AT_TYPE_PLAYER;
+    this->actionFunc = EnNy_Thrown;
+}
+
+void EnNy_Thrown(EnNy* this, PlayState* play) {
+    if (this->actor.bgCheckFlags & 0x3) {
+        this->actor.bgCheckFlags &= ~2;
+        this->actor.speedXZ = 0.0f;
+        this->actor.gravity = 0.0f;
+        this->actor.velocity.y = 0.0f;
+        this->actor.world.rot.y = this->actor.shape.rot.y;
+        this->unk_1E0 = 0.25f;
+        this->collider.base.atFlags &= ~(AT_HIT | AT_BOUNCED | AT_TYPE_PLAYER);
+        this->collider.base.atFlags |= AT_TYPE_ENEMY;
+        func_80ABCE38(this);
+    } else if ((this->actor.bgCheckFlags & 0x8) || (this->collider.base.atFlags & AT_HIT)) {
+        this->stoneTimer = 0;
+        this->actor.shape.shadowAlpha = 0;
+        this->actor.flags &= ~ACTOR_FLAG_TARGETABLE;
+        this->unk_1D0 = 0;
+        Enemy_StartFinishingBlow(play, &this->actor);
+        EnNy_SetupDeath(this);
+    }
 }
 
 s32 EnNy_CollisionCheck(EnNy* this, PlayState* play) {
@@ -320,8 +403,8 @@ s32 EnNy_CollisionCheck(EnNy* this, PlayState* play) {
                         Actor_SetColorFilter(&this->actor, 0x4000, 0xFF, 0x2000, 0x50);
                         break;
                     case 1:
-                        Actor_ApplyDamage(&this->actor);
-                        Actor_SetColorFilter(&this->actor, 0x4000, 0xFF, 0x2000, 0x50);
+                        //Actor_ApplyDamage(&this->actor);
+                        //Actor_SetColorFilter(&this->actor, 0x4000, 0xFF, 0x2000, 0x50);
                         break;
                     case 2:
                         this->unk_1CA = 4;
@@ -346,8 +429,19 @@ s32 EnNy_CollisionCheck(EnNy* this, PlayState* play) {
 }
 
 void func_80ABD3B8(EnNy* this, f32 arg1, f32 arg2) {
-    if (this->unk_1E8 == 0.0f) {
-        this->actor.gravity = -0.4f;
+    if (this->actionFunc == EnNy_LiftedUp) {
+        this->actor.gravity = 0.0f;
+    } else if (this->unk_1E8 == 0.0f) {
+        if (this->actionFunc == EnNy_Thrown) {
+            if (this->actor.yDistToWater < 0.0f) {
+                this->actor.gravity = -1.0f;
+            } else {
+                this->actor.gravity = -0.4f;
+                this->actor.speedXZ *= 0.98f;
+            }
+        } else {
+            this->actor.gravity = -0.4f;
+        }
     } else if (!(arg1 < this->actor.yDistToWater)) {
         this->actor.gravity = -0.4f;
     } else if (arg2 < this->actor.yDistToWater) {
@@ -366,11 +460,23 @@ void func_80ABD3B8(EnNy* this, f32 arg1, f32 arg2) {
     }
 }
 
+void EnNy_SetupDeath(EnNy* this) {
+    s32 i;
+    for (i = 0; i < 8; i++) {
+        this->unk_1F8[i].x = (Rand_CenteredFloat(20.0f) + this->actor.world.pos.x);
+        this->unk_1F8[i].y = (Rand_CenteredFloat(20.0f) + this->actor.world.pos.y);
+        this->unk_1F8[i].z = (Rand_CenteredFloat(20.0f) + this->actor.world.pos.z);
+    }
+    this->timer = 0;
+    this->actor.update = EnNy_UpdateDeath;
+    this->actor.draw = EnNy_DrawDeathEffect;
+    this->actionFunc = EnNy_SetupDie;
+}
+
 void EnNy_Update(Actor* thisx, PlayState* play) {
     EnNy* this = (EnNy*)thisx;
     f32 temp_f20;
     f32 temp_f22;
-    s32 i;
 
     this->timer++;
     temp_f20 = this->unk_1E0 - 0.25f;
@@ -391,19 +497,12 @@ void EnNy_Update(Actor* thisx, PlayState* play) {
     Actor_UpdateBgCheckInfo(play, &this->actor, 20.0f, 20.0f, 60.0f, 7);
     this->unk_1F0 = temp_f22;
     this->actor.world.pos.y += temp_f22;
-    if (EnNy_CollisionCheck(this, play) != 0) {
-        for (i = 0; i < 8; i++) {
-            this->unk_1F8[i].x = (Rand_CenteredFloat(20.0f) + this->actor.world.pos.x);
-            this->unk_1F8[i].y = (Rand_CenteredFloat(20.0f) + this->actor.world.pos.y);
-            this->unk_1F8[i].z = (Rand_CenteredFloat(20.0f) + this->actor.world.pos.z);
-        }
-        this->timer = 0;
-        this->actor.update = EnNy_UpdateDeath;
-        this->actor.draw = EnNy_DrawDeathEffect;
-        this->actionFunc = EnNy_SetupDie;
+    if ((this->actionFunc != EnNy_LiftedUp) && (EnNy_CollisionCheck(this, play) != 0) || (this->actionFunc == EnNy_SetupDie)) {
+        if (this->actionFunc != EnNy_SetupDie)
+            EnNy_SetupDeath(this);
         return;
     }
-    if (this->unk_1E0 > 0.25f) {
+    if (((this->unk_1E0 > 0.25f) && this->unk_1F4 > 1600.0f) || (this->collider.base.atFlags & AT_TYPE_PLAYER)) {
         CollisionCheck_SetAT(play, &play->colChkCtx, &this->collider.base);
     }
     CollisionCheck_SetAC(play, &play->colChkCtx, &this->collider.base);
@@ -529,6 +628,8 @@ void EnNy_Draw(Actor* thisx, PlayState* play) {
 
     OPEN_DISPS(play->state.gfxCtx);
     Collider_UpdateSpheres(0, &this->collider);
+    if (this->actionFunc == EnNy_LiftedUp)
+        Matrix_Translate(0, 1000, 0, MTXMODE_APPLY);
     func_8002ED80(&this->actor, play, 1);
     Gfx_SetupDL_25Xlu(play->state.gfxCtx);
     gSPMatrix(POLY_XLU_DISP++, MATRIX_NEWMTX(play->state.gfxCtx),

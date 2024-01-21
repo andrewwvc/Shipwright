@@ -53,6 +53,9 @@
 #define DAYS_IN_CYCLE 6
 #define DEFAULT_RESOURCE_TIME 200000
 #define INITIAL_GALLERY_MULTIPLIER 0
+#define NAVI_ENEMY_START_ID 0x600
+#define ENEMY_MSG (0x005D)
+#define NAVI_ENEMY_CUSTOM_ID (NAVI_ENEMY_START_ID+ENEMY_MSG)
 
 #define DEKU_TREE_DEAD (gSaveContext.eventChkInf[0] & (1<<7))
 
@@ -329,6 +332,10 @@ extern GraphicsContext* __gfxCtx;
 #define GERUDO_FORTRESS_SMALL_KEY_MAX 4
 #define GANONS_CASTLE_SMALL_KEY_MAX (ResourceMgr_IsSceneMasterQuest(SCENE_GANONTIKA) ? 3 : 2)
 #define TREASURE_GAME_SMALL_KEY_MAX 6
+// #endregion
+
+// #region SOH [S-Edition]
+#define UNDERWATER_FREE_EQUIP_USE 1
 // #endregion
 
 #endif

@@ -2439,6 +2439,30 @@ void EnTest_Crouch(EnTest* this, PlayState* play) {
             Math_SmoothStepToS(&this->actor.shape.rot.y, this->actor.yawTowardsPlayer, 1, 0x1000, 0);
             this->actor.world.rot.y = this->actor.shape.rot.y;
         }
+
+        if (IS_ELITE) {
+            Vec3f circ;
+            Vec3f center = this->actor.world.pos;
+            EffectBlure* eb1 = Effect_GetByIndex(this->effectIndicatorIndex[0]);
+            EffectBlure* eb2 = Effect_GetByIndex(this->effectIndicatorIndex[1]);
+            f32 sin1 = Math_SinS((s16)(this->skelAnime.curFrame*0x2000))*40;
+            f32 cos1 = Math_CosS((s16)(this->skelAnime.curFrame*0x2000))*40;
+            f32 sin2 = Math_SinS(this->actor.shape.rot.y);
+            f32 cos2 = Math_CosS(this->actor.shape.rot.y);
+            center.y += 50.0f;
+
+            circ = center;
+            circ.z += sin1*cos2 - cos1*sin2;
+            circ.x += sin1*sin2 + cos1*cos2;
+            circ.y += cos1;
+            EffectBlure_AddVertex(eb1, &circ, &center);
+
+            circ = center;
+            circ.z -= sin1*cos2 + cos1*sin2;
+            circ.x -= sin1*sin2 - cos1*cos2;
+            circ.y -= cos1;
+            EffectBlure_AddVertex(eb2, &circ, &center);
+        }
     }
 
     if ((8.0f < this->skelAnime.curFrame) && (this->skelAnime.curFrame < 15)) {
@@ -2672,6 +2696,31 @@ void EnTest_CrossoverJump(EnTest* this, PlayState* play) {
         newVecToPlayer.x = player->actor.world.pos.x - curPos.x;
         newVecToPlayer.z = player->actor.world.pos.z - curPos.z;
         Math_SmoothStepToS(&this->actor.shape.rot.y, Math_Atan2S(newVecToPlayer.z, newVecToPlayer.x), 1, 0x2000, 1);
+        if (IS_ELITE && (this->skelAnime.curFrame <= 6)) {
+            Vec3f circ;
+            Vec3f center = this->actor.world.pos;
+            EffectBlure* eb1 = Effect_GetByIndex(this->effectIndicatorIndex[0]);
+            EffectBlure* eb2 = Effect_GetByIndex(this->effectIndicatorIndex[1]);
+            f32 sin1 = Math_SinS((s16)(this->skelAnime.curFrame*0x2000))*40;
+            f32 cos1 = Math_CosS((s16)(this->skelAnime.curFrame*0x2000))*40;
+            f32 sin2 = Math_SinS(this->actor.shape.rot.y);
+            f32 cos2 = Math_CosS(this->actor.shape.rot.y);
+            center.y += 50.0f;
+
+            circ = center;
+            circ.z += sin1*cos2;
+            circ.x += sin1*sin2;
+            circ.y += cos1;
+            EffectBlure_AddVertex(eb1, &circ, &center);
+
+            center.z += 10*sin2;
+            center.x += 10*cos2;
+            circ = center;
+            circ.z -= sin1*cos2;
+            circ.x -= sin1*sin2;
+            circ.y -= cos1;
+            EffectBlure_AddVertex(eb2, &circ, &center);
+        }
     } else {
         Math_SmoothStepToS(&this->actor.shape.rot.y, this->actor.yawTowardsPlayer, 1, 0x1000, 1);
     }

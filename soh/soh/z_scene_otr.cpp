@@ -286,6 +286,12 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, LUS::ActorEnt
             { -1, -1, { ACTOR_EN_ZF, -1740,2800,-1060, 0,24394,0, static_cast<int16_t>(0xFFFF) }},
         } },
     } },
+    { 0x05, { // Water Temple
+        { 0x00, {
+            { -1, -1, { ACTOR_EN_OKUTA, -500, 720, -700, 0,24394,0, (2<<8) }},
+            { -1, -1, { ACTOR_EN_OKUTA, 100, 720, -700, 0,24394,0, (2<<8) }},
+        } },
+    } },
     { 0x07, { // Shadow Temple
         { 0x08, {
             { -1, 0, { ACTOR_EN_ST, 4591,-380,59, 0,-16202,0, 0x9}},
@@ -463,6 +469,8 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, LUS::ActorEnt
             { 3, -1, { ACTOR_EN_GO2, -522,1264,-1560, 0,-4915,0, 0x03e5 | (0x2<<10)}},
             //{ 2, -1, { ACTOR_EN_GO2, /*-20,-3,330,*/ 520,399,565,  0,-17295,0, /*0xffe0*/ 0x03e0 | (0x3<<10)}},
             //{ 3, -1, { ACTOR_EN_GO2, /*-20,-3,330,*/ 520,399,565,  0,-17295,0, /*0xffe0*/ 0x03e0 | (0x3<<10)}},
+            //This should fix the issue with the large rock covering the cavern appearing in cutscenes
+            { 5, 6, { ACTOR_BG_SPOT16_BOMBSTONE, -1679,684,-690, 0,0,0, (0x4<<8) | 0xFF}},
         } },
     } },
     { 0x61, {//Mountian Crater
@@ -474,6 +482,8 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, LUS::ActorEnt
     { 0x57, { // Lake Hylia
         { 0x00, {
             { -1, -1, { ACTOR_EN_RU1, -918,-1336,3560, 0,0x7FFF,0, 0xB }},
+            { 2, -1, { ACTOR_EN_NY, -215,-2147,6194, 0,0x7FFF,0, 0x1 }}, { 3, -1, { ACTOR_EN_NY, -215,-2147,6194, 0,0x7FFF,0, 0x1 }},
+            { 2, -1, { ACTOR_EN_NY, -1877,-2089,6120, 0,0x0,0, 0x1 }}, { 3, -1, { ACTOR_EN_NY, -1877,-2089,6120, 0,0x0,0, 0x1 }},
         } },
     } },
     { SCENE_SPOT03, { // Zora's River
@@ -639,8 +649,8 @@ bool Scene_CommandActorList(PlayState* play, LUS::ISceneCommand* cmd) {
             TempResourceEntries.insert({i,sw});
             auto foundVal = currentResourcePool().find(sw);
             if (foundVal != currentResourcePool().end() && isResourceYetToRestore(foundVal)) {
-                entries[i].params &= 0xFFE0;
-                entries[i].params |= ITEM00_MAX;
+                entries[i].params &= 0xFF1F;
+                entries[i].params |= 0x20;
             } else if (usingBorrowedWallet()) {
                 s16 itemID = (entries[i].params & 0xFF);
                 if (0x3 <= itemID && itemID <= 0x5)

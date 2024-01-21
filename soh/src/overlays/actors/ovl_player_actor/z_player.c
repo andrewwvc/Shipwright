@@ -32,6 +32,7 @@
 #include "soh/Enhancements/enhancementTypes.h"
 
 #define RESIDUAL_SHIELD_ACTIVE ((this->cylinder.base.ocFlags1 & OC1_FIRM) && (this->shieldQuad.info.bumper.dmgFlags == 0x00100000) && (this->stateFlags1 & PLAYER_STATE1_ENEMY_TARGET) && !(this->actor.flags & ACTOR_FLAG_PLAYER_TALKED_TO))
+#define UNDERWATER_SPEED_MODIFIER (1.0/3.0)
 
 typedef enum {
     /* 0x00 */ KNOB_ANIM_ADULT_L,
@@ -2997,7 +2998,9 @@ void func_80835F44(PlayState* play, Player* this, s32 item) {
 
         if ((actionParam == PLAYER_IA_NONE) || !(this->stateFlags1 & PLAYER_STATE1_IN_WATER) ||
             ((this->actor.bgCheckFlags & 1) &&
-             ((actionParam == PLAYER_IA_HOOKSHOT) || (actionParam == PLAYER_IA_LONGSHOT))) ||
+             ((actionParam == PLAYER_IA_HOOKSHOT) || (actionParam == PLAYER_IA_LONGSHOT) ||
+             (UNDERWATER_FREE_EQUIP_USE &&
+               ((Player_ActionToSword(actionParam) != 0) || (actionParam == PLAYER_IA_HAMMER))))) ||
             ((actionParam >= PLAYER_IA_SHIELD_DEKU) && (actionParam <= PLAYER_IA_BOOTS_HOVER))) {
 
             if ((play->bombchuBowlingStatus == 0) &&
@@ -3602,7 +3605,7 @@ void func_80837530(PlayState* play, Player* this, s32 arg2) {
 
     this->stateFlags1 |= PLAYER_STATE1_CHARGING_SPIN_ATTACK;
 
-    if (this->actor.category == ACTORCAT_PLAYER) {
+    if (this->actor.category == ACTORCAT_PLAYER && !(this->stateFlags1 & PLAYER_STATE1_IN_WATER)) {
         Actor_Spawn(&play->actorCtx, play, ACTOR_EN_M_THUNDER, this->bodyPartsPos[PLAYER_BODYPART_WAIST].x,
                     this->bodyPartsPos[PLAYER_BODYPART_WAIST].y, this->bodyPartsPos[PLAYER_BODYPART_WAIST].z, 0, 0, 0,
                     Player_GetSwordHeld(this) | arg2, true);
@@ -3749,7 +3752,10 @@ void func_80837948(PlayState* play, Player* this, s32 arg2) {
 
     this->meleeWeaponAnimation = arg2;
 
-    func_808322D0(play, this, D_80854190[arg2].unk_00);//PlayOnceSetSpeed
+    if (this->stateFlags1 & PLAYER_STATE1_IN_WATER)
+        LinkAnimation_PlayOnceSetSpeedInterp(play, &this->skelAnime, D_80854190[arg2].unk_00, UNDERWATER_SPEED_MODIFIER*2.0f/3.0f);
+    else
+        func_808322D0(play, this, D_80854190[arg2].unk_00);//PlayOnceSetSpeed
     if ((arg2 != 16) && (arg2 != 17)) {
         func_80832F54(play, this, 0x209);
     }
@@ -6710,7 +6716,7 @@ s32 func_8083E5A8(Player* this, PlayState* play) {
                 this->getItemEntry = (GetItemEntry)GET_ITEM_NONE;
             }
         } else if (CHECK_BTN_ALL(sControlInput->press.button, BTN_A) && !(this->stateFlags1 & PLAYER_STATE1_ITEM_OVER_HEAD) &&
-                   !(this->stateFlags2 & PLAYER_STATE2_UNDERWATER)) {
+                   (UNDERWATER_FREE_EQUIP_USE || !(this->stateFlags2 & PLAYER_STATE2_UNDERWATER))) {
             if (this->getItemId != GI_NONE) {
                 GetItemEntry giEntry;
                 if (this->getItemEntry.objectId == OBJECT_INVALID) {
@@ -14256,7 +14262,13 @@ void func_808502D0(Player* this, PlayState* play) {
                     sp3C = &gPlayerAnim_link_fighter_power_jump_kiru_end;
                 }
 
-                func_8083A098(this, sp3C, play);//Allow the next state to follow
+                if (this->stateFlags1 & PLAYER_STATE1_IN_WATER) {
+                    func_8083A060(this, play);
+                    LinkAnimation_PlayOnceSetSpeedInterp(play, &this->skelAnime, sp3C, UNDERWATER_SPEED_MODIFIER*D_808535E8);
+                    //func_8083328C(play, this, anim);//PlayOnceSetSpeed
+                } else {
+                    func_8083A098(this, sp3C, play);//Allow the next state to follow
+                }
 
                 this->skelAnime.moveFlags = sp43;
                 this->stateFlags3 |= PLAYER_STATE3_FINISHED_ATTACKING;
