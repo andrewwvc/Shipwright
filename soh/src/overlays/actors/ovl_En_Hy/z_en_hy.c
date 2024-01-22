@@ -432,7 +432,8 @@ s8 isItchyWoman(Actor* self, PlayState* play) {
 }
 
 s8 isItchyWomanVulnerable(Actor* self) {
-    return ((EnHy*)self)->actionFunc == EnHy_WalkAlong;
+    //return ((EnHy*)self)->actionFunc == EnHy_WalkAlong;
+    return ((EnHy*)self)->questStateTracking == ENHY_STATE_WALK;
 }
 
 u16 func_80A6F810(PlayState* play, Actor* thisx) {
@@ -582,7 +583,8 @@ u16 func_80A6F810(PlayState* play, Actor* thisx) {
         {
             if (play->sceneNum == SCENE_SPOT00) {
                 if (getDayOfCycle() == 3 && (gSaveContext.NPCWeekEvents[0] & 0x1)) {
-                    if (this->actionFunc != EnHy_BeSulking)
+                    //if (this->actionFunc != EnHy_BeSulking)
+                    if (this->questStateTracking != ENHY_STATE_SULK)
                         return HylianMsg+19;
                     else
                         return HylianMsg+24;
@@ -794,6 +796,7 @@ s16 func_80A70058(PlayState* play, Actor* thisx) {
                         }
                     }
                     this->actionFunc = func_80A714C4;
+                    this->questStateTracking = ENHY_STATE_GIVE;
                     break;
             }
             if (this->actor.textId == HylianMsg+15) {
@@ -801,15 +804,18 @@ s16 func_80A70058(PlayState* play, Actor* thisx) {
             } else if (this->actor.textId == HylianMsg+16) {
                 func_80A6F7CC(this, play, GI_HEART_PIECE);
                 this->actionFunc = EnHy_GiveBeggarReward;
+                this->questStateTracking = ENHY_STATE_GIVE;
             } else if (this->actor.textId == HylianMsg+19) {
                 this->actor.minVelocityY = -4.0f;
                 this->actor.gravity = -1.0f;
                 this->actionFunc = EnHy_WalkAlong;
+                this->questStateTracking = ENHY_STATE_WALK;
             } else if (this->actor.textId == HylianMsg+20) {
                 gSaveContext.NPCWeekEvents[0] |= 0x4;
                 if (!(gSaveContext.itemGetInf[3] & 0x8)) {
                     func_80A6F7CC(this, play, GI_HEART_PIECE);
                     this->actionFunc = EnHy_GiveYellowLadyReward;
+                    this->questStateTracking = ENHY_STATE_GIVE;
                 }
             } else if (this->actor.textId == HylianMsg+23) {
                 gSaveContext.NPCWeekEvents[0] &= ~0x1;
@@ -869,7 +875,8 @@ void EnHy_UpdateCollider(EnHy* this, PlayState* play) {
     pos.z += sColliderInfo[this->actor.params & 0x7F].offset.z;
     this->collider.dim.pos = pos;
     CollisionCheck_SetOC(play, &play->colChkCtx, &this->collider.base);
-    if (this->actionFunc == EnHy_WalkAlong && (this->actor.colorFilterTimer == 0)) {
+    //this->actionFunc == EnHy_WalkAlong
+    if ((this->questStateTracking == ENHY_STATE_WALK) && (this->actor.colorFilterTimer == 0)) {
         CollisionCheck_SetAC(play, &play->colChkCtx, &this->collider.base);
     }
 }
@@ -933,7 +940,7 @@ void func_80A70978(EnHy* this, PlayState* play) {
         case ENHY_TYPE_CNE_11:
             if (play->sceneNum == SCENE_SPOT00) {
                 trackingMode =
-                    (this->actionFunc == EnHy_WalkAlong)? NPC_TRACKING_NONE : NPC_TRACKING_FULL_BODY;
+                    (this->questStateTracking == ENHY_STATE_WALK) ? NPC_TRACKING_NONE : NPC_TRACKING_FULL_BODY;
             } else {
                 trackingMode = NPC_TRACKING_HEAD_AND_TORSO;
             }
@@ -1072,6 +1079,7 @@ void EnHy_Init(Actor* thisx, PlayState* play) {
 
     this->getItemEntry = (GetItemEntry)GET_ITEM_NONE;
     this->actionFunc = EnHy_InitImpl;
+    this->questStateTracking = ENHY_STATE_INIT;
 }
 
 void EnHy_Destroy(Actor* thisx, PlayState* play) {
@@ -1115,14 +1123,17 @@ void EnHy_InitImpl(EnHy* this, PlayState* play) {
                     this->actor.speedXZ = 3.0f;
                 }
                 this->actionFunc = func_80A711B4;
+                this->questStateTracking = ENHY_STATE_WALK;
                 break;
             case ENHY_TYPE_BJI_7:
                 this->pathReverse = false;
                 this->actionFunc = func_80A712C0;
+                this->questStateTracking = ENHY_STATE_WALK;
                 break;
             case ENHY_TYPE_AOB:
                 if (play->sceneNum == SCENE_MARKET_DAY) {
                     this->actionFunc = func_80A710F8;
+                    this->questStateTracking = ENHY_STATE_NOTHING;
                     break;
                 }
                 // fall-through
@@ -1140,12 +1151,14 @@ void EnHy_InitImpl(EnHy* this, PlayState* play) {
             case ENHY_TYPE_BJI_19:
             case ENHY_TYPE_AHG_20:
                 this->actionFunc = func_80A7127C;
+                this->questStateTracking = ENHY_STATE_NOTHING;
                 break;
             case ENHY_TYPE_BOJ_5:
             case ENHY_TYPE_BOJ_9:
             case ENHY_TYPE_BOJ_10:
             case ENHY_TYPE_BOJ_12:
                 this->actionFunc = EnHy_DoNothing;
+                this->questStateTracking = ENHY_STATE_NOTHING;
                 break;
             case ENHY_TYPE_CNE_11:
 
@@ -1160,6 +1173,7 @@ void EnHy_InitImpl(EnHy* this, PlayState* play) {
                 }
 
                 this->actionFunc = EnHy_DoNothing;
+                this->questStateTracking = ENHY_STATE_NOTHING;
                 lusprintf("z_en_hy.c", __LINE__, 0, "HyActor CNE_11 spawned! Path: %p, waypoint: %i", this->path, this->waypoint);
                 break;
             default:
@@ -1235,6 +1249,7 @@ void EnHy_WalkAlong(EnHy* this, PlayState* play) {
 
     if (!(getDayOfCycle() == 3) || !(gSaveContext.NPCWeekEvents[0] & 0x1)) {
         this->actionFunc = EnHy_BeSulking;
+        this->questStateTracking = ENHY_STATE_SULK;
         this->actor.speedXZ = 0.0f;
     }
 
@@ -1256,6 +1271,7 @@ void EnHy_WalkAlong(EnHy* this, PlayState* play) {
         Audio_PlayActorSound2(&this->actor, NA_SE_VO_Z0_HURRY);
         if (this->actor.colChkInfo.health <= 0) {
             this->actionFunc = EnHy_BeSulking;
+            this->questStateTracking = ENHY_STATE_SULK;
             this->actor.speedXZ = 0.0f;
         }
     }
@@ -1266,6 +1282,7 @@ void func_80A712C0(EnHy* this, PlayState* play) {
         Animation_ChangeByInfo(&this->skelAnime, sAnimationInfo, ENHY_ANIM_7);
         this->actor.speedXZ = 0.4f;
         this->actionFunc = func_80A7134C;
+        this->questStateTracking = ENHY_STATE_NOTHING;
     }
 
     func_80034F54(play, this->unk_21C, this->unk_23C, 16);
@@ -1308,6 +1325,7 @@ void func_80A7134C(EnHy* this, PlayState* play) {
 void func_80A714C4(EnHy* this, PlayState* play) {
     if (Actor_HasParent(&this->actor, play)) {
         this->actionFunc = func_80A71530;
+        this->questStateTracking = ENHY_STATE_GIVE;
     } else {
         if (!gSaveContext.n64ddFlag || this->getItemEntry.getItemId == GI_NONE) {
             func_8002F434(&this->actor, play, this->unkGetItemId, this->actor.xzDistToPlayer + 1.0f, fabsf(this->actor.yDistToPlayer) + 1.0f);
@@ -1340,12 +1358,14 @@ void func_80A71530(EnHy* this, PlayState* play) {
             }
         }
         this->actionFunc = func_80A7127C;
+        this->questStateTracking = ENHY_STATE_NOTHING;
     }
 }
 
 void EnHy_GiveBeggarReward(EnHy* this, PlayState* play) {
     if (Actor_HasParent(&this->actor, play)) {
         this->actionFunc = EnHy_ReceiveBeggarReward;
+        this->questStateTracking = ENHY_STATE_GIVE;
     } else {
         if (!gSaveContext.n64ddFlag || this->getItemEntry.getItemId == GI_NONE) {
             func_8002F434(&this->actor, play, this->unkGetItemId, this->actor.xzDistToPlayer + 1.0f, fabsf(this->actor.yDistToPlayer) + 1.0f);
@@ -1359,12 +1379,14 @@ void EnHy_ReceiveBeggarReward(EnHy* this, PlayState* play) {
     if ((Message_GetState(&play->msgCtx) == TEXT_STATE_DONE) && Message_ShouldAdvance(play)) {
         gSaveContext.itemGetInf[3] |= 0x4;
         this->actionFunc = EnHy_DoNothing;
+        this->questStateTracking = ENHY_STATE_NOTHING;
     }
 }
 
 void EnHy_GiveYellowLadyReward(EnHy* this, PlayState* play) {
     if (Actor_HasParent(&this->actor, play)) {
         this->actionFunc = EnHy_ReceiveYellowLadyReward;
+        this->questStateTracking = ENHY_STATE_GIVE;
     } else {
         if (!gSaveContext.n64ddFlag || this->getItemEntry.getItemId == GI_NONE) {
             func_8002F434(&this->actor, play, this->unkGetItemId, this->actor.xzDistToPlayer + 1.0f, fabsf(this->actor.yDistToPlayer) + 1.0f);
@@ -1378,6 +1400,7 @@ void EnHy_ReceiveYellowLadyReward(EnHy* this, PlayState* play) {
     if ((Message_GetState(&play->msgCtx) == TEXT_STATE_DONE) && Message_ShouldAdvance(play)) {
         gSaveContext.itemGetInf[3] |= 0x8;
         this->actionFunc = EnHy_DoNothing;
+        this->questStateTracking = ENHY_STATE_NOTHING;
     }
 }
 
