@@ -715,7 +715,7 @@ extern "C" void OTRMessage_Init()
     CustomMessageManager::Instance->CreateMessage(
         questMessageTableID, SariaMsg+30,
         CustomMessage(
-          "Raru has shown me much wisdom and&helped me understand what it means&to be here, serving everyone.^I don't really know how long&he's realy been here,&but I suspect somehow^that he may be as ancient&as the Great Deku Tree.\x0B\x02",
+          "Rauru has shown me much wisdom and&helped me understand what it means&to be here, serving everyone.^I don't really know how long&he's realy been here,&but I suspect somehow^that he may be as ancient&as the Great Deku Tree.\x0B\x02",
           "",
           "",
           TEXTBOX_TYPE_BLUE, TEXTBOX_POS_BOTTOM)
