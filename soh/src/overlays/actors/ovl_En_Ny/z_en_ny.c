@@ -21,6 +21,7 @@ void func_80ABD11C(EnNy* this, PlayState* play);
 void func_80ABCE50(EnNy* this, PlayState* play);
 void func_80ABCE90(EnNy* this, PlayState* play);
 void func_80ABCEEC(EnNy* this, PlayState* play);
+void func_80ABCE38(EnNy* this);
 void EnNy_SetupLiftedUp(EnNy* this);
 void EnNy_SetupThrown(EnNy* this);
 void EnNy_UpdateDeath(Actor* thisx, PlayState* PlayState);
