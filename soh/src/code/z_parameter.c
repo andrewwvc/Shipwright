@@ -2088,15 +2088,15 @@ u8 Item_Give(PlayState* play, u8 item) {
             AMMO(ITEM_STICK) = sAmmoRefillCounts[item - ITEM_STICKS_5];
         } else {
             AMMO(ITEM_STICK) += sAmmoRefillCounts[item - ITEM_STICKS_5];
-            if (AMMO(ITEM_STICK) > CUR_CAPACITY(UPG_STICKS)) {
-                AMMO(ITEM_STICK) = CUR_CAPACITY(UPG_STICKS);
-            }
+        }
+        if (AMMO(ITEM_STICK) > CUR_CAPACITY(UPG_STICKS)) {
+            AMMO(ITEM_STICK) = CUR_CAPACITY(UPG_STICKS);
         }
         item = ITEM_STICK;
     } else if (item == ITEM_NUT) {
         if (gSaveContext.inventory.items[slot] == ITEM_NONE) {
             Inventory_ChangeUpgrade(UPG_NUTS, 1);
-            AMMO(ITEM_NUT) = ITEM_NUT;
+            AMMO(ITEM_NUT) = 1;
         } else {
             AMMO(ITEM_NUT)++;
             if (AMMO(ITEM_NUT) > CUR_CAPACITY(UPG_NUTS)) {
@@ -2112,9 +2112,9 @@ u8 Item_Give(PlayState* play, u8 item) {
                          sAmmoRefillCounts[item - ITEM_NUTS_5]);
         } else {
             AMMO(ITEM_NUT) += sAmmoRefillCounts[item - ITEM_NUTS_5];
-            if (AMMO(ITEM_NUT) > CUR_CAPACITY(UPG_NUTS)) {
-                AMMO(ITEM_NUT) = CUR_CAPACITY(UPG_NUTS);
-            }
+        }
+        if (AMMO(ITEM_NUT) > CUR_CAPACITY(UPG_NUTS)) {
+            AMMO(ITEM_NUT) = CUR_CAPACITY(UPG_NUTS);
         }
         item = ITEM_NUT;
     } else if (item == ITEM_BOMB) {
@@ -2135,9 +2135,9 @@ u8 Item_Give(PlayState* play, u8 item) {
             AMMO(ITEM_BOMBCHU) = 10;
         } else {
             AMMO(ITEM_BOMBCHU) += 10;
-            if (AMMO(ITEM_BOMBCHU) > MAX_BOMBCHU_CAPACITY) {
-                AMMO(ITEM_BOMBCHU) = MAX_BOMBCHU_CAPACITY;
-            }
+        }
+        if (AMMO(ITEM_BOMBCHU) > MAX_BOMBCHU_CAPACITY) {
+            AMMO(ITEM_BOMBCHU) = MAX_BOMBCHU_CAPACITY;
         }
         return Return_Item(item, MOD_NONE, ITEM_NONE);
     } else if ((item == ITEM_BOMBCHUS_5) || (item == ITEM_BOMBCHUS_20)) {
@@ -2146,9 +2146,9 @@ u8 Item_Give(PlayState* play, u8 item) {
             AMMO(ITEM_BOMBCHU) += sAmmoRefillCounts[item - ITEM_BOMBCHUS_5 + 8];
         } else {
             AMMO(ITEM_BOMBCHU) += sAmmoRefillCounts[item - ITEM_BOMBCHUS_5 + 8];
-            if (AMMO(ITEM_BOMBCHU) > MAX_BOMBCHU_CAPACITY) {
-                AMMO(ITEM_BOMBCHU) = MAX_BOMBCHU_CAPACITY;
-            }
+        }
+        if (AMMO(ITEM_BOMBCHU) > MAX_BOMBCHU_CAPACITY) {
+            AMMO(ITEM_BOMBCHU) = MAX_BOMBCHU_CAPACITY;
         }
         return Return_Item(item, MOD_NONE, ITEM_NONE);
     } else if ((item >= ITEM_ARROWS_SMALL) && (item <= ITEM_ARROWS_LARGE)) {
@@ -2164,7 +2164,7 @@ u8 Item_Give(PlayState* play, u8 item) {
     } else if (item == ITEM_SLINGSHOT) {
         Inventory_ChangeUpgrade(UPG_BULLET_BAG, 1);
         INV_CONTENT(ITEM_SLINGSHOT) = ITEM_SLINGSHOT;
-        AMMO(ITEM_SLINGSHOT) = 30;
+        AMMO(ITEM_SLINGSHOT) = CUR_CAPACITY(UPG_BULLET_BAG);
         return Return_Item(item, MOD_NONE, ITEM_NONE);
     } else if (item == ITEM_SEEDS) {
         AMMO(ITEM_SLINGSHOT) += 5;
