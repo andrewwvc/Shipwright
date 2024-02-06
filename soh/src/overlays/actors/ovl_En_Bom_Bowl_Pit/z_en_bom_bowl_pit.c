@@ -179,7 +179,7 @@ void EnBomBowlPit_GivePrize(EnBomBowlPit* this, PlayState* play) {
     this->getItemId = sGetItemIds[this->prizeIndex];
     this->getItemEntry = (GetItemEntry)GET_ITEM_NONE;
 
-    if ((this->getItemId == GI_BOMB_BAG_30) && (CUR_CAPACITY(UPG_BOMB_BAG) == 30)) {
+    if ((this->getItemId == GI_BOMB_BAG_30) && (CUR_UPG_VALUE(UPG_BOMB_BAG) == 2)) {
         this->getItemId = GI_BOMB_BAG_40;
     }
 

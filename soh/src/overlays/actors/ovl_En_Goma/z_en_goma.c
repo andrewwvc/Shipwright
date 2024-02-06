@@ -649,28 +649,30 @@ void EnGoma_UpdateHit(EnGoma* this, PlayState* play) {
                 } else {
                     swordDamage = CollisionCheck_GetSwordDamage(dmgFlags, play);
 
-                    if (swordDamage) {
+                    if (swordDamage && (this->visualState == 0) && Actor_IsFacingPlayer(&this->actor, 0x3500)) {
                         EffectSsSibuki_SpawnBurst(play, &this->actor.focus.pos);
                     } else {
-                        swordDamage = 1;
+                        swordDamage = 0;
                     }
 
-                    this->actor.colChkInfo.health -= swordDamage;
-                    EnGoma_SetupHurt(this, play);
-                    Actor_SetColorFilter(&this->actor, 0x4000, 255, 0, 5);
-                    this->hurtTimer = 13;
+                    if (swordDamage) {
+                        this->actor.colChkInfo.health -= swordDamage;
+                        EnGoma_SetupHurt(this, play);
+                        Actor_SetColorFilter(&this->actor, 0x4000, 255, 0, 5);
+                        this->hurtTimer = 13;
+                    }
                 }
             } else {
-                // die if still an egg
-                if (this->actor.params <= 5) { //! BossGoma only has 3 children
-                    BossGoma* parent = (BossGoma*)this->actor.parent;
+                // // die if still an egg
+                // if (this->actor.params <= 5) { //! BossGoma only has 3 children
+                //     BossGoma* parent = (BossGoma*)this->actor.parent;
 
-                    parent->childrenGohmaState[this->actor.params] = -1;
-                }
+                //     parent->childrenGohmaState[this->actor.params] = -1;
+                // }
 
-                EnGoma_SpawnHatchDebris(this, play);
-                Actor_Kill(&this->actor);
-                GameInteractor_ExecuteOnEnemyDefeat(&this->actor);
+                // EnGoma_SpawnHatchDebris(this, play);
+                // Actor_Kill(&this->actor);
+                // GameInteractor_ExecuteOnEnemyDefeat(&this->actor);
             }
         }
     }
@@ -713,6 +715,9 @@ void EnGoma_Update(Actor* thisx, PlayState* play) {
     if (this->invincibilityTimer != 0) {
         this->invincibilityTimer--;
     }
+
+    if ((s8)this->actor.colChkInfo.health <= 0 && this->actionFunc != EnGoma_Die && this->actionFunc != EnGoma_Dead && this->actionFunc != EnGoma_Hurt)
+        EnGoma_SetupDie(this);
 
     this->actionFunc(this, play);
     Actor_MoveForward(&this->actor);

@@ -325,6 +325,27 @@ typedef struct {
     /*        */ u16 adultTradeItems;
     /*        */ u8 triforcePiecesCollected;
     // #endregion
+    // #region SOH [NPC Mod]
+    /*        */ u32 savedFrameCount;
+    /*        */ u16 goronTimeStatus;
+    /*        */ s32 goronTimeDay;
+    /*        */ s32 SariaDateDay;
+    /*        */ s32 RutoDateDay;
+    /*        */ u16 NPCWeekEvents[4];
+    /*        */ s32 MalonPlayDay;
+    /*        */ s32 MalonRideDay;
+    /*        */ u8 maxBoosts;
+    /*        */ u8 extraMagicPower;
+    /*        */ u16 galleryMultplierChild;
+    /*        */ u16 galleryMultplierAdult;
+    /*        */ s32 galleryTimeChild;
+    /*        */ s32 galleryTimeAdult;
+    /*        */ u16 guardRupeesUsed;
+    /*        */ u16 diveRupeesUsed;
+    /*        */ s16 rupeeCollectionScore;
+    /*        */ u8 spiritDefenseHeartsGiven;
+
+    // #endregion
 } SaveContext; // size = 0x1428
 
 typedef enum {
@@ -589,6 +610,7 @@ typedef enum {
 
 // 0xDA-0xDE
 #define EVENTCHKINF_SKULLTULA_REWARD_INDEX 13
+#define EVENTCHKINF_SKULLTULA_REWARD_INDEX_2 12
 #define EVENTCHKINF_SKULLTULA_REWARD_10_SHIFT 10
 #define EVENTCHKINF_SKULLTULA_REWARD_20_SHIFT 11
 #define EVENTCHKINF_SKULLTULA_REWARD_30_SHIFT 12

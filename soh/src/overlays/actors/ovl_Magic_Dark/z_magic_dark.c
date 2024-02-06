@@ -89,7 +89,7 @@ void MagicDark_DiamondUpdate(Actor* thisx, PlayState* play) {
         return;
     }
 
-    player->invincibilityTimer = -100;
+    //player->invincibilityTimer = -100;
     thisx->scale.x = thisx->scale.z = this->scale;
 
     if (this->timer < 20) {

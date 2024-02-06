@@ -130,6 +130,8 @@ typedef enum {
     /* 15 */ PEAHAT_DMG_EFF_NUT = 15
 } DamageEffect;
 
+#define DINS_FIRE_DAMAGE 3
+
 static DamageTable sDamageTable = {
     /* Deku nut      */ DMG_ENTRY(0, PEAHAT_DMG_EFF_NUT),
     /* Deku stick    */ DMG_ENTRY(2, PEAHAT_DMG_EFF_ATTACK),
@@ -148,7 +150,7 @@ static DamageTable sDamageTable = {
     /* Unk arrow 1   */ DMG_ENTRY(2, PEAHAT_DMG_EFF_ATTACK),
     /* Unk arrow 2   */ DMG_ENTRY(2, PEAHAT_DMG_EFF_ATTACK),
     /* Unk arrow 3   */ DMG_ENTRY(2, PEAHAT_DMG_EFF_ATTACK),
-    /* Fire magic    */ DMG_ENTRY(3, PEAHAT_DMG_EFF_FIRE),
+    /* Fire magic    */ DMG_ENTRY(DINS_FIRE_DAMAGE, PEAHAT_DMG_EFF_FIRE),
     /* Ice magic     */ DMG_ENTRY(0, PEAHAT_DMG_EFF_LIGHT_ICE_ARROW),
     /* Light magic   */ DMG_ENTRY(0, PEAHAT_DMG_EFF_LIGHT_ICE_ARROW),
     /* Shield        */ DMG_ENTRY(0, PEAHAT_DMG_EFF_ATTACK),
@@ -513,11 +515,12 @@ void EnPeehat_Ground_StateSeekPlayer(EnPeehat* this, PlayState* play) {
     }
     if (IS_DAY && (Math_Vec3f_DistXZ(&this->actor.home.pos, &player->actor.world.pos) < this->xzDistMax)) {
         Math_SmoothStepToS(&this->actor.world.rot.y, this->actor.yawTowardsPlayer, 1, 1000, 0);
-        if (this->unk_2FA != 0) {
-            this->actor.shape.rot.y += 0x1C2;
-        } else {
-            this->actor.shape.rot.y -= 0x1C2;
-        }
+        Math_SmoothStepToS(&this->actor.shape.rot.y, this->actor.yawTowardsPlayer, 1, 500, 0);
+        // if (this->unk_2FA != 0) {
+        //     this->actor.shape.rot.y += 0x1C2;
+        // } else {
+        //     this->actor.shape.rot.y -= 0x1C2;
+        // }
     } else {
         EnPeehat_Ground_SetStateReturnHome(this);
     }
@@ -865,6 +868,11 @@ void EnPeehat_SetStateExplode(EnPeehat* this) {
     EnPeehat_SetupAction(this, EnPeehat_StateExplode);
 }
 
+//u8(*predicate)(Actor*, GlobalContext*)
+u8 isLargePeahat(Actor* this, PlayState* play) {
+    return this->params < PEAHAT_TYPE_LARVA;
+}
+
 void EnPeehat_StateExplode(EnPeehat* this, PlayState* play) {
     EnBom* bomb;
     s32 pad[2];
@@ -878,9 +886,14 @@ void EnPeehat_StateExplode(EnPeehat* this, PlayState* play) {
     }
     this->animTimer--;
     if (this->animTimer == 0) {
-        Item_DropCollectibleRandom(play, &this->actor, &this->actor.world.pos, 0x40);
-        Item_DropCollectibleRandom(play, &this->actor, &this->actor.world.pos, 0x40);
-        Item_DropCollectibleRandom(play, &this->actor, &this->actor.world.pos, 0x40);
+        if (!Flags_GetCollectible(play, 1) && !Actor_FindNumberOf(play, &this->actor, ACTOR_EN_PEEHAT, ACTORCAT_ENEMY, 100000.0f, NULL, isLargePeahat)) {
+            Item_DropCollectible(play, &this->actor.world.pos, 0x100+ITEM00_HEART_PIECE);
+        } else {
+            Item_DropCollectibleRandom(play, &this->actor, &this->actor.world.pos, 0x40);
+            Item_DropCollectibleRandom(play, &this->actor, &this->actor.world.pos, 0x40);
+            Item_DropCollectibleRandom(play, &this->actor, &this->actor.world.pos, 0x40);
+        }
+
         Actor_Kill(&this->actor);
         GameInteractor_ExecuteOnEnemyDefeat(&this->actor);
     }
@@ -906,6 +919,9 @@ void EnPeehat_Adult_CollisionCheck(EnPeehat* this, PlayState* play) {
             }
             return;
         } else {
+            if (this->actor.colChkInfo.damageEffect == PEAHAT_DMG_EFF_FIRE && this->actor.colChkInfo.damage > DINS_FIRE_DAMAGE) {
+                this->actor.colChkInfo.damage = DINS_FIRE_DAMAGE;//This is a hack fix for Din's fire doing extra damage when actor frames aren't updating
+            }
             Actor_ApplyDamage(&this->actor);
             Actor_SetColorFilter(&this->actor, 0x4000, 255, 0, 8);
             Audio_PlayActorSound2(&this->actor, NA_SE_EN_PIHAT_DAMAGE);

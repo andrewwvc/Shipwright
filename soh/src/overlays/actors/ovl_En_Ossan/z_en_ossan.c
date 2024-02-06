@@ -297,6 +297,15 @@ ShopItem sShopkeeperStores[][8] = {
       { SI_KEATON_MASK, -50, 76, -20 },
       { SI_BUNNY_HOOD, -80, 52, -3 },
       { SI_SPOOKY_MASK, -80, 76, -3 } },
+
+      { { SI_HYLIAN_SHIELD, 50, 52, -20 },
+      { SI_BOMBS_5_R25, 50, 76, -20 },
+      { SI_DEKU_NUTS_5, 80, 52, -3 },
+      { SI_PIECE_OF_HEART, 80, 76, -3 },
+      { SI_ARROWS_10, -50, 52, -20 },
+      { SI_ARROWS_50, -50, 76, -20 },
+      { SI_DEKU_STICK, -80, 52, -3 },
+      { SI_ARROWS_30, -80, 76, -3 } },
 };
 static EnOssanGetGirlAParamsFunc sShopItemReplaceFunc[] = {
     ShopItemDisp_Default,   ShopItemDisp_Default,    ShopItemDisp_Default, ShopItemDisp_Default,
@@ -311,7 +320,7 @@ static EnOssanGetGirlAParamsFunc sShopItemReplaceFunc[] = {
     ShopItemDisp_GoronMask, ShopItemDisp_GerudoMask, ShopItemDisp_Default, ShopItemDisp_Default,
     ShopItemDisp_Default,   ShopItemDisp_Default,    ShopItemDisp_Default, ShopItemDisp_Default,
     ShopItemDisp_Default,   ShopItemDisp_Default,    ShopItemDisp_Default, ShopItemDisp_Default,
-    ShopItemDisp_Default,   ShopItemDisp_Default,
+    ShopItemDisp_Default,   ShopItemDisp_Default,    ShopItemDisp_Default, ShopItemDisp_Default,
 };
 
 static InitChainEntry sInitChain[] = {
@@ -505,10 +514,15 @@ void EnOssan_TalkKokiriShopkeeper(PlayState* play) {
 }
 
 void EnOssan_TalkBazaarShopkeeper(PlayState* play) {
-    if (play->curSpawn == 0) {
-        Message_ContinueTextbox(play, 0x9D);
+    if (IS_DAY) {
+        if (play->curSpawn == 0) {
+            Message_ContinueTextbox(play, 0x9D);
+        } else {
+            Message_ContinueTextbox(play, 0x9C);
+        }
     } else {
-        Message_ContinueTextbox(play, 0x9C);
+        u16 HylianMsg = GetTextID("hylian");
+        Message_ContinueTextbox(play, HylianMsg+1);
     }
 }
 
@@ -885,7 +899,7 @@ u8 EnOssan_CursorLeft(EnOssan* this, u8 cursorIndex, u8 shelfSlotMax) {
 void EnOssan_TryPaybackMask(EnOssan* this, PlayState* play) {
     s16 price = sMaskPaymentPrice[this->happyMaskShopState];
 
-    if (gSaveContext.rupees < price) {
+    if (Rupees_GetNum() < price) {
         Message_ContinueTextbox(play, 0x70A8);
         this->happyMaskShopkeeperEyeIdx = 1;
         this->happyMaskShopState = OSSAN_HAPPY_STATE_ANGRY;
@@ -1904,7 +1918,10 @@ void EnOssan_PositionSelectedItem(EnOssan* this) {
     f32 tz;
 
     i = this->cursorIndex;
-    shopItem = &sShopkeeperStores[this->actor.params][i];
+    if (this->actor.params == OSSAN_TYPE_BAZAAR && IS_NIGHT)
+        shopItem = &sShopkeeperStores[OSSAN_TYPE_BAZAAR_NIGHT][i];
+    else
+        shopItem = &sShopkeeperStores[this->actor.params][i];
     item = this->shelfSlots[i];
 
     i2 = i >> 2;
@@ -2158,8 +2175,13 @@ void EnOssan_InitBombchuShopkeeper(EnOssan* this, PlayState* play) {
 
 u16 EnOssan_SetupHelloDialog(EnOssan* this) {
     this->happyMaskShopState = OSSAN_HAPPY_STATE_NONE;
+    u16 MiscMsg = GetTextID("misc");
     // mask shop messages
     if (this->actor.params == OSSAN_TYPE_MASK) {
+        if (usingBorrowedWallet()) {
+            this->happyMaskShopState = OSSAN_HAPPY_STATE_ANGRY;
+            return MiscMsg+5;
+        }
         if (INV_CONTENT(ITEM_TRADE_CHILD) == ITEM_SOLD_OUT) {
             if (Flags_GetItemGetInf(ITEMGETINF_3B)) {
                 if (!Flags_GetEventChkInf(EVENTCHKINF_PAID_BACK_BUNNY_HOOD_FEE)) {
@@ -2244,7 +2266,11 @@ void EnOssan_InitActionFunc(EnOssan* this, PlayState* play) {
         this->actor.world.pos.y += sShopkeeperPositionOffsets[this->actor.params].y;
         this->actor.world.pos.z += sShopkeeperPositionOffsets[this->actor.params].z;
 
-        items = sShopkeeperStores[this->actor.params];
+        //items = sShopkeeperStores[this->actor.params];
+        if (this->actor.params == OSSAN_TYPE_BAZAAR && IS_NIGHT)
+            items = &sShopkeeperStores[OSSAN_TYPE_BAZAAR_NIGHT];
+        else
+            items = &sShopkeeperStores[this->actor.params];
 
         ActorShape_Init(&this->actor.shape, 0.0f, ActorShadow_DrawCircle, 20.0f);
         sInitFuncs[this->actor.params](this, play);

@@ -1582,7 +1582,7 @@ void Message_OpenText(PlayState* play, u16 textId) {
     Font* font = &msgCtx->font;
     s16 textBoxType;
 
-    if (msgCtx->msgMode == MSGMODE_NONE) {
+    if (msgCtx->msgMode == MSGMODE_NONE && play->pauseCtx.state == 0) {
         gSaveContext.unk_13EE = gSaveContext.unk_13EA;
     }
     if (YREG(15) == 0x10) {
@@ -1665,6 +1665,7 @@ void Message_OpenText(PlayState* play, u16 textId) {
         Message_FindMessage(play, textId);
         msgCtx->msgLength = font->msgLength = GetEquipNowMessage(font->msgBuf, font->msgOffset, sizeof(font->msgBuf));
     } else {
+        textId = msgCtx->textId;//Allows text substitution from CustomMessage_RetrieveIfExists to propagate
         Message_FindMessage(play, textId);
         msgCtx->msgLength = font->msgLength;
         char* src = (uintptr_t)font->msgOffset;
@@ -3350,7 +3351,9 @@ void Message_Update(PlayState* play) {
             osSyncPrintf(VT_RST);
             msgCtx->msgLength = 0;
             msgCtx->msgMode = MSGMODE_NONE;
-            interfaceCtx->unk_1FA = interfaceCtx->unk_1FC = 0;
+            if (play->pauseCtx.state == 0) {
+                interfaceCtx->unk_1FA = interfaceCtx->unk_1FC = 0;
+            }
             msgCtx->textId = msgCtx->stateTimer = 0;
 
             if (msgCtx->textboxEndType == TEXTBOX_ENDTYPE_PERSISTENT) {

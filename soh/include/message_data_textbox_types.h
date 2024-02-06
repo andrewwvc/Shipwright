@@ -2,7 +2,8 @@
 #define MESSAGE_DATA_TEXTBOX_TYPES_H
 
 typedef enum {
-    /*  0 */ TEXTBOX_TYPE_BLACK,
+    /* -1 */ TEXTBOX_TYPE_MISSING = -1,
+    /*  0 */ TEXTBOX_TYPE_BLACK = 0,
     /*  1 */ TEXTBOX_TYPE_WOODEN,
     /*  2 */ TEXTBOX_TYPE_BLUE,
     /*  3 */ TEXTBOX_TYPE_OCARINA,

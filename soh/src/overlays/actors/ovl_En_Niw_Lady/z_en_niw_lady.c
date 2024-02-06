@@ -320,8 +320,24 @@ void func_80ABA654(EnNiwLady* this, PlayState* play) {
             return;
         }
         if (this->unk_26C == 1) {
-            this->getItemId = GI_RUPEE_PURPLE;
-            func_8002F434(&this->actor, play, GI_RUPEE_PURPLE, 100.0f, 50.0f);
+            ActorEntry ae;
+            s32 entVal = -1;
+            ae.id = ACTOR_EN_ITEM00;
+            ae.pos.x = this->actor.home.pos.x;
+            ae.pos.y = this->actor.home.pos.y;
+            ae.pos.z = this->actor.home.pos.z;
+            ae.rot = this->actor.home.rot;
+            ae.params = GI_RUPEE_PURPLE;
+            entVal = createTempEntry(play, &ae);
+            if (entVal != -1) {
+                this->getItemId = GI_RUPEE_PURPLE;
+                func_8002F434(&this->actor, play, GI_RUPEE_PURPLE, 100.0f, 50.0f);
+                insertSpawnResource(entVal, DEFAULT_RESOURCE_TIME*3);
+            } else {
+                this->getItemId = GI_RUPEE_BLUE;
+                func_8002F434(&this->actor, play, GI_RUPEE_BLUE, 100.0f, 50.0f);
+            }
+
             this->actionFunc = func_80ABAC00;
         }
         this->actionFunc = func_80ABA244;

@@ -4,6 +4,7 @@
 #include "objects/object_oF1d_map/object_oF1d_map.h"
 #include "soh/frame_interpolation.h"
 #include "soh/Enhancements/randomizer/adult_trade_shuffle.h"
+#include "overlays/actors/ovl_Obj_Timeblock/z_obj_timeblock.h"
 
 #define FLAGS (ACTOR_FLAG_TARGETABLE | ACTOR_FLAG_FRIENDLY | ACTOR_FLAG_UPDATE_WHILE_CULLED | ACTOR_FLAG_DRAW_WHILE_CULLED)
 
@@ -38,11 +39,20 @@ Goron: this->actor.params & 0xF0
 
 EnGo2
 (this->actor.params & 0x3E0) >> 5
-(this->actor.params & 0xFC00) >> 0xA - Gorons in Fire Temple
+(this->actor.params & ) >> 0xA - Gorons in Fire Temple
 this->actor.params & 0x1F
 
 Gorons only move when this->interactInfo.talkState == NPC_TALK_STATE_IDLE
 */
+
+#define GORON_IDENTITY_PARAM 0XF
+#define GORON_IDENTITY (this->actor.params & GORON_IDENTITY_PARAM)
+#define GORON_SPECIAL 0X10
+#define TEMP_PATH ((this->actor.params & 0x3E0) >> 5)
+#define HIGH_PATH ((this->actor.params & 0xFC00) >> 0xA)
+
+#define IS_RACING LINK_IS_ADULT
+#define IS_REFINED_ROLLING ((GORON_IDENTITY == GORON_CITY_ROLLING_BIG) && (LINK_IS_ADULT || play->sceneNum == SCENE_HYRULE_FIELD || play->sceneNum == 0x5A))
 
 void EnGo2_Init(Actor* thisx, PlayState* play);
 void EnGo2_Destroy(Actor* thisx, PlayState* play);
@@ -171,6 +181,96 @@ static EnGo2DustEffectData sDustEffectData[2][4] = {
 };
 
 static Vec3f sZeroVec = { 0.0f, 0.0f, 0.0f };
+
+typedef struct SlantCylinder {
+    Vec3f base;
+    Vec3f head;
+    f32 radius;
+} SlantCylinder;
+
+typedef struct SlantCylinderComplex {
+    u32 length;
+    SlantCylinder *cylinders;
+} SlantCylinderComplex;
+
+s8 SCPointCollision(Vec3f *point, SlantCylinder *sc) {
+    Vec3f modPoint;
+    Vec3f modHead;
+    f32 modPointAbs;
+    f32 modHeadAbs;
+    f32 invModHeadAbs;
+    Math_Vec3f_Diff(point,&sc->base,&modPoint);
+    Math_Vec3f_Diff(&sc->head,&sc->base,&modHead);
+    modPointAbs = sqrt(SQXYZ(modPoint));
+    modHeadAbs = sqrt(SQXYZ(modHead));
+    invModHeadAbs = 1/modHeadAbs;
+
+    f32 dot = DOTXYZ(modPoint, modHead);
+    f32 normedDot = dot*invModHeadAbs;
+    if (normedDot < 0.0f || modHeadAbs < normedDot)
+        return false;
+
+    normedDot *= invModHeadAbs;
+    Vec3f projection;
+    projection.x = normedDot*modHead.x;
+    projection.y = normedDot*modHead.y;
+    projection.z = normedDot*modHead.z;
+
+    return (Math_Vec3f_DistXYZ(&projection,&modPoint) < sc->radius);
+}
+
+s8 SCPointCollision2D( Vec3f *point, SlantCylinder *sc) {
+    Vec3f modPoint;
+    Vec3f modHead;
+    f32 modPointAbs;
+    f32 modHeadAbs;
+    f32 invModHeadAbs;
+    Math_Vec3f_Diff(point,&sc->base,&modPoint);
+    Math_Vec3f_Diff(&sc->head,&sc->base,&modHead);
+    modPointAbs = sqrt(SQXZ(modPoint));
+    modHeadAbs = sqrt(SQXZ(modHead));
+    invModHeadAbs = 1/modHeadAbs;
+
+    f32 dot = DOTXZ(modPoint, modHead);
+    f32 normedDot = dot*invModHeadAbs;
+    if (normedDot < 0.0f || modHeadAbs < normedDot)
+        return false;
+
+    normedDot *= invModHeadAbs;
+    Vec3f projection;
+    projection.x = normedDot*modHead.x;
+    projection.y = normedDot*modHead.y;
+    projection.z = normedDot*modHead.z;
+
+    return (Math_Vec3f_DistXZ(&projection,&modPoint) < sc->radius);
+}
+
+s8 SCAPointCollision(Vec3f *point,SlantCylinder *scArray, u32 length) {
+    for (u32 ii = 0; ii < length; ii++) {
+        if (SCPointCollision(point,&scArray[ii]))
+            return 1;
+    }
+    return 0;
+}
+
+s8 SCAPointCollision2D(Vec3f *point,SlantCylinder *scArray, u32 length) {
+    for (u32 ii = 0; ii < length; ii++) {
+        if (SCPointCollision2D(point,&scArray[ii]))
+            return 1;
+    }
+    return 0;
+}
+
+void testSCPointCollision() {
+    SlantCylinder ace = {{10.0f,10.0f,10.0f},{20.0f,20.0f,20.0f},1.0f};
+    Vec3f testPoints[] = {{15.0f,15.0f,15.0f},{0.0f,0.0f,0.0f},{15.0f,15.0f,13.0f},{20.0f,19.0f,20.0f}};
+    s8 results[4] = {0,0,0,0};
+
+    results[0] = SCPointCollision(&testPoints[0],&ace);
+    results[1] = SCPointCollision(&testPoints[1],&ace);
+    results[2] = SCPointCollision(&testPoints[2],&ace);
+    results[3] = SCPointCollision(&testPoints[3],&ace);
+}
 
 void EnGo2_AddDust(EnGo2* this, Vec3f* pos, Vec3f* velocity, Vec3f* accel, u8 initialTimer, f32 scale, f32 scaleStep) {
     EnGoEffect* dustEffect = this->dustEffects;
@@ -333,9 +433,25 @@ u16 EnGo2_GoronFireGenericGetTextId(EnGo2* this) {
 }
 
 u16 EnGo2_GetTextIdGoronCityRollingBig(PlayState* play, EnGo2* this) {
+    u16 GoronMsg = GetTextID("goron");
+    if (LINK_IS_ADULT)
+        return GoronMsg+20;
+    if (play->sceneNum == 0x60)//DMT
+        if (Player_GetMask(play) == PLAYER_MASK_GERUDO)
+            return GoronMsg+29;
+        else
+            return GoronMsg+25;
+    if (play->sceneNum == 0x5A)//Gerudo Valley
+        if (Player_GetMask(play) == PLAYER_MASK_GERUDO)
+            return GoronMsg+31;
+        else
+            if (Flags_GetInfTable(0x1C0)) //((gSaveContext.infTable[28] & 0x0001) == 0x0001)
+                return GoronMsg+32;
+            else
+                return GoronMsg+30;
     if (Flags_GetInfTable(INFTABLE_11E)) {
         return 0x3013;
-    } else if ((CUR_CAPACITY(UPG_BOMB_BAG) >= 20 || IS_RANDO) && this->waypoint > 7 && this->waypoint < 12) {
+    } else if ((CUR_UPG_VALUE(UPG_BOMB_BAG) >= 1 || IS_RANDO) && this->waypoint > 7 && this->waypoint < 12) {
         return 0x3012;
     } else {
         return 0x3011;
@@ -343,25 +459,59 @@ u16 EnGo2_GetTextIdGoronCityRollingBig(PlayState* play, EnGo2* this) {
 }
 
 s16 EnGo2_UpdateTalkStateGoronCityRollingBig(PlayState* play, EnGo2* this) {
+    u16 GoronMsg = GetTextID("goron");
+    if (this->actor.textId == GoronMsg+29) {
+        gAudioContext.seqPlayers[0].fadeTimer = 100;
+        gAudioContext.seqPlayers[0].fadeVolume = 0.0f;
+        Audio_SequencePlayerProcessSound(&gAudioContext.seqPlayers[0]);
+    }
+
     switch (Message_GetState(&play->msgCtx)) {
         case TEXT_STATE_CLOSING:
+            if (this->actor.textId == GoronMsg+29) {
+                Audio_PlayActorSound2(&this->actor, NA_SE_EN_GOLON_CRY);
+                gSaveContext.goronTimeStatus |= (1<<9);
+            } else if (this->actor.textId == GoronMsg+33) {
+                this->actionFunc = func_80A46B40;
+                this->interactInfo.talkState = NPC_TALK_STATE_IDLE;
+                this->unk_211 = true;
+                //Message_CloseTextbox(play);
+                return NPC_TALK_STATE_IDLE;
+            }
             return NPC_TALK_STATE_ACTION;
         case TEXT_STATE_EVENT:
             if (Message_ShouldAdvance(play)) {
                 if (this->actor.textId == 0x3012) {
                     this->actionFunc = EnGo2_SetupGetItem;
                     if(!IS_RANDO) {
-                        EnGo2_GetItem(this, play, CUR_CAPACITY(UPG_BOMB_BAG) == 30 ? GI_BOMB_BAG_40 : GI_BOMB_BAG_30);
+                        EnGo2_GetItem(this, play, (CUR_UPG_VALUE(UPG_BOMB_BAG) == 2) ? GI_BOMB_BAG_40 : GI_BOMB_BAG_30);
                     } else {
                         EnGo2_GetItemEntry(this, play, Randomizer_GetItemFromKnownCheck(RC_GC_ROLLING_GORON_AS_CHILD, GI_BOMB_BAG_40));
                     }
                     Message_CloseTextbox(play);
                     Flags_SetInfTable(INFTABLE_11E);
                     return NPC_TALK_STATE_ACTION;
-                } else {
+                } else if (this->actor.textId == GoronMsg+30) {
+                    this->actionFunc = EnGo2_SetupGetItem;
+                    EnGo2_GetItem(this, play, GI_HEART_PIECE);
+                    Message_CloseTextbox(play);
+                    gSaveContext.infTable[28] |= 0x0001;
                     return NPC_TALK_STATE_ACTION;
                 }
             }
+        case TEXT_STATE_CHOICE:
+            if (Message_ShouldAdvance(play)) {
+                if (this->actor.textId == GoronMsg+32) {
+                        if (play->msgCtx.choiceIndex == 0) {
+                            this->actor.textId = GoronMsg+33;
+                        } else {
+                            this->actor.textId = GoronMsg+34;
+                            gSaveContext.goronTimeStatus &= ~(1<<9);
+                        }
+                    }
+                    Message_ContinueTextbox(play, this->actor.textId);
+                }
+            return 1;
         default:
             return NPC_TALK_STATE_TALKING;
     }
@@ -400,6 +550,26 @@ s16 EnGo2_UpdateTalkStateGoronDmtBombFlower(PlayState* play, EnGo2* this) {
 }
 
 u16 EnGo2_GetTextIdGoronDmtRollingSmall(PlayState* play, EnGo2* this) {
+    if (IS_RACING) {
+        u16 GoronMsg = GetTextID("goron");
+        if (this->raceStatus == 0) {
+            if (HIGH_PATH == 1)
+                return GoronMsg+4;
+            else {
+                EnGo2* partner = NULL;
+                Actor_FindNumberOf(play, &this->actor, ACTOR_EN_GO2, ACTORCAT_NPC, 3000, (Actor**)&partner, NULL);
+                if (partner && partner->raceStatus == 0)
+                    return GoronMsg+3;
+                else
+                    return GoronMsg+6;
+            }
+        } else {
+            if (HIGH_PATH == 1)
+                return GoronMsg+5;
+            else
+                return GoronMsg+2;
+        }
+    }
     if (CHECK_QUEST_ITEM(QUEST_GORON_RUBY)) {
         return 0x3027;
     } else {
@@ -408,11 +578,32 @@ u16 EnGo2_GetTextIdGoronDmtRollingSmall(PlayState* play, EnGo2* this) {
 }
 
 s16 EnGo2_UpdateTalkStateGoronDmtRollingSmall(PlayState* play, EnGo2* this) {
-    if (Message_GetState(&play->msgCtx) == TEXT_STATE_CLOSING) {
+    u8 msgState = Message_GetState(&play->msgCtx);
+    if (msgState == TEXT_STATE_CLOSING) {
         return NPC_TALK_STATE_IDLE;
-    } else {
+    } else if (msgState == TEXT_STATE_EVENT) {
+        u16 GoronMsg = GetTextID("goron");
+        if (Message_ShouldAdvance(play)) {
+            if (this->actor.textId == GoronMsg+6) {
+                if (!(gSaveContext.infTable[28] & (0x1<<8))) {
+                    this->actor.textId = GoronMsg+7;
+                    Message_ContinueTextbox(play,this->actor.textId);
+                } else {
+                    Message_CloseTextbox(play);
+                }
+            } else if (this->actor.textId == GoronMsg+7) {
+                this->actionFunc = EnGo2_SetupGetItem;
+                EnGo2_GetItem(this, play, GI_HEART_PIECE);
+                Message_CloseTextbox(play);
+                gSaveContext.infTable[28] |= (0x1<<8);
+            }
+        }
+        return NPC_TALK_STATE_ACTION;
+    }
+    else{
         return NPC_TALK_STATE_TALKING;
     }
+    return 1;
 }
 
 u16 EnGo2_GetTextIdGoronDmtDcEntrance(PlayState* play, EnGo2* this) {
@@ -439,9 +630,16 @@ s16 EnGo2_UpdateTalkStateGoronDmtDcEntrance(PlayState* play, EnGo2* this) {
 }
 
 u16 EnGo2_GetTextIdGoronCityEntrance(PlayState* play, EnGo2* this) {
+    u16 GoronMsg = GetTextID("goron");
+    if ((gSaveContext.goronTimeStatus & (1<<1)) && !(gSaveContext.goronTimeStatus & (1<<2)) && (LINK_IS_ADULT ^ !!(gSaveContext.goronTimeStatus & (1<<0)))) {
+        if (LINK_IS_ADULT)
+            return GoronMsg+11;
+        else
+            return GoronMsg+12;
+    }
     if (((!IS_RANDO && CHECK_QUEST_ITEM(QUEST_MEDALLION_FIRE)) ||
          (IS_RANDO && Flags_GetRandomizerInf(RAND_INF_DUNGEONS_DONE_FIRE_TEMPLE))) && LINK_IS_ADULT) {
-        return 0x3043;
+        return GoronMsg+17;
     } else if ((!IS_RANDO && CHECK_QUEST_ITEM(QUEST_GORON_RUBY)) ||
                (IS_RANDO && Flags_GetRandomizerInf(RAND_INF_DUNGEONS_DONE_DODONGOS_CAVERN))) {
         return 0x3027;
@@ -462,9 +660,17 @@ s16 EnGo2_UpdateTalkStateGoronCityEntrance(PlayState* play, EnGo2* this) {
 }
 
 u16 EnGo2_GetTextIdGoronCityIsland(PlayState* play, EnGo2* this) {
+    u16 GoronMsg = GetTextID("goron");
     if (((!IS_RANDO && CHECK_QUEST_ITEM(QUEST_MEDALLION_FIRE)) ||
          (IS_RANDO && Flags_GetRandomizerInf(RAND_INF_DUNGEONS_DONE_FIRE_TEMPLE))) && LINK_IS_ADULT) {
-        return 0x3043;
+        if (IS_DAY) {
+            if (!(gSaveContext.goronTimeStatus & (1<<8)))
+                return GoronMsg+18;
+            else
+                return GoronMsg+21;
+        }
+        else
+            return GoronMsg+19;
     } else if ((!IS_RANDO && CHECK_QUEST_ITEM(QUEST_GORON_RUBY)) ||
                (IS_RANDO && Flags_GetRandomizerInf(RAND_INF_DUNGEONS_DONE_DODONGOS_CAVERN))) {
         return 0x3027;
@@ -527,7 +733,7 @@ u16 EnGo2_GetTextIdGoronCityLink(PlayState* play, EnGo2* this) {
 
     if (CHECK_QUEST_ITEM(QUEST_MEDALLION_FIRE)) {
         return Flags_GetInfTable(INFTABLE_10F) ? 0x3042 : 0x3041;
-    } else if (CHECK_OWNED_EQUIP(EQUIP_TYPE_TUNIC, EQUIP_INV_TUNIC_GORON)) {
+    } else if (Flags_GetInfTable(INFTABLE_GORON_CITY_DOORS_UNLOCKED)) {
         return Flags_GetInfTable(INFTABLE_SPOKE_TO_GORON_LINK) ? 0x3038 : 0x3037;
     } else if (Flags_GetInfTable(INFTABLE_STOPPED_GORON_LINKS_ROLLING)) {
         this->unk_20C = 0;
@@ -544,9 +750,10 @@ s16 EnGo2_UpdateTalkStateGoronCityLink(PlayState* play, EnGo2* this) {
             switch (this->actor.textId) {
                 case 0x3036:
                     if (!IS_RANDO) {
-                        EnGo2_GetItem(this, play, GI_TUNIC_GORON);
-                        this->actionFunc = EnGo2_SetupGetItem;
-                        return NPC_TALK_STATE_ACTION;
+                        //EnGo2_GetItem(this, play, GI_TUNIC_GORON);
+                        //this->actionFunc = EnGo2_SetupGetItem;
+                        Flags_SetInfTable(INFTABLE_GORON_CITY_DOORS_UNLOCKED);//TODO
+                        return NPC_TALK_STATE_IDLE;
                     } else {
                         if (Flags_GetTreasure(play, 0x1F)) {
                             return NPC_TALK_STATE_IDLE;
@@ -719,7 +926,8 @@ s16 EnGo2_UpdateTalkStateGoronFireGeneric(PlayState* play, EnGo2* this) {
 }
 
 u16 EnGo2_GetTextIdGoronCityStairwell(PlayState* play, EnGo2* this) {
-    return !LINK_IS_ADULT ? Flags_GetInfTable(INFTABLE_E3) ? 0x3022 : 0x300E : 0x3043;
+    u16 GoronMsg = GetTextID("goron");
+    return !LINK_IS_ADULT ? Flags_GetInfTable(INFTABLE_E3) ? 0x3022 : 0x300E : GoronMsg+22;
 }
 
 s16 EnGo2_UpdateTalkStateGoronCityStairwell(PlayState* play, EnGo2* this) {
@@ -735,19 +943,100 @@ s16 EnGo2_UpdateTalkStateGoronCityStairwell(PlayState* play, EnGo2* this) {
 
 // Goron in child market bazaar after obtaining Goron Ruby
 u16 EnGo2_GetTextIdGoronMarketBazaar(PlayState* play, EnGo2* this) {
-    return 0x7122;
+    u16 GoronMsg = GetTextID("goron");
+    if (play->sceneNum == SCENE_BAZAAR) {
+        if (IS_DAY)
+            return 0x7122;
+        else
+            return GoronMsg+16;
+    } else {
+        if ((gSaveContext.goronTimeStatus & (1<<3)) && (gSaveContext.goronTimeStatus & (1<<4)) && (gSaveContext.goronTimeStatus & (1<<5)) && !(gSaveContext.goronTimeStatus & (1<<6))) {
+            return GoronMsg+23;
+        } else {
+            if (LINK_IS_ADULT)
+                return GoronMsg+13;
+            else {
+                if (IS_DAY)
+                    return GoronMsg+14;
+                else
+                    return GoronMsg+15;
+            }
+        }
+    }
 }
 
 s16 EnGo2_UpdateTalkStateGoronMarketBazaar(PlayState* play, EnGo2* this) {
-    if (Message_GetState(&play->msgCtx) == TEXT_STATE_CLOSING) {
+    u16 GoronMsg = GetTextID("goron");
+    u8 msgState = Message_GetState(&play->msgCtx);
+    if (msgState == TEXT_STATE_CLOSING) {
+        if (this->actor.textId == GoronMsg+13) {
+            gSaveContext.goronTimeStatus |= (1<<3);
+        } else if (this->actor.textId == GoronMsg+14) {
+            gSaveContext.goronTimeStatus |= (1<<4);
+        } else if (this->actor.textId == GoronMsg+15) {
+            gSaveContext.goronTimeStatus |= (1<<5);
+        }
         return NPC_TALK_STATE_IDLE;
+    }
+    else if (msgState == TEXT_STATE_CHOICE) {
+        if (Message_ShouldAdvance(play)) {
+            if (this->actor.textId == GoronMsg+23) {
+                if (play->msgCtx.choiceIndex == 0) {
+                    if (Rupees_GetNum() < 200) {
+                        this->actor.textId = GoronMsg+27;
+                    } else{
+                        Rupees_ChangeBy(-200);
+                        this->actor.textId = GoronMsg+28;
+                    }
+                } else {
+                    this->actor.textId = GoronMsg+26;
+                }
+                Message_ContinueTextbox(play, this->actor.textId);
+            }
+        }
+        return NPC_TALK_STATE_TALKING;
+    } else if (msgState == TEXT_STATE_EVENT) {
+        if (Message_ShouldAdvance(play)) {
+            if (this->actor.textId == GoronMsg+28) {
+                this->actionFunc = EnGo2_SetupGetItem;
+                EnGo2_GetItem(this, play, GI_HEART_PIECE);
+                Message_CloseTextbox(play);
+                gSaveContext.goronTimeStatus |= (1<<6);
+            }
+        }
+        return NPC_TALK_STATE_ACTION;
     } else {
         return NPC_TALK_STATE_TALKING;
     }
 }
 
 u16 EnGo2_GetTextIdGoronCityLostWoods(PlayState* play, EnGo2* this) {
-    if (!LINK_IS_ADULT) {
+    u16 GoronMsg = GetTextID("goron");
+    if (this->actor.params & GORON_SPECIAL) {
+        if (play->sceneNum == SCENE_GORON_CITY) {
+            if (IS_DAY) {
+                if ((gSaveContext.goronTimeStatus & (1<<3)) || (gSaveContext.goronTimeStatus & (1<<4)) || (gSaveContext.goronTimeStatus & (1<<5)))
+                    return GoronMsg+24;
+                else
+                    return GoronMsg+8;
+            } else {
+                if (this->timeBlock)
+                    return GoronMsg+1;
+                else
+                    return GoronMsg+0;
+            }
+        } else {
+            if (LINK_IS_ADULT)
+                return GoronMsg+13;
+            else {
+                if (IS_DAY)
+                    return GoronMsg+14;
+                else
+                    return GoronMsg+15;
+            }
+        }
+    }
+    else if (!LINK_IS_ADULT) {
         if (Flags_GetSwitch(play, 0x1C)) {
             return 0x302F;
         } else {
@@ -759,11 +1048,29 @@ u16 EnGo2_GetTextIdGoronCityLostWoods(PlayState* play, EnGo2* this) {
 }
 
 s16 EnGo2_UpdateTalkStateGoronCityLostWoods(PlayState* play, EnGo2* this) {
-    if (Message_GetState(&play->msgCtx) == TEXT_STATE_CLOSING) {
+    s32 msgState = EnGo2_GetDialogState(this, play);//Message_GetState(&play->msgCtx);
+    if (msgState == TEXT_STATE_CLOSING) {
         if (this->actor.textId == 0x3024) {
             Flags_SetInfTable(INFTABLE_E6);
         }
         return NPC_TALK_STATE_IDLE;
+    } else if (msgState == TEXT_STATE_CHOICE) {
+        if (Message_ShouldAdvance(play)) {
+            u16 GoronMsg = GetTextID("goron");
+            if (this->actor.textId == GoronMsg+8 || this->actor.textId == GoronMsg+24) {
+                if (play->msgCtx.choiceIndex == 0) {
+                    gSaveContext.goronTimeStatus |= (1<<1);//Sets outing indicator
+                    gSaveContext.goronTimeStatus |= (1<<2);//Sets moved indicator (this resets whenever a scene with this actor is loaded)
+                    gSaveContext.goronTimeDay = gSaveContext.totalDays;
+                    this->actor.textId = GoronMsg+9;
+                } else {
+                    gSaveContext.goronTimeStatus &= ~(1<<1);
+                    this->actor.textId = GoronMsg+10;
+                }
+                Message_ContinueTextbox(play, this->actor.textId);
+            }
+        }
+        return NPC_TALK_STATE_TALKING;
     } else {
         return NPC_TALK_STATE_TALKING;
     }
@@ -789,11 +1096,20 @@ s16 EnGo2_UpdateTalkStateGoronDmtFairyHint(PlayState* play, EnGo2* this) {
 u16 EnGo2_GetTextId(PlayState* play, Actor* thisx) {
     EnGo2* this = (EnGo2*)thisx;
     u16 faceReaction = Text_GetFaceReaction(play, 0x20);
+    u16 GoronMsg = GetTextID("goron");
 
     if (faceReaction) {
+        if ((this->actor.params & GORON_IDENTITY_PARAM) == GORON_CITY_ROLLING_BIG && Player_GetMask(play) == PLAYER_MASK_GERUDO) {
+            if (play->sceneNum == 0x60)
+                return GoronMsg+29;
+            else if (play->sceneNum == 0x5A) {
+                return GoronMsg+31;
+            }
+        }
+
         return faceReaction;
     } else {
-        switch (this->actor.params & 0x1F) {
+        switch (this->actor.params & GORON_IDENTITY_PARAM) {
             case GORON_CITY_ROLLING_BIG:
                 return EnGo2_GetTextIdGoronCityRollingBig(play, this);
             case GORON_CITY_LINK:
@@ -828,7 +1144,7 @@ u16 EnGo2_GetTextId(PlayState* play, Actor* thisx) {
 
 s16 EnGo2_UpdateTalkState(PlayState* play, Actor* thisx) {
     EnGo2* this = (EnGo2*)thisx;
-    switch (this->actor.params & 0x1F) {
+    switch (this->actor.params & GORON_IDENTITY_PARAM) {
         case GORON_CITY_ROLLING_BIG:
             return EnGo2_UpdateTalkStateGoronCityRollingBig(play, this);
         case GORON_CITY_LINK:
@@ -861,10 +1177,10 @@ s16 EnGo2_UpdateTalkState(PlayState* play, Actor* thisx) {
 }
 
 s32 func_80A44790(EnGo2* this, PlayState* play) {
-    if ((this->actor.params & 0x1F) != GORON_DMT_BIGGORON && (this->actor.params & 0x1F) != GORON_CITY_ROLLING_BIG) {
+    if ((this->actor.params & GORON_IDENTITY_PARAM) != GORON_DMT_BIGGORON && (this->actor.params & GORON_IDENTITY_PARAM) != GORON_CITY_ROLLING_BIG) {
         return Npc_UpdateTalking(play, &this->actor, &this->interactInfo.talkState, this->unk_218, EnGo2_GetTextId,
-                                 EnGo2_UpdateTalkState);
-    } else if (((this->actor.params & 0x1F) == GORON_DMT_BIGGORON) && ((this->collider.base.ocFlags2 & 1) == 0)) {
+                             EnGo2_UpdateTalkState);
+    } else if (((this->actor.params & GORON_IDENTITY_PARAM) == GORON_DMT_BIGGORON) && ((this->collider.base.ocFlags2 & 1) == 0)) {
         return false;
     } else {
         if (Actor_ProcessTalkRequest(&this->actor, play)) {
@@ -881,14 +1197,14 @@ s32 func_80A44790(EnGo2* this, PlayState* play) {
 }
 
 void EnGo2_SetColliderDim(EnGo2* this) {
-    u8 index = this->actor.params & 0x1F;
+    u8 index = this->actor.params & GORON_IDENTITY_PARAM;
 
     this->collider.dim.radius = D_80A4816C[index].radius;
     this->collider.dim.height = D_80A4816C[index].height;
 }
 
 void EnGo2_SetShape(EnGo2* this) {
-    u8 index = this->actor.params & 0x1F;
+    u8 index = this->actor.params & GORON_IDENTITY_PARAM;
 
     this->actor.shape.shadowScale = D_80A481F8[index].shape_unk_10;
     Actor_SetScale(&this->actor, D_80A481F8[index].scale);
@@ -904,10 +1220,10 @@ void EnGo2_CheckCollision(EnGo2* this, PlayState* play) {
     pos.x = this->actor.world.pos.x;
     pos.y = this->actor.world.pos.y;
     pos.z = this->actor.world.pos.z;
-    xzDist = D_80A4816C[this->actor.params & 0x1F].xzDist;
+    xzDist = D_80A4816C[this->actor.params & GORON_IDENTITY_PARAM].xzDist;
     pos.x += (s16)(xzDist * Math_SinS(this->actor.shape.rot.y));
     pos.z += (s16)(xzDist * Math_CosS(this->actor.shape.rot.y));
-    pos.y += D_80A4816C[this->actor.params & 0x1F].yDist;
+    pos.y += D_80A4816C[this->actor.params & GORON_IDENTITY_PARAM].yDist;
     this->collider.dim.pos = pos;
     CollisionCheck_SetOC(play, &play->colChkCtx, &this->collider.base);
     CollisionCheck_SetAC(play, &play->colChkCtx, &this->collider.base);
@@ -925,17 +1241,18 @@ s32 func_80A44AB0(EnGo2* this, PlayState* play) {
     Player* player = GET_PLAYER(play);
     f32 arg2;
 
-    if ((this->actor.params & 0x1F) == GORON_DMT_BIGGORON) {
+    if ((this->actor.params & GORON_IDENTITY_PARAM) == GORON_DMT_BIGGORON) {
         return false;
     } else {
         if ((this->actionFunc != EnGo2_SlowRolling) && (this->actionFunc != EnGo2_ReverseRolling) &&
             (this->actionFunc != EnGo2_ContinueRolling)) {
             return false;
         } else {
-            if (this->collider.base.acFlags & 2) {
+            if (!IS_REFINED_ROLLING && this->collider.base.acFlags & 2) {
                 Audio_PlaySoundGeneral(NA_SE_SY_CORRECT_CHIME, &D_801333D4, 4, &D_801333E0, &D_801333E0, &D_801333E8);
                 this->actor.flags &= ~ACTOR_FLAG_PLAY_HIT_SFX;
                 this->collider.base.acFlags &= ~0x2;
+                this->raceStatus = 1;
                 EnGo2_StopRolling(this, play);
                 return true;
             }
@@ -959,6 +1276,214 @@ s32 func_80A44AB0(EnGo2* this, PlayState* play) {
     return false;
 }
 
+Vec3s EnGo2_Special_Points0[] = {{450,398,554},{504,398,98},{497,397,-122},{390,398,-273},{316,396,-267},{257,196,-106},{300,196,307},{204,196,368},{11,196,503},{-286,196,338},{-263,196,43},{-306,196,-141},{-576,199,-149},{-752,280,-147},{-809,280,-65},{-843,320,20},{-1056,400,115},{-1155,442,282},{-1099,599,593},{-798,600,667},{-400,398,584},{98,398,718},{152,398,716},{313,397,640}};
+Vec3s EnGo2_Special_Points1[] = {{-282,1258,-1580},{-154,1369,-1073},{-273,1500,-403},{-441,1460,-61},{-663,1259,554},{-685,1220,663}};//,{-673,1192,747},{-1252,1100,1304},{-282,1258,-1580}};
+Vec3s EnGo2_Special_Points2[] = {{-522,1264,-1557},{-624,1375,-1003},{-360,1464,-582},{-273,1500,-403},{-441,1460,-61},{-570,1259,568},{-685,1220,663}};//,{-968,1170,835},{-1364,1130,1106},{-1543,1048,1258},{-282,1258,-1580}};
+Vec3s EnGo2_Special_Points3[] = {{560,399,73},{786,400,103},{959,480,102},{1035,480,173},{1036,520,264},{965,520,333},{798,600,339},{644,600,484},{560,600,793},{432,600,747},{336,397,627}};
+Vec3s EnGo2_Special_Points4[] = {{959,480,102},{1056,480,0},{1030,440,-720},{1030,440,-930},{959,480,102}};
+Vec3s EnGo2_Special_Points5[] = {{350,396,-463},{306,397,-616},{59,400,-823},{-305,398,-687},{-476,397,-431},{-484,397,-85},{-505,398,70},{-485,397,283},{-441,397,493},{-132,397,674},{0,0,0}};//From 0:3, to 0:0 //Round path
+Vec3s EnGo2_Special_Points6[] = {{-369,398,-617},{-338,396,-521},{-299,395,-406},{-287,196,-226},{-401,195,-166},{0,0,0}};//Link from 5:3, to 0:11 //Drop from round path to shortcut
+Vec3s EnGo2_Special_Points7[] = {{-518,398,36},{-578,400,79},{-733,322,89},{0,0,0}};//Link from 5:6, link to 0:16 //Round path to high road
+Vec3s EnGo2_Special_Points8[] = {{-674,600,621},{-689,600,374},{-734,600,180},{-709,600,69},{-645,600,-5},{0,0,0}};//Link from 0:20, to 5:6 //High path between ropes
+Vec3s EnGo2_Special_Points9[] = {{5,-3,291},{-74,-3,590},{-122,71,747},{-219,76,790},{-331,113,719},{-355,125,611},{-304,193,485},{0,0,0}};//Link from 0:6-7 to 0:9 //Bottom out
+Vec3s EnGo2_Special_Points10[] = {{-674,353,56}};//From 0:16 to 5:5
+
+Vec3s EnGo2_Special_Points11[] = {{-8,3230,-4030},{-73,2224,-3524},{-267,1873,-2588},{-332,1592,-1757},{-318,1779,-1288},{-558,1947,-204},{-582,1216,691},{-582,100,4000},{-582,0,8000}};
+Vec3s EnGo2_Special_Points12[] = {{2178,-144,233},{1660,-31,-4},{1242,34,-195},{862,32,-178},{590,35,-122}, {220,-50,-123},{-364,-69,-120},{-587,36,-123},{-1050,21,-106},{-1071,24,15},{-787,31,105},{-93,-228,347},{156,-3265,2840},{1400,-3210,3917},{1400,-3210,3917}};
+Vec3s EnGo2_Special_Points13[] = {{2598,-12,567},{2061,-14,713},{1621,-6,1245},{1866,4,2450},{2962,180,3282},{3597,293,4724},{3732,57,6115},{2690,-164,7078},{1566,-220,7750},{757,-100,8929},{-703,-500,11088},{-4149,-473,12371},{-5157,-401,11436},{-6079,-500,9233},{-6711,-500,8776},{-7970,-434,8535},{-8694,-300,7905},{-9417,-250,7326},{-9800,-37,6539},{-10433,22,6894},{-10433,22,6894}};
+//{450,398,554}
+Path EnGo2_Special_Path[] = {{24, &EnGo2_Special_Points0},{6, &EnGo2_Special_Points1},{7, &EnGo2_Special_Points2},{11, &EnGo2_Special_Points3},{5, &EnGo2_Special_Points4},{11, &EnGo2_Special_Points5},{6, &EnGo2_Special_Points6},{4, &EnGo2_Special_Points7},{6, &EnGo2_Special_Points8},{8, &EnGo2_Special_Points9},{1, &EnGo2_Special_Points10},{9,EnGo2_Special_Points11},{15,EnGo2_Special_Points12},{21,EnGo2_Special_Points13}};
+
+
+SlantCylinder scForward0 = {{512,398,15},{399,396,-291},100.0f};
+SlantCylinder scAlts0[] = {{{575,399,96},{796,400,105},100.0f},{{796,400,105},{959,480,102},100.0f},{{959,480,102},{1100,480,100},100.0f}};
+SlantCylinder scForwards3[] = {{{1050,480,180},{1040,520,260},100.0f},{{1040,520,260},{1040,520,420},100.0f}};
+SlantCylinder scAlt3[] = {{{1040,480,30},{1040,480,-220},100.0f}};
+SlantCylinder scDrop5Forwards[] = {{{390,398,-273},{212,196,-184},90.0f}};
+SlantCylinder scDrop5Alt[] = {{{377,396,-326},{245,398,-706},120.0f}};
+SlantCylinder scDrop6Forwards[] = {{{-423,398,-653},{-494,398,-50},100.0f}};
+SlantCylinder scDrop6Alt[] = {{{-267,396,-489},{-260,196,-305},70.0f}};
+SlantCylinder scRtH7Forwards[] = {{{-483,398,164},{-450,398,524},100.0f}};
+SlantCylinder scRtH7Alt[] = {{{-580,399,83},{-907,324,98},90.0f}};
+SlantCylinder scHtR8Forwards[] = {{{-662,600,640},{-397,398,606},90.0f}};
+SlantCylinder scHtR8Alt[] = {{{-665,600,537},{-712,600,70},110.0f}};
+SlantCylinder scBottom9Forwards[] = {{{294,196,-40},{275,196,371},100.0f}};
+SlantCylinder scbottom9Alt[] = {{{103,-3,-109},{-49,-3,346},90.0f}};
+SlantCylinder scMid10Forwards[] = {{{-856,320,93},{-1200,400,116},100.0f}};
+SlantCylinder scMid10Alt[] = {{{-762,320,100},{-490,398,92},90.0f}};
+SlantCylinder scMid11Forwards[] = {{{-856,320,93},{-1200,400,116},100.0f}};
+SlantCylinder scMid11Alt[] = {{{-762,320,100},{-490,398,92},90.0f}};
+SlantCylinder scMidDown12Forwards[] = {{{115,398,674},{439,398,556},100.0f}};
+SlantCylinder scMidDown12Alt[] = {{{-13,196,483},{-206,196,393},80.0f}};
+
+void EnGo2_PerformPathSelection(EnGo2* this, PlayState* play, Path *switchPath, s8 switchWaypoint, SlantCylinder* scForward, u32 lengthForward, SlantCylinder* scAlt, u32 lengthAlt) {
+    Player* player = GET_PLAYER(play);
+    u8 forwardCollision = 0;
+    u8 altCollision = 0;
+
+    //Find if player is in paths
+    if (SCAPointCollision2D(&player->actor.world.pos,scForward,lengthForward))
+        forwardCollision = 1;
+    if (SCAPointCollision2D(&player->actor.world.pos,scAlt,lengthAlt))
+        altCollision = 1;
+
+    //Find if a bomb is in paths
+    Actor* bomb = play->actorCtx.actorLists[ACTORCAT_EXPLOSIVE].head;
+    while (bomb != NULL) {
+        if (SCAPointCollision2D(&bomb->world.pos,scForward,lengthForward))
+            forwardCollision = 1;
+        if (SCAPointCollision2D(&bomb->world.pos,scAlt,lengthAlt))
+            altCollision = 1;
+
+        bomb = bomb->next;
+    }
+
+    if (forwardCollision) {
+        if (altCollision) {
+            Audio_PlayActorSound2(&this->actor, NA_SE_EN_GOLON_CRY);
+        } else {
+            Audio_PlayActorSound2(&this->actor, NA_SE_EN_GOLON_SIT_DOWN);
+            this->path = switchPath;
+            this->waypoint = switchWaypoint;
+        }
+    } else if (altCollision) {
+        Audio_PlayActorSound2(&this->actor, NA_SE_EN_GOLON_WAKE_UP);
+    }
+}
+
+void EnGo2_PerformPathSelection3D(EnGo2* this, PlayState* play, Path *switchPath, s8 switchWaypoint, SlantCylinder* scForward, u32 lengthForward, SlantCylinder* scAlt, u32 lengthAlt) {
+    Player* player = GET_PLAYER(play);
+    u8 forwardCollision = 0;
+    u8 altCollision = 0;
+
+    //Find if player is in paths
+    if (SCAPointCollision(&player->actor.world.pos,scForward,lengthForward))
+        forwardCollision = 1;
+    if (SCAPointCollision(&player->actor.world.pos,scAlt,lengthAlt))
+        altCollision = 1;
+
+    //Find if a bomb is in paths
+    Actor* bomb = play->actorCtx.actorLists[ACTORCAT_EXPLOSIVE].head;
+    while (bomb != NULL) {
+        if (SCAPointCollision(&bomb->world.pos,scForward,lengthForward))
+            forwardCollision = 1;
+        if (SCAPointCollision(&bomb->world.pos,scAlt,lengthAlt))
+            altCollision = 1;
+
+        bomb = bomb->next;
+    }
+
+    if (forwardCollision) {
+        if (altCollision) {
+            Audio_PlayActorSound2(&this->actor, NA_SE_EN_GOLON_CRY);
+        } else {
+            Audio_PlayActorSound2(&this->actor, NA_SE_EN_GOLON_SIT_DOWN);
+            this->path = switchPath;
+            this->waypoint = switchWaypoint;
+        }
+    } else if (altCollision) {
+        Audio_PlayActorSound2(&this->actor, NA_SE_EN_GOLON_WAKE_UP);
+    }
+}
+
+void EnGo2_Alter_BigRoller_Path(EnGo2* this, PlayState* play) {
+    Player* player = GET_PLAYER(play);
+    Path* oldPath = this->path;
+
+    if (oldPath == &EnGo2_Special_Path[0]) {
+        if ((this->waypoint == 2)) {
+            u8 forwardCollision = 0;
+            u8 altCollision = 0;
+            //Find if player is in paths
+            if (SCPointCollision(&player->actor.world.pos,&scForward0))
+                forwardCollision = 1;
+            if (SCAPointCollision2D(&player->actor.world.pos,&scAlts0,3) && ((player->actor.world.pos.y < 590.0f) || !(player->actor.world.pos.x < 800.0f)))
+                altCollision = 1;
+
+            //Find if a bomb is in paths
+            Actor* bomb = play->actorCtx.actorLists[ACTORCAT_EXPLOSIVE].head;
+            while (bomb != NULL) {
+                if (SCPointCollision(&bomb->world.pos,&scForward0))
+                    forwardCollision = 1;
+                if (SCAPointCollision2D(&bomb->world.pos,&scAlts0,3) && ((bomb->world.pos.y < 590.0f) || !(bomb->world.pos.x < 800.0f)))
+                    altCollision = 1;
+
+                bomb = bomb->next;
+            }
+
+            if (forwardCollision){
+                if (altCollision){
+                    Audio_PlayActorSound2(&this->actor, NA_SE_EN_GOLON_CRY);
+                }
+                else {
+                    Audio_PlayActorSound2(&this->actor, NA_SE_EN_GOLON_SIT_DOWN);
+                    this->path = &EnGo2_Special_Path[3];
+                    this->waypoint = 0;
+                }
+            } else if (altCollision) {
+                Audio_PlayActorSound2(&this->actor, NA_SE_EN_GOLON_WAKE_UP);
+            }
+        } else if (this->waypoint == 3) {
+            EnGo2_PerformPathSelection(this,play,&EnGo2_Special_Path[5],0,scDrop5Forwards,1,scDrop5Alt,1);
+        } else if (this->waypoint == 6) {
+            EnGo2_PerformPathSelection3D(this,play,&EnGo2_Special_Path[9],0,scBottom9Forwards,1,scbottom9Alt,1);
+        } else if (this->waypoint == 16) {
+            EnGo2_PerformPathSelection(this,play,&EnGo2_Special_Path[10],0,scMid10Forwards,1,scMid10Alt,1);
+        } else if (this->waypoint == 20) {
+            EnGo2_PerformPathSelection(this,play,&EnGo2_Special_Path[8],0,scHtR8Forwards,1,scHtR8Alt,1);
+        } else if (this->waypoint == 22) {
+            EnGo2_PerformPathSelection(this,play,&EnGo2_Special_Path[0],9,scMidDown12Forwards,1,scMidDown12Alt,1);
+        }
+    } else if (oldPath == &EnGo2_Special_Path[3]) {
+        if (this->waypoint == 0)
+            this->path = &EnGo2_Special_Path[0];
+        else if (this->waypoint == 3) {
+            EnGo2_PerformPathSelection(this,play,&EnGo2_Special_Path[4],1,scForwards3,2,scAlt3,1);
+        }
+    } else if (oldPath == &EnGo2_Special_Path[5]) {
+        if (this->waypoint == 0) {
+            this->path = &EnGo2_Special_Path[0];
+            this->waypoint = 0;
+        } else if (this->waypoint == 4) {
+            EnGo2_PerformPathSelection(this,play,&EnGo2_Special_Path[0],11,scDrop6Forwards,1,scDrop6Alt,1);
+        } else if (this->waypoint == 7) {
+            EnGo2_PerformPathSelection(this,play,&EnGo2_Special_Path[0],16,scRtH7Forwards,1,scRtH7Alt,1);
+        }
+    } else if (oldPath == &EnGo2_Special_Path[6]) {
+        if (this->waypoint == 0) {
+            this->path = &EnGo2_Special_Path[0];
+            this->waypoint = 12;
+        }
+    } else if (oldPath == &EnGo2_Special_Path[7]) {
+        if (this->waypoint == 0) {
+            this->path = &EnGo2_Special_Path[0];
+            this->waypoint = 16;
+        }
+    } else if (oldPath == &EnGo2_Special_Path[8]) {
+        if (this->waypoint == 0) {
+            this->path = &EnGo2_Special_Path[5];
+            this->waypoint = 5;
+        }
+    } else if (oldPath == &EnGo2_Special_Path[9]) {
+        if (this->waypoint == 0) {
+            this->path = &EnGo2_Special_Path[0];
+            this->waypoint = 9;
+        }
+    } else if (oldPath == &EnGo2_Special_Path[10]) {
+        if (this->waypoint == 0) {
+            this->path = &EnGo2_Special_Path[5];
+            this->waypoint = 6;
+        }
+    }
+    //This section is now handled by EnGo2_SlowRolling
+    //else if (oldPath == &EnGo2_Special_Path[4]) {
+    //     if (this->waypoint == 0) {
+    //         this->path = &EnGo2_Special_Path[3];
+    //         this->waypoint = 3;
+    //     }
+    // }
+}
+
 s32 EnGo2_UpdateWaypoint(EnGo2* this, PlayState* play) {
     s32 change;
 
@@ -976,6 +1501,10 @@ s32 EnGo2_UpdateWaypoint(EnGo2* this, PlayState* play) {
         this->waypoint++;
         if (this->waypoint >= change) {
             this->waypoint = 0;
+        }
+
+        if ((this->actor.params & GORON_IDENTITY_PARAM) == GORON_CITY_ROLLING_BIG) {
+            EnGo2_Alter_BigRoller_Path(this,play);
         }
     }
 
@@ -1004,11 +1533,11 @@ s32 func_80A44D84(EnGo2* this) {
 
 s32 EnGo2_IsWakingUp(EnGo2* this) {
     s16 yawDiff;
-    f32 xyzDist = (this->actor.params & 0x1F) == GORON_DMT_BIGGORON ? 800.0f : 200.0f;
-    f32 yDist = (this->actor.params & 0x1F) == GORON_DMT_BIGGORON ? 400.0f : 60.0f;
+    f32 xyzDist = (this->actor.params & GORON_IDENTITY_PARAM) == GORON_DMT_BIGGORON ? 800.0f : 200.0f;
+    f32 yDist = (this->actor.params & GORON_IDENTITY_PARAM) == GORON_DMT_BIGGORON ? 400.0f : 60.0f;
     s16 yawDiffAbs;
 
-    if ((this->actor.params & 0x1F) == GORON_DMT_BIGGORON) {
+    if ((this->actor.params & GORON_IDENTITY_PARAM) == GORON_DMT_BIGGORON) {
         if ((this->collider.base.ocFlags2 & 1) == 0) {
             this->actor.flags &= ~ACTOR_FLAG_TARGETABLE;
             return false;
@@ -1045,7 +1574,7 @@ s32 EnGo2_IsRollingOnGround(EnGo2* this, s16 arg1, f32 arg2, s16 arg3) {
     }
 
     if (this->unk_59C >= 2) {
-        Audio_PlayActorSound2(&this->actor, (this->actor.params & 0x1F) == GORON_CITY_ROLLING_BIG
+        Audio_PlayActorSound2(&this->actor, (this->actor.params & GORON_IDENTITY_PARAM) == GORON_CITY_ROLLING_BIG
                                                 ? NA_SE_EN_GOLON_LAND_BIG
                                                 : NA_SE_EN_DODO_M_GND);
     }
@@ -1069,7 +1598,7 @@ s32 EnGo2_IsRollingOnGround(EnGo2* this, s16 arg1, f32 arg2, s16 arg3) {
 void EnGo2_BiggoronSetTextId(EnGo2* this, PlayState* play, Player* player) {
     u16 textId;
 
-    if ((this->actor.params & 0x1F) == GORON_DMT_BIGGORON) {
+    if ((this->actor.params & GORON_IDENTITY_PARAM) == GORON_DMT_BIGGORON) {
         if ((!IS_RANDO && gSaveContext.bgsFlag)) {
             if (func_8002F368(play) == EXCH_ITEM_CLAIM_CHECK) {
                 this->actor.textId = 0x3003;
@@ -1138,7 +1667,7 @@ void func_80A45288(EnGo2* this, PlayState* play) {
     if (this->actionFunc != EnGo2_GoronFireGenericAction) {
         this->interactInfo.trackPos = player->actor.world.pos;
         linkAge = gSaveContext.linkAge;
-        this->interactInfo.yOffset = D_80A482D8[this->actor.params & 0x1F][linkAge];
+        this->interactInfo.yOffset = D_80A482D8[this->actor.params & GORON_IDENTITY_PARAM][linkAge];
         Npc_TrackPoint(&this->actor, &this->interactInfo, 4, this->trackingMode);
     }
     if ((this->actionFunc != EnGo2_SetGetItem) && (this->isAwake == true)) {
@@ -1171,7 +1700,7 @@ void EnGo2_RollForward(EnGo2* this) {
 }
 
 void func_80A454CC(EnGo2* this) {
-    switch (this->actor.params & 0x1F) {
+    switch (this->actor.params & GORON_IDENTITY_PARAM) {
         case GORON_CITY_ROLLING_BIG:
         case GORON_DMT_DC_ENTRANCE:
         case GORON_CITY_ENTRANCE:
@@ -1190,22 +1719,37 @@ void func_80A454CC(EnGo2* this) {
     }
 }
 
-f32 EnGo2_GetTargetXZSpeed(EnGo2* this) {
-    f32 yDist = (this->actor.params & 0x1F) == GORON_DMT_BIGGORON ? 400.0f : 60.0f;
-    s32 index = this->actor.params & 0x1F;
+f32 EnGo2_GetTargetXZSpeed(EnGo2* this, PlayState* play) {
+    f32 yDist = (this->actor.params & GORON_IDENTITY_PARAM) == GORON_DMT_BIGGORON ? 400.0f : 60.0f;
+    s32 index = this->actor.params & GORON_IDENTITY_PARAM;
 
-    if (index == GORON_CITY_LINK && (fabsf(this->actor.yDistToPlayer) < yDist) &&
-        (this->actor.xzDistToPlayer < 400.0f)) {
-        return 9.0f;
+    if (index == GORON_CITY_LINK ) {
+        if ((fabsf(this->actor.yDistToPlayer) < yDist) &&
+        (this->actor.xzDistToPlayer < 400.0f))
+            return 9.0f;
+        else
+            return 6.0f;
     } else {
-        return index == GORON_CITY_ROLLING_BIG ? 3.6000001f : 6.0f;
+        if (index == GORON_CITY_ROLLING_BIG) {
+            if (LINK_IS_ADULT)
+                return 6.0f;
+            else if (play->sceneNum == 0x60)
+                return 8.0f;
+            else if (play->sceneNum == 0x5a)
+                return 5.5f;
+            else if (play->sceneNum == SCENE_HYRULE_FIELD)
+                return 7.0f;
+            else
+                return 3.6000001f;
+        }
+        return 6.0f;
     }
 }
 
 s32 EnGo2_IsCameraModified(EnGo2* this, PlayState* play) {
     Camera* camera = play->cameraPtrs[MAIN_CAM];
 
-    if ((this->actor.params & 0x1F) == GORON_DMT_BIGGORON) {
+    if ((this->actor.params & GORON_IDENTITY_PARAM) == GORON_DMT_BIGGORON) {
         if (EnGo2_IsWakingUp(this)) {
             Camera_ChangeSetting(camera, CAM_SET_DIRECTED_YAW);
             func_8005AD1C(camera, 4);
@@ -1215,9 +1759,9 @@ s32 EnGo2_IsCameraModified(EnGo2* this, PlayState* play) {
         }
     }
 
-    if ((this->actor.params & 0x1F) == GORON_FIRE_GENERIC || (this->actor.params & 0x1F) == GORON_CITY_ROLLING_BIG ||
-        (this->actor.params & 0x1F) == GORON_CITY_STAIRWELL || (this->actor.params & 0x1F) == GORON_DMT_BIGGORON ||
-        (this->actor.params & 0x1F) == GORON_MARKET_BAZAAR) {
+    if ((this->actor.params & GORON_IDENTITY_PARAM) == GORON_FIRE_GENERIC || (this->actor.params & GORON_IDENTITY_PARAM) == GORON_CITY_ROLLING_BIG ||
+        (this->actor.params & GORON_IDENTITY_PARAM) == GORON_CITY_STAIRWELL || (this->actor.params & GORON_IDENTITY_PARAM) == GORON_DMT_BIGGORON ||
+        (this->actor.params & GORON_IDENTITY_PARAM) == GORON_MARKET_BAZAAR) {
         return true;
     } else if (((!IS_RANDO && !CHECK_QUEST_ITEM(QUEST_MEDALLION_FIRE)) ||
                 (IS_RANDO && !Flags_GetRandomizerInf(RAND_INF_DUNGEONS_DONE_FIRE_TEMPLE))) &&
@@ -1243,7 +1787,7 @@ void EnGo2_DefaultWakingUp(EnGo2* this) {
 }
 
 void EnGo2_WakingUp(EnGo2* this) {
-    f32 xyzDist = (this->actor.params & 0x1F) == GORON_DMT_BIGGORON ? 800.0f : 200.0f;
+    f32 xyzDist = (this->actor.params & GORON_IDENTITY_PARAM) == GORON_DMT_BIGGORON ? 800.0f : 200.0f;
     s32 isTrue = true;
 
     xyzDist = SQ(xyzDist);
@@ -1266,7 +1810,7 @@ void EnGo2_BiggoronWakingUp(EnGo2* this) {
 }
 
 void EnGo2_SelectGoronWakingUp(EnGo2* this) {
-    switch (this->actor.params & 0x1F) {
+    switch (this->actor.params & GORON_IDENTITY_PARAM) {
         case GORON_DMT_BOMB_FLOWER:
             this->isAwake = true;
             this->trackingMode = EnGo2_IsWakingUp(this) ? NPC_TRACKING_HEAD_AND_TORSO : NPC_TRACKING_NONE;
@@ -1321,7 +1865,7 @@ void EnGo2_EyeMouthTexState(EnGo2* this) {
 void EnGo2_SitDownAnimation(EnGo2* this) {
     if ((this->skelAnime.playSpeed != 0.0f) && (this->skelAnime.animation == &gGoronAnim_004930)) {
         if (this->skelAnime.playSpeed > 0.0f && this->skelAnime.curFrame == 14.0f) {
-            if ((this->actor.params & 0x1F) != GORON_DMT_BIGGORON) {
+            if ((this->actor.params & GORON_IDENTITY_PARAM) != GORON_DMT_BIGGORON) {
                 Audio_PlayActorSound2(&this->actor, NA_SE_EN_GOLON_SIT_DOWN);
             } else {
                 func_800F4524(&D_801333D4, NA_SE_EN_GOLON_SIT_DOWN, 60);
@@ -1339,7 +1883,7 @@ void EnGo2_SitDownAnimation(EnGo2* this) {
 }
 
 void EnGo2_GetDustData(EnGo2* this, s32 index2) {
-    s32 index1 = (this->actor.params & 0x1F) == GORON_CITY_ROLLING_BIG ? 1 : 0;
+    s32 index1 = (this->actor.params & GORON_IDENTITY_PARAM) == GORON_CITY_ROLLING_BIG ? 1 : 0;
     EnGo2DustEffectData* dustEffectData = &sDustEffectData[index1][index2];
 
     EnGo2_SpawnDust(this, dustEffectData->initialTimer, dustEffectData->scale, dustEffectData->scaleStep,
@@ -1347,7 +1891,7 @@ void EnGo2_GetDustData(EnGo2* this, s32 index2) {
 }
 
 void EnGo2_RollingAnimation(EnGo2* this, PlayState* play) {
-    if ((this->actor.params & 0x1F) == GORON_DMT_BIGGORON) {
+    if ((this->actor.params & GORON_IDENTITY_PARAM) == GORON_DMT_BIGGORON) {
         this->actor.flags &= ~ACTOR_FLAG_TARGETABLE;
         Animation_ChangeByInfo(&this->skelAnime, sAnimationInfo, ENGO2_ANIM_10);
         this->skelAnime.playSpeed = -0.5f;
@@ -1369,13 +1913,13 @@ void EnGo2_WakeUp(EnGo2* this, PlayState* play) {
         this->skelAnime.animation = NULL;
     }
     if (this->skelAnime.playSpeed == 0.0f) {
-        if ((this->actor.params & 0x1F) != GORON_DMT_BIGGORON) {
+        if ((this->actor.params & GORON_IDENTITY_PARAM) != GORON_DMT_BIGGORON) {
             Audio_PlayActorSound2(&this->actor, NA_SE_EN_GOLON_WAKE_UP);
         } else {
             func_800F4524(&D_801333D4, NA_SE_EN_GOLON_WAKE_UP, 60);
         }
     }
-    if ((this->actor.params & 0x1F) == GORON_DMT_BIGGORON) {
+    if ((this->actor.params & GORON_IDENTITY_PARAM) == GORON_DMT_BIGGORON) {
         OnePointCutscene_Init(play, 4200, -99, &this->actor, MAIN_CAM);
         // There is an issue interpolating between ENGO2_ANIM_0 and ENGO2_ANIM_1/10, the goron
         // is technically in the same position at the end of ANIM_0 and beginning of ANIM_1/10
@@ -1411,10 +1955,11 @@ void EnGo2_GetItemAnimation(EnGo2* this, PlayState* play) {
 }
 
 void EnGo2_SetupRolling(EnGo2* this, PlayState* play) {
-    if ((this->actor.params & 0x1F) == GORON_CITY_ROLLING_BIG || (this->actor.params & 0x1F) == GORON_CITY_LINK) {
+    if (0 && (this->actor.params & GORON_IDENTITY_PARAM) == GORON_CITY_ROLLING_BIG || (this->actor.params & GORON_IDENTITY_PARAM) == GORON_CITY_LINK) {//This path is deliberately not taken
         this->collider.info.bumperFlags = 1;
         this->actor.speedXZ = Flags_GetInfTable(INFTABLE_11E) ? 6.0f : 3.6000001f;
     } else {
+        this->collider.info.bumperFlags = 1;
         this->actor.speedXZ = 6.0f;
     }
     this->actor.flags |= ACTOR_FLAG_PLAY_HIT_SFX;
@@ -1427,10 +1972,10 @@ void EnGo2_SetupRolling(EnGo2* this, PlayState* play) {
 void EnGo2_StopRolling(EnGo2* this, PlayState* play) {
     EnBom* bomb;
 
-    if (((this->actor.params & 0x1F) != GORON_CITY_ROLLING_BIG) && ((this->actor.params & 0x1F) != GORON_CITY_LINK)) {
-        if ((this->actor.params & 0x1F) == GORON_DMT_ROLLING_SMALL) {
+    if (((this->actor.params & GORON_IDENTITY_PARAM) != GORON_CITY_ROLLING_BIG) && ((this->actor.params & GORON_IDENTITY_PARAM) != GORON_CITY_LINK)) {
+        if ((this->actor.params & GORON_IDENTITY_PARAM) == GORON_DMT_ROLLING_SMALL) {
             bomb = (EnBom*)Actor_Spawn(&play->actorCtx, play, ACTOR_EN_BOM, this->actor.world.pos.x,
-                                       this->actor.world.pos.y, this->actor.world.pos.z, 0, 0, 0, 0, true);
+                                       this->actor.world.pos.y, this->actor.world.pos.z, 0, 0, 0, 0, false);
             if (bomb != NULL) {
                 bomb->timer = 0;
             }
@@ -1448,7 +1993,7 @@ void EnGo2_StopRolling(EnGo2* this, PlayState* play) {
 }
 
 s32 EnGo2_IsFreeingGoronInFire(EnGo2* this, PlayState* play) {
-    if ((this->actor.params & 0x1F) != GORON_FIRE_GENERIC) {
+    if ((this->actor.params & GORON_IDENTITY_PARAM) != GORON_FIRE_GENERIC) {
         return false;
     }
 
@@ -1461,7 +2006,7 @@ s32 EnGo2_IsFreeingGoronInFire(EnGo2* this, PlayState* play) {
 }
 
 s32 EnGo2_IsGoronDmtBombFlower(EnGo2* this) {
-    if ((this->actor.params & 0x1F) != GORON_DMT_BOMB_FLOWER || this->interactInfo.talkState != NPC_TALK_STATE_ACTION) {
+    if ((this->actor.params & GORON_IDENTITY_PARAM) != GORON_DMT_BOMB_FLOWER || this->interactInfo.talkState != NPC_TALK_STATE_ACTION) {
         return false;
     }
 
@@ -1474,7 +2019,7 @@ s32 EnGo2_IsGoronDmtBombFlower(EnGo2* this) {
 }
 
 s32 EnGo2_IsGoronRollingBig(EnGo2* this, PlayState* play) {
-    if ((this->actor.params & 0x1F) != GORON_CITY_ROLLING_BIG ||
+    if ((this->actor.params & GORON_IDENTITY_PARAM) != GORON_CITY_ROLLING_BIG ||
         (this->interactInfo.talkState != NPC_TALK_STATE_ACTION)) {
         return false;
     }
@@ -1485,7 +2030,7 @@ s32 EnGo2_IsGoronRollingBig(EnGo2* this, PlayState* play) {
 }
 
 s32 EnGo2_IsGoronFireGeneric(EnGo2* this) {
-    if ((this->actor.params & 0x1F) != GORON_FIRE_GENERIC || this->interactInfo.talkState == NPC_TALK_STATE_IDLE) {
+    if ((this->actor.params & GORON_IDENTITY_PARAM) != GORON_FIRE_GENERIC || this->interactInfo.talkState == NPC_TALK_STATE_IDLE) {
         return false;
     }
     this->actionFunc = EnGo2_GoronFireGenericAction;
@@ -1493,7 +2038,7 @@ s32 EnGo2_IsGoronFireGeneric(EnGo2* this) {
 }
 
 s32 EnGo2_IsGoronLinkReversing(EnGo2* this) {
-    if ((this->actor.params & 0x1F) != GORON_CITY_LINK || (this->waypoint >= this->unk_216) ||
+    if ((this->actor.params & GORON_IDENTITY_PARAM) != GORON_CITY_LINK || (this->waypoint >= this->unk_216) ||
         !EnGo2_IsWakingUp(this)) {
         return false;
     }
@@ -1516,7 +2061,7 @@ s32 EnGo2_IsRolling(EnGo2* this) {
 void EnGo2_GoronLinkAnimation(EnGo2* this, PlayState* play) {
     s32 animation = ARRAY_COUNT(sAnimationInfo);
 
-    if ((this->actor.params & 0x1F) == GORON_CITY_LINK) {
+    if ((this->actor.params & GORON_IDENTITY_PARAM) == GORON_CITY_LINK) {
         if ((this->actor.textId == 0x3035 && this->unk_20C == 0) ||
             (this->actor.textId == 0x3036 && this->unk_20C == 0)) {
             if (this->skelAnime.animation != &gGoronAnim_000D5C) {
@@ -1569,12 +2114,61 @@ void EnGo2_GoronFireClearCamera(EnGo2* this, PlayState* play) {
 
 void EnGo2_BiggoronAnimation(EnGo2* this) {
     if (INV_CONTENT(ITEM_TRADE_ADULT) >= ITEM_SWORD_BROKEN && INV_CONTENT(ITEM_TRADE_ADULT) <= ITEM_EYEDROPS &&
-        (this->actor.params & 0x1F) == GORON_DMT_BIGGORON && this->interactInfo.talkState == NPC_TALK_STATE_IDLE) {
+        (this->actor.params & GORON_IDENTITY_PARAM) == GORON_DMT_BIGGORON && this->interactInfo.talkState == NPC_TALK_STATE_IDLE) {
         if (DECR(this->animTimer) == 0) {
             this->animTimer = Rand_S16Offset(30, 30);
             func_800F4524(&D_801333D4, NA_SE_EN_GOLON_EYE_BIG, 60);
         }
     }
+}
+
+u8 isTimeblockVisible(Actor* timeblock, PlayState* play) {
+    ObjTimeblock* this = (ObjTimeblock*) timeblock;
+    return this->isVisible;
+}
+
+Actor* EnGo2_findCloseTimeblock(Actor* thisx, PlayState* play, f32 dist) {
+    EnGo2* this = (EnGo2*)thisx;
+    Actor* closestValidBlock = NULL;
+    s32 numBlocks = Actor_FindNumberOf(play, thisx, ACTOR_OBJ_TIMEBLOCK, ACTORCAT_ITEMACTION, dist,
+                        &closestValidBlock, isTimeblockVisible);
+
+    this->timeBlock = closestValidBlock;
+    return closestValidBlock;
+}
+
+void EnGo2_evaluateCloseTimeblock(Actor* thisx, PlayState* play) {
+    EnGo2* this = (EnGo2*)thisx;
+    Actor* closestValidBlock = NULL;
+    s32 numBlocks = Actor_FindNumberOf(play, thisx, ACTOR_OBJ_TIMEBLOCK, ACTORCAT_ITEMACTION, 100.0f,
+                        &closestValidBlock, isTimeblockVisible);
+
+    if (this->timeBlock && !closestValidBlock) {
+        gSaveContext.goronTimeStatus ^= 1;
+        Actor_Kill(&this->actor);
+    }
+    this->timeBlock = closestValidBlock;
+}
+
+void EnGo2_evaluateCloseTimeblock_Big(Actor* thisx, PlayState* play) {
+    EnGo2* this = (EnGo2*)thisx;
+    Actor* closestValidBlock = NULL;
+    s32 numBlocks = Actor_FindNumberOf(play, thisx, ACTOR_OBJ_TIMEBLOCK, ACTORCAT_ITEMACTION, 150.0f,
+                        &closestValidBlock, isTimeblockVisible);
+
+    if (this->timeBlock) {
+        if (!closestValidBlock && (this->actor.world.pos.y > this->timeBlock->world.pos.y+90.0f) &&
+                    (this->actionFunc != EnGo2_SlowRolling && this->actionFunc != EnGo2_ReverseRolling && this->actionFunc != EnGo2_ContinueRolling)) {
+            gSaveContext.goronTimeStatus ^= (1<<8);//Big roller's time status
+            Actor_Kill(&this->actor);
+        }
+    } else {
+        if (closestValidBlock) {
+            this->actor.world.pos.y = closestValidBlock->world.pos.y+100.0f;
+        }
+    }
+
+    this->timeBlock = closestValidBlock;
 }
 
 void EnGo2_Init(Actor* thisx, PlayState* play) {
@@ -1588,10 +2182,9 @@ void EnGo2_Init(Actor* thisx, PlayState* play) {
     CollisionCheck_SetInfo2(&this->actor.colChkInfo, NULL, &sColChkInfoInit);
 
     // Not GORON_CITY_ROLLING_BIG, GORON_CITY_LINK, GORON_DMT_BIGGORON
-    switch (this->actor.params & 0x1F) {
+    switch (this->actor.params & GORON_IDENTITY_PARAM) {
         case GORON_FIRE_GENERIC:
         case GORON_DMT_BOMB_FLOWER:
-        case GORON_DMT_ROLLING_SMALL:
         case GORON_DMT_DC_ENTRANCE:
         case GORON_CITY_ENTRANCE:
         case GORON_CITY_ISLAND:
@@ -1601,6 +2194,7 @@ void EnGo2_Init(Actor* thisx, PlayState* play) {
         case GORON_DMT_FAIRY_HINT:
         case GORON_MARKET_BAZAAR:
             this->actor.flags &= ~ACTOR_FLAG_UPDATE_WHILE_CULLED;
+        case GORON_DMT_ROLLING_SMALL:
             this->actor.flags &= ~ACTOR_FLAG_DRAW_WHILE_CULLED;
     }
 
@@ -1616,9 +2210,30 @@ void EnGo2_Init(Actor* thisx, PlayState* play) {
     this->waypoint = 0;
     this->unk_216 = this->actor.shape.rot.z;
     this->trackingMode = NPC_TRACKING_NONE;
-    this->path = Path_GetByIndex(play, (this->actor.params & 0x3E0) >> 5, 0x1F);
+    s16 tempPath = TEMP_PATH;
+    if (tempPath == 0x1F)
+        this->path = &EnGo2_Special_Path[(this->actor.params & 0xFC00) >> 10];
+    else
+        this->path = Path_GetByIndex(play, tempPath, 0x1F);
     this->getItemEntry = (GetItemEntry)GET_ITEM_NONE;
-    switch (this->actor.params & 0x1F) {
+    this->timeBlock = NULL;
+    this->raceStatus = 0; //Normal race ending
+    EnGo2_findCloseTimeblock(thisx,play,100.0f);
+
+    if ((this->actor.params & GORON_SPECIAL)) {
+        gSaveContext.goronTimeStatus &= ~(1<<2);//Reset moved indicator
+        if (gSaveContext.goronTimeDay+1 < gSaveContext.totalDays)
+            gSaveContext.goronTimeStatus &= ~(1<<1);
+        if ((!LINK_IS_ADULT ^ !!(gSaveContext.goronTimeStatus & (1<<0))) ||
+            (((play->sceneNum == SCENE_GORON_CITY) &&
+                        ((HIGH_PATH ^ !IS_DAY) || (gSaveContext.goronTimeStatus & (1<<1))))
+            || ((play->sceneNum == SCENE_MARKET_DAY || play->sceneNum == SCENE_MARKET_NIGHT || play->sceneNum == SCENE_MARKET_RUINS) &&
+                    !(gSaveContext.goronTimeStatus & (1<<1))))) {
+            Actor_Kill(&this->actor);
+        }
+    }
+
+    switch (this->actor.params & GORON_IDENTITY_PARAM) {
         case GORON_CITY_ENTRANCE:
         case GORON_CITY_ISLAND:
         case GORON_CITY_LOWEST_FLOOR:
@@ -1631,7 +2246,7 @@ void EnGo2_Init(Actor* thisx, PlayState* play) {
             this->actionFunc = EnGo2_CurledUp;
             break;
         case GORON_MARKET_BAZAAR:
-            if ((LINK_IS_ADULT) || !CHECK_QUEST_ITEM(QUEST_GORON_RUBY)) {
+            if (!(this->actor.params & GORON_SPECIAL) && ((LINK_IS_ADULT) || !CHECK_QUEST_ITEM(QUEST_GORON_RUBY))) {
                 Actor_Kill(&this->actor);
             }
             EnGo2_GetItemAnimation(this, play);
@@ -1649,15 +2264,23 @@ void EnGo2_Init(Actor* thisx, PlayState* play) {
                 }
             } else {
                 Flags_UnsetInfTable(INFTABLE_STOPPED_GORON_LINKS_ROLLING);
-                this->collider.dim.height = (D_80A4816C[this->actor.params & 0x1F].height * 0.6f);
+                this->collider.dim.height = (D_80A4816C[this->actor.params & GORON_IDENTITY_PARAM].height * 0.6f);
                 EnGo2_SetupRolling(this, play);
                 this->isAwake = true;
             }
             break;
         case GORON_CITY_ROLLING_BIG:
+            if ((LINK_IS_ADULT && ((!LINK_IS_ADULT ^ !!(gSaveContext.goronTimeStatus & (1<<8))) || ((play->sceneNum == SCENE_GORON_CITY) && IS_NIGHT))) ||
+                        (!LINK_IS_ADULT && (((play->sceneNum == 0x60) && (!(gSaveContext.goronTimeStatus & (1<<8)) || (gSaveContext.goronTimeStatus & (1<<9)))) ||
+                                            (((play->sceneNum == SCENE_HYRULE_FIELD) || (play->sceneNum == 0x5A)) && !(gSaveContext.goronTimeStatus & (1<<9)))))) {
+                Actor_Kill(&this->actor);
+            }
+        //FALLTHROUGH
         case GORON_DMT_ROLLING_SMALL:
-            this->collider.dim.height = (D_80A4816C[this->actor.params & 0x1F].height * 0.6f);
+            this->collider.dim.height = (D_80A4816C[this->actor.params & GORON_IDENTITY_PARAM].height * 0.6f);
             EnGo2_SetupRolling(this, play);
+            if (LINK_IS_ADULT && !CHECK_QUEST_ITEM(QUEST_MEDALLION_FIRE))
+                Actor_Kill(&this->actor);
             break;
         case GORON_FIRE_GENERIC:
             if (Flags_GetSwitch(play, (this->actor.params & 0xFC00) >> 0xA)) {
@@ -1697,12 +2320,12 @@ void EnGo2_Destroy(Actor* thisx, PlayState* play) {
 }
 
 void EnGo2_CurledUp(EnGo2* this, PlayState* play) {
-    u8 index = this->actor.params & 0x1F;
+    u8 index = this->actor.params & GORON_IDENTITY_PARAM;
     s16 height;
     s32 quake;
 
     if (Animation_OnFrame(&this->skelAnime, this->skelAnime.endFrame)) {
-        if ((this->actor.params & 0x1F) == GORON_DMT_BIGGORON) {
+        if ((this->actor.params & GORON_IDENTITY_PARAM) == GORON_DMT_BIGGORON) {
             quake = Quake_Add(GET_ACTIVE_CAM(play), 3);
             Quake_SetSpeed(quake, -0x3CB0);
             Quake_SetQuakeValues(quake, 8, 0, 0, 0);
@@ -1725,13 +2348,13 @@ void EnGo2_CurledUp(EnGo2* this, PlayState* play) {
         this->isAwake = false;
         EnGo2_WakeUp(this, play);
     }
-    if (((this->actor.params & 0x1F) != GORON_FIRE_GENERIC) && EnGo2_IsWakingUp(this)) {
+    if (((this->actor.params & GORON_IDENTITY_PARAM) != GORON_FIRE_GENERIC) && EnGo2_IsWakingUp(this)) {
         EnGo2_WakeUp(this, play);
     }
 }
 
 void func_80A46B40(EnGo2* this, PlayState* play) {
-    u8 index = (this->actor.params & 0x1F);
+    u8 index = (this->actor.params & GORON_IDENTITY_PARAM);
     f32 height;
 
     if (this->unk_211 == true) {
@@ -1748,7 +2371,7 @@ void func_80A46B40(EnGo2* this, PlayState* play) {
         }
     } else {
         if (Animation_OnFrame(&this->skelAnime, this->skelAnime.endFrame)) {
-            if ((this->actor.params & 0x1F) == GORON_DMT_BIGGORON) {
+            if ((this->actor.params & GORON_IDENTITY_PARAM) == GORON_DMT_BIGGORON) {
                 this->actor.flags |= ACTOR_FLAG_TARGETABLE;
             }
             func_80A454CC(this);
@@ -1786,7 +2409,7 @@ void EnGo2_GoronRollingBigContinueRolling(EnGo2* this, PlayState* play) {
 void EnGo2_ContinueRolling(EnGo2* this, PlayState* play) {
     f32 float1 = 1000.0f;
 
-    if (((this->actor.params & 0x1F) != GORON_DMT_ROLLING_SMALL || !(this->actor.xyzDistToPlayerSq > SQ(float1))) &&
+    if (((this->actor.params & GORON_IDENTITY_PARAM) != GORON_DMT_ROLLING_SMALL || !(this->actor.xyzDistToPlayerSq > SQ(float1)) || IS_RACING ) &&
         DECR(this->animTimer) == 0) {
         this->actionFunc = EnGo2_SlowRolling;
         this->actor.speedXZ *= 0.5f; // slowdown
@@ -1807,9 +2430,19 @@ void EnGo2_SlowRolling(EnGo2* this, PlayState* play) {
             EnGo2_GetDustData(this, 3);
         }
         orientation = EnGo2_Orient(this, play);
-        index = this->actor.params & 0x1F;
+        index = this->actor.params & GORON_IDENTITY_PARAM;
         if (index != GORON_CITY_LINK) {
             if ((index == GORON_DMT_ROLLING_SMALL) && (orientation == 1) && (this->waypoint == 0)) {
+                EnGo2_StopRolling(this, play);
+                return;
+            }
+            if ((index == GORON_CITY_ROLLING_BIG) && (orientation == 1) && (this->path == &EnGo2_Special_Path[4]) && ((this->waypoint == 0) || (this->waypoint == 3 && EnGo2_findCloseTimeblock(&this->actor,play,250.0f)))) {
+                EnGo2_StopRolling(this, play);
+                this->path = &EnGo2_Special_Path[3];
+                this->waypoint = 3;
+                return;
+            }
+            if ((index == GORON_CITY_ROLLING_BIG) && (orientation == 1) && ((this->path == &EnGo2_Special_Path[12]) && (this->waypoint == 9) || (this->path == &EnGo2_Special_Path[13]) && (this->waypoint == 0))) {
                 EnGo2_StopRolling(this, play);
                 return;
             }
@@ -1817,7 +2450,14 @@ void EnGo2_SlowRolling(EnGo2* this, PlayState* play) {
             EnGo2_StopRolling(this, play);
             return;
         }
-        Math_ApproachF(&this->actor.speedXZ, EnGo2_GetTargetXZSpeed(this), 0.4f, 0.6f);
+        if ((index == GORON_CITY_ROLLING_BIG)) {
+            Actor* box = Actor_FindNearby(play,&this->actor,ACTOR_OBJ_KIBAKO2,ACTORCAT_BG,100.0f);
+            if (box) {
+                box->home.rot.z = 1;//This breaks the box
+            }
+        }
+
+        Math_ApproachF(&this->actor.speedXZ, EnGo2_GetTargetXZSpeed(this,play), 0.4f, 0.6f);
         this->actor.shape.rot = this->actor.world.rot;
     }
 }
@@ -1826,7 +2466,7 @@ void EnGo2_GroundRolling(EnGo2* this, PlayState* play) {
     if (EnGo2_IsRollingOnGround(this, 4, 8.0f, 0)) {
         EnGo2_GetDustData(this, 0);
         if (this->unk_59C == 0) {
-            switch (this->actor.params & 0x1F) {
+            switch (this->actor.params & GORON_IDENTITY_PARAM) {
                 case GORON_CITY_LINK:
                     this->goronState = 0;
                     this->actionFunc = EnGo2_GoronLinkStopRolling;
@@ -1902,7 +2542,6 @@ void EnGo2_SetGetItem(EnGo2* this, PlayState* play) {
                 EnGo2_GetItemAnimation(this, play);
                 return;
             case GI_TUNIC_GORON:
-                Flags_SetInfTable(INFTABLE_GORON_CITY_DOORS_UNLOCKED);
                 EnGo2_GetItemAnimation(this, play);
                 return;
             case GI_SWORD_BGS:
@@ -2079,6 +2718,10 @@ void EnGo2_GoronFireGenericAction(EnGo2* this, PlayState* play) {
 void EnGo2_Update(Actor* thisx, PlayState* play) {
     EnGo2* this = (EnGo2*)thisx;
 
+    if (this->actor.params & GORON_SPECIAL)
+        EnGo2_evaluateCloseTimeblock(thisx,play);
+    else if ((this->actor.params & GORON_IDENTITY_PARAM) == GORON_CITY_ROLLING_BIG)
+        EnGo2_evaluateCloseTimeblock_Big(thisx,play);
     func_80A45360(this, &this->alpha);
     EnGo2_SitDownAnimation(this);
     SkelAnime_Update(&this->skelAnime);

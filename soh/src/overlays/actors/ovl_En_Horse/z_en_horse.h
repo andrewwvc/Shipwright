@@ -10,21 +10,22 @@ typedef enum {
     /* 2  */ ENHORSE_ACT_IDLE,
     /* 3  */ ENHORSE_ACT_FOLLOW_PLAYER,
     /* 4  */ ENHORSE_ACT_INGO_RACE,
-    /* 5  */ ENHORSE_ACT_MOUNTED_IDLE,
-    /* 6  */ ENHORSE_ACT_MOUNTED_IDLE_WHINNEYING,
-    /* 7  */ ENHORSE_ACT_MOUNTED_TURN,
-    /* 8  */ ENHORSE_ACT_MOUNTED_WALK,
-    /* 9  */ ENHORSE_ACT_MOUNTED_TROT,
-    /* 10 */ ENHORSE_ACT_MOUNTED_GALLOP,
-    /* 11 */ ENHORSE_ACT_MOUNTED_REARING,
-    /* 12 */ ENHORSE_ACT_STOPPING,
-    /* 13 */ ENHORSE_ACT_REVERSE,
-    /* 14 */ ENHORSE_ACT_LOW_JUMP,
-    /* 15 */ ENHORSE_ACT_HIGH_JUMP,
-    /* 16 */ ENHORSE_ACT_BRIDGE_JUMP,
-    /* 17 */ ENHORSE_ACT_CS_UPDATE,
-    /* 18 */ ENHORSE_ACT_HBA,
-    /* 19 */ ENHORSE_ACT_FLEE_PLAYER
+    /* 5  */ ENHORSE_ACT_MALON_RIDE,
+    /* 6  */ ENHORSE_ACT_MOUNTED_IDLE,
+    /* 7  */ ENHORSE_ACT_MOUNTED_IDLE_WHINNEYING,
+    /* 8  */ ENHORSE_ACT_MOUNTED_TURN,
+    /* 9  */ ENHORSE_ACT_MOUNTED_WALK,
+    /* 10  */ ENHORSE_ACT_MOUNTED_TROT,
+    /* 11 */ ENHORSE_ACT_MOUNTED_GALLOP,
+    /* 12 */ ENHORSE_ACT_MOUNTED_REARING,
+    /* 13 */ ENHORSE_ACT_STOPPING,
+    /* 14 */ ENHORSE_ACT_REVERSE,
+    /* 15 */ ENHORSE_ACT_LOW_JUMP,
+    /* 16 */ ENHORSE_ACT_HIGH_JUMP,
+    /* 17 */ ENHORSE_ACT_BRIDGE_JUMP,
+    /* 18 */ ENHORSE_ACT_CS_UPDATE,
+    /* 19 */ ENHORSE_ACT_HBA,
+    /* 20 */ ENHORSE_ACT_FLEE_PLAYER
 } EnHorseAction;
 
 
@@ -103,6 +104,7 @@ typedef struct EnHorse {
     /* 0x01F4 */ Vec3f lastPos;
     /* 0x0200 */ s16 lastYaw;
     /* 0x0204 */ s32 curRaceWaypoint;
+    /* 0x0204 */ s32 curSlalomWaypoint;
     /* 0x0208 */ s32 boostSpeed;
     /* 0x020C */ s32 playerControlled;
     /* 0x0210 */ s32 animationIdx;
@@ -111,6 +113,7 @@ typedef struct EnHorse {
     /* 0x021C */ Vec3f unk_21C;
     /* 0x0228 */ Vec3f unk_228;
     /* 0x0234 */ s32 unk_234;
+                 u8 curSlalomResult;
     /* 0x0238 */ u8 numBoosts;
     /* 0x023C */ s32 boostRegenTime;
     /* 0x0240 */ s32 boostTimer;
@@ -141,8 +144,9 @@ typedef struct EnHorse {
     /* 0x0388 */ s32 inRace;
     /* 0x038C */ Actor* rider;
     /* 0x0390 */ u32 unk_390;
-    /* 0x0394 */ u16 ingoRaceFlags;
+    /* 0x0394 */ s16 raceFlags;
     /* 0x0398 */ f32 ingoHorseMaxSpeed;
+    /*        */ s16 delayTimer;
     // } race; //?
     /* 0x039C */ s32 unk_39C; // probably hbaAction
     /* 0x03A0 */ s32 hbaStarted;
@@ -187,5 +191,7 @@ typedef struct EnHorse {
     (((horseActor)->stateFlags & ENHORSE_JUMPING) \
         ? true                       \
         : false)
+
+void EnHorse_ResetIdleAnimation(EnHorse* this);
 
 #endif

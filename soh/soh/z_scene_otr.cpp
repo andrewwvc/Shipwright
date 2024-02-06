@@ -1,3 +1,5 @@
+#define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_INFO
+
 #include "OTRGlobals.h"
 #include <libultraship/libultraship.h>
 #include "soh/resource/type/Scene.h"
@@ -33,6 +35,204 @@
 #include "soh/resource/type/scenecommand/SetSoundSettings.h"
 #include "soh/resource/type/scenecommand/SetEchoSettings.h"
 #include "soh/resource/type/scenecommand/SetAlternateHeaders.h"
+#include "SaveManager.h"
+
+using json = nlohmann::json;
+
+bool operator==(const LUS::ActorEntry& lhs, const LUS::ActorEntry& rhs)
+{
+    return (lhs.id == rhs.id)
+    && (lhs.pos.x == rhs.pos.x)
+    && (lhs.pos.y == rhs.pos.y)
+    && (lhs.pos.z == rhs.pos.z)
+    && (lhs.rot.x == rhs.rot.x)
+    && (lhs.rot.y == rhs.rot.y)
+    && (lhs.rot.z == rhs.rot.z)
+    && (lhs.params == rhs.params);
+}
+
+void copyActorSpawn(ActorSpawnEnt& lhs, const LUS::ActorEntry& rhs) {
+    lhs.actorNum = rhs.id;
+    lhs.posX = rhs.pos.x;
+    lhs.posY = rhs.pos.y;
+    lhs.posZ = rhs.pos.z;
+    lhs.rotX = rhs.rot.x;
+    lhs.rotY = rhs.rot.y;
+    lhs.rotZ = rhs.rot.z;
+    lhs.initVar = rhs.params;
+}
+
+void to_json(json& j, const ActorSpawnResource& p) {
+    j = json{{"scene", p.scene}, {"room", p.room}, {"actorNum", p.entry.actorNum},
+        {"posX", p.entry.posX}, {"posY", p.entry.posY}, {"posZ", p.entry.posZ},
+        {"rotX", p.entry.rotX}, {"rotY", p.entry.rotY}, {"rotZ", p.entry.rotZ},
+        {"initVar", p.entry.initVar}, {"dirt", p.dirt}};
+}
+
+void from_json(const json& j, ActorSpawnResource& p) {
+    j.at("scene").get_to(p.scene);
+    j.at("room").get_to(p.room);
+    j.at("actorNum").get_to(p.entry.actorNum);
+    j.at("posX").get_to(p.entry.posX);
+    j.at("posY").get_to(p.entry.posY);
+    j.at("posZ").get_to(p.entry.posZ);
+    j.at("rotX").get_to(p.entry.rotX);
+    j.at("rotY").get_to(p.entry.rotY);
+    j.at("rotZ").get_to(p.entry.rotZ);
+    j.at("initVar").get_to(p.entry.initVar);
+    j.at("dirt").get_to(p.dirt);
+}
+
+extern std::map<ActorSpawnResource,int> UsedResources;
+extern std::map<ActorSpawnResource,int> AlternateResourcePool;
+extern std::map<int,ActorSpawnResource> TempResourceEntries;
+s16 usingAlternateResourcePool = 0;
+extern std::map<ActorSpawnResource,int> UsedPinkSpirits;
+
+std::map<ActorSpawnResource,int>& currentResourcePool() {
+    if (usingAlternateResourcePool)
+        return AlternateResourcePool;
+    else
+        return UsedResources;
+
+}
+
+void switchResourcePoolToNormal() {
+    usingAlternateResourcePool = 0;
+    AlternateResourcePool = {};
+}
+
+void switchResourcePoolToAlternate() {
+    usingAlternateResourcePool = 1;
+    AlternateResourcePool = {};
+}
+
+void insertSpawnResource(int entry, int extraTime) {
+    auto itt = TempResourceEntries.find(entry);
+    if (itt != TempResourceEntries.end()) {
+        ActorSpawnResource sw = itt->second;
+        auto existing = currentResourcePool().insert({sw,gSaveContext.savedFrameCount+extraTime});
+        if (!existing.second) {
+            existing.first->second = gSaveContext.savedFrameCount+extraTime;
+        }
+    }
+}
+
+void insertCollectionResource(int entry, int extraTime) {
+    auto itt = TempResourceEntries.find(entry);
+    if (itt != TempResourceEntries.end()) {
+        ActorSpawnResource sw = itt->second;
+        auto existing = UsedPinkSpirits.insert({sw,0});
+        if (!existing.second) {
+            existing.first->second = 0;
+        }
+    }
+}
+
+s32 countCollection() {
+    return UsedPinkSpirits.size();
+}
+
+s32 createTempEntryPlus(PlayState* play, ActorEntry* spawn, s16 dirt) {
+    ActorSpawnResource sw;
+    sw.scene = play->sceneNum;
+    sw.room = play->roomCtx.curRoom.num;
+    sw.entry.actorNum = spawn->id;
+    sw.entry.initVar = spawn->params;
+    sw.entry.posX = spawn->pos.x;
+    sw.entry.posY = spawn->pos.y;
+    sw.entry.posZ = spawn->pos.z;
+    sw.entry.rotX = spawn->rot.x;
+    sw.entry.rotY = spawn->rot.y;
+    sw.entry.rotZ = spawn->rot.z;
+    sw.dirt = dirt;
+    int entNum;
+    auto node = TempResourceEntries.rbegin();
+    if (node != TempResourceEntries.rend())
+        entNum = node->first+1;
+    else
+        entNum = 0;
+    auto foundVal = currentResourcePool().find(sw);
+    if (foundVal != currentResourcePool().end()) {
+        return -1;
+    }
+    TempResourceEntries.insert({entNum, sw});
+    return entNum;
+}
+
+//Returns -1 if entry was found, otherwise return the entry number
+s32 createTempEntry(PlayState* play, ActorEntry* spawn) {
+    return createTempEntryPlus(play,spawn,0);
+}
+
+s32 createTempEntryPlusUnk(PlayState* play, ActorEntry* spawn, s16 dirt) {
+    ActorSpawnResource sw;
+    sw.scene = play->sceneNum;
+    sw.room = play->roomCtx.curRoom.num;
+    sw.entry.actorNum = spawn->id;
+    sw.entry.initVar = spawn->params;
+    sw.entry.posX = spawn->pos.x;
+    sw.entry.posY = spawn->pos.y;
+    sw.entry.posZ = spawn->pos.z;
+    sw.entry.rotX = spawn->rot.x;
+    sw.entry.rotY = spawn->rot.y;
+    sw.entry.rotZ = spawn->rot.z;
+    sw.dirt = dirt;
+    int entNum;
+    auto node = TempResourceEntries.rbegin();
+    if (node != TempResourceEntries.rend())
+        entNum = node->first+1;
+    else
+        entNum = 0;
+    TempResourceEntries.insert({entNum, sw});
+    return entNum;
+}
+
+bool isResourceYetToRestore(auto val) {
+   return val->second > gSaveContext.savedFrameCount;
+}
+
+s32 isResourceUsed(PlayState* play, ActorEntry* spawn, s16 dirt) {
+    ActorSpawnResource sw;
+    sw.scene = play->sceneNum;
+    sw.room = play->roomCtx.curRoom.num;
+    sw.entry.actorNum = spawn->id;
+    sw.entry.initVar = spawn->params;
+    sw.entry.posX = spawn->pos.x;
+    sw.entry.posY = spawn->pos.y;
+    sw.entry.posZ = spawn->pos.z;
+    sw.entry.rotX = spawn->rot.x;
+    sw.entry.rotY = spawn->rot.y;
+    sw.entry.rotZ = spawn->rot.z;
+    sw.dirt = dirt;
+    auto foundVal = currentResourcePool().find(sw);
+    if (foundVal != currentResourcePool().end() && isResourceYetToRestore(foundVal)) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+s32 isResourceCollected(PlayState* play, ActorEntry* spawn, s16 dirt) {
+    ActorSpawnResource sw;
+    sw.scene = play->sceneNum;
+    sw.room = play->roomCtx.curRoom.num;
+    sw.entry.actorNum = spawn->id;
+    sw.entry.initVar = spawn->params;
+    sw.entry.posX = spawn->pos.x;
+    sw.entry.posY = spawn->pos.y;
+    sw.entry.posZ = spawn->pos.z;
+    sw.entry.rotX = spawn->rot.x;
+    sw.entry.rotY = spawn->rot.y;
+    sw.entry.rotZ = spawn->rot.z;
+    sw.dirt = dirt;
+    auto foundVal = UsedPinkSpirits.find(sw);
+    if (foundVal != UsedPinkSpirits.end()) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
 
 extern LUS::IResource* OTRPlay_LoadFile(PlayState* play, const char* fileName);
 extern "C" s32 Object_Spawn(ObjectContext* objectCtx, s16 objectId);
@@ -57,7 +257,6 @@ bool Scene_CommandSpawnList(PlayState* play, LUS::ISceneCommand* cmd) {
     // LUS::SetStartPositionList* cmdStartPos = std::static_pointer_cast<LUS::SetStartPositionList>(cmd);
     LUS::SetStartPositionList* cmdStartPos = (LUS::SetStartPositionList*)cmd;
     ActorEntry* entries = (ActorEntry*)cmdStartPos->GetRawPointer();
-
     play->linkActorEntry = &entries[play->setupEntranceList[play->curSpawn].spawn];
     play->linkAgeOnLoad = ((void)0, gSaveContext.linkAge);
     s16 linkObjectId = gLinkObjectIds[((void)0, gSaveContext.linkAge)];
@@ -67,12 +266,505 @@ bool Scene_CommandSpawnList(PlayState* play, LUS::ISceneCommand* cmd) {
     return false;
 }
 
+
+const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, LUS::ActorEntry>>>> sceneActorOverrides = {
+    { 0x01, { // Dodongo's Cavern
+        { 0x03, {
+            { -1, 4, { ACTOR_EN_ITEM00, 4266,100,-1575, 0, -21299, 0, 0x100+(uint16_t)ITEM00_HEART_PIECE  }},
+        } },
+    } },
+    { 0x02, { // Jabu Jabu's Belly
+        { 0x0d, {
+            //{ -1, 3, { ACTOR_EN_ITEM00, -1150, -1113, -2248, 0, 0, 0, 0x106 }},
+        } },
+    } },
+    { 0x04, { // Fire Temple
+        { 0x08, {
+            { -1, 2, { 0xA, 1944,4681,-393, 0,24394,0, 0x07CD }},
+        } },
+        { 0x0A, {
+            { -1, -1, { ACTOR_EN_ZF, -1925,2800,780, 0,24394,0, static_cast<int16_t>(0xFFFF) }},
+            { -1, -1, { ACTOR_EN_ZF, -1740,2800,-1060, 0,24394,0, static_cast<int16_t>(0xFFFF) }},
+        } },
+    } },
+    { 0x05, { // Water Temple
+        { 0x00, {
+            { -1, -1, { ACTOR_EN_OKUTA, -500, 720, -700, 0,24394,0, (2<<8) }},
+            { -1, -1, { ACTOR_EN_OKUTA, 100, 720, -700, 0,24394,0, (2<<8) }},
+        } },
+    } },
+    { 0x07, { // Shadow Temple
+        { 0x08, {
+            { -1, 0, { ACTOR_EN_ST, 4591,-380,59, 0,-16202,0, 0x9}},
+            { -1, 1, { ACTOR_EN_ST, 4706,-424,259, 0,16384,0, 0x9}},
+            { -1, 2, { ACTOR_EN_ST, 4262,-564,257, 0,16384,0, 0x9}},
+            { -1, 3, { ACTOR_EN_ST, 4591,-600,920, 0,-32768,0, 0x9}},
+            { -1, -1, { ACTOR_EN_BB, 4252,-983,828, 0,0,0, 0xFF}},
+        } },
+        { 0x06, {
+            { -1, -1, { ACTOR_EN_FIREFLY, 3560,-365,-742, 0,-32768,0, 0x4}},
+            { -1, -1, { ACTOR_EN_FIREFLY, 3560,-365,-1105, 0,-10700,0, 0x4}},
+            { -1, -1, { ACTOR_EN_FIREFLY, 3090,-365,-742, 0,-17000,0, 0x4}},
+            { -1, -1, { ACTOR_EN_FIREFLY, 3090,-365,-1105, 0,0,0, 0x4}},
+            //{ -1, -1, { ACTOR_EN_POH, 3020,-500,-970, 0,0,0, 0x0}}
+        } },
+    } },
+    { 0x8, {//Well
+        { 0x00, {
+            { -1, 32, { ACTOR_ELF_MSG2, -627, 97, -1553,  2,0,1, (0x3F<<8)|0xB3 }},
+            { -1, 34, { ACTOR_ELF_MSG2, -986, 59, 87,  2,0,1, (0x3F<<8)|0xB4 }},
+            { -1, -1, { ACTOR_ELF_MSG2, 1186, 97, -1500,  2,0,1, (0x3F<<8)|0xB6 }},
+            { -1, -1, { ACTOR_ELF_MSG2, 865, 40, 305,  2,0,1, (0x3F<<8)|0xB8 }},
+            { -1, -1, { ACTOR_ELF_MSG2, 865, 40, 115,  2,0,1, (0x3F<<8)|0xB7 }},
+            { -1, -1, { ACTOR_ELF_MSG2, 0, 80, -745,  2,0,1, (0x3F<<8)|0xB9 }},
+        } },
+        { 0x02, {
+            { -1, -1, { ACTOR_ELF_MSG2, -2145, 10, -615,  2,0,1, (0x3F<<8)|0xB5 }},
+        } },
+    } },
+    { 0xD, {//Ganon's Castle
+        { 0x10, {
+            { -1, -1, { ACTOR_EN_ITEM00, 0, -240, 770, 0,0,0, 0x100+(uint16_t)ITEM00_DEFENSE_HEART  }},
+        } },
+    } },
+    { 0x55, { // Kokiri Forest
+        { 0x00, {//Village
+            //{ -1, -1, { ACTOR_EN_ITEM00, 1297, 240, -553, 0, 0, 0, 0x0800+(uint16_t)ITEM00_HEART_PIECE }},
+            //{ -1, -1, { ACTOR_EN_TEST, 70, -80, 675, 0, 0, 0, 0xFFFF }},
+            //{ -1, -1, { ACTOR_EN_WOOD02, 0, -80, 870, 0, 0, 0, 0x0011 }},
+            //{ -1, 72, { ACTOR_EN_ITEM00, 0, -80, 870, 0, 0, 0, 0x100+(uint16_t)ITEM00_HEART_PIECE }},
+            //{ -1, -1, { ACTOR_EN_SA, -110, -80, 950, 0, 0, 0, 0x0}},
+            { 0, -1, { ACTOR_OBJ_MAKEKINSUTA, -367,53,-770, 0, 0, 1, 0x0 }}, { 1, -1, { ACTOR_OBJ_MAKEKINSUTA, -367,53,-770, 0, 0, 1, 0x0 }},
+            { 0, -1, { ACTOR_OBJ_MAKEKINSUTA, -459,55,-818, 0, 0, 1, 0x0 }}, { 1, -1, { ACTOR_OBJ_MAKEKINSUTA, -459,55,-818, 0, 0, 1, 0x0 }},
+            { 0, -1, { ACTOR_OBJ_MAKEKINSUTA, -521,56,-773, 0, 0, 1, 0x0 }}, { 1, -1, { ACTOR_OBJ_MAKEKINSUTA, -521,56,-773, 0, 0, 1, 0x0 }},
+            { -1, -1, { 0x77, 355,0,1095, 1, 0, 0, 0x20 }},
+            { -1, -1, { 0x77, 860,185,-475, 2, 0, 0, 0x20 }},
+            { -1, -1, { 0x77, -565,120,880, 3, 0, 0, 0x20 }},
+            { -1, -1, { 0x77, 500,120,105, 4, 0, 0, 0x20 }},
+            { -1, -1, { 0x77, -916,60,-935, 7, 0, 0, 0x20 }},
+            //{ -1, -1, { ACTOR_EN_ITEM00, 0, -80, 870, 0, 0, 0, 0x100+(uint16_t)ITEM00_HEART_PIECE }},
+        } },
+        { 0x01, {//Deku Tree
+            { -1, -1, { 0x77, 4365,-155,-2365, 5, 0, 0, 0x20 }},
+            { -1, -1, { 0x77, 3900,-180,-190, 6, 0, 0, 0x20 }},
+        } },
+    } },
+    { SCENE_LINKS_HOUSE, {
+        { 0x00, {
+            //{ -1, -1, { ACTOR_EN_ITEM00, 0, 0, 0, 0, 0, 0, 0x100+(uint16_t)ITEM00_HEART_PIECE}},
+            { -1, -1, { ACTOR_EN_SA, 100,0,1, 0,-12350,0, 0x0}},
+            { 0, -1, { ACTOR_EN_WONDER_TALK2, -92,25,-8, 0,15350,0, static_cast<int16_t>(0x8000|(0x3D<<6)|0x3f) }},
+            { 1, -1, { ACTOR_EN_WONDER_TALK2, -92,25,-8, 0,15350,0, static_cast<int16_t>(0x8000|(0x41<<6)|0x3f) }},
+            { 2, -1, { ACTOR_EN_WONDER_TALK2, -92,25,-8, 0,15350,0, static_cast<int16_t>(0x8000|(0x3E<<6)|0x3f) }},
+            { 3, -1, { ACTOR_EN_WONDER_TALK2, -92,25,-8, 0,15350,0, static_cast<int16_t>(0x8000|(0x3E<<6)|0x3f) }},
+        } },
+    } },
+    { 0x29, {//Saria's
+        { 0x00, {
+            //{ -1, -1, { ACTOR_EN_ITEM00, 0, 0, 0, 0, 0, 0, 0x100+(uint16_t)ITEM00_HEART_PIECE}},
+            { -1, -1, { ACTOR_EN_WONDER_ITEM, -79,0,-151, 0,0,1, 0x1241}},
+        } },
+    } },
+    { SCENE_LOST_WOODS, { // Lost Woods
+        { 0x5, {//Bridge
+            { -1, -1, { ACTOR_EN_KO, -1150,-360,1152, 0,1200,0, static_cast<int16_t>(0xff00) }},
+            { -1, -1, { ACTOR_OBJ_MAKEKINSUTA, -1140,-10,1208, 0, 0, 2, 0x0 }},
+        } },
+    } },
+    { 0x09, { // Ice Cavern
+        { 0x09, {
+            //{ -1, 9, { ACTOR_EN_ITEM00, 366, 213, -2036, 0, 0, 0, 0x406 }},
+        } },
+    } },
+    { SCENE_HYRULE_FIELD, { // Hyrule Field
+        { 0x00, {
+            //{ 2, -1, { 0x77, 4870, -160, 8506, 0, 0, 0, 0x11 }}, //{ 3, -1, { 0x77, 4870, -160, 8506, 0, 0, 0, 0x11 }},
+            { 2, -1, { 0x00A7, 116,192,6206, 0, 0, 0, 0x18a4 }}, { 3, -1, { 0x00A7, 116,192,6206, 0, 0, 0, 0x18a4 }},
+            { 0, -1, { ACTOR_EN_GO2,  3173,-20,880,  0,-20000,0,  0x03e0 | (13<<10)}}, { 1, -1, { ACTOR_EN_GO2,  3173,-20,880,  0,-20000,0,  0x03e0 | (13<<10)}},
+            { 2, -1, { ACTOR_EN_HORSE, 100,0,2000, 0,0,0, static_cast<int16_t>(0x800B)} }, { 3, -1, { ACTOR_EN_HORSE, 100,0,2000, 0,0,0, static_cast<int16_t>(0x800B)}},
+            {2, -1, { ACTOR_EN_MB, -4010,-300,1700, 0,8104,0, static_cast<int16_t>(0xffff)}},
+            {3, -1, { ACTOR_EN_MB, -4010,-300,1700, 0,8104,0, static_cast<int16_t>(0xffff)}},
+            {2, -1, { ACTOR_EN_MB, -3157,-300,945, 0,8104,0, static_cast<int16_t>(0xffff)}},
+            {3, -1, { ACTOR_EN_MB, -3157,-300,945, 0,8104,0, static_cast<int16_t>(0xffff)}},
+            {2, -1, { ACTOR_EN_MB, -5245,-300,2000, 0,-1321,0, static_cast<int16_t>(0xffff)}},
+            {3, -1, { ACTOR_EN_MB, -5245,-300,2000, 0,-1321,0, static_cast<int16_t>(0xffff)}},
+            { 0, -1, { ACTOR_EN_HY, 0,0,1700, 0,0x000,0, 0x78B}}, { 1, -1, { ACTOR_EN_HY, 0,0,1700, 0,0x000,0, 0x78B}},
+        } },
+    } },
+    { SCENE_MARKET_DAY, { // Castle Town Square - Day
+        { 0x00, {
+            { -1, -1, { ACTOR_EN_GO2, -288,0,188, 0,0x4000,0, 0x03ed | 0x10 | (0x0<<10)}},
+        } },
+    } },
+    { SCENE_MARKET_NIGHT, { // Castle Town Square - Night
+        { 0x00, {
+            { -1, -1, { ACTOR_EN_GO2, 298,0,234, 0,-0x4000,0, 0x03ed | 0x10 | (0x1<<10)}},
+        } },
+    } },
+    { SCENE_MARKET_RUINS, { // Castle Town Square - Ruined
+        { 0x00, {
+            { -1, -1, { ACTOR_EN_GO2, -288,0,188, 0,0x4000,0, 0x03ed | 0x10 | (0x0<<10)}},
+        } },
+    } },
+    { 0x3E, { // Grotto
+        { 0x05, { // Octorok Grotto
+            //{ -1, 8, { ACTOR_EN_ITEM00, 32, -129, 852, 0, 0, 0, 0x406 }},
+        } },
+        { 0x07, {
+            { -1, -1, { ACTOR_EN_ITEM00, 1180,100,800, 0,0,0, 0x100+(uint16_t)ITEM00_HEART_PIECE  }},
+        } },
+    } },
+    { SCENE_STABLE, { //Ranch
+        { 0x00, {
+            { -1, -1,  {ACTOR_EN_NIW, 0,0,0, 0,0x4000,0, 0x10}},
+        } },
+    } },
+    { SCENE_LON_LON_BUILDINGS, {
+        { 0x00, {
+            { -1, -1, { ACTOR_BG_JYA_KANAAMI, -382,200,115, 0,-0x4000,0, 0x0 }},
+            { -1, -1, { ACTOR_EN_A_OBJ, -430,415,0, 0,-0x4000,0, 0x8 }},
+            { -1, -1, { ACTOR_EN_A_OBJ, -510,415,0, 0,-0x4000,0, 0x8 }},
+            { -1, -1, { ACTOR_EN_A_OBJ, -590,415,0, 0,-0x4000,0, 0x8 }},
+            { -1, -1, { ACTOR_EN_ITEM00, -590,495,0, 0,0,0, 0x400+(uint16_t)ITEM00_HEART_PIECE  }},
+        } },
+        { 0x02, {
+            { 0, -1,  {ACTOR_EN_MA1, 1556,164,-160, 0,0,0, 0x0}}, { 1, -1,  {ACTOR_EN_MA1, 1556,164,-160, 0,0,0, 0x0}},
+        } },
+    } },
+    { SCENE_LON_LON_RANCH, { //Ranch
+        { 0x00, {
+            { 0, -1,  {ACTOR_EN_MA1, 1236,0,-2371, 0,0,0, 0x1}}, { 1, -1,  {ACTOR_EN_MA1, 1236,0,-2371, 0,0,0, 0x1}},
+        } },
+    } },
+    { 0x37, {//Impa's
+        { 0x00, {
+            { -1, -1, { ACTOR_EN_WONDER_TALK2, 142,25,210, 0,15350,0, static_cast<int16_t>(0x8000|(0x3F<<6)|0x3f) }},
+            { -1, -1, { ACTOR_EN_WONDER_TALK2, 142,25,67,  0,15350,0, static_cast<int16_t>(0x8000|(0x40<<6)|0x3f) }},
+            { -1, -1, { ACTOR_EN_WONDER_TALK2, 142,25,-85,  0,15350,0, static_cast<int16_t>(0x8000|(0xBA<<6)|0x3f) }},
+        } },
+    } },
+    { SCENE_KAKARIKO_VILLAGE, { // Kakariko
+        { 0x00, {
+            //{ -1, 18, { 0x95, -18,800,1800, 0,-32768,0, 0xb140 }},
+            { 1, 24, { ACTOR_EN_SW, 5,755,-100, 0,0,0, static_cast<int16_t>(0xB104) }},
+            { 0, -1, { ACTOR_EN_HY, -250,320,-400, 0,0x7000,0, 0x78B}}, { 1, -1, { ACTOR_EN_HY, -250,320,-400, 0,0x7000,0, 0x78B}},
+        } },
+    } },
+    { SCENE_GORON_CITY, {//Goron City
+        { 0x00, {
+            { -1, -1, { ACTOR_EN_GO2, -1232,520,-1190, 0,0,0, 0x03eb | 0x10 | (0x0<<10)}},
+        } },
+        { 0x03, {
+            { -1, -1, { ACTOR_EN_GO2, 1030,480,-380, 0,0,0, 0x03eb | 0x10 | (0x1<<10)}},
+            { 2, -1, { ACTOR_EN_GO2, /*-20,-3,330,*/ 520,399,565,  0,-17295,0, /*0xffe0*/ 0x03e0 | (0x0<<10)}},
+            { 3, -1, { ACTOR_EN_GO2, /*-20,-3,330,*/ 520,399,565,  0,-17295,0, /*0xffe0*/ 0x03e0 | (0x0<<10)}},
+        } },
+    } },
+    { 0x60, {//Goron Trail
+        { 0x00, {
+            { 0, -1, { ACTOR_EN_GO2, /*-20,-3,330,*/ -8,3230,-4129,  0,0,0, /*0xffe0*/ 0x03e0 | (11<<10)}},
+            { 1, -1, { ACTOR_EN_GO2, /*-20,-3,330,*/ -8,3230,-4129,  0,0,0, /*0xffe0*/ 0x03e0 | (11<<10)}},
+            { 2, -1, { ACTOR_EN_GO2, -282,1258,-1585, 0,-4915,0, 0x03e5 | (0x1<<10)}},
+            { 3, -1, { ACTOR_EN_GO2, -282,1258,-1585, 0,-4915,0, 0x03e5 | (0x1<<10)}},
+            { 2, -1, { ACTOR_EN_GO2, -522,1264,-1560, 0,-4915,0, 0x03e5 | (0x2<<10)}},
+            { 3, -1, { ACTOR_EN_GO2, -522,1264,-1560, 0,-4915,0, 0x03e5 | (0x2<<10)}},
+            //{ 2, -1, { ACTOR_EN_GO2, /*-20,-3,330,*/ 520,399,565,  0,-17295,0, /*0xffe0*/ 0x03e0 | (0x3<<10)}},
+            //{ 3, -1, { ACTOR_EN_GO2, /*-20,-3,330,*/ 520,399,565,  0,-17295,0, /*0xffe0*/ 0x03e0 | (0x3<<10)}},
+            //This should fix the issue with the large rock covering the cavern appearing in cutscenes
+            { 5, 6, { ACTOR_BG_SPOT16_BOMBSTONE, -1679,684,-690, 0,0,0, (0x4<<8) | 0xFF}},
+        } },
+    } },
+    { 0x61, {//Mountian Crater
+        { 0x01, {
+            { 0, 34, { ACTOR_EN_SHOPNUTS, -853,769,1196, 0,0,0, 0xB}},
+            { 1, 34, { ACTOR_EN_SHOPNUTS, -853,769,1196, 0,0,0, 0xB}},
+        } },
+    } },
+    { 0x57, { // Lake Hylia
+        { 0x00, {
+            { -1, -1, { ACTOR_EN_RU1, -918,-1336,3560, 0,0x7FFF,0, 0xB }},
+            { 2, -1, { ACTOR_EN_NY, -215,-2147,6194, 0,0x7FFF,0, 0x1 }}, { 3, -1, { ACTOR_EN_NY, -215,-2147,6194, 0,0x7FFF,0, 0x1 }},
+            { 2, -1, { ACTOR_EN_NY, -1877,-2089,6120, 0,0x0,0, 0x1 }}, { 3, -1, { ACTOR_EN_NY, -1877,-2089,6120, 0,0x0,0, 0x1 }},
+        } },
+    } },
+    { SCENE_ZORAS_RIVER, { // Zora's River
+        { 0x00, {
+            { 0, 57, { ACTOR_EN_MS, -582,375,-438, 0,16384,0, static_cast<int16_t>(0xFFFF) }},
+            { 0, 60, { ACTOR_OBJ_BOMBIWA, 838,210,-194, 0,-20771,1, 0x0002 }},
+            { 0, 62, { ACTOR_OBJ_BOMBIWA, -464,375,-558, 0,-25850,1, 0x0008 }},
+            { 0, 63, { ACTOR_OBJ_BOMBIWA, -533,375,-594, 0,16384,1, 0x0009 }},
+            { 0, 64, { ACTOR_OBJ_BOMBIWA, -594,375,-617, 0,0,1, 0x000A }},
+            { 0, -1, { ACTOR_OBJ_BOMBIWA, -452,375,-480, 0,-25850,1, 0x000B }},
+            { 1, 57, { ACTOR_EN_MS, -582,375,-438, 0,16384,0, static_cast<int16_t>(0xFFFF) }},
+            { 1, 60, { ACTOR_OBJ_BOMBIWA, 838,210,-194, 0,-20771,1, 0x0002 }},
+            { 1, 62, { ACTOR_OBJ_BOMBIWA, -464,375,-558, 0,-25850,1, 0x0008 }},
+            { 1, 63, { ACTOR_OBJ_BOMBIWA, -533,375,-594, 0,16384,1, 0x0009 }},
+            { 1, 64, { ACTOR_OBJ_BOMBIWA, -594,375,-617, 0,0,1, 0x000A }},
+            { 1, -1, { ACTOR_OBJ_BOMBIWA, -452,375,-480, 0,-25850,1, 0x000B }},
+        } },
+    } },
+    { 0x59, { // Zora's Fountain
+        { 0x00, {
+            { 2, -1, { ACTOR_EN_GOROIWA, 1243,322,100, 0,-20771,1, 0x1D00 }},{ 3, -1, { ACTOR_EN_GOROIWA, 1243,322,100, 0,-20771,1, 0x1D00 }},
+            { 2, 34, { ACTOR_BG_SPOT08_ICEBLOCK, 255,20,-285, 	0,16384,0, 0x1A }}, { 3, 34, { ACTOR_BG_SPOT08_ICEBLOCK, 255,20,-285, 	0,16384,0, 0x1A }},
+            { 2, -1, { ACTOR_OBJ_MAKEKINSUTA, -253,32,-834, 0, 0, 3, 0x3 }}, { 2, -1, { ACTOR_OBJ_MAKEKINSUTA, 253,32,-834, 0, 0, 3, 0x3 }},
+        } },
+    } },
+    { 0x5A, {//Gerudo Valley
+        { 0x00, {
+            { 0, 32, { ACTOR_BG_UMAJUMP, -391,-70,-98, 	-0x000,16384,0, 0x2}},
+            { 1, 32, { ACTOR_BG_UMAJUMP, -391,-70,-98, 	-0x000,16384,0, 0x2}},
+            { 0, -1, { ACTOR_EN_GO2,  2626,-240,447,  0,-22910,0,  0x03e0 | (12<<10)}},
+            { 1, -1, { ACTOR_EN_GO2,  2626,-240,447,  0,-22910,0,  0x03e0 | (12<<10)}},
+        } },
+    } },
+    { 0xC, { // Gerudo Rooms
+        { 0x00, {
+            { 0, -1, { ACTOR_OBJ_KIBAKO2, 529,0,-3556, 0,0,0, static_cast<int16_t>(0xFFFF) }},
+            { 1, -1, { ACTOR_OBJ_KIBAKO2, 529,0,-3556, 0,0,0, static_cast<int16_t>(0xFFFF) }},
+        } },
+    } },
+    { 0x5D, { // Gerudo Fortress
+        { 0x00, {
+            { 0, -1, { ACTOR_EN_NIW, 1525,834,-2020, 0,16384,0, static_cast<int16_t>(0xFFFF) }},
+            { 1, -1, { ACTOR_EN_NIW, 1525,834,-2020, 0,16384,0, static_cast<int16_t>(0xFFFF) }},
+            { 0, -1, { ACTOR_BG_UMAJUMP, 190,1103,-2915, 0x4000,880,0, static_cast<int16_t>(0xFFFF) }},
+            { 0, -1, { ACTOR_BG_UMAJUMP, 190,1103,-2915, 0x4000,-0x7C90,0, static_cast<int16_t>(0xFFFF) }},//rot.y is 880+0x8000
+            { 1, -1, { ACTOR_BG_UMAJUMP, 190,1103,-2915, 0x4000,880,0, static_cast<int16_t>(0xFFFF) }},
+            { 1, -1, { ACTOR_BG_UMAJUMP, 190,1103,-2915, 0x4000,-0x7C90,0, static_cast<int16_t>(0xFFFF) }},//rot.y is 880+0x8000
+            { 0, 21, { 0xA, 926,1042,-2512, 0,-16384,0, 0x7c1 }},
+            { 1, 21, { 0xA, 926,1042,-2512, 0,-16384,0, 0x7c1 }},
+        } },
+    } },
+    { SCENE_HAUNTED_WASTELAND, {
+        { 0x00, {
+            { -1, 4, { ACTOR_EN_SW, 637,-393,-2536, 16384,0,0, static_cast<int16_t>(0xB602) }},
+        } },
+        { 0x01, {
+            { -1, -1, { ACTOR_EN_HATA, 3315,-261, 2244, 0,0,0, static_cast<int16_t>(0xFFFF) }},
+            { -1, -1, { ACTOR_OBJ_KIBAKO2, 3460,-435,2484, 0,7100,0, static_cast<int16_t>(0xFFFF) }},
+            { -1, -1, { ACTOR_OBJ_KIBAKO2, 3621,-392,2847, 0,7100,0, static_cast<int16_t>(0xFFFF) }},
+            { -1, -1, { ACTOR_EN_NIW, 3125,-268,2459, 0,7100,0, static_cast<int16_t>(0xFFFF) }},
+        } },
+    } },
+    { SCENE_SYOTES2, {
+        { 0x00, {
+            //{ -1, 0, { 0x5D, 0,0, 100, 0,0,0,  0 }},
+            { -1, -1, { ACTOR_EN_ITEM00, 0,20,380, 0,0,0, 0x100+(uint16_t)ITEM00_HEART_PIECE  }},
+            } },
+    } },
+    {SCENE_FOREST_TEMPLE, {
+        {0x0, {
+            {-1, -1, {ACTOR_EN_ST, 118,510,155, 0,0,0, 0x4}}
+        } },
+        {0x3, {
+            {-1, 4, {ACTOR_EN_BB, 1387,510,-1436, 0,0x4000,0, static_cast<int16_t>(0xffff)}},
+            {-1, -1, {ACTOR_EN_BB, 1187,463,-1436, 0,-0x4000,0, static_cast<int16_t>(0xffff)}}
+        } },
+        {0x8, {
+            {-1, -1, {ACTOR_EN_DEKUNUTS, -1288,242,-2109, 0,25009,0, 5 << 8}},
+            {-1, -1, {ACTOR_EN_DEKUNUTS, -499,242,-2680, 0,-16512,0, 5 << 8}},
+        } },
+        {0x11, {
+            {-1, -1, {ACTOR_EN_WALLMAS, 128,-779,-1658, 0,0,0, 0x0}},
+            {-1, -1, {ACTOR_EN_WALLMAS, 128,-779,-1658, 0,0,0, 0x5 | (0x10 << 8)}},
+            {-1, -1, {ACTOR_EN_WALLMAS, 128,-779,-1658, 0,0,0, 0x5 | (0x11 << 8)}},
+            {-1, -1, {ACTOR_EN_WALLMAS, 128,-779,-1658, 0,0,0, 0x5 | (0x12 << 8)}},
+        } },
+        {0x0f, {
+            {-1, -1, {ACTOR_EN_WALLMAS, 1830,404,-2700, 0,0,0, 0x2 | (0x20+11 << 8)}},
+            {-1, -1, {ACTOR_EN_ST, 2069,720,-3002, 0,-32768,0, 0x5}}
+        } },
+    } },
+    {SCENE_FIRE_TEMPLE, {
+        {0x18, {
+            {-1, 0, {ACTOR_EN_FD, -2928,2920,139, 0,0,0, 0x0}}
+        } },
+    } },
+};
+
+//Dynamic plant locations
+/*
+-250,-80,1130
+1297,240,-553
+-565,120,880
+10,180,-10
+5330,-190,-1720
+
+Roling Goron locations
+Scene: 0x62, Room: 0x3, Setup: 0x0
+Entity 17	 ID: 0x1ae, 	Params: 0xfc00, 	pos: 520,399,565, 	0,-12925,0
+
+Scene: 0x60, Room: 0x0, Setup: 0x0
+Entity 40	 ID: 0x1ae, 	Params: 0xfc25, 	pos: -311,1500,-393, 	0,-4915,0
+
+-154,1369,-1073
+-273,1500,-403
+-441,1460,-61
+-673,1192,747
+*/
+
 bool Scene_CommandActorList(PlayState* play, LUS::ISceneCommand* cmd) {
     // LUS::SetActorList* cmdActor = std::static_pointer_cast<LUS::SetActorList>(cmd);
     LUS::SetActorList* cmdActor = (LUS::SetActorList*)cmd;
+    std::vector<LUS::ActorEntry> copy = cmdActor->actorList;
 
-    play->numSetupActors = cmdActor->numActors;
-    play->setupActorList = (ActorEntry*)cmdActor->GetRawPointer();
+    //Handles static entry overrides
+    if (!(IsGameMasterQuest() && ((play->sceneNum >= 0 && play->sceneNum <= 9) || play->sceneNum == 11 || play->sceneNum == 13))) {
+        if (sceneActorOverrides.find(play->sceneNum) != sceneActorOverrides.end() &&
+                sceneActorOverrides.at(play->sceneNum).find(play->roomCtx.curRoom.num) != sceneActorOverrides.at(play->sceneNum).end()) {
+            auto& roomOverrides = sceneActorOverrides.at(play->sceneNum).at(play->roomCtx.curRoom.num);
+            for (auto& [setup, index, entry] : roomOverrides) {
+                if (setup == -1 || setup == gSaveContext.sceneSetupIndex) {
+                    if (index == -1) {
+                        copy.push_back(entry);
+                    } else {
+                        copy[index] = entry;
+                    }
+                }
+            }
+        }
+    }
+
+    //Handles dynamic resource persistance overrides
+    ActorEntry* entries = (ActorEntry*)malloc(copy.size() * sizeof(ActorEntry));
+    TempResourceEntries = {};
+
+    for (int i = 0; i < copy.size(); i++)
+    {
+        entries[i].id = copy[i].id;
+        entries[i].pos.x = copy[i].pos.x;
+        entries[i].pos.y = copy[i].pos.y;
+        entries[i].pos.z = copy[i].pos.z;
+        entries[i].rot.x = copy[i].rot.x;
+        entries[i].rot.y = copy[i].rot.y;
+        entries[i].rot.z = copy[i].rot.z;
+        entries[i].params = copy[i].params;
+
+        if (entries[i].id == ACTOR_OBJ_TSUBO) {
+            ActorSpawnResource sw;
+            sw.scene = play->sceneNum;
+            sw.room = play->roomCtx.curRoom.num;
+            copyActorSpawn(sw.entry, copy[i]);
+            sw.dirt = 0;
+            TempResourceEntries.insert({i,sw});
+            auto foundVal = currentResourcePool().find(sw);
+            if (foundVal != currentResourcePool().end() && isResourceYetToRestore(foundVal)) {
+                entries[i].params &= 0xFF1F;
+                entries[i].params |= 0x20;
+            } else if (usingBorrowedWallet()) {
+                s16 itemID = (entries[i].params & 0xFF);
+                if (0x3 <= itemID && itemID <= 0x5)
+                    itemID = ITEM00_RUPEE_BLUE;
+                else if (0x8 <= itemID && itemID <= 0x10)
+                    itemID = ITEM00_RUPEE_BLUE;
+                entries[i].params &= 0xFF00;
+                entries[i].params |= itemID;
+            }
+        } else if (entries[i].id == ACTOR_EN_TUBO_TRAP) {
+            ActorSpawnResource sw;
+            sw.scene = play->sceneNum;
+            sw.room = play->roomCtx.curRoom.num;
+            copyActorSpawn(sw.entry, copy[i]);
+            sw.dirt = 0;
+            TempResourceEntries.insert({i,sw});
+            auto foundVal = UsedResources.find(sw);
+            if (foundVal != UsedResources.end() && isResourceYetToRestore(foundVal)) {
+                entries[i].params = 0x7FFF;
+            }
+        } else if (entries[i].id == ACTOR_EN_WONDER_ITEM && DEKU_TREE_DEAD) {
+            ActorSpawnResource sw;
+            sw.scene = play->sceneNum;
+            sw.room = play->roomCtx.curRoom.num;
+            copyActorSpawn(sw.entry, copy[i]);
+            sw.dirt = 0;
+            TempResourceEntries.insert({i,sw});
+            auto foundVal = currentResourcePool().find(sw);
+            if (foundVal != currentResourcePool().end() && isResourceYetToRestore(foundVal)) {
+                entries[i].params &= 0x07FF;
+                entries[i].params |= (0xA << 0xB);
+            }
+        } else if (entries[i].id == ACTOR_EN_ITEM00 && DEKU_TREE_DEAD) {
+            ActorSpawnResource sw;
+            sw.scene = play->sceneNum;
+            sw.room = play->roomCtx.curRoom.num;
+            copyActorSpawn(sw.entry, copy[i]);
+            sw.dirt = 0;
+            TempResourceEntries.insert({i,sw});
+            auto foundVal = currentResourcePool().find(sw);
+            if (foundVal != currentResourcePool().end() && isResourceYetToRestore(foundVal)) {
+                entries[i].params &= 0xFF00;
+                entries[i].params |= ITEM00_MAX;
+            }
+        } else if (entries[i].id == ACTOR_EN_KUSA && (entries[i].params & 0x3) == 0) {
+            // ActorSpawnResource sw;
+            // sw.scene = play->sceneNum;
+            // sw.room = play->roomCtx.curRoom.num;
+            // copyActorSpawn(sw.entry, copy[i]);
+            // sw.dirt = 0;
+            // TempResourceEntries.insert({i,sw});
+            // auto foundVal = currentResourcePool().find(sw);
+            // if (foundVal != currentResourcePool().end()) {
+            //     entries[i].params &= 0xFFFC;
+            //     entries[i].params |= 3;
+            // }
+        } else if (entries[i].id == ACTOR_OBJ_KIBAKO2) {
+            ActorSpawnResource sw;
+            sw.scene = play->sceneNum;
+            sw.room = play->roomCtx.curRoom.num;
+            copyActorSpawn(sw.entry, copy[i]);
+            sw.dirt = 0;
+            TempResourceEntries.insert({i,sw});
+            auto foundVal = currentResourcePool().find(sw);
+            if (foundVal != currentResourcePool().end() && isResourceYetToRestore(foundVal)) {
+                entries[i].rot.x = 0x1C;
+            } else if (usingBorrowedWallet() && (entries[i].params & 0x8000)) {
+                s16 itemID = (entries[i].rot.x & 0xFF);
+                if (0x3 <= itemID && itemID <= 0x5)
+                    itemID = ITEM00_RUPEE_BLUE;
+                else if (0x8 <= itemID && itemID <= 0x10)
+                    itemID = ITEM00_RUPEE_BLUE;
+                entries[i].rot.x &= 0xFF00;
+                entries[i].rot.x |= itemID;
+            }
+        } else if (entries[i].id == ACTOR_BG_HAKA) {
+            ActorSpawnResource sw;
+            sw.scene = play->sceneNum;
+            sw.room = play->roomCtx.curRoom.num;
+            copyActorSpawn(sw.entry, copy[i]);
+            sw.dirt = 0;
+            TempResourceEntries.insert({i,sw});
+            auto foundVal = UsedResources.find(sw);
+            if (foundVal != UsedResources.end() && isResourceYetToRestore(foundVal)) {
+                entries[i].rot.z = 1;
+            }
+        } else if (entries[i].id == ACTOR_EN_SKJ) {
+            ActorSpawnResource sw;
+            sw.scene = play->sceneNum;
+            sw.room = play->roomCtx.curRoom.num;
+            copyActorSpawn(sw.entry, copy[i]);
+            sw.dirt = 0;
+            TempResourceEntries.insert({i,sw});
+            auto foundVal = currentResourcePool().find(sw);
+            if (foundVal != currentResourcePool().end() && isResourceYetToRestore(foundVal)) {
+                entries[i].rot.z = 0x1;
+            }
+        } else if (entries[i].id == ACTOR_EN_COW) {
+            ActorSpawnResource sw;
+            sw.scene = play->sceneNum;
+            sw.room = play->roomCtx.curRoom.num;
+            copyActorSpawn(sw.entry, copy[i]);
+            sw.dirt = 0;
+            TempResourceEntries.insert({i,sw});
+            auto foundVal = currentResourcePool().find(sw);
+            if (foundVal != currentResourcePool().end() && isResourceYetToRestore(foundVal)) {
+                entries[i].rot.z = 0x1;
+            }
+        }
+    }
+
+    play->numSetupActors = copy.size();//Note that this only allows for max 256 actor entries
+    play->setupActorList = (ActorEntry*)entries;//cmdActor->GetRawPointer();
 
     return false;
 }
@@ -80,13 +772,21 @@ bool Scene_CommandActorList(PlayState* play, LUS::ISceneCommand* cmd) {
 bool Scene_CommandUnused2(PlayState* play, LUS::ISceneCommand* cmd) {
     // OTRTODO: Do we need to implement this?
     // play->unk_11DFC = SEGMENTED_TO_VIRTUAL(cmd->unused02.segment);
-
     return false;
 }
 
 bool Scene_CommandCollisionHeader(PlayState* play, LUS::ISceneCommand* cmd) {
     // LUS::SetCollisionHeader* cmdCol = std::static_pointer_cast<LUS::SetCollisionHeader>(cmd);
     LUS::SetCollisionHeader* cmdCol = (LUS::SetCollisionHeader*)cmd;
+    for (int ii = 0; ii < cmdCol->collisionHeader->surfaceTypes.size(); ii++) {
+        cmdCol->collisionHeader->surfaceTypes[ii].data[0];
+        cmdCol->collisionHeader->surfaceTypes[ii].data[1];
+        if ((play->sceneNum == SCENE_ROYAL_FAMILYS_TOMB && (ii == 0x9 || ii == 0xA)) ||
+            (play->sceneNum == 0x8 && ((cmdCol->collisionHeader->surfaceTypes[ii].data[0] >> 13) == 2))) {//Well surfaces doing spike damage become voidouts
+            cmdCol->collisionHeader->surfaceTypes[ii].data[0] |= 0x14 << 24;
+        }
+    }
+
     BgCheck_Allocate(&play->colCtx, play, (CollisionHeader*)cmdCol->GetRawPointer());
 
     return false;
@@ -152,7 +852,7 @@ extern "C" void* func_800982FC(ObjectContext* objectCtx, s32 bankIndex, s16 obje
 bool Scene_CommandObjectList(PlayState* play, LUS::ISceneCommand* cmd) {
     // LUS::SetObjectList* cmdObj = static_pointer_cast<LUS::SetObjectList>(cmd);
     LUS::SetObjectList* cmdObj = (LUS::SetObjectList*)cmd;
-
+    
     s32 i;
     s32 j;
     s32 k;
@@ -230,15 +930,55 @@ bool Scene_CommandPathList(PlayState* play, LUS::ISceneCommand* cmd) {
     return false;
 }
 
+const std::map<u16,  std::vector<std::tuple<int, int, LUS::TransitionActorEntry>>> sceneTransitionActorOverrides = {
+    { 0x5B, { // Lost Woods
+        { -1, 9,  { 1,(int8_t)255, 0,(int8_t)255,   ACTOR_EN_HOLL, 0,0,-400,  0, 0x3F }},
+        { -1, 10, { 1,(int8_t)255, 0,(int8_t)255,   ACTOR_EN_HOLL, 0,0, 400,  -32768, 0x3F }},
+        { -1, 11, { 0,(int8_t)255, 1,(int8_t)255,   ACTOR_EN_HOLL, 800,0, 400,  -32768, 0x3F }},
+        { -1, 12, { 1,(int8_t)255, 2,(int8_t)255,   ACTOR_EN_HOLL, 400,0, -800,  16384, 0x3F }},
+        { -1, 13, { 2,(int8_t)255, 3,(int8_t)255,   ACTOR_EN_HOLL, 1600,0, -400,  -32768, 0x3F }},
+        { -1, 14, { 7,(int8_t)255, 4,(int8_t)255,   ACTOR_EN_HOLL, 2000,0, -1600,  -16384, 0x3F }},
+        { -1, 15, { 7,(int8_t)255, 8,(int8_t)255,   ACTOR_EN_HOLL, 2000,0, -2400,  16384, 0x3F | (0x7 << 6) }},
+        { -1, 16, { 8,(int8_t)255, 7,(int8_t)255,   ACTOR_EN_HOLL, 1600,0, -2800,  0, 0x3F }},
+        { -1, 17, { 8,(int8_t)255, 7,(int8_t)255,   ACTOR_EN_HOLL, 400,0, -2400,  -16384, 0x3F | (0x7 << 6) }},
+        { -1, 18, { 7,(int8_t)255, 8,(int8_t)255,   ACTOR_EN_HOLL, 800,0, -2800,  0, 0x3F }},
+        { -1, 19, { 7,(int8_t)255, 8,(int8_t)255,   ACTOR_EN_HOLL, 800,0, -2000,  -32768, 0x3F | (0x1 << 9)}},
+    } },
+};
+
 bool Scene_CommandTransitionActorList(PlayState* play, LUS::ISceneCommand* cmd) {
     // LUS::SetTransitionActorList* cmdActor = static_pointer_cast<LUS::SetTransitionActorList>(cmd);
     LUS::SetTransitionActorList* cmdActor = (LUS::SetTransitionActorList*)cmd;
 
-    play->transiActorCtx.numActors = cmdActor->numTransitionActors;
+    if (cmdActor->modificationState == 0) {
+        if (sceneTransitionActorOverrides.find(play->sceneNum) != sceneTransitionActorOverrides.end()) {
+            auto& roomOverrides = sceneTransitionActorOverrides.at(play->sceneNum);
+            for (auto& [setup, index, entry] : roomOverrides) {
+                if (setup == -1 || setup == gSaveContext.sceneSetupIndex) {
+                    if (index == -1) {
+                        cmdActor->transitionActorList.push_back(entry);
+                    } else {
+                        if (index < cmdActor->transitionActorList.size())
+                            cmdActor->transitionActorList[index] = entry;
+                        else
+                            cmdActor->transitionActorList.emplace(cmdActor->transitionActorList.begin()+index,entry);
+                    }
+                }
+            }
+        }
+
+        cmdActor->modificationState = 1;
+    }
+
+    play->transiActorCtx.numActors = cmdActor->transitionActorList.size();
     play->transiActorCtx.list = (TransitionActorEntry*)cmdActor->GetRawPointer();
 
     return false;
 }
+
+//Keeps track of if extra transition actors have been loaded already, avoids multi loading them if this is the case
+//std::map<u16, bool> sceneTransitionLoadFlags = {
+//};
 
 // void TransitionActor_InitContext(GameState* state, TransitionActorContext* transiActorCtx) {
 //    transiActorCtx->numActors = 0;
@@ -488,6 +1228,16 @@ s32 OTRScene_ExecuteCommands(PlayState* play, LUS::Scene* scene) {
 
         // sceneCmd++;
     }
+
+    if (play->sceneNum == SCENE_BESITU) {
+        play->setupExitList = (int16_t*)malloc((1) * sizeof(int16_t));
+        play->setupExitList[0] = 0;
+        play->numSetupActors = 2;
+        play->setupActorList = (ActorEntry*)malloc(play->numSetupActors * sizeof(ActorEntry));
+        play->setupActorList[0] = { ACTOR_EN_WONDER_ITEM, -79,0,-151, 0,0,1, 0x1241};
+        play->setupActorList[1] = { ACTOR_EN_ITEM00, 200,-200,0, 0,0,0, 0x100+(uint16_t)ITEM00_HEART_PIECE  };
+    }
+
     return 0;
 }
 

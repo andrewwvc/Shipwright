@@ -30,7 +30,13 @@ void func_80A712C0(EnHy* this, PlayState* play);
 void func_80A710F8(EnHy* this, PlayState* play);
 void func_80A7127C(EnHy* this, PlayState* play);
 void EnHy_DoNothing(EnHy* this, PlayState* play);
+void EnHy_WalkAlong(EnHy* this, PlayState* play);
+void EnHy_BeSulking(EnHy* this, PlayState* play);
 void func_80A714C4(EnHy* this, PlayState* play);
+void EnHy_GiveBeggarReward(EnHy* this, PlayState* play);
+void EnHy_ReceiveBeggarReward(EnHy* this, PlayState* play);
+void EnHy_GiveYellowLadyReward(EnHy* this, PlayState* play);
+void EnHy_ReceiveYellowLadyReward(EnHy* this, PlayState* play);
 
 const ActorInit En_Hy_InitVars = {
     ACTOR_EN_HY,
@@ -359,17 +365,23 @@ s32 EnHy_FindSkelAndHeadObjects(EnHy* this, PlayState* play) {
 
     this->objBankIndexSkel1 = Object_GetIndex(&play->objectCtx, sSkeletonInfo[skelInfoIndex1].objectId);
     if (this->objBankIndexSkel1 < 0) {
-        return false;
+        this->objBankIndexSkel1 = Object_Spawn(&play->objectCtx, sSkeletonInfo[skelInfoIndex1].objectId);
+        if (this->objBankIndexSkel1 < 0)
+            return false;
     }
 
     this->objBankIndexSkel2 = Object_GetIndex(&play->objectCtx, sSkeletonInfo[skelInfoIndex2].objectId);
     if (this->objBankIndexSkel2 < 0) {
-        return false;
+        this->objBankIndexSkel2 = Object_Spawn(&play->objectCtx, sSkeletonInfo[skelInfoIndex2].objectId);
+        if (this->objBankIndexSkel2 < 0)
+            return false;
     }
 
     this->objBankIndexHead = Object_GetIndex(&play->objectCtx, sHeadInfo[headInfoIndex].objectId);
     if (this->objBankIndexHead < 0) {
-        return false;
+        this->objBankIndexHead = Object_Spawn(&play->objectCtx, sHeadInfo[headInfoIndex].objectId);
+        if (this->objBankIndexHead < 0)
+            return false;
     }
 
     return true;
@@ -415,10 +427,21 @@ void func_80A6F7CC(EnHy* this, PlayState* play, s32 getItemId) {
                   fabsf(this->actor.yDistToPlayer) + 1.0f);
 }
 
+s8 isItchyWoman(Actor* self, PlayState* play) {
+    return (self->params & 0x7F) == ENHY_TYPE_CNE_11;
+}
+
+s8 isItchyWomanVulnerable(Actor* self) {
+    //return ((EnHy*)self)->actionFunc == EnHy_WalkAlong;
+    return ((EnHy*)self)->questStateTracking == ENHY_STATE_WALK;
+}
+
 u16 func_80A6F810(PlayState* play, Actor* thisx) {
     Player* player = GET_PLAYER(play);
     EnHy* this = (EnHy*)thisx;
     u16 textId = Text_GetFaceReaction(play, (this->actor.params & 0x7F) + 37);
+    u16 retval = 0;
+    Actor* foundPerson = NULL;
 
     if (textId != 0) {
         if ((this->actor.params & 0x7F) == ENHY_TYPE_BOJ_5) {
@@ -426,7 +449,7 @@ u16 func_80A6F810(PlayState* play, Actor* thisx) {
         }
         return textId;
     }
-
+    u16 HylianMsg = GetTextID("hylian");
     switch (this->actor.params & 0x7F) {
         case ENHY_TYPE_AOB:
             if (play->sceneNum == SCENE_KAKARIKO_CENTER_GUEST_HOUSE) {
@@ -468,9 +491,24 @@ u16 func_80A6F810(PlayState* play, Actor* thisx) {
                 return 0x701A;
             }
         case ENHY_TYPE_BOJ_3:
-            return (Flags_GetEventChkInf(EVENTCHKINF_ZELDA_FLED_HYRULE_CASTLE)) ? ((Flags_GetInfTable(INFTABLE_C4)) ? 0x7001 : 0x70EB) : 0x7001;
+            retval = Flags_GetEventChkInf(EVENTCHKINF_ZELDA_FLED_HYRULE_CASTLE) ? ((Flags_GetInfTable(INFTABLE_C4)) ? 0x7001 : 0x70EB) : 0x7001;
+            if (retval == 0x70EB)
+                return retval;
+            else {
+                if (getDayOfCycle() < 2)
+                    return retval;
+                else if (getDayOfCycle() == 2)
+                    return HylianMsg+17;
+                else
+                    return HylianMsg+18;
+            }
         case ENHY_TYPE_AHG_4:
-            return (Flags_GetEventChkInf(EVENTCHKINF_ZELDA_FLED_HYRULE_CASTLE)) ? 0x704B : ((Flags_GetInfTable(INFTABLE_C5)) ? 0x7024 : 0x7023);
+            Actor_FindNumberOf(play,&this->actor,ACTOR_EN_HY,ACTORCAT_NPC,500.0f,&foundPerson,isItchyWoman);
+            //if (LINK_IS_CHILD && ((getDayOfCycle() == 3 && (gSaveContext.NPCWeekEvents[0] & 0x1)) || (gSaveContext.NPCWeekEvents[0] & 0x2)))
+            if (foundPerson == NULL && (gSaveContext.infTable[12] & 0x20))
+                return HylianMsg+22;
+            else
+                return Flags_GetEventChkInf(EVENTCHKINF_ZELDA_FLED_HYRULE_CASTLE) ? 0x704B : ((Flags_GetInfTable(INFTABLE_C5)) ? 0x7024 : 0x7023);
         case ENHY_TYPE_BOJ_5:
             player->exchangeItemId = EXCH_ITEM_BLUE_FIRE;
             return 0x700C;
@@ -497,7 +535,23 @@ u16 func_80A6F810(PlayState* play, Actor* thisx) {
             } else if (play->sceneNum == SCENE_KAKARIKO_VILLAGE) {
                 return CHECK_QUEST_ITEM(QUEST_MEDALLION_SHADOW) ? 0x5080 : 0x507F;
             } else {
-                return (Flags_GetEventChkInf(EVENTCHKINF_ZELDA_FLED_HYRULE_CASTLE)) ? 0x7049
+                if (gSaveContext.eventChkInf[4] & 0x20) {
+                    switch (getDayOfCycle()) {
+                        case 1:
+                            return HylianMsg+4;
+                        case 2:
+                            return HylianMsg+6;
+                        case 3:
+                            return HylianMsg+8;
+                        case 4:
+                            return HylianMsg+10;
+                        case 5:
+                            return HylianMsg+12;
+                        case 0:
+                            return HylianMsg+14;
+                    }
+                }
+                return Flags_GetEventChkInf(EVENTCHKINF_ZELDA_FLED_HYRULE_CASTLE) ? 0x7049
                                                          : ((Flags_GetInfTable(INFTABLE_CA)) ? 0x7020 : 0x701F);
             }
         case ENHY_TYPE_BOJ_10:
@@ -506,12 +560,51 @@ u16 func_80A6F810(PlayState* play, Actor* thisx) {
             } else if (play->sceneNum == SCENE_KAKARIKO_VILLAGE) {
                 return CHECK_QUEST_ITEM(QUEST_MEDALLION_SHADOW) ? 0x507C : 0x507B;
             } else {
-                return (Flags_GetEventChkInf(EVENTCHKINF_ZELDA_FLED_HYRULE_CASTLE)) ? 0x7046
+                if (Flags_GetEventChkInf(0x45)) /*(gSaveContext.eventChkInf[4] & 0x20)*/ {
+                    switch (getDayOfCycle()) {
+                        case 1:
+                            return HylianMsg+3;
+                        case 2:
+                            return HylianMsg+5;
+                        case 3:
+                            return HylianMsg+7;
+                        case 4:
+                            return HylianMsg+9;
+                        case 5:
+                            return HylianMsg+11;
+                        case 0:
+                            return HylianMsg+13;
+                    }
+                }
+                return Flags_GetEventChkInf(EVENTCHKINF_ZELDA_FLED_HYRULE_CASTLE) ? 0x7046
                                                          : ((Flags_GetInfTable(INFTABLE_CD)) ? 0x7019 : 0x7018);
             }
         case ENHY_TYPE_CNE_11:
-            return (Flags_GetInfTable(INFTABLE_ENTERED_HYRULE_CASTLE)) ? ((Flags_GetInfTable(INFTABLE_CC)) ? 0x7014 : 0x70A4)
-                                                      : 0x7014;
+        {
+            if (play->sceneNum == SCENE_HYRULE_FIELD) {
+                if (getDayOfCycle() == 3 && (gSaveContext.NPCWeekEvents[0] & 0x1)) {
+                    //if (this->actionFunc != EnHy_BeSulking)
+                    if (this->questStateTracking != ENHY_STATE_SULK)
+                        return HylianMsg+19;
+                    else
+                        return HylianMsg+24;
+                } else {
+                    return HylianMsg+23;
+                }
+            } else if (play->sceneNum == SCENE_KAKARIKO_VILLAGE) {
+                if (gSaveContext.NPCWeekEvents[0] & 0x4)
+                    return HylianMsg+21;
+                else
+                    return HylianMsg+20;
+            } else {
+                retval = (Flags_GetInfTable(INFTABLE_ENTERED_HYRULE_CASTLE)) ? ((Flags_GetInfTable(INFTABLE_CC)) ? 0x7014 : 0x70A4)
+                                                      : 0x7014;;
+                if (getDayOfCycle() == 3 && (retval == 0x7014))
+                    return HylianMsg+15;
+                else
+                    return retval;
+            }
+        }
         case ENHY_TYPE_BOJ_12:
             if (play->sceneNum == SCENE_KAKARIKO_VILLAGE) {
                 return !IS_DAY ? 0x5084 : 0x5083;
@@ -521,6 +614,9 @@ u16 func_80A6F810(PlayState* play, Actor* thisx) {
         case ENHY_TYPE_AHG_13:
             return 0x7055;
         case ENHY_TYPE_BOJ_14:
+        if (IS_DAY && !(play->sceneNum == SCENE_BACK_ALLEY_DAY))
+            return HylianMsg+2;
+        else
             return 0x7089;
         case ENHY_TYPE_BJI_15:
             return 0x708A;
@@ -547,7 +643,10 @@ u16 func_80A6F810(PlayState* play, Actor* thisx) {
         case ENHY_TYPE_BJI_19:
             return 0x7120;
         case ENHY_TYPE_AHG_20:
-            return 0x7121;
+            if (IS_DAY)
+                return 0x7121;
+            else
+                return HylianMsg+0;
         default:
             return 0;
     }
@@ -556,13 +655,37 @@ u16 func_80A6F810(PlayState* play, Actor* thisx) {
 s16 func_80A70058(PlayState* play, Actor* thisx) {
     EnHy* this = (EnHy*)thisx;
     s16 beggarItems[] = { ITEM_BLUE_FIRE, ITEM_FISH, ITEM_BUG, ITEM_FAIRY };
-    s16 beggarRewards[] = { 150, 100, 50, 25 };
+    s16 beggarRewards[] = { BEGGAR_REWARD_FIRE, BEGGAR_REWARD_FISH, BEGGAR_REWARD_BUG, BEGGAR_REWARD_FAIRY };
+    u16 HylianMsg = GetTextID("hylian");
+    s16 npcAgeIndex = LINK_IS_CHILD ? 1 : 2;
+    s16 tradeItemToken;
 
     switch (Message_GetState(&play->msgCtx)) {
         case TEXT_STATE_NONE:
         case TEXT_STATE_DONE_HAS_NEXT:
         case TEXT_STATE_CHOICE:
         case TEXT_STATE_DONE:
+            if (Message_ShouldAdvance(play)) {
+                switch (this->actor.textId) {
+                    case 0x70F0:
+                    case 0x70F1:
+                    case 0x70F2:
+                    case 0x70F3:
+                        tradeItemToken = this->actor.textId - 0x70F0;
+                        if (tradeItemToken&1^tradeItemToken>>1&1)
+                            tradeItemToken ^= 3;//This swaps the bug and fish entries
+                        if (getDayOfCycle() == tradeItemToken + 2)
+                            gSaveContext.NPCWeekEvents[npcAgeIndex] |= (1 << tradeItemToken);
+                        if ((gSaveContext.NPCWeekEvents[npcAgeIndex] & 0xF) == 0xF && !(gSaveContext.itemGetInf[3] & 4)) {
+                            Rupees_ChangeBy(beggarRewards[this->actor.textId - 0x70F0]);
+                            Animation_ChangeByInfo(&this->skelAnime, sAnimationInfo, ENHY_ANIM_17);
+                            Player_UpdateBottleHeld(play, GET_PLAYER(play), ITEM_BOTTLE, PLAYER_IA_BOTTLE);
+                            this->actor.textId = HylianMsg+16;
+                            Message_ContinueTextbox(play, this->actor.textId);
+                        }
+                    break;
+                }
+            }
         case TEXT_STATE_SONG_DEMO_DONE:
         case TEXT_STATE_8:
         case TEXT_STATE_9:
@@ -594,7 +717,8 @@ s16 func_80A70058(PlayState* play, Actor* thisx) {
                 case 0x70F1:
                 case 0x70F2:
                 case 0x70F3:
-                    Rupees_ChangeBy(beggarRewards[this->actor.textId - 0x70F0]);
+                    tradeItemToken = this->actor.textId - 0x70F0;
+                    Rupees_ChangeBy(beggarRewards[tradeItemToken]);
                     Animation_ChangeByInfo(&this->skelAnime, sAnimationInfo, ENHY_ANIM_17);
                     Player_UpdateBottleHeld(play, GET_PLAYER(play), ITEM_BOTTLE, PLAYER_IA_BOTTLE);
                     break;
@@ -672,8 +796,31 @@ s16 func_80A70058(PlayState* play, Actor* thisx) {
                         }
                     }
                     this->actionFunc = func_80A714C4;
+                    this->questStateTracking = ENHY_STATE_GIVE;
                     break;
             }
+            if (this->actor.textId == HylianMsg+15) {
+                gSaveContext.NPCWeekEvents[0] |= 0x1;
+            } else if (this->actor.textId == HylianMsg+16) {
+                func_80A6F7CC(this, play, GI_HEART_PIECE);
+                this->actionFunc = EnHy_GiveBeggarReward;
+                this->questStateTracking = ENHY_STATE_GIVE;
+            } else if (this->actor.textId == HylianMsg+19) {
+                this->actor.minVelocityY = -4.0f;
+                this->actor.gravity = -1.0f;
+                this->actionFunc = EnHy_WalkAlong;
+                this->questStateTracking = ENHY_STATE_WALK;
+            } else if (this->actor.textId == HylianMsg+20) {
+                gSaveContext.NPCWeekEvents[0] |= 0x4;
+                if (!(gSaveContext.itemGetInf[3] & 0x8)) {
+                    func_80A6F7CC(this, play, GI_HEART_PIECE);
+                    this->actionFunc = EnHy_GiveYellowLadyReward;
+                    this->questStateTracking = ENHY_STATE_GIVE;
+                }
+            } else if (this->actor.textId == HylianMsg+23) {
+                gSaveContext.NPCWeekEvents[0] &= ~0x1;
+            }
+
             return NPC_TALK_STATE_IDLE;
         case TEXT_STATE_EVENT:
             if (!Message_ShouldAdvance(play)) {
@@ -728,6 +875,10 @@ void EnHy_UpdateCollider(EnHy* this, PlayState* play) {
     pos.z += sColliderInfo[this->actor.params & 0x7F].offset.z;
     this->collider.dim.pos = pos;
     CollisionCheck_SetOC(play, &play->colChkCtx, &this->collider.base);
+    //this->actionFunc == EnHy_WalkAlong
+    if ((this->questStateTracking == ENHY_STATE_WALK) && (this->actor.colorFilterTimer == 0)) {
+        CollisionCheck_SetAC(play, &play->colChkCtx, &this->collider.base);
+    }
 }
 
 void func_80A70834(EnHy* this, PlayState* play) {
@@ -735,7 +886,7 @@ void func_80A70834(EnHy* this, PlayState* play) {
 
     if ((this->actor.params & 0x7F) == ENHY_TYPE_BOJ_5) {
         if (!Inventory_HasSpecificBottle(ITEM_BLUE_FIRE) && !Inventory_HasSpecificBottle(ITEM_BUG) &&
-            !Inventory_HasSpecificBottle(ITEM_FISH)) {
+            !Inventory_HasSpecificBottle(ITEM_FISH) && !Inventory_HasSpecificBottle(ITEM_FAIRY)) {
             switch (func_8002F368(play)) {
                 case EXCH_ITEM_POE:
                 case EXCH_ITEM_BIG_POE:
@@ -758,6 +909,9 @@ void func_80A70834(EnHy* this, PlayState* play) {
                     break;
                 case EXCH_ITEM_BUG:
                     this->actor.textId = 0x70F2;
+                    break;
+                case EXCH_ITEM_FAIRY:
+                    this->actor.textId = 0x70F3;
                     break;
                 default:
                     if (Player_GetMask(play) == PLAYER_MASK_NONE) {
@@ -782,6 +936,14 @@ void func_80A70978(EnHy* this, PlayState* play) {
         case ENHY_TYPE_BOJ_10:
             trackingMode =
                 (this->interactInfo.talkState == NPC_TALK_STATE_IDLE) ? NPC_TRACKING_NONE : NPC_TRACKING_HEAD_AND_TORSO;
+            break;
+        case ENHY_TYPE_CNE_11:
+            if (play->sceneNum == SCENE_HYRULE_FIELD) {
+                trackingMode =
+                    (this->questStateTracking == ENHY_STATE_WALK) ? NPC_TRACKING_NONE : NPC_TRACKING_FULL_BODY;
+            } else {
+                trackingMode = NPC_TRACKING_HEAD_AND_TORSO;
+            }
             break;
         case ENHY_TYPE_BOJ_12:
             trackingMode = NPC_TRACKING_NONE;
@@ -819,13 +981,21 @@ void func_80A70978(EnHy* this, PlayState* play) {
 
 s32 EnHy_ShouldSpawn(EnHy* this, PlayState* play) {
     switch (play->sceneNum) {
+        case SCENE_HYRULE_FIELD:
+            if ((this->actor.params & 0x7F) == ENHY_TYPE_CNE_11) {
+                if (LINK_IS_CHILD && (getDayOfCycle() == 3) && (gSaveContext.NPCWeekEvents[0] & 0x1) && !(gSaveContext.NPCWeekEvents[0] & 0x2)) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
         case SCENE_KAKARIKO_VILLAGE:
             if (!((this->actor.params & 0x7F) == ENHY_TYPE_BOJ_9 || (this->actor.params & 0x7F) == ENHY_TYPE_BOJ_10 ||
                   (this->actor.params & 0x7F) == ENHY_TYPE_BOJ_12 || (this->actor.params & 0x7F) == ENHY_TYPE_AHG_2 ||
-                  (this->actor.params & 0x7F) == ENHY_TYPE_BJI_7)) {
+                  (this->actor.params & 0x7F) == ENHY_TYPE_BJI_7 || (this->actor.params & 0x7F) == ENHY_TYPE_CNE_11)) {
                 return true;
-            } else if (!LINK_IS_ADULT) {
-                return true;
+            } else if ((this->actor.params & 0x7F) == ENHY_TYPE_CNE_11) {
+                return (LINK_IS_CHILD && (gSaveContext.NPCWeekEvents[0] & 0x2));
             } else if ((this->actor.params & 0x7F) != ENHY_TYPE_BOJ_12 && IS_NIGHT) {
                 return false;
             } else {
@@ -876,6 +1046,10 @@ s32 EnHy_ShouldSpawn(EnHy* this, PlayState* play) {
             }
         default:
             switch (this->actor.params & 0x7F) {
+                case ENHY_TYPE_CNE_11:
+                    if (LINK_IS_CHILD && ((getDayOfCycle() == 3 && (gSaveContext.NPCWeekEvents[0] & 0x1)) || (gSaveContext.NPCWeekEvents[0] & 0x2)))
+                        return false;
+                    break;
                 case ENHY_TYPE_BJI_19:
                 case ENHY_TYPE_AHG_20:
                     if (LINK_IS_ADULT) {
@@ -886,20 +1060,26 @@ s32 EnHy_ShouldSpawn(EnHy* this, PlayState* play) {
     }
 }
 
+static const Vec3s path1points[] = {{0,0,1700}, {35,0,2060}, {1200,0,2245}, {1550,0,1850}, {1565,0,1235}, {1840,0,920}, {2024,0,730}, {2483, 0, 530}, {3105,-20, 727}, {3365,-20,610}, {3850,280,175}, {4280, 420, 440}};
+static Path path1 = {ARRAY_COUNT(path1points), &path1points};
+
 void EnHy_Init(Actor* thisx, PlayState* play) {
     EnHy* this = (EnHy*)thisx;
 
     if ((this->actor.params & 0x7F) >= ENHY_TYPE_MAX || !EnHy_FindOsAnimeObject(this, play) ||
         !EnHy_FindSkelAndHeadObjects(this, play)) {
+        lusprintf("z_en_hy.c", __LINE__, 0, "HyActor type object not found!");
         Actor_Kill(&this->actor);
     }
 
     if (!EnHy_ShouldSpawn(this, play)) {
+        lusprintf("z_en_hy.c", __LINE__, 0, "HyActor killed before spawn!");
         Actor_Kill(&this->actor);
     }
 
     this->getItemEntry = (GetItemEntry)GET_ITEM_NONE;
     this->actionFunc = EnHy_InitImpl;
+    this->questStateTracking = ENHY_STATE_INIT;
 }
 
 void EnHy_Destroy(Actor* thisx, PlayState* play) {
@@ -943,14 +1123,17 @@ void EnHy_InitImpl(EnHy* this, PlayState* play) {
                     this->actor.speedXZ = 3.0f;
                 }
                 this->actionFunc = func_80A711B4;
+                this->questStateTracking = ENHY_STATE_WALK;
                 break;
             case ENHY_TYPE_BJI_7:
                 this->pathReverse = false;
                 this->actionFunc = func_80A712C0;
+                this->questStateTracking = ENHY_STATE_WALK;
                 break;
             case ENHY_TYPE_AOB:
                 if (play->sceneNum == SCENE_MARKET_DAY) {
                     this->actionFunc = func_80A710F8;
+                    this->questStateTracking = ENHY_STATE_NOTHING;
                     break;
                 }
                 // fall-through
@@ -968,15 +1151,33 @@ void EnHy_InitImpl(EnHy* this, PlayState* play) {
             case ENHY_TYPE_BJI_19:
             case ENHY_TYPE_AHG_20:
                 this->actionFunc = func_80A7127C;
+                this->questStateTracking = ENHY_STATE_NOTHING;
                 break;
             case ENHY_TYPE_BOJ_5:
             case ENHY_TYPE_BOJ_9:
             case ENHY_TYPE_BOJ_10:
-            case ENHY_TYPE_CNE_11:
             case ENHY_TYPE_BOJ_12:
                 this->actionFunc = EnHy_DoNothing;
+                this->questStateTracking = ENHY_STATE_NOTHING;
+                break;
+            case ENHY_TYPE_CNE_11:
+
+                if (play->sceneNum == SCENE_HYRULE_FIELD) {
+                    this->path = &path1;
+                    this->waypoint = 1;
+                    this->actor.colChkInfo.health = 4;
+                    this->collider.info.bumperFlags = BUMP_ON;
+                    this->collider.info.bumper.dmgFlags = 0x00FFFFF;
+                    this->collider.base.colType = COLTYPE_HIT7;
+                    this->collider.base.acFlags = AC_ON | AC_TYPE_ENEMY;
+                }
+
+                this->actionFunc = EnHy_DoNothing;
+                this->questStateTracking = ENHY_STATE_NOTHING;
+                lusprintf("z_en_hy.c", __LINE__, 0, "HyActor CNE_11 spawned! Path: %p, waypoint: %i", this->path, this->waypoint);
                 break;
             default:
+                lusprintf("z_en_hy.c", __LINE__, 0, "HyActor killed during spawn!");
                 Actor_Kill(&this->actor);
                 break;
         }
@@ -1018,6 +1219,62 @@ void func_80A7127C(EnHy* this, PlayState* play) {
 }
 
 void EnHy_DoNothing(EnHy* this, PlayState* play) {
+    //This is effectingly supposed to be a 'dummy op' that doesn't affect gameplay but forces
+    //the compiler to not omit this function
+    if (gSaveContext.n64ddFlag) {
+        this->actor.home.pos.y = this->actor.world.pos.y;
+    }
+}
+
+void EnHy_BeSulking(EnHy* this, PlayState* play) {
+    //This is effectingly supposed to be a 'dummy op' that doesn't affect gameplay but forces
+    //the compiler to not omit this function
+    if (gSaveContext.n64ddFlag && (gSaveContext.NPCWeekEvents[0] & 0x1)) {
+        this->actor.home.pos.x = this->actor.world.pos.x;
+    }
+}
+
+void EnHy_WalkAlong(EnHy* this, PlayState* play) {
+    if (this->waypoint != 0)
+        this->actor.speedXZ = 1.0f;
+    else
+        this->actor.speedXZ = 0.0f;
+
+    s16 yaw;
+    f32 distSq;
+
+    distSq = Path_OrientAndGetDistSq(&this->actor, this->path, this->waypoint, &yaw);
+    Math_SmoothStepToS(&this->actor.world.rot.y, yaw, 10, 1000, 1);
+    Math_SmoothStepToS(&this->actor.shape.rot.y, this->actor.world.rot.y, 2, 0x0200, 1);
+
+    if (!(getDayOfCycle() == 3) || !(gSaveContext.NPCWeekEvents[0] & 0x1)) {
+        this->actionFunc = EnHy_BeSulking;
+        this->questStateTracking = ENHY_STATE_SULK;
+        this->actor.speedXZ = 0.0f;
+    }
+
+    if ((distSq > 0.0f) && (distSq < 1000.0f)) {
+        this->waypoint++;
+        if (this->waypoint > (this->path->count - 2) && this->path == &path1)
+                gSaveContext.NPCWeekEvents[0] |= 2;
+        if (this->waypoint > (this->path->count - 1)) {
+            this->waypoint = 0;
+            lusprintf("z_en_hy.c", __LINE__, 0, "HyActor killed due to waypoint being reaached!");
+            Actor_Kill(&this->actor);
+        }
+    }
+
+    if ((this->collider.base.acFlags & AC_HIT) != 0) {
+        this->collider.base.acFlags &= ~AC_HIT;
+        DECR(this->actor.colChkInfo.health);
+        Actor_SetColorFilter(&this->actor, 0x4000, 0xFF, 0, 8);
+        Audio_PlayActorSound2(&this->actor, NA_SE_VO_Z0_HURRY);
+        if (this->actor.colChkInfo.health <= 0) {
+            this->actionFunc = EnHy_BeSulking;
+            this->questStateTracking = ENHY_STATE_SULK;
+            this->actor.speedXZ = 0.0f;
+        }
+    }
 }
 
 void func_80A712C0(EnHy* this, PlayState* play) {
@@ -1025,6 +1282,7 @@ void func_80A712C0(EnHy* this, PlayState* play) {
         Animation_ChangeByInfo(&this->skelAnime, sAnimationInfo, ENHY_ANIM_7);
         this->actor.speedXZ = 0.4f;
         this->actionFunc = func_80A7134C;
+        this->questStateTracking = ENHY_STATE_NOTHING;
     }
 
     func_80034F54(play, this->unk_21C, this->unk_23C, 16);
@@ -1067,6 +1325,7 @@ void func_80A7134C(EnHy* this, PlayState* play) {
 void func_80A714C4(EnHy* this, PlayState* play) {
     if (Actor_HasParent(&this->actor, play)) {
         this->actionFunc = func_80A71530;
+        this->questStateTracking = ENHY_STATE_GIVE;
     } else {
         if (!IS_RANDO || this->getItemEntry.getItemId == GI_NONE) {
             func_8002F434(&this->actor, play, this->unkGetItemId, this->actor.xzDistToPlayer + 1.0f, fabsf(this->actor.yDistToPlayer) + 1.0f);
@@ -1099,6 +1358,49 @@ void func_80A71530(EnHy* this, PlayState* play) {
             }
         }
         this->actionFunc = func_80A7127C;
+        this->questStateTracking = ENHY_STATE_NOTHING;
+    }
+}
+
+void EnHy_GiveBeggarReward(EnHy* this, PlayState* play) {
+    if (Actor_HasParent(&this->actor, play)) {
+        this->actionFunc = EnHy_ReceiveBeggarReward;
+        this->questStateTracking = ENHY_STATE_GIVE;
+    } else {
+        if (!gSaveContext.n64ddFlag || this->getItemEntry.getItemId == GI_NONE) {
+            func_8002F434(&this->actor, play, this->unkGetItemId, this->actor.xzDistToPlayer + 1.0f, fabsf(this->actor.yDistToPlayer) + 1.0f);
+        } else {
+            GiveItemEntryFromActor(&this->actor, play, this->getItemEntry, this->actor.xzDistToPlayer + 1.0f, fabsf(this->actor.yDistToPlayer) + 1.0f);
+        }
+    }
+}
+
+void EnHy_ReceiveBeggarReward(EnHy* this, PlayState* play) {
+    if ((Message_GetState(&play->msgCtx) == TEXT_STATE_DONE) && Message_ShouldAdvance(play)) {
+        gSaveContext.itemGetInf[3] |= 0x4;
+        this->actionFunc = EnHy_DoNothing;
+        this->questStateTracking = ENHY_STATE_NOTHING;
+    }
+}
+
+void EnHy_GiveYellowLadyReward(EnHy* this, PlayState* play) {
+    if (Actor_HasParent(&this->actor, play)) {
+        this->actionFunc = EnHy_ReceiveYellowLadyReward;
+        this->questStateTracking = ENHY_STATE_GIVE;
+    } else {
+        if (!gSaveContext.n64ddFlag || this->getItemEntry.getItemId == GI_NONE) {
+            func_8002F434(&this->actor, play, this->unkGetItemId, this->actor.xzDistToPlayer + 1.0f, fabsf(this->actor.yDistToPlayer) + 1.0f);
+        } else {
+            GiveItemEntryFromActor(&this->actor, play, this->getItemEntry, this->actor.xzDistToPlayer + 1.0f, fabsf(this->actor.yDistToPlayer) + 1.0f);
+        }
+    }
+}
+
+void EnHy_ReceiveYellowLadyReward(EnHy* this, PlayState* play) {
+    if ((Message_GetState(&play->msgCtx) == TEXT_STATE_DONE) && Message_ShouldAdvance(play)) {
+        gSaveContext.itemGetInf[3] |= 0x8;
+        this->actionFunc = EnHy_DoNothing;
+        this->questStateTracking = ENHY_STATE_NOTHING;
     }
 }
 

@@ -50,6 +50,14 @@
 
 #define IS_DAY (gSaveContext.nightFlag == 0)
 #define IS_NIGHT (gSaveContext.nightFlag == 1)
+#define DAYS_IN_CYCLE 6
+#define DEFAULT_RESOURCE_TIME 200000
+#define INITIAL_GALLERY_MULTIPLIER 0
+#define NAVI_ENEMY_START_ID 0x600
+#define ENEMY_MSG (0x005D)
+#define NAVI_ENEMY_CUSTOM_ID (NAVI_ENEMY_START_ID+ENEMY_MSG)
+
+#define DEKU_TREE_DEAD (gSaveContext.eventChkInf[0] & (1<<7))
 
 #define SLOT(item) gItemSlots[item]
 #define INV_CONTENT(item) gSaveContext.inventory.items[SLOT(item)]
@@ -71,6 +79,7 @@
 #define CUR_UPG_VALUE(upg) ((s32)(gSaveContext.inventory.upgrades & gUpgradeMasks[upg]) >> gUpgradeShifts[upg])
 #define CAPACITY(upg, value) gUpgradeCapacities[upg][value]
 #define CUR_CAPACITY(upg) CAPACITY(upg, CUR_UPG_VALUE(upg))
+#define MAX_BOMBCHU_CAPACITY 20
 
 #define CHECK_QUEST_ITEM(item) (gBitFlags[item] & gSaveContext.inventory.questItems)
 #define CHECK_DUNGEON_ITEM(item, dungeonIndex) (gSaveContext.inventory.dungeonItems[dungeonIndex] & gBitFlags[item])
@@ -316,6 +325,10 @@ extern GraphicsContext* __gfxCtx;
     (Randomizer_GetSettingValue(randomizerSettingsKey) != RO_DUNGEON_ITEM_LOC_STARTWITH && \
      Randomizer_GetSettingValue(randomizerSettingsKey) != RO_DUNGEON_ITEM_LOC_VANILLA && \
      Randomizer_GetSettingValue(randomizerSettingsKey) != RO_DUNGEON_ITEM_LOC_OWN_DUNGEON)
+// #endregion
+
+// #region SOH [S-Edition]
+#define UNDERWATER_FREE_EQUIP_USE 1
 // #endregion
 
 #endif

@@ -185,7 +185,7 @@ u8 EnDs_RandoCanGetGrannyItem() {
 }
 
 s32 EnDs_CheckRupeesAndBottle() {
-    if (gSaveContext.rupees < 100) {
+    if (Rupees_GetNum() < 100) {
         return 0;
     } else if (EnDs_RandoCanGetGrannyItem()) { // Allow buying the rando item regardless of having a bottle
         return 2;

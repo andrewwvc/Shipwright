@@ -1,4 +1,6 @@
 #include "util.h"
+#include "variables.h"
+#include "macros.h"
 
 #include <string.h>
 #include <vector>
@@ -189,15 +191,15 @@ std::vector<std::string> itemNames = {
     "Kokiri Boots",
     "Iron Boots",
     "Hover Boots",
-    "Bullet Bag (30)",
-    "Bullet Bag (40)",
-    "Bullet Bag (50)",
-    "Quiver (30)",
-    "Big Quiver (40)",
-    "Biggest Quiver (50)",
-    "Bomb Bag (20)",
-    "Big Bomb Bag (30)",
-    "Biggest Bomb Bag (40)",
+    "Bullet Bag ("+std::to_string(CAPACITY(UPG_BULLET_BAG,1))+")",
+    "Bullet Bag ("+std::to_string(CAPACITY(UPG_BULLET_BAG,2))+")",
+    "Bullet Bag ("+std::to_string(CAPACITY(UPG_BULLET_BAG,3))+")",
+    "Quiver ("+std::to_string(CAPACITY(UPG_QUIVER,1))+")",
+    "Big Quiver ("+std::to_string(CAPACITY(UPG_QUIVER,2))+")",
+    "Biggest Quiver ("+std::to_string(CAPACITY(UPG_QUIVER,3))+")",
+    "Bomb Bag ("+std::to_string(CAPACITY(UPG_BOMB_BAG,1))+")",
+    "Big Bomb Bag ("+std::to_string(CAPACITY(UPG_BOMB_BAG,2))+")",
+    "Biggest Bomb Bag ("+std::to_string(CAPACITY(UPG_BOMB_BAG,3))+")",
     "Goron's Bracelet",
     "Silver Gauntlets",
     "Golden Gauntlets",

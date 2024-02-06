@@ -35,6 +35,7 @@ typedef struct EnSkj {
     /* 0x02EC */ f32 unk_2EC;
     /* 0x02F0 */ f32 unk_2F0;
     /* 0x02F4 */ Vec3f posCopy;
+    /* 0x02F4 */ s16 rewardSelect;
 } EnSkj; // size = 0x0300
 
 #endif

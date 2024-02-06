@@ -2,6 +2,7 @@
 #include "vt.h"
 
 #include <string.h>
+#include <stdlib.h>
 
 #include "soh/Enhancements/gameconsole.h"
 #include "soh/frame_interpolation.h"
@@ -222,6 +223,9 @@ void Play_Destroy(GameState* thisx) {
     ZeldaArena_Cleanup();
     Fault_RemoveClient(&D_801614B8);
     disableBetaQuest();
+    if (play->setupActorList)
+        free(play->setupActorList);
+    play->setupActorList = NULL;
     gPlayState = NULL;
 }
 
@@ -505,6 +509,7 @@ void Play_Init(GameState* thisx) {
         GameInteractor_ExecuteOnExitGame(gSaveContext.fileNum);
         return;
     }
+    play->setupActorList = NULL;
 
     SystemArena_Display();
     // OTRTODO allocate double the normal amount of memory
@@ -608,6 +613,7 @@ void Play_Init(GameState* thisx) {
             gSaveContext.totalDays++;
             gSaveContext.bgsDayCount++;
             gSaveContext.dogIsLost = true;
+            Environment_UpdateDataOnDayChange();
             if (Inventory_ReplaceItem(play, ITEM_WEIRD_EGG, ITEM_CHICKEN) ||
                 Inventory_HatchPocketCucco(play)) {
                 Message_StartTextbox(play, 0x3066, NULL);
@@ -1207,6 +1213,7 @@ void Play_Update(PlayState* play) {
                 }
 
                 play->gameplayFrames++;
+                gSaveContext.savedFrameCount++;
                 // Gameplay stat tracking
                 if (!gSaveContext.sohStats.gameComplete &&
                     (!IS_BOSS_RUSH || !gSaveContext.isBossRushPaused)) {
@@ -1352,6 +1359,7 @@ void Play_Update(PlayState* play) {
                 }
 
                 KaleidoScopeCall_Update(play);
+                Message_Update(play);
             } else if (play->gameOverCtx.state != GAMEOVER_INACTIVE) {
                 if (1 && HREG(63)) {
                     LOG_NUM("1", 1);
@@ -1434,6 +1442,7 @@ skip:
         }
 
         Camera_Update(play->cameraPtrs[play->nextCamera]);
+        //lusprintf(0,0,0,"\nCamera\nSetting: %d,\nMode: %d", play->cameraPtrs[play->nextCamera]->setting, play->cameraPtrs[play->nextCamera]->mode);
 
         if (1 && HREG(63)) {
             LOG_NUM("1", 1);

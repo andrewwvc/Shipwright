@@ -3015,6 +3015,8 @@ void FileChoose_LoadGame(GameState* thisx) {
     osSyncPrintf(VT_RST);
 
     gSaveContext.naviTimer = 0;
+    ElfMessage_ResetPersistantElfMessages();
+    changeToNormalWallet();
 
     // SWORDLESS LINK IS BACK BABY
     if (CVarGetInteger("gSwordlessLink", 0) != 0)

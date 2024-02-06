@@ -1180,6 +1180,8 @@ s32 LinkAnimation_Morph(PlayState* play, SkelAnime* skelAnime) {
     return 0;
 }
 
+static Vec3s sLinkInterpjointTable[1000];
+
 /**
  * Requests a load of the next frame of a Link animation, advances the morph, and requests an interpolation between
  * jointTable and morphTable
@@ -1187,9 +1189,21 @@ s32 LinkAnimation_Morph(PlayState* play, SkelAnime* skelAnime) {
 void LinkAnimation_AnimateFrame(PlayState* play, SkelAnime* skelAnime) {
     AnimationContext_SetLoadFrame(play, skelAnime->animation, skelAnime->curFrame, skelAnime->limbCount,
                                   skelAnime->jointTable);
+    if (skelAnime->mode & ANIM_INTERP) {
+        s32 frame = skelAnime->curFrame;
+        f32 partialFrame = skelAnime->curFrame - frame;
+
+        if (++frame >= (s32)skelAnime->animLength) {
+            frame = 0;
+        } else {
+            AnimationContext_SetLoadFrame(play, skelAnime->animation, frame, skelAnime->limbCount,
+                                    sLinkInterpjointTable);
+            AnimationContext_SetInterp(play, skelAnime->limbCount, skelAnime->jointTable, sLinkInterpjointTable,
+                                        partialFrame);
+        }
+    }
     if (skelAnime->morphWeight != 0) {
         f32 updateRate = R_UPDATE_RATE * 0.5f;
-
         skelAnime->morphWeight -= skelAnime->morphRate * updateRate;
         if (skelAnime->morphWeight <= 0.0f) {
             skelAnime->morphWeight = 0.0f;
@@ -1308,6 +1322,16 @@ void LinkAnimation_PlayOnceSetSpeed(PlayState* play, SkelAnime* skelAnime, LinkA
     LinkAnimation_Change(play, skelAnime, animation, playSpeed, 0.0f, Animation_GetLastFrame(animation),
                          ANIMMODE_ONCE, 0.0f);
 }
+
+/**
+ * Immediately changes to a Link animation that plays once at the specified speed.
+ */
+void LinkAnimation_PlayOnceSetSpeedInterp(PlayState* play, SkelAnime* skelAnime, LinkAnimationHeader* animation,
+                                    f32 playSpeed) {
+    LinkAnimation_Change(play, skelAnime, animation, playSpeed, 0.0f, Animation_GetLastFrame(animation),
+                         ANIMMODE_ONCE_INTERP, 0.0f);
+}
+
 
 /**
  * Immediately changes to a Link animation that loops at the default speed.

@@ -151,6 +151,7 @@ static u16 sHBAScoreDigits[] = { 0, 0, 0, 0 };
 
 static u16 sCUpInvisible = 0;
 static u16 sCUpTimer = 0;
+static u8 sCUpPauseOverride = 0;
 
 s16 gSpoilingItems[] = { ITEM_ODD_MUSHROOM, ITEM_FROG, ITEM_EYEDROPS };
 s16 gSpoilingItemReverts[] = { ITEM_COJIRO, ITEM_PRESCRIPTION, ITEM_PRESCRIPTION };
@@ -964,11 +965,17 @@ void func_80083108(PlayState* play) {
                 gSaveContext.buttonStatus[3] = gSaveContext.buttonStatus[5] = gSaveContext.buttonStatus[6] =
                 gSaveContext.buttonStatus[7] = gSaveContext.buttonStatus[8] = BTN_DISABLED;
             } else if ((Player_GetEnvironmentalHazard(play) >= 2) && (Player_GetEnvironmentalHazard(play) < 5)) {
-                if (gSaveContext.buttonStatus[0] != BTN_DISABLED) {
-                    sp28 = 1;
+                if (UNDERWATER_FREE_EQUIP_USE && (Player_GetEnvironmentalHazard(play) == 2)) {
+                    if (gSaveContext.buttonStatus[0] == BTN_DISABLED) {
+                        sp28 = 1;
+                    }
+                    gSaveContext.buttonStatus[0] = BTN_ENABLED;
+                } else {
+                    if (gSaveContext.buttonStatus[0] != BTN_DISABLED) {
+                        sp28 = 1;
+                    }
+                    gSaveContext.buttonStatus[0] = BTN_DISABLED;
                 }
-
-                gSaveContext.buttonStatus[0] = BTN_DISABLED;
 
                 for (i = 1; i < ARRAY_COUNT(gSaveContext.equips.buttonItems); i++) {
                     if ((gSaveContext.equips.buttonItems[i] >= ITEM_SHIELD_DEKU) &&
@@ -981,7 +988,8 @@ void func_80083108(PlayState* play) {
                         gSaveContext.buttonStatus[BUTTON_STATUS_INDEX(i)] = BTN_ENABLED;
                     } else if (Player_GetEnvironmentalHazard(play) == 2) {
                         if ((gSaveContext.equips.buttonItems[i] != ITEM_HOOKSHOT) &&
-                            (gSaveContext.equips.buttonItems[i] != ITEM_LONGSHOT)) {
+                            (gSaveContext.equips.buttonItems[i] != ITEM_LONGSHOT) &&
+                             (UNDERWATER_FREE_EQUIP_USE && gSaveContext.equips.buttonItems[i] != ITEM_HAMMER)) {
                             if (gSaveContext.buttonStatus[BUTTON_STATUS_INDEX(i)] == BTN_ENABLED) {
                                 sp28 = 1;
                             }
@@ -1301,7 +1309,7 @@ void func_80083108(PlayState* play) {
                               (gSaveContext.equips.buttonItems[i] <= ITEM_BOOTS_HOVER)) && // (tunics/boots) on C-buttons
                             !((gSaveContext.equips.buttonItems[i] >= ITEM_WEIRD_EGG) &&
                               (gSaveContext.equips.buttonItems[i] <= ITEM_CLAIM_CHECK))) {
-                            if ((play->sceneNum != SCENE_TREASURE_BOX_SHOP) ||
+                            if (/*(play->sceneNum != SCENE_TREASURE_BOX_SHOP) ||*/
                                 (gSaveContext.equips.buttonItems[i] != ITEM_LENS)) {
                                 if (gSaveContext.buttonStatus[BUTTON_STATUS_INDEX(i)] == BTN_ENABLED) {
                                     sp28 = 1;
@@ -1387,6 +1395,10 @@ void Interface_SetSceneRestrictions(PlayState* play) {
             interfaceCtx->restrictions.farores = (sRestrictionFlags[i].flags3 & 0x30) >> 4;
             interfaceCtx->restrictions.dinsNayrus = (sRestrictionFlags[i].flags3 & 0x0C) >> 2;
             interfaceCtx->restrictions.all = (sRestrictionFlags[i].flags3 & 0x03) >> 0;
+
+            if (usingBorrowedWallet()) {
+                interfaceCtx->restrictions.bottles = interfaceCtx->restrictions.tradeItems = 1;
+            }
 
             osSyncPrintf(VT_FGCOL(YELLOW));
             osSyncPrintf("parameter->button_status = %x,%x,%x\n", sRestrictionFlags[i].flags1,
@@ -2037,6 +2049,12 @@ u8 Item_Give(PlayState* play, u8 item) {
             Rupees_ChangeBy(500);
         }
         return Return_Item(item, MOD_NONE, ITEM_NONE);
+    } else if (item == ITEM_WALLET_KING) {
+        Inventory_ChangeUpgrade(UPG_WALLET, 3);
+        if (gSaveContext.n64ddFlag && Randomizer_GetSettingValue(RSK_FULL_WALLETS)) {
+            Rupees_ChangeBy(1000);
+        }
+        return Return_Item(item, MOD_NONE, ITEM_NONE);
     } else if (item == ITEM_STICK_UPGRADE_20) {
         if (gSaveContext.inventory.items[slot] == ITEM_NONE) {
             INV_CONTENT(ITEM_STICK) = ITEM_STICK;
@@ -2114,15 +2132,15 @@ u8 Item_Give(PlayState* play, u8 item) {
             AMMO(ITEM_STICK) = sAmmoRefillCounts[item - ITEM_STICKS_5];
         } else {
             AMMO(ITEM_STICK) += sAmmoRefillCounts[item - ITEM_STICKS_5];
-            if (AMMO(ITEM_STICK) > CUR_CAPACITY(UPG_STICKS)) {
-                AMMO(ITEM_STICK) = CUR_CAPACITY(UPG_STICKS);
-            }
+        }
+        if (AMMO(ITEM_STICK) > CUR_CAPACITY(UPG_STICKS)) {
+            AMMO(ITEM_STICK) = CUR_CAPACITY(UPG_STICKS);
         }
         item = ITEM_STICK;
     } else if (item == ITEM_NUT) {
         if (gSaveContext.inventory.items[slot] == ITEM_NONE) {
             Inventory_ChangeUpgrade(UPG_NUTS, 1);
-            AMMO(ITEM_NUT) = ITEM_NUT;
+            AMMO(ITEM_NUT) = 1;
         } else {
             AMMO(ITEM_NUT)++;
             if (AMMO(ITEM_NUT) > CUR_CAPACITY(UPG_NUTS)) {
@@ -2138,9 +2156,9 @@ u8 Item_Give(PlayState* play, u8 item) {
                          sAmmoRefillCounts[item - ITEM_NUTS_5]);
         } else {
             AMMO(ITEM_NUT) += sAmmoRefillCounts[item - ITEM_NUTS_5];
-            if (AMMO(ITEM_NUT) > CUR_CAPACITY(UPG_NUTS)) {
-                AMMO(ITEM_NUT) = CUR_CAPACITY(UPG_NUTS);
-            }
+        }
+        if (AMMO(ITEM_NUT) > CUR_CAPACITY(UPG_NUTS)) {
+            AMMO(ITEM_NUT) = CUR_CAPACITY(UPG_NUTS);
         }
         item = ITEM_NUT;
     } else if (item == ITEM_BOMB) {
@@ -2161,9 +2179,9 @@ u8 Item_Give(PlayState* play, u8 item) {
             AMMO(ITEM_BOMBCHU) = 10;
         } else {
             AMMO(ITEM_BOMBCHU) += 10;
-            if (AMMO(ITEM_BOMBCHU) > 50) {
-                AMMO(ITEM_BOMBCHU) = 50;
-            }
+        }
+        if (AMMO(ITEM_BOMBCHU) > MAX_BOMBCHU_CAPACITY) {
+            AMMO(ITEM_BOMBCHU) = MAX_BOMBCHU_CAPACITY;
         }
         return Return_Item(item, MOD_NONE, ITEM_NONE);
     } else if ((item == ITEM_BOMBCHUS_5) || (item == ITEM_BOMBCHUS_20)) {
@@ -2172,9 +2190,9 @@ u8 Item_Give(PlayState* play, u8 item) {
             AMMO(ITEM_BOMBCHU) += sAmmoRefillCounts[item - ITEM_BOMBCHUS_5 + 8];
         } else {
             AMMO(ITEM_BOMBCHU) += sAmmoRefillCounts[item - ITEM_BOMBCHUS_5 + 8];
-            if (AMMO(ITEM_BOMBCHU) > 50) {
-                AMMO(ITEM_BOMBCHU) = 50;
-            }
+        }
+        if (AMMO(ITEM_BOMBCHU) > MAX_BOMBCHU_CAPACITY) {
+            AMMO(ITEM_BOMBCHU) = MAX_BOMBCHU_CAPACITY;
         }
         return Return_Item(item, MOD_NONE, ITEM_NONE);
     } else if ((item >= ITEM_ARROWS_SMALL) && (item <= ITEM_ARROWS_LARGE)) {
@@ -2190,7 +2208,7 @@ u8 Item_Give(PlayState* play, u8 item) {
     } else if (item == ITEM_SLINGSHOT) {
         Inventory_ChangeUpgrade(UPG_BULLET_BAG, 1);
         INV_CONTENT(ITEM_SLINGSHOT) = ITEM_SLINGSHOT;
-        AMMO(ITEM_SLINGSHOT) = 30;
+        AMMO(ITEM_SLINGSHOT) = CUR_CAPACITY(UPG_BULLET_BAG);
         return Return_Item(item, MOD_NONE, ITEM_NONE);
     } else if (item == ITEM_SEEDS) {
         AMMO(ITEM_SLINGSHOT) += 5;
@@ -2271,6 +2289,18 @@ u8 Item_Give(PlayState* play, u8 item) {
         gSaveContext.healthCapacity += 0x10;
         gSaveContext.health += 0x10;
         gSaveContext.sohStats.heartContainers++;
+        return Return_Item(item, MOD_NONE, ITEM_NONE);
+    } else if (item == ITEM_EXTRA_MAGIC) {
+        gSaveContext.extraMagicPower += 1;
+        gSaveContext.magicFillTarget = Inferface_CalculateMaxMagic(play);
+        gSaveContext.magicLevel = 0;
+        Magic_Fill(play);
+        return Return_Item(item, MOD_NONE, ITEM_NONE);
+    } else if (item == ITEM_EPONA_BOOST) {
+        gSaveContext.maxBoosts += 1;
+        return Return_Item(item, MOD_NONE, ITEM_NONE);
+    } else if (item == ITEM_DEFENSE_HEART) {
+        gSaveContext.inventory.defenseHearts += 1;
         return Return_Item(item, MOD_NONE, ITEM_NONE);
     } else if (item == ITEM_HEART) {
         osSyncPrintf("回復ハート回復ハート回復ハート\n"); // "Recovery Heart"
@@ -2411,7 +2441,7 @@ u16 Randomizer_Item_Give(PlayState* play, GetItemEntry giEntry) {
     slot = SLOT(item);
     if (item == RG_MAGIC_SINGLE) {
         gSaveContext.isMagicAcquired = true;
-        gSaveContext.magicFillTarget = MAGIC_NORMAL_METER;
+        gSaveContext.magicFillTarget = Inferface_CalculateMaxMagic(play);
         Magic_Fill(play);
         return Return_Item_Entry(giEntry, RG_NONE);
     } else if (item == RG_MAGIC_DOUBLE) {
@@ -2419,7 +2449,7 @@ u16 Randomizer_Item_Give(PlayState* play, GetItemEntry giEntry) {
             gSaveContext.isMagicAcquired = true;
         }
         gSaveContext.isDoubleMagicAcquired = true;
-        gSaveContext.magicFillTarget = MAGIC_DOUBLE_METER;
+        gSaveContext.magicFillTarget = Inferface_CalculateMaxMagic(play);
         gSaveContext.magicLevel = 0;
         Magic_Fill(play);
         return Return_Item_Entry(giEntry, RG_NONE);
@@ -2632,8 +2662,8 @@ u16 Randomizer_Item_Give(PlayState* play, GetItemEntry giEntry) {
             AMMO(ITEM_BOMBCHU) = 20;
         } else {
             AMMO(ITEM_BOMBCHU) += AMMO(ITEM_BOMBCHU) < 5 ? 10 : 5;
-            if (AMMO(ITEM_BOMBCHU) > 50) {
-                AMMO(ITEM_BOMBCHU) = 50;
+            if (AMMO(ITEM_BOMBCHU) > MAX_BOMBCHU_CAPACITY) {
+                AMMO(ITEM_BOMBCHU) = MAX_BOMBCHU_CAPACITY;
             }
         }
         return Return_Item_Entry(giEntry, RG_NONE);
@@ -2745,6 +2775,14 @@ u8 Item_CheckObtainability(u8 item) {
     } else if ((item == ITEM_HEART_PIECE_2) || (item == ITEM_HEART_PIECE)) {
         return ITEM_NONE;
     } else if (item == ITEM_HEART_CONTAINER) {
+        return ITEM_NONE;
+    } else if (item == ITEM_EXTRA_MAGIC) {
+        return ITEM_NONE;
+    } else if (item == ITEM_EPONA_BOOST) {
+        return ITEM_NONE;
+    } else if (item == ITEM_DEFENSE_HEART) {
+        return ITEM_NONE;
+    } else if (item == ITEM_WALLET_KING) {
         return ITEM_NONE;
     } else if (item == ITEM_HEART) {
         return ITEM_HEART;
@@ -3073,9 +3111,15 @@ s32 Health_ChangeBy(PlayState* play, s16 healthChange) {
     // clang-format off
     if (healthChange > 0) { Audio_PlaySoundGeneral(NA_SE_SY_HP_RECOVER, &D_801333D4, 4,
                                                    &D_801333E0, &D_801333E0, &D_801333E8);
-    } else if ((gSaveContext.isDoubleDefenseAcquired != 0) && (healthChange < 0)) {
-        healthChange >>= 1;
-        osSyncPrintf("ハート減少半分！！＝%d\n", healthChange); // "Heart decrease halved!!＝%d"
+    } else if (healthChange < 0) {
+        if ((gSaveContext.isDoubleDefenseAcquired != 0) && (gSaveContext.health <= gSaveContext.inventory.defenseHearts*0x10)) {
+            healthChange >>= 1;
+            osSyncPrintf("ハート減少半分！！＝%d\n", healthChange); // "Heart decrease halved!!＝%d"
+        }
+        if (gSaveContext.nayrusLoveTimer != 0) {
+            healthChange >>= 1;
+            osSyncPrintf("ハート減少半分！！＝%d\n", healthChange); // "Heart decrease halved!!＝%d"
+        }
     }
     // clang-format on
 
@@ -3118,9 +3162,58 @@ s32 Health_ChangeBy(PlayState* play, s16 healthChange) {
     }
 }
 
+s16 isUsingAltWallet = 0;
+s16 altWalletRupees = 0;
+
+s16 usingBorrowedWallet() {
+    return isUsingAltWallet;
+}
+
+s16 Rupees_GetNum() {
+    if (isUsingAltWallet)
+        return 0;
+    else
+        return gSaveContext.rupees;
+}
+
+s16 Rupees_GetDisplayNum() {
+    if (isUsingAltWallet)
+        return altWalletRupees;
+    else
+        return gSaveContext.rupees;
+}
+
+s16 Wallet_Upgrade_Value() {
+    if (isUsingAltWallet)
+        return 3;
+    else
+        return CUR_UPG_VALUE(UPG_WALLET);
+}
+
+s16 Wallet_Capacity_Current() {
+    if (isUsingAltWallet)
+        return CAPACITY(UPG_WALLET,3);
+    else
+        return CUR_CAPACITY(UPG_WALLET);
+}
+
+void Rupees_DirectChange(s16 rupeeChange) {
+    if (isUsingAltWallet)
+        altWalletRupees += rupeeChange;
+    else
+        gSaveContext.rupees += rupeeChange;
+}
+
+void Rupees_DirectSet(s16 rupees) {
+    if (isUsingAltWallet)
+        altWalletRupees = rupees;
+    else
+        gSaveContext.rupees = rupees;
+}
+
 void Rupees_ChangeBy(s16 rupeeChange) {
     if (gPlayState == NULL) {
-        gSaveContext.rupees += rupeeChange;
+        Rupees_DirectChange(rupeeChange);
     } else {
         gSaveContext.rupeeAccumulator += rupeeChange;
     }
@@ -3130,6 +3223,39 @@ void Rupees_ChangeBy(s16 rupeeChange) {
     }
     if (rupeeChange < 0) {
         gSaveContext.sohStats.count[COUNT_RUPEES_SPENT] += -rupeeChange;
+    }
+}
+
+void changeToNormalWallet() {
+    switchResourcePoolToNormal();
+    Rupees_DirectChange(gSaveContext.rupeeAccumulator);
+    gSaveContext.rupeeAccumulator = 0;
+    isUsingAltWallet = 0;
+}
+
+void changeToAltWallet() {
+    switchResourcePoolToAlternate();
+    Rupees_DirectChange(gSaveContext.rupeeAccumulator);
+    gSaveContext.rupeeAccumulator = 0;
+    isUsingAltWallet = 1;
+    altWalletRupees = 0;
+    resetGuardRupees();
+    resetDiveRupees();
+
+    if (gPlayState != NULL) {
+        Player_UnsetMask(gPlayState);
+        gPlayState->interfaceCtx.restrictions.bottles = gPlayState->interfaceCtx.restrictions.tradeItems = 1;
+    }
+}
+
+void RupeeQuest_PrepareEnd() {
+    if (usingBorrowedWallet()) {
+        Rupees_DirectChange(gSaveContext.rupeeAccumulator);
+        gSaveContext.rupeeAccumulator = 0;
+        s16 score = Rupees_GetDisplayNum();
+        if (score > gSaveContext.rupeeCollectionScore)
+            gSaveContext.rupeeCollectionScore = score;
+        createRupeeScoreString(gSaveContext.rupeeCollectionScore);
     }
 }
 
@@ -3186,8 +3312,8 @@ void Inventory_ChangeAmmo(s16 item, s16 ammoChange) {
     } else if (item == ITEM_BOMBCHU) {
         AMMO(ITEM_BOMBCHU) += ammoChange;
 
-        if (AMMO(ITEM_BOMBCHU) >= 50) {
-            AMMO(ITEM_BOMBCHU) = 50;
+        if (AMMO(ITEM_BOMBCHU) >= MAX_BOMBCHU_CAPACITY) {
+            AMMO(ITEM_BOMBCHU) = MAX_BOMBCHU_CAPACITY;
         } else if (AMMO(ITEM_BOMBCHU) < 0) {
             AMMO(ITEM_BOMBCHU) = 0;
         }
@@ -3229,7 +3355,7 @@ void Inventory_ChangeAmmo(s16 item, s16 ammoChange) {
 void Magic_Fill(PlayState* play) {
     if (gSaveContext.isMagicAcquired) {
         gSaveContext.prevMagicState = gSaveContext.magicState;
-        gSaveContext.magicFillTarget = (gSaveContext.isDoubleMagicAcquired + 1) * MAGIC_NORMAL_METER;
+        gSaveContext.magicFillTarget = Inferface_CalculateMaxMagic(play);
         gSaveContext.magicState = MAGIC_STATE_FILL;
     }
 }
@@ -3281,12 +3407,12 @@ s32 Magic_RequestChange(PlayState* play, s16 amount, s16 type) {
                 Audio_PlaySoundGeneral(NA_SE_SY_ERROR, &D_801333D4, 4, &D_801333E0, &D_801333E0, &D_801333E8);
                 return false;
             }
-        case MAGIC_CONSUME_LENS:
+        case 3:
             if (gSaveContext.magicState == MAGIC_STATE_IDLE) {
-                if (gSaveContext.magic != 0) {
-                    play->interfaceCtx.unk_230 = 80;
+                if (gSaveContext.magic > amount) {
+                    play->interfaceCtx.unk_230 = 1;
                     gSaveContext.magicState = MAGIC_STATE_CONSUME_LENS;
-                    return true;
+                    return 1;
                 } else {
                     return false;
                 }
@@ -3324,6 +3450,14 @@ s32 Magic_RequestChange(PlayState* play, s16 amount, s16 type) {
     }
 
     return 0;
+}
+
+s32 Inferface_CalculateMaxMagic() {
+    return gSaveContext.isMagicAcquired ? (MAGIC_NORMAL_METER + (gSaveContext.isDoubleMagicAcquired ? 0x10*(gSaveContext.extraMagicPower+1) : 0x0)) : 0x0;
+}
+
+s32 Inferface_CalculateMagicToSet() {
+    return gSaveContext.magicLevel ? Inferface_CalculateMaxMagic() : 0;
 }
 
 void Interface_UpdateMagicBar(PlayState* play) {
@@ -3368,7 +3502,7 @@ void Interface_UpdateMagicBar(PlayState* play) {
 
     switch (gSaveContext.magicState) {
         case MAGIC_STATE_STEP_CAPACITY:
-            temp = gSaveContext.magicLevel * MAGIC_NORMAL_METER;
+            temp = Inferface_CalculateMaxMagic(play);
             if (gSaveContext.magicCapacity != temp) {
                 if (gSaveContext.magicCapacity < temp) {
                     gSaveContext.magicCapacity += 8;
@@ -3598,6 +3732,7 @@ void Interface_DrawMagicBar(PlayState* play) {
     OPEN_DISPS(play->state.gfxCtx);
 
     if (gSaveContext.magicLevel != 0) {
+
         s16 X_Margins;
         s16 Y_Margins;
         if (CVarGetInteger("gMagicBarUseMargins", 0) != 0) {
@@ -3943,6 +4078,10 @@ void Interface_DrawActionLabel(GraphicsContext* gfxCtx, void* texture) {
     CLOSE_DISPS(gfxCtx);
 }
 
+void Interface_SetPauseCUpDisplay(u8 valAlpha) {
+    sCUpPauseOverride = valAlpha;
+}
+
 void Interface_DrawItemButtons(PlayState* play) {
     static void* cUpLabelTextures[] = { gNaviCUpENGTex, gNaviCUpENGTex, gNaviCUpENGTex };
     static s16 startButtonLeftPos[] = { 132, 130, 130 };
@@ -4266,6 +4405,25 @@ void Interface_DrawItemButtons(PlayState* play) {
             gSPWideTextureRectangle(OVERLAY_DISP++, PosX_StartBtn << 2, PosY_StartBtn << 2,
                                 (PosX_StartBtn + StartBTN_W_Scaled) << 2, (PosY_StartBtn + StartBTN_H_Scaled) << 2,
                                 G_TX_RENDERTILE, 0, 0, StartBTN_W_factor, StartBTN_H_factor);
+            if (sCUpPauseOverride) {
+                gDPPipeSync(OVERLAY_DISP++);
+                gDPSetPrimColor(OVERLAY_DISP++, 0, 0, cUpButtonColor.r, cUpButtonColor.g, cUpButtonColor.b, sCUpPauseOverride);
+                gDPSetCombineMode(OVERLAY_DISP++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+                gSPWideTextureRectangle(OVERLAY_DISP++, C_Up_BTN_Pos[0] << 2, C_Up_BTN_Pos[1] << 2, (C_Up_BTN_Pos[0] + 16) << 2,
+                                    (C_Up_BTN_Pos[1] + 16) << 2, G_TX_RENDERTILE, 0, 0, 2 << 10, 2 << 10);
+                gDPPipeSync(OVERLAY_DISP++);
+                gDPSetPrimColor(OVERLAY_DISP++, 0, 0, 255, 255, 255, sCUpPauseOverride);
+                gDPSetEnvColor(OVERLAY_DISP++, 0, 0, 0, 0);
+                gDPSetCombineLERP(OVERLAY_DISP++, PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, TEXEL0, 0, PRIMITIVE, 0,
+                                PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, TEXEL0, 0, PRIMITIVE, 0);
+
+                gDPLoadTextureBlock_4b(OVERLAY_DISP++, cUpLabelTextures[gSaveContext.language], G_IM_FMT_IA, 32, 8, 0,
+                                    G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
+                                    G_TX_NOLOD, G_TX_NOLOD);
+
+                gSPWideTextureRectangle(OVERLAY_DISP++, C_Up_BTN_Pos[0]-LabelX_Navi << 2, C_Up_BTN_Pos[1]+LabelY_Navi << 2,
+                            (C_Up_BTN_Pos[0]-LabelX_Navi + 32) << 2, (C_Up_BTN_Pos[1]+LabelY_Navi + 8) << 2, G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+            }
             gDPPipeSync(OVERLAY_DISP++);
             gDPSetPrimColor(OVERLAY_DISP++, 0, 0, 255, 255, 255, interfaceCtx->startAlpha);
             gDPSetEnvColor(OVERLAY_DISP++, 0, 0, 0, 0);
@@ -4877,7 +5035,7 @@ void Interface_DrawAmmoCount(PlayState* play, s16 button, s16 alpha) {
                    ((i == ITEM_BOMB) && (AMMO(i) == CUR_CAPACITY(UPG_BOMB_BAG))) ||
                    ((i == ITEM_SLINGSHOT) && (AMMO(i) == CUR_CAPACITY(UPG_BULLET_BAG))) ||
                    ((i == ITEM_STICK) && (AMMO(i) == CUR_CAPACITY(UPG_STICKS))) ||
-                   ((i == ITEM_NUT) && (AMMO(i) == CUR_CAPACITY(UPG_NUTS))) || ((i == ITEM_BOMBCHU) && (ammo == 50)) ||
+                   ((i == ITEM_NUT) && (AMMO(i) == CUR_CAPACITY(UPG_NUTS))) || ((i == ITEM_BOMBCHU) && (ammo == MAX_BOMBCHU_CAPACITY)) ||
                    ((i == ITEM_BEAN) && (ammo == 15))) {
             gDPSetPrimColor(OVERLAY_DISP++, 0, 0, 120, 255, 0, alpha);
         }
@@ -5056,8 +5214,8 @@ void Interface_Draw(PlayState* play) {
     static s16 D_80125B1C[][3] = {
         { 0, 150, 0 }, { 100, 255, 0 }, { 255, 255, 255 }, { 0, 0, 0 }, { 255, 255, 255 },
     };
-    static s16 rupeeDigitsFirst[] = { 1, 0, 0, 0 };
-    static s16 rupeeDigitsCount[] = { 2, 3, 3, 3 };
+    static s16 rupeeDigitsFirst[] = { 2, 1, 1, 0 };
+    static s16 rupeeDigitsCount[] = { 2, 3, 3, 4 };
 
     // courtesy of https://github.com/TestRunnerSRL/OoT-Randomizer/blob/Dev/ASM/c/hud_colors.c
     static Color_RGB8 rupeeWalletColors[4] = {
@@ -5092,7 +5250,8 @@ void Interface_Draw(PlayState* play) {
     static s16 D_8015FFE2;
     static s16 D_8015FFE4;
     static s16 D_8015FFE6;
-    static s16 timerDigits[5];
+    static s16 timerDigits1[5];
+    static s16 timerDigits2[5];
     InterfaceContext* interfaceCtx = &play->interfaceCtx;
     PauseContext* pauseCtx = &play->pauseCtx;
     MessageContext* msgCtx = &play->msgCtx;
@@ -5102,7 +5261,8 @@ void Interface_Draw(PlayState* play) {
     s16 svar3;
     s16 svar4;
     s16 svar5;
-    s16 svar6;
+    s16 svar2_2;
+    s16 svar5_2;
     bool fullUi = !CVarGetInteger("gMinimalUI", 0) || !R_MINIMAP_DISABLED || play->pauseCtx.state != 0;
 
     if (GameInteractor_NoUIActive()) {
@@ -5128,7 +5288,7 @@ void Interface_Draw(PlayState* play) {
         if (fullUi) {
             // Rupee Icon
             if (CVarGetInteger("gDynamicWalletIcon", 0)) {
-                switch (CUR_UPG_VALUE(UPG_WALLET)) {
+                switch (Wallet_Upgrade_Value()) {
                     case 0:
                         if (CVarGetInteger("gCosmetics.Consumable_GreenRupee.Changed", 0)) {
                             rColor = CVarGetColor24("gCosmetics.Consumable_GreenRupee.Value", rupeeWalletColors[0]);
@@ -5285,9 +5445,9 @@ void Interface_Draw(PlayState* play) {
             // Rupee Counter
             gDPPipeSync(OVERLAY_DISP++);
 
-            if (gSaveContext.rupees == CUR_CAPACITY(UPG_WALLET)) {
+            if (Rupees_GetDisplayNum() == Wallet_Capacity_Current()) {
                 gDPSetPrimColor(OVERLAY_DISP++, 0, 0, 120, 255, 0, interfaceCtx->magicAlpha);
-            } else if (gSaveContext.rupees != 0) {
+            } else if (Rupees_GetDisplayNum() != 0) {
                 gDPSetPrimColor(OVERLAY_DISP++, 0, 0, 255, 255, 255, interfaceCtx->magicAlpha);
             } else {
                 gDPSetPrimColor(OVERLAY_DISP++, 0, 0, 100, 100, 100, interfaceCtx->magicAlpha);
@@ -5296,25 +5456,30 @@ void Interface_Draw(PlayState* play) {
             gDPSetCombineLERP(OVERLAY_DISP++, 0, 0, 0, PRIMITIVE, TEXEL0, 0, PRIMITIVE, 0, 0, 0, 0, PRIMITIVE, TEXEL0, 0,
                               PRIMITIVE, 0);
 
-            interfaceCtx->counterDigits[0] = interfaceCtx->counterDigits[1] = 0;
-            interfaceCtx->counterDigits[2] = gSaveContext.rupees;
+            interfaceCtx->counterDigits[0] = interfaceCtx->counterDigits[1] = interfaceCtx->counterDigits[2] = 0;
+            interfaceCtx->counterDigits[3] = Rupees_GetDisplayNum();
 
-            if ((interfaceCtx->counterDigits[2] > 9999) || (interfaceCtx->counterDigits[2] < 0)) {
-                interfaceCtx->counterDigits[2] &= 0xDDD;
+            if ((interfaceCtx->counterDigits[3] > 9999) || (interfaceCtx->counterDigits[3] < 0)) {
+                interfaceCtx->counterDigits[3] &= 0xDDD;
             }
 
-            while (interfaceCtx->counterDigits[2] >= 100) {
+            while (interfaceCtx->counterDigits[3] >= 1000) {
                 interfaceCtx->counterDigits[0]++;
-                interfaceCtx->counterDigits[2] -= 100;
+                interfaceCtx->counterDigits[3] -= 1000;
             }
 
-            while (interfaceCtx->counterDigits[2] >= 10) {
+            while (interfaceCtx->counterDigits[3] >= 100) {
                 interfaceCtx->counterDigits[1]++;
-                interfaceCtx->counterDigits[2] -= 10;
+                interfaceCtx->counterDigits[3] -= 100;
             }
 
-            svar2 = rupeeDigitsFirst[CUR_UPG_VALUE(UPG_WALLET)];
-            svar5 = rupeeDigitsCount[CUR_UPG_VALUE(UPG_WALLET)];
+            while (interfaceCtx->counterDigits[3] >= 10) {
+                interfaceCtx->counterDigits[2]++;
+                interfaceCtx->counterDigits[3] -= 10;
+            }
+
+            svar2 = rupeeDigitsFirst[Wallet_Upgrade_Value()];
+            svar5 = rupeeDigitsCount[Wallet_Upgrade_Value()];
 
             // Draw Rupee Counter. Hide in Boss Rush.
             if (!IS_BOSS_RUSH) {
@@ -5727,8 +5892,10 @@ void Interface_Draw(PlayState* play) {
                         } else if (CVarGetInteger("gCarrotsPosType", 0) == 4) {//Hidden
                             CarrotsPosX = -9999;
                         }
+                    } else {
+                        CarrotsPosX -= (gSaveContext.maxBoosts-6)*8;
                     }
-                    for (svar1 = 1, svar5 = CarrotsPosX; svar1 < 7; svar1++, svar5 += 16) {
+                    for (svar1 = 1, svar5 = CarrotsPosX; svar1 < gSaveContext.maxBoosts+1; svar1++, svar5 += 16) {
                         // Carrot Color (based on availability)
                         if ((interfaceCtx->numHorseBoosts == 0) || (interfaceCtx->numHorseBoosts < svar1)) {
                             gDPSetPrimColor(OVERLAY_DISP++, 0, 0, 0, 150, 255, interfaceCtx->aAlpha);
@@ -5804,7 +5971,11 @@ void Interface_Draw(PlayState* play) {
             gSaveContext.cutsceneIndex = 0;
             play->sceneLoadFlag = 0x14;
             play->fadeTransition = 3;
+            if (usingBorrowedWallet())
+                play->nextEntranceIndex = 1360;
+            RupeeQuest_PrepareEnd();
             gSaveContext.timer2State = 0;
+            changeToNormalWallet();
 
             if ((gSaveContext.equips.buttonItems[0] != ITEM_SWORD_KOKIRI) &&
                 (gSaveContext.equips.buttonItems[0] != ITEM_SWORD_MASTER) &&
@@ -5842,7 +6013,6 @@ void Interface_Draw(PlayState* play) {
             (play->transitionMode == 0) && !Play_InCsMode(play) && (gSaveContext.minigameState != 1) &&
             (play->shootingGalleryStatus <= 1) &&
             !((play->sceneNum == SCENE_BOMBCHU_BOWLING_ALLEY) && Flags_GetSwitch(play, 0x38))) {
-            svar6 = 0;
             switch (gSaveContext.timer1State) {
                 case 1:
                     D_8015FFE2 = 20;
@@ -5935,12 +6105,12 @@ void Interface_Draw(PlayState* play) {
                                 }
                                 D_80125A5C = 0;
                             } else if (gSaveContext.timer1Value > 60) {
-                                if (timerDigits[4] == 1) {
+                                if (timerDigits1[4] == 1) {
                                     Audio_PlaySoundGeneral(NA_SE_SY_MESSAGE_WOMAN, &D_801333D4, 4, &D_801333E0,
                                                            &D_801333E0, &D_801333E8);
                                 }
                             } else if (gSaveContext.timer1Value >= 11) {
-                                if (timerDigits[4] & 1) {
+                                if (timerDigits1[4] & 1) {
                                     Audio_PlaySoundGeneral(NA_SE_SY_WARNING_COUNT_N, &D_801333D4, 4, &D_801333E0,
                                                            &D_801333E0, &D_801333E8);
                                 }
@@ -6019,161 +6189,194 @@ void Interface_Draw(PlayState* play) {
                 case 15:
                     break;
                 default:
-                    svar6 = 1;
-                    switch (gSaveContext.timer2State) {
-                        case 1:
-                        case 7:
-                            D_8015FFE6 = 20;
+                    break;
+            }
+
+            switch (gSaveContext.timer2State) {
+                case 1:
+                case 7:
+                    D_8015FFE6 = 20;
+                    D_8015FFE4 = 20;
+                    gSaveContext.timerX[1] = 140;
+                    gSaveContext.timerY[1] = 80;
+                    if (gSaveContext.timer2State == 1) {
+                        gSaveContext.timer2State = 2;
+                    } else {
+                        gSaveContext.timer2State = 8;
+                    }
+                    break;
+                case 2:
+                case 8:
+                    D_8015FFE6--;
+                    if (D_8015FFE6 == 0) {
+                        D_8015FFE6 = 20;
+                        if (gSaveContext.timer2State == 2) {
+                            gSaveContext.timer2State = 3;
+                        } else {
+                            gSaveContext.timer2State = 9;
+                        }
+                    }
+                    break;
+                case 3:
+                case 9:
+                    osSyncPrintf("event_xp[1]=%d,  event_yp[1]=%d  TOTAL_EVENT_TM=%d\n",
+                                    svar5 = gSaveContext.timerX[1], svar2 = gSaveContext.timerY[1],
+                                    gSaveContext.timer2Value);
+                    svar1 = (gSaveContext.timerX[1] - 26) / D_8015FFE6;
+                    gSaveContext.timerX[1] -= svar1;
+                    if (gSaveContext.healthCapacity > 0xA0) {
+                        svar1 = (gSaveContext.timerY[1] - 54) / D_8015FFE6;
+                    } else {
+                        svar1 = (gSaveContext.timerY[1] - 46) / D_8015FFE6;
+                    }
+                    gSaveContext.timerY[1] -= svar1;
+
+                    D_8015FFE6--;
+                    if (D_8015FFE6 == 0) {
+                        D_8015FFE6 = 20;
+                        gSaveContext.timerX[1] = 26;
+
+                        if (gSaveContext.healthCapacity > 0xA0) {
+                            gSaveContext.timerY[1] = 54;
+                        } else {
+                            gSaveContext.timerY[1] = 46;
+                        }
+
+                        if (gSaveContext.timer2State == 3) {
+                            gSaveContext.timer2State = 4;
+                        } else {
+                            gSaveContext.timer2State = 10;
+                        }
+                    }
+                case 4:
+                case 10:
+                    if ((gSaveContext.timer2State == 4) || (gSaveContext.timer2State == 10)) {
+                        if (gSaveContext.healthCapacity > 0xA0) {
+                            gSaveContext.timerY[1] = 54;
+                        } else {
+                            gSaveContext.timerY[1] = 46;
+                        }
+                    }
+
+                    if (gSaveContext.timer2State >= 3) {
+                        D_8015FFE4--;
+                        if (D_8015FFE4 == 0) {
                             D_8015FFE4 = 20;
-                            gSaveContext.timerX[1] = 140;
-                            gSaveContext.timerY[1] = 80;
-                            if (gSaveContext.timer2State == 1) {
-                                gSaveContext.timer2State = 2;
-                            } else {
-                                gSaveContext.timer2State = 8;
-                            }
-                            break;
-                        case 2:
-                        case 8:
-                            D_8015FFE6--;
-                            if (D_8015FFE6 == 0) {
-                                D_8015FFE6 = 20;
-                                if (gSaveContext.timer2State == 2) {
-                                    gSaveContext.timer2State = 3;
-                                } else {
-                                    gSaveContext.timer2State = 9;
+                            if (gSaveContext.timer2State == 4) {
+                                if (play->roomCtx.curRoom.behaviorType2 == ROOM_BEHAVIOR_TYPE2_3 && gSaveContext.timer2Value > 5) {
+                                    for (svar1 = 0; svar1 < ARRAY_COUNT(gSpoilingItems); svar1++) {
+                                        if (INV_CONTENT(ITEM_TRADE_ADULT) == gSpoilingItems[svar1]) {
+                                            s16 MiscMsg = GetTextID("misc");
+                                            gSaveContext.timer2Value = 5;
+                                        }
+                                    }
                                 }
-                            }
-                            break;
-                        case 3:
-                        case 9:
-                            osSyncPrintf("event_xp[1]=%d,  event_yp[1]=%d  TOTAL_EVENT_TM=%d\n",
-                                         svar5 = gSaveContext.timerX[1], svar2 = gSaveContext.timerY[1],
-                                         gSaveContext.timer2Value);
-                            svar1 = (gSaveContext.timerX[1] - 26) / D_8015FFE6;
-                            gSaveContext.timerX[1] -= svar1;
-                            if (gSaveContext.healthCapacity > 0xA0) {
-                                svar1 = (gSaveContext.timerY[1] - 54) / D_8015FFE6;
-                            } else {
-                                svar1 = (gSaveContext.timerY[1] - 46) / D_8015FFE6;
-                            }
-                            gSaveContext.timerY[1] -= svar1;
+                                gSaveContext.timer2Value--;
+                                osSyncPrintf("TOTAL_EVENT_TM=%d\n", gSaveContext.timer2Value);
 
-                            D_8015FFE6--;
-                            if (D_8015FFE6 == 0) {
-                                D_8015FFE6 = 20;
-                                gSaveContext.timerX[1] = 26;
-
-                                if (gSaveContext.healthCapacity > 0xA0) {
-                                    gSaveContext.timerY[1] = 54;
-                                } else {
-                                    gSaveContext.timerY[1] = 46;
-                                }
-
-                                if (gSaveContext.timer2State == 3) {
-                                    gSaveContext.timer2State = 4;
-                                } else {
-                                    gSaveContext.timer2State = 10;
-                                }
-                            }
-                        case 4:
-                        case 10:
-                            if ((gSaveContext.timer2State == 4) || (gSaveContext.timer2State == 10)) {
-                                if (gSaveContext.healthCapacity > 0xA0) {
-                                    gSaveContext.timerY[1] = 54;
-                                } else {
-                                    gSaveContext.timerY[1] = 46;
-                                }
-                            }
-
-                            if (gSaveContext.timer2State >= 3) {
-                                D_8015FFE4--;
-                                if (D_8015FFE4 == 0) {
-                                    D_8015FFE4 = 20;
-                                    if (gSaveContext.timer2State == 4) {
-                                        gSaveContext.timer2Value--;
-                                        osSyncPrintf("TOTAL_EVENT_TM=%d\n", gSaveContext.timer2Value);
-
-                                        if (gSaveContext.timer2Value <= 0) {
-                                            if (!Flags_GetSwitch(play, 0x37) ||
-                                                ((play->sceneNum != SCENE_GANON_BOSS) &&
-                                                 (play->sceneNum != SCENE_GANONS_TOWER_COLLAPSE_EXTERIOR) &&
-                                                 (play->sceneNum != SCENE_GANONS_TOWER_COLLAPSE_INTERIOR) &&
-                                                 (play->sceneNum != SCENE_INSIDE_GANONS_CASTLE_COLLAPSE))) {
-                                                D_8015FFE6 = 40;
-                                                gSaveContext.timer2State = 5;
-                                                gSaveContext.cutsceneIndex = 0;
-                                                Message_StartTextbox(play, 0x71B0, NULL);
-                                                func_8002DF54(play, NULL, 8);
-                                            } else {
-                                                D_8015FFE6 = 40;
-                                                gSaveContext.timer2State = 6;
-                                            }
-                                        } else if (gSaveContext.timer2Value > 60) {
-                                            if (timerDigits[4] == 1) {
-                                                Audio_PlaySoundGeneral(NA_SE_SY_MESSAGE_WOMAN, &D_801333D4, 4,
-                                                                       &D_801333E0, &D_801333E0, &D_801333E8);
-                                            }
-                                        } else if (gSaveContext.timer2Value > 10) {
-                                            if ((timerDigits[4] & 1)) {
-                                                Audio_PlaySoundGeneral(NA_SE_SY_WARNING_COUNT_N, &D_801333D4, 4,
-                                                                       &D_801333E0, &D_801333E0, &D_801333E8);
-                                            }
+                                if (gSaveContext.timer2Value <= 0) {
+                                    if (!Flags_GetSwitch(play, 0x37) ||
+                                        ((play->sceneNum != SCENE_GANON_BOSS) &&
+                                            (play->sceneNum != SCENE_GANONS_TOWER_COLLAPSE_EXTERIOR) &&
+                                            (play->sceneNum != SCENE_GANONS_TOWER_COLLAPSE_INTERIOR) &&
+                                            (play->sceneNum != SCENE_INSIDE_GANONS_CASTLE_COLLAPSE))) {
+                                        s16 MiscMsg = GetTextID("misc");
+                                        D_8015FFE6 = 40;
+                                        gSaveContext.timer2State = 5;
+                                        gSaveContext.cutsceneIndex = 0;
+                                        if (usingBorrowedWallet()) {
+                                            Message_StartTextbox(play, MiscMsg+6, NULL);
+                                        } else if (play->sceneNum == SCENE_DEATH_MOUNTAIN_CRATER) {
+                                            Message_StartTextbox(play, MiscMsg+7, NULL);
                                         } else {
-                                            Audio_PlaySoundGeneral(NA_SE_SY_WARNING_COUNT_E, &D_801333D4, 4,
-                                                                   &D_801333E0, &D_801333E0, &D_801333E8);
+                                            Message_StartTextbox(play, 0x71B0, NULL);
                                         }
+                                        func_8002DF54(play, NULL, 8);
                                     } else {
-                                        gSaveContext.timer2Value++;
-                                        if (gSaveContext.eventInf[1] & 1) {
-                                            if (gSaveContext.timer2Value == 240) {
-                                                Message_StartTextbox(play, 0x6083, NULL);
-                                                gSaveContext.eventInf[1] &= ~1;
-                                                gSaveContext.timer2State = 0;
-                                            }
-                                        }
+                                        D_8015FFE6 = 40;
+                                        gSaveContext.timer2State = 6;
                                     }
-
-                                    if ((gSaveContext.timer2Value % 60) == 0) {
-                                        Audio_PlaySoundGeneral(NA_SE_SY_WARNING_COUNT_N, &D_801333D4, 4, &D_801333E0,
-                                                               &D_801333E0, &D_801333E8);
+                                } else if (gSaveContext.timer2Value > 60) {
+                                    if (timerDigits2[4] == 1) {
+                                        Audio_PlaySoundGeneral(NA_SE_SY_MESSAGE_WOMAN, &D_801333D4, 4,
+                                                                &D_801333E0, &D_801333E0, &D_801333E8);
+                                    }
+                                } else if (gSaveContext.timer2Value > 10) {
+                                    if ((timerDigits2[4] & 1)) {
+                                        Audio_PlaySoundGeneral(NA_SE_SY_WARNING_COUNT_N, &D_801333D4, 4,
+                                                                &D_801333E0, &D_801333E0, &D_801333E8);
+                                    }
+                                } else {
+                                    Audio_PlaySoundGeneral(NA_SE_SY_WARNING_COUNT_E, &D_801333D4, 4,
+                                                            &D_801333E0, &D_801333E0, &D_801333E8);
+                                }
+                            } else {
+                                gSaveContext.timer2Value++;
+                                if (gSaveContext.eventInf[1] & 1) {
+                                    if (gSaveContext.timer2Value == 240) {
+                                        Message_StartTextbox(play, 0x6083, NULL);
+                                        gSaveContext.eventInf[1] &= ~1;
+                                        gSaveContext.timer2State = 0;
                                     }
                                 }
                             }
-                            break;
-                        case 6:
-                            D_8015FFE6--;
-                            if (D_8015FFE6 == 0) {
-                                gSaveContext.timer2State = 0;
+
+                            if ((gSaveContext.timer2Value % 60) == 0) {
+                                Audio_PlaySoundGeneral(NA_SE_SY_WARNING_COUNT_N, &D_801333D4, 4, &D_801333E0,
+                                                        &D_801333E0, &D_801333E8);
                             }
-                            break;
+                        }
+                    }
+                    break;
+                case 6:
+                    D_8015FFE6--;
+                    if (D_8015FFE6 == 0) {
+                        gSaveContext.timer2State = 0;
                     }
                     break;
             }
 
             if (((gSaveContext.timer1State != 0) && (gSaveContext.timer1State != 10)) ||
                 (gSaveContext.timer2State != 0)) {
-                timerDigits[0] = timerDigits[1] = svar2 = timerDigits[3] = 0;
-                timerDigits[2] = 10; // digit 10 is used as ':' (colon)
+                if ((gSaveContext.timer1State != 0) && (gSaveContext.timer1State != 10)) {
+                    timerDigits1[0] = timerDigits1[1] = svar2 = timerDigits1[3] = 0;
+                    timerDigits1[2] = 10; // digit 10 is used as ':' (colon)
+                    timerDigits1[4] = gSaveContext.timer1Value;
 
-                if (gSaveContext.timer1State != 0) {
-                    timerDigits[4] = gSaveContext.timer1Value;
-                } else {
-                    timerDigits[4] = gSaveContext.timer2Value;
-                }
 
-                while (timerDigits[4] >= 60) {
-                    timerDigits[1]++;
-                    if (timerDigits[1] >= 10) {
-                        timerDigits[0]++;
-                        timerDigits[1] -= 10;
+                    while (timerDigits1[4] >= 60) {
+                        timerDigits1[1]++;
+                        if (timerDigits1[1] >= 10) {
+                            timerDigits1[0]++;
+                            timerDigits1[1] -= 10;
+                        }
+                        timerDigits1[4] -= 60;
                     }
-                    timerDigits[4] -= 60;
+
+                    while (timerDigits1[4] >= 10) {
+                        timerDigits1[3]++;
+                        timerDigits1[4] -= 10;
+                    }
                 }
 
-                while (timerDigits[4] >= 10) {
-                    timerDigits[3]++;
-                    timerDigits[4] -= 10;
+                if (gSaveContext.timer2State != 0) {
+                    timerDigits2[0] = timerDigits2[1] = svar2 = timerDigits2[3] = 0;
+                    timerDigits2[2] = 10; // digit 10 is used as ':' (colon)
+                    timerDigits2[4] = gSaveContext.timer2Value;
+
+                    while (timerDigits2[4] >= 60) {
+                        timerDigits2[1]++;
+                        if (timerDigits2[1] >= 10) {
+                            timerDigits2[0]++;
+                            timerDigits2[1] -= 10;
+                        }
+                        timerDigits2[4] -= 60;
+                    }
+
+                    while (timerDigits2[4] >= 10) {
+                        timerDigits2[3]++;
+                        timerDigits2[4] -= 10;
+                    }
                 }
 
                 // Clock Icon
@@ -6186,8 +6389,10 @@ void Interface_Draw(PlayState* play) {
                 } else {
                     X_Margins_Timer = 0;
                 }
-                svar5 = OTRGetRectDimensionFromLeftEdge(gSaveContext.timerX[svar6]+X_Margins_Timer);
-                svar2 = gSaveContext.timerY[svar6];
+                svar5 = OTRGetRectDimensionFromLeftEdge(gSaveContext.timerX[0]+X_Margins_Timer);
+                svar5_2 = OTRGetRectDimensionFromLeftEdge(gSaveContext.timerX[1]+X_Margins_Timer);
+                svar2 = gSaveContext.timerY[0];
+                svar2_2 = gSaveContext.timerY[1];
                 if (CVarGetInteger("gTimersPosType", 0) != 0) {
                     svar2 = (CVarGetInteger("gTimersPosY", 0));
                     if (CVarGetInteger("gTimersPosType", 0) == 1) {//Anchor Left
@@ -6203,13 +6408,35 @@ void Interface_Draw(PlayState* play) {
                     }
                 }
 
-                OVERLAY_DISP =
-                    Gfx_TextureIA8(OVERLAY_DISP, gClockIconTex, 16, 16, svar5, svar2 + 2, 16, 16, 1 << 10, 1 << 10);
+                if (gSaveContext.timer2State != 0)
+                    OVERLAY_DISP =
+                    Gfx_TextureIA8(OVERLAY_DISP, gClockIconTex, 16, 16, svar5_2, svar2_2 + 2, 16, 16, 1 << 10, 1 << 10);
+                if (gSaveContext.timer1State != 0)
+                    OVERLAY_DISP =
+                    Gfx_TextureIA8(OVERLAY_DISP, gClockIconTex, 16, 16, svar5, (gSaveContext.timer2State != 0) ? svar2+20+2 : svar2 + 2, 16, 16, 1 << 10, 1 << 10);
 
                 // Timer Counter
                 gDPPipeSync(OVERLAY_DISP++);
                 gDPSetCombineLERP(OVERLAY_DISP++, 0, 0, 0, PRIMITIVE, TEXEL0, 0, PRIMITIVE, 0, 0, 0, 0, PRIMITIVE,
                                   TEXEL0, 0, PRIMITIVE, 0);
+
+                if (gSaveContext.timer2State != 0) {
+                    if ((gSaveContext.timer2Value < 10) && (gSaveContext.timer2State < 6)) {
+                        gDPSetPrimColor(OVERLAY_DISP++, 0, 0, 255, 50, 0, 255);
+                    } else {
+                        gDPSetPrimColor(OVERLAY_DISP++, 0, 0, 255, 255, 0, 255);
+                    }
+                    for (svar1 = 0; svar1 < 5; svar1++) {
+                        // clang-format off
+                        //svar5 = svar5 + 8;
+                        //svar5 = OTRGetRectDimensionFromLeftEdge(gSaveContext.timerX[svar6]);
+                        OVERLAY_DISP = Gfx_TextureI8(OVERLAY_DISP, digitTextures[timerDigits2[svar1]], 8, 16,
+                                        svar5_2 + timerDigitLeftPos[svar1],
+                                        svar2_2, digitWidth[svar1], VREG(42), VREG(43) << 1,
+                                        VREG(43) << 1);
+                        // clang-format on
+                    }
+                }
 
                 if (gSaveContext.timer1State != 0) {
                     if ((gSaveContext.timer1Value < 10) && (gSaveContext.timer1State < 11)) {
@@ -6217,23 +6444,16 @@ void Interface_Draw(PlayState* play) {
                     } else {
                         gDPSetPrimColor(OVERLAY_DISP++, 0, 0, 255, 255, 255, 255);
                     }
-                } else {
-                    if ((gSaveContext.timer2Value < 10) && (gSaveContext.timer2State < 6)) {
-                        gDPSetPrimColor(OVERLAY_DISP++, 0, 0, 255, 50, 0, 255);
-                    } else {
-                        gDPSetPrimColor(OVERLAY_DISP++, 0, 0, 255, 255, 0, 255);
+                    for (svar1 = 0; svar1 < 5; svar1++) {
+                        // clang-format off
+                        //svar5 = svar5 + 8;
+                        //svar5 = OTRGetRectDimensionFromLeftEdge(gSaveContext.timerX[svar6]);
+                        OVERLAY_DISP = Gfx_TextureI8(OVERLAY_DISP, digitTextures[timerDigits1[svar1]], 8, 16,
+                                        svar5 + timerDigitLeftPos[svar1],
+                                        (gSaveContext.timer2State != 0) ? svar2+20 : svar2, digitWidth[svar1], VREG(42), VREG(43) << 1,
+                                        VREG(43) << 1);
+                        // clang-format on
                     }
-                }
-
-                for (svar1 = 0; svar1 < 5; svar1++) {
-                    // clang-format off
-                    //svar5 = svar5 + 8;
-                    //svar5 = OTRGetRectDimensionFromLeftEdge(gSaveContext.timerX[svar6]); 
-                    OVERLAY_DISP = Gfx_TextureI8(OVERLAY_DISP, digitTextures[timerDigits[svar1]], 8, 16,
-                                      svar5 + timerDigitLeftPos[svar1],
-                                      svar2, digitWidth[svar1], VREG(42), VREG(43) << 1,
-                                      VREG(43) << 1);
-                    // clang-format on
                 }
             }
         }
@@ -6535,29 +6755,29 @@ void Interface_Update(PlayState* play) {
 
     if (gSaveContext.rupeeAccumulator != 0) {
         if (gSaveContext.rupeeAccumulator > 0) {
-            if (gSaveContext.rupees < CUR_CAPACITY(UPG_WALLET)) {
+            if (Rupees_GetDisplayNum() < Wallet_Capacity_Current()) {
                 gSaveContext.rupeeAccumulator--;
-                gSaveContext.rupees++;
+                Rupees_DirectChange(1);
                 Audio_PlaySoundGeneral(NA_SE_SY_RUPY_COUNT, &D_801333D4, 4, &D_801333E0, &D_801333E0, &D_801333E8);
             } else {
                 // "Rupee Amount MAX = %d"
-                osSyncPrintf("ルピー数ＭＡＸ = %d\n", CUR_CAPACITY(UPG_WALLET));
-                gSaveContext.rupees = CUR_CAPACITY(UPG_WALLET);
+                osSyncPrintf("ルピー数ＭＡＸ = %d\n", Wallet_Capacity_Current());
+                Rupees_DirectSet(Wallet_Capacity_Current());
                 gSaveContext.rupeeAccumulator = 0;
             }
-        } else if (gSaveContext.rupees != 0) {
+        } else if (Rupees_GetDisplayNum() != 0) {
             if (gSaveContext.rupeeAccumulator <= -50) {
                 gSaveContext.rupeeAccumulator += 10;
-                gSaveContext.rupees -= 10;
+                Rupees_DirectChange(-10);
 
-                if (gSaveContext.rupees < 0) {
-                    gSaveContext.rupees = 0;
+                if (Rupees_GetDisplayNum() < 0) {
+                    Rupees_DirectSet(0);
                 }
 
                 Audio_PlaySoundGeneral(NA_SE_SY_RUPY_COUNT, &D_801333D4, 4, &D_801333E0, &D_801333E0, &D_801333E8);
             } else {
                 gSaveContext.rupeeAccumulator++;
-                gSaveContext.rupees--;
+                Rupees_DirectChange(-1);
                 Audio_PlaySoundGeneral(NA_SE_SY_RUPY_COUNT, &D_801333D4, 4, &D_801333E0, &D_801333E0, &D_801333E8);
             }
         } else {

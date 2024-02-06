@@ -214,6 +214,8 @@ void BossFd2_SetupEmerge(BossFd2* this, PlayState* play) {
     temp_rand = Rand_ZeroFloat(8.9f);
     this->actor.world.pos.x = sHoleLocations[temp_rand].x;
     this->actor.world.pos.z = sHoleLocations[temp_rand].z;
+    this->actor.isTeleported = 1;
+    this->actor.teleportVec = this->actor.world.pos;
     this->work[FD2_ACTION_STATE] = 0;
     osSyncPrintf("UP INIT 2\n");
     this->timers[0] = 10;
@@ -255,6 +257,8 @@ void BossFd2_Emerge(BossFd2* this, PlayState* play) {
                 this->work[FD2_ACTION_STATE] = 1;
                 this->work[FD2_HOLE_COUNTER]++;
                 this->actor.world.pos.y = -200.0f;
+                this->actor.isTeleported = 1;
+                this->actor.teleportVec = this->actor.world.pos;
                 health = bossFd->actor.colChkInfo.health;
                 if (health == 24) {
                     holeTime = 30;
@@ -279,6 +283,8 @@ void BossFd2_Emerge(BossFd2* this, PlayState* play) {
                     i = Rand_ZeroFloat(8.9f);
                     this->actor.world.pos.x = sHoleLocations[i].x;
                     this->actor.world.pos.z = sHoleLocations[i].z;
+                    this->actor.isTeleported = 1;
+                    this->actor.teleportVec = this->actor.world.pos;
                     this->work[FD2_ACTION_STATE] = 0;
                     this->timers[0] = 10;
                 } else {
@@ -289,6 +295,8 @@ void BossFd2_Emerge(BossFd2* this, PlayState* play) {
                     this->actor.shape.rot.y = this->actor.yawTowardsPlayer;
                     this->timers[0] = 15;
                     this->actor.world.pos.y = 150.0f;
+                    this->actor.isTeleported = 1;
+                    this->actor.teleportVec = this->actor.world.pos;
                     for (i = 0; i < 10; i++) {
                         this->rightMane.pos[i].x += Rand_CenteredFloat(100.0f);
                         this->rightMane.pos[i].z += Rand_CenteredFloat(100.0f);

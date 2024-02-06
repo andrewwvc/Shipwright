@@ -29,6 +29,7 @@ class SetTransitionActorList : public SceneCommand<TransitionActorEntry> {
     size_t GetPointerSize();
 
     uint32_t numTransitionActors;
+    uint32_t modificationState;
     std::vector<TransitionActorEntry> transitionActorList;
 };
 }; // namespace LUS

@@ -618,7 +618,7 @@ void EnfHG_Damage(EnfHG* this, PlayState* play) {
         this->timers[0] = 140;
         this->actionFunc = EnfHG_Retreat;
         Animation_MorphToLoop(&this->skin.skelAnime, &gPhantomHorseRunningAnim, 0.0f);
-        if (bossGnd->actor.colChkInfo.health > 24) {
+        if (bossGnd->actor.colChkInfo.health > 40) {
             this->bossGndSignal = FHG_RIDE;
         } else {
             bossGnd->flyMode = GND_FLY_NEUTRAL;

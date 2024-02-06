@@ -127,7 +127,7 @@ void EnMs_Talk(EnMs* this, PlayState* play) {
     } else if (Message_ShouldAdvance(play)) {
         switch (play->msgCtx.choiceIndex) {
             case 0: // yes
-                if (gSaveContext.rupees <
+                if (Rupees_GetNum() <
                     ((IS_RANDO && Randomizer_GetSettingValue(RSK_SHUFFLE_MAGIC_BEANS))
                          ? 60
                          : sPrices[BEANS_BOUGHT])) {

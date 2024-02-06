@@ -6,6 +6,7 @@
 
 #include "z_en_ma1.h"
 #include "objects/object_ma1/object_ma1.h"
+#include "src/overlays/actors/ovl_En_Crow/z_en_crow.h"
 
 #define FLAGS (ACTOR_FLAG_TARGETABLE | ACTOR_FLAG_FRIENDLY | ACTOR_FLAG_UPDATE_WHILE_CULLED | ACTOR_FLAG_DRAW_WHILE_CULLED | ACTOR_FLAG_NO_FREEZE_OCARINA)
 
@@ -25,6 +26,7 @@ void func_80AA106C(EnMa1* this, PlayState* play);
 void func_80AA10EC(EnMa1* this, PlayState* play);
 void func_80AA1150(EnMa1* this, PlayState* play);
 void EnMa1_DoNothing(EnMa1* this, PlayState* play);
+void EnMa1_DoSomething(EnMa1* this, PlayState* play);
 void EnMa1_WaitForSongGive(EnMa1* this, PlayState* play);
 
 const ActorInit En_Ma1_InitVars = {
@@ -95,6 +97,8 @@ bool Randomizer_ObtainedMalonHCReward() {
 }
 
 u16 EnMa1_GetText(PlayState* play, Actor* thisx) {
+    EnMa1* this = ((EnMa1*)thisx);
+    u16 RanchMsg = GetTextID("ranch");
     // Special case for Malon Hyrule Castle Text. Placing it here at the beginning
     // has the added benefit of circumventing mask text if wearing bunny hood.
     if (IS_RANDO && play->sceneNum == SCENE_HYRULE_CASTLE) {
@@ -104,6 +108,27 @@ u16 EnMa1_GetText(PlayState* play, Actor* thisx) {
 
     if (faceReaction != 0) {
         return faceReaction;
+    }
+
+    if (thisx->params == 0x1){
+        if (this->talkProgress && (EnCrow_ExportDeathCount() || EnCrow_ExportDeathCountBig())){
+            if (EnCrow_ExportDeathCountBig())
+                return RanchMsg+4;
+            else
+                return RanchMsg+3;
+        } else {
+            return RanchMsg+2;
+        }
+    }
+    if (play->sceneNum == SCENE_LON_LON_BUILDINGS) {
+        if (gSaveContext.eventChkInf[2] & 0x0100) {
+            return RanchMsg+1;
+        } else {
+            if (gSaveContext.eventChkInf[2] & 0x0200)
+                return RanchMsg+5;
+            else
+                return RanchMsg+0;
+        }
     }
     if (!IS_RANDO) {
         if (CHECK_QUEST_ITEM(QUEST_SONG_EPONA)) {
@@ -137,6 +162,8 @@ u16 EnMa1_GetText(PlayState* play, Actor* thisx) {
 }
 
 s16 func_80AA0778(PlayState* play, Actor* thisx) {
+    EnMa1* this = ((EnMa1*)thisx);
+    u16 RanchMsg = GetTextID("ranch");
     s16 ret = NPC_TALK_STATE_TALKING;
 
     switch (Message_GetState(&play->msgCtx)) {
@@ -166,6 +193,14 @@ s16 func_80AA0778(PlayState* play, Actor* thisx) {
                     ret = NPC_TALK_STATE_ACTION;
                     break;
                 default:
+                    if ((thisx->textId == RanchMsg+0) || (thisx->textId == RanchMsg+5)) {
+                        gSaveContext.eventChkInf[2] |= 0x0100;//Set to go outside at night
+                        gSaveContext.MalonPlayDay = gSaveContext.totalDays;
+                    } else if (thisx->textId == RanchMsg+2) {
+                        this->talkProgress = 1;
+                    } else if (thisx->textId == RanchMsg+4) {
+                        gSaveContext.eventChkInf[2] |= 0x0200;//Set to be impressed
+                    }
                     ret = NPC_TALK_STATE_IDLE;
                     break;
             }
@@ -216,13 +251,22 @@ s32 func_80AA08C4(EnMa1* this, PlayState* play) {
             return 0;                              // don't make her appear at the castle
         }
     }
-    // Malon asleep in her bed if Talon has left Hyrule Castle and it is nighttime.
+    // Malon (not) asleep in her bed if Talon has left Hyrule Castle and it is nighttime.
     if ((play->sceneNum == SCENE_LON_LON_BUILDINGS) && IS_NIGHT && (Flags_GetEventChkInf(EVENTCHKINF_TALON_RETURNED_FROM_CASTLE))) {
+        if ((gSaveContext.eventChkInf[2] & 0x0100) && (gSaveContext.MalonPlayDay != gSaveContext.totalDays))
+            gSaveContext.eventChkInf[2] &= ~0x0100;
         return 1;
     }
     // Don't spawn Malon if none of the above are true and we are not in Lon Lon Ranch.
     if (play->sceneNum != SCENE_LON_LON_RANCH) {
         return 0;
+    } else {//We are in the ranch
+        if (this->actor.params == 0x1 && (gSaveContext.eventChkInf[2] & 0x0100)) {
+            if ((gSaveContext.MalonPlayDay == gSaveContext.totalDays))
+                return 1;
+            else
+                gSaveContext.eventChkInf[2] &= ~0x0100;
+        }
     }
     // If we've gotten this far, we're in Lon Lon Ranch. Spawn Malon if it is daytime, Talon has left Hyrule Castle, and
     // either we are not randomized, or we are and we have received Malon's item at Hyrule Castle.
@@ -307,6 +351,7 @@ void EnMa1_Init(Actor* thisx, PlayState* play) {
     Actor_SetScale(&this->actor, 0.01f);
     this->actor.targetMode = 6;
     this->interactInfo.talkState = NPC_TALK_STATE_IDLE;
+    this->talkProgress = 0;
 
    // To avoid missing a check, we want Malon to have the actionFunc for singing, but not reacting to Ocarina, if any of
    // the following are true.
@@ -314,7 +359,7 @@ void EnMa1_Init(Actor* thisx, PlayState* play) {
    // 2. We are Randomized and have not obtained Malon's Weird Egg Check.
    // 3. We are not Randomized and have obtained Epona's Song
     if (!Flags_GetEventChkInf(EVENTCHKINF_TALON_RETURNED_FROM_CASTLE) || (IS_RANDO && !Randomizer_ObtainedMalonHCReward()) || (CHECK_QUEST_ITEM(QUEST_SONG_EPONA) && !IS_RANDO) ||
-        (IS_RANDO && Flags_GetTreasure(play, 0x1F))) {
+        (IS_RANDO && Flags_GetTreasure(play, 0x1F)) || (thisx->params == 0x1)) {
         this->actionFunc = func_80AA0D88;
         EnMa1_ChangeAnim(this, ENMA1_ANIM_2);
     // If none of the above conditions were true, set Malon up to teach Epona's Song.
@@ -325,6 +370,11 @@ void EnMa1_Init(Actor* thisx, PlayState* play) {
 
         this->actionFunc = func_80AA0F44;
         EnMa1_ChangeAnim(this, ENMA1_ANIM_2);
+    }
+
+    if (play->sceneNum == SCENE_LON_LON_BUILDINGS) {
+        this->actionFunc = EnMa1_DoSomething;
+        EnMa1_ChangeAnim(this, ENMA1_ANIM_1);
     }
 }
 
@@ -344,6 +394,11 @@ void func_80AA0D88(EnMa1* this, PlayState* play) {
         if (this->skelAnime.animation != &gMalonChildSingAnim) {
             EnMa1_ChangeAnim(this, ENMA1_ANIM_3);
         }
+    }
+
+    if (this->questFlags == 0 && EnCrow_ExportDeathCountBig()) {
+        this->questFlags = 1;
+        func_80078884(NA_SE_SY_CORRECT_CHIME);
     }
 
     // We want to Kill Malon's Actor outside of randomizer when Talon is freed. In Randomizer we don't kill Malon's
@@ -507,6 +562,17 @@ void func_80AA1150(EnMa1* this, PlayState* play) {
 }
 
 void EnMa1_DoNothing(EnMa1* this, PlayState* play) {
+}
+
+void EnMa1_DoSomething(EnMa1* this, PlayState* play) {
+    if (this->interactInfo.talkState == NPC_TALK_STATE_IDLE) {
+        if (this->skelAnime.animation != &gMalonChildIdleAnim) {
+            EnMa1_ChangeAnim(this, ENMA1_ANIM_1);
+        }
+    }
+    if (gSaveContext.n64ddFlag) {
+        this->actor.home.pos.z = this->actor.world.pos.z;
+    }
 }
 
 void EnMa1_Update(Actor* thisx, PlayState* play) {

@@ -123,7 +123,17 @@ class CustomMessageManager {
   private:
     std::unordered_map<std::string, CustomMessageTable> messageTables;
 
+    void ReplaceSpecialCharacters(std::string &string);
+    void ReplaceColors(std::string& string);
     bool InsertCustomMessage(std::string tableID, uint16_t textID, CustomMessage message);
+    bool ReplaceCustomMessage(std::string tableID, uint16_t textID, CustomMessage message);
+
+    // std::string MESSAGE_END();
+    // std::string ITEM_OBTAINED(uint8_t x);
+    // std::string NEWLINE();
+    // std::string COLOR(uint8_t x);
+    // std::string WAIT_FOR_INPUT();
+    // std::string PLAYER_NAME();
 
   public:
     static CustomMessageManager* Instance;
@@ -169,6 +179,16 @@ class CustomMessageManager {
      */
     CustomMessage RetrieveMessage(std::string tableID, uint16_t textID);
 
+    /*Formats the provided Custom Message Entry and replaces an existing entry with the same textID,
+    given that already exists*/
+    bool ReplaceMessage(std::string tableID, uint16_t textID, CustomMessage messageEntry);
+
+    /*
+    Retrieves a message from the table with id tableID with the provided textID.
+    Returns a NULL_CUSTOM_MESSAGE if the message or table does not exist.
+    */
+    //CustomMessage RetrieveMessage(std::string tableID, uint16_t textID);
+
     /**
      * @brief Empties out the message table identified by tableID.
      *
@@ -206,4 +226,22 @@ class MessageNotFoundException : public std::exception {
         sprintf(message, "Message from table %s with textId %u was not found", messageTableId.c_str(), textId);
         return message;
     }
+};
+
+class TextIDAllocator {
+  protected:
+    uint16_t start;
+    uint16_t max_range;
+    uint16_t end;
+    std::unordered_map<std::string, uint16_t> labels;
+
+  public:
+    static TextIDAllocator* Instance;
+
+    TextIDAllocator();
+    ~TextIDAllocator();
+
+    void reset();
+    uint16_t allocateRange(std::string name, uint16_t num_ids);
+    uint16_t getId(std::string name);
 };

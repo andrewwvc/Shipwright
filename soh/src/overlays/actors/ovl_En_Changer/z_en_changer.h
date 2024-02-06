@@ -22,6 +22,8 @@ typedef struct EnChanger {
     /* 0x0164 */ s16 chestOpened;
     /* 0x0166 */ s16 timer;
     /* 0x0168 */ s16 roomChestsOpened;
+    /*        */ s16 randValue;
+    /* 0x0158 */ EnBox* chestArray[6];
 } EnChanger; // size = 0x016C
 
 #endif

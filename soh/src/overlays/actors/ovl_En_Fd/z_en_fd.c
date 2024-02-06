@@ -49,7 +49,7 @@ static ColliderJntSphElementInit sJntSphElementsInit[12] = {
     {
         {
             ELEMTYPE_UNK0,
-            { 0xFFCFFFFF, 0x01, 0x04 },
+            { 0x20000000, 0x01, 0x10 },
             { 0x00040088, 0x00, 0x00 },
             TOUCH_ON | TOUCH_SFX_NORMAL,
             BUMP_ON | BUMP_HOOKABLE,
@@ -60,7 +60,7 @@ static ColliderJntSphElementInit sJntSphElementsInit[12] = {
     {
         {
             ELEMTYPE_UNK0,
-            { 0xFFCFFFFF, 0x01, 0x04 },
+            { 0x20000000, 0x01, 0x10 },
             { 0x00040008, 0x00, 0x00 },
             TOUCH_ON | TOUCH_SFX_NORMAL,
             BUMP_ON,
@@ -71,7 +71,7 @@ static ColliderJntSphElementInit sJntSphElementsInit[12] = {
     {
         {
             ELEMTYPE_UNK0,
-            { 0xFFCFFFFF, 0x01, 0x04 },
+            { 0x20000000, 0x01, 0x10 },
             { 0x00040008, 0x00, 0x00 },
             TOUCH_ON | TOUCH_SFX_NORMAL,
             BUMP_ON,
@@ -82,7 +82,7 @@ static ColliderJntSphElementInit sJntSphElementsInit[12] = {
     {
         {
             ELEMTYPE_UNK0,
-            { 0xFFCFFFFF, 0x01, 0x04 },
+            { 0x20000000, 0x01, 0x10 },
             { 0x00040008, 0x00, 0x00 },
             TOUCH_ON | TOUCH_SFX_NORMAL,
             BUMP_ON,
@@ -93,7 +93,7 @@ static ColliderJntSphElementInit sJntSphElementsInit[12] = {
     {
         {
             ELEMTYPE_UNK0,
-            { 0xFFCFFFFF, 0x01, 0x04 },
+            { 0x20000000, 0x01, 0x10 },
             { 0x00040008, 0x00, 0x00 },
             TOUCH_ON | TOUCH_SFX_NORMAL,
             BUMP_ON,
@@ -104,7 +104,7 @@ static ColliderJntSphElementInit sJntSphElementsInit[12] = {
     {
         {
             ELEMTYPE_UNK0,
-            { 0xFFCFFFFF, 0x01, 0x04 },
+            { 0x20000000, 0x01, 0x10 },
             { 0x00040008, 0x00, 0x00 },
             TOUCH_ON | TOUCH_SFX_NORMAL,
             BUMP_ON,
@@ -115,7 +115,7 @@ static ColliderJntSphElementInit sJntSphElementsInit[12] = {
     {
         {
             ELEMTYPE_UNK0,
-            { 0xFFCFFFFF, 0x01, 0x04 },
+            { 0x20000000, 0x01, 0x10 },
             { 0x00040008, 0x00, 0x00 },
             TOUCH_ON | TOUCH_SFX_NORMAL,
             BUMP_ON,
@@ -126,7 +126,7 @@ static ColliderJntSphElementInit sJntSphElementsInit[12] = {
     {
         {
             ELEMTYPE_UNK0,
-            { 0xFFCFFFFF, 0x01, 0x04 },
+            { 0x20000000, 0x01, 0x10 },
             { 0x00040008, 0x00, 0x00 },
             TOUCH_ON | TOUCH_SFX_NORMAL,
             BUMP_ON,
@@ -137,7 +137,7 @@ static ColliderJntSphElementInit sJntSphElementsInit[12] = {
     {
         {
             ELEMTYPE_UNK0,
-            { 0xFFCFFFFF, 0x01, 0x04 },
+            { 0x20000000, 0x01, 0x10 },
             { 0x00040008, 0x00, 0x00 },
             TOUCH_ON | TOUCH_SFX_NORMAL,
             BUMP_ON,
@@ -148,7 +148,7 @@ static ColliderJntSphElementInit sJntSphElementsInit[12] = {
     {
         {
             ELEMTYPE_UNK0,
-            { 0xFFCFFFFF, 0x01, 0x04 },
+            { 0x20000000, 0x01, 0x10 },
             { 0x00040008, 0x00, 0x00 },
             TOUCH_ON | TOUCH_SFX_NORMAL,
             BUMP_ON,
@@ -159,7 +159,7 @@ static ColliderJntSphElementInit sJntSphElementsInit[12] = {
     {
         {
             ELEMTYPE_UNK0,
-            { 0xFFCFFFFF, 0x01, 0x04 },
+            { 0x20000000, 0x01, 0x10 },
             { 0x00040008, 0x00, 0x00 },
             TOUCH_ON | TOUCH_SFX_NORMAL,
             BUMP_ON,
@@ -170,7 +170,7 @@ static ColliderJntSphElementInit sJntSphElementsInit[12] = {
     {
         {
             ELEMTYPE_UNK0,
-            { 0xFFCFFFFF, 0x01, 0x04 },
+            { 0x20000000, 0x01, 0x10 },
             { 0x00040008, 0x00, 0x00 },
             TOUCH_ON | TOUCH_SFX_NORMAL,
             BUMP_ON,
@@ -185,7 +185,7 @@ static ColliderJntSphInit sJntSphInit = {
         COLTYPE_NONE,
         AT_ON | AT_TYPE_ENEMY,
         AC_ON | AC_TYPE_PLAYER,
-        OC1_ON | OC1_TYPE_ALL,
+        OC1_ON | AC_TYPE_PLAYER,
         OC2_TYPE_1,
         COLSHAPE_JNTSPH,
     },
@@ -375,9 +375,9 @@ Actor* EnFd_FindPotentialTheat(EnFd* this, PlayState* play) {
     Player* player;
     Actor* bomb = EnFd_FindBomb(this, play);
 
-    if (bomb != NULL) {
-        return bomb;
-    }
+    //if (bomb != NULL) {
+        //return bomb;
+    //}
 
     if (this->attackTimer != 0) {
         return NULL;
@@ -466,6 +466,8 @@ void EnFd_Init(Actor* thisx, PlayState* play) {
     this->actor.gravity = -1.0f;
     this->runDir = Rand_ZeroOne() < 0.5f ? -1 : 1;
     this->actor.naviEnemyId = 0x22;
+    this->storedParams = this->actor.params;
+    this->actor.params = 0xFFFF;
     this->actionFunc = EnFd_Reappear;
 }
 
@@ -475,6 +477,11 @@ void EnFd_Destroy(Actor* thisx, PlayState* play) {
     Collider_DestroyJntSph(play, &this->collider);
 
     ResourceMgr_UnregisterSkeleton(&this->skelAnime);
+    Actor* actor = play->actorCtx.actorLists[ACTORCAT_ENEMY].head;
+    while (actor != NULL) {
+        Actor_Kill(actor);
+        actor = actor->next;
+    }
 }
 
 void EnFd_Reappear(EnFd* this, PlayState* play) {
@@ -543,13 +550,13 @@ void EnFd_SpinAndSpawnFire(EnFd* this, PlayState* play) {
     if (DECR(this->spinTimer) != 0) {
         this->actor.shape.rot.y += (this->runDir * 0x2000);
         if (this->spinTimer == 30 && this->invincibilityTimer == 0) {
-            if (this->actor.xzDistToPlayer > 160.0f) {
+            //if (this->actor.xzDistToPlayer > 160.0f) {
                 // orange flames
-                EnFd_SpawnChildFire(this, play, 8, 0);
-            } else {
+                EnFd_SpawnChildFire(this, play, 12, 0);
+            //} else {
                 // blue flames
                 EnFd_SpawnChildFire(this, play, 8, 1);
-            }
+            //}
         }
     } else {
         // slow shape rotation down to meet `this` rotation within ~1.66 degrees
@@ -686,13 +693,16 @@ void EnFd_Update(Actor* thisx, PlayState* play) {
     this->actionFunc(this, play);
     EnFd_UpdateDots(this);
     EnFd_UpdateFlames(this);
+    if ((this->storedParams & 0xF) < 0xF) {
+        this->storedParams = CLAMP(thisx->colChkInfo.health - 1, 0, 23)/8;
+    }
     if (this->actionFunc != EnFd_Reappear && this->actionFunc != EnFd_SpinAndGrow &&
         this->actionFunc != EnFd_WaitForCore) {
         if (this->attackTimer == 0 && this->invincibilityTimer == 0) {
             CollisionCheck_SetAT(play, &play->colChkCtx, &this->collider.base);
         }
 
-        if ((this->actionFunc == EnFd_Run) || (this->actionFunc == EnFd_SpinAndSpawnFire)) {
+        if ((this->actionFunc == EnFd_Run) /*|| (this->actionFunc == EnFd_SpinAndSpawnFire)*/) {
             CollisionCheck_SetAC(play, &play->colChkCtx, &this->collider.base);
         }
         CollisionCheck_SetOC(play, &play->colChkCtx, &this->collider.base);

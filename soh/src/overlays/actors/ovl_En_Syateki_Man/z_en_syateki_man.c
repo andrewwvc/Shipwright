@@ -226,7 +226,7 @@ void EnSyatekiMan_Talk(EnSyatekiMan* this, PlayState* play) {
         if (this->textIdx == SYATEKI_TEXT_CHOICE) {
             switch (play->msgCtx.choiceIndex) {
                 case 0:
-                    if (gSaveContext.rupees >= 20) {
+                    if (Rupees_GetNum() >= 20) {
                         Rupees_ChangeBy(-20);
                         this->textIdx = SYATEKI_TEXT_START_GAME;
                         nextState = 1;
@@ -293,6 +293,13 @@ void EnSyatekiMan_StartGame(EnSyatekiMan* this, PlayState* play) {
         Message_CloseTextbox(play);
         gallery = ((EnSyatekiItm*)this->actor.parent);
         if (gallery->actor.update != NULL) {
+            if (LINK_IS_CHILD) {
+                if (gSaveContext.galleryMultplierChild > INITIAL_GALLERY_MULTIPLIER && gSaveContext.galleryTimeChild <= gSaveContext.savedFrameCount)
+                    gSaveContext.galleryMultplierChild = INITIAL_GALLERY_MULTIPLIER;
+            } else {
+                if (gSaveContext.galleryMultplierAdult > INITIAL_GALLERY_MULTIPLIER && gSaveContext.galleryTimeAdult <= gSaveContext.savedFrameCount)
+                    gSaveContext.galleryMultplierAdult = INITIAL_GALLERY_MULTIPLIER;
+            }
             if(CVarGetInteger("gCustomizeShootingGallery", 0) && CVarGetInteger("gInstantShootingGalleryWin", 0)) {
                 gallery->hitCount = 10;
                 gallery->signal = ENSYATEKI_END;
@@ -370,9 +377,14 @@ void EnSyatekiMan_EndGame(EnSyatekiMan* this, PlayState* play) {
                         } else {
                             this->getItemEntry = (GetItemEntry)GET_ITEM_NONE;
                             this->getItemId = GI_RUPEE_PURPLE;
+                            gSaveContext.galleryMultplierChild++;
+                            if (0 == gSaveContext.galleryMultplierChild)
+                                gSaveContext.galleryMultplierChild = INITIAL_GALLERY_MULTIPLIER;
+                            if (gSaveContext.galleryMultplierChild == INITIAL_GALLERY_MULTIPLIER+1)
+                                gSaveContext.galleryTimeChild = gSaveContext.savedFrameCount+DEFAULT_RESOURCE_TIME;
                         }
                     } else {
-                        // Only give the adult rando reward when the player has a quiver
+                        s16 isRupee = 0;
                         if (IS_RANDO && !Flags_GetTreasure(play, 0x1F) && CUR_UPG_VALUE(UPG_QUIVER) > 0) {
                             this->getItemEntry = Randomizer_GetItemFromKnownCheck(RC_KAK_SHOOTING_GALLERY_REWARD, GI_QUIVER_50);
                             this->getItemId = this->getItemEntry.getItemId;
@@ -383,6 +395,7 @@ void EnSyatekiMan_EndGame(EnSyatekiMan* this, PlayState* play) {
                             switch (CUR_UPG_VALUE(UPG_QUIVER)) {
                                 case 0:
                                     this->getItemId = GI_RUPEE_PURPLE;
+                                    isRupee = 1;
                                     break;
                                 case 1:
                                     this->getItemId = GI_QUIVER_40;
@@ -394,6 +407,15 @@ void EnSyatekiMan_EndGame(EnSyatekiMan* this, PlayState* play) {
                         } else {
                             this->getItemEntry = (GetItemEntry)GET_ITEM_NONE;
                             this->getItemId = GI_RUPEE_PURPLE;
+                            isRupee = 1;
+                        }
+
+                        if (isRupee) {
+                            gSaveContext.galleryMultplierAdult++;
+                            if (0 == gSaveContext.galleryMultplierAdult)
+                                gSaveContext.galleryMultplierAdult = INITIAL_GALLERY_MULTIPLIER;
+                            if (gSaveContext.galleryMultplierAdult == INITIAL_GALLERY_MULTIPLIER+1)
+                                gSaveContext.galleryTimeAdult = gSaveContext.savedFrameCount+DEFAULT_RESOURCE_TIME;
                         }
                     }
                     if (!IS_RANDO || this->getItemEntry.getItemId == GI_NONE) {

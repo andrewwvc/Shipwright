@@ -3507,6 +3507,7 @@ void KaleidoScope_Update(PlayState* play)
         }
     }
 
+    Interface_SetPauseCUpDisplay(0);
     switch (pauseCtx->state) {
         case 3:
             for (int buttonIndex = 0; buttonIndex < ARRAY_COUNT(gSaveContext.buttonStatus); buttonIndex++) {
@@ -3833,7 +3834,7 @@ void KaleidoScope_Update(PlayState* play)
             pauseCtx->tradeQuestLocation = 0xFF;
 
             i = INV_CONTENT(ITEM_TRADE_ADULT);
-            if (LINK_AGE_IN_YEARS == YEARS_ADULT) {
+            /*if (LINK_AGE_IN_YEARS == YEARS_ADULT) {
                 if ((i <= ITEM_POCKET_CUCCO) || (i == ITEM_ODD_MUSHROOM)) {
                     pauseCtx->tradeQuestLocation = 8;
                 }
@@ -3855,7 +3856,7 @@ void KaleidoScope_Update(PlayState* play)
                 if ((i == ITEM_CLAIM_CHECK) && (gSaveContext.bgsFlag == 0)) {
                     pauseCtx->tradeQuestLocation = 7;
                 }
-            }
+            }*/
 
             KaleidoScope_ResetTradeSelect();
 
@@ -3921,6 +3922,8 @@ void KaleidoScope_Update(PlayState* play)
                         Interface_ChangeAlpha(50);
                         pauseCtx->unk_1EC = 0;
                         pauseCtx->state = 7;
+                    } else if (pauseCtx->pageIndex == PAUSE_QUEST) {
+                        goto handle_navi;
                     }
                     break;
 
@@ -4020,10 +4023,38 @@ void KaleidoScope_Update(PlayState* play)
                         Interface_ChangeAlpha(50);
                         pauseCtx->unk_1EC = 0;
                         pauseCtx->state = 7;
+                    } else {
+                        goto handle_navi;
                     }
                     break;
 
                 case 9:
+                    break;
+
+                case 10:
+                    Interface_SetPauseCUpDisplay(100);
+                    if (play->msgCtx.msgMode == MSGMODE_NONE) {
+                        Interface_SetDoAction(play, DO_ACTION_DECIDE);
+                        Interface_LoadActionLabelB(play, DO_ACTION_SAVE);
+                        pauseCtx->unk_1E4 = 0;
+                    }
+                    break;
+
+                case 11:
+                handle_navi:
+                    {
+                        u16 msg = ElfMessage_GetSpecialNaviText(play);
+                        if (msg != 0 && msg != 0x015F) {
+                            Interface_SetPauseCUpDisplay(255);
+                            if (CHECK_BTN_ALL(input->press.button, BTN_CUP)) {
+                                if ((gSaveContext.eventChkInf[0] & 0x200) || CHECK_QUEST_ITEM(QUEST_KOKIRI_EMERALD))
+                                    gSaveContext.eventChkInf[1] |= 0x8000;
+                                Message_StartTextbox(play, msg, NULL);
+                                pauseCtx->unk_1E4 = 10;
+                                ElfMessage_SelectSpecialNaviText(play);
+                            }
+                        }
+                    }
                     break;
 
                 default:

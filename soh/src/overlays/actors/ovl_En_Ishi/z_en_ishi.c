@@ -256,8 +256,8 @@ void EnIshi_DropCollectible(EnIshi* this, PlayState* play) {
         if (dropParams >= 0xD) {
             dropParams = 0;
         }
-
-        Item_DropCollectibleRandom(play, NULL, &this->actor.world.pos, dropParams << 4);
+        if (Rand_ZeroOne() < 0.33333f)
+            Item_DropCollectibleRandom(play, NULL, &this->actor.world.pos, dropParams << 4);
     }
 }
 

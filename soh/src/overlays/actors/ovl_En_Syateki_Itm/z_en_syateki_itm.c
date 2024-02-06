@@ -172,6 +172,7 @@ void EnSyatekiItm_SpawnTargets(EnSyatekiItm* this, PlayState* play) {
     Vec3f zeroVec = { 0.0f, 0.0f, 0.0f };
     s32 i;
     s32 roundIdx;
+    f32 speedMult = galleryMultiplierValue();
 
     if (play->shootingGalleryStatus == -1) {
         player->actor.freezeTimer = 10;
@@ -252,20 +253,20 @@ void EnSyatekiItm_SpawnTargets(EnSyatekiItm* this, PlayState* play) {
             switch (roundIdx) {
                 case SYATEKI_ROUND_BLUE_SEQUENTIAL:
                     if (i == 1) {
-                        this->targets[i]->delayTimer = 60;
+                        this->targets[i]->delayTimer = 30;
                     }
                     break;
                 case SYATEKI_ROUND_GREEN_THROW:
-                    this->targets[i]->actor.velocity.y = 15.0f;
-                    this->targets[i]->actor.gravity = -1.0f;
+                    this->targets[i]->actor.velocity.y = 15.0f*speedMult;
+                    this->targets[i]->actor.gravity = -1.0f*speedMult*speedMult;
                     this->targets[i]->moveMode = GSWITCH_THROW;
                     break;
                 case SYATEKI_ROUND_RED_LEFT:
-                    this->targets[i]->actor.velocity.x = -5.0f;
+                    this->targets[i]->actor.velocity.x = -5.0f*speedMult;
                     this->targets[i]->moveMode = GSWITCH_LEFT;
                     break;
                 case SYATEKI_ROUND_RED_RIGHT:
-                    this->targets[i]->actor.velocity.x = 7.0f;
+                    this->targets[i]->actor.velocity.x = 7.0f*speedMult;
                     this->targets[i]->moveMode = GSWITCH_RIGHT;
                     break;
             }

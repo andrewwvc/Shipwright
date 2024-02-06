@@ -207,14 +207,28 @@ const std::string CustomMessage::PLAYER_NAME() const {
     return "\x0F"s;
 }
 
-bool CustomMessageManager::InsertCustomMessage(std::string tableID, uint16_t textID, CustomMessage messages) {
+bool CustomMessageManager::InsertCustomMessage(std::string tableID, uint16_t textID, CustomMessage message) {
     auto foundMessageTable = messageTables.find(tableID);
     if (foundMessageTable == messageTables.end()) {
         return false;
     }
     auto& messageTable = foundMessageTable->second;
-    auto messageInsertResult = messageTable.emplace(textID, messages);
+    auto messageInsertResult = messageTable.emplace(textID, message);
     return messageInsertResult.second;
+}
+
+bool CustomMessageManager::ReplaceCustomMessage(std::string tableID, uint16_t textID, CustomMessage message) {
+    auto foundMessageTable = messageTables.find(tableID);
+    if (foundMessageTable == messageTables.end()) {
+        return false;
+    }
+    auto& messageTable = foundMessageTable->second;
+    auto foundMessage = messageTable.find(textID);
+    if (foundMessage == messageTable.end()) {
+        return false;
+    }
+    foundMessage->second = message;
+    return true;
 }
 
 bool CustomMessageManager::CreateGetItemMessage(std::string tableID, uint16_t giid, ItemID iid,
@@ -229,6 +243,15 @@ bool CustomMessageManager::CreateMessage(std::string tableID, uint16_t textID, C
     return InsertCustomMessage(tableID, textID, messageEntry);
 }
 
+bool CustomMessageManager::ReplaceMessage(std::string tableID, uint16_t textID, CustomMessage messageEntry) {
+    messageEntry.Format();
+    // FormatCustomMessage(messageEntry.GetEnglish());
+    // FormatCustomMessage(messageEntry.GetGerman());
+    // FormatCustomMessage(messageEntry.GetFrench());
+
+    return ReplaceCustomMessage(tableID, textID, messageEntry);
+}
+
 CustomMessage CustomMessageManager::RetrieveMessage(std::string tableID, uint16_t textID) {
     std::unordered_map<std::string, CustomMessageTable>::const_iterator foundMessageTable = messageTables.find(tableID);
     if (foundMessageTable == messageTables.end()) {
@@ -237,7 +260,7 @@ CustomMessage CustomMessageManager::RetrieveMessage(std::string tableID, uint16_
     CustomMessageTable messageTable = foundMessageTable->second;
     std::unordered_map<uint16_t, CustomMessage>::const_iterator foundMessage = messageTable.find(textID);
     if (foundMessage == messageTable.end()) {
-        throw(MessageNotFoundException(tableID, textID));
+        return CustomMessage("","","", TEXTBOX_TYPE_MISSING);
     }
     CustomMessage message = foundMessage->second;
     return message;
@@ -256,4 +279,60 @@ bool CustomMessageManager::ClearMessageTable(std::string tableID) {
 bool CustomMessageManager::AddCustomMessageTable(std::string tableID) { 
     CustomMessageTable newMessageTable;
     return messageTables.emplace(tableID, newMessageTable).second;
+}
+
+// std::string CustomMessageManager::MESSAGE_END() {
+//     return "\x02"s;
+// }
+
+// std::string CustomMessageManager::ITEM_OBTAINED(uint8_t x) {
+//     return "\x13"s + char(x);
+// }
+
+// std::string CustomMessageManager::NEWLINE() {
+//     return "\x01"s;
+// }
+
+// std::string CustomMessageManager::COLOR(uint8_t x) {
+//     return "\x05"s + char(x);
+// }
+
+// std::string CustomMessageManager::WAIT_FOR_INPUT() {
+//     return "\x04"s;
+// }
+
+// std::string CustomMessageManager::PLAYER_NAME() {
+//     return "\x0F"s;
+// }
+
+
+
+TextIDAllocator::TextIDAllocator() {
+    reset();
+}
+
+TextIDAllocator::~TextIDAllocator() {
+}
+
+void TextIDAllocator::reset() {
+    start = 0x8000;
+    max_range = 0xFFFF;
+    end = start;
+}
+
+uint16_t TextIDAllocator::allocateRange(std::string name, uint16_t num_ids) {
+    uint16_t current = end;
+    labels.insert({name,end});
+    end += num_ids;
+    return current;
+}
+
+uint16_t TextIDAllocator::getId(std::string name) {
+    auto foundId = labels.find(name);
+
+    if (foundId == labels.end()) {
+        return 0;
+    }
+
+    return foundId->second;
 }

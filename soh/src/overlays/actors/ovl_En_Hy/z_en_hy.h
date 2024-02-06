@@ -29,6 +29,14 @@ typedef enum {
     /* 21 */ ENHY_TYPE_MAX
 } EnHyType;
 
+typedef enum {
+    ENHY_STATE_INIT,
+    ENHY_STATE_NOTHING,
+    ENHY_STATE_WALK,
+    ENHY_STATE_SULK,
+    ENHY_STATE_GIVE,
+} EnHyQuestState;
+
 struct EnHy;
 
 typedef void (*EnHyActionFunc)(struct EnHy*, PlayState*);
@@ -60,6 +68,15 @@ typedef struct EnHy {
     /* 0x02D0 */ Vec3s morphTable[16];
     /* 0x0330 */ u16 unk_330;
     /*        */ GetItemEntry getItemEntry;
+                 s16 questStateTracking;
 } EnHy; // size = 0x0334
+
+#define BEGGAR_REWARD_FIRE 30
+#define BEGGAR_REWARD_FISH 20
+#define BEGGAR_REWARD_BUG 1
+#define BEGGAR_REWARD_FAIRY 3
+
+s8 isItchyWoman(Actor* self, PlayState* play);
+s8 isItchyWomanVulnerable(Actor* self);
 
 #endif

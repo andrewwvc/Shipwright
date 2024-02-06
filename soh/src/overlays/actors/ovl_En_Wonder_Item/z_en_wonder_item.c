@@ -74,6 +74,9 @@ void EnWonderItem_DropCollectible(EnWonderItem* this, PlayState* play, s32 autoC
     };
     s32 i;
     s32 randomDrop;
+    s32 resourceTimeMultiplier = 1;
+    if (this->itemDrop == 10)
+        resourceTimeMultiplier = 2;
 
     func_80078884(NA_SE_SY_GET_ITEM);
 
@@ -96,6 +99,7 @@ void EnWonderItem_DropCollectible(EnWonderItem* this, PlayState* play, s32 autoC
             }
         }
     }
+    insertSpawnResource(this->actor.entryNum, DEFAULT_RESOURCE_TIME*resourceTimeMultiplier);
     if (this->switchFlag >= 0) {
         Flags_SetSwitch(play, this->switchFlag);
     }
@@ -125,7 +129,7 @@ void EnWonderItem_Init(Actor* thisx, PlayState* play) {
         this->switchFlag = -1;
     }
     this->actor.targetMode = 1;
-    if ((this->switchFlag >= 0) && Flags_GetSwitch(play, this->switchFlag)) {
+    if ((this->switchFlag >= 0) && Flags_GetSwitch(play, this->switchFlag) && (!(8 <= this->itemDrop && this->itemDrop <= 10) || !usingBorrowedWallet())) {
         osSyncPrintf(VT_FGCOL(GREEN) "☆☆☆☆☆ Ｙｏｕ ａｒｅ Ｓｈｏｃｋ！  ☆☆☆☆☆ %d\n" VT_RST, this->switchFlag);
         Actor_Kill(&this->actor);
         return;

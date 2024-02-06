@@ -24,6 +24,11 @@ void EnSt_FinishBouncing(EnSt* this, PlayState* play);
 
 #include "overlays/ovl_En_St/ovl_En_St.h"
 
+#define SKULLTULA_PARAM_BIG 1
+#define SKULLTULA_PARAM_INVISIBLE 2
+#define SKULLTULA_PARAM_DORMANT 4
+#define SKULLTULA_PARAM_STEEL 8
+
 const ActorInit En_St_InitVars = {
     ACTOR_EN_ST,
     ACTORCAT_ENEMY,
@@ -281,18 +286,26 @@ void EnSt_InitColliders(EnSt* this, PlayState* play) {
 
     s32 i;
     s32 pad;
+    u32 defenseFlags, hitFlags;
 
     for (i = 0; i < ARRAY_COUNT(cylinders); i++) {
         Collider_InitCylinder(play, &this->colCylinder[i]);
         Collider_SetCylinder(play, &this->colCylinder[i], &this->actor, cylinders[i]);
     }
 
-    this->colCylinder[0].info.bumper.dmgFlags = 0x0003F8F9;
-    this->colCylinder[1].info.bumper.dmgFlags = 0xFFC00706;
+    if (this->actor.params & SKULLTULA_PARAM_STEEL) {
+        defenseFlags = 0x4FCC1FE6;
+        hitFlags = 0xB0032019;
+    } else {
+        defenseFlags = 0x0FCC1FA6;
+        hitFlags = 0xF0032059;
+    }
+    this->colCylinder[0].info.bumper.dmgFlags = hitFlags;//0x0003F8F9
+    this->colCylinder[1].info.bumper.dmgFlags = defenseFlags;//0xFFC00706
     this->colCylinder[2].base.colType = COLTYPE_METAL;
     this->colCylinder[2].info.bumperFlags = BUMP_ON | BUMP_HOOKABLE | BUMP_NO_AT_INFO;
     this->colCylinder[2].info.elemType = ELEMTYPE_UNK2;
-    this->colCylinder[2].info.bumper.dmgFlags = 0xFFCC0706;
+    this->colCylinder[2].info.bumper.dmgFlags = defenseFlags;
 
     CollisionCheck_SetInfo2(&this->actor.colChkInfo, DamageTable_Get(2), &sColChkInit);
 
@@ -400,7 +413,10 @@ s32 EnSt_CheckHitLink(EnSt* this, PlayState* play) {
     this->gaveDamageSpinTimer = 30;
     play->damagePlayer(play, -8);
     Audio_PlayActorSound2(&player->actor, NA_SE_PL_BODY_HIT);
-    func_8002F71C(play, &this->actor, 4.0f, this->actor.yawTowardsPlayer, 6.0f);
+    if (this->actor.params & SKULLTULA_PARAM_STEEL)
+        func_8002F71C(play, &this->actor, 4.0f, this->actor.shape.rot.y, 6.0f);
+    else
+        func_8002F71C(play, &this->actor, 4.0f, this->actor.yawTowardsPlayer, 6.0f);
     return true;
 }
 
@@ -414,7 +430,7 @@ s32 EnSt_CheckHitFrontside(EnSt* this) {
         this->colCylinder[2].base.acFlags &= ~AC_HIT;
         this->invulnerableTimer = 8;
         this->playSwayFlag = 0;
-        this->swayTimer = 60;
+        this->swayTimer = (this->actor.params & SKULLTULA_PARAM_STEEL) ? 80 : 60;
         return true;
     }
 }
@@ -467,6 +483,11 @@ s32 EnSt_CheckHitBackside(EnSt* this, PlayState* play) {
     this->actor.gravity = -1.0f;
     Audio_PlayActorSound2(&this->actor, NA_SE_EN_STALWALL_DEAD);
     GameInteractor_ExecuteOnEnemyDefeat(&this->actor);
+    if (this->actor.params & SKULLTULA_PARAM_BIG) {
+        gSaveContext.sohStats.count[COUNT_ENEMIES_DEFEATED_SKULLTULA_BIG]++;
+    } else {
+        gSaveContext.sohStats.count[COUNT_ENEMIES_DEFEATED_SKULLTULA]++;
+    }
 
     if (flags & 0x1F820) {
         // arrow, fire arrow, ice arrow, light arrow,
@@ -512,7 +533,7 @@ void EnSt_SetColliderScale(EnSt* this) {
     f32 yShift;
     s32 i;
 
-    if (this->actor.params == 1) {
+    if (this->actor.params & SKULLTULA_PARAM_BIG) {
         scaleAmount = 1.4f;
     }
 
@@ -595,7 +616,7 @@ void EnSt_UpdateYaw(EnSt* this, PlayState* play) {
             return;
         }
 
-        if (this->actionFunc != EnSt_WaitOnGround) {
+        if (this->actionFunc != EnSt_WaitOnGround || (this->actor.params & SKULLTULA_PARAM_STEEL)) {
             // set the timers to turn away or turn towards the player
             this->rotAwayTimer = 30;
             this->rotTowardsTimer = 0;
@@ -743,7 +764,10 @@ void EnSt_Sway(EnSt* this) {
 
     if (this->swayTimer != 0) {
 
-        this->swayAngle += 0xA28;
+        if (this->actor.params & SKULLTULA_PARAM_STEEL)
+            this->swayAngle += 0x880;
+        else
+            this->swayAngle += 0xA28;
         this->swayTimer--;
 
         if (this->swayTimer == 0) {
@@ -751,6 +775,8 @@ void EnSt_Sway(EnSt* this) {
         }
 
         swayAmt = this->swayTimer * (7.0f / 15.0f);
+        if (this->actor.params & SKULLTULA_PARAM_STEEL)
+            swayAmt *= 0.8f;
         rotAngle = Math_SinS(this->swayAngle) * (swayAmt * (65536.0f / 360.0f));
 
         if (this->absPrevSwayAngle >= ABS(rotAngle) && this->playSwayFlag == 0) {
@@ -786,14 +812,20 @@ void EnSt_Init(Actor* thisx, PlayState* play) {
     Animation_ChangeByInfo(&this->skelAnime, sAnimationInfo, ENST_ANIM_0);
     this->blureIdx = EnSt_CreateBlureEffect(play);
     EnSt_InitColliders(this, play);
-    if (thisx->params == 2) {
+    if (this->actor.params & SKULLTULA_PARAM_DORMANT)
+        this->isActivated = false;
+    else
+        this->isActivated = true;
+    this->actor.params &= ~SKULLTULA_PARAM_DORMANT;
+    if (this->actor.params & SKULLTULA_PARAM_INVISIBLE) {
         this->actor.flags |= ACTOR_FLAG_LENS;
     }
-    if (this->actor.params == 1) {
+    if (this->actor.params & SKULLTULA_PARAM_BIG) {
         this->actor.naviEnemyId = 0x05;
     } else {
         this->actor.naviEnemyId = 0x04;
     }
+
     EnSt_CheckCeilingPos(this, play);
     this->actor.flags |= ACTOR_FLAG_ARROW_DRAGGABLE;
     this->actor.flags |= ACTOR_FLAG_PLAY_HIT_SFX;
@@ -817,7 +849,7 @@ void EnSt_Destroy(Actor* thisx, PlayState* play) {
 }
 
 void EnSt_WaitOnCeiling(EnSt* this, PlayState* play) {
-    if (EnSt_IsCloseToPlayer(this, play)) {
+    if (EnSt_IsCloseToPlayer(this, play) && this->isActivated) {
         EnSt_SetDropAnimAndVel(this);
         EnSt_SetupAction(this, EnSt_MoveToGround);
     } else {
@@ -1012,6 +1044,9 @@ void EnSt_Update(Actor* thisx, PlayState* play) {
     s32 pad;
     Color_RGBA8 color = { 0, 0, 0, 0 };
 
+    if (!EnSt_IsCloseToPlayer(this,play))
+        this->isActivated = true;
+
     if (this->actor.flags & ACTOR_FLAG_DRAGGED_BY_ARROW) {
         SkelAnime_Update(&this->skelAnime);
     } else if (!EnSt_CheckColliders(this, play)) {
@@ -1041,7 +1076,9 @@ void EnSt_Update(Actor* thisx, PlayState* play) {
 
         EnSt_UpdateYaw(this, play);
 
-        if (this->actionFunc == EnSt_WaitOnGround) {
+        if (this->actor.params & SKULLTULA_PARAM_STEEL) {
+            color.b = 255;
+        } else if (this->actionFunc == EnSt_WaitOnGround) {
             if ((play->state.frames & 0x10) != 0) {
                 color.r = 255;
             }

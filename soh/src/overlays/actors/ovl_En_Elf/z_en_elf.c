@@ -599,6 +599,19 @@ void func_80A03148(EnElf* this, Vec3f* arg1, f32 arg2, f32 arg3, f32 arg4) {
     func_8002D7EC(&this->actor);
 }
 
+void Elf_GiveDefense(EnElf* this, PlayState* play) {
+    if (Actor_HasParent(&this->actor, play)) {
+        gSaveContext.spiritDefenseHeartsGiven++;
+        this->actionFunc = func_80A03610;
+    } else {
+        func_8002F434(&this->actor, play, GI_DEFENSE_HEART, 100.0f, 50.0f);
+    }
+}
+
+u8 isGivingDefense(Actor* thisx, PlayState* play) {
+    return ((EnElf*)thisx)->actionFunc == Elf_GiveDefense;
+}
+
 void func_80A0329C(EnElf* this, PlayState* play) {
     Player* refActor = GET_PLAYER(play);
     s32 pad;
@@ -622,6 +635,10 @@ void func_80A0329C(EnElf* this, PlayState* play) {
     }
 
     if (Actor_HasParent(&this->actor, play)) {
+        if (this->fairyFlags & FAIRY_FLAG_BIG)
+            insertCollectionResource(this->actor.entryNum, DEFAULT_RESOURCE_TIME);
+        else
+            insertSpawnResource(this->actor.entryNum, DEFAULT_RESOURCE_TIME);
         Actor_Kill(&this->actor);
         return;
     }
@@ -644,7 +661,7 @@ void func_80A0329C(EnElf* this, PlayState* play) {
                 }
                 else
                 {
-                    Health_ChangeBy(play, 128);
+                    Health_ChangeBy(play, 0x60);
                 }
                 if (this->fairyFlags & FAIRY_FLAG_BIG) {
                     Magic_Fill(play);
@@ -655,7 +672,18 @@ void func_80A0329C(EnElf* this, PlayState* play) {
                 this->unk_28C.y = 30.0f;
                 this->unk_2B4 = 0.0f;
                 this->unk_2AA = 0;
-                EnElf_SetupAction(this, func_80A03610);
+                if (this->fairyFlags & FAIRY_FLAG_BIG)
+                    insertCollectionResource(this->actor.entryNum, DEFAULT_RESOURCE_TIME);
+                else
+                    insertSpawnResource(this->actor.entryNum, DEFAULT_RESOURCE_TIME);
+
+                if ((gSaveContext.spiritDefenseHeartsGiven+1)*10 <= countCollection() &&
+                        Actor_FindNumberOf(play,&this->actor,ACTOR_EN_ELF,ACTORCAT_ITEMACTION, 500.0f, NULL, isGivingDefense) < 1) {
+                    func_8002F434(&this->actor, play, GI_DEFENSE_HEART, 100.0f, 50.0f);
+                    EnElf_SetupAction(this, Elf_GiveDefense);
+                } else {
+                    EnElf_SetupAction(this, func_80A03610);
+                }
                 return;
             }
         }
@@ -1274,7 +1302,7 @@ void func_80A05040(Actor* thisx, PlayState* play) {
     if ((Message_GetState(&play->msgCtx) == TEXT_STATE_CHOICE) && Message_ShouldAdvance(play)) {
         switch (play->msgCtx.choiceIndex) {
             case 0: // yes
-                Message_ContinueTextbox(play, ElfMessage_GetSariaText(play));
+                Message_ContinueTextbox(play, ElfMessage_GetSariaText(play, 1));
                 this->actor.update = func_80A05114;
                 break;
             case 1: // no
@@ -1308,7 +1336,7 @@ void func_80A05188(Actor* thisx, PlayState* play) {
     func_80A04DE4(this, play);
 
     if ((Message_GetState(&play->msgCtx) == TEXT_STATE_EVENT) && Message_ShouldAdvance(play)) {
-        Message_ContinueTextbox(play, ElfMessage_GetSariaText(play));
+        Message_ContinueTextbox(play, ElfMessage_GetSariaText(play, 0));
         this->actor.update = func_80A05114;
     }
 
@@ -1325,7 +1353,8 @@ void func_80A05208(Actor* thisx, PlayState* play) {
     if ((Message_GetState(&play->msgCtx) == TEXT_STATE_CHOICE) && Message_ShouldAdvance(play)) {
         switch (play->msgCtx.choiceIndex) {
             case 0: // yes
-                naviCUpText = ElfMessage_GetCUpText(play);
+                naviCUpText = ElfMessage_GetSpecialNaviText(play);
+                ElfMessage_SelectSpecialNaviText(play);
 
                 if (naviCUpText != 0) {
                     Message_ContinueTextbox(play, naviCUpText);
@@ -1385,11 +1414,14 @@ void func_80A053F0(Actor* thisx, PlayState* play) {
 
     if (player->naviTextId == 0) {
         if (player->unk_664 == NULL) {
-            if (((gSaveContext.naviTimer >= 600) && (gSaveContext.naviTimer <= 3000)) || (nREG(89) != 0)) {
-                player->naviTextId = ElfMessage_GetCUpText(play);
+            u16 txtTemp = ElfMessage_GetCUpText(play);
+            if (((gSaveContext.naviTimer >= 600) && (gSaveContext.naviTimer <= 3000) && (txtTemp < 0x0142)) || ((txtTemp >= 0x0142) && !(gSaveContext.eventChkInf[1] & 0x8000)) || (nREG(89) != 0)) {
+                player->naviTextId = txtTemp;
 
                 if (player->naviTextId == 0x15F) {
                     player->naviTextId = 0;
+                } else if (player->naviTextId >= 0x0142) {
+                    player->naviTextId = 0x015E;
                 }
             }
         }
@@ -1402,7 +1434,7 @@ void func_80A053F0(Actor* thisx, PlayState* play) {
         func_800F4524(&D_801333D4, NA_SE_VO_SK_LAUGH, 0x20);
         thisx->focus.pos = thisx->world.pos;
 
-        if (thisx->textId == ElfMessage_GetCUpText(play)) {
+        if (thisx->textId == ElfMessage_GetCUpText(play)) {//This will not be true if the msg is 0x0142 or beyond, and this is intentional
             this->fairyFlags |= 0x80;
             gSaveContext.naviTimer = 3001;
         }

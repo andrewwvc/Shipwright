@@ -17,11 +17,14 @@ typedef enum {
 } ChangerChestSide;
 
 void EnChanger_Init(Actor* thisx, PlayState* play);
+void EnChanger_InitAlt(Actor* thisx, PlayState* play);
 void EnChanger_Destroy(Actor* thisx, PlayState* play);
 void EnChanger_Update(Actor* thisx, PlayState* play);
 
 void EnChanger_Wait(EnChanger* this, PlayState* play);
+void EnChanger_WaitAlt(EnChanger* this, PlayState* play);
 void EnChanger_OpenChests(EnChanger* this, PlayState* play);
+void EnChanger_OpenChestsAlt(EnChanger* this, PlayState* play);
 void EnChanger_SetHeartPieceFlag(EnChanger* this, PlayState* play);
 
 const ActorInit En_Changer_InitVars = {
@@ -47,6 +50,16 @@ static Vec3f sRightChestPos[] = {
     { 140.0f, 20.0f, -1125.0f }, { 140.0f, 20.0f, -1565.0f }, { 140.0f, 20.0f, -2005.0f },
 };
 
+static f32 sBaseRoomPos[] = {
+    0.0f , -245.0f , -685.0f ,
+    -1125.0f , -1565.0f , -2005.0f
+};
+
+static Vec3f sRelativeChestPos[] = {
+    { -120.0f, 0.0f, -130.0f },  { -100.0f, 20.0f, 0.0f },  { -120.0f, 0.0f, 145.0f },
+    { 160.0f, 0.0f, -130.0f }, { 140.0f, 20.0f, 0.0f }, { 160.0f, 0.0f, 145.0f },
+};
+
 static s32 sLoserGetItemIds[] = {
     GI_NONE, GI_RUPEE_GREEN_LOSE, GI_RUPEE_GREEN_LOSE, GI_RUPEE_BLUE_LOSE, GI_RUPEE_BLUE_LOSE, GI_RUPEE_RED_LOSE,
 };
@@ -65,7 +78,105 @@ static s32 sTreasureFlags[] = { 0x0000, 0x0002, 0x0004, 0x0006, 0x0008, 0x000A }
 void EnChanger_Destroy(Actor* thisx, PlayState* play) {
 }
 
+void EnChanger_InitAlt(Actor* thisx, PlayState* play) {
+    EnChanger* this = (EnChanger*)thisx;
+    s16 leftChestParams;
+    s16 rightChestParams;
+    s16 rewardChestParams;
+    s16 minigameRoomNum;
+    s16 rightChestItem;
+    s16 leftChestItem;
+    s16 temp_v1_3;
+    s16 new_var;
+    s32 rewardParams;
+
+    minigameRoomNum = play->roomCtx.curRoom.num - 1;
+    if (minigameRoomNum < 0) {
+        minigameRoomNum = 0;
+    }
+    if (Flags_GetTreasure(play, sTreasureFlags[minigameRoomNum])) {
+        this->roomChestsOpened = true;
+    }
+
+    minigameRoomNum *= 2;
+    // Spawn Heart Piece in chest (or Purple Rupee if won Heart Piece)
+    if (play->roomCtx.curRoom.num >= 6) {
+        rewardChestParams = ((gSaveContext.itemGetInf[3] & 0x4000) ? (0x4EA0) : (0x4000 | (GI_DEFENSE_HEART & 0x7F)));
+        rewardChestParams = sTreasureFlags[5] | rewardChestParams;
+        this->finalChest = (EnBox*)Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, ACTOR_EN_BOX,
+                                                      20.0f, 20.0f, -2500.0f, 0, 0x7FFF, (gSaveContext.itemGetInf[3] & 0x4000) ? 0 : ((GI_DEFENSE_HEART & 0x80) << 1), rewardChestParams);
+        if (this->finalChest != NULL) {
+            if (this->roomChestsOpened) {
+                Flags_SetTreasure(play, rewardChestParams & 0x1F);
+                Actor_Kill(&this->actor);
+                return;
+            } else {
+                rewardParams = ((gSaveContext.itemGetInf[3] & 0x4000) ? (ITEM_ETC_RUPEE_PURPLE_CHEST_GAME)
+                                                                     : (ITEM_ETC_HEART_PIECE_CHEST_GAME)) &
+                               0xFF;
+                Actor_Spawn(&play->actorCtx, play, ACTOR_ITEM_ETCETERA, 20.0f, 20.0f, -2500.0f, 0, 0, 0,
+                            ((sTreasureFlags[5] & 0x1F) << 8) + rewardParams, true);
+                // "Central treasure instance/occurrence (GREAT)"
+                osSyncPrintf(VT_FGCOL(YELLOW) "☆☆☆☆☆ 中央宝発生(ＧＲＥＡＴ) ☆☆☆☆☆ %x\n" VT_RST, rewardChestParams);
+                this->actionFunc = EnChanger_SetHeartPieceFlag;
+                return;
+            }
+        }
+    }
+
+    // Use 'left chest' params for the losing items, and 'right chest' params for the winner
+    leftChestParams = (sLoserGetItemIds[play->roomCtx.curRoom.num] << 5) | 0x4000;
+    this->leftChestNum = minigameRoomNum;
+    this->leftChestGetItemId = sLoserGetItemIds[play->roomCtx.curRoom.num];
+    leftChestItem = sItemEtcTypes[play->roomCtx.curRoom.num];
+    leftChestParams |= minigameRoomNum;
+    rightChestParams = minigameRoomNum | 0x4E21;
+    this->rightChestNum = minigameRoomNum | 1;
+    this->rightChestGetItemId = GI_DOOR_KEY;
+    rightChestItem = ITEM_ETC_KEY_SMALL_CHEST_GAME;
+
+    this->randValue = (s16)(Rand_ZeroOne() * 6);
+
+    for (s16 ii = 0; ii < 6; ii++) {
+        if (this->randValue == ii) {
+            this->chestArray[ii] = (EnBox*)Actor_SpawnAsChild(
+                        &play->actorCtx, &this->actor, play, ACTOR_EN_BOX, sRelativeChestPos[ii].x,
+                        sRelativeChestPos[ii].y, sBaseRoomPos[play->roomCtx.curRoom.num] + sRelativeChestPos[ii].z, 0, (ii < 3) ? -0x3FFF : 0x3FFF,
+                        0, rightChestParams);
+        } else {
+            this->chestArray[ii] = (EnBox*)Actor_SpawnAsChild(
+                        &play->actorCtx, &this->actor, play, ACTOR_EN_BOX, sRelativeChestPos[ii].x,
+                        sRelativeChestPos[ii].y, sBaseRoomPos[play->roomCtx.curRoom.num] + sRelativeChestPos[ii].z, 0, (ii < 3) ? -0x3FFF : 0x3FFF,
+                        0, leftChestParams);
+        }
+
+        if (this->chestArray[ii] != NULL) {
+            if (this->roomChestsOpened) {
+                Flags_SetTreasure(play, this->leftChestNum & 0x1F);
+                Flags_SetTreasure(play, this->rightChestNum & 0x1F);
+            } else {
+                Actor_Spawn(
+                    &play->actorCtx, play, ACTOR_ITEM_ETCETERA, sRelativeChestPos[ii].x,
+                    sRelativeChestPos[ii].y, sBaseRoomPos[play->roomCtx.curRoom.num] + sRelativeChestPos[ii].z,
+                    0, 0, 0, (this->randValue == ii) ? ((this->rightChestNum & 0x1F) << 8) + (rightChestItem & 0xFF) : ((this->leftChestNum & 0x1F) << 8) + (leftChestItem & 0xFF), true);
+            }
+        }
+    }
+
+    if (this->roomChestsOpened) {
+        Actor_Kill(&this->actor);
+        return;
+    }
+
+    this->actor.flags &= ~ACTOR_FLAG_TARGETABLE;
+    this->actionFunc = EnChanger_WaitAlt;
+}
+
 void EnChanger_Init(Actor* thisx, PlayState* play2) {
+    if (gSaveContext.eventInf[3] & 0x8000) {
+        EnChanger_InitAlt(thisx,play2);
+        return;
+    }
     EnChanger* this = (EnChanger*)thisx;
     PlayState* play = play2;
     s16 leftChestParams;
@@ -205,6 +316,21 @@ void EnChanger_Init(Actor* thisx, PlayState* play2) {
     this->actionFunc = EnChanger_Wait;
 }
 
+void EnChanger_WaitAlt(EnChanger* this, PlayState* play) {
+    for (s16 ii = 0; ii < 6; ii++) {
+        if (this->chestArray[ii]->unk_1F4 != 0) {
+            this->chestOpened = ii;
+            this->timer = 80;
+            if (this->randValue == ii)
+                Flags_SetTreasure(play, this->leftChestNum & 0x1F);
+            else
+                Flags_SetTreasure(play, this->rightChestNum & 0x1F);
+            this->actionFunc = EnChanger_OpenChestsAlt;
+            return;
+        }
+    }
+}
+
 void EnChanger_Wait(EnChanger* this, PlayState* play) {
     if (this->leftChest->unk_1F4 != 0) {
         this->timer = 80;
@@ -215,6 +341,42 @@ void EnChanger_Wait(EnChanger* this, PlayState* play) {
         this->timer = 80;
         Flags_SetTreasure(play, this->leftChestNum & 0x1F);
         this->actionFunc = EnChanger_OpenChests;
+    }
+}
+
+// Spawns the EnExItem showing what was in the other chest
+void EnChanger_OpenChestsAlt(EnChanger* this, PlayState* play) {
+    f32 zPos;
+    f32 yPos;
+    f32 xPos;
+    s16 temp_s0_2;
+    EnBox* left;
+    EnBox* right;
+
+    left = this->leftChest;
+    right = this->rightChest;
+
+    if (this->timer == 0) {
+        temp_s0_2 = this->chestOpened; // Required to use the right registers
+
+        for (s16 ii = 0; ii < 6; ii++) {
+            if (ii != this->chestOpened) {
+                xPos = this->chestArray[ii]->dyna.actor.world.pos.x;
+                yPos = this->chestArray[ii]->dyna.actor.world.pos.y;
+                zPos = this->chestArray[ii]->dyna.actor.world.pos.z;
+
+                if (this->randValue == ii) {
+                    Actor_Spawn(&play->actorCtx, play, ACTOR_EN_EX_ITEM, xPos, yPos, zPos, 0, 0, 0, 0xF, true);
+                    Flags_SetSwitch(play, 0x32);
+                } else {
+                    temp_s0_2 = (s16)(this->leftChestGetItemId - GI_RUPEE_GREEN_LOSE) + EXITEM_CHEST;
+                    Actor_Spawn(&play->actorCtx, play, ACTOR_EN_EX_ITEM, xPos, yPos, zPos, 0, 0, 0,
+                                temp_s0_2, true);
+                }
+            }
+        }
+
+        Actor_Kill(&this->actor);
     }
 }
 
@@ -275,7 +437,11 @@ void EnChanger_OpenChests(EnChanger* this, PlayState* play) {
 
 void EnChanger_SetHeartPieceFlag(EnChanger* this, PlayState* play) {
     if (this->finalChest->unk_1F4 != 0) {
-        if (!Flags_GetItemGetInf(ITEMGETINF_1B)) {
+        if (gSaveContext.eventInf[3]& 0x8000) {
+            if (!(gSaveContext.itemGetInf[3] & 0x4000))
+                gSaveContext.itemGetInf[3] |= 0x4000;
+
+        } else if (!Flags_GetItemGetInf(ITEMGETINF_1B)) {
             Flags_SetItemGetInf(ITEMGETINF_1B);
         }
         Actor_Kill(&this->actor);

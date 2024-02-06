@@ -45,6 +45,78 @@ typedef struct {
 
 #include <nlohmann/json.hpp>
 
+struct ActorSpawnEnt {
+  public:
+    uint16_t actorNum;
+    int16_t posX;
+    int16_t posY;
+    int16_t posZ;
+    int16_t rotX;
+    int16_t rotY;
+    int16_t rotZ;
+    uint16_t initVar;
+};
+
+struct ActorSpawnResource {
+    public:
+    int scene;
+    int room;
+    ActorSpawnEnt entry;
+    s16 dirt;
+};
+
+void to_json(nlohmann::json& j, const ActorSpawnResource& p);
+void from_json(const nlohmann::json& j, ActorSpawnResource& p);
+constexpr bool operator<(const ActorSpawnResource& lhs, const ActorSpawnResource& rhs)
+{
+    if (lhs.scene < rhs.scene)
+        return true;
+    else if (lhs.scene > rhs.scene)
+        return false;
+    else if (lhs.room < rhs.room)
+        return true;
+    else if (lhs.room > rhs.room)
+        return false;
+    else if (lhs.entry.actorNum < rhs.entry.actorNum)
+        return true;
+    else if (lhs.entry.actorNum > rhs.entry.actorNum)
+        return false;
+    else if (lhs.entry.posX < rhs.entry.posX)
+        return true;
+    else if (lhs.entry.posX > rhs.entry.posX)
+        return false;
+    else if (lhs.entry.posY < rhs.entry.posY)
+        return true;
+    else if (lhs.entry.posY > rhs.entry.posY)
+        return false;
+    else if (lhs.entry.posZ < rhs.entry.posZ)
+        return true;
+    else if (lhs.entry.posZ > rhs.entry.posZ)
+        return false;
+    else if (lhs.entry.rotX < rhs.entry.rotX)
+        return true;
+    else if (lhs.entry.rotX > rhs.entry.rotX)
+        return false;
+    else if (lhs.entry.rotY < rhs.entry.rotY)
+        return true;
+    else if (lhs.entry.rotY > rhs.entry.rotY)
+        return false;
+    else if (lhs.entry.rotZ < rhs.entry.rotZ)
+        return true;
+    else if (lhs.entry.rotZ > rhs.entry.rotZ)
+        return false;
+    else if (lhs.entry.initVar < rhs.entry.initVar)
+        return true;
+    else if (lhs.entry.initVar > rhs.entry.initVar)
+        return false;
+    else if (lhs.dirt < rhs.dirt)
+        return true;
+    else if (lhs.dirt > rhs.dirt)
+        return false;
+
+    return false;
+}
+
 class SaveManager {
   public:
     static SaveManager* Instance;
@@ -155,6 +227,9 @@ class SaveManager {
     static void InitFileNormal();
     static void InitFileDebug();
     static void InitFileMaxed();
+
+    static void LoadPersistenceVersion1();
+    static void SavePersistence(SaveContext* saveContext, int sectionID, bool fullSave);
 
     static void LoadRandomizerVersion1();
     static void LoadRandomizerVersion2();

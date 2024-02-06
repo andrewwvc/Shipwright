@@ -960,7 +960,7 @@ s32 Collider_ResetQuadOC(PlayState* play, Collider* collider) {
  * For quad colliders with AT_NEAREST, resets the previous AC collider it hit if the current element is closer,
  * otherwise returns false. Used on player AT colliders to prevent multiple collisions from registering.
  */
-s32 Collider_QuadSetNearestAC(PlayState* play, ColliderQuad* quad, Vec3f* hitPos) {
+s32 Collider_QuadSetNearestAC(PlayState* play, ColliderQuad* quad, Vec3f* hitPos, Collider* ac) {
     f32 acDist;
     Vec3f dcMid;
 
@@ -969,7 +969,7 @@ s32 Collider_QuadSetNearestAC(PlayState* play, ColliderQuad* quad, Vec3f* hitPos
     }
     Math_Vec3s_ToVec3f(&dcMid, &quad->dim.dcMid);
     acDist = Math3D_Vec3fDistSq(&dcMid, hitPos);
-    if (acDist < quad->dim.acDist) {
+    if (acDist < quad->dim.acDist || (ac && (ac->ocFlags1 & OC1_DOMINANT))) {
         quad->dim.acDist = acDist;
         if (quad->info.atHit != NULL) {
             Collider_ResetACBase(play, quad->info.atHit);
@@ -1725,7 +1725,8 @@ void CollisionCheck_SetBounce(Collider* at, Collider* ac) {
  */
 s32 CollisionCheck_SetATvsAC(PlayState* play, Collider* at, ColliderInfo* atInfo, Vec3f* atPos, Collider* ac,
                              ColliderInfo* acInfo, Vec3f* acPos, Vec3f* hitPos) {
-    if (ac->acFlags & AC_HARD && at->actor != NULL && ac->actor != NULL) {
+    s16 fragileCollision = ((ac->ocFlags1 & OC1_FIRM)  && (at->atFlags & AT_WEAK));
+    if (((ac->acFlags & AC_HARD) || fragileCollision) && at->actor != NULL && ac->actor != NULL) {
         CollisionCheck_SetBounce(at, ac);
     }
     if (!(acInfo->bumperFlags & BUMP_NO_AT_INFO)) {
@@ -1751,7 +1752,12 @@ s32 CollisionCheck_SetATvsAC(PlayState* play, Collider* at, ColliderInfo* atInfo
     acInfo->bumper.hitPos.z = hitPos->z;
     if (!(atInfo->toucherFlags & TOUCH_AT_HITMARK) && ac->colType != COLTYPE_METAL && ac->colType != COLTYPE_WOOD &&
         ac->colType != COLTYPE_HARD) {
-        acInfo->bumperFlags |= BUMP_DRAW_HITMARK;
+        if (fragileCollision) {
+            EffectSsHitMark_SpawnFixedScale(play, EFFECT_HITMARK_METAL, hitPos);
+            CollisionCheck_SpawnShieldParticlesMetalSound(play, hitPos, &ac->actor->projectedPos);
+        } else {
+            acInfo->bumperFlags |= BUMP_DRAW_HITMARK;
+        }
     } else {
         CollisionCheck_HitEffects(play, at, atInfo, ac, acInfo, hitPos);
         atInfo->toucherFlags |= TOUCH_DREW_HITMARK;
@@ -2080,7 +2086,7 @@ void CollisionCheck_AC_QuadVsJntSph(PlayState* play, CollisionCheckContext* colC
             }
             if (Math3D_TriVsSphIntersect(&acElem->dim.worldSphere, &D_8015E2A0, &hitPos) == 1 ||
                 Math3D_TriVsSphIntersect(&acElem->dim.worldSphere, &D_8015E2D8, &hitPos) == 1) {
-                if (Collider_QuadSetNearestAC(play, at, &hitPos)) {
+                if (Collider_QuadSetNearestAC(play, at, &hitPos, colAC)) {
                     Vec3f atPos;
                     Vec3f acPos;
 
@@ -2289,7 +2295,7 @@ void CollisionCheck_AC_QuadVsCyl(PlayState* play, CollisionCheckContext* colChkC
         Math3D_TriNorm(&D_8015E3A0, &at->dim.quad[2], &at->dim.quad[3], &at->dim.quad[1]);
         Math3D_TriNorm(&D_8015E3D8, &at->dim.quad[2], &at->dim.quad[1], &at->dim.quad[0]);
         if (Math3D_CylTriVsIntersect(&ac->dim, &D_8015E3A0, &D_8015E410) == 1) {
-            if (Collider_QuadSetNearestAC(play, at, &D_8015E410)) {
+            if (Collider_QuadSetNearestAC(play, at, &D_8015E410, colAC)) {
                 Vec3f atPos1;
                 Vec3f acPos1;
 
@@ -2303,7 +2309,7 @@ void CollisionCheck_AC_QuadVsCyl(PlayState* play, CollisionCheckContext* colChkC
             }
         }
         if (Math3D_CylTriVsIntersect(&ac->dim, &D_8015E3D8, &D_8015E410) == 1) {
-            if (Collider_QuadSetNearestAC(play, at, &D_8015E410)) {
+            if (Collider_QuadSetNearestAC(play, at, &D_8015E410, colAC)) {
                 Vec3f atPos2;
                 Vec3f acPos2;
 
@@ -2441,7 +2447,7 @@ void CollisionCheck_AC_QuadVsTris(PlayState* play, CollisionCheckContext* colChk
             }
             if (Math3D_TriVsTriIntersect(&D_8015E4C0, &acElem->dim, &D_8015E4B0) == 1 ||
                 Math3D_TriVsTriIntersect(&D_8015E4F8, &acElem->dim, &D_8015E4B0) == 1) {
-                if (Collider_QuadSetNearestAC(play, at, &D_8015E4B0)) {
+                if (Collider_QuadSetNearestAC(play, at, &D_8015E4B0, colAC)) {
                     Vec3f atPos;
                     Vec3f acPos;
 
@@ -2494,7 +2500,7 @@ void CollisionCheck_AC_QuadVsQuad(PlayState* play, CollisionCheckContext* colChk
     for (i = 0; i < 2; i++) {
         for (j = 0; j < 2; j++) {
             if (Math3D_TriVsTriIntersect(&D_8015E5A8[j], &D_8015E530[i], &D_8015E598) == 1) {
-                if (Collider_QuadSetNearestAC(play, at, &D_8015E598)) {
+                if (Collider_QuadSetNearestAC(play, at, &D_8015E598, colAC)) {
                     Vec3f atPos;
                     Vec3f acPos;
 
@@ -3043,7 +3049,7 @@ void CollisionCheck_ApplyDamage(PlayState* play, CollisionCheckContext* colChkCt
         damage = tbl->table[i] & 0xF;
         collider->actor->colChkInfo.damageEffect = tbl->table[i] >> 4 & 0xF;
     }
-    if (!(collider->acFlags & AC_HARD)) {
+    if (!(collider->acFlags & AC_HARD) && !((collider->ocFlags1 & OC1_FIRM) && (info->acHit != NULL) && (info->acHit->atFlags & AT_WEAK))) {
         collider->actor->colChkInfo.damage += damage;
     }
 

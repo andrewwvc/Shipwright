@@ -10,6 +10,7 @@
 #include "soh/Enhancements/randomizer/draw.h"
 
 #include <stdlib.h>
+#include <string.h>
 
 typedef struct {
     /* 0x00 */ u8 flag;
@@ -522,6 +523,10 @@ Vec3f sGetItemRefPos;
 s32 sLeftHandType;
 s32 sRightHandType;
 
+extern void func_80844E68(Player* this, PlayState* play);
+extern void func_80845000(Player* this, PlayState* play);
+extern void func_80845308(Player* this, PlayState* play);
+
 void Player_SetBootData(PlayState* play, Player* this) {
     s32 currentBoots;
     s16* bootRegs;
@@ -592,6 +597,37 @@ s32 Player_IsChildWithHylianShield(Player* this) {
     return gSaveContext.linkAge != 0 && (this->currentShield == PLAYER_SHIELD_HYLIAN);
 }
 
+s32 Player_IsInCrouchBlock(Player* this) {
+    return ((this->stateFlags1 & PLAYER_STATE1_SHIELDING) && ((this->unk_6AE & 0xC1) == 0xC1) &&
+        (strcmp(this->skelAnime.animation, gPlayerAnim_link_normal_defense_wait) == 0 || strcmp(this->skelAnime.animation, gPlayerAnim_link_normal_defense_wait_free) == 0));
+}
+
+s32 Player_IsRolling(Player* this) {
+    return (strcmp(this->skelAnime.animation, gPlayerAnim_link_normal_landing_roll_free) == 0 ||
+        strcmp(this->skelAnime.animation, gPlayerAnim_link_normal_landing_roll) == 0 ||
+        strcmp(this->skelAnime.animation, gPlayerAnim_link_fighter_landing_roll_long) == 0);
+}
+
+s32 Player_IsSideHopping(Player* this) {
+    return (strcmp(this->skelAnime.animation, gPlayerAnim_link_fighter_Lside_jump) == 0 ||
+        strcmp(this->skelAnime.animation, gPlayerAnim_link_fighter_Lside_jump_end) == 0 ||
+        strcmp(this->skelAnime.animation, gPlayerAnim_link_fighter_Lside_jump_endL) == 0 ||
+        strcmp(this->skelAnime.animation, gPlayerAnim_link_fighter_Rside_jump) == 0 ||
+        strcmp(this->skelAnime.animation, gPlayerAnim_link_fighter_Rside_jump_end) == 0 ||
+        strcmp(this->skelAnime.animation, gPlayerAnim_link_fighter_Rside_jump_endR) == 0);
+}
+
+s32 Player_IsBackFlipping(Player* this) {
+    return (strcmp(this->skelAnime.animation, gPlayerAnim_link_fighter_backturn_jump) == 0 ||
+        strcmp(this->skelAnime.animation, gPlayerAnim_link_fighter_backturn_jump_end) == 0 ||
+        strcmp(this->skelAnime.animation, gPlayerAnim_link_fighter_backturn_jump_endR) == 0);
+}
+
+s32 Player_IsMakingNoise(PlayState* play) {
+    Player* this = GET_PLAYER(play);
+    return func_8002DDE4(play) || Player_IsRolling(this) || Player_IsSideHopping(this) || Player_IsBackFlipping(this);
+}
+
 s32 Player_ActionToModelGroup(Player* this, s32 actionParam) {
     s32 modelGroup = sActionModelGroups[actionParam];
 
@@ -601,6 +637,77 @@ s32 Player_ActionToModelGroup(Player* this, s32 actionParam) {
     } else {
         return modelGroup;
     }
+}
+
+s32 isPlayerInBasicHorizontalSlash(PlayState* play) {
+    Player* player = GET_PLAYER(play);
+    if (player->meleeWeaponState == 0)
+        return 0;
+    return((player->meleeWeaponAnimation >= 4 && player->meleeWeaponAnimation <= 11) ||
+                              (player->meleeWeaponAnimation == 20 || player->meleeWeaponAnimation == 21));
+}
+
+s32 isPlayerInBasicVerticalSlash(PlayState* play) {
+    Player* player = GET_PLAYER(play);
+    if (player->meleeWeaponState == 0)
+        return 0;
+    return player->meleeWeaponAnimation >= 0 && player->meleeWeaponAnimation <= PLAYER_MWA_FORWARD_COMBO_2H;
+}
+
+s32 isPlayerInSpinAttack(PlayState* play) {
+    Player* player = GET_PLAYER(play);
+
+    if (player->func_674 == func_80844E68 || player->func_674 == func_80845000 || player->func_674 == func_80845308)
+        return 1;
+
+    if (player->meleeWeaponState == 0)
+        return 0;
+
+    switch (player->meleeWeaponAnimation) {
+        case PLAYER_MWA_SPIN_ATTACK_1H:
+        case PLAYER_MWA_SPIN_ATTACK_2H:
+        case PLAYER_MWA_BIG_SPIN_1H:
+        case PLAYER_MWA_BIG_SPIN_2H:
+        return 1;
+
+        default:
+        return 0;
+    }
+}
+
+
+s32 isPlayerInHorizontalSlash(PlayState* play) {
+    return isPlayerInBasicHorizontalSlash(play) || isPlayerInSpinAttack(play);
+}
+
+s32 isPlayerInJumpAttack(PlayState* play) {
+    Player* player = GET_PLAYER(play);
+    return player->meleeWeaponAnimation >= PLAYER_MWA_FLIPSLASH_START && player->meleeWeaponAnimation <= PLAYER_MWA_JUMPSLASH_FINISH;
+}
+
+s32 isPlayerInVerticalSlash(PlayState* play) {
+    Player* player = GET_PLAYER(play);
+    if (player->meleeWeaponState == 0)
+        return 0;
+    return isPlayerInBasicVerticalSlash(play) ||
+                player->meleeWeaponAnimation == PLAYER_MWA_JUMPSLASH_START || player->meleeWeaponAnimation == PLAYER_MWA_JUMPSLASH_FINISH;
+}
+
+s32 isPlayerInStab(PlayState* play) {
+    Player* player = GET_PLAYER(play);
+    if (player->meleeWeaponState == 0)
+        return 0;
+    return player->meleeWeaponAnimation >= PLAYER_MWA_STAB_1H && player->meleeWeaponAnimation <= PLAYER_MWA_STAB_COMBO_2H;
+}
+
+s32 isPlayerInHorizontalAttack(PlayState* play) {
+    Player* player = GET_PLAYER(play);
+    return isPlayerInHorizontalSlash(play) || (player->meleeWeaponAnimation == PLAYER_MWA_HAMMER_SIDE && player->meleeWeaponState);
+}
+
+s32 isPlayerInVerticalAttack(PlayState* play) {
+    Player* player = GET_PLAYER(play);
+    return isPlayerInVerticalSlash(play) || (player->meleeWeaponAnimation == PLAYER_MWA_HAMMER_FORWARD && player->meleeWeaponState);
 }
 
 void Player_SetModelsForHoldingShield(Player* this) {
@@ -755,13 +862,14 @@ s32 Player_GetStrength(void) {
 u8 Player_GetMask(PlayState* play) {
     Player* this = GET_PLAYER(play);
 
-    return this->currentMask;
+    return this ? this->currentMask : PLAYER_MASK_NONE;
 }
 
 Player* Player_UnsetMask(PlayState* play) {
     Player* this = GET_PLAYER(play);
 
-    this->currentMask = PLAYER_MASK_NONE;
+    if (this)
+        this->currentMask = PLAYER_MASK_NONE;
 
     return this;
 }
@@ -812,6 +920,16 @@ s32 func_8008F128(Player* this) {
     return Player_HoldsHookshot(this) && (this->heldActor == NULL);
 }
 
+s32 isProjectileNotched(PlayState* play) {
+    Player* this = GET_PLAYER(play);
+    return  this->heldItemAction >= PLAYER_IA_BOW && this->heldItemAction <= PLAYER_IA_LONGSHOT &&
+            this->heldActor != NULL;
+}
+
+s32 isRangedWeaponReady(PlayState* play) {
+    return Player_isRangedWeaponReady(play);
+}
+
 s32 Player_ActionToMeleeWeapon(s32 actionParam) {
     s32 sword = actionParam - PLAYER_IA_FISHING_POLE;
 
@@ -827,7 +945,7 @@ s32 Player_GetMeleeWeaponHeld(Player* this) {
 }
 
 s32 Player_HoldsTwoHandedWeapon(Player* this) {
-    if ((this->heldItemAction >= PLAYER_IA_SWORD_BIGGORON) && (this->heldItemAction <= PLAYER_IA_HAMMER)) {
+    if ((this->heldItemAction >= PLAYER_IA_SWORD_BIGGORON) && (this->heldItemAction <= PLAYER_IA_BOW_0E)) {
         return 1;
     } else {
         return 0;
@@ -1422,7 +1540,18 @@ void Player_UpdateShieldCollider(PlayState* play, Player* this, ColliderQuad* co
         COLTYPE_METAL,
     };
 
-    if (this->stateFlags1 & 0x400000) {
+    if (this->stateFlags1 & PLAYER_STATE1_SHIELDING) {
+        collider->info.toucher.dmgFlags = 0x00100000;
+        collider->info.bumper.dmgFlags  = 0xDFCFFFFF;
+    }
+    else {
+        collider->info.toucher.dmgFlags = 0x00000000;
+        collider->info.bumper.dmgFlags  = 0x00100000;
+    }
+
+    s16 stepVal = IN_SUB_STEP_MOTION;
+
+    if ((this->stateFlags1 & PLAYER_STATE1_SHIELDING) || (this->unk_664 != NULL && !Player_isInSwordAnimation(play) && !Player_isInReboundAnimation(play) && stepVal && (!this->stepTracking) && (this->invincibilityTimer == 0))) {
         Vec3f quadDest[4];
 
         this->shieldQuad.base.colType = shieldColTypes[this->currentShield];
@@ -1432,6 +1561,7 @@ void Player_UpdateShieldCollider(PlayState* play, Player* this, ColliderQuad* co
         Matrix_MultVec3f(&quadSrc[2], &quadDest[2]);
         Matrix_MultVec3f(&quadSrc[3], &quadDest[3]);
         Collider_SetQuadVertices(collider, &quadDest[0], &quadDest[1], &quadDest[2], &quadDest[3]);
+        this->cylinder.base.ocFlags1 |= OC1_FIRM;
 
         CollisionCheck_SetAC(play, &play->colChkCtx, &collider->base);
         CollisionCheck_SetAT(play, &play->colChkCtx, &collider->base);
@@ -1635,21 +1765,37 @@ BowStringData sBowStringData[] = {
     { gLinkChildSlinghotStringDL, { 606.0f, 236.0f, 0.0f } }, // slingshot
 };
 
-Vec3f sRightHandLimbModelShieldQuadVertices[] = {
+//Shield data
+Vec3f D_80126154[] = {
+    { -1500.0f, -1500.0f, -600.0f },
+    { 1500.0f, -1500.0f, -600.0f },
+    { -1500.0f, 1500.0f, -600.0f },
+    { 1500.0f, 1500.0f, -600.0f },
+};
+
+Vec3f originalShield1[] = {
     { -4500.0f, -3000.0f, -600.0f },
     { 1500.0f, -3000.0f, -600.0f },
     { -4500.0f, 3000.0f, -600.0f },
     { 1500.0f, 3000.0f, -600.0f },
 };
 
+Vec3f D_BigSword[] = {
+    { -1000.0f, -1000.0f, -600.0f },
+    { 3500.0f, -1000.0f, -600.0f },
+    { -1000.0f, 1000.0f, -600.0f },
+    { 3500.0f, 1000.0f, -600.0f },
+};
+
 Vec3f D_80126184 = { 100.0f, 1500.0f, 0.0f };
 Vec3f D_80126190 = { 100.0f, 1640.0f, 0.0f };
 
+//Shield data
 Vec3f sSheathLimbModelShieldQuadVertices[] = {
-    { -3000.0f, -3000.0f, -900.0f },
-    { 3000.0f, -3000.0f, -900.0f },
-    { -3000.0f, 3000.0f, -900.0f },
-    { 3000.0f, 3000.0f, -900.0f },
+    { -1500.0f, -1500.0f, -900.0f },
+    { 1500.0f, -1500.0f, -900.0f },
+    { -1500.0f, 1500.0f, -900.0f },
+    { 1500.0f, 1500.0f, -900.0f },
 };
 
 Vec3f sSheathLimbModelShieldOnBackPos = { 630.0f, 100.0f, -30.0f };
@@ -1803,9 +1949,11 @@ void Player_PostLimbDrawGameplay(PlayState* play, s32 limbIndex, Gfx** dList, Ve
             Matrix_Pop();
 
             CLOSE_DISPS(play->state.gfxCtx);
-        } else if ((this->actor.scale.y >= 0.0f) && (this->rightHandType == PLAYER_MODELTYPE_RH_SHIELD)) {
+        } else if ((this->actor.scale.y >= 0.0f) && ((this->rightHandType == PLAYER_MODELTYPE_RH_SHIELD) ||
+                    (Player_HoldsTwoHandedWeapon(this) && (this->stateFlags1 & PLAYER_STATE1_SHIELDING) && this->shieldRelaxTimer <= 6))) {
             Matrix_Get(&this->shieldMf);
-            Player_UpdateShieldCollider(play, this, &this->shieldQuad, sRightHandLimbModelShieldQuadVertices);
+            Player* player = GET_PLAYER(play);
+            Player_UpdateShieldCollider(play, this, &this->shieldQuad, Player_HoldsTwoHandedWeapon(this) ? D_BigSword : (this == player) ? D_80126154 : originalShield1);
         }
 
         if (this->actor.scale.y >= 0.0f) {

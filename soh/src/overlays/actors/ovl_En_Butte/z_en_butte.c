@@ -225,6 +225,17 @@ void EnButte_FlyAround(EnButte* this, PlayState* play) {
     f32 animSpeed;
     s16 rotStep;
 
+    s16 actorParams = 0;
+    s32 entVal = -1;
+    ActorEntry ae;
+
+    ae.id = this->actor.id;
+    ae.pos.x = round(this->actor.home.pos.x);
+    ae.pos.y = round(this->actor.home.pos.y);
+    ae.pos.z = round(this->actor.home.pos.z);
+    ae.rot = this->actor.home.rot;
+    ae.params = 0; //this->actor.params;
+
     distSqFromHome = Math3D_Dist2DSq(this->actor.world.pos.x, this->actor.world.pos.z, this->actor.home.pos.x,
                                      this->actor.home.pos.z);
     func_809CD56C(this);
@@ -276,7 +287,8 @@ void EnButte_FlyAround(EnButte* this, PlayState* play) {
         (this->swordDownTimer <= 0) &&
         ((Math3D_Dist2DSq(player->actor.world.pos.x, player->actor.world.pos.z, this->actor.home.pos.x,
                           this->actor.home.pos.z) < SQ(120.0f)) ||
-         (this->actor.xzDistToPlayer < 60.0f))) {
+         (this->actor.xzDistToPlayer < 60.0f)) &&
+         !isResourceCollected(play, &ae, actorParams)) {
         EnButte_SetupFollowLink(this);
         this->unk_257 = 2;
     } else if (this->actor.xzDistToPlayer < 120.0) {
@@ -341,10 +353,10 @@ void EnButte_FollowLink(EnButte* this, PlayState* play) {
     if (!((player->heldItemAction == PLAYER_IA_DEKU_STICK) && (fabsf(player->actor.speedXZ) < 1.8f) &&
           (this->swordDownTimer <= 0) && (distSqFromHome < SQ(320.0f)))) {
         EnButte_SetupFlyAround(this);
-    } else if (distSqFromHome > SQ(240.0f)) {
+    } else if (distSqFromHome < SQ(240.0f)) {
         distSqFromSword = Math3D_Dist2DSq(player->meleeWeaponInfo[0].tip.x, player->meleeWeaponInfo[0].tip.z,
                                           this->actor.world.pos.x, this->actor.world.pos.z);
-        if (distSqFromSword < SQ(60.0f)) {
+        if (distSqFromSword < SQ(10.0f)) {
             EnButte_SetupTransformIntoFairy(this);
         }
     }
@@ -365,8 +377,25 @@ void EnButte_TransformIntoFairy(EnButte* this, PlayState* play) {
     if (this->timer == 5) {
         SoundSource_PlaySfxAtFixedWorldPos(play, &this->actor.world.pos, 60, NA_SE_EV_BUTTERFRY_TO_FAIRY);
     } else if (this->timer == 4) {
-        Actor_Spawn(&play->actorCtx, play, ACTOR_EN_ELF, this->actor.focus.pos.x, this->actor.focus.pos.y,
-                    this->actor.focus.pos.z, 0, this->actor.shape.rot.y, 0, FAIRY_HEAL_TIMED, true);
+        s16 actorParams = 0;
+        s32 entVal = -1;
+        ActorEntry ae;
+        Actor* fairy = NULL;
+
+        ae.id = this->actor.id;
+        ae.pos.x = round(this->actor.home.pos.x);
+        ae.pos.y = round(this->actor.home.pos.y);
+        ae.pos.z = round(this->actor.home.pos.z);
+        ae.rot = this->actor.home.rot;
+        ae.params = 0;//this->actor.params;
+        if (!isResourceCollected(play, &ae, actorParams))
+            fairy = Actor_Spawn(&play->actorCtx, play, ACTOR_EN_ELF, this->actor.focus.pos.x, this->actor.focus.pos.y,
+                    this->actor.focus.pos.z, 0, this->actor.shape.rot.y, 0, FAIRY_HEAL_BIG, true);
+        if (fairy != NULL) {
+            entVal = createTempEntryPlusUnk(play, &ae, 0);
+            this->actor.entryNum = entVal;
+            fairy->entryNum = entVal;
+        }
         this->drawSkelAnime = false;
     } else if (this->timer <= 0) {
         EnButte_SetupWaitToDie(this);

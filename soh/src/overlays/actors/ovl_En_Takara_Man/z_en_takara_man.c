@@ -80,11 +80,15 @@ void EnTakaraMan_Destroy(Actor* thisx, PlayState* play) {
 }
 
 void func_80B176E0(EnTakaraMan* this, PlayState* play) {
+    u16 MiscMsg = GetTextID("misc");
     f32 frameCount = Animation_GetLastFrame(&object_ts_Anim_000498);
 
     Animation_Change(&this->skelAnime, &object_ts_Anim_000498, 1.0f, 0.0f, (s16)frameCount, ANIMMODE_LOOP, -10.0f);
     if (!this->unk_214) {
-        this->actor.textId = 0x6D;
+        if (gSaveContext.itemGetInf[1] & 0x800)
+            this->actor.textId = MiscMsg+4;
+        else
+            this->actor.textId = 0x6D;
         this->dialogState = TEXT_STATE_CHOICE;
     }
     this->actionFunc = func_80B1778C;
@@ -140,30 +144,76 @@ void func_80B1778C(EnTakaraMan* this, PlayState* play) {
 
 void func_80B17934(EnTakaraMan* this, PlayState* play) {
     if (this->dialogState == Message_GetState(&play->msgCtx) && Message_ShouldAdvance(play)) {
-        switch (play->msgCtx.choiceIndex) {
-            case 0: // Yes
-                if (gSaveContext.rupees >= 10) {
+        if (!(gSaveContext.itemGetInf[1] & 0x800)) {
+            switch (play->msgCtx.choiceIndex) {
+                case 0: // Yes
+                    if (Rupees_GetNum() >= 10) {
+                        Message_CloseTextbox(play);
+                        Rupees_ChangeBy(-10);
+                        this->unk_214 = 1;
+                        this->actor.parent = NULL;
+                        func_8002F434(&this->actor, play, GI_DOOR_KEY, 2000.0f, 1000.0f);
+                        this->actionFunc = func_80B17A6C;
+                    } else {
+                        Message_CloseTextbox(play);
+                        this->actor.textId = 0x85;
+                        Message_ContinueTextbox(play, this->actor.textId);
+                        this->dialogState = TEXT_STATE_EVENT;
+                        this->actionFunc = func_80B17B14;
+                    }
+                    break;
+                case 1: // No
                     Message_CloseTextbox(play);
-                    Rupees_ChangeBy(-10);
-                    this->unk_214 = 1;
-                    this->actor.parent = NULL;
-                    func_8002F434(&this->actor, play, GI_DOOR_KEY, 2000.0f, 1000.0f);
-                    this->actionFunc = func_80B17A6C;
-                } else {
-                    Message_CloseTextbox(play);
-                    this->actor.textId = 0x85;
+                    this->actor.textId = 0x2D;
                     Message_ContinueTextbox(play, this->actor.textId);
                     this->dialogState = TEXT_STATE_EVENT;
                     this->actionFunc = func_80B17B14;
-                }
-                break;
-            case 1: // No
-                Message_CloseTextbox(play);
-                this->actor.textId = 0x2D;
-                Message_ContinueTextbox(play, this->actor.textId);
-                this->dialogState = TEXT_STATE_EVENT;
-                this->actionFunc = func_80B17B14;
-                break;
+                    break;
+            }
+        } else {
+            switch (play->msgCtx.choiceIndex) {
+                case 0: // Special
+                    if (Rupees_GetNum() >= 30) {
+                        Message_CloseTextbox(play);
+                        Rupees_ChangeBy(-30);
+                        this->unk_214 = 1;
+                        this->actor.parent = NULL;
+                        func_8002F434(&this->actor, play, GI_DOOR_KEY, 2000.0f, 1000.0f);
+                        gSaveContext.eventInf[3] |= 0x8000;
+                        this->actionFunc = func_80B17A6C;
+                    } else {
+                        Message_CloseTextbox(play);
+                        this->actor.textId = 0x85;
+                        Message_ContinueTextbox(play, this->actor.textId);
+                        this->dialogState = TEXT_STATE_EVENT;
+                        this->actionFunc = func_80B17B14;
+                    }
+                    break;
+                case 1: // Yes
+                    if (Rupees_GetNum() >= 10) {
+                        Message_CloseTextbox(play);
+                        Rupees_ChangeBy(-10);
+                        this->unk_214 = 1;
+                        this->actor.parent = NULL;
+                        func_8002F434(&this->actor, play, GI_DOOR_KEY, 2000.0f, 1000.0f);
+                        gSaveContext.eventInf[3] &= ~0x8000;
+                        this->actionFunc = func_80B17A6C;
+                    } else {
+                        Message_CloseTextbox(play);
+                        this->actor.textId = 0x85;
+                        Message_ContinueTextbox(play, this->actor.textId);
+                        this->dialogState = TEXT_STATE_EVENT;
+                        this->actionFunc = func_80B17B14;
+                    }
+                    break;
+                case 2: // No
+                    Message_CloseTextbox(play);
+                    this->actor.textId = 0x2D;
+                    Message_ContinueTextbox(play, this->actor.textId);
+                    this->dialogState = TEXT_STATE_EVENT;
+                    this->actionFunc = func_80B17B14;
+                    break;
+            }
         }
     }
 }

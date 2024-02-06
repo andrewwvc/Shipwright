@@ -13,6 +13,7 @@
 #include "soh/Enhancements/nametag.h"
 
 #include "soh/ActorDB.h"
+#include <limits.h>
 
 #include <string.h>
 #include <stdlib.h>
@@ -293,6 +294,90 @@ void Actor_SetFeetPos(Actor* actor, s32 limbIndex, s32 leftFootIndex, Vec3f* lef
 void func_8002BE04(PlayState* play, Vec3f* arg1, Vec3f* arg2, f32* arg3) {
     SkinMatrix_Vec3fMtxFMultXYZW(&play->viewProjectionMtxF, arg1, arg2, arg3);
     *arg3 = (*arg3 < 1.0f) ? 1.0f : (1.0f / *arg3);
+}
+
+s16 aimToActorMovement(Actor* this, Actor* target, f32 projectileSpeed, PlayState* play, f32* time, f32* projectedY, f32 maxTargetSpeed) {
+    //maxTargetSpeed should be set to 0.0f to allow for unlimited target speed
+    f32 tSpeed;
+    if (maxTargetSpeed > 0.0f && target->speedXZ > maxTargetSpeed)
+        tSpeed = maxTargetSpeed;
+    else
+        tSpeed = target->speedXZ;
+    f32 posX = target->world.pos.x - this->world.pos.x;
+    f32 posZ = target->world.pos.z - this->world.pos.z;
+    f32 velX = Math_SinS(target->world.rot.y) * tSpeed;
+    f32 velZ = Math_CosS(target->world.rot.y) * tSpeed;
+    Vec3f projectedWorldPos;
+    f32 addedHeight = 80.0f;
+
+    CollisionPoly* outPoly;
+    Vec3f result;
+    s32 bgID;
+
+    if (projectileSpeed < target->speedXZ){
+        *time = 0.0f;
+        *projectedY = BgCheck_EntityRaycastFloor2(play,&play->colCtx,&outPoly,&target->world.pos);
+        if (BGCHECK_Y_MIN == *projectedY)
+            *projectedY = target->world.pos.y;
+        return this->yawTowardsPlayer;
+    } else {
+        f32 a = velX*velX + velZ*velZ - projectileSpeed*projectileSpeed;
+        f32 b = 2.0f*(velX*posX+velZ*posZ);
+        f32 c = posX*posX + posZ*posZ;
+        f32 det = b*b - 4.0f*a*c;
+
+        if (a == 0.0f || a == -0.0f || det < 0.0f)
+            return this->yawTowardsPlayer;
+        //Assumes that the sqrt of det is larger than b and that a is negative.
+        *time = (-b - sqrtf(det))/(2.0f*a);
+
+        f32 projectedX = posX+velX**time;
+        f32 projectedZ = posZ+velZ**time;
+
+        projectedWorldPos.x = projectedX+this->world.pos.x;
+        projectedWorldPos.z = projectedZ+this->world.pos.z;
+        projectedWorldPos.y = target->world.pos.y+addedHeight;
+
+        *projectedY = BgCheck_EntityRaycastFloor2(play,&play->colCtx,&outPoly,&projectedWorldPos);
+        if (BGCHECK_Y_MIN == *projectedY)
+            *projectedY = target->world.pos.y;
+        projectedWorldPos.y = *projectedY;
+
+        //Prevents futilely aiming into walls
+        if (BgCheck_CheckWallImpl(&play->colCtx,(1<<1),&result,&projectedWorldPos,&target->world.pos,12,&outPoly,&bgID,target,80,0)) {
+            projectedWorldPos.x = result.x;
+            projectedWorldPos.z = result.z;
+            projectedWorldPos.y = result.y;
+
+            projectedX = projectedWorldPos.x - this->world.pos.x;
+            projectedZ = projectedWorldPos.z - this->world.pos.z;
+            *projectedY = BgCheck_EntityRaycastFloor2(play,&play->colCtx,&outPoly,&projectedWorldPos);
+            if (BGCHECK_Y_MIN == *projectedY)
+                *projectedY = target->world.pos.y;
+        }
+
+        projectedWorldPos.y += 15.0f;
+        Vec3f augmentedSelfPos = this->world.pos;
+        if (augmentedSelfPos.y < projectedWorldPos.y)
+            augmentedSelfPos.y = projectedWorldPos.y;
+        //Causes the shooter to aim directly at the target if the projected position ends up behind something
+        if (BgCheck_CheckLineImpl(&play->colCtx,(1<<1),0,&augmentedSelfPos,&projectedWorldPos,&result,
+                    &outPoly,&bgID,&target,1.0,BgCheck_GetBccFlags(1,0,0,1,0))) {
+            *projectedY = target->world.pos.y;
+            return this->yawTowardsPlayer;
+        }
+
+        return Math_Atan2S(projectedZ, projectedX);
+    }
+}
+
+s16 aimToPlayerMovement(Actor* this, f32 speed, PlayState* play) {
+    Player* player = GET_PLAYER(play);
+    f32 time;
+    f32 projectedY = 80.0f;
+
+    //Assumes that the player's normal running speed is 6.0f
+    return aimToActorMovement(this, &player->actor, speed, play, &time, &projectedY, 6.0f);
 }
 
 typedef struct {
@@ -1208,10 +1293,14 @@ void Actor_Init(Actor* actor, PlayState* play) {
     actor->uncullZoneForward = 1000.0f;
     actor->uncullZoneScale = 350.0f;
     actor->uncullZoneDownward = 700.0f;
+    actor->isTeleported = 0;
+    Vec3f zeroVec = {0.0f,0.0f,0.0f};
+    actor->teleportVec = zeroVec;
     if (CVarGetInteger("gDisableDrawDistance", 0) != 0 && actor->id != ACTOR_EN_TORCH2 && actor->id != ACTOR_EN_BLKOBJ // Extra check for Dark Link and his room 
-        && actor->id != ACTOR_EN_HORSE // Check for Epona, else if we call her she will spawn at the other side of the  map + we can hear her during the title screen sequence
+        && !(actor->id == ACTOR_EN_HORSE && (actor->params & 0xF) != 0xB) // Check for Epona, else if we call her she will spawn at the other side of the  map + we can hear her during the title screen sequence
         && actor->id != ACTOR_EN_HORSE_GANON && actor->id != ACTOR_EN_HORSE_ZELDA  // check for Zelda's and Ganondorf's horses that will always be scene during cinematic whith camera paning
-        && (play->sceneNum != SCENE_DODONGOS_CAVERN && actor->id != ACTOR_EN_ZF)) { // Check for DC and Lizalfos for the case where the miniboss music would still play under certains conditions and changing room
+        && (play->sceneNum != SCENE_DODONGOS_CAVERN && actor->id != ACTOR_EN_ZF) // Check for DC and Lizalfos for the case where the miniboss music would still play under certains conditions and changing room
+        && (play->sceneNum != 0x5b || (play->roomCtx.curRoom.num != 0x7 && play->roomCtx.curRoom.num != 0x8 && play->roomCtx.curRoom.num != 0x4))) {
         actor->uncullZoneForward = 32767.0f;
         actor->uncullZoneScale = 32767.0f;
         actor->uncullZoneDownward = 32767.0f;
@@ -1498,7 +1587,13 @@ s32 Actor_ActorBIsFacingActorA(Actor* actorA, Actor* actorB, s16 maxAngle) {
  * The maximum angle difference that qualifies as "facing" is specified by `maxAngle`.
  */
 s32 Actor_IsFacingPlayer(Actor* actor, s16 maxAngle) {
+    if (maxAngle <= 0)
+        return false;
+
     s16 yawDiff = actor->yawTowardsPlayer - actor->shape.rot.y;
+
+    if (yawDiff == SHRT_MIN)//This is important, as otherwise overflow will cause an actor facing directly away from the player to count as facing towards
+        return false;
 
     if (ABS(yawDiff) < maxAngle) {
         return true;
@@ -1873,7 +1968,7 @@ typedef struct {
 TargetRangeParams D_80115FF8[] = {
     TARGET_RANGE(70, 140),   TARGET_RANGE(170, 255),    TARGET_RANGE(280, 5600),      TARGET_RANGE(350, 525),
     TARGET_RANGE(700, 1050), TARGET_RANGE(1000, 1500),  TARGET_RANGE(100, 105.36842), TARGET_RANGE(140, 163.33333),
-    TARGET_RANGE(240, 576),  TARGET_RANGE(280, 280000),
+    TARGET_RANGE(240, 576),  TARGET_RANGE(280, 280000), TARGET_RANGE(0, 0),
 };
 
 u32 func_8002F090(Actor* actor, f32 arg1) {
@@ -2476,7 +2571,7 @@ void func_800304DC(PlayState* play, ActorContext* actorCtx, ActorEntry* actorEnt
 
     actorCtx->absoluteSpace = NULL;
 
-    Actor_SpawnEntry(actorCtx, actorEntry, play);
+    Actor_SpawnEntry(actorCtx, actorEntry, play, -1);
     func_8002C0C0(&actorCtx->targetCtx, actorCtx->actorLists[ACTORCAT_PLAYER].head, play);
     func_8002FA60(play);
 }
@@ -2505,7 +2600,7 @@ void Actor_UpdateAll(PlayState* play, ActorContext* actorCtx) {
     if (play->numSetupActors != 0) {
         actorEntry = &play->setupActorList[0];
         for (i = 0; i < play->numSetupActors; i++) {
-            Actor_SpawnEntry(&play->actorCtx, actorEntry++, play);
+            Actor_SpawnEntry(&play->actorCtx, actorEntry++, play, i);
         }
         play->numSetupActors = 0;
         GameInteractor_ExecuteOnSceneSpawnActors();
@@ -2662,14 +2757,26 @@ void Actor_Draw(PlayState* play, Actor* actor) {
     Lights_Draw(lights, play->state.gfxCtx);
 
     FrameInterpolation_RecordActorPosRotMatrix();
-    if (actor->flags & ACTOR_FLAG_IGNORE_QUAKE) {
-        Matrix_SetTranslateRotateYXZ(
-            actor->world.pos.x + play->mainCamera.skyboxOffset.x,
-            actor->world.pos.y + (f32)((actor->shape.yOffset * actor->scale.y) + play->mainCamera.skyboxOffset.y),
-            actor->world.pos.z + play->mainCamera.skyboxOffset.z, &actor->shape.rot);
+    if (!actor->isTeleported) {
+        if (actor->flags & ACTOR_FLAG_IGNORE_QUAKE) {
+            Matrix_SetTranslateRotateYXZ(
+                actor->world.pos.x + play->mainCamera.skyboxOffset.x,
+                actor->world.pos.y + (f32)((actor->shape.yOffset * actor->scale.y) + play->mainCamera.skyboxOffset.y),
+                actor->world.pos.z + play->mainCamera.skyboxOffset.z, &actor->shape.rot);
+        } else {
+            Matrix_SetTranslateRotateYXZ(actor->world.pos.x, actor->world.pos.y + (actor->shape.yOffset * actor->scale.y),
+                                        actor->world.pos.z, &actor->shape.rot);
+        }
     } else {
-        Matrix_SetTranslateRotateYXZ(actor->world.pos.x, actor->world.pos.y + (actor->shape.yOffset * actor->scale.y),
-                                     actor->world.pos.z, &actor->shape.rot);
+        if (actor->flags & ACTOR_FLAG_IGNORE_QUAKE) {
+            Matrix_SetFalsifiedTranslateRotateYXZ(
+                actor->world.pos.x + play->mainCamera.skyboxOffset.x,
+                actor->world.pos.y + (f32)((actor->shape.yOffset * actor->scale.y) + play->mainCamera.skyboxOffset.y),
+                actor->world.pos.z + play->mainCamera.skyboxOffset.z, &actor->shape.rot, &actor->teleportVec);
+        } else {
+            Matrix_SetFalsifiedTranslateRotateYXZ(actor->world.pos.x, actor->world.pos.y + (actor->shape.yOffset * actor->scale.y),
+                                        actor->world.pos.z, &actor->shape.rot, &actor->teleportVec);
+        }
     }
 
     Matrix_Scale(actor->scale.x, actor->scale.y, actor->scale.z, MTXMODE_APPLY);
@@ -2712,6 +2819,7 @@ void Actor_Draw(PlayState* play, Actor* actor) {
 
     CLOSE_DISPS(play->state.gfxCtx);
     FrameInterpolation_RecordCloseChild();
+    actor->isTeleported = 0;
 
     Fault_RemoveClient(&faultClient);
 }
@@ -2852,9 +2960,10 @@ s32 func_800314D4(PlayState* play, Actor* actor, Vec3f* arg2, f32 arg3) {
     f32 var;
 
     if (CVarGetInteger("gDisableDrawDistance", 0) != 0 && actor->id != ACTOR_EN_TORCH2 && actor->id != ACTOR_EN_BLKOBJ // Extra check for Dark Link and his room 
-        && actor->id != ACTOR_EN_HORSE // Check for Epona, else if we call her she will spawn at the other side of the  map + we can hear her during the title screen sequence
+        && !(actor->id == ACTOR_EN_HORSE && (actor->params & 0xF) != 0xB) // Check for Epona, else if we call her she will spawn at the other side of the  map + we can hear her during the title screen sequence
         && actor->id != ACTOR_EN_HORSE_GANON && actor->id != ACTOR_EN_HORSE_ZELDA  // check for Zelda's and Ganondorf's horses that will always be scene during cinematic whith camera paning
-        && (play->sceneNum != SCENE_DODONGOS_CAVERN && actor->id != ACTOR_EN_ZF)) { // Check for DC and Lizalfos for the case where the miniboss music would still play under certains conditions and changing room
+        && (play->sceneNum != SCENE_DODONGOS_CAVERN && actor->id != ACTOR_EN_ZF) // Check for DC and Lizalfos for the case where the miniboss music would still play under certains conditions and changing room
+        && (play->sceneNum != 0x5b || (play->roomCtx.curRoom.num != 0x7 && play->roomCtx.curRoom.num != 0x8 && play->roomCtx.curRoom.num != 0x4))) {
         return true;
     }
 
@@ -3163,7 +3272,7 @@ Actor* Actor_Spawn(ActorContext* actorCtx, PlayState* play, s16 actorId, f32 pos
 
     objBankIndex = Object_GetIndex(&gPlayState->objectCtx, dbEntry->objectId);
 
-    if (objBankIndex < 0 && (!gMapLoading || CVarGetInteger("gRandomizedEnemies", 0))) {
+    if (objBankIndex < 0 /*&& (!gMapLoading || CVarGetInteger("gRandomizedEnemies", 0))*/) { //This is being commented out to enable actor spawn overrides, this will spawn extra enemies in the graveyard if they are not erased
         objBankIndex = 0;
     }
 
@@ -3218,6 +3327,7 @@ Actor* Actor_Spawn(ActorContext* actorCtx, PlayState* play, s16 actorId, f32 pos
     actor->home.rot.y = rotY;
     actor->home.rot.z = rotZ;
     actor->params = params;
+    actor->entryNum = -1;
 
     Actor_AddToCategory(actorCtx, actor, dbEntry->category);
 
@@ -3283,10 +3393,12 @@ void Actor_SpawnTransitionActors(PlayState* play, ActorContext* actorCtx) {
     }
 }
 
-Actor* Actor_SpawnEntry(ActorContext* actorCtx, ActorEntry* actorEntry, PlayState* play) {
+Actor* Actor_SpawnEntry(ActorContext* actorCtx, ActorEntry* actorEntry, PlayState* play, s16 entryNum) {
     gMapLoading = 1;
     Actor* ret = Actor_Spawn(actorCtx, play, actorEntry->id, actorEntry->pos.x, actorEntry->pos.y, actorEntry->pos.z,
                        actorEntry->rot.x, actorEntry->rot.y, actorEntry->rot.z, actorEntry->params, true);
+    if (ret)
+        ret->entryNum = entryNum;
     gMapLoading = 0;
 
     return ret;
@@ -3868,6 +3980,10 @@ s32 Actor_IsTargeted(PlayState* play, Actor* actor) {
     }
 }
 
+s32 Actor_OtherIsTargetedPlaceholder(PlayState* play, Actor* actor) {
+    return false;
+}
+
 /**
  * Returns true if the player is targeting an actor other than the provided actor
  */
@@ -3875,6 +3991,20 @@ s32 Actor_OtherIsTargeted(PlayState* play, Actor* actor) {
     Player* player = GET_PLAYER(play);
 
     if ((player->stateFlags1 & 0x10) && !actor->isTargeted) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+/**
+ * Returns true if the player is targeting an actor other than the provided actor AND
+ * that actor is of the same type as the provided one
+ */
+s32 Actor_SameIsTargeted(PlayState* play, Actor* actor) {
+    Player* player = GET_PLAYER(play);
+
+    if ((player->stateFlags1 & 0x10) && !actor->isTargeted && player->unk_664 && (actor->id == player->unk_664->id)) {
         return true;
     } else {
         return false;
@@ -4510,6 +4640,36 @@ Actor* Actor_FindNearby(PlayState* play, Actor* refActor, s16 actorId, u8 actorC
     }
 
     return NULL;
+}
+
+s32 Actor_FindNumberOf(PlayState* play, Actor* refActor, s16 actorId, u8 actorCategory, f32 range,
+                        Actor** closest, u8(*predicate)(Actor*, PlayState*)) {
+    Actor* actor = play->actorCtx.actorLists[actorCategory].head;
+    f32 minDist = range*2.0f;
+    s32 total = 0;
+    if (closest)
+        *closest = NULL;
+
+    while (actor != NULL) {
+        if (actor == refActor || ((actorId != -1) && (actorId != actor->id))) {
+            actor = actor->next;
+        } else {
+            f32 currentDist = Actor_WorldDistXYZToActor(refActor, actor);
+            if (currentDist <= range && (predicate ? predicate(actor,play) : true)) {
+                total++;
+                if (currentDist <= minDist) {
+                    minDist = currentDist;
+                    if (closest)
+                        *closest = actor;
+                }
+                actor = actor->next;
+            } else {
+                actor = actor->next;
+            }
+        }
+    }
+
+    return total;
 }
 
 s32 func_800354B4(PlayState* play, Actor* actor, f32 range, s16 arg3, s16 arg4, s16 arg5) {
@@ -5908,7 +6068,7 @@ s32 func_800374E0(PlayState* play, Actor* actor, u16 textId) {
         case 0x2030:
         case 0x2031:
             if (msgCtx->choiceIndex == 0) {
-                if (gSaveContext.rupees >= 10) {
+                if (Rupees_GetNum() >= 10) {
                     func_80035B18(play, actor, 0x2034);
                     Rupees_ChangeBy(-10);
                 } else {

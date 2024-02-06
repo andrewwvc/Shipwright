@@ -433,7 +433,7 @@ void UseBeans(Actor* thisx, PlayState* play, u8 started) {
         if (started == 1) {
             this->entry = ItemTable_Retrieve(GI_BEAN);
             if (play->actorCtx.titleCtx.alpha <= 0) {
-                if (gSaveContext.rupees >= 100 && GiveItemEntryWithoutActor(play, this->entry)) {
+                if (Rupees_GetNum() >= 100 && GiveItemEntryWithoutActor(play, this->entry)) {
                     Rupees_ChangeBy(-100);
                 } else {
                     func_80078884(NA_SE_SY_ERROR);

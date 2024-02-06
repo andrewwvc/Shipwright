@@ -235,6 +235,13 @@ static s32 sOcarinaGameRewards[] = {
     GI_RUPEE_RED,
 };
 
+s32 selectOcarinaGameReward(EnSkj* this, s32 roundSlot) {
+    if (roundSlot < 3)
+        return sOcarinaGameRewards[roundSlot];
+    else
+        return this->rewardSelect;
+}
+
 static AnimationMinimalInfo sAnimationInfo[] = {
     { &gSkullKidBackflipAnim, ANIMMODE_ONCE, 0.0f },
     { &gSkullKidShootNeedleAnim, ANIMMODE_ONCE, 0.0f },
@@ -364,6 +371,8 @@ void EnSkj_SetNaviId(EnSkj* this) {
 
 void EnSkj_Init(Actor* thisx, PlayState* play2) {
     s16 type = (thisx->params >> 0xA) & 0x3F;
+    thisx->world.rot.z = 0;
+    thisx->shape.rot.z = 0;
     EnSkj* this = (EnSkj*)thisx;
     PlayState* play = play2;
     s32 pad;
@@ -1324,8 +1333,12 @@ void EnSkj_Update(Actor* thisx, PlayState* play) {
             dropPos.x = this->actor.world.pos.x;
             dropPos.y = this->actor.world.pos.y;
             dropPos.z = this->actor.world.pos.z;
-
-            Item_DropCollectible(play, &dropPos, ITEM00_RUPEE_ORANGE);
+            if (this->actor.home.rot.z != 1) {
+                EnItem00* item = Item_DropCollectible(play, &dropPos, ITEM00_RUPEE_ORANGE);
+                if (item) {
+                    item->actor.entryNum = this->actor.entryNum;
+                }
+            }
         }
         Actor_Kill(&this->actor);
         return;
@@ -1373,7 +1386,8 @@ void EnSkj_TurnPlayer(EnSkj* this, Player* player) {
 void EnSkj_SetupWaitForOcarina(EnSkj* this, PlayState* play) {
     Player* player = GET_PLAYER(play);
 
-    if (EnSkj_RangeCheck(player, this)) {
+
+    if (!usingBorrowedWallet() && EnSkj_RangeCheck(player, this)) {
         sOcarinaMinigameSkullKids[SKULL_KID_LEFT].skullkid->playerInRange = true;
         sOcarinaMinigameSkullKids[SKULL_KID_RIGHT].skullkid->playerInRange = true;
 
@@ -1393,15 +1407,17 @@ void EnSkj_SetupWaitForOcarina(EnSkj* this, PlayState* play) {
 void EnSkj_WaitForOcarina(EnSkj* this, PlayState* play) {
     Player* player = GET_PLAYER(play);
 
-    if (player->stateFlags2 & 0x1000000) {
-        player->stateFlags2 |= 0x2000000;
-        func_800F5BF0(NATURE_ID_KOKIRI_REGION);
-        EnSkj_TurnPlayer(this, player);
-        player->unk_6A8 = &this->actor;
-        Message_StartTextbox(play, 0x10BE, &this->actor);
-        this->actionFunc = EnSkj_StartOcarinaMinigame;
-    } else if (EnSkj_RangeCheck(player, this)) {
-        player->stateFlags2 |= 0x800000;
+    if (!usingBorrowedWallet()) {
+        if (player->stateFlags2 & 0x1000000) {
+            player->stateFlags2 |= 0x2000000;
+            func_800F5BF0(NATURE_ID_KOKIRI_REGION);
+            EnSkj_TurnPlayer(this, player);
+            player->unk_6A8 = &this->actor;
+            Message_StartTextbox(play, 0x10BE, &this->actor);
+            this->actionFunc = EnSkj_StartOcarinaMinigame;
+        } else if (EnSkj_RangeCheck(player, this)) {
+            player->stateFlags2 |= 0x800000;
+        }
     }
 }
 
@@ -1417,6 +1433,7 @@ void EnSkj_StartOcarinaMinigame(EnSkj* this, PlayState* play) {
             sOcarinaMinigameSkullKids[SKULL_KID_LEFT].skullkid->minigameState = SKULL_KID_OCARINA_PLAY_NOTES;
         }
         this->songFailTimer = 160;
+        this->rewardSelect = Rand_ZeroOne() < 0.5f ? GI_RUPEE_RED : GI_RUPEE_BLUE;
         this->actionFunc = EnSkj_WaitForPlayback;
     }
 }
@@ -1544,7 +1561,7 @@ void EnSkj_WaitToGiveReward(EnSkj* this, PlayState* play) {
             GetItemEntry getItemEntry = Randomizer_GetItemFromKnownCheck(RC_LW_OCARINA_MEMORY_GAME, GI_HEART_PIECE);
             GiveItemEntryFromActor(&this->actor, play, getItemEntry, 26.0f, 26.0f);
         } else {
-            func_8002F434(&this->actor, play, sOcarinaGameRewards[gSaveContext.ocarinaGameRoundNum], 26.0f, 26.0f);
+            func_8002F434(&this->actor, play, selectOcarinaGameReward(this, gSaveContext.ocarinaGameRoundNum), 26.0f, 26.0f);
         }
 
         this->actionFunc = EnSkj_GiveOcarinaGameReward;
@@ -1560,7 +1577,7 @@ void EnSkj_GiveOcarinaGameReward(EnSkj* this, PlayState* play) {
             GetItemEntry getItemEntry = Randomizer_GetItemFromKnownCheck(RC_LW_OCARINA_MEMORY_GAME, GI_HEART_PIECE);
             GiveItemEntryFromActor(&this->actor, play, getItemEntry, 26.0f, 26.0f);
         } else {
-            func_8002F434(&this->actor, play, sOcarinaGameRewards[gSaveContext.ocarinaGameRoundNum], 26.0f, 26.0f);
+            func_8002F434(&this->actor, play, selectOcarinaGameReward(this, gSaveContext.ocarinaGameRoundNum), 26.0f, 26.0f);
         }
     }
 }

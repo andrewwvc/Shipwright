@@ -5,6 +5,7 @@
  */
 
 #include "z_en_arrow.h"
+#include "overlays/actors/ovl_Bg_Spot08_Iceblock/z_bg_spot08_iceblock.h"
 #include "objects/gameplay_keep/gameplay_keep.h"
 #include "objects/object_gi_nuts/object_gi_nuts.h"
 
@@ -79,7 +80,7 @@ void EnArrow_Init(Actor* thisx, PlayState* play) {
         0, 1, 0, { 255, 255, 170, 255 }, { 255, 255, 0, 0 }, 0,
     };
     static u32 dmgFlags[] = {
-        0x00000800, 0x00000020, 0x00000020, 0x00000800, 0x00001000,
+        0x00000800, 0x00004000, 0x00000020, 0x00000800, 0x00001000,
         0x00002000, 0x00010000, 0x00004000, 0x00008000, 0x00000004,
     };
     EnArrow* this = (EnArrow*)thisx;
@@ -212,11 +213,14 @@ void EnArrow_Shoot(EnArrow* this, PlayState* play) {
                 break;
 
             case ARROW_NORMAL_LIT:
-            case ARROW_NORMAL_HORSE:
             case ARROW_NORMAL:
                 Player_PlaySfx(&player->actor, NA_SE_IT_ARROW_SHOT);
                 break;
 
+            case ARROW_NORMAL_HORSE:
+                Player_PlaySfx(&player->actor, NA_SE_IT_DEKU);
+                break;
+            
             case ARROW_FIRE:
             case ARROW_ICE:
             case ARROW_LIGHT:
@@ -369,15 +373,59 @@ void EnArrow_Fly(EnArrow* this, PlayState* play) {
             }
         }
     } else {
+        u8 didFormIce = false;
+        WaterBox* outWaterBox;
+        f32 ySurface = this->actor.world.pos.y;
+        Vec3f piorPosition;
+        if (this->actor.params == ARROW_ICE) {
+	        if (WaterBox_GetSurfaceImpl(play, &play->colCtx, this->actor.world.pos.x,
+                                 this->actor.world.pos.z, &ySurface, &outWaterBox) &&
+                                 (this->actor.world.pos.y <= ySurface && ySurface < this->unk_210.y)) {
+                didFormIce = true;
+            }
+        }
+
+        Math_Vec3f_Copy(&piorPosition, &this->unk_210);
         Math_Vec3f_Copy(&this->unk_210, &this->actor.world.pos);
         Actor_MoveForward(&this->actor);
 
-        if ((this->touchedPoly =
+        if (didFormIce) {
+                Vec3f diff;
+                Math_Vec3f_Diff(&piorPosition, &this->unk_210, &diff);
+                f32 ydiff1 = ySurface - this->unk_210.y;
+                f32 ydiff2 = piorPosition.y - this->unk_210.y;
+                f32 yRatio = (ydiff2 > 0.0f) ? ydiff1/ydiff2 : 0.0f;
+                Vec3f finalPos = {yRatio*diff.x+this->unk_210.x,ySurface,yRatio*diff.z+this->unk_210.z};
+
+                BgSpot08Iceblock* iceblock = (BgSpot08Iceblock*)Actor_Spawn(&play->actorCtx, play,ACTOR_BG_SPOT08_ICEBLOCK,
+                    finalPos.x,finalPos.y,finalPos.z,
+                    0x0000,this->actor.world.rot.y,0x0000,0x1020,false);
+                iceblock->water = outWaterBox;
+                this->unk_210 = finalPos;
+                EnArrow_SetupAction(this, func_809B45E0);
+                Audio_PlayActorSound2(&this->actor, NA_SE_IT_ARROW_STICK_OBJ);
+                this->timer = 20;
+                this->hitFlags |= 1;
+        } else if ((this->touchedPoly =
                  BgCheck_ProjectileLineTest(&play->colCtx, &this->actor.prevPos, &this->actor.world.pos, &hitPoint,
                                             &this->actor.wallPoly, true, true, true, true, &bgId))) {
             func_8002F9EC(play, &this->actor, this->actor.wallPoly, bgId, &hitPoint);
             Math_Vec3f_Copy(&posCopy, &this->actor.world.pos);
             Math_Vec3f_Copy(&this->actor.world.pos, &hitPoint);
+
+            if (DynaPoly_IsBgIdBgActor(bgId)) {
+                DynaPolyActor* dyna1 = DynaPoly_GetActor(&play->colCtx,bgId);
+                Actor* actor1 = &dyna1->actor;
+
+                if (ACTOR_BG_SPOT08_ICEBLOCK == actor1->id) {
+                    if (this->actor.params == ARROW_FIRE) {
+                        if (BgSpot08Iceblock_thaw(actor1))
+                            Actor_Kill(&this->actor);
+                    } else if (this->actor.params == ARROW_ICE) {
+                        BgSpot08Iceblock_freeze(actor1);
+                    }
+                }
+            }
         }
 
         if (this->actor.params <= ARROW_0E) {

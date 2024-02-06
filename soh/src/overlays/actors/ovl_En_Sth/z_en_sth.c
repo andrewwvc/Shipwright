@@ -23,6 +23,8 @@ void EnSth_WaitForObjectLoaded(EnSth* this, PlayState* play);
 void EnSth_ParentRewardObtainedWait(EnSth* this, PlayState* play);
 void EnSth_RewardUnobtainedWait(EnSth* this, PlayState* play);
 void EnSth_ChildRewardObtainedWait(EnSth* this, PlayState* play);
+void EnSth_GiveReward(EnSth* this, PlayState* play);
+void EnSth_GivePlayerItem(EnSth* this, PlayState* play);
 
 const ActorInit En_Sth_InitVars = {
     ACTOR_EN_STH,
@@ -82,25 +84,15 @@ static EnSthActionFunc sRewardObtainedWaitActions[6] = {
 };
 
 static u16 sEventFlags[6] = {
-    0,
-    EVENTCHKINF_SKULLTULA_REWARD_10_MASK,
-    EVENTCHKINF_SKULLTULA_REWARD_20_MASK,
-    EVENTCHKINF_SKULLTULA_REWARD_30_MASK,
-    EVENTCHKINF_SKULLTULA_REWARD_40_MASK,
-    EVENTCHKINF_SKULLTULA_REWARD_50_MASK,
-};
-
-static u16 sEventFlagsShift[6] = {
-    0,
-    EVENTCHKINF_SKULLTULA_REWARD_10_SHIFT,
-    EVENTCHKINF_SKULLTULA_REWARD_20_SHIFT,
-    EVENTCHKINF_SKULLTULA_REWARD_30_SHIFT,
-    EVENTCHKINF_SKULLTULA_REWARD_40_SHIFT,
-    EVENTCHKINF_SKULLTULA_REWARD_50_SHIFT,
+    0x8000, 0x0400, 0x0800, 0x1000, 0x2000, 0x4000,
 };
 
 static s16 sGetItemIds[6] = {
     GI_RUPEE_GOLD, GI_WALLET_ADULT, GI_STONE_OF_AGONY, GI_WALLET_GIANT, GI_BOMBCHUS_10, GI_HEART_PIECE,
+};
+
+static s16 sGetItemIds2[6] = {
+    GI_DEFENSE_HEART, GI_HEART_PIECE, GI_EXTRA_MAGIC, GI_DEFENSE_HEART, GI_WALLET_KING, GI_HEART_PIECE,
 };
 
 static Vec3f D_80B0B49C = { 700.0f, 400.0f, 0.0f };
@@ -108,6 +100,19 @@ static Vec3f D_80B0B49C = { 700.0f, 400.0f, 0.0f };
 static Color_RGB8 sTunicColors[6] = {
     { 190, 110, 0 }, { 0, 180, 110 }, { 0, 255, 80 }, { 255, 160, 60 }, { 190, 230, 250 }, { 240, 230, 120 },
 };
+
+s32 log2Int( s32 input ) {
+    s32 log = 1;
+
+    if( input == 0 )
+        return 0;
+    while( input != 1 && log < 32) {
+        input >> 1;
+        log++;
+    }
+
+    return log;
+}
 
 void EnSth_SetupAction(EnSth* this, EnSthActionFunc actionFunc) {
     this->actionFunc = actionFunc;
@@ -178,7 +183,7 @@ void EnSth_SetupAfterObjectLoaded(EnSth* this, PlayState* play) {
 
     this->eventFlag = sEventFlags[this->actor.params];
     params = &this->actor.params;
-    if (gSaveContext.eventChkInf[EVENTCHKINF_SKULLTULA_REWARD_INDEX] & this->eventFlag) {
+    if ((gSaveContext.eventChkInf[EVENTCHKINF_SKULLTULA_REWARD_INDEX] & this->eventFlag) && ((gSaveContext.inventory.gsTokens < (this->actor.params * 10)+50) || (gSaveContext.eventChkInf[EVENTCHKINF_SKULLTULA_REWARD_INDEX_2] & this->eventFlag) || !this->actor.params)) {
         EnSth_SetupAction(this, sRewardObtainedWaitActions[*params]);
     } else {
         EnSth_SetupAction(this, EnSth_RewardUnobtainedWait);
@@ -233,21 +238,69 @@ void EnSth_LookAtPlayer(EnSth* this, PlayState* play) {
 }
 
 void EnSth_RewardObtainedTalk(EnSth* this, PlayState* play) {
+    u16 CursedFamilyMsg = GetTextID("cursedfamily");
+    u8 msgState = Message_GetState(&play->msgCtx);
+    u8 msgShouldAdvance = Message_ShouldAdvance(play);
+    if (this->actor.params == 0) {
+        if ((msgState == TEXT_STATE_EVENT) && msgShouldAdvance) {
+            if (this->actor.textId == CursedFamilyMsg+3) {
+                createRupeeScoreString(gSaveContext.rupeeCollectionScore);
+                this->actor.textId = CursedFamilyMsg+5;
+                Message_ContinueTextbox(play,this->actor.textId);
+                return;
+            } else if (this->actor.textId == CursedFamilyMsg+6) {
+                Message_CloseTextbox(play);
+                EnSth_SetupAction(this, EnSth_GiveReward);
+                EnSth_GivePlayerItem(this, play);
+                return;
+            }
+        } else if ((msgState == TEXT_STATE_CHOICE) && msgShouldAdvance) {
+            if (this->actor.textId == CursedFamilyMsg+4) {
+                if (play->msgCtx.choiceIndex == 0 && gSaveContext.timer2State != 0) {
+                    RupeeQuest_PrepareEnd();
+                    changeToNormalWallet();
+                    gSaveContext.timer2State = 0;
+                    EnSth_SetupAction(this, EnSth_ParentRewardObtainedWait);
+                    return;
+                }
+            } else if (this->actor.textId == CursedFamilyMsg+5) {
+                if (play->msgCtx.choiceIndex == 0) {
+                    changeToAltWallet();
+                    func_80088AA0(600);
+                    EnSth_SetupAction(this, EnSth_ParentRewardObtainedWait);
+                    return;
+                } else {
+                    EnSth_SetupAction(this, EnSth_ParentRewardObtainedWait);
+                    return;
+                }
+            }
+        }
+    }
     if (Actor_TextboxIsClosing(&this->actor, play)) {
         if (this->actor.params == 0) {
             EnSth_SetupAction(this, EnSth_ParentRewardObtainedWait);
         } else {
-            EnSth_SetupAction(this, EnSth_ChildRewardObtainedWait);
+            if ((gSaveContext.inventory.gsTokens < (this->actor.params * 10)+50) || (gSaveContext.eventChkInf[12] & this->eventFlag))
+                EnSth_SetupAction(this, EnSth_ChildRewardObtainedWait);
+            else
+                EnSth_SetupAction(this, EnSth_RewardUnobtainedWait);
         }
     }
     EnSth_FacePlayer(this, play);
 }
 
 void EnSth_ParentRewardObtainedWait(EnSth* this, PlayState* play) {
+    u16 CursedFamilyMsg = GetTextID("cursedfamily");
     if (Actor_ProcessTalkRequest(&this->actor, play)) {
+        createRupeeScoreString(gSaveContext.rupeeCollectionScore);
         EnSth_SetupAction(this, EnSth_RewardObtainedTalk);
     } else {
-        this->actor.textId = 0x23;
+        if (usingBorrowedWallet())
+            this->actor.textId = CursedFamilyMsg+4;
+        else if ((gSaveContext.eventChkInf[12] & this->eventFlag) || (gSaveContext.rupeeCollectionScore < 1000))
+            this->actor.textId = CursedFamilyMsg+3;
+        else
+            this->actor.textId = CursedFamilyMsg+6;
         if (this->actor.xzDistToPlayer < 100.0f) {
             func_8002F2CC(&this->actor, play, 100.0f);
         }
@@ -256,7 +309,11 @@ void EnSth_ParentRewardObtainedWait(EnSth* this, PlayState* play) {
 }
 
 void EnSth_GivePlayerItem(EnSth* this, PlayState* play) {
-    u16 getItemId = sGetItemIds[this->actor.params];
+    u16 getItemId;
+    if (gSaveContext.eventChkInf[13] & this->eventFlag)
+        getItemId = sGetItemIds2[this->actor.params];
+    else
+        getItemId = sGetItemIds[this->actor.params];
     GetItemEntry getItemEntry = (GetItemEntry)GET_ITEM_NONE;
     
     if (IS_RANDO) {
@@ -285,9 +342,10 @@ void EnSth_GivePlayerItem(EnSth* this, PlayState* play) {
         }
         getItemId = getItemEntry.getItemId;
     } else {
-        switch (this->actor.params) {
-            case 1:
-            case 3:
+        switch (getItemId) {
+            case GI_WALLET_ADULT:
+            case GI_WALLET_GIANT:
+            case GI_WALLET_KING:
                 switch (CUR_UPG_VALUE(UPG_WALLET)) {
                     case 0:
                         getItemId = GI_WALLET_ADULT;
@@ -295,6 +353,10 @@ void EnSth_GivePlayerItem(EnSth* this, PlayState* play) {
 
                     case 1:
                         getItemId = GI_WALLET_GIANT;
+                        break;
+
+                    case 2:
+                        getItemId = GI_WALLET_KING;
                         break;
                 }
                 break;
@@ -312,9 +374,14 @@ void EnSth_GiveReward(EnSth* this, PlayState* play) {
     if (Actor_HasParent(&this->actor, play)) {
         this->actor.parent = NULL;
         EnSth_SetupAction(this, EnSth_RewardObtainedTalk);
-        gSaveContext.eventChkInf[EVENTCHKINF_SKULLTULA_REWARD_INDEX] |= this->eventFlag;
-        if (this->eventFlag != 0) {
-            GameInteractor_ExecuteOnFlagSet(FLAG_EVENT_CHECK_INF, (EVENTCHKINF_SKULLTULA_REWARD_INDEX << 4) + sEventFlagsShift[this->actor.params]);
+        if (gSaveContext.eventChkInf[EVENTCHKINF_SKULLTULA_REWARD_INDEX] & this->eventFlag) {
+            gSaveContext.eventChkInf[EVENTCHKINF_SKULLTULA_REWARD_INDEX_2] |= this->eventFlag;
+            if (this->eventFlag != 0)
+                GameInteractor_ExecuteOnFlagSet(FLAG_EVENT_CHECK_INF, (EVENTCHKINF_SKULLTULA_REWARD_INDEX_2 << 4) + log2Int(this->eventFlag));
+        } else {
+            gSaveContext.eventChkInf[EVENTCHKINF_SKULLTULA_REWARD_INDEX] |= this->eventFlag;
+            if (this->eventFlag != 0)
+                GameInteractor_ExecuteOnFlagSet(FLAG_EVENT_CHECK_INF, (EVENTCHKINF_SKULLTULA_REWARD_INDEX << 4) + log2Int(this->eventFlag));
         }
     } else {
         EnSth_GivePlayerItem(this, play);
@@ -335,10 +402,14 @@ void EnSth_RewardUnobtainedWait(EnSth* this, PlayState* play) {
     if (Actor_ProcessTalkRequest(&this->actor, play)) {
         EnSth_SetupAction(this, EnSth_RewardUnobtainedTalk);
     } else {
+        u16 CursedFamilyMsg = GetTextID("cursedfamily");
         if (this->actor.params == 0) {
             this->actor.textId = 0x28;
         } else {
-            this->actor.textId = 0x21;
+            if (gSaveContext.eventChkInf[13] & this->eventFlag)
+                this->actor.textId = CursedFamilyMsg+2;
+            else
+                this->actor.textId = 0x21;
         }
         if (this->actor.xzDistToPlayer < 100.0f) {
             func_8002F2CC(&this->actor, play, 100.0f);
@@ -351,10 +422,16 @@ void EnSth_ChildRewardObtainedWait(EnSth* this, PlayState* play) {
     if (Actor_ProcessTalkRequest(&this->actor, play)) {
         EnSth_SetupAction(this, EnSth_RewardObtainedTalk);
     } else {
+        u16 CursedFamilyMsg = GetTextID("cursedfamily");
         if (gSaveContext.inventory.gsTokens < 50) {
             this->actor.textId = 0x20;
         } else {
-            this->actor.textId = 0x1F;
+            if (gSaveContext.inventory.gsTokens < (this->actor.params * 10)+50)
+                this->actor.textId = CursedFamilyMsg+0;
+            else if (gSaveContext.inventory.gsTokens < 100)
+                this->actor.textId = CursedFamilyMsg+1;
+            else
+                this->actor.textId = 0x1F;
         }
         if (this->actor.xzDistToPlayer < 100.0f) {
             func_8002F2CC(&this->actor, play, 100.0f);

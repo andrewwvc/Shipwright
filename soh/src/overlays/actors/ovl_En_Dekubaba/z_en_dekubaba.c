@@ -137,7 +137,10 @@ static ColliderJntSphInit sJntSphInit = {
     sJntSphElementsInit,
 };
 
-static CollisionCheckInfoInit sColChkInfoInit = { 2, 25, 25, MASS_IMMOVABLE };
+//Note: EnDekubaba_Init changes the dekubaba's initial health value when it is a Big type baba
+#define BABA_HP_SMALL 6
+#define BABA_HP_BIG 10
+static CollisionCheckInfoInit sColChkInfoInit = { BABA_HP_SMALL, 25, 25, MASS_IMMOVABLE };
 
 typedef enum {
     /* 0x0 */ DEKUBABA_DMGEFF_NONE,
@@ -150,7 +153,7 @@ typedef enum {
 static DamageTable sDekuBabaDamageTable = {
     /* Deku nut      */ DMG_ENTRY(0, DEKUBABA_DMGEFF_DEKUNUT),
     /* Deku stick    */ DMG_ENTRY(2, DEKUBABA_DMGEFF_NONE),
-    /* Slingshot     */ DMG_ENTRY(1, DEKUBABA_DMGEFF_NONE),
+    /* Slingshot     */ DMG_ENTRY(0, DEKUBABA_DMGEFF_NONE),
     /* Explosive     */ DMG_ENTRY(2, DEKUBABA_DMGEFF_NONE),
     /* Boomerang     */ DMG_ENTRY(2, DEKUBABA_DMGEFF_BOOMERANG),
     /* Normal arrow  */ DMG_ENTRY(2, DEKUBABA_DMGEFF_NONE),
@@ -187,7 +190,7 @@ static DamageTable sDekuBabaDamageTable = {
 static DamageTable sBigDekuBabaDamageTable = {
     /* Deku nut      */ DMG_ENTRY(0, DEKUBABA_DMGEFF_DEKUNUT),
     /* Deku stick    */ DMG_ENTRY(2, DEKUBABA_DMGEFF_NONE),
-    /* Slingshot     */ DMG_ENTRY(1, DEKUBABA_DMGEFF_NONE),
+    /* Slingshot     */ DMG_ENTRY(0, DEKUBABA_DMGEFF_NONE),
     /* Explosive     */ DMG_ENTRY(2, DEKUBABA_DMGEFF_NONE),
     /* Boomerang     */ DMG_ENTRY(2, DEKUBABA_DMGEFF_BOOMERANG),
     /* Normal arrow  */ DMG_ENTRY(2, DEKUBABA_DMGEFF_NONE),
@@ -223,6 +226,22 @@ static InitChainEntry sInitChain[] = {
     ICHAIN_F32(targetArrowOffset, 1500, ICHAIN_STOP),
 };
 
+static void EnDekubaba_ChangeSize(EnDekubaba* this, f32 newSize) {
+    this->size = newSize;
+    this->actor.targetMode = (s8)newSize;
+    for (s32 i = 0; i < sJntSphInit.count; i++) {
+            this->collider.elements[i].dim.worldSphere.radius = this->collider.elements[i].dim.modelSphere.radius =
+                (sJntSphElementsInit[i].dim.modelSphere.radius * this->size);
+    }
+}
+
+static const f32 DEKUBABA_ATTACK_RANGE = 80.0f;
+
+static bool isBabaClose(EnDekubaba* this, PlayState* play){
+    Player* player = GET_PLAYER(play);
+    return (DEKUBABA_ATTACK_RANGE * this->size > Math_Vec3f_DistXZ(&this->actor.home.pos, &player->actor.world.pos));
+}
+
 void EnDekubaba_Init(Actor* thisx, PlayState* play) {
     EnDekubaba* this = (EnDekubaba*)thisx;
     s32 i;
@@ -235,12 +254,7 @@ void EnDekubaba_Init(Actor* thisx, PlayState* play) {
     Collider_SetJntSph(play, &this->collider, &this->actor, &sJntSphInit, this->colliderElements);
 
     if (this->actor.params == DEKUBABA_BIG) {
-        this->size = 2.5f;
-
-        for (i = 0; i < sJntSphInit.count; i++) {
-            this->collider.elements[i].dim.worldSphere.radius = this->collider.elements[i].dim.modelSphere.radius =
-                (sJntSphElementsInit[i].dim.modelSphere.radius * 2.50f);
-        }
+        EnDekubaba_ChangeSize(this, 2.5f);
 
         // This and its counterpart below mean that a Deku Stick jumpslash will not trigger the Deku Stick drop route.
         // (Of course they reckoned without each age being able to use the other's items, so Stick and Master Sword
@@ -249,8 +263,10 @@ void EnDekubaba_Init(Actor* thisx, PlayState* play) {
             sBigDekuBabaDamageTable.table[0x1B] = DMG_ENTRY(4, DEKUBABA_DMGEFF_NONE); // DMG_JUMP_MASTER
         }
 
+        this->collider.elements[0].info.toucher.damage *= 2;
+
         CollisionCheck_SetInfo(&this->actor.colChkInfo, &sBigDekuBabaDamageTable, &sColChkInfoInit);
-        this->actor.colChkInfo.health = 4;
+        this->actor.colChkInfo.health = BABA_HP_BIG;
         this->actor.naviEnemyId = 0x08; // Big Deku Baba
         this->actor.targetMode = 2;
     } else {
@@ -667,7 +683,7 @@ void EnDekubaba_DecideLunge(EnDekubaba* this, PlayState* play) {
 
     if (240.0f * this->size < Math_Vec3f_DistXZ(&this->actor.home.pos, &player->actor.world.pos)) {
         EnDekubaba_SetupRetract(this);
-    } else if ((this->timer == 0) || (this->actor.xzDistToPlayer < 80.0f * this->size)) {
+    } else if ((this->timer == 0) || isBabaClose(this,play)) {
         EnDekubaba_SetupPrepareLunge(this);
     }
 }
@@ -745,7 +761,11 @@ void EnDekubaba_PrepareLunge(EnDekubaba* this, PlayState* play) {
     Math_ScaledStepToS(&this->stemSectionAngle[2], -0x6AA4, 0x888);
 
     if (this->timer == 0) {
-        EnDekubaba_SetupLunge(this);
+        if (isBabaClose(this,play))
+            EnDekubaba_SetupLunge(this);
+        else {
+            EnDekubaba_SetupRecover(this);
+        }
     }
 
     EnDekubaba_UpdateHeadPosition(this);
@@ -815,7 +835,7 @@ void EnDekubaba_PullBack(EnDekubaba* this, PlayState* play) {
         this->timer++;
 
         if (this->timer > 30) {
-            if (this->actor.xzDistToPlayer < 80.0f * this->size) {
+            if (isBabaClose(this,play)) {
                 EnDekubaba_SetupPrepareLunge(this);
             } else {
                 EnDekubaba_SetupDecideLunge(this);
@@ -883,7 +903,7 @@ void EnDekubaba_Hit(EnDekubaba* this, PlayState* play) {
         } else {
             this->collider.base.acFlags |= AC_ON;
             if (this->timer == 0) {
-                if (this->actor.xzDistToPlayer < 80.0f * this->size) {
+                if (isBabaClose(this,play)) {
                     EnDekubaba_SetupPrepareLunge(this);
                 } else {
                     EnDekubaba_SetupRecover(this);
@@ -907,7 +927,7 @@ void EnDekubaba_StunnedVertical(EnDekubaba* this, PlayState* play) {
     if (this->timer == 0) {
         EnDekubaba_DisableHitboxes(this);
 
-        if (this->actor.xzDistToPlayer < 80.0f * this->size) {
+        if (isBabaClose(this,play)) {
             EnDekubaba_SetupPrepareLunge(this);
         } else {
             EnDekubaba_SetupRecover(this);
@@ -933,7 +953,7 @@ void EnDekubaba_Sway(EnDekubaba* this, PlayState* play) {
 
     if (ABS(angleToVertical) < 0x100) {
         this->collider.base.acFlags |= AC_ON;
-        if (this->actor.xzDistToPlayer < 80.0f * this->size) {
+        if (isBabaClose(this,play)) {
             EnDekubaba_SetupPrepareLunge(this);
         } else {
             EnDekubaba_SetupRecover(this);
@@ -1077,7 +1097,10 @@ void EnDekubaba_UpdateDamage(EnDekubaba* this, PlayState* play) {
                 return;
             }
 
+            s32 damageDone = this->actor.colChkInfo.health - phi_s0;
             this->actor.colChkInfo.health = CLAMP_MIN(phi_s0, 0);
+            if (damageDone > 0 && this->actor.colChkInfo.health > 0)
+                EnDekubaba_ChangeSize(this,this->size+0.10f*damageDone);
 
             if (this->actor.colChkInfo.damageEffect == DEKUBABA_DMGEFF_FIRE) {
                 firePos = &this->actor.world.pos;

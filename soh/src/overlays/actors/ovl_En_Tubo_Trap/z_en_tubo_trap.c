@@ -32,7 +32,7 @@ static ColliderCylinderInit sCylinderInit = {
     },
     {
         ELEMTYPE_UNK0,
-        { 0xFFCFFFFF, 0x00, 0x04 },
+        { 0xFFCFFFFF, 0x00, 0x10 },
         { 0xFFCFFFFF, 0x00, 0x00 },
         TOUCH_ON | TOUCH_SFX_NORMAL,
         BUMP_ON,
@@ -77,7 +77,11 @@ void EnTuboTrap_DropCollectible(EnTuboTrap* this, PlayState* play) {
     s16 param3FF = (params >> 6) & 0x3FF;
 
     if (param3FF >= 0 && param3FF < 0x1A) {
-        Item_DropCollectible(play, &this->actor.world.pos, param3FF | ((params & 0x3F) << 8));
+        EnItem00* item = Item_DropCollectible(play, &this->actor.world.pos, param3FF | ((params & 0x3F) << 8));
+
+        if (item) {
+            item->actor.entryNum = this->actor.entryNum;
+        }
     }
 }
 
@@ -209,7 +213,7 @@ void EnTuboTrap_HandleImpact(EnTuboTrap* this, PlayState* play) {
             EnTuboTrap_SpawnEffectsOnLand(this, play);
             SoundSource_PlaySfxAtFixedWorldPos(play, &this->actor.world.pos, 40, NA_SE_EV_POT_BROKEN);
             SoundSource_PlaySfxAtFixedWorldPos(play, &player2->actor.world.pos, 40, NA_SE_PL_BODY_HIT);
-            EnTuboTrap_DropCollectible(this, play);
+            //EnTuboTrap_DropCollectible(this, play);
             Actor_Kill(&this->actor);
             GameInteractor_ExecuteOnEnemyDefeat(&this->actor);
             return;

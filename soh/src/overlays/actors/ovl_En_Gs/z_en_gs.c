@@ -105,6 +105,7 @@ void EnGs_Init(Actor* thisx, PlayState* play) {
 
     thisx->targetMode = 6;
     this->unk_1D8 = thisx->world.pos;
+    thisx->world.rot.z = thisx->shape.rot.z = 0;
     this->actionFunc = func_80A4F734;
     this->unk_1B4[0].x = 1.0f;
     this->unk_1B4[0].y = 1.0f;
@@ -143,6 +144,37 @@ void func_80A4E470(EnGs* this, PlayState* play) {
     bREG(15) = 0;
     if (this->actor.xzDistToPlayer <= 100.0f) {
         bREG(15) = 1;
+        s16 actorParams = 0;
+        s32 entVal = -1;
+        ActorEntry ae;
+        s8 resourceUsed, resourceCollected;
+
+        ae.id = this->actor.id;
+        ae.pos.x = round(this->actor.home.pos.x);
+        ae.pos.y = round(this->actor.home.pos.y);
+        ae.pos.z = round(this->actor.home.pos.z);
+        ae.rot = this->actor.home.rot;
+        ae.params = this->actor.params;
+
+        if (play->sceneNum == SCENE_GROTTOS) {
+            int numOfActorLists =
+            sizeof(play->actorCtx.actorLists) / sizeof(play->actorCtx.actorLists[0]);
+            for (int ii = 0; ii < numOfActorLists; ii++) {
+                if (play->actorCtx.actorLists[ii].length) {
+                    if (play->actorCtx.actorLists[ii].head->id == 10) {
+                        // set the params for the hint check to be negative chest params
+                        actorParams = play->actorCtx.actorLists[ii].head->params;
+                    }
+                }
+            }
+        }
+        resourceUsed = isResourceUsed(play, &ae, actorParams);
+        resourceCollected = isResourceCollected(play, &ae, actorParams);
+        if (resourceUsed && resourceCollected) {
+            this->unk_19D = 0;
+            return;
+        }
+
         if (this->unk_19D == 0) {
             player->stateFlags2 |= 0x800000;
             if (player->stateFlags2 & 0x1000000) {
@@ -151,22 +183,37 @@ void func_80A4E470(EnGs* this, PlayState* play) {
             }
 
         } else if (this->unk_19D & 1) {
-            if (play->msgCtx.ocarinaMode == OCARINA_MODE_04) {
+            if (play->msgCtx.ocarinaMode == OCARINA_MODE_04 && this->actor.home.rot.z != 1) {
+                Actor* fairy = NULL;
+
                 if ((play->msgCtx.unk_E3F2 == OCARINA_SONG_SARIAS) ||
                     (play->msgCtx.unk_E3F2 == OCARINA_SONG_EPONAS) ||
                     (play->msgCtx.unk_E3F2 == OCARINA_SONG_LULLABY) ||
                     (play->msgCtx.unk_E3F2 == OCARINA_SONG_SUNS) ||
                     (play->msgCtx.unk_E3F2 == OCARINA_SONG_TIME)) {
-                    Actor_Spawn(&play->actorCtx, play, ACTOR_EN_ELF, this->actor.world.pos.x,
-                                this->actor.world.pos.y + 40.0f, this->actor.world.pos.z, 0, 0, 0, FAIRY_HEAL_TIMED, true);
-                    Audio_PlayActorSound2(&this->actor, NA_SE_EV_BUTTERFRY_TO_FAIRY);
+                    if (!resourceUsed) {
+                        fairy = Actor_Spawn(&play->actorCtx, play, ACTOR_EN_ELF, this->actor.world.pos.x,
+                                    this->actor.world.pos.y + 40.0f, this->actor.world.pos.z, 0, 0, 0, FAIRY_HEAL_TIMED, true);
+                        Audio_PlayActorSound2(&this->actor, NA_SE_EV_BUTTERFRY_TO_FAIRY);
+                    }
                 } else if (play->msgCtx.unk_E3F2 == OCARINA_SONG_STORMS) {
-                    Actor_Spawn(&play->actorCtx, play, ACTOR_EN_ELF, this->actor.world.pos.x,
-                                this->actor.world.pos.y + 40.0f, this->actor.world.pos.z, 0, 0, 0, FAIRY_HEAL_BIG, true);
-                    Audio_PlayActorSound2(&this->actor, NA_SE_EV_BUTTERFRY_TO_FAIRY);
+                    if (!resourceCollected) {
+                        fairy = Actor_Spawn(&play->actorCtx, play, ACTOR_EN_ELF, this->actor.world.pos.x,
+                                    this->actor.world.pos.y + 40.0f, this->actor.world.pos.z, 0, 0, 0, FAIRY_HEAL_BIG, true);
+                        Audio_PlayActorSound2(&this->actor, NA_SE_EV_BUTTERFRY_TO_FAIRY);
+                    }
                 }
                 this->unk_19D = 0;
-                Flags_SetSwitch(play, (this->actor.params >> 8) & 0x3F);
+                if (fairy != NULL) {
+                    Flags_SetSwitch(play, (this->actor.params >> 8) & 0x3F);
+                    if (play->sceneNum == SCENE_GROTTOS) {
+                        entVal = createTempEntryPlusUnk(play, &ae, actorParams);
+                    } else {
+                        entVal = createTempEntryPlusUnk(play, &ae, 0);
+                    }
+                    this->actor.entryNum = entVal;
+                    fairy->entryNum = entVal;
+                }
             } else if (play->msgCtx.ocarinaMode == OCARINA_MODE_01) {
                 player->stateFlags2 |= 0x800000;
             }

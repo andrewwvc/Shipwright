@@ -1,4 +1,4 @@
-﻿#include "OTRGlobals.h"
+#include "OTRGlobals.h"
 #include "OTRAudio.h"
 #include <iostream>
 #include <algorithm>
@@ -123,10 +123,16 @@ void SoH_ProcessDroppedFiles(std::string filePath);
 OTRGlobals* OTRGlobals::Instance;
 SaveManager* SaveManager::Instance;
 CustomMessageManager* CustomMessageManager::Instance;
+TextIDAllocator* TextIDAllocator::Instance;
 ItemTableManager* ItemTableManager::Instance;
 GameInteractor* GameInteractor::Instance;
 AudioCollection* AudioCollection::Instance;
 SpeechSynthesizer* SpeechSynthesizer::Instance;
+std::unordered_map<uint16_t, uint16_t>* textIDSubstitutionTable;
+std::map<ActorSpawnResource,int> UsedResources = {};
+std::map<ActorSpawnResource,int> AlternateResourcePool = {};
+std::map<int,ActorSpawnResource> TempResourceEntries = {};
+std::map<ActorSpawnResource,int> UsedPinkSpirits = {};
 
 extern "C" char** cameraStrings;
 std::vector<std::shared_ptr<std::string>> cameraStdStrings;
@@ -431,6 +437,8 @@ struct ExtensionEntry {
 extern uintptr_t clearMtx;
 extern "C" Mtx gMtxClear;
 extern "C" MtxF gMtxFClear;
+extern "C" void createFishString(int num);
+extern "C" void createRupeeScoreString(int score);
 extern "C" void OTRMessage_Init();
 extern "C" void AudioMgr_CreateNextAudioBuffer(s16* samples, u32 num_samples);
 extern "C" void AudioPlayer_Play(const uint8_t* buf, uint32_t len);
@@ -574,8 +582,8 @@ extern "C" void VanillaItemTable_Init() {
         GET_ITEM(ITEM_HEART_CONTAINER,  OBJECT_GI_HEARTS,        GID_HEART_CONTAINER,  0xC6, 0x80, CHEST_ANIM_LONG,  ITEM_CATEGORY_LESSER,          MOD_NONE, GI_HEART_CONTAINER),
         GET_ITEM(ITEM_HEART_PIECE_2,    OBJECT_GI_HEARTS,        GID_HEART_PIECE,      0xC2, 0x80, CHEST_ANIM_LONG,  ITEM_CATEGORY_LESSER,          MOD_NONE, GI_HEART_PIECE),
         GET_ITEM(ITEM_KEY_BOSS,         OBJECT_GI_BOSSKEY,       GID_KEY_BOSS,         0xC7, 0x80, CHEST_ANIM_LONG,  ITEM_CATEGORY_BOSS_KEY,        MOD_NONE, GI_KEY_BOSS),
-        GET_ITEM(ITEM_COMPASS,          OBJECT_GI_COMPASS,       GID_COMPASS,          0x67, 0x80, CHEST_ANIM_LONG,  ITEM_CATEGORY_LESSER,          MOD_NONE, GI_COMPASS),
-        GET_ITEM(ITEM_DUNGEON_MAP,      OBJECT_GI_MAP,           GID_DUNGEON_MAP,      0x66, 0x80, CHEST_ANIM_LONG,  ITEM_CATEGORY_LESSER,          MOD_NONE, GI_MAP),
+        GET_ITEM(ITEM_COMPASS,          OBJECT_GI_COMPASS,       GID_COMPASS,          0x67, 0x80, CHEST_ANIM_SHORT,  ITEM_CATEGORY_LESSER,          MOD_NONE, GI_COMPASS),
+        GET_ITEM(ITEM_DUNGEON_MAP,      OBJECT_GI_MAP,           GID_DUNGEON_MAP,      0x66, 0x80, CHEST_ANIM_SHORT,  ITEM_CATEGORY_LESSER,          MOD_NONE, GI_MAP),
         GET_ITEM(ITEM_KEY_SMALL,        OBJECT_GI_KEY,           GID_KEY_SMALL,        0x60, 0x80, CHEST_ANIM_SHORT, ITEM_CATEGORY_SMALL_KEY,       MOD_NONE, GI_KEY_SMALL),
         GET_ITEM(ITEM_MAGIC_SMALL,      OBJECT_GI_MAGICPOT,      GID_MAGIC_SMALL,      0x52, 0x6F, CHEST_ANIM_SHORT, ITEM_CATEGORY_JUNK,            MOD_NONE, GI_MAGIC_SMALL),
         GET_ITEM(ITEM_MAGIC_LARGE,      OBJECT_GI_MAGICPOT,      GID_MAGIC_LARGE,      0x52, 0x6E, CHEST_ANIM_SHORT, ITEM_CATEGORY_JUNK,            MOD_NONE, GI_MAGIC_LARGE),
@@ -636,6 +644,10 @@ extern "C" void VanillaItemTable_Init() {
         GET_ITEM(ITEM_BULLET_BAG_50,    OBJECT_GI_DEKUPOUCH,     GID_BULLET_BAG_50,    0x6C, 0x80, CHEST_ANIM_LONG,  ITEM_CATEGORY_LESSER,          MOD_NONE, GI_BULLET_BAG_50),
         GET_ITEM_NONE,
         GET_ITEM_NONE,
+        GET_ITEM(ITEM_EXTRA_MAGIC,  OBJECT_GI_MAGICPOT,      GID_MAGIC_LARGE,      0x810, 0x80, CHEST_ANIM_LONG, ITEM_CATEGORY_LESSER,          MOD_NONE, GI_EXTRA_MAGIC),
+        GET_ITEM(ITEM_EPONA_BOOST,  OBJECT_GI_BUTTERFLY,     GID_BUTTERFLY,        0x811, 0x80, CHEST_ANIM_LONG, ITEM_CATEGORY_LESSER,          MOD_NONE, GI_EPONA_BOOST),
+        GET_ITEM(ITEM_DEFENSE_HEART,  OBJECT_GI_HEARTS,     GID_HEART_CONTAINER,        0x812, 0x80, CHEST_ANIM_LONG, ITEM_CATEGORY_LESSER,          MOD_NONE, GI_DEFENSE_HEART),
+        GET_ITEM(ITEM_WALLET_KING,     OBJECT_GI_PURSE,         GID_WALLET_GIANT,     0x813, 0x80, CHEST_ANIM_LONG,  ITEM_CATEGORY_MAJOR,           MOD_NONE, GI_WALLET_KING),
         GET_ITEM_NONE // GI_MAX - if you need to add to this table insert it before this entry.
     };
     ItemTableManager::Instance->AddItemTable(MOD_NONE);
@@ -940,6 +952,18 @@ bool PathTestCleanup(FILE* tfile) {
     catch (std::filesystem::filesystem_error const& ex) { return false; }
     return true;
 }
+extern "C" uint16_t GetTextID(const char* name) {
+    return TextIDAllocator::Instance->getId(name);
+}
+
+extern "C" uint16_t RetrieveTextSubstitution(uint16_t textID) {
+    std::unordered_map<uint16_t,uint16_t>::const_iterator iter = textIDSubstitutionTable->find(textID);
+    if (iter != textIDSubstitutionTable->end()) {
+        return iter->second;
+    }
+    return textID;
+}
+
 
 extern "C" void InitOTR() {
 
@@ -1036,6 +1060,7 @@ extern "C" void InitOTR() {
 
     OTRGlobals::Instance = new OTRGlobals();
     CustomMessageManager::Instance = new CustomMessageManager();
+    TextIDAllocator::Instance = new TextIDAllocator();
     ItemTableManager::Instance = new ItemTableManager();
     GameInteractor::Instance = new GameInteractor();
     SaveManager::Instance = new SaveManager();
@@ -1050,6 +1075,8 @@ extern "C" void InitOTR() {
     SpeechSynthesizer::Instance->Init();
 #endif
     
+    textIDSubstitutionTable = new std::unordered_map<uint16_t, uint16_t>();
+
     clearMtx = (uintptr_t)&gMtxClear;
     OTRMessage_Init();
     OTRAudio_Init();
@@ -2517,6 +2544,49 @@ extern "C" int CustomMessage_RetrieveIfExists(PlayState* play) {
             if ((gPlayState->sceneNum == SCENE_SACRED_FOREST_MEADOW && textId == TEXT_SARIA_SFM) || (textId >= TEXT_SARIAS_SONG_TEXT_START && textId <= TEXT_SARIAS_SONG_TEXT_END)) {
                 messageEntry = OTRGlobals::Instance->gRandomizer->GetSariaMessage(textId);
             }
+        }
+    } else {
+        if (Player_GetMask(play) == PLAYER_MASK_TRUTH) {
+            s16 actorParams;
+
+            // if we're in a generic grotto
+            if (play->sceneNum == 62 && textId == 0x418 && msgCtx->talkActor->params == 14360) {
+                // look for the chest in the actorlist to determine
+                // which grotto we're in
+                int numOfActorLists =
+                    sizeof(play->actorCtx.actorLists) / sizeof(play->actorCtx.actorLists[0]);
+                for (int i = 0; i < numOfActorLists; i++) {
+                    if (play->actorCtx.actorLists[i].length) {
+                        if (play->actorCtx.actorLists[i].head->id == 10) {
+                            // set the params for the hint check to be negative chest params
+                            actorParams = play->actorCtx.actorLists[i].head->params & 0x1F;
+                        }
+                    }
+                }
+
+                uint16_t newTextId = GetTextID("stone")+actorParams;
+                uint16_t substituteID = RetrieveTextSubstitution(newTextId);
+                if (newTextId == substituteID) {
+                    messageEntry = CustomMessageManager::Instance->RetrieveMessage(questMessageTableID, newTextId);
+                } else {
+                    textId = msgCtx->textId = substituteID;
+                }
+                if (messageEntry.GetTextBoxType() == TEXTBOX_TYPE_MISSING) {
+                    messageEntry = CustomMessageManager::Instance->RetrieveMessage(questMessageTableID, textId);
+                }
+            } else {
+                uint16_t substituteID = RetrieveTextSubstitution(textId);
+                if (substituteID == textId)
+                    messageEntry = CustomMessageManager::Instance->RetrieveMessage(questMessageTableID, substituteID);
+                else
+                    textId = msgCtx->textId = substituteID;
+            }
+        } else {
+            uint16_t substituteID = RetrieveTextSubstitution(textId);
+            if (substituteID == textId)
+                messageEntry = CustomMessageManager::Instance->RetrieveMessage(questMessageTableID, substituteID);
+            else
+                textId = msgCtx->textId = substituteID;
         }
     }
     if (textId == TEXT_GS_NO_FREEZE || textId == TEXT_GS_FREEZE) {

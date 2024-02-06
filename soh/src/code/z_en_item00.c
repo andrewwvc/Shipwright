@@ -74,6 +74,7 @@ static void* sItemDropTex[] = {
 };
 
 static u8 sItemDropIds[] = {
+    //1
     ITEM00_RUPEE_GREEN,
     ITEM00_RUPEE_BLUE,
     0xFF,
@@ -90,6 +91,7 @@ static u8 sItemDropIds[] = {
     ITEM00_SEEDS,
     0xFF,
     ITEM00_RUPEE_BLUE,
+    //2
     ITEM00_RUPEE_GREEN,
     ITEM00_MAGIC_SMALL,
     ITEM00_RUPEE_GREEN,
@@ -106,6 +108,7 @@ static u8 sItemDropIds[] = {
     0xFF,
     0xFF,
     ITEM00_MAGIC_SMALL,
+    //3
     ITEM00_RUPEE_GREEN,
     ITEM00_RUPEE_GREEN,
     ITEM00_MAGIC_SMALL,
@@ -122,6 +125,7 @@ static u8 sItemDropIds[] = {
     0xFF,
     ITEM00_FLEXIBLE,
     ITEM00_MAGIC_SMALL,
+    //4
     ITEM00_RUPEE_GREEN,
     ITEM00_RUPEE_GREEN,
     ITEM00_NUTS,
@@ -138,6 +142,7 @@ static u8 sItemDropIds[] = {
     0xFF,
     0xFF,
     0xFF,
+    //5
     ITEM00_RUPEE_GREEN,
     ITEM00_RUPEE_GREEN,
     ITEM00_SEEDS,
@@ -154,6 +159,7 @@ static u8 sItemDropIds[] = {
     0xFF,
     0xFF,
     ITEM00_MAGIC_SMALL,
+    //6
     ITEM00_RUPEE_GREEN,
     ITEM00_MAGIC_SMALL,
     ITEM00_RUPEE_GREEN,
@@ -170,6 +176,7 @@ static u8 sItemDropIds[] = {
     ITEM00_SEEDS,
     0xFF,
     ITEM00_MAGIC_SMALL,
+    //7
     ITEM00_RUPEE_GREEN,
     ITEM00_RUPEE_BLUE,
     0xFF,
@@ -186,6 +193,7 @@ static u8 sItemDropIds[] = {
     ITEM00_FLEXIBLE,
     0xFF,
     ITEM00_MAGIC_LARGE,
+    //8
     ITEM00_RUPEE_GREEN,
     0xFF,
     ITEM00_RUPEE_BLUE,
@@ -202,6 +210,7 @@ static u8 sItemDropIds[] = {
     0xFF,
     0xFF,
     ITEM00_MAGIC_LARGE,
+    //9 - Arrows
     ITEM00_ARROWS_LARGE,
     ITEM00_ARROWS_MEDIUM,
     ITEM00_ARROWS_MEDIUM,
@@ -218,6 +227,7 @@ static u8 sItemDropIds[] = {
     ITEM00_ARROWS_MEDIUM,
     ITEM00_ARROWS_LARGE,
     ITEM00_ARROWS_LARGE,
+    //10 - Magic
     ITEM00_MAGIC_LARGE,
     ITEM00_MAGIC_SMALL,
     ITEM00_MAGIC_SMALL,
@@ -234,6 +244,7 @@ static u8 sItemDropIds[] = {
     ITEM00_MAGIC_SMALL,
     ITEM00_MAGIC_SMALL,
     ITEM00_MAGIC_LARGE,
+    //11 - Bombs
     ITEM00_BOMBS_A,
     0xFF,
     ITEM00_BOMBS_A,
@@ -250,6 +261,7 @@ static u8 sItemDropIds[] = {
     ITEM00_BOMBS_A,
     0xFF,
     ITEM00_BOMBS_A,
+    //12 - Hearts
     ITEM00_HEART,
     ITEM00_HEART,
     ITEM00_HEART,
@@ -266,6 +278,7 @@ static u8 sItemDropIds[] = {
     ITEM00_HEART,
     ITEM00_HEART,
     ITEM00_HEART,
+    //13 - Large Rupees
     ITEM00_RUPEE_RED,
     ITEM00_RUPEE_BLUE,
     ITEM00_RUPEE_BLUE,
@@ -282,6 +295,7 @@ static u8 sItemDropIds[] = {
     ITEM00_RUPEE_RED,
     ITEM00_RUPEE_RED,
     ITEM00_RUPEE_RED,
+    //14 - Forest Items
     ITEM00_SEEDS,
     0xFF,
     ITEM00_NUTS,
@@ -298,6 +312,7 @@ static u8 sItemDropIds[] = {
     ITEM00_NUTS,
     ITEM00_HEART,
     ITEM00_SEEDS,
+    //15 - Hearts 'n Seeds
     ITEM00_HEART,
     0xFF,
     ITEM00_SEEDS,
@@ -317,13 +332,50 @@ static u8 sItemDropIds[] = {
 };
 
 static u8 sDropQuantities[] = {
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-    1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1, 3, 3, 3, 1, 1, 3, 1, 3, 1, 1, 1, 3, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 0, 0, 0, 0,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1,
+    3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+    3, 3, 3, 1, 3, 3, 3, 1, 1, 3, 1, 3, 1, 1, 1, 3,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1,
+    0, 0, 0, 0,
+};
+
+static u8 sDropQuantitiesAlt[] = {
+    //Green rupee section
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //9 - Arrows
+    0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //10 - Magic
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //11 - Bombs
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //12 - Hearts
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //13 - Large Rupees
+    0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //14 - Forest Items
+    1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //15 - Hearts 'n Seeds
+    1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //Garbage
+    0, 0, 0, 1
 };
 
 void EnItem00_SetupAction(EnItem00* this, EnItem00ActionFunc actionFunc) {
@@ -341,6 +393,10 @@ void EnItem00_SetObjectDependency(EnItem00* this, PlayState* play, s16 objectInd
     }
 }
 
+s16 isRupee(s16 itemVal) {
+    return (0 <= itemVal && itemVal <= 2) || itemVal == ITEM00_RUPEE_PURPLE || itemVal == ITEM00_RUPEE_ORANGE;
+}
+
 void EnItem00_Init(Actor* thisx, PlayState* play) {
     EnItem00* this = (EnItem00*)thisx;
     s32 pad;
@@ -349,6 +405,7 @@ void EnItem00_Init(Actor* thisx, PlayState* play) {
     s32 getItemId = GI_NONE;
     this->randoGiEntry = (GetItemEntry)GET_ITEM_NONE;
     s16 spawnParam8000 = this->actor.params & 0x8000;
+    s16 spawnParam4000 = this->actor.params & 0x4000;
     s32 pad1;
 
     this->ogParams = this->actor.params;
@@ -357,7 +414,7 @@ void EnItem00_Init(Actor* thisx, PlayState* play) {
 
     this->actor.params &= 0xFF;
 
-    if (Flags_GetCollectible(play, this->collectibleFlag)) {
+    if (!(isRupee(this->actor.params) && usingBorrowedWallet()) && Flags_GetCollectible(play, this->collectibleFlag)) {
         Actor_Kill(&this->actor);
         return;
     }
@@ -392,6 +449,13 @@ void EnItem00_Init(Actor* thisx, PlayState* play) {
             yOffset = 650.0f;
             Actor_SetScale(&this->actor, 0.02f);
             this->scale = 0.02f;
+            if (play->sceneNum == 0x3E && play->roomCtx.curRoom.num == 0x07) {
+                this->actor.flags |= ACTOR_FLAG_LENS;
+            }
+            if (spawnParam4000) {
+                Actor_SetScale(&this->actor, 0.00f);
+                //this->scale = 0.00f;
+            }
             break;
         case ITEM00_HEART:
             this->actor.home.rot.z = Rand_CenteredFloat(65535.0f);
@@ -401,6 +465,12 @@ void EnItem00_Init(Actor* thisx, PlayState* play) {
             break;
         case ITEM00_HEART_CONTAINER:
             yOffset = 430.0f;
+            this->unk_158 = 0;
+            Actor_SetScale(&this->actor, 0.02f);
+            this->scale = 0.02f;
+            break;
+        case ITEM00_DEFENSE_HEART:
+            yOffset = 830.0f;
             this->unk_158 = 0;
             Actor_SetScale(&this->actor, 0.02f);
             this->scale = 0.02f;
@@ -477,6 +547,9 @@ void EnItem00_Init(Actor* thisx, PlayState* play) {
             yOffset = 320.0f;
             Actor_SetScale(&this->actor, 0.03f);
             this->scale = 0.03f;
+        case ITEM00_MAX:
+            Actor_Kill(&this->actor);
+            return;
             break;
     }
 
@@ -565,6 +638,7 @@ void EnItem00_Init(Actor* thisx, PlayState* play) {
             break;
         case ITEM00_HEART_PIECE:
         case ITEM00_HEART_CONTAINER:
+        case ITEM00_DEFENSE_HEART:
         case ITEM00_SHIELD_DEKU:
         case ITEM00_SHIELD_HYLIAN:
         case ITEM00_TUNIC_ZORA:
@@ -598,7 +672,7 @@ void EnItem00_Destroy(Actor* thisx, PlayState* play) {
 
 void func_8001DFC8(EnItem00* this, PlayState* play) {
     if ((this->actor.params <= ITEM00_RUPEE_RED) || ((this->actor.params == ITEM00_HEART) && (this->unk_15A < 0)) ||
-        (this->actor.params == ITEM00_HEART_PIECE)) {
+        (this->actor.params == ITEM00_HEART_PIECE) || (this->actor.params == ITEM00_DEFENSE_HEART)) {
         this->actor.shape.rot.y += 960;
     } else {
         if ((this->actor.params >= ITEM00_SHIELD_DEKU) && (this->actor.params != ITEM00_BOMBS_SPECIAL) &&
@@ -626,14 +700,14 @@ void func_8001DFC8(EnItem00* this, PlayState* play) {
 
     if (this->unk_154 == 0) {
         if ((this->actor.params != ITEM00_SMALL_KEY) && (this->actor.params != ITEM00_HEART_PIECE) &&
-            (this->actor.params != ITEM00_HEART_CONTAINER)) {
+            (this->actor.params != ITEM00_HEART_CONTAINER) && (this->actor.params  != ITEM00_DEFENSE_HEART)) {
             this->unk_154 = -1;
         }
     }
 
     if (this->unk_15A == 0) {
         if ((this->actor.params != ITEM00_SMALL_KEY) && (this->actor.params != ITEM00_HEART_PIECE) &&
-            (this->actor.params != ITEM00_HEART_CONTAINER)) {
+            (this->actor.params != ITEM00_HEART_CONTAINER) && (this->actor.params  != ITEM00_DEFENSE_HEART)) {
             Actor_Kill(&this->actor);
         }
     }
@@ -867,6 +941,7 @@ void EnItem00_Update(Actor* thisx, PlayState* play) {
         return;
     }
 
+    s32 resourceTimeMultiplier = 1;
     switch (this->actor.params) {
         case ITEM00_RUPEE_GREEN:
             Item_Give(play, ITEM_RUPEE_GREEN);
@@ -876,12 +951,15 @@ void EnItem00_Update(Actor* thisx, PlayState* play) {
             break;
         case ITEM00_RUPEE_RED:
             Item_Give(play, ITEM_RUPEE_RED);
+            resourceTimeMultiplier = 2;
             break;
         case ITEM00_RUPEE_PURPLE:
             Item_Give(play, ITEM_RUPEE_PURPLE);
+            resourceTimeMultiplier = 3;
             break;
         case ITEM00_RUPEE_ORANGE:
             Item_Give(play, ITEM_RUPEE_GOLD);
+            resourceTimeMultiplier = 4;
             break;
         case ITEM00_STICK:
             getItemId = GI_STICKS_1;
@@ -923,6 +1001,9 @@ void EnItem00_Update(Actor* thisx, PlayState* play) {
         case ITEM00_HEART_CONTAINER:
             getItemId = GI_HEART_CONTAINER;
             break;
+        case ITEM00_DEFENSE_HEART:
+            getItemId = GI_DEFENSE_HEART;
+            break;
         case ITEM00_MAGIC_LARGE:
             getItemId = GI_MAGIC_LARGE;
             break;
@@ -948,6 +1029,8 @@ void EnItem00_Update(Actor* thisx, PlayState* play) {
             break;
     }
 
+    insertSpawnResource(this->actor.entryNum, DEFAULT_RESOURCE_TIME*resourceTimeMultiplier);
+
     params = &this->actor.params;
 
     if ((getItemId != GI_NONE) && !Actor_HasParent(&this->actor, play)) {
@@ -962,6 +1045,7 @@ void EnItem00_Update(Actor* thisx, PlayState* play) {
     switch (*params) {
         case ITEM00_HEART_PIECE:
         case ITEM00_HEART_CONTAINER:
+        case ITEM00_DEFENSE_HEART:
         case ITEM00_SMALL_KEY:
         case ITEM00_SHIELD_DEKU:
         case ITEM00_SHIELD_HYLIAN:
@@ -1046,14 +1130,37 @@ void EnItem00_Draw(Actor* thisx, PlayState* play) {
                 }
                 break;
             case ITEM00_HEART_PIECE:
+//<<<<<<< HEAD
                 if (CVarGetInteger("gNewDrops", 0) && !IS_RANDO) {
                     mtxScale = 21.0f;
                     Matrix_Scale(mtxScale, mtxScale, mtxScale, MTXMODE_APPLY);
                     GetItem_Draw(play, GID_HEART_PIECE);
                 } else {
+                    this->scale = 0.02f;
+                    if (!(this->ogParams & 0x4000))
+                        Matrix_Scale(this->scale, this->scale, this->scale, MTXMODE_APPLY);
                     EnItem00_DrawHeartPiece(this, play);
                 }
+//=======
+//                 if (CVarGetInteger("gNewDrops", 0) && !IS_RANDO) {
+//                     if (!(this->ogParams & 0x4000))
+//                         Actor_SetScale(&this->actor, 0.5f);
+//                     this->scale = 0.5f;
+//                     this->actor.shape.yOffset = 50.0f;
+//                     this->actor.world.rot.x = 0x4000;
+//                     this->actor.shape.shadowScale = 0.3f;
+//                     GetItem_Draw(play, GID_HEART_PIECE);
+//                 } else {
+//                     this->actor.shape.yOffset = 650.0f;
+//                     this->actor.shape.shadowScale = 0.03f;
+//                     if (!(this->ogParams & 0x4000))
+//                         Actor_SetScale(&this->actor, 0.02f);
+//                     this->scale = 0.02f;
+// >>>>>>> andrewvc/sulu-s3-edition
+//                     EnItem00_DrawHeartPiece(this, play);
+//                 }
                 break;
+            case ITEM00_DEFENSE_HEART:
             case ITEM00_HEART_CONTAINER:
                 EnItem00_DrawHeartContainer(this, play);
                 break;
@@ -1592,7 +1699,8 @@ EnItem00* Item_DropCollectible(PlayState* play, Vec3f* spawnPos, s16 params) {
                 spawnedActor->unk_15A = 220;
                 if ((spawnedActor->actor.params != ITEM00_SMALL_KEY) &&
                     (spawnedActor->actor.params != ITEM00_HEART_PIECE) &&
-                    (spawnedActor->actor.params != ITEM00_HEART_CONTAINER)) {
+                    (spawnedActor->actor.params != ITEM00_HEART_CONTAINER) &&
+                    (spawnedActor->actor.params != ITEM00_DEFENSE_HEART)) {
                     spawnedActor->actor.room = -1;
                 }
                 spawnedActor->actor.flags |= ACTOR_FLAG_UPDATE_WHILE_CULLED;
@@ -1637,7 +1745,7 @@ EnItem00* Item_DropCollectible2(PlayState* play, Vec3f* spawnPos, s16 params) {
     return spawnedActor;
 }
 
-void Item_DropCollectibleRandom(PlayState* play, Actor* fromActor, Vec3f* spawnPos, s16 params) {
+void Item_DropCollectibleRandom1(PlayState* play, Actor* fromActor, Vec3f* spawnPos, s16 params, s16 mod) {
     s32 pad;
     EnItem00* spawnedActor;
     s16 dropQuantity;
@@ -1675,7 +1783,7 @@ void Item_DropCollectibleRandom(PlayState* play, Actor* fromActor, Vec3f* spawnP
                 dropTableIndex = 1;
             }
         }
-        if (fromActor->dropFlag & 0x20) {
+        if (fromActor->dropFlag & 0x20 && (Rand_ZeroOne() <= 0.01f)) {
             dropId = ITEM00_RUPEE_PURPLE;
         } else {
             dropId = sItemDropIds[params + dropTableIndex];
@@ -1715,11 +1823,11 @@ void Item_DropCollectibleRandom(PlayState* play, Actor* fromActor, Vec3f* spawnP
             params = 0xA * 0x10;
             dropTableIndex = 0x0;
             dropId = ITEM00_ARROWS_MEDIUM;
-        } else if (AMMO(ITEM_BOMB) < 6) {
+        } else if (AMMO(ITEM_BOMB) < 2) {
             params = 0xD * 0x10;
             dropTableIndex = 0x0;
             dropId = ITEM00_BOMBS_A;
-        } else if (gSaveContext.rupees < 11) {
+        } else if (Rupees_GetDisplayNum() < 11) {
             params = 0xA * 0x10;
             dropTableIndex = 0x0;
             dropId = ITEM00_RUPEE_RED;
@@ -1729,7 +1837,11 @@ void Item_DropCollectibleRandom(PlayState* play, Actor* fromActor, Vec3f* spawnP
     }
 
     if (dropId != 0xFF && (!CVarGetInteger("gNoHeartDrops", 0) || dropId != ITEM00_HEART)) {
-        dropQuantity = sDropQuantities[params + dropTableIndex];
+        //Provide the regular variety of drops when in Kokiri Village prior to the Deku Tree's death, change this afterwards to reduced drops
+        if (mod)
+            dropQuantity = !(DEKU_TREE_DEAD) ? sDropQuantities[params + dropTableIndex] : sDropQuantitiesAlt[params + dropTableIndex];
+        else
+            dropQuantity = sDropQuantities[params + dropTableIndex];
         while (dropQuantity > 0) {
             if (!param8000) {
                 dropId = func_8001F404(dropId);
@@ -1746,7 +1858,8 @@ void Item_DropCollectibleRandom(PlayState* play, Actor* fromActor, Vec3f* spawnP
                         spawnedActor->actor.flags |= ACTOR_FLAG_UPDATE_WHILE_CULLED;
                         if ((spawnedActor->actor.params != ITEM00_SMALL_KEY) &&
                             (spawnedActor->actor.params != ITEM00_HEART_PIECE) &&
-                            (spawnedActor->actor.params != ITEM00_HEART_CONTAINER)) {
+                            (spawnedActor->actor.params != ITEM00_HEART_CONTAINER) &&
+                            (spawnedActor->actor.params != ITEM00_DEFENSE_HEART)) {
                             spawnedActor->actor.room = -1;
                         }
                         spawnedActor->unk_15A = 220;
@@ -1762,4 +1875,14 @@ void Item_DropCollectibleRandom(PlayState* play, Actor* fromActor, Vec3f* spawnP
             dropQuantity--;
         }
     }
+}
+
+void Item_DropCollectibleRandom(PlayState* play, Actor* fromActor, Vec3f* spawnPos, s16 params) {
+    if (Rand_ZeroOne() < 0.25f)
+        Item_DropCollectibleRandom1(play, fromActor, spawnPos, params, 0);
+}
+
+void Item_DropCollectibleRandomSmall(PlayState* play, Actor* fromActor, Vec3f* spawnPos, s16 params) {
+    if (Rand_ZeroOne() < 0.5f)
+        Item_DropCollectibleRandom1(play, fromActor, spawnPos, params, 1);
 }
