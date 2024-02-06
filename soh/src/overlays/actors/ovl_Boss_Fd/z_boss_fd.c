@@ -1079,7 +1079,7 @@ void BossFd_Fly(BossFd* this, PlayState* play) {
             }
             if (this->timers[0] == 7 && !IS_BOSS_RUSH) {
                 Actor_Spawn(&play->actorCtx, play, ACTOR_EN_ITEM00, this->actor.world.pos.x,
-                            this->actor.world.pos.y, this->actor.world.pos.z, 0, 0, 0, 0x4000+0x1F00+(uint16_t)ITEM00_HEART_PIECE, true);
+                            100, this->actor.world.pos.z, 0, 0, 0, 0x4000+0x1F00+(uint16_t)ITEM00_HEART_PIECE, true);
             }
             break;
         case BOSSFD_WAIT_INTRO:
