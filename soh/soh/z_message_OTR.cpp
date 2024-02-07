@@ -437,6 +437,52 @@ extern "C" void OTRMessage_Init()
     MakeNormalMsgEng(0x7074, "You destroyed the wicked&creatures that haunted the temple&and awakened the Sage...^But there are still other Sages&who need your help.^In order to awaken all the other&Sages, you must become even&more powerful.^You must travel through&forests...^over mountains...^under water...^and even through time...");
     MakeNormalMsgEng(0x707A, "However, so long as the evil power&in each temple remains, the Sages&cannot hear their awakening call&from the Sacred Realm...^Unfortunately, equipped as you&currently are, you cannot yet&enter any temple...^But, if you believe what I'm saying,&you should head to %rKakariko&Village%w...^Do you understand,&\x0F?");
 
+    //Ganondorf Text
+    char pName[9];
+    pName[8] = 0;
+    int iiC = 7;
+    for (; iiC >= 0; iiC--) {
+      if (gSaveContext.playerName[iiC] == 62) {
+        pName[iiC] = 0;
+      } else {
+        break;
+      }
+    }
+
+    for (; iiC >= 0; iiC--) {
+      char temp = gSaveContext.playerName[iiC];
+
+      if (temp == 62)
+          temp = 32;
+      else if (10 <= temp && temp <= 36)
+        temp += 55;
+      else if (36 <= temp && temp <= 61)
+        temp += 29;
+      else if (temp == 63)
+        temp = 45;
+      else if (temp == 64)
+        temp = 46;
+
+      pName[iiC] = temp;
+    }
+
+    std::string angryName(pName);
+    static std::string angryTextEng;
+    static std::string angryTextGer;
+    static std::string angryTextFra;
+    angryTextEng = "\x1A""\x14\x03""CURSE YOU..."+angryName+"!""\x0E""\x1E";
+    angryTextGer = "\x1A""\x14\x03""ICH...&VERFLUCHE...&DICH... "+angryName+"!""\x0E""\x1E";
+    angryTextFra = "\x1A""\x14\x03""JE TE MAUDIS..."+angryName+"!""\x0E""\x1E";
+
+    MakeNormalMsgEng(0x70DC, angryTextEng);
+    CustomMessageManager::Instance->ReplaceMessage(
+        questMessageTableID, 0x70DC,
+        CustomMessage(
+          angryTextEng,
+          angryTextGer,
+          angryTextFra,
+          TEXTBOX_TYPE_BLACK, TEXTBOX_POS_BOTTOM));
+
     u16 StoneMsg = TextIDAllocator::Instance->allocateRange("stone", 64);
 
     MakeBlueMsgEng(0x405, "They say that one part of&the secret directions&to a lost place is:^West&East&South&West");//Medigoron Crater Text
