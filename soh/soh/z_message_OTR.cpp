@@ -374,7 +374,7 @@ extern "C" void OTRMessage_Init()
     CustomMessageManager::Instance->CreateMessage(
         questMessageTableID, WonderMsg+0xBA,
         CustomMessage(
-          "Each day is associated with an&element fitting to its character.^The first, the Etherial,&heavenly radiance and feeling.&The second, %yGold%w and&solid precious metal.^The third, %rFire%w and ash.&The forth, %BEarth%w and soil.&The fifth, %bWater%w and the living ocean.&The sixth, the %cAir%w and its inhabitants.",
+          "Each day is associated with an&element fitting to its character.^The first, the Etherial,&heavenly radiance and feeling.&The second, %yGold%w and&solid precious metal.^The third, %rFire%w and ash.&The forth, %gEarth%w and soil.&The fifth, %bWater%w and the living ocean.&The sixth, the %cAir%w and its inhabitants.",
           "",
           "",
           TEXTBOX_TYPE_BLUE, TEXTBOX_POS_MIDDLE)
