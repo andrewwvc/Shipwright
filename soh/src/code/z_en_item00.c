@@ -454,7 +454,6 @@ void EnItem00_Init(Actor* thisx, PlayState* play) {
             }
             if (spawnParam4000) {
                 Actor_SetScale(&this->actor, 0.00f);
-                //this->scale = 0.00f;
             }
             break;
         case ITEM00_HEART:
@@ -1130,35 +1129,13 @@ void EnItem00_Draw(Actor* thisx, PlayState* play) {
                 }
                 break;
             case ITEM00_HEART_PIECE:
-//<<<<<<< HEAD
                 if (CVarGetInteger("gNewDrops", 0) && !IS_RANDO) {
                     mtxScale = 21.0f;
                     Matrix_Scale(mtxScale, mtxScale, mtxScale, MTXMODE_APPLY);
                     GetItem_Draw(play, GID_HEART_PIECE);
                 } else {
-                    this->scale = 0.02f;
-                    if (!(this->ogParams & 0x4000))
-                        Matrix_Scale(this->scale, this->scale, this->scale, MTXMODE_APPLY);
                     EnItem00_DrawHeartPiece(this, play);
                 }
-//=======
-//                 if (CVarGetInteger("gNewDrops", 0) && !IS_RANDO) {
-//                     if (!(this->ogParams & 0x4000))
-//                         Actor_SetScale(&this->actor, 0.5f);
-//                     this->scale = 0.5f;
-//                     this->actor.shape.yOffset = 50.0f;
-//                     this->actor.world.rot.x = 0x4000;
-//                     this->actor.shape.shadowScale = 0.3f;
-//                     GetItem_Draw(play, GID_HEART_PIECE);
-//                 } else {
-//                     this->actor.shape.yOffset = 650.0f;
-//                     this->actor.shape.shadowScale = 0.03f;
-//                     if (!(this->ogParams & 0x4000))
-//                         Actor_SetScale(&this->actor, 0.02f);
-//                     this->scale = 0.02f;
-// >>>>>>> andrewvc/sulu-s3-edition
-//                     EnItem00_DrawHeartPiece(this, play);
-//                 }
                 break;
             case ITEM00_DEFENSE_HEART:
             case ITEM00_HEART_CONTAINER:
