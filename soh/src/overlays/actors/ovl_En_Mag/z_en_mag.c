@@ -6,6 +6,7 @@
 
 #include "z_en_mag.h"
 #include "objects/object_mag/object_mag.h"
+#include "soh_assets.h"
 #include <GameVersions.h>
 
 #define FLAGS (ACTOR_FLAG_UPDATE_WHILE_CULLED | ACTOR_FLAG_DRAW_WHILE_CULLED)
@@ -923,6 +924,10 @@ void EnMag_DrawInnerVanilla(Actor* thisx, PlayState* play, Gfx** gfxp) {
 
         EnMag_DrawTextureI8(&gfx, gTitleTheLegendOfTextTex, 72, 8, 153, 72, 72, 8, 1024, 1024);
         EnMag_DrawTextureI8(&gfx, gTitleOcarinaOfTimeTMTextTex, 96, 8, 151, 126, 96, 8, 1024, 1024);
+
+        gDPPipeSync(gfx++);
+        gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, (s16)this->subAlpha);
+        EnMag_DrawImageRGBA32(&gfx, 185, 145, gTitleSeditionSubtitleTex, 128, 32);
     }
 
     Gfx_SetupDL_39Ptr(&gfx);

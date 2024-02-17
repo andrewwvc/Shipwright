@@ -41,6 +41,9 @@ static const ALIGN_ASSET(2) char gSkullTreasureChestSideAndTopTex[] = dgSkullTre
 #define dgTitleRandomizerSubtitleTex "__OTR__objects/object_mag/gTitleRandomizerSubtitleTex"
 static const ALIGN_ASSET(2) char gTitleRandomizerSubtitleTex[] = dgTitleRandomizerSubtitleTex;
 
+#define dgTitleSeditionSubtitleTex "__OTR__objects/object_mag/gTitleSeditionSubtitleTex"
+static const ALIGN_ASSET(2) char gTitleSeditionSubtitleTex[] = dgTitleSeditionSubtitleTex;
+
 #define dgTitleBossRushSubtitleTex "__OTR__objects/object_mag/gTitleBossRushSubtitleTex"
 static const ALIGN_ASSET(2) char gTitleBossRushSubtitleTex[] = dgTitleBossRushSubtitleTex;
 
