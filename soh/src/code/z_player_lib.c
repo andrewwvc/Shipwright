@@ -55,6 +55,7 @@ u8 sActionModelGroups[] = {
     PLAYER_MODELGROUP_HOOKSHOT,      // PLAYER_IA_LONGSHOT
     PLAYER_MODELGROUP_EXPLOSIVES,    // PLAYER_IA_BOMB
     PLAYER_MODELGROUP_EXPLOSIVES,    // PLAYER_IA_BOMBCHU
+    PLAYER_MODELGROUP_EXPLOSIVES,    // PLAYER_IA_BOMBMINE
     PLAYER_MODELGROUP_BOOMERANG,     // PLAYER_IA_BOOMERANG
     PLAYER_MODELGROUP_DEFAULT,       // PLAYER_IA_MAGIC_SPELL_15
     PLAYER_MODELGROUP_DEFAULT,       // PLAYER_IA_MAGIC_SPELL_16
@@ -973,7 +974,7 @@ s32 Player_GetBottleHeld(Player* this) {
 s32 Player_ActionToExplosive(Player* this, s32 actionParam) {
     s32 explosive = actionParam - PLAYER_IA_BOMB;
 
-    if ((explosive >= 0) && (explosive < 2)) {
+    if ((explosive >= 0) && (explosive < 3)) {
         return explosive;
     } else {
         return -1;

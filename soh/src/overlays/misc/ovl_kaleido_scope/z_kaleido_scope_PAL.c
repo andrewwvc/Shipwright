@@ -20,6 +20,7 @@
 #include "soh/Enhancements/randomizer/randomizer_grotto.h"
 #include "soh/Enhancements/cosmetics/cosmeticsTypes.h"
 #include "soh/Enhancements/game-interactor/GameInteractor_Hooks.h"
+#include "soh_assets.h"
 
 
 static void* sEquipmentFRATexs[] = {
@@ -587,6 +588,10 @@ static void* iconNameTextures[] =
     gBiggoronsSwordItemNameFRATex,
 };
 
+static void* iconNameTexturesEx[] = {
+    gLandmineItemNameENGTex,
+};
+
 static void* mapNameTextures[] =
 {
     gHauntedWastelandPointNameENGTex,
@@ -875,6 +880,15 @@ u8 gItemAgeReqs[] = {
     AGE_REQ_NONE,   // ITEM_SCALE_SILVER
     AGE_REQ_NONE,   // ITEM_SCALE_GOLDEN
     AGE_REQ_ADULT,  // ITEM_GIANTS_KNIFE
+    AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE,
+    AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE,
+    AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE,
+    AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE,
+    AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE,
+    AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE,
+    AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE,
+    AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE,
+    AGE_REQ_NONE
 };
 
 u8 gAreaGsFlags[] = {
@@ -2217,7 +2231,10 @@ void KaleidoScope_UpdateNamePanel(PlayState* play) {
         }
 
         if (pauseCtx->namedItem != PAUSE_ITEM_NONE) {
-            if ((pauseCtx->pageIndex == PAUSE_MAP) && !sInDungeonScene) {
+            if (ITEM_LANDMINE <= pauseCtx->namedItem && pauseCtx->namedItem < ITEM_LAST_USED) {
+                const char* textureName = iconNameTexturesEx[pauseCtx->namedItem-ITEM_LANDMINE];
+                memcpy(pauseCtx->nameSegment, textureName, strlen(textureName) + 1);
+            } else if ((pauseCtx->pageIndex == PAUSE_MAP) && !sInDungeonScene) {
                 if (gSaveContext.language) {
                     sp2A += 12;
                 }

@@ -120,3 +120,9 @@ static const ALIGN_ASSET(2) char gFileSelLanguageGERTex[] = dgFileSelLanguageGER
 
 #define dgEmptyTexture "__OTR__textures/virtual/gEmptyTexture"
 static const ALIGN_ASSET(2) char gEmptyTexture[] = dgEmptyTexture;
+
+#define dgItemIconLandmineTex "__OTR__textures/icons/land_mine_icon"
+static const ALIGN_ASSET(2) char gItemIconLandmineTex[] = dgItemIconLandmineTex;
+
+#define dgLandmineItemNameENGTex "__OTR__textures/title_static/land_mine_item_name_eng"
+static const ALIGN_ASSET(2) char gLandmineItemNameENGTex[] = dgLandmineItemNameENGTex;

@@ -52,6 +52,7 @@ typedef enum {
 typedef struct {
     /* 0x00 */ u8 itemId;
     /* 0x02 */ s16 actorId;
+    /* 0x03 */ s16 params;
 } ExplosiveInfo; // size = 0x04
 
 typedef struct {
@@ -1069,6 +1070,16 @@ static s8 sItemActionParams[] = {
     PLAYER_IA_BOOTS_KOKIRI,
     PLAYER_IA_BOOTS_IRON,
     PLAYER_IA_BOOTS_HOVER,
+    0, 0, 0, 0, 0, 0, 0, 0, 0,   //    71, 72, 73, 74, 75, 76, 77, 78, 79,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,//80, 81, 82, 83, 84, 85, 86, 87, 88, 89,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,//90, 91, 92, 93, 94, 95, 96, 97, 98, 99,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,//100, 101, 102, 103, 104, 105, 106, 107, 108, 109,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,//110, 111, 112, 113, 114, 115, 116, 117, 118, 119,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,//120, 121, 122, 123, 124, 125, 126, 127, 128, 129,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,//130, 131, 132, 133, 134, 135, 136, 137, 138, 139,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,//140, 141, 142, 143, 144, 145, 146, 147, 148, 149,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,//150, 151, 152, 153, 154, 155, 156, 157, 158, 159,
+    PLAYER_IA_BOMBMINE, //160
 };
 
 static u8 sMaskMemory;
@@ -1079,7 +1090,7 @@ u8 gWalkSpeedToggle2;
 static s32 (*D_80853EDC[])(Player* this, PlayState* play) = {
     func_8083485C, func_8083485C, func_8083485C, func_808349DC, func_808349DC, func_808349DC, func_8083485C,
     func_8083485C, func_8083501C, func_8083501C, func_8083501C, func_8083501C, func_8083501C, func_8083501C,
-    func_8083501C, func_8083501C, func_8083501C, func_8083501C, func_808356E8, func_808356E8, func_80835800,
+    func_8083501C, func_8083501C, func_8083501C, func_8083501C, func_808356E8, func_808356E8, func_808356E8, func_80835800,
     func_8083485C, func_8083485C, func_8083485C, func_8083485C, func_8083485C, func_8083485C, func_8083485C,
     func_8083485C, func_8083485C, func_8083485C, func_8083485C, func_8083485C, func_8083485C, func_8083485C,
     func_8083485C, func_8083485C, func_8083485C, func_8083485C, func_8083485C, func_8083485C, func_8083485C,
@@ -1093,7 +1104,7 @@ static s32 (*D_80853EDC[])(Player* this, PlayState* play) = {
 static void (*D_80853FE8[])(PlayState* play, Player* this) = {
     func_80833770, func_80833770, func_80833770, func_80833770, func_80833770, func_80833770, func_8083377C,
     func_80833790, func_8083379C, func_8083379C, func_8083379C, func_8083379C, func_8083379C, func_8083379C,
-    func_8083379C, func_8083379C, func_80833910, func_80833910, func_808337D4, func_808337D4, func_80833984,
+    func_8083379C, func_8083379C, func_80833910, func_80833910, func_808337D4, func_808337D4, func_808337D4, func_80833984,
     func_80833770, func_80833770, func_80833770, func_80833770, func_80833770, func_80833770, func_80833770,
     func_80833770, func_80833770, func_80833770, func_80833770, func_80833770, func_80833770, func_80833770,
     func_80833770, func_80833770, func_80833770, func_80833770, func_80833770, func_80833770, func_80833770,
@@ -1155,8 +1166,9 @@ static s8 D_80854164[PLAYER_ANIMTYPE_MAX][PLAYER_ANIMTYPE_MAX] = {
 };
 
 static ExplosiveInfo sExplosiveInfos[] = {
-    { ITEM_BOMB, ACTOR_EN_BOM },
-    { ITEM_BOMBCHU, ACTOR_EN_BOM_CHU },
+    { ITEM_BOMB, ACTOR_EN_BOM, 0x0},
+    { ITEM_BOMBCHU, ACTOR_EN_BOM_CHU, 0x0 },
+    { ITEM_BOMB, ACTOR_EN_BOM_CHU, 0x1},
 };
 
 static struct_80854190 D_80854190[] = {
@@ -1930,7 +1942,7 @@ void func_808337D4(PlayState* play, Player* this) {
 
     spawnedActor = Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, explosiveInfo->actorId,
                                       this->actor.world.pos.x, this->actor.world.pos.y, this->actor.world.pos.z, 0,
-                                      this->actor.shape.rot.y, 0, 0);
+                                      this->actor.shape.rot.y, 0, explosiveInfo->params);
     if (spawnedActor != NULL) {
         if ((explosiveType != 0) && (play->bombchuBowlingStatus != 0)) {
             if (!CVarGetInteger("gInfiniteAmmo", 0)) {

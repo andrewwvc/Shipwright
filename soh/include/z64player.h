@@ -85,6 +85,7 @@ typedef enum {
     /* 0x11 */ PLAYER_IA_LONGSHOT,
     /* 0x12 */ PLAYER_IA_BOMB,
     /* 0x13 */ PLAYER_IA_BOMBCHU,
+               PLAYER_IA_BOMBMINE,
     /* 0x14 */ PLAYER_IA_BOOMERANG,
     /* 0x15 */ PLAYER_IA_MAGIC_SPELL_15,
     /* 0x16 */ PLAYER_IA_MAGIC_SPELL_16,
