@@ -451,6 +451,7 @@ typedef enum {
     /* 0x7F */ GI_EPONA_BOOST,
     /* 0x80 */ GI_DEFENSE_HEART,
     /* 0x81 */ GI_WALLET_KING,
+    /* 0x82 */ GI_LANDMINE,
     /* 0x84 */ GI_MAX
 } GetItemID;
 

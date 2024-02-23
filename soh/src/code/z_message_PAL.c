@@ -732,7 +732,7 @@ u16 Message_DrawItemIcon(PlayState* play, u16 itemId, Gfx** p, u16 i) {
     // Invalidate icon texture as it may have changed from the last time a text box had an icon
     gSPInvalidateTexCache(gfx++, (uintptr_t)msgCtx->textboxSegment + MESSAGE_STATIC_TEX_SIZE);
 
-    if (itemId >= ITEM_MEDALLION_FOREST) {
+    if (itemId >= ITEM_MEDALLION_FOREST && itemId < ITEM_EXTRA_MAGIC) {
         gDPLoadTextureBlock(gfx++, (uintptr_t)msgCtx->textboxSegment + MESSAGE_STATIC_TEX_SIZE, G_IM_FMT_RGBA, G_IM_SIZ_32b,
                             24, 24, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
                             G_TX_NOLOD, G_TX_NOLOD);
@@ -1132,7 +1132,7 @@ void Message_LoadItemIcon(PlayState* play, u16 itemId, s16 y) {
         interfaceCtx->mapPalette[30] = 0xFF;
         interfaceCtx->mapPalette[31] = 0xFF;
     }
-    if (itemId < ITEM_MEDALLION_FOREST) {
+    if (itemId < ITEM_MEDALLION_FOREST || ITEM_EXTRA_MAGIC >= ITEM_EXTRA_MAGIC) {
         R_TEXTBOX_ICON_XPOS = R_TEXT_INIT_XPOS - sIconItem32XOffsets[gSaveContext.language];
         R_TEXTBOX_ICON_YPOS = y + 6;
         R_TEXTBOX_ICON_SIZE = 32;
@@ -1523,7 +1523,7 @@ void Message_Decode(PlayState* play) {
             msgCtx->msgBufDecoded[++decodedBufPos] = font->msgBuf[msgCtx->msgBufPos + 1];
             osSyncPrintf("ITEM_NO=(%d) (%d)\n", msgCtx->msgBufDecoded[decodedBufPos],
                          font->msgBuf[msgCtx->msgBufPos + 1]);
-            Message_LoadItemIcon(play, font->msgBuf[msgCtx->msgBufPos + 1], R_TEXTBOX_Y + 10);
+            Message_LoadItemIcon(play, msgCtx->msgBufDecoded[decodedBufPos], R_TEXTBOX_Y + 10);
         } else if (temp_s2 == MESSAGE_BACKGROUND) {
             msgCtx->textboxBackgroundIdx = font->msgBuf[msgCtx->msgBufPos + 1] * 2;
             msgCtx->textboxBackgroundForeColorIdx = (font->msgBuf[msgCtx->msgBufPos + 2] & 0xF0) >> 4;
