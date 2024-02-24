@@ -1,6 +1,7 @@
 #include "z_en_bom_chu.h"
 #include "overlays/actors/ovl_En_Bom/z_en_bom.h"
 #include "objects/gameplay_keep/gameplay_keep.h"
+#include "soh_assets.h"
 
 #define FLAGS ACTOR_FLAG_UPDATE_WHILE_CULLED
 
@@ -513,6 +514,8 @@ void EnBomChu_Draw(Actor* thisx, PlayState* play) {
     s32 pad;
     EnBomChu* this = (EnBomChu*)thisx;
     f32 colorIntensity;
+    f32 colorMultiplierRG;
+    f32 colorMultiplierB;
     s32 blinkHalfPeriod;
     s32 blinkTime;
     Color_RGB8 BombchuCol = CVarGetColor24("gBombTrailCol", BombchuColorOriginal);
@@ -541,22 +544,29 @@ void EnBomChu_Draw(Actor* thisx, PlayState* play) {
     }
 
     colorIntensity = blinkTime / (f32)blinkHalfPeriod;
-    if (this->actor.params == BOMBCHU_PARAMS_MINE)
-        colorIntensity *= 0.5f;
+    if (this->actor.params == BOMBCHU_PARAMS_MINE) {
+        colorMultiplierRG = 0.6f;
+        colorMultiplierB = 1.7f;
+    } else {
+        colorMultiplierRG = colorMultiplierB = 1.0f;
+    }
 
     if (CVarGetInteger("gCosmetics.Equipment_ChuBody.Changed", 0)) {
         Color_RGB8 color = CVarGetColor24("gCosmetics.Equipment_ChuBody.Value", (Color_RGB8){ 209.0f, 34.0f, (uint8_t)(-35.0f) });
         gDPSetEnvColor(POLY_OPA_DISP++, (colorIntensity * color.r), (colorIntensity * color.g),
                    (colorIntensity * color.b), 255);
     } else {
-        gDPSetEnvColor(POLY_OPA_DISP++, 9.0f + (colorIntensity * 209.0f), 9.0f + (colorIntensity * 34.0f),
-                   35.0f + (colorIntensity * -35.0f), 255);
+        gDPSetEnvColor(POLY_OPA_DISP++, 9.0f + (colorIntensity * colorMultiplierRG * 209.0f), 9.0f + (colorIntensity * colorMultiplierRG * 34.0f),
+                   (35.0f + (colorIntensity * -35.0f))*colorMultiplierB, 255);
     }
 
     Matrix_Translate(this->visualJitter * (1.0f / BOMBCHU_SCALE), 0.0f, 0.0f, MTXMODE_APPLY);
     gSPMatrix(POLY_OPA_DISP++, MATRIX_NEWMTX(play->state.gfxCtx),
               G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-    gSPDisplayList(POLY_OPA_DISP++, gBombchuDL);
+    if (this->actor.params == BOMBCHU_PARAMS_MINE)
+        gSPDisplayList(POLY_OPA_DISP++, gLandmineDL);
+    else
+        gSPDisplayList(POLY_OPA_DISP++, gBombchuDL);
 
     CLOSE_DISPS(play->state.gfxCtx);
 }

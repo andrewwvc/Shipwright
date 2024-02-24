@@ -1,4 +1,4 @@
-#include "OTRGlobals.h"
+﻿#include "OTRGlobals.h"
 #include "OTRAudio.h"
 #include <iostream>
 #include <algorithm>
@@ -648,7 +648,7 @@ extern "C" void VanillaItemTable_Init() {
         GET_ITEM(ITEM_EPONA_BOOST,      OBJECT_GI_BUTTERFLY,     GID_BUTTERFLY,        0x811, 0x80, CHEST_ANIM_LONG, ITEM_CATEGORY_LESSER,          MOD_NONE, GI_EPONA_BOOST),
         GET_ITEM(ITEM_DEFENSE_HEART,    OBJECT_GI_HEARTS,        GID_HEART_CONTAINER,  0x812, 0x80, CHEST_ANIM_LONG, ITEM_CATEGORY_LESSER,          MOD_NONE, GI_DEFENSE_HEART),
         GET_ITEM(ITEM_WALLET_KING,      OBJECT_GI_PURSE,         GID_WALLET_GIANT,     0x813, 0x80, CHEST_ANIM_LONG, ITEM_CATEGORY_MAJOR,           MOD_NONE, GI_WALLET_KING),
-        GET_ITEM(ITEM_LANDMINE,         OBJECT_GI_BOMB_2,        GID_BOMBCHU,          0x814, 0x80, CHEST_ANIM_LONG, ITEM_CATEGORY_MAJOR,           MOD_NONE, GI_LANDMINE),
+        GET_ITEM(ITEM_LANDMINE,         OBJECT_GI_BOMB_2,        GID_LANDMINE,          0x814, 0x80, CHEST_ANIM_LONG, ITEM_CATEGORY_MAJOR,           MOD_NONE, GI_LANDMINE),
         GET_ITEM_NONE // GI_MAX - if you need to add to this table insert it before this entry.
     };
     ItemTableManager::Instance->AddItemTable(MOD_NONE);

@@ -113,6 +113,7 @@ void GetItem_DrawJewelGoron(PlayState* play, s16 drawId);
 void GetItem_DrawJewelZora(PlayState* play, s16 drawId);
 void GetItem_DrawGenericMusicNote(PlayState* play, s16 drawId);
 void GetItem_DrawTriforcePiece(PlayState* play, s16 drawId);
+void GetItem_DrawLandmine(PlayState* play, s16 drawId);
 
 typedef struct {
     /* 0x00 */ void (*drawFunc)(PlayState*, s16);
@@ -388,7 +389,8 @@ DrawItemTableEntry sDrawItemTable[] = {
     { GetItem_DrawGenericMusicNote, { gGiSongNoteDL } }, //Sun's song
     { GetItem_DrawGenericMusicNote, { gGiSongNoteDL } }, //Song of time
     { GetItem_DrawGenericMusicNote, { gGiSongNoteDL } }, //Song of storms
-    { GetItem_DrawTriforcePiece, { gTriforcePiece0DL } } // Triforce Piece
+    { GetItem_DrawTriforcePiece, { gTriforcePiece0DL } }, // Triforce Piece
+    { GetItem_DrawLandmine, { gLandmineDL }} // Land Mine
 };
 
 /**
@@ -513,6 +515,24 @@ void GetItem_DrawMaskOrBombchu(PlayState* play, s16 drawId) {
               G_MTX_MODELVIEW | G_MTX_LOAD);
     gSPDisplayList(POLY_OPA_DISP++, sDrawItemTable[drawId].dlists[0]);
 
+    CLOSE_DISPS(play->state.gfxCtx);
+}
+
+void GetItem_DrawLandmine(PlayState* play, s16 drawId) {
+    OPEN_DISPS(play->state.gfxCtx);
+    Matrix_Push();
+    Matrix_RotateZYX(0x4000, 0, 0, MTXMODE_APPLY);
+    Matrix_Translate(0.0f, -6.0f, 0.0f, MTXMODE_APPLY);
+    Matrix_Scale(0.03f, 0.03f, 0.03f, MTXMODE_APPLY);
+
+    Gfx_SetupDL_26Opa(play->state.gfxCtx);
+    gSPMatrix(POLY_OPA_DISP++, MATRIX_NEWMTX(play->state.gfxCtx),
+              G_MTX_MODELVIEW | G_MTX_LOAD);
+
+    gDPSetEnvColor(POLY_OPA_DISP++, 15, 0, 90, 255);
+    gSPDisplayList(POLY_OPA_DISP++, sDrawItemTable[drawId].dlists[0]);
+
+    Matrix_Pop();
     CLOSE_DISPS(play->state.gfxCtx);
 }
 

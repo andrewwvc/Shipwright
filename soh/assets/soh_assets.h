@@ -126,3 +126,6 @@ static const ALIGN_ASSET(2) char gItemIconLandmineTex[] = dgItemIconLandmineTex;
 
 #define dgLandmineItemNameENGTex "__OTR__textures/title_static/land_mine_item_name_eng"
 static const ALIGN_ASSET(2) char gLandmineItemNameENGTex[] = dgLandmineItemNameENGTex;
+
+#define dgLandmineDL "__OTR__objects/object_landmine/gBombshellDL"
+static const ALIGN_ASSET(2) char gLandmineDL[] = dgLandmineDL;
