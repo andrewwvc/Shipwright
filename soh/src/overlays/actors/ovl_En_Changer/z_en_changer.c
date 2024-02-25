@@ -78,6 +78,8 @@ static s32 sTreasureFlags[] = { 0x0000, 0x0002, 0x0004, 0x0006, 0x0008, 0x000A }
 void EnChanger_Destroy(Actor* thisx, PlayState* play) {
 }
 
+#define FINAL_SPECIAL_REWARD GI_DEFENSE_HEART
+
 void EnChanger_InitAlt(Actor* thisx, PlayState* play) {
     EnChanger* this = (EnChanger*)thisx;
     s16 leftChestParams;
@@ -101,10 +103,10 @@ void EnChanger_InitAlt(Actor* thisx, PlayState* play) {
     minigameRoomNum *= 2;
     // Spawn Heart Piece in chest (or Purple Rupee if won Heart Piece)
     if (play->roomCtx.curRoom.num >= 6) {
-        rewardChestParams = ((gSaveContext.itemGetInf[3] & 0x4000) ? (0x4EA0) : (0x4000 | (GI_DEFENSE_HEART & 0x7F)));
+        rewardChestParams = ((gSaveContext.itemGetInf[3] & 0x4000) ? (0x4EA0) : (0x4000 | ((FINAL_SPECIAL_REWARD & 0x7F) << 5)));
         rewardChestParams = sTreasureFlags[5] | rewardChestParams;
         this->finalChest = (EnBox*)Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, ACTOR_EN_BOX,
-                                                      20.0f, 20.0f, -2500.0f, 0, 0x7FFF, (gSaveContext.itemGetInf[3] & 0x4000) ? 0 : ((GI_DEFENSE_HEART & 0x80) << 1), rewardChestParams);
+                                                      20.0f, 20.0f, -2500.0f, 0, 0x7FFF, (gSaveContext.itemGetInf[3] & 0x4000) ? 0 : ((FINAL_SPECIAL_REWARD & 0x80) << 1), rewardChestParams);
         if (this->finalChest != NULL) {
             if (this->roomChestsOpened) {
                 Flags_SetTreasure(play, rewardChestParams & 0x1F);
