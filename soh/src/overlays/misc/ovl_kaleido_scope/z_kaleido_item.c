@@ -57,7 +57,7 @@ void KaleidoScope_DrawAmmoCount(PauseContext* pauseCtx, GraphicsContext* gfxCtx,
     gDPPipeSync(POLY_KAL_DISP++);
 
     if (i != 0) {
-        gSPVertex(POLY_KAL_DISP++, &pauseCtx->itemVtx[(sAmmoVtxOffset[slot] + 31) * 4], 4, 0);
+        gSPVertex(POLY_KAL_DISP++, &pauseCtx->itemVtx[(sAmmoVtxOffset[slot] + NUM_ITEM_SLOTS_TOTAL + NUM_EQUIPMENT_BUTTONS) * 4], 4, 0);
 
         gDPLoadTextureBlock(POLY_KAL_DISP++, ((u8*)_gAmmoDigit0Tex[i]), G_IM_FMT_IA, G_IM_SIZ_8b, 8, 8, 0,
                             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
@@ -66,7 +66,7 @@ void KaleidoScope_DrawAmmoCount(PauseContext* pauseCtx, GraphicsContext* gfxCtx,
         gSP1Quadrangle(POLY_KAL_DISP++, 0, 2, 3, 1, 0);
     }
 
-    gSPVertex(POLY_KAL_DISP++, &pauseCtx->itemVtx[(sAmmoVtxOffset[slot] + 32) * 4], 4, 0);
+    gSPVertex(POLY_KAL_DISP++, &pauseCtx->itemVtx[(sAmmoVtxOffset[slot] + NUM_ITEM_SLOTS_TOTAL + NUM_EQUIPMENT_BUTTONS + 1) * 4], 4, 0);
 
     gDPLoadTextureBlock(POLY_KAL_DISP++, ((u8*)_gAmmoDigit0Tex[ammo]), G_IM_FMT_IA, G_IM_SIZ_8b, 8, 8, 0,
                         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
@@ -124,7 +124,7 @@ static Vtx sCycleAButtonVtx[] = {
 };
 
 // Track animation timers for each inventory slot
-static sSlotCycleActiveAnimTimer[24] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+static sSlotCycleActiveAnimTimer[NUM_ITEM_SLOTS_TOTAL] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
 // Renders a left and/or right item for any item slot that can support cycling
 void KaleidoScope_DrawItemCycleExtras(PlayState* play, u8 slot, u8 isCycling, u8 canCycle, u8 leftItem, u8 rightItem) {
@@ -297,14 +297,14 @@ void KaleidoScope_DrawItemSelect(PlayState* play) {
                             pauseCtx->cursorX[PAUSE_ITEM] = cursorX;
                             pauseCtx->cursorY[PAUSE_ITEM] += 1;
 
-                            if (pauseCtx->cursorY[PAUSE_ITEM] >= 4) {
+                            if (pauseCtx->cursorY[PAUSE_ITEM] >= NUM_ITEM_SLOT_LINES_TOTAL) {
                                 pauseCtx->cursorY[PAUSE_ITEM] = 0;
                             }
 
                             pauseCtx->cursorPoint[PAUSE_ITEM] =
                                 pauseCtx->cursorX[PAUSE_ITEM] + (pauseCtx->cursorY[PAUSE_ITEM] * 6);
 
-                            if (pauseCtx->cursorPoint[PAUSE_ITEM] >= 24) {
+                            if (pauseCtx->cursorPoint[PAUSE_ITEM] >= NUM_ITEM_SLOTS_TOTAL) {
                                 pauseCtx->cursorPoint[PAUSE_ITEM] = pauseCtx->cursorX[PAUSE_ITEM];
                             }
 
@@ -329,14 +329,14 @@ void KaleidoScope_DrawItemSelect(PlayState* play) {
                             pauseCtx->cursorX[PAUSE_ITEM] = cursorX;
                             pauseCtx->cursorY[PAUSE_ITEM] += 1;
 
-                            if (pauseCtx->cursorY[PAUSE_ITEM] >= 4) {
+                            if (pauseCtx->cursorY[PAUSE_ITEM] >= NUM_ITEM_SLOT_LINES_TOTAL) {
                                 pauseCtx->cursorY[PAUSE_ITEM] = 0;
                             }
 
                             pauseCtx->cursorPoint[PAUSE_ITEM] =
                                 pauseCtx->cursorX[PAUSE_ITEM] + (pauseCtx->cursorY[PAUSE_ITEM] * 6);
 
-                            if (pauseCtx->cursorPoint[PAUSE_ITEM] >= 24) {
+                            if (pauseCtx->cursorPoint[PAUSE_ITEM] >= NUM_ITEM_SLOTS_TOTAL) {
                                 pauseCtx->cursorPoint[PAUSE_ITEM] = pauseCtx->cursorX[PAUSE_ITEM];
                             }
 
@@ -379,7 +379,7 @@ void KaleidoScope_DrawItemSelect(PlayState* play) {
 
                     cursorY = cursorY + 1;
                     cursorPoint = cursorPoint + 6;
-                    if (cursorY < 4) {
+                    if (cursorY < NUM_ITEM_SLOT_LINES_TOTAL) {
                         continue;
                     }
 
@@ -414,7 +414,7 @@ void KaleidoScope_DrawItemSelect(PlayState* play) {
 
                     cursorY = cursorY + 1;
                     cursorPoint = cursorPoint + 6;
-                    if (cursorY < 4) {
+                    if (cursorY < NUM_ITEM_SLOT_LINES_TOTAL) {
                         continue;
                     }
 
@@ -454,7 +454,7 @@ void KaleidoScope_DrawItemSelect(PlayState* play) {
                                 moveCursorResult = 2;
                             }
                         } else if ((pauseCtx->stickRelY < -30) || (dpad && CHECK_BTN_ALL(input->press.button, BTN_DDOWN))) {
-                            if (pauseCtx->cursorY[PAUSE_ITEM] < 3) {
+                            if (pauseCtx->cursorY[PAUSE_ITEM] < NUM_ITEM_SLOT_LINES_TOTAL-1) {
                                 pauseCtx->cursorY[PAUSE_ITEM] += 1;
                                 pauseCtx->cursorPoint[PAUSE_ITEM] += 6;
                                 if ((gSaveContext.inventory.items[pauseCtx->cursorPoint[PAUSE_ITEM]] != ITEM_NONE) ||
@@ -601,7 +601,7 @@ void KaleidoScope_DrawItemSelect(PlayState* play) {
     gDPSetPrimColor(POLY_KAL_DISP++, 0, 0, 255, 255, 255, pauseCtx->alpha);
     gDPSetEnvColor(POLY_KAL_DISP++, 0, 0, 0, 0);
 
-    for (i = 0, j = 24 * 4; i < ARRAY_COUNT(gSaveContext.equips.cButtonSlots); i++, j += 4) {
+    for (i = 0, j = NUM_ITEM_SLOTS_TOTAL * 4; i < ARRAY_COUNT(gSaveContext.equips.cButtonSlots); i++, j += 4) {
         if ((gSaveContext.equips.buttonItems[i + 1] != ITEM_NONE) &&
             !((gSaveContext.equips.buttonItems[i + 1] >= ITEM_SHIELD_DEKU) &&
               (gSaveContext.equips.buttonItems[i + 1] <= ITEM_BOOTS_HOVER))) {
@@ -613,7 +613,7 @@ void KaleidoScope_DrawItemSelect(PlayState* play) {
     gDPPipeSync(POLY_KAL_DISP++);
     gDPSetCombineMode(POLY_KAL_DISP++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
 
-    for (i = j = 0; i < 24; i++, j += 4) {
+    for (i = j = 0; i < NUM_ITEM_SLOTS_TOTAL; i++, j += 4) {
         gDPSetPrimColor(POLY_KAL_DISP++, 0, 0, 255, 255, 255, pauseCtx->alpha);
 
         if (gSaveContext.inventory.items[i] != ITEM_NONE) {

@@ -36,14 +36,24 @@ typedef enum {
 #define MAGIC_NORMAL_METER 0x30
 #define MAGIC_DOUBLE_METER (2 * MAGIC_NORMAL_METER)
 
+#define SLOTS_PER_LINE 6
+#define NUM_ITEM_SLOT_LINES_REGULAR 4
+#define NUM_ITEM_SLOT_LINES_EXTRA 1
+#define NUM_ITEM_SLOT_LINES_TOTAL (NUM_ITEM_SLOT_LINES_REGULAR+NUM_ITEM_SLOT_LINES_EXTRA)
+#define NUM_ITEM_SLOTS_REGULAR (SLOTS_PER_LINE*NUM_ITEM_SLOT_LINES_REGULAR)
+#define NUM_ITEM_SLOTS_EXTRA (SLOTS_PER_LINE*NUM_ITEM_SLOT_LINES_EXTRA)
+#define NUM_ITEM_SLOTS_TOTAL (SLOTS_PER_LINE*NUM_ITEM_SLOT_LINES_TOTAL)
+
+#define NUM_EQUIPMENT_BUTTONS 7
+
 typedef struct {
-    /* 0x00 */ u8 buttonItems[8]; // SOH [Enhancements] Changed from 4 to 8 to support Dpad equips
-    /* 0x04 */ u8 cButtonSlots[7]; // SOH [Enhancements] Changed from 3 to 7 to support Dpad equips
+    /* 0x00 */ u8 buttonItems[NUM_EQUIPMENT_BUTTONS+1]; // SOH [Enhancements] Changed from 4 to 8 to support Dpad equips
+    /* 0x04 */ u8 cButtonSlots[NUM_EQUIPMENT_BUTTONS]; // SOH [Enhancements] Changed from 3 to 7 to support Dpad equips
     /* 0x08 */ u16 equipment; // a mask where each nibble corresponds to a type of equipment `EquipmentType`, and each nibble is a piece `EquipValue*`
 } ItemEquips; // size = 0x0A
 
 typedef struct {
-    /* 0x00 */ u8 items[24];
+    /* 0x00 */ u8 items[NUM_ITEM_SLOTS_TOTAL];
     /* 0x18 */ s8 ammo[16];
     /* 0x28 */ u16 equipment; // a mask where each nibble corresponds to a type of equipment `EquipmentType`, and each bit to an owned piece `EquipInv*`
     /* 0x2C */ u32 upgrades;

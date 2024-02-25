@@ -1,6 +1,7 @@
 #pragma once
 
 #include <libultraship/libultra/gbi.h>
+#include "z64save.h"
 
 #define SECTION_PARENT_NONE -1
 typedef struct {
@@ -20,7 +21,7 @@ typedef struct {
     s16 buildVersionMinor;
     s16 buildVersionPatch;
 
-    u8 inventoryItems[24];
+    u8 inventoryItems[NUM_ITEM_SLOTS_TOTAL];
     u16 equipment;
     u32 upgrades;
     u8 isMagicAcquired;

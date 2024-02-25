@@ -763,6 +763,12 @@ u8 gSlotAgeReqs[] = {
     AGE_REQ_NONE,   // SLOT_BOTTLE_4
     AGE_REQ_ADULT,  // SLOT_TRADE_ADULT
     AGE_REQ_CHILD,  // SLOT_TRADE_CHILD
+    AGE_REQ_NONE,
+    AGE_REQ_NONE,
+    AGE_REQ_NONE,
+    AGE_REQ_NONE,
+    AGE_REQ_NONE,
+    AGE_REQ_NONE,
 };
 
 u8 gEquipAgeReqs[][4] = {
@@ -888,7 +894,7 @@ u8 gItemAgeReqs[] = {
     AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE,
     AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE,
     AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE,
-    AGE_REQ_NONE
+    AGE_REQ_NONE    // ITEM_LANDMINE
 };
 
 u8 gAreaGsFlags[] = {
@@ -1034,7 +1040,7 @@ void KaleidoScope_SetDefaultCursor(PlayState* play) {
                         break;
                     }
                     i++;
-                    if (i >= 24) {
+                    if (i >= NUM_ITEM_SLOTS_TOTAL) {
                         i = 0;
                     }
                     if (i == s) {
@@ -2760,9 +2766,9 @@ void KaleidoScope_InitVertices(PlayState* play, GraphicsContext* gfxCtx) {
         pauseCtx->cursorVtx[19].v.tc[1] = 0x400;
 
     // 24 items, 7 "item selected" backgrounds, 14 ammo digits (2 each for 7 items) -- then 4 vertices for each
-    pauseCtx->itemVtx = Graph_Alloc(gfxCtx, (24 + 7 + 14) * 4 * sizeof(Vtx));
+    pauseCtx->itemVtx = Graph_Alloc(gfxCtx, (NUM_ITEM_SLOTS_TOTAL + NUM_EQUIPMENT_BUTTONS + 14) * 4 * sizeof(Vtx));
 
-    for (phi_t4 = 0, phi_t2 = 0, phi_t5 = 58; phi_t4 < 4; phi_t4++, phi_t5 -= 32) {
+    for (phi_t4 = 0, phi_t2 = 0, phi_t5 = 58; phi_t4 < NUM_ITEM_SLOT_LINES_TOTAL; phi_t4++, phi_t5 -= 32) {
         for (phi_t1 = -96, phi_t3 = 0; phi_t3 < 6; phi_t3++, phi_t2 += 4, phi_t1 += 32) {
             pauseCtx->itemVtx[phi_t2 + 0].v.ob[0] = pauseCtx->itemVtx[phi_t2 + 2].v.ob[0] = phi_t1 + 2;
 
