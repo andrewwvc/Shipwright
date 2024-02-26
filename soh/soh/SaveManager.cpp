@@ -1835,18 +1835,6 @@ void SaveManager::LoadBaseVersion4() {
         });
         SaveManager::Instance->LoadData("equipment", gSaveContext.adultEquips.equipment);
     });
-    //Moves equpment slot numbers to the end section so that items slots are contiguous
-    u8 *slotLists[2];
-    slotLists[0] = gSaveContext.childEquips.cButtonSlots;
-    slotLists[1] = gSaveContext.adultEquips.buttonItems;
-    for (size_t ii = 0; ii < NUM_EQUIPMENT_BUTTONS; ii++) {
-        for (size_t jj = 0; ii < 2; ii++) {
-            if (OLD_EQUIP_START_SLOT <= slotLists[jj][ii] && slotLists[jj][ii] <= OLD_EQUIP_END_SLOT)
-                slotLists[jj][ii] += (SLOT_TUNIC_KOKIRI-OLD_EQUIP_START_SLOT);
-            else if (OLD_EQUIP_END_SLOT < slotLists[jj][ii] && slotLists[jj][ii] < SLOT_NONE)
-                slotLists[jj][ii] -= 6;
-        }
-    }
     SaveManager::Instance->LoadData("unk_54", gSaveContext.unk_54);
     SaveManager::Instance->LoadData("savedSceneNum", gSaveContext.savedSceneNum);
     SaveManager::Instance->LoadStruct("equips", []() {
@@ -1858,6 +1846,19 @@ void SaveManager::LoadBaseVersion4() {
         });
         SaveManager::Instance->LoadData("equipment", gSaveContext.equips.equipment);
     });
+    //Moves equpment slot numbers to the end section so that items slots are contiguous
+    u8 *slotLists[3];
+    slotLists[0] = gSaveContext.childEquips.cButtonSlots;
+    slotLists[1] = gSaveContext.adultEquips.cButtonSlots;
+    slotLists[3] = gSaveContext.equips.cButtonSlots;
+    for (size_t ii = 0; ii < NUM_EQUIPMENT_BUTTONS; ii++) {
+        for (size_t jj = 0; ii < 3; ii++) {
+            if (OLD_EQUIP_START_SLOT <= slotLists[jj][ii] && slotLists[jj][ii] <= OLD_EQUIP_END_SLOT)
+                slotLists[jj][ii] += (SLOT_TUNIC_KOKIRI-OLD_EQUIP_START_SLOT);
+            else if (OLD_EQUIP_END_SLOT < slotLists[jj][ii] && slotLists[jj][ii] < SLOT_NONE)
+                slotLists[jj][ii] -= 6;
+        }
+    }
     SaveManager::Instance->LoadStruct("inventory", []() {
         SaveManager::Instance->LoadArray("items", ARRAY_COUNT(gSaveContext.inventory.items), [](size_t i) {
             SaveManager::Instance->LoadData("", gSaveContext.inventory.items[i], static_cast<uint8_t>(ITEM_NONE));
@@ -2025,15 +2026,16 @@ void SaveManager::SaveBase(SaveContext* saveContext, int sectionID, bool fullSav
     SaveManager::Instance->SaveData("bgsFlag", saveContext->bgsFlag);
     SaveManager::Instance->SaveData("ocarinaGameRoundNum", saveContext->ocarinaGameRoundNum);
     //Moves equipment slot numbers back to their original save file format, compatable with previous saves
-    u8 *slotLists[2];
+    u8 *slotLists[3];
     slotLists[0] = saveContext->childEquips.cButtonSlots;
-    slotLists[1] = saveContext->adultEquips.buttonItems;
+    slotLists[1] = saveContext->adultEquips.cButtonSlots;
+    slotLists[3] = saveContext->equips.cButtonSlots;
     for (size_t ii = 0; ii < NUM_EQUIPMENT_BUTTONS; ii++) {
-        for (size_t jj = 0; ii < 2; ii++) {
-            if (SLOT_TUNIC_KOKIRI <= slotLists[jj][ii] && slotLists[jj][ii] <= SLOT_BOOTS_HOVER)
-                slotLists[jj][ii] -= (SLOT_TUNIC_KOKIRI-OLD_EQUIP_START_SLOT);
-            else if (SLOT_TRADE_CHILD < slotLists[jj][ii] && slotLists[jj][ii] < SLOT_TUNIC_KOKIRI)
-                slotLists[jj][ii] += 6;
+        for (size_t jj = 0; ii < 3; ii++) {
+            if (OLD_EQUIP_START_SLOT <= slotLists[jj][ii] && slotLists[jj][ii] <= OLD_EQUIP_END_SLOT)
+                slotLists[jj][ii] += (SLOT_TUNIC_KOKIRI-OLD_EQUIP_START_SLOT);
+            else if (OLD_EQUIP_END_SLOT < slotLists[jj][ii] && slotLists[jj][ii] < SLOT_NONE)
+                slotLists[jj][ii] -= 6;
         }
     }
     SaveManager::Instance->SaveStruct("childEquips", [&]() {
@@ -2054,15 +2056,6 @@ void SaveManager::SaveBase(SaveContext* saveContext, int sectionID, bool fullSav
         });
         SaveManager::Instance->SaveData("equipment", saveContext->adultEquips.equipment);
     });
-    //Moves equpment slot numbers to the end section so that items slots are contiguous
-    for (size_t ii = 0; ii < NUM_EQUIPMENT_BUTTONS; ii++) {
-        for (size_t jj = 0; ii < 2; ii++) {
-            if (OLD_EQUIP_START_SLOT <= slotLists[jj][ii] && slotLists[jj][ii] <= OLD_EQUIP_END_SLOT)
-                slotLists[jj][ii] += (SLOT_TUNIC_KOKIRI-OLD_EQUIP_START_SLOT);
-            else if (OLD_EQUIP_END_SLOT < slotLists[jj][ii] && slotLists[jj][ii] < SLOT_NONE)
-                slotLists[jj][ii] -= 6;
-        }
-    }
     SaveManager::Instance->SaveData("unk_54", saveContext->unk_54);
     SaveManager::Instance->SaveData("savedSceneNum", saveContext->savedSceneNum);
     SaveManager::Instance->SaveStruct("equips", [&]() {
@@ -2074,6 +2067,15 @@ void SaveManager::SaveBase(SaveContext* saveContext, int sectionID, bool fullSav
         });
         SaveManager::Instance->SaveData("equipment", saveContext->equips.equipment);
     });
+    //Moves equpment slot numbers to the end section so that items slots are contiguous
+    for (size_t ii = 0; ii < NUM_EQUIPMENT_BUTTONS; ii++) {
+        for (size_t jj = 0; ii < 3; ii++) {
+            if (OLD_EQUIP_START_SLOT <= slotLists[jj][ii] && slotLists[jj][ii] <= OLD_EQUIP_END_SLOT)
+                slotLists[jj][ii] += (SLOT_TUNIC_KOKIRI-OLD_EQUIP_START_SLOT);
+            else if (OLD_EQUIP_END_SLOT < slotLists[jj][ii] && slotLists[jj][ii] < SLOT_NONE)
+                slotLists[jj][ii] -= 6;
+        }
+    }
     SaveManager::Instance->SaveStruct("inventory", [&]() {
         SaveManager::Instance->SaveArray("items", ARRAY_COUNT(saveContext->inventory.items), [&](size_t i) {
             SaveManager::Instance->SaveData("", saveContext->inventory.items[i]);
