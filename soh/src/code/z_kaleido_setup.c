@@ -133,6 +133,9 @@ void KaleidoSetup_Init(PlayState* play) {
     pauseCtx->ocarinaSongIdx = -1;
     pauseCtx->cursorSpecialPos = 0;
 
+    pauseCtx->itemSlotScrollY = 0;
+    pauseCtx->itemScrollOffsetY = 0;
+
     View_Init(&pauseCtx->view, play->state.gfxCtx);
 }
 
