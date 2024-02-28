@@ -1168,7 +1168,7 @@ static s8 D_80854164[PLAYER_ANIMTYPE_MAX][PLAYER_ANIMTYPE_MAX] = {
 static ExplosiveInfo sExplosiveInfos[] = {
     { ITEM_BOMB, ACTOR_EN_BOM, 0x0},
     { ITEM_BOMBCHU, ACTOR_EN_BOM_CHU, 0x0 },
-    { ITEM_BOMB, ACTOR_EN_BOM_CHU, 0x1},
+    { ITEM_BOMB, ACTOR_EN_BOM_CHU, 0x2},
 };
 
 static struct_80854190 D_80854190[] = {

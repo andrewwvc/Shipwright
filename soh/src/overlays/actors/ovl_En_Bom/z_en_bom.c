@@ -199,7 +199,7 @@ void EnBom_Explode(EnBom* this, PlayState* play) {
         func_800AA000(this->actor.xzDistToPlayer, 0xFF, 0x14, 0x96);
     }
 
-    if (CVarGetInteger("gStaticExplosionRadius", 0)) {
+    if (this->forceStaticExplosion || CVarGetInteger("gStaticExplosionRadius", 0)) {
         //72 is the maximum radius of an OoT bomb explosion
         this->explosionCollider.elements[0].dim.worldSphere.radius = 72;
     } else {

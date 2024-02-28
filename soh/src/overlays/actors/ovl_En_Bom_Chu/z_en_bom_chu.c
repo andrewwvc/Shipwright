@@ -6,8 +6,10 @@
 #define FLAGS ACTOR_FLAG_UPDATE_WHILE_CULLED
 
 #define BOMBCHU_SCALE 0.01f
+
 #define BOMBCHU_PARAMS_REGULAR 0
-#define BOMBCHU_PARAMS_MINE 1
+//There is no PARAM 1 because this indicates an explosion to actors that detect explosions
+#define BOMBCHU_PARAMS_MINE 2
 
 void EnBomChu_Init(Actor* thisx, PlayState* play);
 void EnBomChu_Destroy(Actor* thisx, PlayState* play);
@@ -115,6 +117,9 @@ void EnBomChu_Explode(EnBomChu* this, PlayState* play) {
                                this->actor.world.pos.y, this->actor.world.pos.z, 0, 0, 0, BOMB_BODY, true);
     if (bomb != NULL) {
         bomb->timer = 0;
+        if (this->actor.params == BOMBCHU_PARAMS_MINE) {
+            bomb->forceStaticExplosion = 1;
+        }
     }
 
     this->timer = 1;
@@ -363,17 +368,64 @@ void EnBomChu_Move(EnBomChu* this, PlayState* play) {
     func_8002F8F0(&this->actor, NA_SE_IT_BOMBCHU_MOVE - SFX_FLAG);
 }
 
+u8 isNotIntangibleEnemy(Actor* actor, PlayState* play) {
+    return (actor->id != ACTOR_EN_WALLMAS);
+}
+
 void EnBomChu_Landmine(EnBomChu* this, PlayState* play) {
+    CollisionPoly* polyUpDown;
+    s32 bgIdUpDown;
+    f32 lineLength;
+    Vec3f posA;
+    Vec3f posB;
+    Vec3f posUpDown;
+
+
     if (this->timer != 0) {
         this->timer--;
     }
 
     if ((this->timer == 0) || (this->collider.base.acFlags & AC_HIT) ||
             ((this->collider.base.ocFlags1 & OC1_HIT) && (this->collider.base.oc->category != ACTORCAT_PLAYER)) ||
-              Actor_FindNearby(play, &this->actor, -1, ACTORCAT_ENEMY, 60.0f)) {
+              Actor_FindNumberOf(play, &this->actor, -1, ACTORCAT_ENEMY, 60.0f, NULL, isNotIntangibleEnemy) ||
+              (play->actorCtx.unk_02 != 0 && this->actor.xzDistToPlayer < 200.0f &&
+                ABS(this->actor.yDistToPlayer) < 40.0f)) { //Allows hammer shockwave trigger
         EnBomChu_Explode(this, play);
         return;
     }
+
+    lineLength = 3.0f;
+
+    posA.x = this->actor.world.pos.x + (this->axisUp.x * lineLength);
+    posA.y = this->actor.world.pos.y + (this->axisUp.y * lineLength);
+    posA.z = this->actor.world.pos.z + (this->axisUp.z * lineLength);
+
+    posB.x = this->actor.world.pos.x - (this->axisUp.x * lineLength);
+    posB.y = this->actor.world.pos.y - (this->axisUp.y * lineLength);
+    posB.z = this->actor.world.pos.z - (this->axisUp.z * lineLength);
+
+    if (BgCheck_EntityLineTest1(&play->colCtx, &posA, &posB, &posUpDown, &polyUpDown, true, true, true, true,
+                                &bgIdUpDown) &&
+        !(func_80041DB8(&play->colCtx, polyUpDown, bgIdUpDown) & 0x30) && // && not crawl space?
+        !SurfaceType_IsIgnoredByProjectiles(&play->colCtx, polyUpDown, bgIdUpDown)) {
+
+        if (DynaPoly_IsBgIdBgActor(bgIdUpDown)) {
+            DynaPolyActor* dynaActor = DynaPoly_GetActor(&play->colCtx, bgIdUpDown);
+            if (dynaActor && dynaActor->actor.id == ACTOR_BG_SPOT08_ICEBLOCK) {
+                EnBomChu_UpdateFloorPoly(this, polyUpDown, play);
+
+                this->actor.world.pos = posUpDown;
+                this->actor.floorBgId = bgIdUpDown;
+            }
+        }
+
+    } else {
+        EnBomChu_Explode(this, play);
+    }
+
+    Math_ScaledStepToS(&this->actor.shape.rot.x, -this->actor.world.rot.x, 0x800);
+    Math_ScaledStepToS(&this->actor.shape.rot.y, this->actor.world.rot.y, 0x800);
+    Math_ScaledStepToS(&this->actor.shape.rot.z, this->actor.world.rot.z, 0x800);
 }
 
 void EnBomChu_WaitForKill(EnBomChu* this, PlayState* play) {
