@@ -3047,6 +3047,7 @@ void CollisionCheck_ApplyDamage(PlayState* play, CollisionCheckContext* colChkCt
         }
 
         damage = tbl->table[i] & 0xF;
+        damage = damage*info->acHitInfo->toucher.damage/DAMAGE_BASE_VAL;
         collider->actor->colChkInfo.damageEffect = tbl->table[i] >> 4 & 0xF;
     }
     if (!(collider->acFlags & AC_HARD) && !((collider->ocFlags1 & OC1_FIRM) && (info->acHit != NULL) && (info->acHit->atFlags & AT_WEAK))) {
