@@ -8,6 +8,7 @@
 #include "vt.h"
 #include "objects/object_gla/object_gla.h"
 #include "soh/Enhancements/randomizer/randomizer_entrance.h"
+#include "overlays/actors/ovl_En_Bom/z_en_bom.h"
 #include <assert.h>
 
 #define FLAGS (ACTOR_FLAG_TARGETABLE | ACTOR_FLAG_FRIENDLY | ACTOR_FLAG_UPDATE_WHILE_CULLED)
@@ -577,6 +578,10 @@ void EnGe2_UpdateAfterTalk(Actor* thisx, PlayState* play) {
     EnGe2_MoveAndBlink(this, play);
 }
 
+u8 isHighExplosion(Actor* actor, PlayState* play) {
+    return (actor->params == 1) && ((EnBom*)actor)->forceStaticExplosion;
+}
+
 void EnGe2_Update(Actor* thisx, PlayState* play) {
     EnGe2* this = (EnGe2*)thisx;
     s32 paramsType;
@@ -585,7 +590,8 @@ void EnGe2_Update(Actor* thisx, PlayState* play) {
 
     if ((this->stateFlags & GE2_STATE_KO) || (this->stateFlags & GE2_STATE_CAPTURING)) {
         this->actionFunc(this, play);
-    } else if ((this->collider.base.acFlags & 2) || Actor_FindNearby(play,&this->actor,ACTOR_EN_GO2,ACTORCAT_NPC,100.0f)) {
+    } else if ((this->collider.base.acFlags & 2) || Actor_FindNearby(play,&this->actor,ACTOR_EN_GO2,ACTORCAT_NPC,100.0f) ||
+                Actor_FindNumberOf(play, thisx, ACTOR_EN_BOM, ACTORCAT_EXPLOSIVE, 72.0f, NULL, isHighExplosion)) {
         if ((this->collider.info.acHitInfo != NULL) && (this->collider.info.acHitInfo->toucher.dmgFlags & 0x80)) {
             Actor_SetColorFilter(&this->actor, 0, 120, 0, 400);
             this->actor.update = EnGe2_UpdateStunned;

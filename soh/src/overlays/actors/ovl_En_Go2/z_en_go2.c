@@ -493,7 +493,7 @@ s16 EnGo2_UpdateTalkStateGoronCityRollingBig(PlayState* play, EnGo2* this) {
                     return NPC_TALK_STATE_ACTION;
                 } else if (this->actor.textId == GoronMsg+30) {
                     this->actionFunc = EnGo2_SetupGetItem;
-                    EnGo2_GetItem(this, play, GI_HEART_PIECE);
+                    EnGo2_GetItem(this, play, GI_LANDMINE);
                     Message_CloseTextbox(play);
                     gSaveContext.infTable[28] |= 0x0001;
                     return NPC_TALK_STATE_ACTION;
