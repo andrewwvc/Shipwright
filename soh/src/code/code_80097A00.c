@@ -172,6 +172,7 @@ void* gItemIcons[] = {
     0,0,0,0,0,0,0,0,0,0,
     0,0,0,0,0,0,0,0,0,0,
     gItemIconLandmineTex,
+    gItemIconNayrusAffectionTex,
 };
 
 // Used to map item IDs to inventory slots
@@ -198,7 +199,7 @@ u8 gItemSlots[] = {
     SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,
     SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,
 
-    SLOT_LANDMINE,
+    SLOT_LANDMINE,  SLOT_NAYRUS_AFFECTION
 };
 
 void Inventory_ChangeEquipment(s16 equipment, u16 value) {

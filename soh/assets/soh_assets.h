@@ -129,3 +129,9 @@ static const ALIGN_ASSET(2) char gLandmineItemNameENGTex[] = dgLandmineItemNameE
 
 #define dgLandmineDL "__OTR__objects/object_landmine/gBombshellDL"
 static const ALIGN_ASSET(2) char gLandmineDL[] = dgLandmineDL;
+
+#define dgItemIconNayrusAffectionTex "__OTR__textures/icons/nayrus_affection_icon"
+static const ALIGN_ASSET(2) char gItemIconNayrusAffectionTex[] = dgItemIconNayrusAffectionTex;
+
+#define dgNayrusAffectionItemNameENGTex "__OTR__textures/title_static/nayrus_affection_item_name_eng"
+static const ALIGN_ASSET(2) char gNayrusAffectionItemNameENGTex[] = dgNayrusAffectionItemNameENGTex;

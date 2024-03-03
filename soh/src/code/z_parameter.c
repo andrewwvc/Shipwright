@@ -2786,7 +2786,9 @@ u8 Item_CheckObtainability(u8 item) {
         return ITEM_NONE;
     } else if (item == ITEM_LANDMINE) {
         return ITEM_NONE;
-    } else if (item == ITEM_HEART) {
+    } else if (item == ITEM_NAYRUS_AFFECTION) {
+        return ITEM_NONE;
+    }else if (item == ITEM_HEART) {
         return ITEM_HEART;
     } else if ((item == ITEM_MAGIC_SMALL) || (item == ITEM_MAGIC_LARGE)) {
         // "Magic Pot Get_Inf_Table( 25, 0x0100)=%d"

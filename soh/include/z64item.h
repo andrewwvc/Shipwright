@@ -145,7 +145,7 @@ typedef enum {
     /* 0x1A */ SLOT_PLACEHOLDER1,
     /* 0x1B */ SLOT_PLACEHOLDER2,
     /* 0x1C */ SLOT_PLACEHOLDER3,
-    /* 0x1D */ SLOT_PLACEHOLDER4,
+    /* 0x1D */ SLOT_NAYRUS_AFFECTION,
     /* 0xF9 */ SLOT_TUNIC_KOKIRI = 0xF9,
     /* 0xFA */ SLOT_TUNIC_GORON,
     /* 0xFB */ SLOT_TUNIC_ZORA,
@@ -317,6 +317,7 @@ typedef enum {
     /* 0x9E */ ITEM_DEFENSE_HEART,
     /* 0x9F */ ITEM_WALLET_KING,
     /* 0xA0 */ ITEM_LANDMINE,
+    /* 0xA1 */ ITEM_NAYRUS_AFFECTION,
     /* 0xFC */ ITEM_LAST_USED = 0xFC,
     /* 0xFE */ ITEM_NONE_FE = 0xFE,
     /* 0xFF */ ITEM_NONE = 0xFF
@@ -458,6 +459,7 @@ typedef enum {
     /* 0x80 */ GI_DEFENSE_HEART,
     /* 0x81 */ GI_WALLET_KING,
     /* 0x82 */ GI_LANDMINE,
+    /* 0x83 */ GI_NAYRUS_AFFECTION,
     /* 0x84 */ GI_MAX
 } GetItemID;
 
