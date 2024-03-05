@@ -135,3 +135,9 @@ static const ALIGN_ASSET(2) char gItemIconNayrusAffectionTex[] = dgItemIconNayru
 
 #define dgNayrusAffectionItemNameENGTex "__OTR__textures/title_static/nayrus_affection_item_name_eng"
 static const ALIGN_ASSET(2) char gNayrusAffectionItemNameENGTex[] = dgNayrusAffectionItemNameENGTex;
+
+#define dgItemIconDinsCrucibleTex "__OTR__textures/icons/dins_crucible_icon"
+static const ALIGN_ASSET(2) char gItemIconDinsCrucibleTex[] = dgItemIconDinsCrucibleTex;
+
+#define dgDinsCrucibleItemNameENGTex "__OTR__textures/title_static/dins_crucible_item_name_eng"
+static const ALIGN_ASSET(2) char gDinsCrucibleItemNameENGTex[] = dgDinsCrucibleItemNameENGTex;

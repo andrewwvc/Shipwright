@@ -1080,7 +1080,8 @@ static s8 sItemActionParams[] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,//140, 141, 142, 143, 144, 145, 146, 147, 148, 149,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,//150, 151, 152, 153, 154, 155, 156, 157, 158, 159,
     PLAYER_IA_BOMBMINE, //160
-    PLAYER_IA_MAGIC_SPELL_15
+    PLAYER_IA_MAGIC_SPELL_15,
+    PLAYER_IA_MAGIC_SPELL_16,
 };
 
 static u8 sMaskMemory;
@@ -1265,7 +1266,7 @@ static u8 D_80854384[2] = { 0x1A, 0x1B };
 
 static u16 D_80854388[] = { BTN_B, BTN_CLEFT, BTN_CDOWN, BTN_CRIGHT, BTN_DUP, BTN_DDOWN, BTN_DLEFT, BTN_DRIGHT };
 
-static u8 sMagicSpellCosts[] = { 24, 24, 24, 12, 24, 12 };
+static u8 sMagicSpellCosts[] = { 24, 18, 24, 12, 24, 12 };
 
 static u16 D_80854398[] = { NA_SE_IT_BOW_DRAW, NA_SE_IT_SLING_DRAW, NA_SE_IT_HOOKSHOT_READY };
 
@@ -5278,7 +5279,7 @@ void func_8083AF44(PlayState* play, Player* this, s32 magicSpell) {
     }
 
     if (magicSpell == 0) {}
-    else if (magicSpell == 5) {
+    else if (magicSpell == 5 || magicSpell == 1) {
         this->subCamId = OnePointCutscene_Init(play, 1100, -101, NULL, MAIN_CAM);
     } else {
         func_80835EA4(play, 10);
@@ -14470,6 +14471,7 @@ static LinkAnimationHeader* D_80854A58[] = {
     &gPlayerAnim_link_magic_honoo1,
     &gPlayerAnim_link_magic_tamashii1,
     &gPlayerAnim_link_magic_honoo1,
+    &gPlayerAnim_link_magic_kaze1,
 };
 
 static LinkAnimationHeader* D_80854A64[] = {
@@ -14477,6 +14479,7 @@ static LinkAnimationHeader* D_80854A64[] = {
     &gPlayerAnim_link_magic_honoo2,
     &gPlayerAnim_link_magic_tamashii2,
     &gPlayerAnim_link_magic_honoo2,
+    &gPlayerAnim_link_magic_kaze2,
 };
 
 static LinkAnimationHeader* D_80854A70[] = {
@@ -14484,15 +14487,17 @@ static LinkAnimationHeader* D_80854A70[] = {
     &gPlayerAnim_link_magic_honoo3,
     &gPlayerAnim_link_magic_tamashii3,
     &gPlayerAnim_link_magic_honoo3,
+    &gPlayerAnim_link_magic_kaze3,
 };
 
-static u8 D_80854A7C[] = { 70, 10, 10, 10 };
+static u8 D_80854A7C[] = { 70, 10, 10, 10, 10 };
 
 static struct_80832924 D_80854A80[] = {
     { NA_SE_PL_SKIP, 0x814 },
     { NA_SE_VO_LI_SWORD_N, 0x2014 },
     { 0, -0x301A },
     { 0, -0x301A },
+    { NA_SE_PL_SKIP, 0x814 },
 };
 
 static struct_80832924 D_80854A8C[][2] = {
@@ -14512,6 +14517,10 @@ static struct_80832924 D_80854A8C[][2] = {
         { 0, 0x4014 },
         { NA_SE_VO_LI_MAGIC_NALE, -0x202C },
     },
+    {
+        { 0, 0x4014 },
+        { NA_SE_VO_LI_MAGIC_FROL, -0x201E },
+    },
 };
 
 void func_808507F4(Player* this, PlayState* play) {
@@ -14529,6 +14538,9 @@ void func_808507F4(Player* this, PlayState* play) {
             if (this->unk_850 == 0) {
                 LinkAnimation_PlayOnceSetSpeed(play, &this->skelAnime, D_80854A58[this->unk_84F], 0.83f * (isFastFarores ? 2 : baseAnimSpeed));
                 if (this->unk_84F == 3) {
+                    this->stateFlags1 |= PLAYER_STATE1_IN_ITEM_CS | PLAYER_STATE1_IN_CUTSCENE;
+                    gSaveContext.magicState = MAGIC_STATE_CONSUME_SETUP;
+                } else if (this->unk_84F == 4) {
                     this->stateFlags1 |= PLAYER_STATE1_IN_ITEM_CS | PLAYER_STATE1_IN_CUTSCENE;
                     gSaveContext.magicState = MAGIC_STATE_CONSUME_SETUP;
                 } else if (func_80846A00(play, this, this->unk_84F) != NULL) {
@@ -14582,6 +14594,10 @@ void func_808507F4(Player* this, PlayState* play) {
                 this->unk_84F = -1;
                 if (this->itemAction == PLAYER_IA_MAGIC_SPELL_15) {
                     gSaveContext.healthAccumulator = 0x20;
+                    Magic_Reset(play);
+                } else if (this->itemAction == PLAYER_IA_MAGIC_SPELL_16) {
+                    Actor_Spawn(&play->actorCtx, play, ACTOR_OBJ_OSHIHIKI, this->actor.world.pos.x+Math_SinS(this->actor.world.rot.y)*55.0f,
+                       this->actor.world.pos.y, this->actor.world.pos.z+Math_CosS(this->actor.world.rot.y)*55.0f, 0, this->actor.world.rot.y, 0, 0x4040, true);
                     Magic_Reset(play);
                 }
             }

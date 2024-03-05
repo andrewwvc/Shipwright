@@ -650,6 +650,7 @@ extern "C" void VanillaItemTable_Init() {
         GET_ITEM(ITEM_WALLET_KING,      OBJECT_GI_PURSE,         GID_WALLET_GIANT,     0x813, 0x80, CHEST_ANIM_LONG, ITEM_CATEGORY_MAJOR,           MOD_NONE, GI_WALLET_KING),
         GET_ITEM(ITEM_LANDMINE,         OBJECT_GI_BOMB_2,        GID_LANDMINE,         0x814, 0x80, CHEST_ANIM_LONG, ITEM_CATEGORY_MAJOR,           MOD_NONE, GI_LANDMINE),
         GET_ITEM(ITEM_NAYRUS_AFFECTION, OBJECT_GI_GODDESS,       GID_NAYRUS_LOVE,      0x815, 0x80, CHEST_ANIM_LONG, ITEM_CATEGORY_MAJOR,           MOD_NONE, GI_NAYRUS_AFFECTION),
+        GET_ITEM(ITEM_DINS_CRUCIBLE,    OBJECT_GI_GODDESS,       GID_DINS_FIRE,        0x816, 0x80, CHEST_ANIM_LONG, ITEM_CATEGORY_MAJOR,           MOD_NONE, GI_DINS_CRUCIBLE),
         GET_ITEM_NONE // GI_MAX - if you need to add to this table insert it before this entry.
     };
     ItemTableManager::Instance->AddItemTable(MOD_NONE);

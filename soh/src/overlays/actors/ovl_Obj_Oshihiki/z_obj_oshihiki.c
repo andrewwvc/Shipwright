@@ -260,7 +260,7 @@ void ObjOshihiki_SetColor(ObjOshihiki* this, PlayState* play) {
     if (i >= ARRAY_COUNT(sColors)) {
         // "Error : scene_data_ID cannot be determined"
         osSyncPrintf("Error : scene_data_ID が判別できない。(%s %d)\n", __FILE__, __LINE__);
-        color->r = color->g = color->b = 255;
+        color->r = color->g = color->b = 125;
     } else {
         src = &sColors[i][paramsColorIdx];
         color->r = src->r;
@@ -684,11 +684,11 @@ void ObjOshihiki_Draw(Actor* thisx, PlayState* play) {
         case SCENE_SPIRIT_TEMPLE:
         case SCENE_SHADOW_TEMPLE:
         case SCENE_GERUDO_TRAINING_GROUND:
+        default:
             gDPSetEnvColor(POLY_OPA_DISP++, this->color.r, this->color.g, this->color.b, 255);
             break;
-        default:
-            gDPSetEnvColor(POLY_OPA_DISP++, mREG(13), mREG(14), mREG(15), 255);
-            break;
+            //gDPSetEnvColor(POLY_OPA_DISP++, mREG(13), mREG(14), mREG(15), 255);
+            //break;
     }
 
     gSPDisplayList(POLY_OPA_DISP++, gPushBlockDL);

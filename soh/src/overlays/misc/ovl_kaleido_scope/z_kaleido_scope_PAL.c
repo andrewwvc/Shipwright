@@ -591,6 +591,7 @@ static void* iconNameTextures[] =
 static void* iconNameTexturesEx[] = {
     gLandmineItemNameENGTex,
     gNayrusAffectionItemNameENGTex,
+    gDinsCrucibleItemNameENGTex,
 };
 
 static void* mapNameTextures[] =
@@ -897,6 +898,7 @@ u8 gItemAgeReqs[] = {
     AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE,
     AGE_REQ_NONE,   // ITEM_LANDMINE
     AGE_REQ_NONE,   // ITEM_NAYRUS_AFFECTION
+    AGE_REQ_NONE,   // ITEM_DINS_CRUCIBLE
 };
 
 u8 gAreaGsFlags[] = {

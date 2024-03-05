@@ -387,6 +387,7 @@ extern "C" void OTRMessage_Init()
     MakeBlueMsgEng(0x813, "You received a King's Wallet!&This can carry enough money&for a king! I don't even&know how much it can carry!");
     MakeBlueMsgEng(0x814, "\x13\xA0You received the Landmine! Place&it down. Then when an enemy&approaches...KAPAW...BOOM!");
     MakeBlueMsgEng(0x815, "\x13\xA1You received Nayru's Affection!&Use it to restore 2 hearts&each time you cast it!");
+    MakeBlueMsgEng(0x816, "\x13\xA2You received Din's Crucible!&Use it to forge a movable stone block!");
 
     MakeBlueMsgEng(0x7,  "\x13\x48You got a&%rDeku Seed Bullet Bag%w.&This bag can hold up to %y"+std::to_string(CAPACITY(UPG_BULLET_BAG,2))+"%w&slingshot bullets.");
     MakeBlueMsgEng(0x6C, "\x13\x49Your %rDeku Seed Bullet Bag%w&has become bigger!&Now you can carry more bullets!&This bag can hold %y"+std::to_string(CAPACITY(UPG_BULLET_BAG,3))+"%w bullets!");

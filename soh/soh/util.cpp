@@ -282,6 +282,7 @@ std::vector<std::string> itemNames = {
     "King's Wallet",
     "Land Mine",
     "Nayru's Affection",
+    "Din's Crucible",
 };
 
 std::vector<std::string> questItemNames = {

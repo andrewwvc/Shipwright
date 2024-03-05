@@ -4,7 +4,7 @@
 #include "z64.h"
 #include "segment_symbols.h"
 #define ITEMS_BASE_ICONS 160
-#define ITEMS_EXTRA_ICONS 2
+#define ITEMS_EXTRA_ICONS 3
 
 #ifdef __cplusplus
 extern "C"

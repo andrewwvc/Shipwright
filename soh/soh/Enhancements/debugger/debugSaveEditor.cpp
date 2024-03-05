@@ -141,6 +141,7 @@ std::map<uint32_t, ItemMapEntry> itemMapping = {
     ITEM_MAP_ENTRY(ITEM_MAGIC_LARGE),
     ITEM_MAP_ENTRY(ITEM_LANDMINE),
     ITEM_MAP_ENTRY(ITEM_NAYRUS_AFFECTION),
+    ITEM_MAP_ENTRY(ITEM_DINS_CRUCIBLE),
 };
 
 std::map<uint32_t, ItemMapEntry> gregMapping = {
