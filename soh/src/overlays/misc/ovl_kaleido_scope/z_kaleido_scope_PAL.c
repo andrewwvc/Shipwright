@@ -798,6 +798,12 @@ u8 gEquipAgeReqs[][4] = {
         AGE_REQ_ADULT,  // EQUIP_TYPE_BOOTS EQUIP_VALUE_BOOTS_IRON
         AGE_REQ_ADULT   // EQUIP_TYPE_BOOTS EQUIP_VALUE_BOOTS_HOVER
     },
+    {
+        AGE_REQ_NONE,   // 0 UPG_SCALE
+        AGE_REQ_NONE,   // EQUIP_TYPE_BOOTS EQUIP_VALUE_BOOTS_KOKIRI
+        AGE_REQ_NONE,  // EQUIP_TYPE_BOOTS EQUIP_VALUE_BOOTS_IRON
+        AGE_REQ_NONE   // EQUIP_TYPE_BOOTS EQUIP_VALUE_BOOTS_HOVER
+    },
 
 };
 
@@ -2652,7 +2658,7 @@ static s16 D_8082B11C[] = { 0, 4, 8, 12, 24, 32, 56 };
 
 static s16 D_8082B12C[] = { -114, 12, 44, 76 };
 
-static u8 D_8082B134[] = { 1, 5, 9, 13 };
+static u8 D_8082B134[] = { 1, 5, 9, 13, 17 };
 
 static s16 D_8082B138[] = {
     74,  74,  46,  18,  18,  46,   -108, -90,  -72, -54, -36, -18, -108, -90, -72, -54,
@@ -2914,9 +2920,9 @@ void KaleidoScope_InitVertices(PlayState* play, GraphicsContext* gfxCtx) {
         }
     }
 
-    pauseCtx->equipVtx = Graph_Alloc(gfxCtx, 112 * sizeof(Vtx));
+    pauseCtx->equipVtx = Graph_Alloc(gfxCtx, (48 + NUM_EQUIPMENT_ROWS * (16 + 4))  * sizeof(Vtx));
 
-    for (phi_t4 = 0, phi_t2 = 0, phi_t5 = 58; phi_t2 < 4; phi_t2++, phi_t5 -= 32) {
+    for (phi_t4 = 0, phi_t2 = 0, phi_t5 = 58; phi_t2 < NUM_EQUIPMENT_ROWS; phi_t2++, phi_t5 -= 32) {
         for (phi_t3 = 0; phi_t3 < 4; phi_t3++, phi_t4 += 4) {
             pauseCtx->equipVtx[phi_t4 + 0].v.ob[0] = pauseCtx->equipVtx[phi_t4 + 2].v.ob[0] = D_8082B12C[phi_t3] + 2;
 
@@ -2953,7 +2959,7 @@ void KaleidoScope_InitVertices(PlayState* play, GraphicsContext* gfxCtx) {
         }
     }
 
-    for (phi_t3 = 0; phi_t3 < 4; phi_t3++, phi_t4 += 4) {
+    for (phi_t3 = 0; phi_t3 < NUM_EQUIPMENT_ROWS; phi_t3++, phi_t4 += 4) {
         if (CUR_EQUIP_VALUE(phi_t3) != 0) {
             phi_t2 = (CUR_EQUIP_VALUE(phi_t3) + D_8082B134[phi_t3] - 1) * 4;
 

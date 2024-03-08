@@ -6,7 +6,8 @@ typedef enum {
     /* 1 */ EQUIP_TYPE_SHIELD,
     /* 2 */ EQUIP_TYPE_TUNIC,
     /* 3 */ EQUIP_TYPE_BOOTS,
-    /* 4 */ EQUIP_TYPE_MAX
+    /* 4 */ EQUIP_TYPE_RING,
+    /* 5 */ EQUIP_TYPE_MAX
 } EquipmentType;
 
 // `EquipInv*` enums are for Inventory.equipment (for example used in the `CHECK_OWNED_EQUIP` macro)
@@ -35,6 +36,12 @@ typedef enum {
     /* 1 */ EQUIP_INV_BOOTS_IRON,
     /* 2 */ EQUIP_INV_BOOTS_HOVER
 } EquipInvBoots;
+
+typedef enum {
+    /* 0 */ EQUIP_INV_RINGS_1,
+    /* 1 */ EQUIP_INV_RINGS_2,
+    /* 2 */ EQUIP_INV_RINGS_3
+} EquipInvRings;
 
 // `EquipValue*` enums are for ItemEquips.equipment (for example used in the `CUR_EQUIP_VALUE` macro)
 
@@ -69,6 +76,14 @@ typedef enum {
     /* 3 */ EQUIP_VALUE_BOOTS_HOVER,
     /* 4 */ EQUIP_VALUE_BOOTS_MAX
 } EquipValueBoots;
+
+typedef enum {
+    /* 0 */ EQUIP_VALUE_RINGS_NONE,
+    /* 1 */ EQUIP_VALUE_RINGS_1,
+    /* 2 */ EQUIP_VALUE_RINGS_2,
+    /* 3 */ EQUIP_VALUE_RINGS_3,
+    /* 4 */ EQUIP_VALUE_RINGS_MAX,
+} EquipValueRings;
 
 typedef enum {
     /* 0x00 */ UPG_QUIVER,

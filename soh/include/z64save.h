@@ -49,13 +49,13 @@ typedef enum {
 typedef struct {
     /* 0x00 */ u8 buttonItems[NUM_EQUIPMENT_BUTTONS+1]; // SOH [Enhancements] Changed from 4 to 8 to support Dpad equips
     /* 0x04 */ u8 cButtonSlots[NUM_EQUIPMENT_BUTTONS]; // SOH [Enhancements] Changed from 3 to 7 to support Dpad equips
-    /* 0x08 */ u16 equipment; // a mask where each nibble corresponds to a type of equipment `EquipmentType`, and each nibble is a piece `EquipValue*`
+    /* 0x08 */ u32 equipment; // a mask where each nibble corresponds to a type of equipment `EquipmentType`, and each nibble is a piece `EquipValue*`
 } ItemEquips; // size = 0x0A
 
 typedef struct {
     /* 0x00 */ u8 items[NUM_ITEM_SLOTS_TOTAL];
     /* 0x18 */ s8 ammo[16];
-    /* 0x28 */ u16 equipment; // a mask where each nibble corresponds to a type of equipment `EquipmentType`, and each bit to an owned piece `EquipInv*`
+    /* 0x28 */ u32 equipment; // a mask where each nibble corresponds to a type of equipment `EquipmentType`, and each bit to an owned piece `EquipInv*`
     /* 0x2C */ u32 upgrades;
     /* 0x30 */ u32 questItems;
     /* 0x34 */ u8 dungeonItems[20];

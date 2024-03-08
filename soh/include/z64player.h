@@ -505,6 +505,7 @@ typedef struct Player {
     /* 0x014D */ s8         currentSwordItemId;
     /* 0x014E */ s8         currentShield; // current shield from `PlayerShield`
     /* 0x014F */ s8         currentBoots; // current boots from `PlayerBoots`
+    /* 0x014F */ s8         currentRing; // current ring
     /* 0x0150 */ s8         heldItemButton; // Button index for the item currently used
     /* 0x0151 */ s8         heldItemAction; // Item action for the item currently used
     /* 0x0152 */ u8         heldItemId; // Item id for the item currently used

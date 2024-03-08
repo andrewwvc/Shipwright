@@ -75,6 +75,7 @@
 #define SHIELD_EQUIP_TO_PLAYER(shieldEquip) (shieldEquip)
 #define TUNIC_EQUIP_TO_PLAYER(tunicEquip) ((tunicEquip) - 1)
 #define BOOTS_EQUIP_TO_PLAYER(bootsEquip) ((bootsEquip) - 1)
+#define RING_EQUIP_TO_PLAYER(ringEquip) (ringEquip)
 
 #define CUR_UPG_VALUE(upg) ((s32)(gSaveContext.inventory.upgrades & gUpgradeMasks[upg]) >> gUpgradeShifts[upg])
 #define CAPACITY(upg, value) gUpgradeCapacities[upg][value]

@@ -8,10 +8,10 @@ static u8 sAdultUpgrades[] = { UPG_QUIVER, UPG_BOMB_BAG, UPG_STRENGTH, UPG_SCALE
 static u8 sChildUpgradeItemBases[] = { ITEM_BULLET_BAG_30, ITEM_BOMB_BAG_20, ITEM_BRACELET, ITEM_SCALE_SILVER };
 static u8 sAdultUpgradeItemBases[] = { ITEM_QUIVER_30, ITEM_BOMB_BAG_20, ITEM_BRACELET, ITEM_SCALE_SILVER };
 
-static u8 sUpgradeItemOffsets[] = { 0x00, 0x03, 0x06, 0x09 };
+static u8 sUpgradeItemOffsets[] = { 0x00, 0x03, 0x06, 0x09, 0x00, 0x00, 0x00, 0x00}; //This determines the name displayed by scope_PAL
 
 static u8 sEquipmentItemOffsets[] = {
-    0x00, 0x00, 0x01, 0x02, 0x00, 0x03, 0x04, 0x05, 0x00, 0x06, 0x07, 0x08, 0x00, 0x09, 0x0A, 0x0B,
+    0x00, 0x00, 0x01, 0x02, 0x00, 0x03, 0x04, 0x05, 0x00, 0x06, 0x07, 0x08, 0x00, 0x09, 0x0A, 0x0B, 0x0, 0x9, 0XA, ITEM_LANDMINE-ITEM_SWORD_KOKIRI,
 };
 
 static s16 sEquipTimer = 0;
@@ -43,7 +43,7 @@ void KaleidoScope_DrawEquipmentImage(PlayState* play, void* source, u32 width, u
         textureCount += 1;
     }
 
-    vtxIndex = 80;
+    vtxIndex = NUM_EQUIPMENT_ROWS * (16 + 4);
 
     gDPSetTileCustom(POLY_KAL_DISP++, G_IM_FMT_RGBA, G_IM_SIZ_16b, width, textureHeight, 0, G_TX_NOMIRROR | G_TX_CLAMP,
                      G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -188,7 +188,7 @@ void KaleidoScope_DrawEquipment(PlayState* play) {
     gDPSetPrimColor(POLY_KAL_DISP++, 0, 0, ZREG(39), ZREG(40), ZREG(41), pauseCtx->alpha);
     gDPSetEnvColor(POLY_KAL_DISP++, ZREG(43), ZREG(44), ZREG(45), 0);
 
-    for (i = 0, j = 64; i < 4; i++, j += 4) {
+    for (i = 0, j = NUM_EQUIPMENT_ROWS * 16 ; i < NUM_EQUIPMENT_ROWS; i++, j += 4) {
         if (CUR_EQUIP_VALUE(i) != 0) {
             gDPPipeSync(POLY_KAL_DISP++);
             gSPVertex(POLY_KAL_DISP++, &pauseCtx->equipVtx[j], 4, 0);
@@ -237,14 +237,14 @@ void KaleidoScope_DrawEquipment(PlayState* play) {
                         pauseCtx->cursorX[PAUSE_EQUIP] = cursorX;
                         pauseCtx->cursorY[PAUSE_EQUIP] += 1;
 
-                        if (pauseCtx->cursorY[PAUSE_EQUIP] >= 4) {
+                        if (pauseCtx->cursorY[PAUSE_EQUIP] >= NUM_EQUIPMENT_ROWS) {
                             pauseCtx->cursorY[PAUSE_EQUIP] = 0;
                         }
 
                         pauseCtx->cursorPoint[PAUSE_EQUIP] =
                             pauseCtx->cursorX[PAUSE_EQUIP] + (pauseCtx->cursorY[PAUSE_EQUIP] * 4);
 
-                        if (pauseCtx->cursorPoint[PAUSE_EQUIP] >= 16) {
+                        if (pauseCtx->cursorPoint[PAUSE_EQUIP] >= NUM_EQUIPMENT_ROWS*4) {
                             pauseCtx->cursorPoint[PAUSE_EQUIP] = pauseCtx->cursorX[PAUSE_EQUIP];
                         }
 
@@ -271,14 +271,14 @@ void KaleidoScope_DrawEquipment(PlayState* play) {
                         pauseCtx->cursorX[PAUSE_EQUIP] = cursorX;
                         pauseCtx->cursorY[PAUSE_EQUIP] += 1;
 
-                        if (pauseCtx->cursorY[PAUSE_EQUIP] >= 4) {
+                        if (pauseCtx->cursorY[PAUSE_EQUIP] >= NUM_EQUIPMENT_ROWS) {
                             pauseCtx->cursorY[PAUSE_EQUIP] = 0;
                         }
 
                         pauseCtx->cursorPoint[PAUSE_EQUIP] =
                             pauseCtx->cursorX[PAUSE_EQUIP] + (pauseCtx->cursorY[PAUSE_EQUIP] * 4);
 
-                        if (pauseCtx->cursorPoint[PAUSE_EQUIP] >= 16) {
+                        if (pauseCtx->cursorPoint[PAUSE_EQUIP] >= NUM_EQUIPMENT_ROWS*4) {
                             pauseCtx->cursorPoint[PAUSE_EQUIP] = pauseCtx->cursorX[PAUSE_EQUIP];
                         }
 
@@ -324,7 +324,7 @@ void KaleidoScope_DrawEquipment(PlayState* play) {
                         cursorMoveResult = 3;
                     }
                 } else if ((pauseCtx->stickRelY < -30) || (dpad && CHECK_BTN_ALL(input->press.button, BTN_DDOWN))) {
-                    if (pauseCtx->cursorY[PAUSE_EQUIP] < 3) {
+                    if (pauseCtx->cursorY[PAUSE_EQUIP] < NUM_EQUIPMENT_ROWS-1) {
                         pauseCtx->cursorY[PAUSE_EQUIP] += 1;
                         pauseCtx->cursorPoint[PAUSE_EQUIP] += 4;
 
@@ -640,7 +640,7 @@ void KaleidoScope_DrawEquipment(PlayState* play) {
         }
     }
 
-    for (rowStart = 0, i = 0, point = 4; i < 4; i++, rowStart += 4, point += 16) {
+    for (rowStart = 0, i = 0, point = 4; i < NUM_EQUIPMENT_ROWS; i++, rowStart += 4, point += 16) {
 
         for (k = 0, temp = rowStart + 1, bit = rowStart, j = point; k < 3; k++, bit++, j += 4, temp++) {
 
@@ -666,44 +666,46 @@ void KaleidoScope_DrawEquipment(PlayState* play) {
     gDPSetCombineMode(POLY_KAL_DISP++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
     gDPSetPrimColor(POLY_KAL_DISP++, 0, 0, 255, 255, 255, pauseCtx->alpha);
 
-    for (rowStart = 0, j = 0, temp = 0, i = 0; i < 4; i++, rowStart += 4, j += 16) {
+    for (rowStart = 0, j = 0, temp = 0, i = 0; i < NUM_EQUIPMENT_ROWS; i++, rowStart += 4, j += 16) {
         gSPVertex(POLY_KAL_DISP++, &pauseCtx->equipVtx[j], 16, 0);
         bool drawGreyItems = !CVarGetInteger("gTimelessEquipment", 0);
-        if (LINK_AGE_IN_YEARS == YEARS_CHILD) {
-            point = CUR_UPG_VALUE(sChildUpgrades[i]);
-            if ((point != 0) && (CUR_UPG_VALUE(sChildUpgrades[i]) != 0)) {
-                if (drawGreyItems &&
-                    ((sChildUpgradeItemBases[i] + CUR_UPG_VALUE(sChildUpgrades[i]) - 1) == ITEM_GAUNTLETS_SILVER || 
-                    (sChildUpgradeItemBases[i] + CUR_UPG_VALUE(sChildUpgrades[i]) - 1) == ITEM_GAUNTLETS_GOLD)) { // Grey Out the Gauntlets
-                    gDPSetGrayscaleColor(POLY_KAL_DISP++, 109, 109, 109, 255);
-                    gSPGrayscale(POLY_KAL_DISP++, true);
+        if (i < 4) {
+            if (LINK_AGE_IN_YEARS == YEARS_CHILD) {
+                point = CUR_UPG_VALUE(sChildUpgrades[i]);
+                if ((point != 0) && (CUR_UPG_VALUE(sChildUpgrades[i]) != 0)) {
+                    if (drawGreyItems &&
+                        ((sChildUpgradeItemBases[i] + CUR_UPG_VALUE(sChildUpgrades[i]) - 1) == ITEM_GAUNTLETS_SILVER ||
+                        (sChildUpgradeItemBases[i] + CUR_UPG_VALUE(sChildUpgrades[i]) - 1) == ITEM_GAUNTLETS_GOLD)) { // Grey Out the Gauntlets
+                        gDPSetGrayscaleColor(POLY_KAL_DISP++, 109, 109, 109, 255);
+                        gSPGrayscale(POLY_KAL_DISP++, true);
+                    }
+                    KaleidoScope_DrawQuadTextureRGBA32(play->state.gfxCtx, gItemIcons[sChildUpgradeItemBases[i] + point - 1], 32, 32, 0);
+                    gSPGrayscale(POLY_KAL_DISP++, false);
                 }
-                KaleidoScope_DrawQuadTextureRGBA32(play->state.gfxCtx, gItemIcons[sChildUpgradeItemBases[i] + point - 1], 32, 32, 0);
-                gSPGrayscale(POLY_KAL_DISP++, false);
-            }
-        } else {
-            if ((i == 0) && (CUR_UPG_VALUE(sAdultUpgrades[i]) == 0)) { // If the player doesn't have the bow, load the current slingshot ammo upgrade instead.
-                if (drawGreyItems) {
-                    gDPSetGrayscaleColor(POLY_KAL_DISP++, 109, 109, 109, 255); // Grey Out Slingshot Bullet Bags
-                    gSPGrayscale(POLY_KAL_DISP++, true);
+            } else {
+                if ((i == 0) && (CUR_UPG_VALUE(sAdultUpgrades[i]) == 0)) { // If the player doesn't have the bow, load the current slingshot ammo upgrade instead.
+                    if (drawGreyItems) {
+                        gDPSetGrayscaleColor(POLY_KAL_DISP++, 109, 109, 109, 255); // Grey Out Slingshot Bullet Bags
+                        gSPGrayscale(POLY_KAL_DISP++, true);
+                    }
+                    KaleidoScope_DrawQuadTextureRGBA32(play->state.gfxCtx, gItemIcons[sChildUpgradeItemBases[i] + CUR_UPG_VALUE(sChildUpgrades[i]) - 1], 32, 32, 0);
+                    gSPGrayscale(POLY_KAL_DISP++, false);
+                } else if (CUR_UPG_VALUE(sAdultUpgrades[i]) != 0) {
+                    if (drawGreyItems &&
+                        ((sAdultUpgradeItemBases[i] + CUR_UPG_VALUE(sAdultUpgrades[i]) - 1) == ITEM_BRACELET &&
+                            !(IS_RANDO))) { // Grey Out the Goron Bracelet when Not Randomized
+                        gDPSetGrayscaleColor(POLY_KAL_DISP++, 109, 109, 109, 255);
+                        gSPGrayscale(POLY_KAL_DISP++, true);
+                    }
+                    KaleidoScope_DrawQuadTextureRGBA32(play->state.gfxCtx, gItemIcons[sAdultUpgradeItemBases[i] + CUR_UPG_VALUE(sAdultUpgrades[i]) - 1], 32, 32, 0);
+                    gSPGrayscale(POLY_KAL_DISP++, false);
                 }
-                KaleidoScope_DrawQuadTextureRGBA32(play->state.gfxCtx, gItemIcons[sChildUpgradeItemBases[i] + CUR_UPG_VALUE(sChildUpgrades[i]) - 1], 32, 32, 0);
-                gSPGrayscale(POLY_KAL_DISP++, false);
-            } else if (CUR_UPG_VALUE(sAdultUpgrades[i]) != 0) {
-                if (drawGreyItems &&
-                    ((sAdultUpgradeItemBases[i] + CUR_UPG_VALUE(sAdultUpgrades[i]) - 1) == ITEM_BRACELET &&
-                        !(IS_RANDO))) { // Grey Out the Goron Bracelet when Not Randomized
-                    gDPSetGrayscaleColor(POLY_KAL_DISP++, 109, 109, 109, 255);
-                    gSPGrayscale(POLY_KAL_DISP++, true);
-                }
-                KaleidoScope_DrawQuadTextureRGBA32(play->state.gfxCtx, gItemIcons[sAdultUpgradeItemBases[i] + CUR_UPG_VALUE(sAdultUpgrades[i]) - 1], 32, 32, 0);
-                gSPGrayscale(POLY_KAL_DISP++, false);
             }
         }
         // Draw inventory screen icons
         for (k = 0, bit = rowStart, point = 4; k < 3; k++, point += 4, temp++, bit++) {
 
-            int itemId = ITEM_SWORD_KOKIRI + temp;
+            int itemId = ITEM_SWORD_KOKIRI + sEquipmentItemOffsets[(temp/3)*4+(temp%3)+1];
             bool age_restricted = !CHECK_AGE_REQ_ITEM(itemId);
             if (age_restricted) {
                 gDPSetGrayscaleColor(POLY_KAL_DISP++, 109, 109, 109, 255);

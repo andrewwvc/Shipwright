@@ -12,15 +12,15 @@ u32 gBitFlags[] = {
     (1 << 24), (1 << 25), (1 << 26), (1 << 27), (1 << 28), (1 << 29), (1 << 30), (1 << 31),
 };
 
-u16 gEquipMasks[] = { 0x000F, 0x00F0, 0x0F00, 0xF000 };
-u16 gEquipNegMasks[] = { 0xFFF0, 0xFF0F, 0xF0FF, 0x0FFF };
+u32 gEquipMasks[] = { 0x000F, 0x00F0, 0x0F00, 0xF000, 0xF0000};
+u32 gEquipNegMasks[] = { 0xFFFFFFF0, 0xFFFFFF0F, 0xFFFFF0FF, 0xFFFF0FFF,  0xFFF0FFFF};
 u32 gUpgradeMasks[] = {
     0x00000007, 0x00000038, 0x000001C0, 0x00000E00, 0x00003000, 0x0001C000, 0x000E0000, 0x00700000,
 };
 u32 gUpgradeNegMasks[] = {
     0xFFFFFFF8, 0xFFFFFFC7, 0xFFFFFE3F, 0xFFFFF1FF, 0xFFFFCFFF, 0xFFFE3FFF, 0xFFF1FFFF, 0xFF8FFFFF,
 };
-u8 gEquipShifts[] = { 0, 4, 8, 12 };
+u8 gEquipShifts[] = { 0, 4, 8, 12, 16, 20, 24, 28 };
 u8 gUpgradeShifts[] = { 0, 3, 6, 9, 12, 14, 17, 20 };
 
 u16 gUpgradeCapacities[][4] = {
@@ -203,15 +203,15 @@ u8 gItemSlots[] = {
     SLOT_LANDMINE,  SLOT_NAYRUS_AFFECTION, SLOT_DINS_CRUCIBLE
 };
 
-void Inventory_ChangeEquipment(s16 equipment, u16 value) {
+void Inventory_ChangeEquipment(s32 equipment, u32 value) {
     gSaveContext.equips.equipment &= gEquipNegMasks[equipment];
     gSaveContext.equips.equipment |= value << gEquipShifts[equipment];
 }
 
-u8 Inventory_DeleteEquipment(PlayState* play, s16 equipment) {
+u8 Inventory_DeleteEquipment(PlayState* play, s32 equipment) {
     Player* player = GET_PLAYER(play);
     s32 pad;
-    u16 equipValue = gSaveContext.equips.equipment & gEquipMasks[equipment];
+    u32 equipValue = gSaveContext.equips.equipment & gEquipMasks[equipment];
 
     // "Erasing equipment item = %d  zzz=%d"
     osSyncPrintf("装備アイテム抹消 = %d  zzz=%d\n", equipment, equipValue);

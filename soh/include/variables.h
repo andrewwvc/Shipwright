@@ -5,6 +5,7 @@
 #include "segment_symbols.h"
 #define ITEMS_BASE_ICONS 160
 #define ITEMS_EXTRA_ICONS 3
+#define NUM_EQUIPMENT_ROWS 5
 
 #ifdef __cplusplus
 extern "C"
@@ -93,10 +94,10 @@ extern "C"
 	extern Gfx gCullFrontDList[];
 	extern Gfx gEmptyDL[];
 	extern u32 gBitFlags[32];
-	extern u16 gEquipMasks[4];
-	extern u16 gEquipNegMasks[4];
+	extern u32 gEquipMasks[NUM_EQUIPMENT_ROWS];
+	extern u32 gEquipNegMasks[NUM_EQUIPMENT_ROWS];
 	extern u32 gUpgradeMasks[8];
-	extern u8 gEquipShifts[4];
+	extern u8 gEquipShifts[NUM_EQUIPMENT_ROWS];
 	extern u8 gUpgradeShifts[8];
 	extern u16 gUpgradeCapacities[8][4];
 	extern u32 gGsFlagsMasks[4];
