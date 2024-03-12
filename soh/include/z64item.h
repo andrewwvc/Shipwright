@@ -334,6 +334,9 @@ typedef enum {
     /* 0xA0 */ ITEM_LANDMINE,
     /* 0xA1 */ ITEM_NAYRUS_AFFECTION,
     /* 0xA2 */ ITEM_DINS_CRUCIBLE,
+    /* 0xA3 */ ITEM_RING_1,
+    /* 0xA4 */ ITEM_RING_2,
+    /* 0xA5 */ ITEM_RING_3,
     /* 0xFC */ ITEM_LAST_USED = 0xFC,
     /* 0xFE */ ITEM_NONE_FE = 0xFE,
     /* 0xFF */ ITEM_NONE = 0xFF
@@ -341,6 +344,8 @@ typedef enum {
 
 #define ITEM_TRADE_CHILD ITEM_WEIRD_EGG
 #define ITEM_TRADE_ADULT ITEM_POCKET_EGG
+#define RING_ITEM_MIN ITEM_RING_1
+#define RING_ITEM_MAX ITEM_RING_3
 
 // Get Item result may vary depending on context (chest/shop/scrub/drop)
 typedef enum {
@@ -476,9 +481,15 @@ typedef enum {
     /* 0x81 */ GI_WALLET_KING,
     /* 0x82 */ GI_LANDMINE,
     /* 0x83 */ GI_NAYRUS_AFFECTION,
-    /* 0x83 */ GI_DINS_CRUCIBLE,
-    /* 0x84 */ GI_MAX
+    /* 0x84 */ GI_DINS_CRUCIBLE,
+    /* 0x85 */ GI_RING,
+    /* 0x85 */ GI_RING_BLUE,
+    /* 0x85 */ GI_RING_RED,
+    /* 0x86 */ GI_MAX
 } GetItemID;
+
+#define RING_GI_MIN GI_RING
+#define RING_GI_MAX GI_RING_RED
 
 typedef enum {
     /* 0x00 */ GID_BOTTLE,

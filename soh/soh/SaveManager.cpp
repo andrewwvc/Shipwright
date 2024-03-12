@@ -555,6 +555,12 @@ void SaveManager::InitFileNormal() {
     }
     gSaveContext.inventory.defenseHearts = 0;
     gSaveContext.inventory.gsTokens = 0;
+    for (int ii = 0; ii < NUM_RING_TYPES; ii++) {
+        gSaveContext.inventory.rings[ii] = 0;
+    }
+    for (int ii = 0; ii < ARRAY_COUNT(gSaveContext.inventory.ringEquips); ii++) {
+        gSaveContext.inventory.ringEquips[ii] = 0;
+    }
     for (int scene = 0; scene < ARRAY_COUNT(gSaveContext.sceneFlags); scene++) {
         gSaveContext.sceneFlags[scene].chest = 0;
         gSaveContext.sceneFlags[scene].swch = 0;
@@ -1877,6 +1883,12 @@ void SaveManager::LoadBaseVersion4() {
         });
         SaveManager::Instance->LoadData("defenseHearts", gSaveContext.inventory.defenseHearts);
         SaveManager::Instance->LoadData("gsTokens", gSaveContext.inventory.gsTokens);
+        SaveManager::Instance->LoadArray("rings", ARRAY_COUNT(gSaveContext.inventory.rings), [](size_t i) {
+            SaveManager::Instance->LoadData("", gSaveContext.inventory.rings[i], static_cast<uint8_t>(0));
+        });
+        SaveManager::Instance->LoadArray("ringEquips", ARRAY_COUNT(gSaveContext.inventory.ringEquips), [](size_t i) {
+            SaveManager::Instance->LoadData("", gSaveContext.inventory.ringEquips[i], static_cast<uint16_t>(0));
+        });
     });
     SaveManager::Instance->LoadArray("sceneFlags", ARRAY_COUNT(gSaveContext.sceneFlags), [](size_t i) {
         SaveManager::Instance->LoadStruct("", [&i]() {
@@ -2094,6 +2106,12 @@ void SaveManager::SaveBase(SaveContext* saveContext, int sectionID, bool fullSav
         });
         SaveManager::Instance->SaveData("defenseHearts", saveContext->inventory.defenseHearts);
         SaveManager::Instance->SaveData("gsTokens", saveContext->inventory.gsTokens);
+        SaveManager::Instance->SaveArray("rings", ARRAY_COUNT(saveContext->inventory.rings), [&](size_t i) {
+            SaveManager::Instance->SaveData("", saveContext->inventory.rings[i]);
+        });
+        SaveManager::Instance->SaveArray("ringEquips", ARRAY_COUNT(saveContext->inventory.ringEquips), [&](size_t i) {
+            SaveManager::Instance->SaveData("", saveContext->inventory.ringEquips[i]);
+        });
     });
     SaveManager::Instance->SaveArray("sceneFlags", ARRAY_COUNT(saveContext->sceneFlags), [&](size_t i) {
         SaveManager::Instance->SaveStruct("", [&]() {

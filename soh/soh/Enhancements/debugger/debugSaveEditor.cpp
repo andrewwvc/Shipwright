@@ -142,6 +142,9 @@ std::map<uint32_t, ItemMapEntry> itemMapping = {
     ITEM_MAP_ENTRY(ITEM_LANDMINE),
     ITEM_MAP_ENTRY(ITEM_NAYRUS_AFFECTION),
     ITEM_MAP_ENTRY(ITEM_DINS_CRUCIBLE),
+    ITEM_MAP_ENTRY(ITEM_RING_1),
+    ITEM_MAP_ENTRY(ITEM_RING_2),
+    ITEM_MAP_ENTRY(ITEM_RING_3),
 };
 
 std::map<uint32_t, ItemMapEntry> gregMapping = {
@@ -1283,7 +1286,7 @@ void DrawEquipmentTab() {
         ITEM_SHIELD_DEKU,  ITEM_SHIELD_HYLIAN, ITEM_SHIELD_MIRROR, ITEM_NONE,
         ITEM_TUNIC_KOKIRI, ITEM_TUNIC_GORON,   ITEM_TUNIC_ZORA,    ITEM_NONE,
         ITEM_BOOTS_KOKIRI, ITEM_BOOTS_IRON,    ITEM_BOOTS_HOVER,   ITEM_NONE,
-        ITEM_BOOTS_KOKIRI, ITEM_BOOTS_IRON,    ITEM_BOOTS_HOVER,   ITEM_NONE,
+        ITEM_RING_1,       ITEM_RING_2,        ITEM_RING_3,        ITEM_NONE,
     };
     for (int32_t i = 0; i < equipmentValues.size(); i++) {
         // Skip over unused 4th slots for shields, boots, and tunics

@@ -11,7 +11,7 @@ static u8 sAdultUpgradeItemBases[] = { ITEM_QUIVER_30, ITEM_BOMB_BAG_20, ITEM_BR
 static u8 sUpgradeItemOffsets[] = { 0x00, 0x03, 0x06, 0x09, 0x00, 0x00, 0x00, 0x00}; //This determines the name displayed by scope_PAL
 
 static u8 sEquipmentItemOffsets[] = {
-    0x00, 0x00, 0x01, 0x02, 0x00, 0x03, 0x04, 0x05, 0x00, 0x06, 0x07, 0x08, 0x00, 0x09, 0x0A, 0x0B, 0x0, 0x9, 0XA, ITEM_LANDMINE-ITEM_SWORD_KOKIRI,
+    0x00, 0x00, 0x01, 0x02, 0x00, 0x03, 0x04, 0x05, 0x00, 0x06, 0x07, 0x08, 0x00, 0x09, 0x0A, 0x0B, 0x0,ITEM_RING_1-ITEM_SWORD_KOKIRI, ITEM_RING_2-ITEM_SWORD_KOKIRI, ITEM_RING_3-ITEM_SWORD_KOKIRI,
 };
 
 static s16 sEquipTimer = 0;
@@ -549,6 +549,12 @@ void KaleidoScope_DrawEquipment(PlayState* play) {
                             Inventory_ChangeEquipment(EQUIP_TYPE_BOOTS, EQUIP_VALUE_BOOTS_KOKIRI); // "Unequip" it (by equipping Kokiri Boots)
                             goto RESUME_EQUIPMENT;                     // Skip to here so we don't re-equip it
                         }
+
+                        // If we're on the "rings" section of the equipment screen AND we're on currently-equipped ring
+                        if (pauseCtx->cursorY[PAUSE_EQUIP] == 4 && pauseCtx->cursorX[PAUSE_EQUIP] == CUR_EQUIP_VALUE(EQUIP_TYPE_RING)) {
+                            Inventory_ChangeEquipment(EQUIP_TYPE_RING, EQUIP_VALUE_RINGS_NONE); // Unequip it
+                            goto RESUME_EQUIPMENT;                     // Skip to here so we don't re-equip it
+                        }
                     }
 
                     if (CHECK_OWNED_EQUIP(pauseCtx->cursorY[PAUSE_EQUIP], pauseCtx->cursorX[PAUSE_EQUIP] - 1)) {
@@ -581,9 +587,20 @@ void KaleidoScope_DrawEquipment(PlayState* play) {
                     Audio_PlaySoundGeneral(NA_SE_SY_DECIDE, &D_801333D4, 4, &D_801333E0, &D_801333E0, &D_801333E8);
                     pauseCtx->unk_1E4 = 7;
                     sEquipTimer = 10;
+                } else if (pauseCtx->cursorY[PAUSE_EQUIP] == 4 && pauseCtx->cursorX[PAUSE_EQUIP] > 0 &&
+                                (play->sceneNum == SCENE_LINKS_HOUSE || play->sceneNum == SCENE_TEMPLE_OF_TIME || play->sceneNum == SCENE_BAZAAR)) {
+                    if (CHECK_BTN_ALL(input->press.button, BTN_CLEFT)) {
+                        Ring_SwapLeft(pauseCtx->cursorX[PAUSE_EQUIP]-1);
+                        pauseCtx->namedItem = 0;
+                        Audio_PlaySoundGeneral(NA_SE_SY_DECIDE, &D_801333D4, 4, &D_801333E0, &D_801333E0, &D_801333E8);
+                    } else if (CHECK_BTN_ALL(input->press.button, BTN_CRIGHT)) {
+                        Ring_SwapRight(pauseCtx->cursorX[PAUSE_EQUIP]-1);
+                        pauseCtx->namedItem = 0;
+                        Audio_PlaySoundGeneral(NA_SE_SY_DECIDE, &D_801333D4, 4, &D_801333E0, &D_801333E0, &D_801333E8);
+                    }
                 } else if (CVarGetInteger("gAssignableTunicsAndBoots", 0) != 0) {
                     // Only allow assigning tunic and boots to c-buttons
-                    if (pauseCtx->cursorY[PAUSE_EQUIP] > 1) {
+                    if (pauseCtx->cursorY[PAUSE_EQUIP] > 1 && pauseCtx->cursorY[PAUSE_EQUIP] < 4) {
                         if (CHECK_OWNED_EQUIP(pauseCtx->cursorY[PAUSE_EQUIP], pauseCtx->cursorX[PAUSE_EQUIP] - 1)) {
                             u16 slot = 0;
                             switch (cursorItem) {

@@ -594,6 +594,32 @@ static void* iconNameTexturesEx[] = {
     gDinsCrucibleItemNameENGTex,
 };
 
+static void* iconNameTexturesRing[] = {
+    gKokiriEmeraldItemNameFRATex,
+    gGoronsRubyItemNameFRATex,
+    gZorasSapphireItemNameFRATex,
+    gStoneofAgonyItemNameFRATex,
+    gGerudosCardItemNameFRATex,
+    gGoldSkulltulaItemNameFRATex,
+    gHeartContainerItemNameFRATex,
+    gUnusedPieceOfHeartItemName3JPNTex,
+    gBossKeyItemNameFRATex,
+    gCompassItemNameFRATex,
+    gDungeonMapItemNameFRATex,
+    gMinuetOfForestItemNameFRATex,
+    gBoleroOfFireItemNameFRATex,
+    gSerenadeOfWaterItemNameFRATex,
+    gRequiemOfSpiritItemNameFRATex,
+    gNocturneOfShadowItemNameFRATex,
+    gPreludeOfLightItemNameFRATex,
+    gZeldasLullabyItemNameFRATex,
+    gEponasSongItemNameFRATex,
+    gSariasSongItemNameFRATex,
+    gSunsSongItemNameFRATex,
+    gSongOfTimeItemNameFRATex,
+    gSongOfStormsItemNameFRATex,
+};
+
 static void* mapNameTextures[] =
 {
     gHauntedWastelandPointNameENGTex,
@@ -905,6 +931,9 @@ u8 gItemAgeReqs[] = {
     AGE_REQ_NONE,   // ITEM_LANDMINE
     AGE_REQ_NONE,   // ITEM_NAYRUS_AFFECTION
     AGE_REQ_NONE,   // ITEM_DINS_CRUCIBLE
+    AGE_REQ_NONE,   // ITEM_RING_1
+    AGE_REQ_NONE,   // ITEM_RING_2
+    AGE_REQ_NONE,   // ITEM_RING_3
 };
 
 u8 gAreaGsFlags[] = {
@@ -2250,7 +2279,11 @@ void KaleidoScope_UpdateNamePanel(PlayState* play) {
 
         if (pauseCtx->namedItem != PAUSE_ITEM_NONE) {
             if (ITEM_LANDMINE <= pauseCtx->namedItem && pauseCtx->namedItem < ITEM_LAST_USED) {
-                const char* textureName = iconNameTexturesEx[pauseCtx->namedItem-ITEM_LANDMINE];
+                const char* textureName;
+                if (RING_ITEM_MIN <= pauseCtx->namedItem && pauseCtx->namedItem <= RING_ITEM_MAX)
+                    textureName = iconNameTexturesRing[gSaveContext.inventory.ringEquips[pauseCtx->namedItem-RING_ITEM_MIN]];
+                else
+                    textureName = iconNameTexturesEx[pauseCtx->namedItem-ITEM_LANDMINE];
                 memcpy(pauseCtx->nameSegment, textureName, strlen(textureName) + 1);
             } else if ((pauseCtx->pageIndex == PAUSE_MAP) && !sInDungeonScene) {
                 if (gSaveContext.language) {

@@ -13278,6 +13278,9 @@ s32 func_8084DFF4(PlayState* play, Player* this) {
                     gSaveContext.bgsFlag = true;
                     gSaveContext.swordHealth = 8;
                 }
+                if (RING_ITEM_MIN <= giEntry.itemId && giEntry.itemId <= RING_ITEM_MAX) {
+                    Ring_Give(play, giEntry.getItemId);
+                }
                 Item_Give(play, giEntry.itemId);
             } else {
                 Randomizer_Item_Give(play, giEntry);

@@ -1838,6 +1838,75 @@ u8 Return_Item(u8 itemID, ModIndex modId, ItemID returnItem) {
     return Return_Item_Entry(ItemTable_RetrieveEntry(modId, get), returnItem);
 }
 
+u8 Ring_Give(PlayState* play, u16 getItemId) {
+    if (RING_GI_MIN <= getItemId && getItemId <= RING_GI_MAX) {
+        if (gSaveContext.inventory.rings[getItemId-RING_GI_MIN] < sizeof(gSaveContext.inventory.rings[0]))
+            gSaveContext.inventory.rings[getItemId-RING_GI_MIN]++;
+        return 1;
+    }
+    return 0;
+}
+
+u16 Ring_SwapRight(u8 ringSlot) {
+    s32 ii = 0;
+    s32 temp = gSaveContext.inventory.ringEquips[ringSlot];
+    if (temp != 0) {
+        ii++;
+    }
+
+    while (ii < NUM_RING_TYPES) {
+        gSaveContext.inventory.ringEquips[ringSlot]++;
+        if (gSaveContext.inventory.ringEquips[ringSlot] > NUM_RING_TYPES)
+            gSaveContext.inventory.ringEquips[ringSlot] = 1;
+
+        if (gSaveContext.inventory.rings[gSaveContext.inventory.ringEquips[ringSlot]-1]) {
+            //Include check to see if other slots have this ring in them
+            s8 check = 1;
+            for (s32 jj = 0; jj < ARRAY_COUNT(gSaveContext.inventory.ringEquips); jj++) {
+                if (jj != ringSlot && gSaveContext.inventory.ringEquips[ringSlot] == gSaveContext.inventory.ringEquips[jj]) {
+                    check = 0;
+                    break;
+                }
+            }
+            if (check)
+                return gSaveContext.inventory.ringEquips[ringSlot];
+        }
+        ii++;
+    }
+
+    return gSaveContext.inventory.ringEquips[ringSlot] = temp;
+}
+
+u16 Ring_SwapLeft(u8 ringSlot) {
+    s32 ii = 0;
+    s32 temp = gSaveContext.inventory.ringEquips[ringSlot];
+    if (temp != 0) {
+        ii++;
+    }
+
+    while (ii < NUM_RING_TYPES) {
+        gSaveContext.inventory.ringEquips[ringSlot]--;
+        if (gSaveContext.inventory.ringEquips[ringSlot] <= 0)
+            gSaveContext.inventory.ringEquips[ringSlot] = NUM_RING_TYPES;
+
+        if (gSaveContext.inventory.rings[gSaveContext.inventory.ringEquips[ringSlot]-1]) {
+            //Include check to see if other slots have this ring in them
+            s8 check = 1;
+            for (s32 jj = 0; jj < ARRAY_COUNT(gSaveContext.inventory.ringEquips); jj++) {
+                if (jj != ringSlot && gSaveContext.inventory.ringEquips[ringSlot] == gSaveContext.inventory.ringEquips[jj]) {
+                    check = 0;
+                    break;
+                }
+            }
+            if (check)
+                return gSaveContext.inventory.ringEquips[ringSlot];
+        }
+        ii++;
+    }
+
+    return gSaveContext.inventory.ringEquips[ringSlot] = temp;
+}
+
 /**
  * @brief Adds the given item to Link's inventory.
  * 
@@ -1962,6 +2031,12 @@ u8 Item_Give(PlayState* play, u8 item) {
         return Return_Item(item, MOD_NONE, ITEM_NONE);
     } else if ((item >= ITEM_BOOTS_KOKIRI) && (item <= ITEM_BOOTS_HOVER)) {
         gSaveContext.inventory.equipment |= OWNED_EQUIP_FLAG(EQUIP_TYPE_BOOTS, item - ITEM_BOOTS_KOKIRI);
+        return Return_Item(item, MOD_NONE, ITEM_NONE);
+    } else if ((item >= RING_ITEM_MIN) && (item <= RING_ITEM_MAX)) {
+        if (!(gSaveContext.inventory.equipment & OWNED_EQUIP_FLAG(EQUIP_TYPE_RING, item - RING_ITEM_MIN))) {
+            Ring_SwapRight(item-RING_ITEM_MIN);
+            gSaveContext.inventory.equipment |= OWNED_EQUIP_FLAG(EQUIP_TYPE_RING, item - RING_ITEM_MIN);
+        }
         return Return_Item(item, MOD_NONE, ITEM_NONE);
     } else if ((item == ITEM_KEY_BOSS) || (item == ITEM_COMPASS) || (item == ITEM_DUNGEON_MAP)) {
         gSaveContext.inventory.dungeonItems[gSaveContext.mapIndex] |= gBitFlags[item - ITEM_KEY_BOSS];
@@ -2790,7 +2865,9 @@ u8 Item_CheckObtainability(u8 item) {
         return ITEM_NONE;
     } else if (item == ITEM_DINS_CRUCIBLE) {
         return ITEM_NONE;
-    } else if (item == ITEM_HEART) {
+    } else if (item == ITEM_RING_1 || item == ITEM_RING_2 || item == ITEM_RING_3) {
+        return ITEM_NONE;
+    }else if (item == ITEM_HEART) {
         return ITEM_HEART;
     } else if ((item == ITEM_MAGIC_SMALL) || (item == ITEM_MAGIC_LARGE)) {
         // "Magic Pot Get_Inf_Table( 25, 0x0100)=%d"

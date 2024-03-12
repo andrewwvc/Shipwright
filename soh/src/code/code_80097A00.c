@@ -174,6 +174,9 @@ void* gItemIcons[] = {
     gItemIconLandmineTex,
     gItemIconNayrusAffectionTex,
     gItemIconDinsCrucibleTex,
+    gItemIconRing1Tex,
+    gItemIconRing1Tex,
+    gItemIconRing1Tex,
 };
 
 // Used to map item IDs to inventory slots
@@ -200,7 +203,7 @@ u8 gItemSlots[] = {
     SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,
     SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,
 
-    SLOT_LANDMINE,  SLOT_NAYRUS_AFFECTION, SLOT_DINS_CRUCIBLE
+    SLOT_LANDMINE,  SLOT_NAYRUS_AFFECTION, SLOT_DINS_CRUCIBLE, SLOT_NONE,SLOT_NONE,SLOT_NONE,
 };
 
 void Inventory_ChangeEquipment(s32 equipment, u32 value) {

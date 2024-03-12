@@ -44,6 +44,9 @@ typedef enum {
 #define NUM_ITEM_SLOTS_EXTRA (SLOTS_PER_LINE*NUM_ITEM_SLOT_LINES_EXTRA)
 #define NUM_ITEM_SLOTS_TOTAL (SLOTS_PER_LINE*NUM_ITEM_SLOT_LINES_TOTAL)
 
+#define NUM_RING_TYPES 20
+#define NUM_RING_EQUIPS 3
+
 #define NUM_EQUIPMENT_BUTTONS 7
 
 typedef struct {
@@ -62,6 +65,8 @@ typedef struct {
     /* 0x48 */ s8 dungeonKeys[19];
     /* 0x5B */ s8 defenseHearts;
     /* 0x5C */ s16 gsTokens;
+    /* 0x5D */ u8 rings[NUM_RING_TYPES];
+    /*      */ u16 ringEquips[NUM_RING_EQUIPS];
 } Inventory; // size = 0x5E
 
 typedef struct {
