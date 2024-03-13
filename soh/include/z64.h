@@ -914,6 +914,8 @@ typedef struct {
     /* 0x0266 */ u8     worldMapPoints[20]; // 0 = hidden; 1 = displayed; 2 = highlighted
     /* 0x027A */ u8     tradeQuestLocation;
     /* 0x027C */ SkelAnime playerSkelAnime;
+                 s16    equipSlotScrollY;
+                 s16    equipScrollOffsetY;
                  s16    itemSlotScrollY;
                  s16    itemScrollOffsetY;
 } PauseContext; // size = 0x2C0

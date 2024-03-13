@@ -678,6 +678,19 @@ void KaleidoScope_DrawEquipment(PlayState* play) {
         }
     }
 
+    if (pauseCtx->cursorY[PAUSE_EQUIP] > pauseCtx->equipSlotScrollY+3) {
+        pauseCtx->equipSlotScrollY = pauseCtx->cursorY[PAUSE_EQUIP]-3;
+    } else if (pauseCtx->cursorY[PAUSE_EQUIP] < pauseCtx->equipSlotScrollY) {
+        pauseCtx->equipSlotScrollY = pauseCtx->cursorY[PAUSE_EQUIP];
+    }
+
+    s16 scrollYTarget = 32*pauseCtx->equipSlotScrollY;
+    if (pauseCtx->equipScrollOffsetY > scrollYTarget) {
+        pauseCtx->equipScrollOffsetY -= 8;
+    } else if (pauseCtx->equipScrollOffsetY < scrollYTarget) {
+        pauseCtx->equipScrollOffsetY += 8;
+    }
+
     Gfx_SetupDL_42Opa(play->state.gfxCtx);
 
     gDPSetCombineMode(POLY_KAL_DISP++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
