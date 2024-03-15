@@ -178,6 +178,7 @@ void KaleidoScope_DrawEquipment(PlayState* play) {
     s16 cursorX;
     s16 cursorY;
     s16 oldCursorPoint;
+    s16 prevEquipedRing = Ring_Get_Equiped();
     bool dpad = (CVarGetInteger("gDpadPause", 0) && !CHECK_BTN_ALL(input->cur.button, BTN_CUP));
     bool pauseAnyCursor = (CVarGetInteger("gPauseAnyCursor", 0) == PAUSE_ANY_CURSOR_RANDO_ONLY && IS_RANDO) ||
                           (CVarGetInteger("gPauseAnyCursor", 0) == PAUSE_ANY_CURSOR_ALWAYS_ON);
@@ -654,6 +655,24 @@ void KaleidoScope_DrawEquipment(PlayState* play) {
         sEquipTimer--;
         if (sEquipTimer == 0) {
             pauseCtx->unk_1E4 = 0;
+        }
+    }
+
+    //Deal with ring changes
+    s16 currRing = Ring_Get_Equiped();
+    if (prevEquipedRing != currRing) {
+        if (prevEquipedRing == RI_RING_OF_SILENCE) {
+            Audio_SetGameVolume(SEQ_PLAYER_BGM_MAIN, CVarGetFloat("gMainMusicVolume", 1.0f));
+            Audio_SetGameVolume(SEQ_PLAYER_BGM_SUB, CVarGetFloat("gSubMusicVolume", 1.0f));
+        } else if (currRing == RI_RING_OF_SILENCE) {
+            Audio_SetGameVolume(SEQ_PLAYER_BGM_MAIN, 0.0f);
+            Audio_SetGameVolume(SEQ_PLAYER_BGM_SUB, 0.0f);
+        }
+
+        if (prevEquipedRing == RI_MUTE_RING) {
+            Audio_SetGameVolume(SEQ_PLAYER_SFX, CVarGetFloat("gSFXMusicVolume", 1.0f));
+        } else if (currRing == RI_MUTE_RING) {
+            Audio_SetGameVolume(SEQ_PLAYER_SFX, 0.0f);
         }
     }
 

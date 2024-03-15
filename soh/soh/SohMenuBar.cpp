@@ -33,6 +33,10 @@ extern bool isBetaQuestEnabled;
 
 extern "C" PlayState* gPlayState;
 
+extern "C" {
+    s16 Ring_Get_Equiped();
+}
+
 enum SeqPlayers {
     /* 0 */ SEQ_BGM_MAIN,
     /* 1 */ SEQ_FANFARE,
@@ -181,13 +185,13 @@ void DrawSettingsMenu() {
         if (ImGui::BeginMenu("Audio")) {
             UIWidgets::PaddedEnhancementSliderFloat("Master Volume: %d %%", "##Master_Vol", "gGameMasterVolume", 0.0f, 1.0f, "", 1.0f, true, true, false, true);
             if (UIWidgets::PaddedEnhancementSliderFloat("Main Music Volume: %d %%", "##Main_Music_Vol", "gMainMusicVolume", 0.0f, 1.0f, "", 1.0f, true, true, false, true)) {
-                Audio_SetGameVolume(SEQ_BGM_MAIN, CVarGetFloat("gMainMusicVolume", 1.0f));
+                Audio_SetGameVolume(SEQ_BGM_MAIN, (Ring_Get_Equiped() == RI_RING_OF_SILENCE) ? 0.0f : CVarGetFloat("gMainMusicVolume", 1.0f));
             }
             if (UIWidgets::PaddedEnhancementSliderFloat("Sub Music Volume: %d %%", "##Sub_Music_Vol", "gSubMusicVolume", 0.0f, 1.0f, "", 1.0f, true, true, false, true)) {
-                Audio_SetGameVolume(SEQ_BGM_SUB, CVarGetFloat("gSubMusicVolume", 1.0f));
+                Audio_SetGameVolume(SEQ_BGM_SUB, (Ring_Get_Equiped() == RI_RING_OF_SILENCE) ? 0.0f : CVarGetFloat("gSubMusicVolume", 1.0f));
             }
             if (UIWidgets::PaddedEnhancementSliderFloat("Sound Effects Volume: %d %%", "##Sound_Effect_Vol", "gSFXMusicVolume", 0.0f, 1.0f, "", 1.0f, true, true, false, true)) {
-                Audio_SetGameVolume(SEQ_SFX, CVarGetFloat("gSFXMusicVolume", 1.0f));
+                Audio_SetGameVolume(SEQ_SFX, (Ring_Get_Equiped() == RI_MUTE_RING) ? 0.0f : CVarGetFloat("gSFXMusicVolume", 1.0f));
             }
             if (UIWidgets::PaddedEnhancementSliderFloat("Fanfare Volume: %d %%", "##Fanfare_Vol", "gFanfareVolume", 0.0f, 1.0f, "", 1.0f, true, true, false, true)) {
                 Audio_SetGameVolume(SEQ_FANFARE, CVarGetFloat("gFanfareVolume", 1.0f));
