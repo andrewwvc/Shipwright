@@ -3073,7 +3073,7 @@ void func_80835F44(PlayState* play, Player* this, s32 item) {
             if (temp >= 0) {
                 if (((actionParam == PLAYER_IA_FARORES_WIND) && (gSaveContext.respawn[RESPAWN_MODE_TOP].data > 0)) ||
                     ((gSaveContext.magicCapacity != 0) && (gSaveContext.magicState == MAGIC_STATE_IDLE) &&
-                     (gSaveContext.magic >= sMagicSpellCosts[temp]))) {
+                     ((Ring_Get_Equiped() == RI_WITCHS_RING) ? gSaveContext.health >= sMagicSpellCosts[temp]*WITCH_RING_MULTIPLIER : gSaveContext.magic >= sMagicSpellCosts[temp]))) {
                     this->itemAction = actionParam;
                     this->unk_6AD = 4;
                 } else {
@@ -14534,6 +14534,7 @@ static struct_80832924 D_80854A8C[][2] = {
 void func_808507F4(Player* this, PlayState* play) {
     u8 isFastFarores = CVarGetInteger("gFastFarores", 0) && this->itemAction == PLAYER_IA_FARORES_WIND;
     u8 baseAnimSpeed = 1;
+    s16 resultingMagicState = (Ring_Get_Equiped() == RI_WITCHS_RING) ? MAGIC_STATE_METER_FLASH_3 : MAGIC_STATE_CONSUME_SETUP;
     if (this->itemAction == PLAYER_IA_MAGIC_SPELL_15)
         baseAnimSpeed = 2;
     if (LinkAnimation_Update(play, &this->skelAnime)) {
@@ -14547,14 +14548,14 @@ void func_808507F4(Player* this, PlayState* play) {
                 LinkAnimation_PlayOnceSetSpeed(play, &this->skelAnime, D_80854A58[this->unk_84F], 0.83f * (isFastFarores ? 2 : baseAnimSpeed));
                 if (this->unk_84F == 3) {
                     this->stateFlags1 |= PLAYER_STATE1_IN_ITEM_CS | PLAYER_STATE1_IN_CUTSCENE;
-                    gSaveContext.magicState = MAGIC_STATE_CONSUME_SETUP;
+                    gSaveContext.magicState = resultingMagicState;
                 } else if (this->unk_84F == 4) {
                     this->stateFlags1 |= PLAYER_STATE1_IN_ITEM_CS | PLAYER_STATE1_IN_CUTSCENE;
-                    gSaveContext.magicState = MAGIC_STATE_CONSUME_SETUP;
+                    gSaveContext.magicState = resultingMagicState;
                 } else if (func_80846A00(play, this, this->unk_84F) != NULL) {
                     this->stateFlags1 |= PLAYER_STATE1_IN_ITEM_CS | PLAYER_STATE1_IN_CUTSCENE;
                     if ((this->unk_84F != 0) || (gSaveContext.respawn[RESPAWN_MODE_TOP].data <= 0)) {
-                        gSaveContext.magicState = MAGIC_STATE_CONSUME_SETUP;
+                        gSaveContext.magicState = resultingMagicState;
                     }
                 } else {
                     Magic_Reset(play);

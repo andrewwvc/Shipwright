@@ -3464,7 +3464,10 @@ s32 Magic_RequestChange(PlayState* play, s16 amount, s16 type) {
         return false;
     }
 
-    if ((type != 5) && (gSaveContext.magic - amount) < 0) {
+    if ((Ring_Get_Equiped() == RI_WITCHS_RING) && (type != MAGIC_ADD))
+        amount = amount*WITCH_RING_MULTIPLIER;
+
+    if ((type != MAGIC_ADD) && ((Ring_Get_Equiped() == RI_WITCHS_RING) ? (gSaveContext.health - amount) < 0 : (gSaveContext.magic - amount) < 0)) {
         if (gSaveContext.magicCapacity != 0) {
             Audio_PlaySoundGeneral(NA_SE_SY_ERROR, &D_801333D4, 4, &D_801333E0, &D_801333E0, &D_801333E8);
         }
@@ -3478,8 +3481,13 @@ s32 Magic_RequestChange(PlayState* play, s16 amount, s16 type) {
                 if (gSaveContext.magicState == MAGIC_STATE_CONSUME_LENS) {
                     play->actorCtx.lensActive = false;
                 }
-                gSaveContext.magicTarget = gSaveContext.magic - amount;
-                gSaveContext.magicState = MAGIC_STATE_CONSUME_SETUP;
+                if (Ring_Get_Equiped() == RI_WITCHS_RING) {
+                    Health_ChangeBy(play, -amount);
+                    gSaveContext.magicState = MAGIC_STATE_METER_FLASH_3;
+                } else {
+                    gSaveContext.magicTarget = gSaveContext.magic - amount;
+                    gSaveContext.magicState = MAGIC_STATE_CONSUME_SETUP;
+                }
                 return 1;
             } else {
                 Audio_PlaySoundGeneral(NA_SE_SY_ERROR, &D_801333D4, 4, &D_801333E0, &D_801333E0, &D_801333E8);
@@ -3490,14 +3498,19 @@ s32 Magic_RequestChange(PlayState* play, s16 amount, s16 type) {
                 if (gSaveContext.magicState == MAGIC_STATE_CONSUME_LENS) {
                     play->actorCtx.lensActive = false;
                 }
-                gSaveContext.magicTarget = gSaveContext.magic - amount;
-                gSaveContext.magicState = MAGIC_STATE_METER_FLASH_3;
+                if (Ring_Get_Equiped() == RI_WITCHS_RING) {
+                    Health_ChangeBy(play, -amount);
+                    gSaveContext.magicState = MAGIC_STATE_METER_FLASH_3;
+                } else {
+                    gSaveContext.magicTarget = gSaveContext.magic - amount;
+                    gSaveContext.magicState = MAGIC_STATE_METER_FLASH_3;
+                }
                 return true;
             } else {
                 Audio_PlaySoundGeneral(NA_SE_SY_ERROR, &D_801333D4, 4, &D_801333E0, &D_801333E0, &D_801333E8);
                 return false;
             }
-        case 3:
+        case MAGIC_CONSUME_LENS:
             if (gSaveContext.magicState == MAGIC_STATE_IDLE) {
                 if (gSaveContext.magic > amount) {
                     play->interfaceCtx.unk_230 = 1;
@@ -3518,8 +3531,13 @@ s32 Magic_RequestChange(PlayState* play, s16 amount, s16 type) {
                 if (gSaveContext.magicState == MAGIC_STATE_CONSUME_LENS) {
                     play->actorCtx.lensActive = false;
                 }
-                gSaveContext.magicTarget = gSaveContext.magic - amount;
-                gSaveContext.magicState = MAGIC_STATE_METER_FLASH_2;
+                if (Ring_Get_Equiped() == RI_WITCHS_RING) {
+                    Health_ChangeBy(play, -amount);
+                    gSaveContext.magicState = MAGIC_STATE_METER_FLASH_3;
+                } else {
+                    gSaveContext.magicTarget = gSaveContext.magic - amount;
+                    gSaveContext.magicState = MAGIC_STATE_METER_FLASH_2;
+                }
                 return true;
             } else {
                 Audio_PlaySoundGeneral(NA_SE_SY_ERROR, &D_801333D4, 4, &D_801333E0, &D_801333E0, &D_801333E8);
@@ -3726,7 +3744,10 @@ void Interface_UpdateMagicBar(PlayState* play) {
 
                 interfaceCtx->unk_230--;
                 if (interfaceCtx->unk_230 == 0) {
-                    gSaveContext.magic--;
+                    if (Ring_Get_Equiped() == RI_WITCHS_RING)
+                        Health_ChangeBy(play, -1);
+                    else
+                        gSaveContext.magic--;
                     interfaceCtx->unk_230 = 80;
                 }
             }

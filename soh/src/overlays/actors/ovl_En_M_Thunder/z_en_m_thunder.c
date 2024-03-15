@@ -196,8 +196,11 @@ void func_80A9F408(EnMThunder* this, PlayState* play) {
             return;
         } else {
             player->stateFlags2 &= ~PLAYER_STATE2_SPIN_ATTACKING;
-            if ((this->actor.params & 0xFF00) >> 8) {
-                gSaveContext.magicState = MAGIC_STATE_CONSUME_SETUP;
+            if (((this->actor.params & 0xFF00) >> 8)) {
+                if (Ring_Get_Equiped() == RI_WITCHS_RING)
+                    gSaveContext.magicState = MAGIC_STATE_METER_FLASH_3;
+                else
+                    gSaveContext.magicState = MAGIC_STATE_CONSUME_SETUP;
             }
             if (player->unk_858 < ORANGE_SPIN_TIME) {
                 this->collider.info.toucher.dmgFlags = D_80AA044C[this->unk_1C7];
