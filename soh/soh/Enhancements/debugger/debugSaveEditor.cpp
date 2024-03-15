@@ -1396,6 +1396,16 @@ void DrawEquipmentTab() {
         std::to_string(CAPACITY(UPG_NUTS,3)),
     };
     DrawUpgrade("Deku Nuts", UPG_NUTS, nutNames);
+
+    for (int32_t ii = 0; ii < ARRAY_COUNT(gSaveContext.inventory.ringEquips); ii++) {
+        const std::string ringName = "Ring Slot "+std::to_string(ii);
+        ImGui::InputScalar(ringName.c_str(), ImGuiDataType_U8, &gSaveContext.inventory.ringEquips[ii]);
+    }
+
+    for (int32_t ii = 0; ii < ARRAY_COUNT(gSaveContext.inventory.rings); ii++) {
+        const std::string ringName = "Ring Type "+std::to_string(ii+1);
+        ImGui::InputScalar(ringName.c_str(), ImGuiDataType_U8, &gSaveContext.inventory.rings[ii]);
+    }
 }
 
 // Draws a toggleable icon for a quest item that is faded when disabled
@@ -1553,6 +1563,7 @@ void DrawPlayerTab() {
         const char* curShield;
         const char* curTunic;
         const char* curBoots;
+        const char* curRing;
 
         switch (player->currentSwordItemId) {
             case ITEM_SWORD_KOKIRI:
@@ -1615,6 +1626,23 @@ void DrawPlayerTab() {
                 break;
             case PLAYER_BOOTS_HOVER:
                 curBoots = "Hover Boots";
+                break;
+            default:
+                break;
+        }
+
+        switch (player->currentRing) {
+            case 0:
+                curRing = "None";
+                break;
+            case 1:
+                curRing = "Ring 1";
+                break;
+            case 2:
+                curRing = "Ring 2";
+                break;
+            case 3:
+                curRing = "Ring 3";
                 break;
             default:
                 break;
@@ -1771,6 +1799,26 @@ void DrawPlayerTab() {
             if (ImGui::Selectable("Hover Boots")) {
                 player->currentBoots = PLAYER_BOOTS_HOVER;
                 Inventory_ChangeEquipment(EQUIP_TYPE_BOOTS, EQUIP_VALUE_BOOTS_HOVER);
+            }
+            ImGui::EndCombo();
+        }
+
+        if (ImGui::BeginCombo("Rings", curRing)) {
+            if (ImGui::Selectable("None")) {
+                player->currentRing = 1;
+                Inventory_ChangeEquipment(EQUIP_TYPE_RING, EQUIP_VALUE_RINGS_NONE);
+            }
+            if (ImGui::Selectable("Ring 1")) {
+                player->currentRing = 1;
+                Inventory_ChangeEquipment(EQUIP_TYPE_RING, EQUIP_VALUE_RINGS_1);
+            }
+            if (ImGui::Selectable("Ring 2")) {
+                player->currentRing = 2;
+                Inventory_ChangeEquipment(EQUIP_TYPE_BOOTS, EQUIP_VALUE_RINGS_2);
+            }
+            if (ImGui::Selectable("Ring 3")) {
+                player->currentRing = 3;
+                Inventory_ChangeEquipment(EQUIP_TYPE_BOOTS, EQUIP_VALUE_RINGS_3);
             }
             ImGui::EndCombo();
         }

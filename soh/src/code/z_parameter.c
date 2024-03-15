@@ -1847,6 +1847,13 @@ u8 Ring_Give(PlayState* play, u16 getItemId) {
     return 0;
 }
 
+s16 Ring_Get_Equiped() {//Returns -1 for no ring
+    if (CUR_EQUIP_VALUE(EQUIP_TYPE_RING))
+        return gSaveContext.inventory.ringEquips[CUR_EQUIP_VALUE(EQUIP_TYPE_RING)-1]-1;
+    else
+        return -1;
+}
+
 u16 Ring_SwapRight(u8 ringSlot) {
     s32 ii = 0;
     s32 temp = gSaveContext.inventory.ringEquips[ringSlot];

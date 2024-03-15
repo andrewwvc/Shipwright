@@ -483,13 +483,55 @@ typedef enum {
     /* 0x83 */ GI_NAYRUS_AFFECTION,
     /* 0x84 */ GI_DINS_CRUCIBLE,
     /* 0x85 */ GI_RING,
-    /* 0x85 */ GI_RING_BLUE,
-    /* 0x85 */ GI_RING_RED,
+    /* 0x85 */ GI_RING_1,
+    /* 0x85 */ GI_RING_2,
+    /* 0x85 */ GI_RING_3,
+    /* 0x85 */ GI_RING_4,
+    /* 0x85 */ GI_RING_5,
+    /* 0x85 */ GI_RING_6,
+    /* 0x85 */ GI_RING_7,
+    /* 0x85 */ GI_RING_8,
+    /* 0x85 */ GI_RING_9,
+    /* 0x85 */ GI_RING_10,
+    /* 0x85 */ GI_RING_11,
+    /* 0x85 */ GI_RING_12,
+    /* 0x85 */ GI_RING_13,
+    /* 0x85 */ GI_RING_14,
+    /* 0x85 */ GI_RING_15,
+    /* 0x85 */ GI_RING_16,
+    /* 0x85 */ GI_RING_17,
+    /* 0x85 */ GI_RING_18,
+    /* 0x85 */ GI_RING_19,
     /* 0x86 */ GI_MAX
 } GetItemID;
 
 #define RING_GI_MIN GI_RING
-#define RING_GI_MAX GI_RING_RED
+#define RING_GI_MAX GI_RING_19
+
+typedef enum {
+    /* 00 */ RI_ATTRACTION_RING,//Makes items easier to pick up
+    /* 01 */ RI_REPULSION_RING,
+    /* 02 */ RI_LOVE_RING,//Increases heart drop rate, no rupees
+    /* 03 */ RI_GREED_RING,//Increases rupee drop rate, no hearts
+    /* 04 */ RI_BRAVERY_RING,//Slightly increases weapon damage, doubles damage taken
+    /* 05 */ RI_COWARDS_RING,//Slightly degreases damage taken from strong hits, reduces offensive damage
+    /* 06 */ RI_WOOD_RING,//Lets you see Kokiri from afar
+    /* 07 */ RI_MOUNTAIN_RING,//Makes Gorons wake up from afar
+    /* 08 */ RI_FOUNTAIN_RING,//Lets you see Zora from afar
+    /* 09 */ RI_FOCUS_RING,//Lets you Z-target from a slightly larger range
+    /* 10 */ RI_FEATHER_RING,//Cuccus are no longer your foes...
+    /* 11 */ RI_SNEAK_RING,//You are as stealthy during daytime as you are at night
+    /* 12 */ RI_SORCERERS_RING,//This cannot be equipped when not selected.
+    /* 13 */ RI_WITCHS_RING,//Magic use drains hearts isntead of the magic bar
+    /* 14 */ RI_NIMBLE_RING,//Increases roll effectiveness/invincibility
+    /* 15 */ RI_RING_OF_SILENCE,//Silences all music
+    /* 16 */ RI_RING_OF_DARKNESS,//Renders no image
+    /* 17 */ RI_ACROBAT_RING,//Alters jump attack
+    /* 18 */ RI_MUTE_RING,//You cannot speak or yell
+    /* 19 */ RI_SECRET_RING,//It's a secret to everyone
+} RingID;
+
+#define WITCH_RING_MULTIPLIER 2
 
 typedef enum {
     /* 0x00 */ GID_BOTTLE,

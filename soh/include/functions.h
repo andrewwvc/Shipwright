@@ -1108,6 +1108,7 @@ void func_80084BF4(PlayState* play, u16 flag);
 uint16_t Interface_DrawTextLine(GraphicsContext* gfx, char text[], int16_t x, int16_t y, uint16_t colorR, uint16_t colorG, uint16_t colorB, uint16_t colorA, float textScale, uint8_t textShadow);
 u8 Item_Give(PlayState* play, u8 item);
 u8 Ring_Give(PlayState* play, u16 getItemId);
+s16 Ring_Get_Equiped();
 u16 Ring_SwapRight(u8 ringSlot);
 u16 Ring_SwapLeft(u8 ringSlot);
 u16 Randomizer_Item_Give(PlayState* play, GetItemEntry giEntry);
