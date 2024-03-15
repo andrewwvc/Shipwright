@@ -185,7 +185,7 @@ void EnGe2_Destroy(Actor* thisx, PlayState* play) {
 s32 Ge2_DetectPlayerInAction(PlayState* play, EnGe2* this) {
     f32 visionScale;
 
-    visionScale = (!IS_DAY ? 1.0f : 1.5f);
+    visionScale = ((!IS_DAY || Ring_Get_Equiped() == RI_SNEAK_RING) ? 1.0f : 1.5f);
 
     if ((250.0f * visionScale) < this->actor.xzDistToPlayer) {
         return 0;
@@ -207,7 +207,7 @@ s32 Ge2_DetectPlayerInUpdate(PlayState* play, EnGe2* this, Vec3f* pos, s16 yRot,
     CollisionPoly* outPoly;
     f32 visionScale;
 
-    visionScale = (!IS_DAY ? 0.75f : 1.5f);
+    visionScale = ((!IS_DAY || Ring_Get_Equiped() == RI_SNEAK_RING) ? 0.75f : 1.5f);
 
     if ((250.0f * visionScale) < this->actor.xzDistToPlayer) {
         return 0;

@@ -9018,7 +9018,12 @@ void func_80844708(Player* this, PlayState* play) {
     cylinderOc = NULL;
     sp44 = LinkAnimation_Update(play, &this->skelAnime);
 
-    if (LinkAnimation_OnFrame(&this->skelAnime, 8.0f)) {
+    if (Ring_Get_Equiped() == RI_NIMBLE_RING) {
+        if (LinkAnimation_OnFrame(&this->skelAnime, 6.0f)) {
+            func_80837AFC(this, -12);
+        }
+
+    } else if (LinkAnimation_OnFrame(&this->skelAnime, 8.0f)) {
         func_80837AFC(this, -10);
     }
 
