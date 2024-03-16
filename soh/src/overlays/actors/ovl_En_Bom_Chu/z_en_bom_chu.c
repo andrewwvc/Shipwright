@@ -97,6 +97,7 @@ void EnBomChu_Init(Actor* thisx, PlayState* play) {
     Effect_Add(play, &this->blure2Index, EFFECT_BLURE1, 0, 0, &blureInit);
 
     this->actor.room = -1;
+    this->roomPlanted = -1;
     this->timer = 120;
     this->actionFunc = EnBomChu_WaitForRelease;
 }
@@ -256,6 +257,7 @@ void EnBomChu_WaitForRelease(EnBomChu* this, PlayState* play) {
         } else {
             this->actor.speedXZ = 0.0f;
             this->timer = 4000;
+            this->roomPlanted = play->roomCtx.curRoom.num;
             EnBomChu_UpdateFloorPoly(this, this->actor.floorPoly, play);
             func_8002F850(play, &this->actor);
             this->actionFunc = EnBomChu_Landmine;
@@ -379,13 +381,23 @@ void EnBomChu_Landmine(EnBomChu* this, PlayState* play) {
     Vec3f posA;
     Vec3f posB;
     Vec3f posUpDown;
+    Player* player = GET_PLAYER(play);
 
 
     if (this->timer != 0) {
         this->timer--;
     }
 
-    if ((this->timer == 0) || (this->collider.base.acFlags & AC_HIT) ||
+    posA = player->actor.world.pos;
+    posA.y += 20.0f;
+    posB = this->actor.world.pos;
+    posB.y += 2.0f;
+    if (this->timer == 0 || (this->roomPlanted != play->roomCtx.curRoom.num && BgCheck_AnyLineTest1(&play->colCtx, &posA, &posB, &posUpDown, &polyUpDown, true) &&
+                                (posA = play->view.eye, BgCheck_AnyLineTest1(&play->colCtx, &posA, &posB, &posUpDown, &polyUpDown, true)))) {
+        Actor_Kill(&this->actor);
+    }
+
+    if ((this->collider.base.acFlags & AC_HIT) ||
             ((this->collider.base.ocFlags1 & OC1_HIT) && (this->collider.base.oc->category != ACTORCAT_PLAYER)) ||
               Actor_FindNumberOf(play, &this->actor, -1, ACTORCAT_ENEMY, 60.0f, NULL, isNotIntangibleEnemy) ||
               (play->actorCtx.unk_02 != 0 && this->actor.xzDistToPlayer < 200.0f &&

@@ -20,6 +20,7 @@ typedef struct EnBomChu {
     /* 0x0180 */ s32 blure2Index;
     /* 0x0184 */ ColliderJntSph collider;
     /* 0x01A4 */ ColliderJntSphElement colliderElements[1];
+                 s8 roomPlanted;
 } EnBomChu; // size = 0x01E4
 
 #endif
