@@ -144,3 +144,6 @@ static const ALIGN_ASSET(2) char gDinsCrucibleItemNameENGTex[] = dgDinsCrucibleI
 
 #define dgItemIconRing1Tex "__OTR__textures/icons/ring_icon"
 static const ALIGN_ASSET(2) char gItemIconRing1Tex[] = dgItemIconRing1Tex;
+
+#define dgGiRing0DL "__OTR__objects/object_ring_0/gGiRing0DL"
+static const ALIGN_ASSET(2) char gGiRing0DL[] = dgGiRing0DL;

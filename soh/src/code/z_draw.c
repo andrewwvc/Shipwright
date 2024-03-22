@@ -114,6 +114,7 @@ void GetItem_DrawJewelZora(PlayState* play, s16 drawId);
 void GetItem_DrawGenericMusicNote(PlayState* play, s16 drawId);
 void GetItem_DrawTriforcePiece(PlayState* play, s16 drawId);
 void GetItem_DrawLandmine(PlayState* play, s16 drawId);
+void GetItem_DrawRing(PlayState* play, s16 drawId);
 
 typedef struct {
     /* 0x00 */ void (*drawFunc)(PlayState*, s16);
@@ -390,7 +391,10 @@ DrawItemTableEntry sDrawItemTable[] = {
     { GetItem_DrawGenericMusicNote, { gGiSongNoteDL } }, //Song of time
     { GetItem_DrawGenericMusicNote, { gGiSongNoteDL } }, //Song of storms
     { GetItem_DrawTriforcePiece, { gTriforcePiece0DL } }, // Triforce Piece
-    { GetItem_DrawLandmine, { gLandmineDL }} // Land Mine
+    { GetItem_DrawLandmine, { gLandmineDL }}, // Land Mine
+    { GetItem_DrawRing, { gGiRing0DL }}, // Ring 0
+    { GetItem_DrawRing, { gGiRing0DL }}, // Ring 1
+    { GetItem_DrawRing, { gGiRing0DL }}, //
 };
 
 /**
@@ -837,6 +841,43 @@ void GetItem_DrawOpa0Xlu1(PlayState* play, s16 drawId) {
     gSPMatrix(POLY_XLU_DISP++, MATRIX_NEWMTX(play->state.gfxCtx),
               G_MTX_MODELVIEW | G_MTX_LOAD);
     gSPDisplayList(POLY_XLU_DISP++, sDrawItemTable[drawId].dlists[1]);
+
+    CLOSE_DISPS(play->state.gfxCtx);
+}
+
+void GetItem_DrawRing(PlayState* play, s16 drawId) {
+    OPEN_DISPS(play->state.gfxCtx);
+
+    s16 color_slot = drawId-GID_RING_0;
+    static s16 colors[][2][3] = {
+        {{255,255,255},{12,21,26}},  //Default dull blue
+        {{255,255,255},{60,8,8}},  //Crimson
+        {{255,255,255},{20,60,20}},
+        {{255,255,255},{12,21,26}},  //Default dull blue
+        {{255,255,255},{12,21,26}},  //Default dull blue
+        {{255,255,255},{12,21,26}},  //Default dull blue
+        {{255,255,255},{12,21,26}},  //Default dull blue
+        {{255,255,255},{12,21,26}},  //Default dull blue
+        {{255,255,255},{12,21,26}},  //Default dull blue
+        {{255,255,255},{12,21,26}},  //Default dull blue
+        {{255,255,255},{12,21,26}},  //Default dull blue
+        {{255,255,255},{12,21,26}},  //Default dull blue
+        {{255,255,255},{12,21,26}},  //Default dull blue
+        {{255,255,255},{12,21,26}},  //Default dull blue
+        {{255,255,255},{12,21,26}},  //Default dull blue
+        {{255,255,255},{12,21,26}},  //Default dull blue
+        {{255,255,255},{12,21,26}},  //Default dull blue
+        {{255,255,255},{12,21,26}},  //Default dull blue
+        {{255,255,255},{12,21,26}},  //Default dull blue
+        {{255,255,255},{12,21,26}},  //Default dull blue
+    };
+
+    Gfx_SetupDL_25Opa(play->state.gfxCtx);
+    gSPMatrix(POLY_OPA_DISP++, MATRIX_NEWMTX(play->state.gfxCtx),
+              G_MTX_MODELVIEW | G_MTX_LOAD);
+    gDPSetPrimColor(POLY_OPA_DISP++, 0, 0, colors[color_slot][0][0], colors[color_slot][0][1], colors[color_slot][0][2], 255);
+    gDPSetEnvColor(POLY_OPA_DISP++, colors[color_slot][1][0], colors[color_slot][1][1], colors[color_slot][1][2], 255);
+    gSPDisplayList(POLY_OPA_DISP++, sDrawItemTable[drawId].dlists[0]);
 
     CLOSE_DISPS(play->state.gfxCtx);
 }
