@@ -88,6 +88,7 @@ void ObjTsubo_SpawnCollectible(ObjTsubo* this, PlayState* play) {
     s16 collectibleFlag = (((this->actor.params >> 9) & 0x3F) << 8);
     s16 collectedFlag = ((this->actor.params & 0x20) >> 5);
     s16 lowSpawnFlag = ((this->actor.params & 0x40) >> 6);
+    s16 highDropParams = ((this->actor.home.rot.z & 0x7) <<5 );
 
     if (collectedFlag) {
         s16 isSetToMax = 1;
@@ -107,9 +108,9 @@ void ObjTsubo_SpawnCollectible(ObjTsubo* this, PlayState* play) {
         }
     }
 
-    if ((dropParams >= ITEM00_RUPEE_GREEN) && (dropParams <= ITEM00_BOMBS_SPECIAL)) {
+    if ((dropParams >= ITEM00_RUPEE_GREEN) && (dropParams < ITEM00_MAX)) {
         EnItem00* item = Item_DropCollectible(play, &this->actor.world.pos,
-                             (dropParams | collectibleFlag));
+                             (dropParams | highDropParams | collectibleFlag));
         if (item) {
             item->actor.entryNum = this->actor.entryNum;
         }

@@ -550,6 +550,14 @@ void EnItem00_Init(Actor* thisx, PlayState* play) {
             Actor_Kill(&this->actor);
             return;
             break;
+        default:
+            if (ITEM00_RING_0 <= this->actor.params && this->actor.params <= ITEM00_RING_LAST) {
+                this->unk_158 = 0;
+                Actor_SetScale(&this->actor, 0.03f);
+                this->scale = 0.03f;
+                yOffset = 200.0f;
+            }
+            break;
     }
 
     this->unk_156 = 0;
@@ -671,8 +679,16 @@ void EnItem00_Destroy(Actor* thisx, PlayState* play) {
 
 void func_8001DFC8(EnItem00* this, PlayState* play) {
     if ((this->actor.params <= ITEM00_RUPEE_RED) || ((this->actor.params == ITEM00_HEART) && (this->unk_15A < 0)) ||
-        (this->actor.params == ITEM00_HEART_PIECE) || (this->actor.params == ITEM00_DEFENSE_HEART)) {
+            (this->actor.params == ITEM00_HEART_PIECE) || (this->actor.params == ITEM00_DEFENSE_HEART)) {
         this->actor.shape.rot.y += 960;
+    } else if (ITEM00_RING_0 <= this->actor.params && this->actor.params <= ITEM00_RING_LAST) {
+        if (this->unk_15A >= 0) {
+            this->actor.shape.rot.y += (ABS(this->actor.shape.rot.x) == 0x4000) ? 0 : 1000;
+            Math_SmoothStepToS(&this->actor.world.rot.x, 0, 2, 2500, 500);
+            Math_SmoothStepToS(&this->actor.shape.rot.x, this->actor.world.rot.x - 0x4000, 2, 100, 50);
+        } else {
+            this->actor.shape.rot.y += 960;
+        }
     } else {
         if ((this->actor.params >= ITEM00_SHIELD_DEKU) && (this->actor.params != ITEM00_BOMBS_SPECIAL) &&
             (this->actor.params != ITEM00_BOMBCHU)) {
@@ -699,14 +715,16 @@ void func_8001DFC8(EnItem00* this, PlayState* play) {
 
     if (this->unk_154 == 0) {
         if ((this->actor.params != ITEM00_SMALL_KEY) && (this->actor.params != ITEM00_HEART_PIECE) &&
-            (this->actor.params != ITEM00_HEART_CONTAINER) && (this->actor.params  != ITEM00_DEFENSE_HEART)) {
+            (this->actor.params != ITEM00_HEART_CONTAINER) && (this->actor.params  != ITEM00_DEFENSE_HEART) &&
+            (this->actor.params < ITEM00_RING_0 || ITEM00_RING_LAST < this->actor.params)) {
             this->unk_154 = -1;
         }
     }
 
     if (this->unk_15A == 0) {
         if ((this->actor.params != ITEM00_SMALL_KEY) && (this->actor.params != ITEM00_HEART_PIECE) &&
-            (this->actor.params != ITEM00_HEART_CONTAINER) && (this->actor.params  != ITEM00_DEFENSE_HEART)) {
+            (this->actor.params != ITEM00_HEART_CONTAINER) && (this->actor.params  != ITEM00_DEFENSE_HEART) &&
+            (this->actor.params < ITEM00_RING_0 || ITEM00_RING_LAST < this->actor.params)) {
             Actor_Kill(&this->actor);
         }
     }
@@ -1026,6 +1044,11 @@ void EnItem00_Update(Actor* thisx, PlayState* play) {
         case ITEM00_BOMBCHU:
             Item_Give(play, ITEM_BOMBCHUS_5);
             break;
+        default:
+            if (ITEM00_RING_0 <= this->actor.params && this->actor.params <= ITEM00_RING_LAST) {
+                getItemId = GI_RING + this->actor.params - ITEM00_RING_0;
+            }
+            break;
     }
 
     insertSpawnResource(this->actor.entryNum, DEFAULT_RESOURCE_TIME*resourceTimeMultiplier);
@@ -1055,6 +1078,14 @@ void EnItem00_Update(Actor* thisx, PlayState* play) {
                 Actor_Kill(&this->actor);
             }
             return;
+        default:
+            if (ITEM00_RING_0 <= this->actor.params && this->actor.params <= ITEM00_RING_LAST) {
+                if (Actor_HasParent(&this->actor, play)) {
+                    Flags_SetCollectible(play, this->collectibleFlag);
+                    Actor_Kill(&this->actor);
+                }
+                return;
+            }
     }
 
     if ((*params <= ITEM00_RUPEE_RED) || (*params == ITEM00_RUPEE_ORANGE)) {
@@ -1262,6 +1293,13 @@ void EnItem00_Draw(Actor* thisx, PlayState* play) {
                 GetItem_Draw(play, GID_TUNIC_GORON);
                 break;
             case ITEM00_FLEXIBLE:
+                break;
+            default:
+                if (ITEM00_RING_0 <= this->actor.params && this->actor.params <= ITEM00_RING_LAST) {
+                    mtxScale = 8.0f;
+                    Matrix_Scale(mtxScale, mtxScale, mtxScale, MTXMODE_APPLY);
+                    GetItem_Draw(play, GID_RING_0 + this->actor.params - ITEM00_RING_0);
+                }
                 break;
         }
     }
@@ -1677,7 +1715,8 @@ EnItem00* Item_DropCollectible(PlayState* play, Vec3f* spawnPos, s16 params) {
                 if ((spawnedActor->actor.params != ITEM00_SMALL_KEY) &&
                     (spawnedActor->actor.params != ITEM00_HEART_PIECE) &&
                     (spawnedActor->actor.params != ITEM00_HEART_CONTAINER) &&
-                    (spawnedActor->actor.params != ITEM00_DEFENSE_HEART)) {
+                    (spawnedActor->actor.params != ITEM00_DEFENSE_HEART) &&
+                    (spawnedActor->actor.params < ITEM00_RING_0 || ITEM00_RING_LAST < spawnedActor->actor.params)) {
                     spawnedActor->actor.room = -1;
                 }
                 spawnedActor->actor.flags |= ACTOR_FLAG_UPDATE_WHILE_CULLED;
@@ -1836,7 +1875,8 @@ void Item_DropCollectibleRandom1(PlayState* play, Actor* fromActor, Vec3f* spawn
                         if ((spawnedActor->actor.params != ITEM00_SMALL_KEY) &&
                             (spawnedActor->actor.params != ITEM00_HEART_PIECE) &&
                             (spawnedActor->actor.params != ITEM00_HEART_CONTAINER) &&
-                            (spawnedActor->actor.params != ITEM00_DEFENSE_HEART)) {
+                            (spawnedActor->actor.params != ITEM00_DEFENSE_HEART) &&
+                            (spawnedActor->actor.params < ITEM00_RING_0 || ITEM00_RING_LAST < spawnedActor->actor.params)) {
                             spawnedActor->actor.room = -1;
                         }
                         spawnedActor->unk_15A = 220;
