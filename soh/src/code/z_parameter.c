@@ -1892,9 +1892,10 @@ u16 Ring_SwapLeft(u8 ringSlot) {
     }
 
     while (ii < NUM_RING_TYPES) {
-        gSaveContext.inventory.ringEquips[ringSlot]--;
-        if (gSaveContext.inventory.ringEquips[ringSlot] <= 0)
+        if (gSaveContext.inventory.ringEquips[ringSlot] == 0)
             gSaveContext.inventory.ringEquips[ringSlot] = NUM_RING_TYPES;
+        else
+            gSaveContext.inventory.ringEquips[ringSlot]--;
 
         if (gSaveContext.inventory.rings[gSaveContext.inventory.ringEquips[ringSlot]-1]) {
             //Include check to see if other slots have this ring in them

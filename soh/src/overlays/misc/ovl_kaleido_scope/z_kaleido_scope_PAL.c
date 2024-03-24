@@ -2242,10 +2242,50 @@ void KaleidoScope_DrawInfoPanel(PlayState* play) {
                     return;
                  }
 
-                //gSPDisplayList(POLY_KAL_DISP++, gAButtonIconDL);
-                gDPSetPrimColor(POLY_KAL_DISP++, 0, 0, aButtonColor.r, aButtonColor.g, aButtonColor.b, 255);
-                gDPLoadTextureBlock(POLY_KAL_DISP++, gABtnSymbolTex, G_IM_FMT_IA, G_IM_SIZ_8b, 24, 16, 0, G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP, 4, 4, G_TX_NOLOD, G_TX_NOLOD);
-                gSP1Quadrangle(POLY_KAL_DISP++, 0, 2, 3, 1, 0);
+                if (RINGS_SWAPPABLE_REQ) {
+                    s16 PosX; // General Pos of C button icon
+                    if (gSaveContext.language == LANGUAGE_ENG) {
+                        PosX = 112;
+                    } else if (gSaveContext.language == LANGUAGE_GER) {
+                        PosX = 175;
+                    } else { // French
+                        PosX = 98;
+                    }
+                    s16 PosY = 200 - pauseCtx->infoPanelOffsetY; //General Pos of C button icon
+                    s16 icon_w = 46; // Original texture size
+                    s16 icon_h = 16;
+                    s32 icon_x_offset;
+                    s16 icon_w_crop = 17.0f; //Left
+                    s16 modPosX = PosX;
+                    int height = icon_h * 1.0f; //Adjust Height with scale
+                    int width = icon_w * 1.0f; //Adjust Width with scale
+                    int width_crop = icon_w_crop * 1.0f; //Adjust Width with scale
+                    int height_factor = (1 << 10) * icon_h / height;
+                    int width_factor = (1 << 10) * icon_w / width;
+                    int texOffsetS = 0;
+                    gDPSetPrimColor(POLY_KAL_DISP++, 0, 0, cButtonsColor.r, cButtonsColor.g, cButtonsColor.b, 255);
+                    for (s16 i=0; i < 2; i++) {
+                        if (i == 0) {
+                            modPosX = PosX + icon_w_crop + 1;
+                            texOffsetS = 1000;
+                            icon_x_offset = width_crop*3-3;
+                            gDPSetPrimColor(POLY_KAL_DISP++, 0, 0, cRightButtonColor.r, cRightButtonColor.g, cRightButtonColor.b, 255);
+                        } else if (i == 1) {
+                            modPosX = PosX;
+                            texOffsetS = 0;
+                            icon_x_offset = width_crop;
+                            gDPSetPrimColor(POLY_KAL_DISP++, 0, 0, cLeftButtonColor.r, cLeftButtonColor.g, cLeftButtonColor.b, 255);
+                        }
+                        gDPLoadTextureBlock(POLY_KAL_DISP++, gCBtnSymbolsTex, G_IM_FMT_IA, G_IM_SIZ_8b, icon_w, icon_h, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+                        //gSPScisTextureRectangle(POLY_KAL_DISP++,PosX << 2, PosY << 2, (PosX + icon_x_offset) << 2, (PosY + height) << 2, G_TX_RENDERTILE, 0, 0, width_factor, height_factor);
+                        gSPWideTextureRectangle(POLY_KAL_DISP++, modPosX << 2, PosY << 2, (modPosX + icon_x_offset) << 2, (PosY + height) << 2, G_TX_WRAP, texOffsetS, 0, width_factor, height_factor);
+                    }
+                } else {
+                    //gSPDisplayList(POLY_KAL_DISP++, gAButtonIconDL);
+                    gDPSetPrimColor(POLY_KAL_DISP++, 0, 0, aButtonColor.r, aButtonColor.g, aButtonColor.b, 255);
+                    gDPLoadTextureBlock(POLY_KAL_DISP++, gABtnSymbolTex, G_IM_FMT_IA, G_IM_SIZ_8b, 24, 16, 0, G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP, 4, 4, G_TX_NOLOD, G_TX_NOLOD);
+                    gSP1Quadrangle(POLY_KAL_DISP++, 0, 2, 3, 1, 0);
+                }
 
                 gDPPipeSync(POLY_KAL_DISP++);
                 gDPSetPrimColor(POLY_KAL_DISP++, 0, 0, 255, 255, 255, 255);

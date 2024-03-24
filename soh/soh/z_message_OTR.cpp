@@ -388,7 +388,7 @@ extern "C" void OTRMessage_Init()
     MakeBlueMsgEng(0x814, "\x13\xA0You received the Landmine! Place&it down. Then when an enemy&approaches...KAPAW...BOOM!");
     MakeBlueMsgEng(0x815, "\x13\xA1You received Nayru's Affection!&Use it to restore 2 hearts&each time you cast it!");
     MakeBlueMsgEng(0x816, "\x13\xA2You received Din's Crucible!&Use it to forge a movable stone block!");
-    MakeBlueMsgEng(0x817, "\x13\xA3You received a ring! On the&%yEquipment Subscreen%w select&the slot the ring is in with&%b\x9F%w to %requip%w or %runequip%w it.^\x13\xA3While in a %rsafe place%w, like&%byour house%w, use %y\xA7%w or %y\xA8%w while&the cursor is on a ring slot to &%ccycle between the rings you own%w.^\x13\xA3You may find and own many more&ring types than you can carry in&your slots at one time, so feel&free to swap them out!");
+    MakeBlueMsgEng(0x817, "\x13\xA3You received a ring! On the&%yEquipment Subscreen%w select&the slot the ring is in with&%b\x9F%w to %requip%w or %runequip%w it.^\x13\xA3You may find and own many more&ring types than you can carry in&your slots at one time, so feel&free to swap them out!^\x13\xA3While in a %rsafe place%w, like&%byour house%w, use %y\xA7%w or %y\xA8%w while&the cursor is on a ring slot to &%ccycle between the rings you own%w.");
 
     MakeBlueMsgEng(0x7,  "\x13\x48You got a&%rDeku Seed Bullet Bag%w.&This bag can hold up to %y"+std::to_string(CAPACITY(UPG_BULLET_BAG,2))+"%w&slingshot bullets.");
     MakeBlueMsgEng(0x6C, "\x13\x49Your %rDeku Seed Bullet Bag%w&has become bigger!&Now you can carry more bullets!&This bag can hold %y"+std::to_string(CAPACITY(UPG_BULLET_BAG,3))+"%w bullets!");

@@ -25,6 +25,8 @@ extern bool gSelectingMask;
 #define CHECK_AGE_REQ_SLOT(slotIndex) (CVarGetInteger("gTimelessEquipment", 0) || (gSlotAgeReqs[slotIndex] == AGE_REQ_NONE) || gSlotAgeReqs[slotIndex] == ((void)0, gSaveContext.linkAge))
 #define CHECK_AGE_REQ_ITEM(itemIndex) (CVarGetInteger("gTimelessEquipment", 0) || (gItemAgeReqs[itemIndex] == AGE_REQ_NONE) || (gItemAgeReqs[itemIndex] == gSaveContext.linkAge))
 
+#define RINGS_SWAPPABLE_REQ (pauseCtx->cursorY[PAUSE_EQUIP] == 4 && pauseCtx->cursorX[PAUSE_EQUIP] > 0 && (play->sceneNum == SCENE_LINKS_HOUSE || play->sceneNum == SCENE_TEMPLE_OF_TIME || play->sceneNum == SCENE_BAZAAR))
+
 void KaleidoScope_DrawQuestStatus(PlayState* play, GraphicsContext* gfxCtx);
 s32 KaleidoScope_UpdateQuestStatusPoint(PauseContext* pauseCtx, s32 point);
 void KaleidoScope_DrawDebugEditor(PlayState* play);

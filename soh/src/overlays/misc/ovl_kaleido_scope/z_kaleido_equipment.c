@@ -588,8 +588,7 @@ void KaleidoScope_DrawEquipment(PlayState* play) {
                     Audio_PlaySoundGeneral(NA_SE_SY_DECIDE, &D_801333D4, 4, &D_801333E0, &D_801333E0, &D_801333E8);
                     pauseCtx->unk_1E4 = 7;
                     sEquipTimer = 10;
-                } else if (pauseCtx->cursorY[PAUSE_EQUIP] == 4 && pauseCtx->cursorX[PAUSE_EQUIP] > 0 &&
-                                (play->sceneNum == SCENE_LINKS_HOUSE || play->sceneNum == SCENE_TEMPLE_OF_TIME || play->sceneNum == SCENE_BAZAAR)) {
+                } else if (RINGS_SWAPPABLE_REQ) {
                     if (CHECK_BTN_ALL(input->press.button, BTN_CLEFT)) {
                         Ring_SwapLeft(pauseCtx->cursorX[PAUSE_EQUIP]-1);
                         pauseCtx->namedItem = 0;
