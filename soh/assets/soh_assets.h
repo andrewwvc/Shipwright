@@ -147,3 +147,27 @@ static const ALIGN_ASSET(2) char gItemIconRing1Tex[] = dgItemIconRing1Tex;
 
 #define dgGiRing0DL "__OTR__objects/object_ring_0/gGiRing0DL"
 static const ALIGN_ASSET(2) char gGiRing0DL[] = dgGiRing0DL;
+
+#define dgAttractionRingItemNameENG "__OTR__textures/title_static/gAttractionRingItemNameENG"
+static const ALIGN_ASSET(2) char gAttractionRingItemNameENG[] = dgAttractionRingItemNameENG;
+
+#define dgRepulsionRingItemNameENG "__OTR__textures/title_static/gRepulsionRingItemNameENG"
+static const ALIGN_ASSET(2) char gRepulsionRingItemNameENG[] = dgRepulsionRingItemNameENG;
+
+#define dgWitchsRingItemNameENG "__OTR__textures/title_static/gWitchsRingItemNameENG"
+static const ALIGN_ASSET(2) char gWitchsRingItemNameENG[] = dgWitchsRingItemNameENG;
+
+#define dgLoveRingItemNameENG "__OTR__textures/title_static/gLoveRingItemNameENG"
+static const ALIGN_ASSET(2) char gLoveRingItemNameENG[] = dgLoveRingItemNameENG;
+
+#define dgGreedRingItemNameENG "__OTR__textures/title_static/gGreedRingItemNameENG"
+static const ALIGN_ASSET(2) char gGreedRingItemNameENG[] = dgGreedRingItemNameENG;
+
+#define dgNimbleRingItemNameENG "__OTR__textures/title_static/gNimbleRingItemNameENG"
+static const ALIGN_ASSET(2) char gNimbleRingItemNameENG[] = dgNimbleRingItemNameENG;
+
+#define dgRingOfSilenceItemNameENG "__OTR__textures/title_static/gRingOfSilenceItemNameENG"
+static const ALIGN_ASSET(2) char gRingOfSilenceItemNameENG[] = dgRingOfSilenceItemNameENG;
+
+#define dgMuteRingItemNameENG "__OTR__textures/title_static/gMuteRingItemNameENG"
+static const ALIGN_ASSET(2) char gMuteRingItemNameENG[] = dgMuteRingItemNameENG;
