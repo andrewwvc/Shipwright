@@ -683,7 +683,11 @@ void func_8001DFC8(EnItem00* this, PlayState* play) {
         this->actor.shape.rot.y += 960;
     } else if (ITEM00_RING_0 <= this->actor.params && this->actor.params <= ITEM00_RING_LAST) {
         if (this->unk_15A >= 0) {
-            this->actor.shape.rot.y += (ABS(this->actor.shape.rot.x) == 0x4000) ? 0 : 1000;
+            f32 sinVal = ABS(Math_SinS(this->actor.shape.rot.x));
+            f32 rotMultiplier = (1+sinVal*sinVal);
+            s16 yRot = (ABS(this->actor.shape.rot.x) == 0x4000) ? 0 : 1000*SQ(rotMultiplier*rotMultiplier);
+            this->actor.shape.rot.y += yRot;
+            this->actor.shape.rot.z -= yRot*sinVal*0.99f;
             Math_SmoothStepToS(&this->actor.world.rot.x, 0, 2, 2500, 500);
             Math_SmoothStepToS(&this->actor.shape.rot.x, this->actor.world.rot.x - 0x4000, 2, 100, 50);
         } else {
