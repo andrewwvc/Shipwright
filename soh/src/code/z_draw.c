@@ -395,6 +395,23 @@ DrawItemTableEntry sDrawItemTable[] = {
     { GetItem_DrawRing, { gGiRing0DL }}, // Ring 0
     { GetItem_DrawRing, { gGiRing0DL }}, // Ring 1
     { GetItem_DrawRing, { gGiRing0DL }}, //
+    { GetItem_DrawRing, { gGiRing0DL }}, //
+    { GetItem_DrawRing, { gGiRing0DL }}, //
+    { GetItem_DrawRing, { gGiRing0DL }}, //
+    { GetItem_DrawRing, { gGiRing0DL }}, //
+    { GetItem_DrawRing, { gGiRing0DL }}, //
+    { GetItem_DrawRing, { gGiRing0DL }}, //
+    { GetItem_DrawRing, { gGiRing0DL }}, //
+    { GetItem_DrawRing, { gGiRing0DL }}, //
+    { GetItem_DrawRing, { gGiRing0DL }}, //
+    { GetItem_DrawRing, { gGiRing0DL }}, //
+    { GetItem_DrawRing, { gGiRing0DL }}, //
+    { GetItem_DrawRing, { gGiRing0DL }}, //
+    { GetItem_DrawRing, { gGiRing0DL }}, //
+    { GetItem_DrawRing, { gGiRing0DL }}, //
+    { GetItem_DrawRing, { gGiRing0DL }}, //
+    { GetItem_DrawRing, { gGiRing0DL }}, //
+    { GetItem_DrawRing, { gGiRing0DL }}, //
 };
 
 /**
@@ -863,8 +880,8 @@ void GetItem_DrawRing(PlayState* play, s16 drawId) {
         {{255,255,255},{12,21,26}},  //Default dull blue
         {{255,255,255},{12,21,26}},  //Default dull blue
         {{255,255,255},{12,21,26}},  //Default dull blue
-        {{255,255,255},{12,21,26}},  //Default dull blue
-        {{255,255,255},{12,21,26}},  //Default dull blue
+        {{20,10,0},{100,21,26}},  //Default dull blue
+        {{240,240,20},{100,100,0}},  //Bright yellow
         {{255,255,255},{12,21,26}},  //Default dull blue
         {{255,255,255},{12,21,26}},  //Default dull blue
         {{255,255,255},{12,21,26}},  //Default dull blue
