@@ -887,7 +887,7 @@ void EnItem00_Update(Actor* thisx, PlayState* play) {
 
     if (this->unk_15A > 0) {
         this->unk_15A--;
-        if (CVarGetInteger("gDropsDontDie", 0) && (this->unk_154 <= 0)) {
+        if ((CVarGetInteger("gDropsDontDie", 0) || (Ring_Get_Equiped() == RI_ATTRACTION_RING) || (Ring_Get_Equiped() == RI_REPULSION_RING)) && (this->unk_154 <= 0)) {
             this->unk_15A++;
         }
     }
@@ -951,7 +951,9 @@ void EnItem00_Update(Actor* thisx, PlayState* play) {
         return;
     }
 
-    if (!((this->actor.xzDistToPlayer <= 30.0f) && (this->actor.yDistToPlayer >= -50.0f) &&
+    f32 itemRange = (Ring_Get_Equiped() == RI_ATTRACTION_RING) ? 45.0f : (Ring_Get_Equiped() == RI_REPULSION_RING) ? 12.0f : 30.0f;
+
+    if (!((this->actor.xzDistToPlayer <= itemRange) && (this->actor.yDistToPlayer >= -50.0f) &&
           (this->actor.yDistToPlayer <= 50.0f))) {
         if (!Actor_HasParent(&this->actor, play)) {
             return;
