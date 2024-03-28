@@ -1711,10 +1711,16 @@ EnItem00* Item_DropCollectible(PlayState* play, Vec3f* spawnPos, s16 params) {
             spawnedActor = (EnItem00*)Actor_Spawn(&play->actorCtx, play, ACTOR_EN_ITEM00, spawnPos->x,
                                                   spawnPos->y, spawnPos->z, 0, 0, 0, params | param8000 | param3F00, true);
             if ((spawnedActor != NULL) && !param8000) {
+                Player* player = GET_PLAYER(play);
+                f32 x, z;
+                s16 angle;
+                z = spawnPos->z - player->actor.world.pos.z;
+                x = spawnPos->x - player->actor.world.pos.x;
+                angle = Math_Atan2S(z, x);
                 spawnedActor->actor.velocity.y = !param4000 ? 8.0f : -2.0f;
                 spawnedActor->actor.speedXZ = 2.0f;
                 spawnedActor->actor.gravity = -0.9f;
-                spawnedActor->actor.world.rot.y = Rand_CenteredFloat(65536.0f);
+                spawnedActor->actor.world.rot.y = ((Ring_Get_Equiped() == RI_REPULSION_RING)) ? angle : Rand_CenteredFloat(65536.0f);
                 Actor_SetScale(&spawnedActor->actor, 0.0f);
                 EnItem00_SetupAction(spawnedActor, func_8001E304);
                 spawnedActor->unk_15A = 220;
@@ -1755,10 +1761,17 @@ EnItem00* Item_DropCollectible2(PlayState* play, Vec3f* spawnPos, s16 params) {
             spawnedActor = (EnItem00*)Actor_Spawn(&play->actorCtx, play, ACTOR_EN_ITEM00, spawnPos->x,
                                                   spawnPos->y, spawnPos->z, 0, 0, 0, params | param8000 | param3F00, true);
             if ((spawnedActor != NULL) && !param8000) {
+                Player* player = GET_PLAYER(play);
+                f32 x, z;
+                s16 angle;
+                z = spawnPos->z - player->actor.world.pos.z;
+                x = spawnPos->x - player->actor.world.pos.x;
+                angle = Math_Atan2S(z, x);
+
                 spawnedActor->actor.velocity.y = 0.0f;
                 spawnedActor->actor.speedXZ = 0.0f;
                 spawnedActor->actor.gravity = param4000 ? 0.0f : -0.9f;
-                spawnedActor->actor.world.rot.y = Rand_CenteredFloat(65536.0f);
+                spawnedActor->actor.world.rot.y = ((Ring_Get_Equiped() == RI_REPULSION_RING)) ? angle : Rand_CenteredFloat(65536.0f);
                 spawnedActor->actor.flags |= ACTOR_FLAG_UPDATE_WHILE_CULLED;
             }
         }
@@ -1874,7 +1887,7 @@ void Item_DropCollectibleRandom1(PlayState* play, Actor* fromActor, Vec3f* spawn
                         spawnedActor->actor.velocity.y = 8.0f;
                         spawnedActor->actor.speedXZ = 2.0f;
                         spawnedActor->actor.gravity = -0.9f;
-                        spawnedActor->actor.world.rot.y = Rand_ZeroOne() * 40000.0f;
+                        spawnedActor->actor.world.rot.y = ((Ring_Get_Equiped() == RI_REPULSION_RING)) && fromActor ? -fromActor->yawTowardsPlayer : Rand_ZeroOne() * 40000.0f;
                         Actor_SetScale(&spawnedActor->actor, 0.0f);
                         EnItem00_SetupAction(spawnedActor, func_8001E304);
                         spawnedActor->actor.flags |= ACTOR_FLAG_UPDATE_WHILE_CULLED;
