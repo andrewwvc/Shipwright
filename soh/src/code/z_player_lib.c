@@ -1553,7 +1553,7 @@ void Player_UpdateShieldCollider(PlayState* play, Player* this, ColliderQuad* co
 
     s16 stepVal = IN_SUB_STEP_MOTION;
 
-    if ((this->stateFlags1 & PLAYER_STATE1_SHIELDING) || (this->unk_664 != NULL && !Player_isInSwordAnimation(play) && !Player_isInReboundAnimation(play) && stepVal && (!this->stepTracking) && (this->invincibilityTimer == 0))) {
+    if ((this->stateFlags1 & PLAYER_STATE1_SHIELDING) || (this->unk_664 != NULL && CUR_EQUIP_VALUE(EQUIP_TYPE_SHIELD) && !Player_isInSwordAnimation(play) && !Player_isInReboundAnimation(play) && stepVal && (!this->stepTracking) && (this->invincibilityTimer == 0))) {
         Vec3f quadDest[4];
 
         this->shieldQuad.base.colType = shieldColTypes[this->currentShield];
