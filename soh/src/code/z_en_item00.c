@@ -394,7 +394,12 @@ void EnItem00_SetObjectDependency(EnItem00* this, PlayState* play, s16 objectInd
 }
 
 s16 isRupee(s16 itemVal) {
-    return (0 <= itemVal && itemVal <= 2) || itemVal == ITEM00_RUPEE_PURPLE || itemVal == ITEM00_RUPEE_ORANGE;
+    return (ITEM00_RUPEE_GREEN <= itemVal && itemVal <= ITEM00_RUPEE_RED) || itemVal == ITEM00_RUPEE_PURPLE || itemVal == ITEM00_RUPEE_ORANGE;
+}
+
+s16 isMinor(s16 itemVal) {
+    return (ITEM00_RUPEE_GREEN <= itemVal && itemVal <= ITEM00_ARROWS_SINGLE || ITEM00_ARROWS_SMALL <= itemVal && itemVal <= ITEM00_SEEDS ||
+            ITEM00_FLEXIBLE <= itemVal && itemVal <= ITEM00_RUPEE_PURPLE);
 }
 
 void EnItem00_Init(Actor* thisx, PlayState* play) {
