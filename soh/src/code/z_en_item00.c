@@ -378,6 +378,62 @@ static u8 sDropQuantitiesAlt[] = {
     0, 0, 0, 1
 };
 
+static u8 sDropQuantitiesHearts[] = {
+    //Green rupee section
+    0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //9 - Arrows
+    0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //10 - Magic
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //11 - Bombs
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //12 - Hearts
+    1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
+    //13 - Large Rupees
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //14 - Forest Items
+    1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //15 - Hearts 'n Seeds
+    1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //Garbage
+    0, 0, 0, 1
+};
+
+static u8 sDropQuantitiesGreed[] = {
+    //Green rupee section
+    1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //9 - Arrows
+    0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //10 - Magic
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //11 - Bombs
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //12 - Hearts
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //13 - Large Rupees
+    1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //14 - Forest Items
+    1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //15 - Hearts 'n Seeds
+    0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //Garbage
+    0, 0, 0, 1
+};
+
 void EnItem00_SetupAction(EnItem00* this, EnItem00ActionFunc actionFunc) {
     this->actionFunc = actionFunc;
 }
@@ -1690,6 +1746,8 @@ s16 func_8001F404(s16 dropId) {
 
 // External functions used by other actors to drop collectibles, which usually results in spawning an En_Item00 actor.
 
+#define HEART_DROPS_DISABLED (CVarGetInteger("gNoHeartDrops", 0) || (Ring_Get_Equiped() == RI_GREED_RING))
+
 EnItem00* Item_DropCollectible(PlayState* play, Vec3f* spawnPos, s16 params) {
     s32 pad[2];
     EnItem00* spawnedActor = NULL;
@@ -1699,7 +1757,8 @@ EnItem00* Item_DropCollectible(PlayState* play, Vec3f* spawnPos, s16 params) {
 
     params &= 0x3FFF;
 
-    if ((params & 0x00FF) == ITEM00_HEART && CVarGetInteger("gNoHeartDrops", 0)) { return NULL; }
+    if ((params & 0x00FF) == ITEM00_HEART && HEART_DROPS_DISABLED) { return NULL; }
+    if (isRupee(params & 0x00FF) && (Ring_Get_Equiped() == RI_LOVE_RING)) { return NULL; }
 
     if (((params & 0x00FF) == ITEM00_FLEXIBLE) && !param4000) {
         // TODO: Prevent the cast to EnItem00 here since this is a different actor (En_Elf)
@@ -1752,7 +1811,8 @@ EnItem00* Item_DropCollectible2(PlayState* play, Vec3f* spawnPos, s16 params) {
 
     params &= 0x3FFF;
 
-    if ((params & 0x00FF) == ITEM00_HEART && CVarGetInteger("gNoHeartDrops", 0)) { return NULL; }
+    if ((params & 0x00FF) == ITEM00_HEART && HEART_DROPS_DISABLED) { return NULL; }
+    if (isRupee(params & 0x00FF) && (Ring_Get_Equiped() == RI_LOVE_RING)) { return NULL; }
     
     if (((params & 0x00FF) == ITEM00_FLEXIBLE) && !param4000) {
         // TODO: Prevent the cast to EnItem00 here since this is a different actor (En_Elf)
@@ -1839,11 +1899,11 @@ void Item_DropCollectibleRandom1(PlayState* play, Actor* fromActor, Vec3f* spawn
             EffectSsDeadSound_SpawnStationary(play, spawnPos, NA_SE_EV_BUTTERFRY_TO_FAIRY, true,
                                               DEADSOUND_REPEAT_MODE_OFF, 40);
             return;
-        } else if (gSaveContext.health <= 0x30 && !CVarGetInteger("gNoHeartDrops", 0)) { // 3 hearts or less
+        } else if (gSaveContext.health <= 0x30 && !HEART_DROPS_DISABLED) { // 3 hearts or less
             params = 0xB * 0x10;
             dropTableIndex = 0x0;
             dropId = ITEM00_HEART;
-        } else if (gSaveContext.health <= 0x50 && !CVarGetInteger("gNoHeartDrops", 0)) { // 5 hearts or less
+        } else if (gSaveContext.health <= 0x50 && !HEART_DROPS_DISABLED) { // 5 hearts or less
             params = 0xA * 0x10;
             dropTableIndex = 0x0;
             dropId = ITEM00_HEART;
@@ -1876,15 +1936,26 @@ void Item_DropCollectibleRandom1(PlayState* play, Actor* fromActor, Vec3f* spawn
         }
     }
 
-    if (dropId != 0xFF && (!CVarGetInteger("gNoHeartDrops", 0) || dropId != ITEM00_HEART)) {
+    f32 specialRand = Rand_ZeroOne();
+    if ((Ring_Get_Equiped() == RI_GREED_RING) && isMinor(dropId) && !isRupee(dropId) && specialRand < 0.2f) {
+        if (specialRand < 0.02f)
+            dropId = ITEM00_RUPEE_BLUE;
+        else
+            dropId = ITEM00_RUPEE_GREEN;
+    }
+
+    if (dropId != 0xFF && (!HEART_DROPS_DISABLED || dropId != ITEM00_HEART) && (!(Ring_Get_Equiped() == RI_LOVE_RING) || !isRupee(dropId))) {
         //Provide the regular variety of drops when in Kokiri Village prior to the Deku Tree's death, change this afterwards to reduced drops
         if (mod)
-            dropQuantity = !(DEKU_TREE_DEAD) ? sDropQuantities[params + dropTableIndex] : sDropQuantitiesAlt[params + dropTableIndex];
+            dropQuantity = (Ring_Get_Equiped() == RI_LOVE_RING) ? sDropQuantitiesHearts[params + dropTableIndex] : (Ring_Get_Equiped() == RI_GREED_RING)? sDropQuantitiesGreed[params + dropTableIndex] : !(DEKU_TREE_DEAD) ? sDropQuantities[params + dropTableIndex] : sDropQuantitiesAlt[params + dropTableIndex];
         else
             dropQuantity = sDropQuantities[params + dropTableIndex];
         while (dropQuantity > 0) {
             if (!param8000) {
                 dropId = func_8001F404(dropId);
+                if ((Ring_Get_Equiped() == RI_LOVE_RING) && isMinor(dropId) && !isRupee(dropId) && Rand_ZeroOne() < 0.2f) {
+                    dropId = ITEM00_HEART;
+                }
                 if (dropId != 0xFF) {
                     spawnedActor = (EnItem00*)Actor_Spawn(&play->actorCtx, play, ACTOR_EN_ITEM00, spawnPos->x,
                                                           spawnPos->y, spawnPos->z, 0, 0, 0, dropId, true);
