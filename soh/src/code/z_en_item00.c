@@ -948,7 +948,7 @@ void EnItem00_Update(Actor* thisx, PlayState* play) {
 
     if (this->unk_15A > 0) {
         this->unk_15A--;
-        if ((CVarGetInteger("gDropsDontDie", 0) || (Ring_Get_Equiped() == RI_ATTRACTION_RING) || (Ring_Get_Equiped() == RI_REPULSION_RING)) && (this->unk_154 <= 0)) {
+        if ((CVarGetInteger("gDropsDontDie", 0) || (Ring_Get_Equiped() == RI_RING_OF_PERSISTANCE)) && (this->unk_154 <= 0)) {
             this->unk_15A++;
         }
     }
