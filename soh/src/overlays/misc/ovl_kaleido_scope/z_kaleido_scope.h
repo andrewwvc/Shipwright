@@ -12,6 +12,7 @@ extern u8 gSlotAgeReqs[];
 extern u8 gItemAgeReqs[];
 extern u8 gAreaGsFlags[];
 extern bool gSelectingMask;
+extern s16 gRingColors[][2][3];
 
 #define MAP_48x85_TEX_WIDTH 48
 #define MAP_48x85_TEX_HEIGHT 85

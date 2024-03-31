@@ -764,6 +764,12 @@ void KaleidoScope_DrawEquipment(PlayState* play) {
             } else if ((i == 0) && (k == 2) && (gBitFlags[bit + 1] & gSaveContext.inventory.equipment)) {
                 KaleidoScope_DrawQuadTextureRGBA32(play->state.gfxCtx, gItemIconBrokenGiantsKnifeTex, 32, 32, point);
             } else if (gBitFlags[bit] & gSaveContext.inventory.equipment) {
+                if (i == 4 && gSaveContext.inventory.ringEquips[k]) {
+                    s16 ringTypeIndex = gSaveContext.inventory.ringEquips[k]-1;
+                    gDPSetCombineMode(POLY_KAL_DISP++,G_CC_BLENDPEDECALA, G_CC_BLENDPEDECALA);
+                    gDPSetPrimColor(POLY_KAL_DISP++, 0, 0, gRingColors[ringTypeIndex][0][0], gRingColors[ringTypeIndex][0][1], gRingColors[ringTypeIndex][0][2], pauseCtx->alpha);
+                    gDPSetEnvColor(POLY_KAL_DISP++, gRingColors[ringTypeIndex][1][0], gRingColors[ringTypeIndex][1][1], gRingColors[ringTypeIndex][1][2], pauseCtx->alpha);
+                }
                 KaleidoScope_DrawQuadTextureRGBA32(play->state.gfxCtx, gItemIcons[itemId], 32, 32, point);
             }
             gSPGrayscale(POLY_KAL_DISP++, false);

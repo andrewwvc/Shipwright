@@ -862,38 +862,39 @@ void GetItem_DrawOpa0Xlu1(PlayState* play, s16 drawId) {
     CLOSE_DISPS(play->state.gfxCtx);
 }
 
+s16 gRingColors[][2][3] = {
+    {{255,255,255},{12,21,26}},  //Default dull blue
+    {{255,255,255},{60,8,8}},  //Crimson
+    {{255,0,100},{30,10,10}},
+    {{235,255,235},{20,60,20}},  //Default dull blue
+    {{255,255,255},{12,21,26}},  //Default dull blue
+    {{255,255,255},{12,21,26}},  //Default dull blue
+    {{120,90,10},{22,14,2}},  //Default dull blue
+    {{180,140,20},{42,32,6}},  //Default dull blue
+    {{255,255,255},{12,21,26}},  //Default dull blue
+    {{255,255,255},{12,21,26}},  //Default dull blue
+    {{255,255,255},{12,21,26}},  //Default dull blue
+    {{255,255,255},{12,21,26}},  //Default dull blue
+    {{255,255,255},{12,21,26}},  //Default dull blue
+    {{20,10,0},{100,21,26}},  //Default dull blue
+    {{240,240,20},{80,80,20}},  //Bright yellow
+    {{255,255,255},{12,110,90}},  //Default dull blue
+    {{255,255,255},{12,21,26}},  //Default dull blue
+    {{255,255,255},{12,21,26}},  //Default dull blue
+    {{255,255,255},{12,21,26}},  //Default dull blue
+    {{255,255,255},{12,21,26}},  //Default dull blue
+};
+
 void GetItem_DrawRing(PlayState* play, s16 drawId) {
     OPEN_DISPS(play->state.gfxCtx);
 
     s16 color_slot = drawId-GID_RING_0;
-    static s16 colors[][2][3] = {
-        {{255,255,255},{12,21,26}},  //Default dull blue
-        {{255,255,255},{60,8,8}},  //Crimson
-        {{255,255,255},{20,60,20}},
-        {{255,255,255},{12,21,26}},  //Default dull blue
-        {{255,255,255},{12,21,26}},  //Default dull blue
-        {{255,255,255},{12,21,26}},  //Default dull blue
-        {{255,255,255},{12,21,26}},  //Default dull blue
-        {{255,255,255},{12,21,26}},  //Default dull blue
-        {{255,255,255},{12,21,26}},  //Default dull blue
-        {{255,255,255},{12,21,26}},  //Default dull blue
-        {{255,255,255},{12,21,26}},  //Default dull blue
-        {{255,255,255},{12,21,26}},  //Default dull blue
-        {{255,255,255},{12,21,26}},  //Default dull blue
-        {{20,10,0},{100,21,26}},  //Default dull blue
-        {{240,240,20},{100,100,0}},  //Bright yellow
-        {{255,255,255},{12,21,26}},  //Default dull blue
-        {{255,255,255},{12,21,26}},  //Default dull blue
-        {{255,255,255},{12,21,26}},  //Default dull blue
-        {{255,255,255},{12,21,26}},  //Default dull blue
-        {{255,255,255},{12,21,26}},  //Default dull blue
-    };
 
     Gfx_SetupDL_25Opa(play->state.gfxCtx);
     gSPMatrix(POLY_OPA_DISP++, MATRIX_NEWMTX(play->state.gfxCtx),
               G_MTX_MODELVIEW | G_MTX_LOAD);
-    gDPSetPrimColor(POLY_OPA_DISP++, 0, 0, colors[color_slot][0][0], colors[color_slot][0][1], colors[color_slot][0][2], 255);
-    gDPSetEnvColor(POLY_OPA_DISP++, colors[color_slot][1][0], colors[color_slot][1][1], colors[color_slot][1][2], 255);
+    gDPSetPrimColor(POLY_OPA_DISP++, 0, 0, gRingColors[color_slot][0][0], gRingColors[color_slot][0][1], gRingColors[color_slot][0][2], 255);
+    gDPSetEnvColor(POLY_OPA_DISP++, gRingColors[color_slot][1][0], gRingColors[color_slot][1][1], gRingColors[color_slot][1][2], 255);
     gSPDisplayList(POLY_OPA_DISP++, sDrawItemTable[drawId].dlists[0]);
 
     CLOSE_DISPS(play->state.gfxCtx);
