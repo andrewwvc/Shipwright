@@ -13274,6 +13274,7 @@ s32 func_8084DFF4(PlayState* play, Player* this) {
                     equipItem >= ITEM_SWORD_KOKIRI && equipItem <= ITEM_TUNIC_ZORA &&
                     CHECK_AGE_REQ_ITEM(equipItem);
 
+        play->msgCtx.unk_E3D0 = giEntry.getItemId;//Value to be given to z_message_PAL.c to look up icon color table
         Message_StartTextbox(play, giEntry.textId, &this->actor);
         // RANDOTODO: Macro this boolean check.
         if (!(giEntry.modIndex == MOD_RANDOMIZER && giEntry.itemId == RG_ICE_TRAP)) {

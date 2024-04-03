@@ -712,6 +712,8 @@ f32 sFontWidths[144] = {
     14.0f, // ?
 };
 
+extern s16 gRingColors[][2][3];
+
 f32 Message_GetCharacterWidth(unsigned char characterIndex) {
     return sFontWidths[characterIndex] * (R_TEXT_CHAR_SCALE / 100.0f);
 }
@@ -726,8 +728,15 @@ u16 Message_DrawItemIcon(PlayState* play, u16 itemId, Gfx** p, u16 i) {
     // clang-format on
 
     gDPPipeSync(gfx++);
-    gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
-    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, msgCtx->textColorAlpha);
+    if (RING_ITEM_MIN <= itemId && itemId <= RING_ITEM_MAX) {
+        s16 ringTypeIndex = msgCtx->unk_E3D0 - GI_RING;//Value passed in through z_player.c
+        gDPSetCombineMode(gfx++,G_CC_BLENDPEDECALA, G_CC_BLENDPEDECALA);
+        gDPSetPrimColor(gfx++, 0, 0, gRingColors[ringTypeIndex][0][0], gRingColors[ringTypeIndex][0][1], gRingColors[ringTypeIndex][0][2], msgCtx->textColorAlpha);
+        gDPSetEnvColor(gfx++, gRingColors[ringTypeIndex][1][0], gRingColors[ringTypeIndex][1][1], gRingColors[ringTypeIndex][1][2], msgCtx->textColorAlpha);
+    } else {
+        gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+        gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, msgCtx->textColorAlpha);
+    }
 
     // Invalidate icon texture as it may have changed from the last time a text box had an icon
     gSPInvalidateTexCache(gfx++, (uintptr_t)msgCtx->textboxSegment + MESSAGE_STATIC_TEX_SIZE);
@@ -850,7 +859,6 @@ void Message_DrawText(PlayState* play, Gfx** gfxP) {
         msgCtx->textColorR = msgCtx->textColorG = msgCtx->textColorB = 255;
     }
 
-    msgCtx->unk_E3D0 = 0;
     charTexIdx = 0;
 
     for (i = 0; i < msgCtx->textDrawPos; i++) {
@@ -1708,7 +1716,7 @@ void Message_OpenText(PlayState* play, u16 textId) {
         msgCtx->textboxColorAlphaCurrent = 0;
     }
     msgCtx->choiceNum = msgCtx->textUnskippable = msgCtx->textboxEndType = 0;
-    msgCtx->msgBufPos = msgCtx->unk_E3D0 = msgCtx->textDrawPos = 0;
+    msgCtx->msgBufPos = msgCtx->textDrawPos = 0;
 }
 
 void Message_StartTextbox(PlayState* play, u16 textId, Actor* actor) {
@@ -1742,7 +1750,7 @@ void Message_ContinueTextbox(PlayState* play, u16 textId) {
     msgCtx->textboxColorAlphaCurrent = msgCtx->textboxColorAlphaTarget;
     msgCtx->msgMode = MSGMODE_TEXT_CONTINUING;
     msgCtx->stateTimer = 3;
-    msgCtx->textboxEndType = msgCtx->msgBufPos = msgCtx->unk_E3D0 = msgCtx->textDrawPos = msgCtx->textDelayTimer = 0;
+    msgCtx->textboxEndType = msgCtx->msgBufPos = msgCtx->textDrawPos = msgCtx->textDelayTimer = 0;
     msgCtx->textColorAlpha = 255;
 
     if (YREG(31) == 0 && play->interfaceCtx.unk_1FA == 0) {
