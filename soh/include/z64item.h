@@ -525,7 +525,7 @@ typedef enum {
     /* 13 */ RI_WITCHS_RING,//Magic use drains hearts isntead of the magic bar
     /* 14 */ RI_NIMBLE_RING,//Increases roll effectiveness/invincibility
     /* 15 */ RI_RING_OF_SILENCE,//Silences all music
-    /* 16 */ RI_RING_OF_PERSISTANCE,//Renders no image
+    /* 16 */ RI_RING_OF_PERSISTENCE,//Renders no image
     /* 17 */ RI_ACROBAT_RING,//Alters jump attack
     /* 18 */ RI_MUTE_RING,//You cannot speak or yell
     /* 19 */ RI_SECRET_RING,//It's a secret to everyone

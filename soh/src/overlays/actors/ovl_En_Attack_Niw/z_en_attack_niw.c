@@ -356,7 +356,7 @@ void EnAttackNiw_Update(Actor* thisx, PlayState* play) {
     }
 
     tmpf1 = 20.0f;
-    if (this->actor.xyzDistToPlayerSq < SQ(tmpf1)) {
+    if (this->actor.xyzDistToPlayerSq < SQ(tmpf1) && (Ring_Get_Equiped() != RI_FEATHER_RING)) {
         cucco = (EnNiw*)this->actor.parent;
         if ((this->actor.parent->update != NULL) && (this->actor.parent != NULL) && (cucco != NULL) &&
             (cucco->timer9 == 0) && (player->invincibilityTimer == 0)) {

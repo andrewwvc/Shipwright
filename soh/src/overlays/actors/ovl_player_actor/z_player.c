@@ -5634,7 +5634,7 @@ s32 func_8083BB20(Player* this) {
 //Causes Jump Slashing to activate after B is pressed in the air
 s32 func_8083BBA0(Player* this, PlayState* play) {
     if (func_8083BB20(this) && (D_808535E4 != 7)) {
-        func_8083BA90(play, this, 17, 3.0f, 4.5f);
+        func_8083BA90(play, this, (Ring_Get_Equiped() == RI_ACROBAT_RING) ? 16 : 17, 3.0f, 4.5f);
         return 1;
     }
 
@@ -5696,7 +5696,7 @@ s32 func_8083BDBC(Player* this, PlayState* play) {
                     if (Player_GetMeleeWeaponHeld(this) && func_808365C8(this) && (sp2C < 0)) {
                         //Performs Jumping Attack
                         if (this->shieldRelaxTimer == 0)
-                            func_8083BA90(play, this, 17, 5.0f, 5.0f);
+                            func_8083BA90(play, this, (Ring_Get_Equiped() == RI_ACROBAT_RING) ? 16 : 17, 5.0f, 5.0f);
                     } else {
                         //Performs roll
                         func_8083BC04(this, play);

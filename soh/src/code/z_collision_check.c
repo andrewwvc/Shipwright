@@ -3039,6 +3039,7 @@ void CollisionCheck_ApplyDamage(PlayState* play, CollisionCheckContext* colChkCt
     } else {
         s32 i;
         u32 flags = info->acHitInfo->toucher.dmgFlags;
+        s16 ring = Ring_Get_Equiped();
 
         for (i = 0; i < 0x20; i++, flags >>= 1) {
             if (flags == 1) {
@@ -3047,7 +3048,7 @@ void CollisionCheck_ApplyDamage(PlayState* play, CollisionCheckContext* colChkCt
         }
 
         damage = tbl->table[i] & 0xF;
-        damage = damage*info->acHitInfo->toucher.damage/DAMAGE_BASE_VAL;
+        damage = damage*info->acHitInfo->toucher.damage*((ring == RI_SORCERERS_RING || ring == RI_COWARDS_RING) ? 0.5f : (ring == RI_BRAVERY_RING) ? 1.5f : 1.0f)/DAMAGE_BASE_VAL;
         collider->actor->colChkInfo.damageEffect = tbl->table[i] >> 4 & 0xF;
     }
     if (!(collider->acFlags & AC_HARD) && !((collider->ocFlags1 & OC1_FIRM) && (info->acHit != NULL) && (info->acHit->atFlags & AT_WEAK))) {

@@ -731,7 +731,7 @@ void EnZo_DetectPlayerInitially(EnZo* this, PlayState* play) {
 }
 
 void EnZo_Submerged(EnZo* this, PlayState* play) {
-    if (EnZo_PlayerInProximity(this, play)) {
+    if (EnZo_PlayerInProximity(this, play) || (Ring_Get_Equiped() == RI_FOUNTAIN_RING)) {
         this->actionFunc = EnZo_Surface;
         this->actor.velocity.y = 4.0f;
     }
@@ -778,7 +778,7 @@ void EnZo_TreadWater(EnZo* this, PlayState* play) {
         }
     }
 
-    if (EnZo_PlayerInProximity(this, play) != 0) {
+    if (EnZo_PlayerInProximity(this, play) != 0 || (Ring_Get_Equiped() == RI_FOUNTAIN_RING)) {
         this->timeToDive = Rand_S16Offset(40, 40);
     } else if (DECR(this->timeToDive) == 0) {
         f32 startFrame;

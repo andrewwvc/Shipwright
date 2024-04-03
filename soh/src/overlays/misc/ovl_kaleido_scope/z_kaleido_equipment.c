@@ -551,6 +551,13 @@ void KaleidoScope_DrawEquipment(PlayState* play) {
                             goto RESUME_EQUIPMENT;                     // Skip to here so we don't re-equip it
                         }
 
+                        s16 ring = Ring_Get_Equiped();
+
+                        if (pauseCtx->cursorY[PAUSE_EQUIP] == 4 && (ring == RI_SORCERERS_RING || ring == RI_BRAVERY_RING || ring == RI_COWARDS_RING)) {
+                            if (!RINGS_SWAPPABLE_REQ)
+                                goto EQUIP_FAIL;
+                        }
+
                         // If we're on the "rings" section of the equipment screen AND we're on currently-equipped ring
                         if (pauseCtx->cursorY[PAUSE_EQUIP] == 4 && pauseCtx->cursorX[PAUSE_EQUIP] == CUR_EQUIP_VALUE(EQUIP_TYPE_RING)) {
                             Inventory_ChangeEquipment(EQUIP_TYPE_RING, EQUIP_VALUE_RINGS_NONE); // Unequip it

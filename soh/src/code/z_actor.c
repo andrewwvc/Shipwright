@@ -1972,7 +1972,7 @@ TargetRangeParams D_80115FF8[] = {
 };
 
 u32 func_8002F090(Actor* actor, f32 arg1) {
-    return arg1 < D_80115FF8[actor->targetMode].rangeSq;
+    return arg1 < D_80115FF8[actor->targetMode].rangeSq * ((Ring_Get_Equiped() == RI_FOCUS_RING) ? 1.5f : 1.0f);
 }
 
 s32 func_8002F0C8(Actor* actor, Player* player, s32 flag) {

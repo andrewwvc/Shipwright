@@ -3223,6 +3223,13 @@ s32 Health_ChangeBy(PlayState* play, s16 healthChange) {
         }
     }
 
+    if (healthChange < 0) {
+        if (Ring_Get_Equiped() == RI_SORCERERS_RING || Ring_Get_Equiped() == RI_BRAVERY_RING)
+            healthChange *= 2;
+        else if (Ring_Get_Equiped() == RI_COWARDS_RING)
+            healthChange = (healthChange*3)/4;
+    }
+
     gSaveContext.health += healthChange;
 
     if (gSaveContext.health > gSaveContext.healthCapacity) {
@@ -3465,8 +3472,11 @@ s32 Magic_RequestChange(PlayState* play, s16 amount, s16 type) {
         return false;
     }
 
-    if ((Ring_Get_Equiped() == RI_WITCHS_RING) && (type != MAGIC_ADD))
+    s16 ring = Ring_Get_Equiped();
+    if ((ring == RI_WITCHS_RING) && (type != MAGIC_ADD))
         amount = amount*WITCH_RING_MULTIPLIER;
+    else if (ring == RI_SORCERERS_RING && (type != MAGIC_ADD))
+        amount = amount/2;
 
     if ((type != MAGIC_ADD) && ((Ring_Get_Equiped() == RI_WITCHS_RING) ? (gSaveContext.health - amount) < 0 : (gSaveContext.magic - amount) < 0)) {
         if (gSaveContext.magicCapacity != 0) {

@@ -1547,6 +1547,9 @@ s32 EnGo2_IsWakingUp(EnGo2* this) {
         }
     }
 
+    if (Ring_Get_Equiped() == RI_MOUNTAIN_RING)
+        return true;
+
     xyzDist = SQ(xyzDist);
     yawDiff = (f32)this->actor.yawTowardsPlayer - (f32)this->actor.shape.rot.y;
     yawDiffAbs = ABS(yawDiff);
