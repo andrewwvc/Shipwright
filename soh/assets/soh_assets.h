@@ -154,20 +154,53 @@ static const ALIGN_ASSET(2) char gAttractionRingItemNameENG[] = dgAttractionRing
 #define dgRepulsionRingItemNameENG "__OTR__textures/title_static/gRepulsionRingItemNameENG"
 static const ALIGN_ASSET(2) char gRepulsionRingItemNameENG[] = dgRepulsionRingItemNameENG;
 
-#define dgWitchsRingItemNameENG "__OTR__textures/title_static/gWitchsRingItemNameENG"
-static const ALIGN_ASSET(2) char gWitchsRingItemNameENG[] = dgWitchsRingItemNameENG;
-
 #define dgLoveRingItemNameENG "__OTR__textures/title_static/gLoveRingItemNameENG"
 static const ALIGN_ASSET(2) char gLoveRingItemNameENG[] = dgLoveRingItemNameENG;
 
 #define dgGreedRingItemNameENG "__OTR__textures/title_static/gGreedRingItemNameENG"
 static const ALIGN_ASSET(2) char gGreedRingItemNameENG[] = dgGreedRingItemNameENG;
 
+#define dgBraveryRingItemNameENG "__OTR__textures/title_static/gBraveryRingItemNameENG"
+static const ALIGN_ASSET(2) char gBraveryRingItemNameENG[] = dgBraveryRingItemNameENG;
+
+#define dgCowardsRingItemNameENG "__OTR__textures/title_static/gCowardsRingItemNameENG"
+static const ALIGN_ASSET(2) char gCowardsRingItemNameENG[] = dgCowardsRingItemNameENG;
+
+#define dgWoodRingItemNameENG "__OTR__textures/title_static/gWoodRingItemNameENG"
+static const ALIGN_ASSET(2) char gWoodRingItemNameENG[] = dgWoodRingItemNameENG;
+
+#define dgMountainRingItemNameENG "__OTR__textures/title_static/gMountainRingItemNameENG"
+static const ALIGN_ASSET(2) char gMountainRingItemNameENG[] = dgMountainRingItemNameENG;
+
+#define dgFountainRingItemNameENG "__OTR__textures/title_static/gFountainRingItemNameENG"
+static const ALIGN_ASSET(2) char gFountainRingItemNameENG[] = dgFountainRingItemNameENG;
+
+#define dgFocusRingItemNameENG "__OTR__textures/title_static/gFocusRingItemNameENG"
+static const ALIGN_ASSET(2) char gFocusRingItemNameENG[] = dgFocusRingItemNameENG;
+
+#define dgFeatherRingItemNameENG "__OTR__textures/title_static/gFeatherRingItemNameENG"
+static const ALIGN_ASSET(2) char gFeatherRingItemNameENG[] = dgFeatherRingItemNameENG;
+
+#define dgSneakRingItemNameENG "__OTR__textures/title_static/gSneakRingItemNameENG"
+static const ALIGN_ASSET(2) char gSneakRingItemNameENG[] = dgSneakRingItemNameENG;
+
+#define dgSorcerersRingItemNameENG "__OTR__textures/title_static/gSorcerersRingItemNameENG"
+static const ALIGN_ASSET(2) char gSorcerersRingItemNameENG[] = dgSorcerersRingItemNameENG;
+
+#define dgWitchsRingItemNameENG "__OTR__textures/title_static/gWitchsRingItemNameENG"
+static const ALIGN_ASSET(2) char gWitchsRingItemNameENG[] = dgWitchsRingItemNameENG;
+
 #define dgNimbleRingItemNameENG "__OTR__textures/title_static/gNimbleRingItemNameENG"
 static const ALIGN_ASSET(2) char gNimbleRingItemNameENG[] = dgNimbleRingItemNameENG;
 
 #define dgRingOfSilenceItemNameENG "__OTR__textures/title_static/gRingOfSilenceItemNameENG"
 static const ALIGN_ASSET(2) char gRingOfSilenceItemNameENG[] = dgRingOfSilenceItemNameENG;
+
+#define dgRingOfPersistenceItemNameENG "__OTR__textures/title_static/gRingOfPersistenceItemNameENG"
+static const ALIGN_ASSET(2) char gRingOfPersistenceItemNameENG[] = dgRingOfPersistenceItemNameENG;
+
+#define dgAcrobatRingItemNameENG "__OTR__textures/title_static/gAcrobatRingItemNameENG"
+static const ALIGN_ASSET(2) char gAcrobatRingItemNameENG[] = dgAcrobatRingItemNameENG;
 
 #define dgMuteRingItemNameENG "__OTR__textures/title_static/gMuteRingItemNameENG"
 static const ALIGN_ASSET(2) char gMuteRingItemNameENG[] = dgMuteRingItemNameENG;
