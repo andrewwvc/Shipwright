@@ -597,11 +597,13 @@ void KaleidoScope_DrawEquipment(PlayState* play) {
                     sEquipTimer = 10;
                 } else if (RINGS_SWAPPABLE_REQ) {
                     if (CHECK_BTN_ALL(input->press.button, BTN_CLEFT)) {
-                        Ring_SwapLeft(pauseCtx->cursorX[PAUSE_EQUIP]-1);
+                        if (Ring_Get_In_Slot(pauseCtx->cursorX[PAUSE_EQUIP]-1)+1 != Ring_SwapLeft(pauseCtx->cursorX[PAUSE_EQUIP]-1))
+                            gSaveContext.eventChkInf[2] |= 0x2000;//Sets the event showing that the player has swapped a ring
                         pauseCtx->namedItem = 0;
                         Audio_PlaySoundGeneral(NA_SE_SY_DECIDE, &D_801333D4, 4, &D_801333E0, &D_801333E0, &D_801333E8);
                     } else if (CHECK_BTN_ALL(input->press.button, BTN_CRIGHT)) {
-                        Ring_SwapRight(pauseCtx->cursorX[PAUSE_EQUIP]-1);
+                        if (Ring_Get_In_Slot(pauseCtx->cursorX[PAUSE_EQUIP]-1)+1 != Ring_SwapRight(pauseCtx->cursorX[PAUSE_EQUIP]-1))
+                            gSaveContext.eventChkInf[2] |= 0x2000;
                         pauseCtx->namedItem = 0;
                         Audio_PlaySoundGeneral(NA_SE_SY_DECIDE, &D_801333D4, 4, &D_801333E0, &D_801333E0, &D_801333E8);
                     }

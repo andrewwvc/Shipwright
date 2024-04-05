@@ -430,6 +430,7 @@ extern "C" void OTRMessage_Init()
     MakeBlueMsgEng(0x0109, "%cIf we're really going to confront&Ganondorf we may need all&the preparation we can get.^%cIf there's any equipment we need&but don't have, we can still exit&the castle to search for it.^%cBe prepared to use things you may&not have needed to before.");
     MakeBlueMsgEng(0x010A, "%cI can hardly believe what happened.&Has the world really been ruled&by Ganondorf for seven years?");
     MakeBlueMsgEng(0x010B, "%cIf we're going to really take this&journey seriously, you may want&to ask the %wKnow-It-All Brothers%c&for more advice on things.^%cThere's a lot you don't know&and if I brush up on my&trivia I may get to show&off more of it, heh heh.");
+    MakeBlueMsgEng(0x010C, "%cHey, have you tried checking out the&other rings you've been collecting that&are stashed in your place?^%cUse %y\xA7%c or %y\xA8%c on the&%yEquipment Subscreen%c when a ring is&selected to swap out that one.");
 
     //Great Fairy Text
     MakeNormalMsgEng(0xE8, "Your magic power has been&enhanced! Now you can gain even&more Magic Capacity!^Collecting %gIcons of Magic%w&will allow for greater enhancement!");

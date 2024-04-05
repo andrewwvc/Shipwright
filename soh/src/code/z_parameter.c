@@ -1842,9 +1842,17 @@ u8 Ring_Give(PlayState* play, u16 getItemId) {
     if (RING_GI_MIN <= getItemId && getItemId <= RING_GI_MAX) {
         if (gSaveContext.inventory.rings[getItemId-RING_GI_MIN] < 255)
             gSaveContext.inventory.rings[getItemId-RING_GI_MIN]++;
-        return 1;
+        return gSaveContext.inventory.rings[getItemId-RING_GI_MIN];
     }
     return 0;
+}
+
+s16 Ring_Get_In_Slot(s16 slotNum) {
+    if (0 <= slotNum && slotNum < 3) {
+        return gSaveContext.inventory.ringEquips[slotNum]-1;
+    }
+
+    return -1;
 }
 
 s16 Ring_Get_Equiped() {//Returns -1 for no ring
@@ -2041,9 +2049,21 @@ u8 Item_Give(PlayState* play, u8 item) {
         gSaveContext.inventory.equipment |= OWNED_EQUIP_FLAG(EQUIP_TYPE_BOOTS, item - ITEM_BOOTS_KOKIRI);
         return Return_Item(item, MOD_NONE, ITEM_NONE);
     } else if ((item >= RING_ITEM_MIN) && (item <= RING_ITEM_MAX)) {
-        if (!(gSaveContext.inventory.equipment & OWNED_EQUIP_FLAG(EQUIP_TYPE_RING, item - RING_ITEM_MIN))) {
-            Ring_SwapRight(item-RING_ITEM_MIN);
-            gSaveContext.inventory.equipment |= OWNED_EQUIP_FLAG(EQUIP_TYPE_RING, item - RING_ITEM_MIN);
+        for (s16 ii = 0; ii < 3; ii++) {
+            u32 flag = OWNED_EQUIP_FLAG(EQUIP_TYPE_RING, ii);
+            if (gSaveContext.inventory.equipment & flag) {
+                if (ii == 2) {
+                    if (Ring_SwapRight(ii)) {
+                        gSaveContext.eventChkInf[2] |= 0x4000;
+                        Ring_SwapLeft(ii);
+                    }
+                }
+                continue;
+            } else {
+                if (Ring_SwapRight(ii))
+                    gSaveContext.inventory.equipment |= flag;
+                break;
+            }
         }
         return Return_Item(item, MOD_NONE, ITEM_NONE);
     } else if ((item == ITEM_KEY_BOSS) || (item == ITEM_COMPASS) || (item == ITEM_DUNGEON_MAP)) {
