@@ -554,8 +554,11 @@ void KaleidoScope_DrawEquipment(PlayState* play) {
                         s16 ring = Ring_Get_Equiped();
 
                         if (pauseCtx->cursorY[PAUSE_EQUIP] == 4 && (ring == RI_SORCERERS_RING || ring == RI_BRAVERY_RING || ring == RI_COWARDS_RING)) {
-                            if (!RINGS_SWAPPABLE_REQ)
+                            if (!RINGS_SWAPPABLE_REQ) {
+                                Message_StartTextbox(play, 0x010D, NULL);
+                                pauseCtx->unk_1E4 = 10;
                                 goto EQUIP_FAIL;
+                            }
                         }
 
                         // If we're on the "rings" section of the equipment screen AND we're on currently-equipped ring
