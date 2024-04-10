@@ -1039,6 +1039,20 @@ void EnOssan_State_FacingShopkeeper(EnOssan* this, PlayState* play, Player* play
 void EnOssan_State_TalkingToShopkeeper(EnOssan* this, PlayState* play, Player* player) {
     if ((Message_GetState(&play->msgCtx) == TEXT_STATE_EVENT) && Message_ShouldAdvance(play)) {
         EnOssan_StartShopping(play, this);
+    } else if ((Message_GetState(&play->msgCtx) == TEXT_STATE_CHOICE)) {
+        if (Message_ShouldAdvance(play)) {
+            //Messages for the Bomchu shop owner
+            u16 MiscMsg = GetTextID("misc");
+            switch (play->msgCtx.choiceIndex) {
+                case 0:
+                    Message_ContinueTextbox(play, MiscMsg+9);
+                    break;
+                case 1:
+                    Message_ContinueTextbox(play, MiscMsg+10);
+                    break;
+            }
+            func_80078884(NA_SE_SY_DECIDE);
+        }
     }
 }
 

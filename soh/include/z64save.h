@@ -359,6 +359,7 @@ typedef struct {
     /*        */ u16 diveRupeesUsed;
     /*        */ s16 rupeeCollectionScore;
     /*        */ u8 spiritDefenseHeartsGiven;
+    /*        */ s16 extraBombchuAccumulation;
 
     // #endregion
 } SaveContext; // size = 0x1428

@@ -515,6 +515,19 @@ extern "C" void OTRMessage_Init()
     //"They say that the Gerudo&currently keep something special above&their highest prison cell."
     //"They say that certain shops&may be doing business&at hours that they&advertise as being closed."
 
+    //Shops
+    MakeNormalMsgEng(0x008C, "\x08""Bombchu  10 pieces   10 Rupees\x09&&\x1B%gBuy&Don't buy%w");
+    MakeNormalMsgEng(0x00BC, "\x08%rBombchu  (10 pieces)  10 Rupees&%wThis looks like a toy mouse, but&it's actually a self-propelled time&bomb!\x09\x0A")
+    CustomMessageManager::Instance->CreateMessage(
+        questMessageTableID, 0x7076,
+        CustomMessage(
+          "This is a new type of bomb!&It's available only in limited&quantities initially...but there may be&something you can do about that!^I can offer you a collection service&or we can discuss special bomb types.\x1B&%gService&Special Bombs%w",
+          //"This is a new type of bomb!&It's available only in limited&quantities initially...but there&may be something you can do!^If you collect bombchus from other&places, but they become too much&for you to carry, they can crawl&their way back here!^Then I can offer my special service&of storing and providing them back&to you, for a small fee,&of course.\x0B\x02",
+          "",
+          "",
+          TEXTBOX_TYPE_BLACK, TEXTBOX_POS_VARIABLE)
+    );
+
     //Deku Scrubs
     MakeNormalMsgEng(0x10E0,"\x12\x38\x82""All right! You win! In return,&I'll tell you a secret&if you pay me %r50 rupees%w!\x07\x10\xA3");
     MakeNormalMsgEng(0x10E1,"\x12\x38\x80""OK, there is path to a place&hidden in the woods that is&revealed in %bthree%w parts,&of %bfour%w directions each!^The order of the parts is&something you will have&to work out yourself!^But I can say that there&is a final hidden direction,&and that is %gSouth%w!\x0B\x02");
@@ -1314,6 +1327,8 @@ extern "C" void OTRMessage_Init()
           TEXTBOX_TYPE_BLUE, TEXTBOX_POS_TOP)
     );
     MakeNormalMsgEng(MiscMsg+8, "I'm not sure I want you&to worry, but I've had some&concerns about the lady who's&been waiting outside the gate.^She seems to be afraid to leave.&I would help her, but my&duty is to stand guard here.");
+    MakeNormalMsgEng(MiscMsg+9, "OK, if you collect bombchus from other&places, but they become too much&for you to carry, they can crawl&their way back here!^Then I can offer my special service&of storing and providing them back&to you, for a small fee,\x14\x02 of course.&\x14\x01Then they will appear to your right.\x0B\x02");
+    MakeNormalMsgEng(MiscMsg+10, "I...did have other types of special&%cmechanical bombs%w to sell, besides&bombchus, but they've all sold out.^A particular Goron was very interested&in our %pauto\x2Dtrap%w bombs, so he bought&up every one of them! You'd have&to go to Death Mountain to inquire!\x0B\x02");
 
     u16 GerudoMsg = TextIDAllocator::Instance->allocateRange("gerudo", 10);
     MakeNormalMsgEng(GerudoMsg+0, "Heh, since you're clearly a master,&the only thing left is&to try for a perfect score,&if you can!\x0B\x02");

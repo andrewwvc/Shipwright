@@ -656,6 +656,7 @@ void SaveManager::InitFileNormal() {
     gSaveContext.diveRupeesUsed = 0;
     gSaveContext.rupeeCollectionScore = 0;
     gSaveContext.spiritDefenseHeartsGiven = 0;
+    gSaveContext.extraBombchuAccumulation = 0;
     UsedResources = {};
     UsedPinkSpirits = {};
 
@@ -2009,6 +2010,7 @@ void SaveManager::LoadBaseVersion4() {
     SaveManager::Instance->LoadData("diveRupeesUsed", gSaveContext.diveRupeesUsed);
     SaveManager::Instance->LoadData("rupeeCollectionScore", gSaveContext.rupeeCollectionScore);
     SaveManager::Instance->LoadData("spiritDefenseHeartsGiven", gSaveContext.spiritDefenseHeartsGiven);
+    SaveManager::Instance->LoadData("extraBombchuAccumulation", gSaveContext.extraBombchuAccumulation);
     SaveManager::Instance->LoadData("UsedPinkSpirits", UsedPinkSpirits, {});
 }
 
@@ -2229,6 +2231,7 @@ void SaveManager::SaveBase(SaveContext* saveContext, int sectionID, bool fullSav
     SaveManager::Instance->SaveData("diveRupeesUsed", saveContext->diveRupeesUsed);
     SaveManager::Instance->SaveData("rupeeCollectionScore", saveContext->rupeeCollectionScore);
     SaveManager::Instance->SaveData("spiritDefenseHeartsGiven", gSaveContext.spiritDefenseHeartsGiven);
+    SaveManager::Instance->SaveData("extraBombchuAccumulation", gSaveContext.extraBombchuAccumulation);
     SaveManager::Instance->SaveData("UsedPinkSpirits", UsedPinkSpirits);
 }
 

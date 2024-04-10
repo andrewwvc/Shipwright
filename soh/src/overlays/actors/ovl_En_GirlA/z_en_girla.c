@@ -230,7 +230,7 @@ static ShopItemEntry shopItemEntries[] = {
     { OBJECT_GI_EGG, GID_EGG, func_8002EBCC, 10000, 1, 0x00B5, 0x0085, GI_NONE, EnGirlA_CanBuy_Unk20,
       EnGirlA_ItemGive_Unk20, EnGirlA_BuyEvent_ShieldDiscount },
     /* SI_BOMBCHU_10_1 */
-    { OBJECT_GI_BOMB_2, GID_BOMBCHU, func_8002EBCC, 100, 10, 0x00BC, 0x008C, GI_BOMBCHUS_10, EnGirlA_CanBuy_Bombchus,
+    { OBJECT_GI_BOMB_2, GID_BOMBCHU, func_8002EBCC, 10, 10, 0x00BC, 0x008C, GI_BOMBCHUS_10, EnGirlA_CanBuy_Bombchus,
       NULL, EnGirlA_BuyEvent_ObtainBombchuPack },
     /* SI_BOMBCHU_20_1 */
     { OBJECT_GI_BOMB_2, GID_BOMBCHU, func_8002EBCC, 180, 20, 0x0061, 0x002A, GI_BOMBCHUS_20, EnGirlA_CanBuy_Bombchus,
@@ -239,10 +239,10 @@ static ShopItemEntry shopItemEntries[] = {
     { OBJECT_GI_BOMB_2, GID_BOMBCHU, func_8002EBCC, 180, 20, 0x0061, 0x002A, GI_BOMBCHUS_20, EnGirlA_CanBuy_Bombchus,
       NULL, EnGirlA_BuyEvent_ObtainBombchuPack },
     /* SI_BOMBCHU_10_2 */
-    { OBJECT_GI_BOMB_2, GID_BOMBCHU, func_8002EBCC, 100, 10, 0x00BC, 0x008C, GI_BOMBCHUS_10, EnGirlA_CanBuy_Bombchus,
+    { OBJECT_GI_BOMB_2, GID_BOMBCHU, func_8002EBCC, 10, 10, 0x00BC, 0x008C, GI_BOMBCHUS_10, EnGirlA_CanBuy_Bombchus,
       NULL, EnGirlA_BuyEvent_ObtainBombchuPack },
     /* SI_BOMBCHU_10_3 */
-    { OBJECT_GI_BOMB_2, GID_BOMBCHU, func_8002EBCC, 100, 10, 0x00BC, 0x008C, GI_BOMBCHUS_10, EnGirlA_CanBuy_Bombchus,
+    { OBJECT_GI_BOMB_2, GID_BOMBCHU, func_8002EBCC, 10, 10, 0x00BC, 0x008C, GI_BOMBCHUS_10, EnGirlA_CanBuy_Bombchus,
       NULL, EnGirlA_BuyEvent_ObtainBombchuPack },
     /* SI_BOMBCHU_20_3 */
     { OBJECT_GI_BOMB_2, GID_BOMBCHU, func_8002EBCC, 180, 20, 0x0061, 0x002A, GI_BOMBCHUS_20, EnGirlA_CanBuy_Bombchus,
@@ -251,7 +251,7 @@ static ShopItemEntry shopItemEntries[] = {
     { OBJECT_GI_BOMB_2, GID_BOMBCHU, func_8002EBCC, 180, 20, 0x0061, 0x002A, GI_BOMBCHUS_20, EnGirlA_CanBuy_Bombchus,
       NULL, EnGirlA_BuyEvent_ObtainBombchuPack },
     /* SI_BOMBCHU_10_4 */
-    { OBJECT_GI_BOMB_2, GID_BOMBCHU, func_8002EBCC, 100, 10, 0x00BC, 0x008C, GI_BOMBCHUS_10, EnGirlA_CanBuy_Bombchus,
+    { OBJECT_GI_BOMB_2, GID_BOMBCHU, func_8002EBCC, 10, 10, 0x00BC, 0x008C, GI_BOMBCHUS_10, EnGirlA_CanBuy_Bombchus,
       NULL, EnGirlA_BuyEvent_ObtainBombchuPack },
     /* SI_DEKU_SEEDS_30 */
     { OBJECT_GI_SEED, GID_SEEDS, func_8002EBCC, 30, 30, 0x00DF, 0x00DE, GI_SEEDS_30, EnGirlA_CanBuy_DekuSeeds,
@@ -708,7 +708,7 @@ s32 EnGirlA_CanBuy_Bombchus(PlayState* play, EnGirlA* this) {
             return CANBUY_RESULT_CANT_GET_NOW;
         }
     }
-    if (AMMO(ITEM_BOMBCHU) >= 50) {
+    if (AMMO(ITEM_BOMBCHU) >= MAX_BOMBCHU_CAPACITY) {
         return CANBUY_RESULT_CANT_GET_NOW;
     }
     if (Rupees_GetNum() < this->basePrice) {

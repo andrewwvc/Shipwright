@@ -1923,6 +1923,32 @@ u16 Ring_SwapLeft(u8 ringSlot) {
     return gSaveContext.inventory.ringEquips[ringSlot] = temp;
 }
 
+static u16 BombchuFlags[] = {ITEMGETINF_03, ITEMGETINF_06, ITEMGETINF_07, ITEMGETINF_0A};
+
+void Item_ResetBombchus() {
+    for (s16 ii = 0; ii < ARRAY_COUNT(BombchuFlags); ii++) {
+        Flags_SetItemGetInf(BombchuFlags[ii]);
+    }
+}
+
+void Item_ManageBombchus() {
+    for (s16 ii = 0; ii < ARRAY_COUNT(BombchuFlags); ii++) {
+        if (gSaveContext.extraBombchuAccumulation < 10)
+            break;
+        if (Flags_GetItemGetInf(BombchuFlags[ii])) {
+            Flags_UnsetItemGetInf(BombchuFlags[ii]);
+            gSaveContext.extraBombchuAccumulation -= 10;
+        }
+    }
+
+    for (s16 ii = 0; ii < ARRAY_COUNT(BombchuFlags); ii++) {
+         if (Flags_GetItemGetInf(BombchuFlags[ii]))
+            return;
+    }
+
+    gSaveContext.extraBombchuAccumulation = 0;
+}
+
 /**
  * @brief Adds the given item to Link's inventory.
  * 
@@ -2110,6 +2136,7 @@ u8 Item_Give(PlayState* play, u8 item) {
             Inventory_ChangeUpgrade(UPG_BOMB_BAG, 1);
             INV_CONTENT(ITEM_BOMB) = ITEM_BOMB;
             AMMO(ITEM_BOMB) = CAPACITY(UPG_BOMB_BAG, 1);
+            Item_ResetBombchus();//This is done here to setup the bombchu shop flags before the player can access it
             return Return_Item(item, MOD_NONE, ITEM_NONE);
         } else {
             AMMO(ITEM_BOMB)++;
@@ -2280,22 +2307,28 @@ u8 Item_Give(PlayState* play, u8 item) {
         if (gSaveContext.inventory.items[slot] == ITEM_NONE) {
             INV_CONTENT(ITEM_BOMBCHU) = ITEM_BOMBCHU;
             AMMO(ITEM_BOMBCHU) = 10;
+            Item_ResetBombchus();
         } else {
             AMMO(ITEM_BOMBCHU) += 10;
         }
         if (AMMO(ITEM_BOMBCHU) > MAX_BOMBCHU_CAPACITY) {
+            gSaveContext.extraBombchuAccumulation += AMMO(ITEM_BOMBCHU) - MAX_BOMBCHU_CAPACITY;
             AMMO(ITEM_BOMBCHU) = MAX_BOMBCHU_CAPACITY;
+            Item_ManageBombchus();
         }
         return Return_Item(item, MOD_NONE, ITEM_NONE);
     } else if ((item == ITEM_BOMBCHUS_5) || (item == ITEM_BOMBCHUS_20)) {
         if (gSaveContext.inventory.items[slot] == ITEM_NONE) {
             INV_CONTENT(ITEM_BOMBCHU) = ITEM_BOMBCHU;
             AMMO(ITEM_BOMBCHU) += sAmmoRefillCounts[item - ITEM_BOMBCHUS_5 + 8];
+            Item_ResetBombchus();
         } else {
             AMMO(ITEM_BOMBCHU) += sAmmoRefillCounts[item - ITEM_BOMBCHUS_5 + 8];
         }
         if (AMMO(ITEM_BOMBCHU) > MAX_BOMBCHU_CAPACITY) {
+            gSaveContext.extraBombchuAccumulation += AMMO(ITEM_BOMBCHU) - MAX_BOMBCHU_CAPACITY;
             AMMO(ITEM_BOMBCHU) = MAX_BOMBCHU_CAPACITY;
+            Item_ManageBombchus();
         }
         return Return_Item(item, MOD_NONE, ITEM_NONE);
     } else if ((item >= ITEM_ARROWS_SMALL) && (item <= ITEM_ARROWS_LARGE)) {
@@ -3430,8 +3463,10 @@ void Inventory_ChangeAmmo(s16 item, s16 ammoChange) {
     } else if (item == ITEM_BOMBCHU) {
         AMMO(ITEM_BOMBCHU) += ammoChange;
 
-        if (AMMO(ITEM_BOMBCHU) >= MAX_BOMBCHU_CAPACITY) {
+        if (AMMO(ITEM_BOMBCHU) > MAX_BOMBCHU_CAPACITY) {
+            gSaveContext.extraBombchuAccumulation += AMMO(ITEM_BOMBCHU) - MAX_BOMBCHU_CAPACITY;
             AMMO(ITEM_BOMBCHU) = MAX_BOMBCHU_CAPACITY;
+            Item_ManageBombchus();
         } else if (AMMO(ITEM_BOMBCHU) < 0) {
             AMMO(ITEM_BOMBCHU) = 0;
         }
