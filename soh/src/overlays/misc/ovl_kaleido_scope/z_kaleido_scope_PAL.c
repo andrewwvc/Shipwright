@@ -615,7 +615,7 @@ static void* iconNameTexturesRing[] = {
     gRingOfPersistenceItemNameENG,
     gAcrobatRingItemNameENG,
     gMuteRingItemNameENG,
-    gSunsSongItemNameFRATex,
+    gProtectionRingItemNameENG,
     gSongOfTimeItemNameFRATex,
     gSongOfStormsItemNameFRATex,
 };

@@ -204,3 +204,6 @@ static const ALIGN_ASSET(2) char gAcrobatRingItemNameENG[] = dgAcrobatRingItemNa
 
 #define dgMuteRingItemNameENG "__OTR__textures/title_static/gMuteRingItemNameENG"
 static const ALIGN_ASSET(2) char gMuteRingItemNameENG[] = dgMuteRingItemNameENG;
+
+#define dgProtectionRingItemNameENG "__OTR__textures/title_static/gProtectionRingItemNameENG"
+static const ALIGN_ASSET(2) char gProtectionRingItemNameENG[] = dgProtectionRingItemNameENG;
