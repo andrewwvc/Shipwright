@@ -531,6 +531,11 @@ extern "C" void OTRMessage_Init()
     //Deku Scrubs
     MakeNormalMsgEng(0x10E0,"\x12\x38\x82""All right! You win! In return,&I'll tell you a secret&if you pay me %r50 rupees%w!\x07\x10\xA3");
     MakeNormalMsgEng(0x10E1,"\x12\x38\x80""OK, there is path to a place&hidden in the woods that is&revealed in %bthree%w parts,&of %bfour%w directions each!^The order of the parts is&something you will have&to work out yourself!^But I can say that there&is a final hidden direction,&and that is %gSouth%w!\x0B\x02");
+    MakeNormalMsgEng(0x10E2,"\x12\x38\x82""All right! You win! In return,&I'll sell you a %cring%w&if you pay me %r200 rupees%w!\x07\x10\xA3");
+    MakeNormalMsgEng(0x10E3,"\x12\x38\x82""All right! You win! In return,&I'll sell you a %cring%w&if you pay me %r400 rupees%w!\x07\x10\xA3");
+    MakeNormalMsgEng(0x10E4,"\x12\x38\x82""All right! You win! In return,&I'll sell you a %cring%w&if you pay me %r800 rupees%w!\x07\x10\xA3");
+    MakeNormalMsgEng(0x10E5,"\x12\x38\x82""All right! You win! In return,&I'll sell you a %cring%w&if you pay me %r5000 rupees%w!\x07\x10\xA3");
+    MakeNormalMsgEng(0x10E6,"\x12\x38\x82""All right! You win! In return,&I'll sell you %csomething special%w&if you pay me %r3000 rupees%w!\x07\x10\xA3");
 
     u16 SariaMsg = TextIDAllocator::Instance->allocateRange("saria", 50);
     CustomMessageManager::Instance->CreateMessage(

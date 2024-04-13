@@ -357,6 +357,7 @@ const std::vector<FlagTable> flagTables = {
         { 0x1AD, "Entered Ganon's Castle" },
         { 0x1AE, "Entered Ganon's Tower (Collapsing)" },
         { 0x1AF, "Entered Ganon's Castle (Collapsing)" },
+        { 0x1B0, "Scrub Defense Heart" },
         { 0x1D0, "No Sword on B" },
     } },
     { "Event Inf Flags", EVENT_INF, 0x03, {

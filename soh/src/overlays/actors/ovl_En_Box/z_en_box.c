@@ -32,7 +32,36 @@ when set, gets cleared next EnBox_Update call and clip to the floor
 */
 #define ENBOX_MOVE_STICK_TO_GROUND (1 << 4)
 
-#define ENBOX_ITEM_ID ((this->dyna.actor.params >> 5 & 0x7F) | ((this->dyna.actor.home.rot.z & 0x0F00) >> 1))
+s16 EnBox_GiveGrottoReplacementID(EnBox* this) {
+    switch (this->dyna.actor.params) {
+        case 0x59A0:
+        return GI_RING+RI_LOVE_RING;
+
+        case 0x59B4:
+        return GI_RUPEE_GOLD;
+
+        case 0x59A3:
+        return GI_RUPEE_PURPLE;
+
+        case 0x59C2:
+        return GI_RUPEE_GOLD;
+
+        case 0x59C8:
+        return GI_RUPEE_PURPLE;
+
+        case 0x59C9:
+        return GI_RING+RI_MOUNTAIN_RING;
+
+        case 0x59CC:
+        return GI_RUPEE_GOLD;
+
+        default:
+        return ((this->dyna.actor.params >> 5 & 0x7F) | ((this->dyna.actor.home.rot.z & 0x0F00) >> 1));
+    }
+}
+
+#define ENBOX_ITEM_ID ((play->sceneNum == SCENE_GROTTOS && play->roomCtx.curRoom.num == 0) ? EnBox_GiveGrottoReplacementID(this) : \
+                        ((this->dyna.actor.params >> 5 & 0x7F) | ((this->dyna.actor.home.rot.z & 0x0F00) >> 1)))
 
 typedef enum {
     ENBOX_STATE_0, // waiting for player near / player available / player ? (IDLE)

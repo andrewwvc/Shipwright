@@ -417,12 +417,21 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, LUS::ActorEnt
             { -1, -1, { ACTOR_EN_GO2, -288,0,188, 0,0x4000,0, 0x03ed | 0x10 | (0x0<<10)}},
         } },
     } },
-    { 0x3E, { // Grotto
+    { SCENE_GROTTOS, {
+        { 0x02, { // Redead grotto
+            { -1, 2, { ACTOR_EN_BOX, 1807,0, -343, 0,0,ROTZ_BOX_ITEM(GI_RING+RI_RING_OF_PERSISTENCE), 0x7000 | 0xA | PARAMS_BOX_ITEM(GI_RING+RI_RING_OF_PERSISTENCE) }},
+        } },
         { 0x05, { // Octorok Grotto
-            //{ -1, 8, { ACTOR_EN_ITEM00, 32, -129, 852, 0, 0, 0, 0x406 }},
+            { -1, 8, { ACTOR_EN_ITEM00, 32, -129, 852, 0, 0, 0, 0x200+(uint16_t)(ITEM00_RING_0+RI_RING_OF_SILENCE) }},
         } },
         { 0x07, {
             { -1, -1, { ACTOR_EN_ITEM00, 1180,100,800, 0,0,0, 0x100+(uint16_t)ITEM00_HEART_PIECE  }},
+        } },
+        { 0x09, {
+            { -1, -1, {ACTOR_EN_SHOPNUTS,  2360,0,930, 0,0,0, 0xC}},
+        } },
+        { 0x0C, {
+            { -1, 1,  {ACTOR_EN_SHOPNUTS, 5099,-20,882, 0,0,0, 0xC}},
         } },
     } },
     { SCENE_STABLE, { //Ranch

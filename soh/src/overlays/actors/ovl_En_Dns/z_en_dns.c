@@ -34,6 +34,7 @@ void func_809EFA9C(EnDns* this);
 void func_809EFACC(EnDns* this);
 void func_809EFAFC(EnDns* this);
 void func_809EFB40(EnDns* this);
+void func_PurchaseDefenseHeart(EnDns* this);
 
 void EnDns_SetupWait(EnDns* this, PlayState* play);
 void EnDns_Wait(EnDns* this, PlayState* play);
@@ -79,7 +80,7 @@ static ColliderCylinderInitType1 sCylinderInit = {
 };
 
 static u16 D_809F040C[] = {
-    0x10A0, 0x10A1, 0x10A2, 0x10CA, 0x10CB, 0x10CC, 0x10CD, 0x10CE, 0x10CF, 0x10DC, 0x10DD, 0x10E0,
+    0x10A0, 0x10A1, 0x10A2, 0x10CA, 0x10CB, 0x10CC, 0x10CD, 0x10CE, 0x10CF, 0x10DC, 0x10DD, 0x10E0, 0x10E2,
 };
 
 // Debug text: "sells"  { "Deku Nuts",    "Deku Sticks",        "Piece of Heart",  "Deku Seeds",
@@ -115,9 +116,20 @@ static DnsItemEntry D_809F04F0 = { 40, 1, GI_NUT_UPGRADE_30, func_809EF70C, func
 
 static DnsItemEntry D_BuySecret = { 50, 0, GI_NONE, func_809EF70C, func_809EF9F8 };
 
+static DnsItemEntry D_BuyRing = { 400, 1, GI_RING+RI_FEATHER_RING, func_809EF70C, func_809EF9F8 };
+
+static DnsItemEntry D_BuyRingWood = { 200, 1, GI_RING+RI_WOOD_RING, func_809EF70C, func_809EF9F8 };
+
+static DnsItemEntry D_BuyRingFocus = { 800, 1, GI_RING+RI_FOCUS_RING, func_809EF70C, func_809EF9F8 };//Zora's River lower circle
+
+static DnsItemEntry D_BuyRingAcrobat = { 200, 1, GI_RING+RI_ACROBAT_RING, func_809EF70C, func_809EF9F8 };//Lake Hylia Grave
+
+static DnsItemEntry D_BuyDefsenseHeart = { 3000, 1, GI_DEFENSE_HEART, func_809EF70C, func_PurchaseDefenseHeart };//Near Tent
+
 static DnsItemEntry* sItemEntries[] = {
     &D_809F0450, &D_809F0460, &D_809F0470, &D_809F0480, &D_809F0490, &D_809F04A0,
     &D_809F04B0, &D_809F04C0, &D_809F04D0, &D_809F04E0, &D_809F04F0, &D_BuySecret,
+    &D_BuyRing
 };
 
 static InitChainEntry sInitChain[] = {
@@ -137,6 +149,72 @@ static AnimationMinimalInfo sAnimationInfo[] = {
     { &gBusinessScrubAnim_4404, ANIMMODE_ONCE, 0.0f },
     { &gBusinessScrubNervousTransitionAnim, ANIMMODE_ONCE, 0.0f },
 };
+
+DnsItemEntry* EnDns_GrottoExitToItemEntry(s16 entranceNum) {
+    switch (entranceNum) {
+        case 234:
+        case 413:
+        case 477:
+        return &D_BuyRingFocus;
+        case 279:
+        case 557:
+        case 976:
+        return &D_BuyDefsenseHeart;
+        case 252:
+        case 533:
+        case 1536:
+        return &D_BuyRingWood;
+        case 258:
+        case 537:
+        case 541:
+        case 686:
+        case 777:
+        case 972:
+        case 1376:
+        case 1540:
+        return &D_BuyRingAcrobat;
+        case 343:
+        case 888:
+        case 1071:
+        case 1492:
+        return &D_BuyRing;
+        default:
+        return &D_809F04A0;
+    }
+}
+
+u16 EnDns_GrottoExitToTextEntry(s16 entranceNum) {
+    switch (entranceNum) {
+        case 234:
+        case 413:
+        case 477:
+        return 0x10E4;
+        case 279:
+        case 557:
+        case 976:
+        return 0x10E6;
+        case 252:
+        case 533:
+        case 1536:
+        return 0x10E2;
+        case 258:
+        case 537:
+        case 541:
+        case 686:
+        case 777:
+        case 972:
+        case 1376:
+        case 1540:
+        return 0x10E2;
+        case 343:
+        case 888:
+        case 1071:
+        case 1492:
+        return 0x10E3;
+        default:
+        return 0x10CC;
+    }
+}
 
 void EnDns_Init(Actor* thisx, PlayState* play) {
     EnDns* this = (EnDns*)thisx;
@@ -168,8 +246,13 @@ void EnDns_Init(Actor* thisx, PlayState* play) {
     this->actor.speedXZ = 0.0f;
     this->actor.velocity.y = 0.0f;
     this->actor.gravity = -1.0f;
-    this->actor.textId = D_809F040C[this->actor.params];
-    this->dnsItemEntry = sItemEntries[this->actor.params];
+    if (this->actor.params == 0xC) {
+        this->dnsItemEntry = EnDns_GrottoExitToItemEntry(gSaveContext.respawn[RESPAWN_MODE_RETURN].entranceIndex);
+        this->actor.textId = EnDns_GrottoExitToTextEntry(gSaveContext.respawn[RESPAWN_MODE_RETURN].entranceIndex);
+    } else  {
+        this->dnsItemEntry = sItemEntries[this->actor.params];
+        this->actor.textId = D_809F040C[this->actor.params];
+    }
     if (IS_RANDO) {
         // Ugly, but the best way we can identify which grotto we are in, same method 3DRando uses, but we'll need to account for entrance rando
         s16 respawnData = gSaveContext.respawn[RESPAWN_MODE_RETURN].data & ((1 << 8) - 1);
@@ -357,6 +440,11 @@ void func_809EFB40(EnDns* this) {
     Rupees_ChangeBy(-this->dnsItemEntry->itemPrice);
 }
 
+void func_PurchaseDefenseHeart(EnDns* this) {
+    Flags_SetInfTable(0x1B0);
+    Rupees_ChangeBy(-this->dnsItemEntry->itemPrice);
+}
+
 void EnDns_SetupWait(EnDns* this, PlayState* play) {
     if (this->skelAnime.curFrame == this->skelAnime.endFrame) {
         this->actionFunc = EnDns_Wait;
@@ -541,7 +629,10 @@ void EnDns_Update(Actor* thisx, PlayState* play) {
     s16 pad;
 
     this->dustTimer++;
-    this->actor.textId = D_809F040C[this->actor.params];
+    if (this->actor.params == 0xC)
+        this->actor.textId = EnDns_GrottoExitToTextEntry(gSaveContext.respawn[RESPAWN_MODE_RETURN].entranceIndex);
+    else
+        this->actor.textId = D_809F040C[this->actor.params];
     if (IS_RANDO && this->scrubIdentity.isShuffled) {
         this->actor.textId = 0x9000 + (this->scrubIdentity.randomizerInf - RAND_INF_SCRUBS_PURCHASED_DODONGOS_CAVERN_DEKU_SCRUB_NEAR_BOMB_BAG_LEFT);
     }
