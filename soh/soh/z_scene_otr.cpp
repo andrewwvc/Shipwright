@@ -319,6 +319,9 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, LUS::ActorEnt
             { -1, -1, { ACTOR_EN_FIREFLY, 3090,-365,-1105, 0,0,0, 0x4}},
             //{ -1, -1, { ACTOR_EN_POH, 3020,-500,-970, 0,0,0, 0x0}}
         } },
+        { 21, {
+            { -1, -1, { ACTOR_EN_BOX, 1345,-163,-2500, 0,-2478,ROTZ_BOX_ITEM(GI_DEFENSE_HEART), 0x4000 | 0x1D | PARAMS_BOX_ITEM(GI_DEFENSE_HEART)}},
+        } },
     } },
     { 0x8, {//Well
         { 0x00, {

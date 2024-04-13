@@ -501,7 +501,7 @@ extern "C" void OTRMessage_Init()
     MakeBlueMsgEng(0x420, "They say that Dampe, the gravekeeper,&has a reward reserved for those&with very impresive speed.^However, he unlikely&to relinquish anything until&he gives up the ghost.");//Deku Tree
     MakeBlueMsgEng(StoneMsg+0,"There may be something special&behind falls that are %rnot%w water...");
     MakeBlueMsgEng(StoneMsg+2,"They say that many people&would like Hyrule Field to&be cleared of Peahats.");
-    MakeBlueMsgEng(StoneMsg+8, "They say that dungeons may&have hidden areas that are&not even marked on any map.");
+    MakeBlueMsgEng(StoneMsg+8, "They say that many dungeons may&have hidden areas that are&not even marked on any map.^There many even be an invisible&chest in the depths of&a temple of punishment, that&is not on any chart.");
     MakeBlueMsgEng(StoneMsg+9,"They say that a level of&tension resides between the&various races in Hyrule.^The use of masks may be&the key to allow one to&better understand this.");
     MakeBlueMsgEng(StoneMsg+12, "They say that certain items, when&they are used together, may be&able to combine their abilities.^So it may pay to experiemnt&with methods of pairing things!");
     MakeBlueMsgEng(StoneMsg+20, "They say that certain shops&may be doing business&at hours that they&advertise as being closed.");
