@@ -267,6 +267,14 @@ bool Scene_CommandSpawnList(PlayState* play, LUS::ISceneCommand* cmd) {
 }
 
 
+#define CHILD_SETUPS(entryNum, value0, value1, value2, value3, value4, value5, value6, value7) {0, entryNum, value0, value1, value2, value3, value4, value5, value6, value7}, {1, entryNum, value0, value1, value2, value3, value4, value5, value6, value7},
+#define ADULT_SETUPS(entryNum, value0, value1, value2, value3, value4, value5, value6, value7) {2, entryNum, value0, value1, value2, value3, value4, value5, value6, value7}, {3, entryNum, value0, value1, value2, value3, value4, value5, value6, value7},
+#define PARAMS_BOX_ITEM(val) ((val & 0x7F) << 5)
+#define ROTZ_BOX_ITEM(val) ((val & 0x80) << 1)
+#define PARAMS_TSUBO_ITEM00(val) (val & 0x1F)
+#define ROTZ_TSUBO_ITEM00(val) ((val >> 5) & 0x7)
+
+
 const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, LUS::ActorEntry>>>> sceneActorOverrides = {
     { 0x01, { // Dodongo's Cavern
         { 0x03, {
