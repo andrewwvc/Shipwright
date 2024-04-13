@@ -3033,6 +3033,8 @@ void CollisionCheck_ApplyDamage(PlayState* play, CollisionCheckContext* colChkCt
     tbl = collider->actor->colChkInfo.damageTable;
     if (tbl == NULL) {
         damage = (f32)info->acHitInfo->toucher.damage - info->bumper.defense;
+        if (info->acHitInfo->toucher.dmgFlags == DMG_EXPLOSIVE && Ring_Get_Equiped() == RI_PROTECTION_RING)
+            damage /= 2;
         if (damage < 0) {
             damage = 0;
         }

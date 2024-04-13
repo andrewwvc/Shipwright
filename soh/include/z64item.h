@@ -528,7 +528,7 @@ typedef enum {
     /* 16 */ RI_RING_OF_PERSISTENCE,//Renders no image
     /* 17 */ RI_ACROBAT_RING,//Alters jump attack
     /* 18 */ RI_MUTE_RING,//You cannot speak or yell
-    /* 19 */ RI_SECRET_RING,//It's a secret to everyone
+    /* 19 */ RI_PROTECTION_RING,//Protects you from explosion damage
 } RingID;
 
 #define WITCH_RING_MULTIPLIER 2
