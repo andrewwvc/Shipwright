@@ -1113,6 +1113,7 @@ void EnItem00_Update(Actor* thisx, PlayState* play) {
             break;
         default:
             if (ITEM00_RING_0 <= this->actor.params && this->actor.params <= ITEM00_RING_LAST) {
+                resourceTimeMultiplier = 3;
                 getItemId = GI_RING + this->actor.params - ITEM00_RING_0;
             }
             break;
