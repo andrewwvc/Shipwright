@@ -286,6 +286,9 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, LUS::ActorEnt
             { -1, -1, { ACTOR_EN_ZF, -1925,2800,780, 0,24394,0, static_cast<int16_t>(0xFFFF) }},
             { -1, -1, { ACTOR_EN_ZF, -1740,2800,-1060, 0,24394,0, static_cast<int16_t>(0xFFFF) }},
         } },
+        {0x18, {
+            {-1, 0, {ACTOR_EN_FD, -2928,2920,139, 0,0,0, 0x0}}
+        } },
     } },
     { 0x05, { // Water Temple
         { 0x00, {
@@ -574,11 +577,6 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, LUS::ActorEnt
         {0x0f, {
             {-1, -1, {ACTOR_EN_WALLMAS, 1830,404,-2700, 0,0,0, 0x2 | (0x20+11 << 8)}},
             {-1, -1, {ACTOR_EN_ST, 2069,720,-3002, 0,-32768,0, 0x5}}
-        } },
-    } },
-    {SCENE_FIRE_TEMPLE, {
-        {0x18, {
-            {-1, 0, {ACTOR_EN_FD, -2928,2920,139, 0,0,0, 0x0}}
         } },
     } },
 };
