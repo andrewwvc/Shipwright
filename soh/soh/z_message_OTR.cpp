@@ -1220,8 +1220,10 @@ extern "C" void OTRMessage_Init()
     MakeNormalMsgEng(0x70F3, "Oh, a darling little %cFairy%w!&I'll buy it for %r"+std::to_string(BEGGAR_REWARD_FAIRY)+" Rupees%w!&All sales final, OK?");
     MakeNormalMsgEng(0xF000, "\x08%rPiece of Heart   300 Rupees%w&Adds a quarter of a section&to your heart container.&4 together will improve your life!\t\n\x02");
     MakeNormalMsgEng(0xF001, "\x08Piece of Heart   300 Rupees&\x09\x1B&%gBuy&Don't buy%w\x02");
-    u16 RanchMsg = TextIDAllocator::Instance->allocateRange("ranch", 20);
+    MakeNormalMsgEng(0xF002, "\x08%rProtective Ring    999 Rupees&%wYou're a good customer, so here's&a special offer you'll find useful.&Protects against explosive damage.\x09\x0A")
+    MakeNormalMsgEng(0xF003, "\x08""Protective Ring    999 Rupees\x09&&\x1B%gBuy&Don't buy%w");
 
+    u16 RanchMsg = TextIDAllocator::Instance->allocateRange("ranch", 20);
     MakeNormalMsgEng(RanchMsg+0, "Oh, I really can't get to sleep.^Hey, fairy boy, when did&you get in here anyway?&You've been sneaking about,&haven't you?^Hmm...we could go out and play,&but you'd have to be careful&to not wake dad.^I'll see you outside.");
     MakeNormalMsgEng(RanchMsg+1, "Don't worry.^I should be able to get&out through the window.");
     MakeNormalMsgEng(RanchMsg+2, "Well, I did want to play,&but there are all these&mean birds flying around.^There's no way I can go&out there like this now.");

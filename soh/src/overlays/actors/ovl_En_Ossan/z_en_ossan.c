@@ -321,6 +321,7 @@ static EnOssanGetGirlAParamsFunc sShopItemReplaceFunc[] = {
     ShopItemDisp_Default,   ShopItemDisp_Default,    ShopItemDisp_Default, ShopItemDisp_Default,
     ShopItemDisp_Default,   ShopItemDisp_Default,    ShopItemDisp_Default, ShopItemDisp_Default,
     ShopItemDisp_Default,   ShopItemDisp_Default,    ShopItemDisp_Default, ShopItemDisp_Default,
+    ShopItemDisp_Default
 };
 
 static InitChainEntry sInitChain[] = {
@@ -1779,6 +1780,8 @@ void EnOssan_State_GiveItemWithFanfare(EnOssan* this, PlayState* play, Player* p
     }
 }
 
+void EnGirlA_InitItem(EnGirlA* this, PlayState* play);
+
 void EnOssan_State_ItemPurchased(EnOssan* this, PlayState* play, Player* player) {
     EnGirlA* item;
     EnGirlA* itemTemp;
@@ -1819,6 +1822,13 @@ void EnOssan_State_ItemPurchased(EnOssan* this, PlayState* play, Player* player)
             item->updateStockedItemFunc(play, item);
             EnOssan_EndInteraction(play, this);
             return;
+        }
+        //Handle the case where selling out bombchu stock should cause a ring to appear
+        if ((this->actor.params == OSSAN_TYPE_BOMBCHUS) && (this->cursorIndex != 7) &&
+                        Flags_GetItemGetInf(ITEMGETINF_05) &&Flags_GetItemGetInf(ITEMGETINF_04) && Flags_GetItemGetInf(ITEMGETINF_08) && Flags_GetItemGetInf(ITEMGETINF_09)) {
+            item = this->shelfSlots[7];
+            item->actor.params = SI_PROTECTION_RING;
+            EnGirlA_InitItem(item, play);
         }
         this->stateFlag = OSSAN_STATE_CONTINUE_SHOPPING_PROMPT;
         Message_ContinueTextbox(play, 0x6B);

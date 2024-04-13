@@ -882,7 +882,7 @@ s16 gRingColors[][2][3] = {
     {{255,100,100},{15,61,12}},
     {{255,150,0},{80,0,0}},
     {{90,90,255},{60,60,0}},  //Default dull blue
-    {{255,255,255},{12,21,26}},  //Default dull blue
+    {{80,0,140},{25,25,25}},
 };
 
 void GetItem_DrawRing(PlayState* play, s16 drawId) {

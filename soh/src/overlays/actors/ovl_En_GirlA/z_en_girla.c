@@ -70,6 +70,9 @@ void EnGirlA_ItemGive_Unk20(PlayState* play, EnGirlA* this);
 void EnGirlA_ItemGive_DekuSeeds(PlayState* play, EnGirlA* this);
 void EnGirlA_ItemGive_Randomizer(PlayState* play, EnGirlA* this);
 void EnGirlA_ItemGive_PieceOfHeart(PlayState* play, EnGirlA* this);
+void EnGirlA_ItemGive_Ring(PlayState* play, EnGirlA* this);
+void EnGirlA_BuyEvent_HeartPiece(PlayState* play, EnGirlA* this);
+void EnGirlA_BuyEvent_Ring(PlayState* play, EnGirlA* this);
 void EnGirlA_BuyEvent_ShieldDiscount(PlayState* play, EnGirlA* this);
 void EnGirlA_BuyEvent_ObtainBombchuPack(PlayState* play, EnGirlA* this);
 void EnGirlA_BuyEvent_GoronTunic(PlayState* play, EnGirlA* this);
@@ -321,7 +324,9 @@ static ShopItemEntry shopItemEntries[] = {
       EnGirlA_ItemGive_Randomizer, EnGirlA_BuyEvent_Randomizer },
     /* SI_PIECE_OF_HEART */
     { OBJECT_B_HEART, GID_HEART_PIECE, NULL, 300, 1, 0xF000, 0xF001, GI_HEART_PIECE, EnGirlA_CanBuy_HeartPiece,
-      EnGirlA_ItemGive_PieceOfHeart, EnGirlA_BuyEvent_ShieldDiscount }
+      EnGirlA_ItemGive_PieceOfHeart, EnGirlA_BuyEvent_HeartPiece },
+    { OBJECT_GI_KEY, GID_RING_0+RI_PROTECTION_RING, NULL, 999, 1, 0xF002, 0xF003, GI_RING+RI_PROTECTION_RING, EnGirlA_CanBuy_HeartPiece,
+      EnGirlA_ItemGive_Ring, EnGirlA_BuyEvent_Ring}
 };
 
 // Defines the Hylian Shield discount amount
@@ -383,7 +388,10 @@ s32 EnGirlA_TryChangeShopItem(EnGirlA* this, PlayState* play) {
             break;
         case SI_BOMBCHU_20_2:
             if (Flags_GetItemGetInf(ITEMGETINF_05)) {
-                this->actor.params = SI_SOLD_OUT;
+                if (Flags_GetItemGetInf(ITEMGETINF_04) && Flags_GetItemGetInf(ITEMGETINF_08) && Flags_GetItemGetInf(ITEMGETINF_09))
+                    this->actor.params = SI_PROTECTION_RING;
+                else
+                    this->actor.params = SI_SOLD_OUT;
                 return true;
             }
             break;
@@ -667,7 +675,7 @@ s32 EnGirlA_CanBuy_HeartPiece(PlayState* play, EnGirlA* this) {
     if (Rupees_GetNum() < this->basePrice) {
         return CANBUY_RESULT_NEED_RUPEES;
     }
-    return CANBUY_RESULT_SUCCESS;
+    return CANBUY_RESULT_SUCCESS_FANFARE;
 }
 
 s32 EnGirlA_CanBuy_MilkBottle(PlayState* play, EnGirlA* this) {
@@ -1016,6 +1024,9 @@ void EnGirlA_ItemGive_Randomizer(PlayState* play, EnGirlA* this) {
 }
 
 void EnGirlA_ItemGive_PieceOfHeart(PlayState* play, EnGirlA* this) {
+    GetItemEntry entry = ItemTable_Retrieve(this->getItemId);
+    gSaveContext.pendingSale = entry.itemId;
+    gSaveContext.pendingSaleMod = entry.modIndex;
     Item_Give(play, ITEM_HEART_PIECE);
     gSaveContext.healthAccumulator = 0x140;
     if ((s32)(gSaveContext.inventory.questItems & 0xF0000000) == 0x40000000) {
@@ -1023,7 +1034,31 @@ void EnGirlA_ItemGive_PieceOfHeart(PlayState* play, EnGirlA* this) {
         gSaveContext.healthCapacity += 0x10;
         gSaveContext.health += 0x10;
     }
-    gSaveContext.itemGetInf[2] |= 0x01;
+    gSaveContext.itemGetInf[2] |= 0x01;//For the bazzar night shop
+    Rupees_ChangeBy(-this->basePrice);
+}
+
+void EnGirlA_BuyEvent_HeartPiece(PlayState* play, EnGirlA* this) {
+    GetItemEntry entry = ItemTable_Retrieve(this->getItemId);
+    gSaveContext.pendingSale = entry.itemId;
+    gSaveContext.pendingSaleMod = entry.modIndex;
+    gSaveContext.itemGetInf[2] |= 0x01;//For the bazzar night shop
+    Rupees_ChangeBy(-this->basePrice);
+}
+
+void EnGirlA_ItemGive_Ring(PlayState* play, EnGirlA* this) {
+    GetItemEntry entry = ItemTable_Retrieve(this->getItemId);
+    gSaveContext.pendingSale = entry.itemId;
+    gSaveContext.pendingSaleMod = entry.modIndex;
+    Ring_Give(play, entry.getItemId);
+    Item_Give(play, entry.itemId);
+    Rupees_ChangeBy(-this->basePrice);
+}
+
+void EnGirlA_BuyEvent_Ring(PlayState* play, EnGirlA* this) {
+    GetItemEntry entry = ItemTable_Retrieve(this->getItemId);
+    gSaveContext.pendingSale = entry.itemId;
+    gSaveContext.pendingSaleMod = entry.modIndex;
     Rupees_ChangeBy(-this->basePrice);
 }
 
