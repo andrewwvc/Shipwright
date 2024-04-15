@@ -498,12 +498,13 @@ extern "C" void OTRMessage_Init()
     MakeBlueMsgEng(0x40D, "They say that the Gerudo&currently keep something special&above their highest prison cell.");//Running Man
     MakeBlueMsgEng(0x411, "They say that one part of&the secret directions&to a lost place is:^South&North&West&West");//Gerudo Valley
     MakeBlueMsgEng(0x41A, "They say that the reward&for completing the Gerudo&Training Grounds has many uses.^And experimenting, in order to&discover what kinds of things it&works on, could pay off well.");//Gerudo Colossus
-    MakeBlueMsgEng(0x420, "They say that Dampe, the gravekeeper,&has a reward reserved for those&with very impresive speed.^However, he unlikely&to relinquish anything until&he gives up the ghost.");//Deku Tree
+    MakeBlueMsgEng(0x420, "They say that the man who rides&on a flying carpet may offer %cseveral%w&different items depending on the&circumstances regarding your meeting.");//Deku Tree
     MakeBlueMsgEng(StoneMsg+0,"There may be something special&behind falls that are %rnot%w water...");
     MakeBlueMsgEng(StoneMsg+2,"They say that many people&would like Hyrule Field to&be cleared of Peahats.");
     MakeBlueMsgEng(StoneMsg+8, "They say that many dungeons may&have hidden areas that are&not even marked on any map.^There many even be an invisible&chest in the depths of&a temple of punishment, that&is not on any chart.");
     MakeBlueMsgEng(StoneMsg+9,"They say that a level of&tension resides between the&various races in Hyrule.^The use of masks may be&the key to allow one to&better understand this.");
-    MakeBlueMsgEng(StoneMsg+12, "They say that certain items, when&they are used together, may be&able to combine their abilities.^So it may pay to experiemnt&with methods of pairing things!");
+    MakeBlueMsgEng(StoneMsg+12, "They say that Dampe, the gravekeeper,&has a reward reserved for those&with very impresive speed.^However, he unlikely&to relinquish anything until&he gives up the ghost.");
+    //MakeBlueMsgEng(StoneMsg+12, "They say that certain items, when&they are used together, may be&able to combine their abilities.^So it may pay to experiemnt&with methods of pairing things!");
     MakeBlueMsgEng(StoneMsg+20, "They say that certain shops&may be doing business&at hours that they&advertise as being closed.");
     MakeBlueMsgEng(StoneMsg+23, "They say there is a secret&that most cannot see,&in a place where&fairies no longer live.");
    // (*textIDSubstitutionTable)[StoneMsg+8] = 0x413;//Previous dungeons
@@ -1336,6 +1337,10 @@ extern "C" void OTRMessage_Init()
     MakeNormalMsgEng(MiscMsg+8, "I'm not sure I want you&to worry, but I've had some&concerns about the lady who's&been waiting outside the gate.^She seems to be afraid to leave.&I would help her, but my&duty is to stand guard here.");
     MakeNormalMsgEng(MiscMsg+9, "OK, if you collect bombchus from other&places, but they become too much&for you to carry, they can crawl&their way back here!^Then I can offer my special service&of storing and providing them back&to you, for a small fee,\x14\x02 of course.&\x14\x01Then they will appear to your right.\x0B\x02");
     MakeNormalMsgEng(MiscMsg+10, "I...did have other types of special&%cmechanical bombs%w to sell, besides&bombchus, but they've all sold out.^A particular Goron was very interested&in our %pauto\x2Dtrap%w bombs, so he bought&up every one of them! You'd have&to go to Death Mountain to inquire!\x0B\x02");
+    MakeNormalMsgEng(MiscMsg+11, "\x06\x41Well Come!^I am selling stuff, strange and&rare, from all over the world to&everybody.&Today's special is...^A round, shiny object!&It might make a good gift!&I won't tell you what it is until&I see the money....^How about %r800 Rupees%w?&\x09\x1B&%gBuy&Don't buy%w\x02");
+    MakeNormalMsgEng(MiscMsg+12, "Thank you very much!^What I'm selling is...\x14\x02%rA Ring%w!\x14\x01""^I can see that you've come far&and under harsh circumstances.&Maybe what I've given you is...&perhaps unfitting.");
+    MakeNormalMsgEng(MiscMsg+13, "\x06\x41Well Come!^I am selling stuff, strange and&rare, from all over the world to&everybody.&Today's special is...^A fantasic, lovely thing!&Who could resist!&I won't tell you what it is until&I see the money....^How about %r2000 Rupees%w?&\x09\x1B&%gBuy&Don't buy%w\x02");
+    MakeNormalMsgEng(MiscMsg+14, "Thank you very much!^What I'm selling is...&\x14\x02%rA means of protecting your life%w!\x14\x01""^I can see that you've come far&and under harsh circumstances.&I believe you might be the&rare soul who appreciates this.");
 
     u16 GerudoMsg = TextIDAllocator::Instance->allocateRange("gerudo", 10);
     MakeNormalMsgEng(GerudoMsg+0, "Heh, since you're clearly a master,&the only thing left is&to try for a perfect score,&if you can!\x0B\x02");

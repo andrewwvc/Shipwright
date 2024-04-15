@@ -222,6 +222,7 @@ const std::vector<FlagTable> flagTables = {
         { 0x30, "Obtained Odd Potion" },
         { 0x31, "Obtained Poacher's Saw" },
         { 0x32, "Obtained Beggar's Reward" },
+        { 0x33, "Obtained Carpet Man's Reward" },
         { 0x36, "Obtained Mido's Gift" },
         { 0x38, "Sold Keaton Mask" },
         { 0x39, "Sold Skull Mask" },

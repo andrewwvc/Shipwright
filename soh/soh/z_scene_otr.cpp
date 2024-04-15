@@ -286,7 +286,10 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, LUS::ActorEnt
             //{ -1, 3, { ACTOR_EN_ITEM00, -1150, -1113, -2248, 0, 0, 0, 0x106 }},
         } },
     } },
-    { 0x04, { // Fire Temple
+    { SCENE_FIRE_TEMPLE, { // Fire Temple
+        { 0x01, {
+            { -1, 27, { ACTOR_OBJ_TSUBO, 2226,400,-809, 0,0,ROTZ_TSUBO_ITEM00(ITEM00_RING_0+RI_NIMBLE_RING), 0x0200 | PARAMS_TSUBO_ITEM00(ITEM00_RING_0+RI_NIMBLE_RING) }},
+        } },
         { 0x08, {
             { -1, 2, { 0xA, 1944,4681,-393, 0,24394,0, 0x07CD }},
         } },
@@ -304,7 +307,7 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, LUS::ActorEnt
             { -1, -1, { ACTOR_EN_OKUTA, 100, 720, -700, 0,24394,0, (2<<8) }},
         } },
     } },
-    { 0x07, { // Shadow Temple
+    { SCENE_SHADOW_TEMPLE, { // Shadow Temple
         { 0x08, {
             { -1, 0, { ACTOR_EN_ST, 4591,-380,59, 0,-16202,0, 0x9}},
             { -1, 1, { ACTOR_EN_ST, 4706,-424,259, 0,16384,0, 0x9}},
@@ -379,6 +382,11 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, LUS::ActorEnt
             { -1, -1, { ACTOR_EN_WONDER_ITEM, -79,0,-151, 0,0,1, 0x1241}},
         } },
     } },
+    { SCENE_MIDOS_HOUSE, {
+        { 0x00, {
+            { -1, 6, { ACTOR_EN_BOX, -60,0,35 ,  0, -0x4000, ROTZ_BOX_ITEM(GI_RING+RI_ATTRACTION_RING), 0x5003 | PARAMS_BOX_ITEM(GI_RING+RI_ATTRACTION_RING) }},
+        } },
+    } },
     { SCENE_LOST_WOODS, { // Lost Woods
         { 0x5, {//Bridge
             { -1, -1, { ACTOR_EN_KO, -1150,-360,1152, 0,1200,0, static_cast<int16_t>(0xff00) }},
@@ -386,8 +394,18 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, LUS::ActorEnt
         } },
     } },
     { 0x09, { // Ice Cavern
+        { 0x01, {
+            { -1, -1, { ACTOR_OBJ_TSUBO, -375,205,1100, 0,0,ROTZ_TSUBO_ITEM00(ITEM00_RING_0+RI_SORCERERS_RING), 0x0800 | PARAMS_TSUBO_ITEM00(ITEM00_RING_0+RI_SORCERERS_RING) }},
+            { -1, -1, { ACTOR_BG_ICE_SHELTER, -375,200,1100, 0,0,0, 0x100 }},
+        } },
         { 0x09, {
             //{ -1, 9, { ACTOR_EN_ITEM00, 366, 213, -2036, 0, 0, 0, 0x406 }},
+            { -1, 9, { ACTOR_OBJ_TSUBO, 366, 213,-2036, 0,0,ROTZ_TSUBO_ITEM00(ITEM00_RING_0+RI_MUTE_RING), 0x0400 | PARAMS_TSUBO_ITEM00(ITEM00_RING_0+RI_MUTE_RING) }},
+        } },
+    } },
+    { SCENE_MARKET_GUARD_HOUSE, {
+        { 0x00, {
+            CHILD_SETUPS(41, {ACTOR_OBJ_TSUBO, 177,120,85, 0,0,ROTZ_TSUBO_ITEM00(ITEM00_RING_0+RI_REPULSION_RING), 0x6900 | PARAMS_TSUBO_ITEM00(ITEM00_RING_0+RI_REPULSION_RING)})
         } },
     } },
     { SCENE_HYRULE_FIELD, { // Hyrule Field
@@ -476,6 +494,7 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, LUS::ActorEnt
     { SCENE_GORON_CITY, {//Goron City
         { 0x00, {
             { -1, -1, { ACTOR_EN_GO2, -1232,520,-1190, 0,0,0, 0x03eb | 0x10 | (0x0<<10)}},
+            { -1, -1, { ACTOR_EN_ITEM00, -1163, 520, -945, 0, 0, 0, 0x200+(uint16_t)(ITEM00_RING_0+RI_FOUNTAIN_RING) }},
         } },
         { 0x03, {
             { -1, -1, { ACTOR_EN_GO2, 1030,480,-380, 0,0,0, 0x03eb | 0x10 | (0x1<<10)}},
@@ -546,6 +565,9 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, LUS::ActorEnt
             { 0, -1, { ACTOR_OBJ_KIBAKO2, 529,0,-3556, 0,0,0, static_cast<int16_t>(0xFFFF) }},
             { 1, -1, { ACTOR_OBJ_KIBAKO2, 529,0,-3556, 0,0,0, static_cast<int16_t>(0xFFFF) }},
         } },
+        { 0x03, {
+            { -1, 4, { ACTOR_EN_ITEM00, 1942, 40, -585, 0, 0, 0, 0x200+(uint16_t)(ITEM00_RING_0+RI_BRAVERY_RING) }},
+        } },
     } },
     { 0x5D, { // Gerudo Fortress
         { 0x00, {
@@ -583,6 +605,9 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, LUS::ActorEnt
         {0x3, {
             {-1, 4, {ACTOR_EN_BB, 1387,510,-1436, 0,0x4000,0, static_cast<int16_t>(0xffff)}},
             {-1, -1, {ACTOR_EN_BB, 1187,463,-1436, 0,-0x4000,0, static_cast<int16_t>(0xffff)}}
+        } },
+        {0x7, {
+            {-1, 7, {ACTOR_EN_BOX, 1668,323,-2594, 0,16384,ROTZ_BOX_ITEM(GI_RING+RI_GREED_RING), 0x5005 | PARAMS_BOX_ITEM(GI_RING+RI_GREED_RING)}},
         } },
         {0x8, {
             {-1, -1, {ACTOR_EN_DEKUNUTS, -1288,242,-2109, 0,25009,0, 5 << 8}},

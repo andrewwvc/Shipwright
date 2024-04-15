@@ -21,5 +21,4 @@ typedef struct EnJs {
     /* 0x0288 */ s16 unk_288;
     /* 0x028C */ EnJsActionFunc actionFunc;
 } EnJs; // size = 0x0290
-
 #endif

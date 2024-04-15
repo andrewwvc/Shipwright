@@ -49,6 +49,9 @@ static ColliderCylinderInit sCylinderInit = {
     { 30, 40, 0, { 0, 0, 0 } },
 };
 
+#define SELL_BARRIER_CONDITION (play->curSpawn == 0x1 && !Flags_GetItemGetInf(0x33))
+#define SELL_RING_CONDITION (IS_NIGHT)
+
 void En_Js_SetupAction(EnJs* this, EnJsActionFunc actionFunc) {
     this->actionFunc = actionFunc;
 }
@@ -120,7 +123,10 @@ void func_80A890C0(EnJs* this, PlayState* play) {
 
 void func_80A8910C(EnJs* this, PlayState* play) {
     if (Actor_TextboxIsClosing(&this->actor, play)) {
-        this->actor.textId = 0x6078;
+        s16 MiscMsg = GetTextID("misc");
+        this->actor.textId = SELL_BARRIER_CONDITION ? MiscMsg+14 : SELL_RING_CONDITION ? MiscMsg+12 : 0x6078;
+        if (SELL_BARRIER_CONDITION)
+            Flags_SetItemGetInf(0x33);
         En_Js_SetupAction(this, func_80A890C0);
         this->actor.flags |= ACTOR_FLAG_WILL_TALK;
     }
@@ -139,10 +145,11 @@ void func_80A89160(EnJs* this, PlayState* play) {
             GiveItemEntryFromActor(&this->actor, play, itemEntry, 10000.0f, 50.0f);
             Flags_SetRandomizerInf(RAND_INF_MERCHANTS_CARPET_SALESMAN);
         } else {
-            GetItemEntry itemEntry = ItemTable_Retrieve(GI_BOMBCHUS_10);
+            s16 itemToGive = SELL_BARRIER_CONDITION ? GI_DEFENSE_HEART : SELL_RING_CONDITION ? GI_RING+RI_COWARDS_RING : GI_BOMBCHUS_10;
+            GetItemEntry itemEntry = ItemTable_Retrieve(itemToGive);
             gSaveContext.pendingSale = itemEntry.itemId;
             gSaveContext.pendingSaleMod = itemEntry.modIndex;
-            func_8002F434(&this->actor, play, GI_BOMBCHUS_10, 10000.0f, 50.0f);
+            func_8002F434(&this->actor, play, itemToGive, 10000.0f, 50.0f);
         }
     }
 }
@@ -173,7 +180,8 @@ void func_80A89294(EnJs* this) {
 }
 
 void func_80A89304(EnJs* this, PlayState* play) {
-    if (func_80A88F64(this, play, 0x6077)) {
+    s16 MiscMsg = GetTextID("misc");
+    if (func_80A88F64(this, play, SELL_BARRIER_CONDITION ? MiscMsg+13 : SELL_RING_CONDITION ? MiscMsg+11 : 0x6077)) {
         func_80A89294(this);
     }
 }

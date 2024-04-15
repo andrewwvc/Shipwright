@@ -481,6 +481,7 @@ void func_80AE5C38(EnReeba* this, PlayState* play) {
                 Item_DropCollectibleRandom(play, &this->actor, &pos, 0xE0);
             } else {
                 Item_DropCollectibleRandom(play, &this->actor, &pos, 0xC0);
+                Item_DropCollectible(play, &pos, ITEM00_RING_0+RI_WITCHS_RING);
             }
 
             if (this->actor.parent != NULL) {

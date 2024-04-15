@@ -5079,7 +5079,7 @@ void Fishing_HandleOwnerDialog(Fishing* this, PlayState* play) {
                         }
                     }
                 } else {
-                    getItemId = GI_RUPEE_PURPLE;
+                    getItemId = GI_RING+RI_SNEAK_RING;
                     D_80B7A670 = 0.0f;
                 }
 
