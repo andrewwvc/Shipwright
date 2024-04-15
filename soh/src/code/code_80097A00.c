@@ -20,7 +20,7 @@ u32 gUpgradeMasks[] = {
 u32 gUpgradeNegMasks[] = {
     0xFFFFFFF8, 0xFFFFFFC7, 0xFFFFFE3F, 0xFFFFF1FF, 0xFFFFCFFF, 0xFFFE3FFF, 0xFFF1FFFF, 0xFF8FFFFF,
 };
-u8 gEquipShifts[] = { 0, 4, 8, 12, 16, 20, 24, 28 };
+u8 gEquipShifts[] = { 0, 4, 8, 12, 16};
 u8 gUpgradeShifts[] = { 0, 3, 6, 9, 12, 14, 17, 20 };
 
 u16 gUpgradeCapacities[][4] = {
