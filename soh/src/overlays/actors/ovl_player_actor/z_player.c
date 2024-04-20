@@ -9969,11 +9969,12 @@ void func_808469BC(PlayState* play, Player* this) {
     this->stateFlags1 |= PLAYER_STATE1_IN_CUTSCENE;
 }
 
-static s16 D_80854700[] = { ACTOR_MAGIC_WIND, ACTOR_MAGIC_DARK, ACTOR_MAGIC_FIRE };
+static s16 D_80854700[] = { ACTOR_MAGIC_WIND, ACTOR_MAGIC_DARK, ACTOR_MAGIC_FIRE, ACTOR_MAGIC_WIND, ACTOR_MAGIC_FIRE };
+static s16 gMagicSpellParams[] = { 0, 0, 0, 1, 1 };
 
 Actor* func_80846A00(PlayState* play, Player* this, s32 arg2) {
     return Actor_Spawn(&play->actorCtx, play, D_80854700[arg2], this->actor.world.pos.x,
-                       this->actor.world.pos.y, this->actor.world.pos.z, 0, 0, 0, 0, true);
+                       this->actor.world.pos.y, this->actor.world.pos.z, 0, 0, 0, gMagicSpellParams[arg2], true);
 }
 
 void func_80846A68(PlayState* play, Player* this) {
@@ -14547,12 +14548,13 @@ void func_808507F4(Player* this, PlayState* play) {
         } else {
             if (this->unk_850 == 0) {
                 LinkAnimation_PlayOnceSetSpeed(play, &this->skelAnime, D_80854A58[this->unk_84F], 0.83f * (isFastFarores ? 2 : baseAnimSpeed));
-                if (this->unk_84F == 3) {
-                    this->stateFlags1 |= PLAYER_STATE1_IN_ITEM_CS | PLAYER_STATE1_IN_CUTSCENE;
-                    gSaveContext.magicState = resultingMagicState;
-                } else if (this->unk_84F == 4) {
-                    this->stateFlags1 |= PLAYER_STATE1_IN_ITEM_CS | PLAYER_STATE1_IN_CUTSCENE;
-                    gSaveContext.magicState = resultingMagicState;
+                if (this->unk_84F == 4) {
+                    //if (func_80846A00(play, this, this->unk_84F) != NULL) {
+                    if (Actor_Spawn(&play->actorCtx, play, ACTOR_MAGIC_FIRE, this->actor.world.pos.x+Math_SinS(this->actor.world.rot.y)*55.0f,
+                       this->actor.world.pos.y+40.0f, this->actor.world.pos.z+Math_CosS(this->actor.world.rot.y)*55.0f, 0, 0, 0, 1, true)) {
+                        this->stateFlags1 |= PLAYER_STATE1_IN_ITEM_CS | PLAYER_STATE1_IN_CUTSCENE;
+                        gSaveContext.magicState = resultingMagicState;
+                    }
                 } else if (func_80846A00(play, this, this->unk_84F) != NULL) {
                     this->stateFlags1 |= PLAYER_STATE1_IN_ITEM_CS | PLAYER_STATE1_IN_CUTSCENE;
                     if ((this->unk_84F != 0) || (gSaveContext.respawn[RESPAWN_MODE_TOP].data <= 0)) {
@@ -14607,7 +14609,7 @@ void func_808507F4(Player* this, PlayState* play) {
                     Magic_Reset(play);
                 } else if (this->itemAction == PLAYER_IA_MAGIC_SPELL_16) {
                     Actor_Spawn(&play->actorCtx, play, ACTOR_OBJ_OSHIHIKI, this->actor.world.pos.x+Math_SinS(this->actor.world.rot.y)*55.0f,
-                       this->actor.world.pos.y, this->actor.world.pos.z+Math_CosS(this->actor.world.rot.y)*55.0f, 0, this->actor.world.rot.y, 0, 0x4040, true);
+                       this->actor.world.pos.y+20.0f, this->actor.world.pos.z+Math_CosS(this->actor.world.rot.y)*55.0f, 0, this->actor.world.rot.y, 0, 0x4040, true);
                     Magic_Reset(play);
                 }
             }

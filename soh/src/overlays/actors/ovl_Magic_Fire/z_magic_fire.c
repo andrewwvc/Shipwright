@@ -111,7 +111,8 @@ void MagicFire_UpdateBeforeCast(Actor* thisx, PlayState* play) {
         this->actor.update = MagicFire_Update;
         Player_PlaySfx(&player->actor, NA_SE_PL_MAGIC_FIRE);
     }
-    this->actor.world.pos = player->actor.world.pos;
+    if (this->actor.params == 0)
+        this->actor.world.pos = player->actor.world.pos;
 }
 
 void MagicFire_Update(Actor* thisx, PlayState* play) {
@@ -119,7 +120,8 @@ void MagicFire_Update(Actor* thisx, PlayState* play) {
     Player* player = GET_PLAYER(play);
     s32 pad;
 
-    this->actor.world.pos = player->actor.world.pos;
+    if (this->actor.params == 0)
+        this->actor.world.pos = player->actor.world.pos;
     if ((play->msgCtx.msgMode == MSGMODE_OCARINA_CORRECT_PLAYBACK) ||
         (play->msgCtx.msgMode == MSGMODE_SONG_PLAYED)) {
         Actor_Kill(&this->actor);
@@ -149,7 +151,7 @@ void MagicFire_Update(Actor* thisx, PlayState* play) {
         case DF_ACTION_EXPAND_SLOWLY: // Fire sphere slowly expands out of player for 30 frames
             Math_StepToF(&this->alphaMultiplier, 1.0f, 1.0f / 30.0f);
             if (this->actionTimer > 0) {
-                Math_SmoothStepToF(&this->actor.scale.x, 0.4f, this->scalingSpeed, 0.1f, 0.001f);
+                Math_SmoothStepToF(&this->actor.scale.x, this->actor.params ? 0.2f : 0.4f, this->scalingSpeed, 0.1f, 0.001f);
                 this->actor.scale.y = this->actor.scale.z = this->actor.scale.x;
             } else {
                 this->actionTimer = 25;
@@ -160,7 +162,10 @@ void MagicFire_Update(Actor* thisx, PlayState* play) {
             if (this->actionTimer <= 0) {
                 this->actionTimer = 15;
                 this->action++;
-                this->scalingSpeed = 0.05f;
+                if (this->actor.params == 1)
+                    this->scalingSpeed = 0.01f;
+                else
+                    this->scalingSpeed = 0.05f;
             }
             break;
         case DF_ACTION_EXPAND_QUICKLY: // Sphere beings to grow again and quickly expands out until killed
@@ -235,6 +240,14 @@ void MagicFire_Draw(Actor* thisx, PlayState* play) {
             gDPSetPrimColor(POLY_XLU_DISP++, 0, 0x80, Spell_col.r, Spell_col.g, Spell_col.b, (u8)(this->alphaMultiplier * 255));
             gDPSetEnvColor(POLY_XLU_DISP++, Spell_env.r, Spell_env.g, Spell_env.b, (u8)(this->alphaMultiplier * 255));
         } else {
+            if (this->actor.params == 1) {
+                Spell_env_ori.r = 255;
+                Spell_env_ori.g = 0;
+                Spell_env_ori.b = 180;
+                Spell_col_ori.r = 180;
+                Spell_col_ori.g = 220;
+                Spell_col_ori.b = 0;
+            }
             gDPSetPrimColor(POLY_XLU_DISP++, 0, 0x80, Spell_col_ori.r, Spell_col_ori.g, Spell_col_ori.b, (u8)(this->alphaMultiplier * 255));
             gDPSetEnvColor(POLY_XLU_DISP++, Spell_env_ori.r, Spell_env_ori.g, Spell_env_ori.b, (u8)(this->alphaMultiplier * 255));
         }
