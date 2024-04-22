@@ -100,6 +100,7 @@ s16 func_80AA1A38(PlayState* play, Actor* thisx) {
                 case 0x2051:
                     Flags_SetInfTable(INFTABLE_8C);
                     ret = NPC_TALK_STATE_ACTION;
+                    Item_DropCollectible(play, &thisx->world.pos, ITEM00_RING_0+RI_MUTE_RING);
                     break;
                 case 0x2053:
                     Flags_SetInfTable(INFTABLE_8D);
@@ -154,8 +155,11 @@ u16 func_80AA1B58(EnMa2* this, PlayState* play) {
         (this->actor.shape.rot.z == 6)) {
         if ((gSaveContext.eventChkInf[2] & 0x0400) && gSaveContext.MalonRideDay == gSaveContext.totalDays)//Prevent Malon from appearing in this form at night if she's out riding
             return 0;
-        else
+        else {
+            if (!gSaveContext.inventory.rings[RI_MUTE_RING] && Flags_GetInfTable(INFTABLE_8C))
+                Item_DropCollectible(play, &this->actor.world.pos, ITEM00_RING_0+RI_MUTE_RING);
             return 2;
+        }
     }
     if (!Flags_GetEventChkInf(EVENTCHKINF_EPONA_OBTAINED) || (play->sceneNum != SCENE_LON_LON_RANCH)) {
         return 0;
@@ -166,8 +170,11 @@ u16 func_80AA1B58(EnMa2* this, PlayState* play) {
     if ((this->actor.shape.rot.z == 8) && IS_NIGHT) {
         if ((gSaveContext.eventChkInf[2] & 0x0400) && gSaveContext.MalonRideDay == gSaveContext.totalDays)//Prevent Malon from appearing in this form at night if she's out riding
             return 0;
-        else
+        else {
+            if (!gSaveContext.inventory.rings[RI_MUTE_RING] && Flags_GetInfTable(INFTABLE_8C))
+                Item_DropCollectible(play, &this->actor.world.pos, ITEM00_RING_0+RI_MUTE_RING);
             return 3;
+        }
     }
     return 0;
 }

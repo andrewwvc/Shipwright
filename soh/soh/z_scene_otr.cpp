@@ -400,7 +400,7 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, LUS::ActorEnt
         } },
         { 0x09, {
             //{ -1, 9, { ACTOR_EN_ITEM00, 366, 213, -2036, 0, 0, 0, 0x406 }},
-            { -1, 9, { ACTOR_OBJ_TSUBO, 366, 213,-2036, 0,0,ROTZ_TSUBO_ITEM00(ITEM00_RING_0+RI_MUTE_RING), 0x0400 | PARAMS_TSUBO_ITEM00(ITEM00_RING_0+RI_MUTE_RING) }},
+            //{ -1, 9, { ACTOR_OBJ_TSUBO, 366, 213,-2036, 0,0,ROTZ_TSUBO_ITEM00(ITEM00_RING_0+RI_MUTE_RING), 0x0400 | PARAMS_TSUBO_ITEM00(ITEM00_RING_0+RI_MUTE_RING) }},
         } },
     } },
     { SCENE_MARKET_GUARD_HOUSE, {
