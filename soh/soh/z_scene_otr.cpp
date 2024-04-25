@@ -589,7 +589,7 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, LUS::ActorEnt
             { -1, -1, { ACTOR_EN_HATA, 3315,-261, 2244, 0,0,0, static_cast<int16_t>(0xFFFF) }},
             { -1, -1, { ACTOR_OBJ_KIBAKO2, 3460,-435,2484, 0,7100,0, static_cast<int16_t>(0xFFFF) }},
             { -1, -1, { ACTOR_OBJ_KIBAKO2, 3621,-392,2847, 0,7100,0, static_cast<int16_t>(0xFFFF) }},
-            { -1, -1, { ACTOR_EN_NIW, 3125,-268,2459, 0,7100,0, static_cast<int16_t>(0xFFFF) }},
+            //{ -1, -1, { ACTOR_EN_NIW, 3125,-268,2459, 0,7100,0, static_cast<int16_t>(0xFFFF) }},
         } },
     } },
     { SCENE_SYOTES2, {
