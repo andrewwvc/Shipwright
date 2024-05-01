@@ -22,7 +22,7 @@ typedef struct {
     s16 buildVersionPatch;
 
     u8 inventoryItems[NUM_ITEM_SLOTS_TOTAL];
-    u16 equipment;
+    u32 equipment;
     u32 upgrades;
     u8 isMagicAcquired;
     u8 isDoubleMagicAcquired;

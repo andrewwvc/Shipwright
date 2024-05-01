@@ -1859,7 +1859,7 @@ void SaveManager::LoadBaseVersion4() {
     slotLists[1] = gSaveContext.adultEquips.cButtonSlots;
     slotLists[3] = gSaveContext.equips.cButtonSlots;
     for (size_t ii = 0; ii < NUM_EQUIPMENT_BUTTONS; ii++) {
-        for (size_t jj = 0; ii < 3; ii++) {
+        for (size_t jj = 0; jj < 3; jj++) {
             if (OLD_EQUIP_START_SLOT <= slotLists[jj][ii] && slotLists[jj][ii] <= OLD_EQUIP_END_SLOT)
                 slotLists[jj][ii] += (SLOT_TUNIC_KOKIRI-OLD_EQUIP_START_SLOT);
             else if (OLD_EQUIP_END_SLOT < slotLists[jj][ii] && slotLists[jj][ii] < SLOT_NONE)
@@ -2045,11 +2045,11 @@ void SaveManager::SaveBase(SaveContext* saveContext, int sectionID, bool fullSav
     slotLists[1] = saveContext->adultEquips.cButtonSlots;
     slotLists[3] = saveContext->equips.cButtonSlots;
     for (size_t ii = 0; ii < NUM_EQUIPMENT_BUTTONS; ii++) {
-        for (size_t jj = 0; ii < 3; ii++) {
-            if (OLD_EQUIP_START_SLOT <= slotLists[jj][ii] && slotLists[jj][ii] <= OLD_EQUIP_END_SLOT)
-                slotLists[jj][ii] += (SLOT_TUNIC_KOKIRI-OLD_EQUIP_START_SLOT);
-            else if (OLD_EQUIP_END_SLOT < slotLists[jj][ii] && slotLists[jj][ii] < SLOT_NONE)
-                slotLists[jj][ii] -= 6;
+        for (size_t jj = 0; jj < 3; jj++) {
+            if (SLOT_TUNIC_KOKIRI <= slotLists[jj][ii] && slotLists[jj][ii] < SLOT_NONE)
+                slotLists[jj][ii] -= (SLOT_TUNIC_KOKIRI-OLD_EQUIP_START_SLOT);
+            else if (OLD_EQUIP_START_SLOT <= slotLists[jj][ii] && slotLists[jj][ii] < SLOT_TUNIC_KOKIRI)
+                slotLists[jj][ii] += 6;
         }
     }
     SaveManager::Instance->SaveStruct("childEquips", [&]() {
@@ -2083,7 +2083,7 @@ void SaveManager::SaveBase(SaveContext* saveContext, int sectionID, bool fullSav
     });
     //Moves equpment slot numbers to the end section so that items slots are contiguous
     for (size_t ii = 0; ii < NUM_EQUIPMENT_BUTTONS; ii++) {
-        for (size_t jj = 0; ii < 3; ii++) {
+        for (size_t jj = 0; jj < 3; jj++) {
             if (OLD_EQUIP_START_SLOT <= slotLists[jj][ii] && slotLists[jj][ii] <= OLD_EQUIP_END_SLOT)
                 slotLists[jj][ii] += (SLOT_TUNIC_KOKIRI-OLD_EQUIP_START_SLOT);
             else if (OLD_EQUIP_END_SLOT < slotLists[jj][ii] && slotLists[jj][ii] < SLOT_NONE)

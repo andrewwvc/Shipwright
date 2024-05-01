@@ -1503,7 +1503,7 @@ void Inventory_SwapAgeEquipment(void) {
 
             if (IS_RANDO && Randomizer_GetSettingValue(RSK_SHUFFLE_MASTER_SWORD) && 
                 gSaveContext.equips.buttonItems[0] == ITEM_NONE) {
-                gSaveContext.equips.equipment &= (u16) ~(0xF << (EQUIP_TYPE_SWORD * 4));
+                gSaveContext.equips.equipment &= (u32) ~(0xF << (EQUIP_TYPE_SWORD * 4));
             }
 
             // Set the dpad to nothing
@@ -1585,7 +1585,7 @@ void Inventory_SwapAgeEquipment(void) {
             }
 
             gSaveContext.equips.equipment = gSaveContext.childEquips.equipment;
-            gSaveContext.equips.equipment &= (u16) ~(0xF << (EQUIP_TYPE_SWORD * 4));
+            gSaveContext.equips.equipment &= (u32) ~(0xF << (EQUIP_TYPE_SWORD * 4));
             // Equips kokiri sword in the inventory screen only if kokiri sword exists in inventory and a sword has been equipped already
             if (!(CHECK_OWNED_EQUIP(EQUIP_TYPE_SWORD, EQUIP_INV_SWORD_KOKIRI) == 0) && !Flags_GetInfTable(INFTABLE_SWORDLESS)) {
                 gSaveContext.equips.equipment |= EQUIP_VALUE_SWORD_KOKIRI << (EQUIP_TYPE_SWORD * 4);
@@ -1616,7 +1616,7 @@ void Inventory_SwapAgeEquipment(void) {
             }
 
             gSaveContext.equips.equipment = gSaveContext.childEquips.equipment;
-            gSaveContext.equips.equipment &= (u16) ~(0xF << (EQUIP_TYPE_SWORD * 4));
+            gSaveContext.equips.equipment &= (u32) ~(0xF << (EQUIP_TYPE_SWORD * 4));
             gSaveContext.equips.equipment |= EQUIP_VALUE_SWORD_KOKIRI << (EQUIP_TYPE_SWORD * 4);
         } else if (IS_RANDO && Randomizer_GetSettingValue(RSK_STARTING_AGE) == RO_AGE_ADULT) {
             /*If in rando and starting age is adult, childEquips is not initialized and buttonItems[0]
@@ -1646,7 +1646,7 @@ void Inventory_SwapAgeEquipment(void) {
             Flags_SetInfTable(INFTABLE_SWORDLESS);
             if (gSaveContext.childEquips.equipment == 0) {
                 // force equip kokiri tunic and boots in scenario gSaveContext.childEquips.equipment is uninitialized
-                gSaveContext.equips.equipment &= (u16) ~(0xF << (EQUIP_TYPE_SWORD * 4));
+                gSaveContext.equips.equipment &= (u32) ~(0xF << (EQUIP_TYPE_SWORD * 4));
                 gSaveContext.equips.equipment |= (EQUIP_VALUE_TUNIC_KOKIRI << (EQUIP_TYPE_TUNIC * 4)) |
                                                  (EQUIP_VALUE_BOOTS_KOKIRI << (EQUIP_TYPE_BOOTS * 4));
             }
@@ -2057,7 +2057,7 @@ u8 Item_Give(PlayState* play, u8 item) {
             
         } else if (item == ITEM_SWORD_MASTER) {
             gSaveContext.equips.buttonItems[0] = ITEM_SWORD_MASTER;
-            gSaveContext.equips.equipment &= (u16) ~(0xF << (EQUIP_TYPE_SWORD * 4));
+            gSaveContext.equips.equipment &= (u32) ~(0xF << (EQUIP_TYPE_SWORD * 4));
             gSaveContext.equips.equipment |= EQUIP_VALUE_SWORD_MASTER << (EQUIP_TYPE_SWORD * 4);
             if (play != NULL) {
                 Interface_LoadItemIcon1(play, 0);
