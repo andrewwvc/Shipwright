@@ -1857,7 +1857,7 @@ void SaveManager::LoadBaseVersion4() {
     u8 *slotLists[3];
     slotLists[0] = gSaveContext.childEquips.cButtonSlots;
     slotLists[1] = gSaveContext.adultEquips.cButtonSlots;
-    slotLists[3] = gSaveContext.equips.cButtonSlots;
+    slotLists[2] = gSaveContext.equips.cButtonSlots;
     for (size_t ii = 0; ii < NUM_EQUIPMENT_BUTTONS; ii++) {
         for (size_t jj = 0; jj < 3; jj++) {
             if (OLD_EQUIP_START_SLOT <= slotLists[jj][ii] && slotLists[jj][ii] <= OLD_EQUIP_END_SLOT)
@@ -2043,7 +2043,7 @@ void SaveManager::SaveBase(SaveContext* saveContext, int sectionID, bool fullSav
     u8 *slotLists[3];
     slotLists[0] = saveContext->childEquips.cButtonSlots;
     slotLists[1] = saveContext->adultEquips.cButtonSlots;
-    slotLists[3] = saveContext->equips.cButtonSlots;
+    slotLists[2] = saveContext->equips.cButtonSlots;
     for (size_t ii = 0; ii < NUM_EQUIPMENT_BUTTONS; ii++) {
         for (size_t jj = 0; jj < 3; jj++) {
             if (SLOT_TUNIC_KOKIRI <= slotLists[jj][ii] && slotLists[jj][ii] < SLOT_NONE)
