@@ -342,6 +342,7 @@ typedef enum {
     /* 0xFF */ ITEM_NONE = 0xFF
 } ItemID;
 
+#define ITEM_MAX ITEM_RING_3
 #define ITEM_TRADE_CHILD ITEM_WEIRD_EGG
 #define ITEM_TRADE_ADULT ITEM_POCKET_EGG
 #define RING_ITEM_MIN ITEM_RING_1

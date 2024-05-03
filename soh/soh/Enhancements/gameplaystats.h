@@ -1,5 +1,7 @@
 #pragma once
 
+#include "z64item.h"
+
 // When using RTA timing
     // get the diff since the save was created,
     // unless the game is complete in which we use the defeated ganon timestamp
@@ -23,7 +25,7 @@ typedef enum {
     // 0x00 to 0x9B (0 to 155) used for getting items,
     // piggybacked off enum "ItemID" in z64item.h
 
-    /* 0xA0 */ TIMESTAMP_DEFEAT_GOHMA = 0xA0,   // z_boss_goma.c
+    /* 0xA0 */ TIMESTAMP_DEFEAT_GOHMA = ITEM_MAX+1,   // z_boss_goma.c
     /* 0xA1 */ TIMESTAMP_DEFEAT_KING_DODONGO,   // z_boss_dodongo.c
     /* 0xA2 */ TIMESTAMP_DEFEAT_BARINADE,       // z_boss_va.c
     /* 0xA3 */ TIMESTAMP_DEFEAT_PHANTOM_GANON,  // z_boss_ganondrof.c

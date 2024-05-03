@@ -4,6 +4,7 @@
 #include <libultraship/libultra.h>
 #include "z64math.h"
 #include "z64audio.h"
+#include "z64item.h"
 #include "soh/Enhancements/randomizer/randomizerTypes.h"
 #include "soh/Enhancements/randomizer/randomizer_inf.h"
 #include "soh/Enhancements/gameplaystats.h"
@@ -44,8 +45,8 @@ typedef enum {
 #define NUM_ITEM_SLOTS_EXTRA (SLOTS_PER_LINE*NUM_ITEM_SLOT_LINES_EXTRA)
 #define NUM_ITEM_SLOTS_TOTAL (SLOTS_PER_LINE*NUM_ITEM_SLOT_LINES_TOTAL)
 
-#define NUM_RING_TYPES 20
-#define NUM_RING_EQUIPS 3
+#define NUM_RING_TYPES RING_GI_MAX+1-RING_GI_MIN
+#define NUM_RING_EQUIPS EQUIP_VALUE_RINGS_MAX-1
 
 #define NUM_EQUIPMENT_BUTTONS 7
 
