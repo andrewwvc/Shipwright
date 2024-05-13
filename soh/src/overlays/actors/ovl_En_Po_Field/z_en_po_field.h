@@ -13,6 +13,8 @@ typedef enum {
     EN_PO_FIELD_BIG
 } EnPoFieldSize;
 
+#define PO_FIELD_NO_FLAMES 6
+
 typedef struct {
     /* 0x0000 */ Color_RGB8 primColor;
     /* 0x0003 */ Color_RGB8 lightColor;
@@ -36,11 +38,11 @@ typedef struct EnPoField {
     /* 0x0214 */ Color_RGBA8 soulColor;
     /* 0x021C */ f32 scaleModifier;
     /* 0x0220 */ f32 flameScale;
-    /* 0x0224 */ Vec3f flamePosition;
+    /* 0x0224 */ Vec3f flamePosition[PO_FIELD_NO_FLAMES];
     /* 0x0230 */ LightNode* lightNode;
     /* 0x0234 */ LightInfo lightInfo;
     /* 0x0244 */ ColliderCylinder collider;
-    /* 0x0290 */ ColliderCylinder flameCollider;
+    /* 0x0290 */ ColliderCylinder flameCollider[PO_FIELD_NO_FLAMES];
 } EnPoField; // size = 0x02DC
 
 #endif
