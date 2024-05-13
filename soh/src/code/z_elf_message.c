@@ -313,7 +313,7 @@ u16 ElfMessage_GetSpecialNaviText(PlayState* play) {
             if (!(gSaveContext.eventChkInf[0] & 0x4000) && LINK_IS_CHILD)
                 messageNumbers[ii++] = 0x010B;//Reminder to talk to Know-it-All bros.
             if ((gSaveContext.eventChkInf[2] & 0x4000) && !(gSaveContext.eventChkInf[2] & 0x2000))
-                messageNumbers[ii++] = 0x010C;//Talking about ring swapping
+                messageNumbers[ii++] = 0x010E;//Talking about ring swapping
             if (!CHECK_QUEST_ITEM(QUEST_MEDALLION_FOREST))
                 messageNumbers[ii++] = 0x150;
             if (!CHECK_QUEST_ITEM(QUEST_MEDALLION_FIRE))
@@ -342,7 +342,7 @@ u16 ElfMessage_GetSpecialNaviText(PlayState* play) {
             if (!(gSaveContext.eventChkInf[0] & 0x4000) && LINK_IS_CHILD)
                 messageNumbers[ii++] = 0x010B;//Reminder to talk to Know-it-All bros.
             if ((gSaveContext.eventChkInf[2] & 0x4000) && !(gSaveContext.eventChkInf[2] & 0x2000))
-                messageNumbers[ii++] = 0x010C;//Talking about ring swapping
+                messageNumbers[ii++] = 0x010E;//Talking about ring swapping
             if (!(gSaveContext.eventChkInf[0xA]&(1<<0xA)))
                 messageNumbers[ii++] = 0x154;
             else if (INV_CONTENT(ITEM_LENS) == ITEM_NONE)
@@ -373,7 +373,7 @@ u16 ElfMessage_GetSpecialNaviText(PlayState* play) {
             if (!(gSaveContext.eventChkInf[0] & 0x4000))
                 messageNumbers[ii++] = 0x010B;
             if ((gSaveContext.eventChkInf[2] & 0x4000) && !(gSaveContext.eventChkInf[2] & 0x2000))
-                messageNumbers[ii++] = 0x010C;//Talking about ring swapping
+                messageNumbers[ii++] = 0x010E;//Talking about ring swapping
             if (!CHECK_QUEST_ITEM(ITEM_SONG_SARIA - ITEM_SONG_MINUET + QUEST_SONG_MINUET)) {
                 messageNumbers[ii++] = 0x145;
                 messageNumbers[ii++] = 0x146;
@@ -403,7 +403,7 @@ u16 ElfMessage_GetSpecialNaviText(PlayState* play) {
             if (!(gSaveContext.eventChkInf[0] & 0x4000))
                 messageNumbers[ii++] = 0x010B;
             if ((gSaveContext.eventChkInf[2] & 0x4000) && !(gSaveContext.eventChkInf[2] & 0x2000))
-                messageNumbers[ii++] = 0x010C;//Talking about ring swapping
+                messageNumbers[ii++] = 0x010E;//Talking about ring swapping
             messageNumbers[ii++] = tempMsg;
             if (ii > 0) {
                 if (!ElfMessage_ComparePersistantElfMessages(messageNumbers, ii)) {
