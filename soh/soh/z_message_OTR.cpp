@@ -417,8 +417,9 @@ extern "C" void OTRMessage_Init()
     MakeBlueMsgEng(0x060F, "%wLizalfos&%cThese sword weilding enemies may be&able to change the angle they attack&from if you hold up your shield.^%cBut a sneaky attack to your side&can still be blocked if you&%wstop%c holding %w\xA3%c while targeting!");
     MakeBlueMsgEng(0x0610, "%wDinolfos&%cThese sword weilding enemies may be&able to change the angle they attack&from if you hold up your shield.^%cBut a sneaky attack to your side&can still be blocked if you&%wstop%c holding %w\xA3%c while targeting!");
     MakeBlueMsgEng(0x061B, "%wStalfos&%cLure it close to you and watch its&movement carefully! Attack it when&it drops its guard!^%cIt seems to be vulnerable to&%rdifferent sword techniques%c depending&on what it's doing...^%cWatch the %wcolored phantasms&%cthat appear when it attacks...");
+    MakeBlueMsgEng(0x061C, "%wBlue Bubble&%cAttacking it with %wbasic%c attacks&seems to just swat it away.^%cMaybe if you put your all into it&and hit it with your %wstrongest&techniques%c, its defences might break.");
     MakeBlueMsgEng(0x0622, "%wFlare Dancer&%cExtinguish its flaming clothes&first... though it seems to&keep them intact by spinning...");
-    MakeBlueMsgEng(0x0625, "%wMorpha&%cMaster of the Water Temple. It&has absolute control of water. Pull&out its nucleus and attack it!^%cIf you're having trouble, try&finding ways of using %wdifferent&%y\xA1%c items to defend yourself.");
+    MakeBlueMsgEng(0x0625, "%wMorpha&%cMaster of the Water Temple. It&has absolute control of water. Pull&out its nucleus and attack it!^%cIf you're having trouble, try&finding ways of using %wdifferent&%y\xA1%c items to defend yourself.^%cIf it is chasing you, don't be&afraid to use whatever part of the&room you need to&to get away from it.");
     MakeBlueMsgEng(0x0628, "%wSpike&%cIt seems just like a stone&when it retracts its spikes...");
     MakeBlueMsgEng(0x062F, "%wDead Hand&%c\x0F, just try to stay calm...");
     MakeBlueMsgEng(0x0635, "%wIron Knuckle&%cBeware of the incredibly strong axe!&You may need to use different dodges&depending on how they attack!");
