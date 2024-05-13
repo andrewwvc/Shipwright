@@ -1086,7 +1086,7 @@ void EnDekubaba_UpdateDamage(EnDekubaba* this, PlayState* play) {
                 }
             } else if ((this->actor.colChkInfo.damageEffect == DEKUBABA_DMGEFF_BOOMERANG) ||
                        (this->actor.colChkInfo.damageEffect == DEKUBABA_DMGEFF_SWORD)) {
-                if (phi_s0 > 0) {
+                if (phi_s0 > 0 && (this->actor.colChkInfo.damageEffect == DEKUBABA_DMGEFF_SWORD) && !isPlayerInHorizontalSlash(play)) {
                     EnDekubaba_SetupSway(this);
                 } else {
                     EnDekubaba_SetupPrunedSomersault(this);
