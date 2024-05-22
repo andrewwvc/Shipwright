@@ -5,10 +5,13 @@
  */
 
 #include "z_en_po_sisters.h"
+#include "overlays/actors/ovl_En_Bb/z_en_bb.h"
 #include "objects/gameplay_keep/gameplay_keep.h"
 #include "objects/object_po_sisters/object_po_sisters.h"
 #include "soh/frame_interpolation.h"
 #include "soh/Enhancements/game-interactor/GameInteractor_Hooks.h"
+
+void EnBb_SetupInstantDeath(EnBb* this, PlayState* play);
 
 #define FLAGS (ACTOR_FLAG_TARGETABLE | ACTOR_FLAG_HOSTILE | ACTOR_FLAG_UPDATE_WHILE_CULLED | ACTOR_FLAG_HOOKSHOT_DRAGS | ACTOR_FLAG_IGNORE_QUAKE | ACTOR_FLAG_ARROW_DRAGGABLE)
 
@@ -88,7 +91,7 @@ static ColliderCylinderInit sCylinderInit = {
     },
     {
         ELEMTYPE_UNK0,
-        { 0xFFCFFFFF, 0x00, 0x08 },
+        { 0x20000000, 0x00, 0x10 },
         { 0x4FC7FFEA, 0x00, 0x00 },
         TOUCH_ON | TOUCH_SFX_NORMAL,
         BUMP_ON | BUMP_HOOKABLE,
@@ -153,6 +156,11 @@ static Vec3s D_80ADD7A4[4] = {
 };
 
 static Vec3f D_80ADD7BC = { 120.0f, 250.0f, -1420.0f };
+
+#define POE_SISTER_MEG 0
+#define POE_SISTER_JOE 1
+#define POE_SISTER_BETH 2
+#define POE_SISTER_AMY 3
 
 static Gfx* D_80ADD7C8[4] = {
     gPoeSistersMegBodyDL,
@@ -241,6 +249,14 @@ void EnPoSisters_Destroy(Actor* thisx, PlayState* play) {
     Collider_DestroyCylinder(play, &this->collider);
 
     ResourceMgr_UnregisterSkeleton(&this->skelAnime);
+
+    Actor* enemy = play->actorCtx.actorLists[ACTORCAT_ENEMY].head;
+    while (enemy != NULL) {
+        if (ACTOR_EN_BB == enemy->id && enemy->parent == thisx) {
+            EnBb_SetupInstantDeath((EnBb*)enemy, play);
+        }
+        enemy = enemy->next;
+    }
 }
 
 void func_80AD9240(EnPoSisters* this, s32 arg1, Vec3f* arg2) {
@@ -289,7 +305,7 @@ void func_80AD944C(EnPoSisters* this) {
 }
 
 void func_80AD94E0(EnPoSisters* this) {
-    this->actor.speedXZ = 5.0f;
+    this->actor.speedXZ = 7.0f;
     if (this->unk_194 == 0) {
         this->collider.base.colType = COLTYPE_METAL;
         this->collider.base.acFlags |= AC_HARD;
@@ -492,10 +508,15 @@ void func_80AD9E60(EnPoSisters* this) {
     this->actionFunc = func_80ADB51C;
 }
 
+#define TOTAL_FLOAT_TIME_MEG 100
+#define START_SPIN_TIME_MEG (TOTAL_FLOAT_TIME_MEG-16)
+#define LATE_SPIN_TIME_MEG 31
+#define STOP_PULSE_RATE (this->unk_195 ? 0x800 : MAX(((10-this->actor.colChkInfo.health)+5)*0x1400/15, 0x1000))
+
 void func_80AD9F1C(EnPoSisters* this) {
     Animation_MorphToLoop(&this->skelAnime, &gPoeSistersFloatAnim, -3.0f);
     this->unk_22E.a = 255;
-    this->unk_19A = 300;
+    this->unk_19A = 100;
     this->unk_19C = 3;
     this->unk_199 |= 9;
     this->actor.flags |= ACTOR_FLAG_TARGETABLE;
@@ -599,7 +620,7 @@ void func_80ADA35C(EnPoSisters* this, PlayState* play) {
     if (this->unk_196 != 0) {
         this->unk_196--;
     }
-    this->actor.world.pos.y += (2.0f + 0.5f * Rand_ZeroOne()) * Math_SinS(this->unk_196 * 0x800);
+    this->actor.world.pos.y += (2.0f + 0.5f * Rand_ZeroOne()) * Math_SinS(this->unk_196 * STOP_PULSE_RATE);
     if (this->unk_22E.a == 255 && this->actionFunc != func_80ADA8C0 && this->actionFunc != func_80ADA7F0) {
         if (this->actionFunc == func_80ADAC70) {
             func_8002F974(&this->actor, NA_SE_EN_PO_AWAY - SFX_FLAG);
@@ -666,6 +687,7 @@ void func_80ADA7F0(EnPoSisters* this, PlayState* play) {
         this->unk_19A--;
     }
     this->actor.shape.rot.y += 384.0f * ((this->skelAnime.endFrame + 1.0f) * 3.0f - this->unk_19A);
+    Math_ScaledStepToS(&this->actor.world.rot.y, this->actor.yawTowardsPlayer, 0x400);
     if (this->unk_19A == 18 || this->unk_19A == 7) {
         Audio_PlayActorSound2(&this->actor, NA_SE_EN_PO_ROLL);
     }
@@ -962,10 +984,13 @@ void func_80ADB770(EnPoSisters* this, PlayState* play) {
             SkelAnime_Update(&this->skelAnime);
             if (this->unk_195 == 0) {
                 if (ABS((s16)(16 - this->unk_196)) < 14) {
+                    s16 orbitRate = ((10-this->actor.colChkInfo.health)+1);
+                    if (orbitRate > 8)
+                        orbitRate = 8;
                     this->actor.shape.rot.y +=
-                        (0x580 - (this->unk_19C * 0x180)) * fabsf(Math_SinS(this->unk_196 * 0x800));
+                        (0x580 - (this->unk_19C * 0x180)) * fabsf(Math_SinS(this->unk_196 * STOP_PULSE_RATE))*orbitRate;
                 }
-                if (this->unk_19A >= 284 || this->unk_19A < 31) {
+                if (this->unk_19A >= START_SPIN_TIME_MEG || this->unk_19A < LATE_SPIN_TIME_MEG) {
                     this->unk_199 |= 0x40;
                 } else {
                     this->unk_199 &= ~0x40;
@@ -976,7 +1001,10 @@ void func_80ADB770(EnPoSisters* this, PlayState* play) {
         }
     }
     if (this->unk_195 == 0) {
-        if (this->unk_19A >= 284 || (this->unk_19A < 31 && this->unk_19A >= 16)) {
+        if (this->actor.isTargeted && (GET_PLAYER(play)->stateFlags1 & PLAYER_STATE1_TARGETING) && this->unk_19A >= LATE_SPIN_TIME_MEG) {
+            Audio_PlayActorSound2(&this->actor, NA_SE_EN_PO_LAUGH2);
+            func_80AD9C24(this, play);
+        } else if (this->unk_19A >= START_SPIN_TIME_MEG || (this->unk_19A < LATE_SPIN_TIME_MEG && this->unk_19A >= 16)) {
             this->unk_199 |= 0x40;
         } else {
             this->unk_199 &= ~0x40;
@@ -985,7 +1013,7 @@ void func_80ADB770(EnPoSisters* this, PlayState* play) {
     if (Actor_WorldDistXZToPoint(&GET_PLAYER(play)->actor, &this->actor.home.pos) > 600.0f) {
         this->unk_199 &= ~0x40;
         func_80AD9C24(this, play);
-    } else if (this->unk_19A == 0) {
+    } else if (this->unk_19A < 16) {
         if (this->unk_195 == 0) {
             func_80AD94E0(this);
         } else {
@@ -1179,6 +1207,22 @@ void func_80ADC10C(EnPoSisters* this, PlayState* play) {
         } else {
             if (Actor_ApplyDamage(&this->actor) != 0) {
                 Audio_PlayActorSound2(&this->actor, NA_SE_EN_PO_DAMAGE);
+                switch (this->unk_194) {
+                    case POE_SISTER_JOE: //Red Sister
+                    Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, ACTOR_EN_BB, this->actor.world.pos.x,
+                                        this->actor.world.pos.y, this->actor.world.pos.z, 0, this->actor.yawTowardsPlayer, 0, 0x01FE);
+                    break;
+
+                    case POE_SISTER_BETH: //Blue Sister
+                    Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, ACTOR_EN_BB, this->actor.world.pos.x,
+                                        this->actor.world.pos.y, this->actor.world.pos.z, 0, this->actor.yawTowardsPlayer, 0, 0x00FF);
+                    break;
+
+                    case POE_SISTER_AMY: //Green Sister
+                    Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, ACTOR_EN_BB, this->actor.world.pos.x,
+                                        this->actor.world.pos.y+40.0f, this->actor.world.pos.z, 0, this->actor.yawTowardsPlayer, 0, 0x01FC);
+                    break;
+                }
             } else {
                 Enemy_StartFinishingBlow(play, &this->actor);
                 Audio_PlayActorSound2(&this->actor, NA_SE_EN_PO_SISTER_DEAD);
@@ -1291,8 +1335,8 @@ s32 EnPoSisters_OverrideLimbDraw(PlayState* play, s32 limbIndex, Gfx** dList, Ve
     Color_RGBA8* color;
 
     if (limbIndex == 1 && (this->unk_199 & 0x40)) {
-        if (this->unk_19A >= 284) {
-            rot->x += (this->unk_19A * 0x1000) + 0xFFEE4000;
+        if (this->unk_19A >= START_SPIN_TIME_MEG) {
+            rot->x += (this->unk_19A * 0x1000) + 0xFFEE4000 - (0x1000*(284-START_SPIN_TIME_MEG));
         } else {
             rot->x += (this->unk_19A * 0x1000) + 0xFFFF1000;
         }

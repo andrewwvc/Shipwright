@@ -70,6 +70,7 @@ void EnBb_SetupFlameTrail(EnBb* this);
 void EnBb_FlameTrail(EnBb* this, PlayState* play);
 
 void EnBb_SetupDeath(EnBb* this, PlayState* play);
+void EnBb_SetupInstantDeath(EnBb* this, PlayState* play);
 void EnBb_Death(EnBb* this, PlayState* play);
 
 void EnBb_Damage(EnBb* this, PlayState* play);
@@ -518,6 +519,13 @@ void EnBb_Death(EnBb* this, PlayState* play) {
     Actor_Kill(&this->actor);
 }
 
+void EnBb_SetupInstantDeath(EnBb* this, PlayState* play) {
+    if (this->actor.params == ENBB_RED) {
+        EnBb_KillFlameTrail(this);
+    }
+    EnBb_SetupDeath(this, play);
+}
+
 void EnBb_SetupDamage(EnBb* this) {
     this->action = BB_DAMAGE;
     Audio_PlayActorSound2(&this->actor, NA_SE_EN_BUBLE_DAMAGE);
@@ -766,7 +774,7 @@ void EnBb_Down(EnBb* this, PlayState* play) {
 
 void EnBb_SetupRed(PlayState* play, EnBb* this) {
     Animation_PlayLoop(&this->skelAnime, &object_Bb_Anim_000184);
-    if (this->action == BB_DOWN) {
+    if (this->actionState == BBRED_ATTACK) {
         this->actor.speedXZ = 5.0f;
         this->actor.gravity = -1.0f;
         this->actor.velocity.y = 16.0f;
@@ -774,6 +782,7 @@ void EnBb_SetupRed(PlayState* play, EnBb* this) {
         this->timer = 0;
         this->moveMode = BBMOVE_NORMAL;
         this->actor.bgCheckFlags &= ~1;
+        EnBb_SpawnFlameTrail(play, this, true);
     } else {
         this->actor.colChkInfo.health = 4;
         this->timer = 0;
