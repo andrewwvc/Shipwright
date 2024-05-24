@@ -334,6 +334,7 @@ void EnWf_SetupAction(EnWf* this, EnWfActionFunc actionFunc) {
 void EnWf_Init(Actor* thisx, PlayState* play) {
     s32 pad;
     EnWf* this = (EnWf*)thisx;
+    EffectBlureInit1 slashBlure;
 
     Actor_ProcessInitChain(thisx, sInitChain);
 
@@ -362,6 +363,19 @@ void EnWf_Init(Actor* thisx, PlayState* play) {
         thisx->colChkInfo.damageTable = &sDamageTable;
         thisx->naviEnemyId = 0x4C; // Wolfos
     } else {                       // WOLFOS_WHITE
+        slashBlure.p1StartColor[0] = slashBlure.p1EndColor[0] = slashBlure.p2StartColor[0] = slashBlure.p2EndColor[0] = 255;
+        slashBlure.p1StartColor[1] = slashBlure.p1EndColor[1] = slashBlure.p2StartColor[1] = slashBlure.p2EndColor[1] = 170;
+        slashBlure.p1StartColor[2] = slashBlure.p1EndColor[2] = slashBlure.p2StartColor[2] = slashBlure.p2EndColor[2] = 0;
+
+        slashBlure.p1StartColor[3] = 255;
+        slashBlure.p1EndColor[3] = 0;
+        slashBlure.p2EndColor[3] = 0;
+        slashBlure.p2StartColor[3] = 64;
+
+        slashBlure.elemDuration = 4;
+        slashBlure.unkFlag = 0;
+        slashBlure.calcMode = 2;
+        Effect_Add(play, &this->effectIndex, EFFECT_BLURE1, 0, 0, &slashBlure);
         SkelAnime_InitFlex(play, &this->skelAnime, &gWolfosWhiteSkel, &gWolfosWaitingAnim, this->jointTable,
                            this->morphTable, WOLFOS_LIMB_MAX);
         Actor_SetScale(thisx, 0.0125f);
@@ -388,6 +402,10 @@ void EnWf_Destroy(Actor* thisx, PlayState* play) {
 
     if ((this->actor.params != WOLFOS_NORMAL) && (this->switchFlag != 0xFF)) {
         func_800F5B58();
+    }
+
+    if (this->actor.params == WOLFOS_WHITE) {
+        Effect_Delete(play, this->effectIndex);
     }
 
     if (this->actor.parent != NULL) {
@@ -655,6 +673,11 @@ void EnWf_RunAtPlayer(EnWf* this, PlayState* play) {
             (playerFacingAngleDiff >= 8000)) {
             this->actor.shape.rot.y = this->actor.world.rot.y = this->actor.yawTowardsPlayer;
 
+            if (this->actor.params == WOLFOS_WHITE) {
+                EnWf_SetupSlash(this);
+                return;
+            }
+
             if (Rand_ZeroOne() > 0.7f) {
                 EnWf_SetupRunAroundPlayer(this);
                 return;
@@ -857,7 +880,7 @@ void EnWf_SetupSlash(EnWf* this) {
     this->colliderSpheres.base.atFlags &= ~AT_HIT;
     this->actor.shape.rot.y = this->actor.yawTowardsPlayer;
     this->action = WOLFOS_ACTION_SLASH;
-    this->unk_2FA = 0; // Set and not used
+    this->unk_2FA = 0; // Used for blur effect
     this->actionTimer = 7;
     this->skelAnime.endFrame = 20.0f;
     this->actor.speedXZ = 0.0f;
@@ -871,7 +894,7 @@ void EnWf_SetupSingleSwipe(EnWf* this) {
     this->colliderSpheres.base.atFlags &= ~AT_HIT;
     this->actor.shape.rot.y = this->actor.yawTowardsPlayer;
     this->action = WOLFOS_ACTION_SLASH;
-    this->unk_2FA = 0; // Set and not used
+    this->unk_2FA = 1; // Used for blur effect
     this->actionTimer = 7;
     this->actor.speedXZ = 2.0f;
 
@@ -900,10 +923,12 @@ void EnWf_Slash(EnWf* this, PlayState* play) {
                 this->colliderSpheres.base.atFlags &= ~AT_WEAK;
             else
                 this->colliderSpheres.base.atFlags |= AT_WEAK;
+            this->unk_2FA = 0;
             this->colliderSpheres.elements[0].info.toucher.dmgFlags = 0x00100000;
             this->colliderSpheres.elements[1].info.toucher.dmgFlags = 0x00100000;
         } else {
             this->colliderSpheres.base.atFlags &= ~AT_WEAK;
+            this->unk_2FA = 1;
             this->colliderSpheres.elements[0].info.toucher.dmgFlags = 0xFFCFFFFF;
             this->colliderSpheres.elements[1].info.toucher.dmgFlags = 0xFFCFFFFF;
         }
@@ -1542,6 +1567,7 @@ s32 EnWf_OverrideLimbDraw(PlayState* play, s32 limbIndex, Gfx** dList, Vec3f* po
 void EnWf_PostLimbDraw(PlayState* play, s32 limbIndex, Gfx** dList, Vec3s* rot, void* thisx) {
     static Vec3f colliderVec = { 1200.0f, 0.0f, 0.0f };
     static Vec3f bodyPartVec = { 0.0f, 0.0f, 0.0f };
+    static Vec3f extensionVec = { 3600.0f, 0.0f, 0.0f };
     EnWf* this = (EnWf*)thisx;
     s32 bodyPartIndex = -1;
 
@@ -1600,6 +1626,30 @@ void EnWf_PostLimbDraw(PlayState* play, s32 limbIndex, Gfx** dList, Vec3s* rot, 
             this->bodyPartsPos[bodyPartIndex].x = bodyPartPos.x;
             this->bodyPartsPos[bodyPartIndex].y = bodyPartPos.y;
             this->bodyPartsPos[bodyPartIndex].z = bodyPartPos.z;
+        }
+    }
+
+    if ((this->actor.params == WOLFOS_WHITE) &&
+        ((limbIndex == WOLFOS_LIMB_FRONT_LEFT_CLAW && this->unk_2FA == 0) ||
+         (limbIndex == WOLFOS_LIMB_FRONT_RIGHT_CLAW && this->unk_2FA == 1))) {
+        EffectBlure* blur = Effect_GetByIndex(this->effectIndex);
+        if (this->unk_2FA) {
+            blur->p1StartColor.r = blur->p1EndColor.r = blur->p2StartColor.r = blur->p2EndColor.r = 255;
+            blur->p1StartColor.g = blur->p1EndColor.g = blur->p2StartColor.g = blur->p2EndColor.g = 255;
+            blur->p1StartColor.b = blur->p1EndColor.b = blur->p2StartColor.b = blur->p2EndColor.b = 255;
+        } else {
+            blur->p1StartColor.r = blur->p1EndColor.r = blur->p2StartColor.r = blur->p2EndColor.r = 255;
+            blur->p1StartColor.g = blur->p1EndColor.g = blur->p2StartColor.g = blur->p2EndColor.g = 170;
+            blur->p1StartColor.b = blur->p1EndColor.b = blur->p2StartColor.b = blur->p2EndColor.b = 0;
+        }
+        Vec3f bodyPartPos;
+        Vec3f bodyPartPosExtend;
+        Matrix_MultVec3f(&bodyPartVec, &bodyPartPos);
+        Matrix_MultVec3f(&extensionVec, &bodyPartPosExtend);
+        if ((this->slashStatus == 1)) {
+            EffectBlure_AddVertex(Effect_GetByIndex(this->effectIndex), &bodyPartPosExtend, &bodyPartPos);
+        } else {
+            EffectBlure_AddSpace(Effect_GetByIndex(this->effectIndex));
         }
     }
 }

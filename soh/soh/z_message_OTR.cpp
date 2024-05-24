@@ -423,7 +423,7 @@ extern "C" void OTRMessage_Init()
     MakeBlueMsgEng(0x0628, "%wSpike&%cIt seems just like a stone&when it retracts its spikes...");
     MakeBlueMsgEng(0x062F, "%wDead Hand&%c\x0F, just try to stay calm...");
     MakeBlueMsgEng(0x0635, "%wIron Knuckle&%cBeware of the incredibly strong axe!&You may need to use different dodges&depending on how they attack!");
-    MakeBlueMsgEng(0x0657, "%wWhite Wolfos%c&This seems to be a much more&fearsome and powerful Wolfos. It might&be tricky to land attacks on them!^%cWith arms this long, you may&have to block attacks from each&arm with your shield %rdifferently!");
+    MakeBlueMsgEng(0x0657, "%wWhite Wolfos%c&This seems to be a much more&fearsome and powerful Wolfos. It might&be tricky to land attacks on it!^%cWith arms this long, you may&have to block attacks from each&arm with your shield %rdifferently%c!");
     MakeBlueMsgEng(EnemyMsg+0, "%wIron Knuckle&%cBeware of the incredibly strong axe!&You may need to use different dodges&depending on how they attack!^%cYou're an adult now, so if you're&%w\xA4 Targeting%c, hold %w\xA3%c in order to let&high swings pass over your head.");
     MakeBlueMsgEng(EnemyMsg+1, "%wOctospike&%cThese ones spit out something&interesting!");
 

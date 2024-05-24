@@ -81,6 +81,7 @@ typedef struct EnWf {
     /* 0x04BC */ Vec3f unk_4BC;
     /* 0x04C8 */ Vec3f unk_4C8;
     /* 0x04D4 */ Vec3s unk_4D4;
+                 s32 effectIndex;
 } EnWf; // size = 0x04DC
 
 typedef enum {
