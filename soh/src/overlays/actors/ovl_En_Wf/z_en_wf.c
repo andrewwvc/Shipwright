@@ -852,8 +852,9 @@ void EnWf_RunAroundPlayer(EnWf* this, PlayState* play) {
             Audio_PlayActorSound2(&this->actor, NA_SE_EN_WOLFOS_CRY);
         }
 
-        if ((Math_CosS(angle1 - this->actor.shape.rot.y) < -0.85f) && !Actor_OtherIsTargetedPlaceholder(play, &this->actor) &&
-            (this->actor.xzDistToPlayer <= 80.0f)) {
+        if (((Math_CosS(angle1 - this->actor.shape.rot.y) < -0.85f) && !Actor_OtherIsTargetedPlaceholder(play, &this->actor) &&
+            (this->actor.xzDistToPlayer <= 80.0f)) ||
+            ((this->actor.params == WOLFOS_WHITE) && (this->actor.xzDistToPlayer <= 160.0f) && (player->meleeWeaponState != 0))) {
             EnWf_SetupSlash(this);
         } else {
             this->actionTimer--;
@@ -1445,6 +1446,10 @@ void EnWf_UpdateDamage(EnWf* this, PlayState* play) {
         this->colliderSpheres.base.acFlags &= ~(AC_HIT | AC_BOUNCED);
         this->colliderCylinderBody.base.acFlags &= ~AC_HIT;
         this->colliderCylinderTail.base.acFlags &= ~AC_HIT;
+        if (this->actor.params == WOLFOS_WHITE && (this->action == WOLFOS_ACTION_SLASH) && Player_isInReboundAnimation(play)) {
+            Player* player = GET_PLAYER(play);
+            player->linearVelocity = 0.0f;//Prevents Link from moving out of range of attacks when his attack bounces, assumes this collision is handled after the player's
+        }
     } else if ((this->colliderCylinderBody.base.acFlags & AC_HIT) ||
                (this->colliderCylinderTail.base.acFlags & AC_HIT)) {
         if (this->action >= WOLFOS_ACTION_WAIT) {
