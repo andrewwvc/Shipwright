@@ -3726,7 +3726,8 @@ void Interface_UpdateMagicBar(PlayState* play) {
                 } else {
                     sMagicBorder = sMagicBorder_ori;
                 }
-            } else if (gSaveContext.magic == gSaveContext.magicTarget) {
+            } else if (gSaveContext.magic <= gSaveContext.magicTarget) {
+                gSaveContext.magic = gSaveContext.magicTarget;
                 gSaveContext.magicState = MAGIC_STATE_METER_FLASH_1;
                 if (CVarGetInteger("gCosmetics.Consumable_MagicBorder.Changed", 0)) {
                     sMagicBorder = CVarGetColor24("gCosmetics.Consumable_MagicBorder.Value", sMagicBorder_ori);
