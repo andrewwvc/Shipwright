@@ -264,7 +264,7 @@ extern "C" void OTRMessage_Init()
     CustomMessageManager::Instance->CreateMessage(
         questMessageTableID, WonderMsg+0x3D,
         CustomMessage(
-          "You're looking good today \x0F!",
+          "You're looking good today \x0F!\x07\x02\x42",
           "",
           "",
           TEXTBOX_TYPE_BLUE, TEXTBOX_POS_MIDDLE)
@@ -273,7 +273,7 @@ extern "C" void OTRMessage_Init()
     CustomMessageManager::Instance->CreateMessage(
         questMessageTableID, WonderMsg+0x3E,
         CustomMessage(
-          "Wow, you sure have grown!&You're still not quite&used to seeing yourself&as an adult, are you?",
+          "Wow, you sure have grown!&You're still not quite&used to seeing yourself&as an adult, are you?\x07\x02\x42",
           "",
           "",
           TEXTBOX_TYPE_BLUE, TEXTBOX_POS_MIDDLE)
@@ -300,10 +300,51 @@ extern "C" void OTRMessage_Init()
     CustomMessageManager::Instance->CreateMessage(
         questMessageTableID, WonderMsg+0x41,
         CustomMessage(
-          "You're looking good tonight \x0F!",
+          "You're looking good tonight \x0F!\x07\x02\x42",
           "",
           "",
           TEXTBOX_TYPE_BLUE, TEXTBOX_POS_MIDDLE)
+    );
+
+    //Mirror Introspection Text
+    static std::string mirrorTextEng;
+    s32 spiritCount = countCollection();
+    if (gSaveContext.inventory.defenseHearts > 1 && spiritCount > 1)
+      mirrorTextEng = "Hmmm... let's see...&You have "+std::to_string(gSaveContext.inventory.defenseHearts)+" heart barriers...&and "+std::to_string(spiritCount)+" pink sprites collected!";
+    else if (gSaveContext.inventory.defenseHearts == 0 && spiritCount == 0)
+      mirrorTextEng = "A mirror really does reflect&the nature of your soul, doesn't it?.";
+    else if (gSaveContext.inventory.defenseHearts == 1 && spiritCount == 0)
+      mirrorTextEng = "Hmmm... let's see...&You have "+std::to_string(gSaveContext.inventory.defenseHearts)+" heart barrier collected!";
+    else if (gSaveContext.inventory.defenseHearts > 1 && spiritCount == 0)
+      mirrorTextEng = "Hmmm... let's see...&You have "+std::to_string(gSaveContext.inventory.defenseHearts)+" heart barriers collected!";
+    else if (gSaveContext.inventory.defenseHearts == 0 && spiritCount == 1)
+      mirrorTextEng = "Hmmm... let's see...&You have "+std::to_string(spiritCount)+" pink sprite collected!";
+    else if (gSaveContext.inventory.defenseHearts == 1 && spiritCount == 1)
+      mirrorTextEng = "Hmmm... let's see...&You have "+std::to_string(gSaveContext.inventory.defenseHearts)+" heart barrier...&and "+std::to_string(spiritCount)+" pink sprite collected!";
+    else if (gSaveContext.inventory.defenseHearts > 1 && spiritCount == 1)
+      mirrorTextEng = "Hmmm... let's see...&You have "+std::to_string(gSaveContext.inventory.defenseHearts)+" heart barriers...&and "+std::to_string(spiritCount)+" pink sprite collected!";
+    else if (gSaveContext.inventory.defenseHearts == 0 && spiritCount > 1)
+      mirrorTextEng = "Hmmm... let's see...&You have "+std::to_string(spiritCount)+" pink sprites collected!";
+    else if (gSaveContext.inventory.defenseHearts == 1 && spiritCount > 1)
+      mirrorTextEng = "Hmmm... let's see...&You have "+std::to_string(gSaveContext.inventory.defenseHearts)+" heart barrier...&and "+std::to_string(spiritCount)+" pink sprites collected!";
+    else
+      mirrorTextEng = "Hmmm... let's see...&You have "+std::to_string(gSaveContext.inventory.defenseHearts)+" heart barriers...&and "+std::to_string(spiritCount)+" pink sprites collected!";
+
+    CustomMessageManager::Instance->CreateMessage(
+        questMessageTableID, WonderMsg+0x42,
+        CustomMessage(
+          mirrorTextEng,
+          "",
+          "",
+          TEXTBOX_TYPE_BLUE, TEXTBOX_POS_MIDDLE)
+    );
+    CustomMessageManager::Instance->ReplaceMessage(
+      questMessageTableID, WonderMsg+0x42,
+      CustomMessage(
+        mirrorTextEng,
+        "",
+        "",
+        TEXTBOX_TYPE_BLUE, TEXTBOX_POS_MIDDLE)
     );
 
     u16 ElfMsg = 0x0100;
