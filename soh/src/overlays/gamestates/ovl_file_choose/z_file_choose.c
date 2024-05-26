@@ -3018,6 +3018,9 @@ void FileChoose_LoadGame(GameState* thisx) {
     gSaveContext.naviTimer = 0;
     ElfMessage_ResetPersistantElfMessages();
     changeToNormalWallet();
+    Audio_SetGameVolume(SEQ_PLAYER_BGM_MAIN, (Ring_Get_Equiped() == RI_RING_OF_SILENCE) ? 0.0f : CVarGetFloat("gMainMusicVolume", 1.0f));
+    Audio_SetGameVolume(SEQ_PLAYER_BGM_SUB, (Ring_Get_Equiped() == RI_RING_OF_SILENCE) ? 0.0f : CVarGetFloat("gSubMusicVolume", 1.0f));
+    Audio_SetGameVolume(SEQ_PLAYER_SFX, (Ring_Get_Equiped() == RI_MUTE_RING) ? 0.0f : CVarGetFloat("gSFXMusicVolume", 1.0f));
 
     // SWORDLESS LINK IS BACK BABY
     if (CVarGetInteger("gSwordlessLink", 0) != 0)
