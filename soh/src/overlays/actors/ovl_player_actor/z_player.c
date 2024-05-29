@@ -13275,8 +13275,10 @@ s32 func_8084DFF4(PlayState* play, Player* this) {
                     equipItem >= ITEM_SWORD_KOKIRI && equipItem <= ITEM_TUNIC_ZORA &&
                     CHECK_AGE_REQ_ITEM(equipItem);
 
+        lusprintf(__FILE__, __LINE__, 2, "GetItemEntry - collectable: %i, drawItemId: %i, drawModIndex: %i,\nfield: %#x, getItemCategory: %i, getItemFrom: %i, getItemId: %d, gi: %d,\n gid: %i, itemId: %i, modIndex: %i, objectId: %i, textId: %#x", giEntry.collectable, giEntry.drawItemId, giEntry.drawModIndex, giEntry.field, giEntry.getItemCategory, giEntry.getItemFrom, giEntry.getItemId, giEntry.gi, giEntry.gid, giEntry.itemId, giEntry.modIndex, giEntry.objectId, giEntry.textId);
         play->msgCtx.unk_E3D0 = giEntry.getItemId;//Value to be given to z_message_PAL.c to look up icon color table
         Message_StartTextbox(play, giEntry.textId, &this->actor);
+        lusprintf(__FILE__, __LINE__, 2, "GiveItem - Post Textbox");
         // RANDOTODO: Macro this boolean check.
         if (!(giEntry.modIndex == MOD_RANDOMIZER && giEntry.itemId == RG_ICE_TRAP)) {
             if (giEntry.modIndex == MOD_NONE) {
@@ -13286,8 +13288,10 @@ s32 func_8084DFF4(PlayState* play, Player* this) {
                     gSaveContext.swordHealth = 8;
                 }
                 if (RING_ITEM_MIN <= giEntry.itemId && giEntry.itemId <= RING_ITEM_MAX) {
+                    lusprintf(__FILE__, __LINE__, 2, "GiveItem - Pre Ring Give");
                     Ring_Give(play, giEntry.getItemId);
                 }
+                lusprintf(__FILE__, __LINE__, 2, "GiveItem - Pre Item Give");
                 Item_Give(play, giEntry.itemId);
             } else {
                 Randomizer_Item_Give(play, giEntry);

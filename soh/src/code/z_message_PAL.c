@@ -728,11 +728,19 @@ u16 Message_DrawItemIcon(PlayState* play, u16 itemId, Gfx** p, u16 i) {
     // clang-format on
 
     gDPPipeSync(gfx++);
+    //s16 ringTypeIndex = msgCtx->unk_E3D0 - GI_RING;//Value passed in through z_player.c
     if (RING_ITEM_MIN <= itemId && itemId <= RING_ITEM_MAX) {
         s16 ringTypeIndex = msgCtx->unk_E3D0 - GI_RING;//Value passed in through z_player.c
-        gDPSetCombineMode(gfx++,G_CC_BLENDPEDECALA, G_CC_BLENDPEDECALA);
-        gDPSetPrimColor(gfx++, 0, 0, gRingColors[ringTypeIndex][0][0], gRingColors[ringTypeIndex][0][1], gRingColors[ringTypeIndex][0][2], msgCtx->textColorAlpha);
-        gDPSetEnvColor(gfx++, gRingColors[ringTypeIndex][1][0], gRingColors[ringTypeIndex][1][1], gRingColors[ringTypeIndex][1][2], msgCtx->textColorAlpha);
+        if (ringTypeIndex < NUM_RING_TYPES) {
+            gDPSetCombineMode(gfx++,G_CC_BLENDPEDECALA, G_CC_BLENDPEDECALA);
+            gDPSetPrimColor(gfx++, 0, 0, gRingColors[ringTypeIndex][0][0], gRingColors[ringTypeIndex][0][1], gRingColors[ringTypeIndex][0][2], msgCtx->textColorAlpha);
+            gDPSetEnvColor(gfx++, gRingColors[ringTypeIndex][1][0], gRingColors[ringTypeIndex][1][1], gRingColors[ringTypeIndex][1][2], msgCtx->textColorAlpha);
+        } else {
+            lusprintf(__FILE__, __LINE__, 2, "DrawItemIcon - Ring unk_E3D0: %i", msgCtx->unk_E3D0);
+            gDPSetCombineMode(gfx++,G_CC_BLENDPEDECALA, G_CC_BLENDPEDECALA);
+            gDPSetPrimColor(gfx++, 0, 0, gRingColors[0][0][0], gRingColors[0][0][1], gRingColors[0][0][2], msgCtx->textColorAlpha);
+            gDPSetEnvColor(gfx++, gRingColors[0][1][0], gRingColors[0][1][1], gRingColors[0][1][2], msgCtx->textColorAlpha);
+        }
     } else {
         gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
         gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, msgCtx->textColorAlpha);

@@ -1839,6 +1839,7 @@ u8 Return_Item(u8 itemID, ModIndex modId, ItemID returnItem) {
 }
 
 u8 Ring_Give(PlayState* play, u16 getItemId) {
+    lusprintf(__FILE__, __LINE__, 2, "Ring Give - getItemId: %#x", getItemId);
     if (RING_GI_MIN <= getItemId && getItemId <= RING_GI_MAX) {
         if (gSaveContext.inventory.rings[getItemId-RING_GI_MIN] < 255)
             gSaveContext.inventory.rings[getItemId-RING_GI_MIN]++;
