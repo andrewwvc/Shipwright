@@ -3802,7 +3802,11 @@ s32 func_80837B18_modified(PlayState* play, Player* this, s32 damage, u8 modifie
 
     s32 modifiedDamage = damage;
     if (modified) {
-        modifiedDamage *= (1 << CVarGetInteger("gDamageMul", 0));
+        s32 mult = CVarGetInteger("gDamageMul", 0);
+        if (mult < 9)
+            modifiedDamage *= (1 << mult);
+        else if (ABS(damage) != 1)
+            modifiedDamage /= (1 << (mult-8));
     }
 
     return Health_ChangeBy(play, modifiedDamage);

@@ -73,7 +73,7 @@ static const char* imguiScaleOptions[4] = { "Small", "Normal", "Large", "X-Large
         "Dungeons (Vanilla)", "Dungeons (MQ)", "Dungeons Random", "Dungeons Random (Seeded)",
     };
     static const char* enemyRandomizerModes[3] = { "Disabled", "Random", "Random (Seeded)" };
-    static const char* allPowers[9] = {
+    static const char* allPowers[11] = {
                         "Vanilla (1x)",
                         "Double (2x)",
                         "Quadruple (4x)",
@@ -82,7 +82,9 @@ static const char* imguiScaleOptions[4] = { "Small", "Normal", "Large", "X-Large
                         "Ridiculous (32x)",
                         "Merciless (64x)",
                         "Pure Torture (128x)",
-                        "OHKO (256x)" };
+                        "OHKO (256x)",
+                        "Easy (x/2)",
+                        "Plays Itself (x/4)" };
     static const char* subPowers[8] = { allPowers[0], allPowers[1], allPowers[2], allPowers[3], allPowers[4], allPowers[5], allPowers[6], allPowers[7] };
     static const char* subSubPowers[7] = { allPowers[0], allPowers[1], allPowers[2], allPowers[3], allPowers[4], allPowers[5], allPowers[6] };
     static const char* zFightingOptions[3] = { "Disabled", "Consistent Vanish", "No Vanish" };
@@ -640,7 +642,9 @@ void DrawEnhancementsMenu() {
                     "32x: Can survive all common attacks with max health and double defense\n"
                     "64x: Can survive trivial damage with max health without double defense\n"
                     "128x: Can survive trivial damage with max health and double defense\n"
-                    "256x: Cannot survive damage"
+                    "256x: Cannot survive damage\n"
+                    "x/2: Halves damage taken\n"
+                    "x/4: Quarters damage taken"
                 );
                 UIWidgets::PaddedText("Fall Damage Multiplier", true, false);
                 UIWidgets::EnhancementCombobox("gFallDamageMul", subPowers, 0);
