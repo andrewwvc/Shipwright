@@ -434,6 +434,16 @@ static u8 sDropQuantitiesGreed[] = {
     0, 0, 0, 1
 };
 
+static s16 quantityTable[] = {1, 5, 20, //2
+                            16, 5, 1, 1, 1,//7
+                            5, 10, 30,//10
+                            5, 5, 1, //13
+                            12, 24, 5, 1, 112, //18
+                            200, 50, //20
+                            1,1,1,1,1, //25
+                            5 //26
+                            };
+
 void EnItem00_SetupAction(EnItem00* this, EnItem00ActionFunc actionFunc) {
     this->actionFunc = actionFunc;
 }
@@ -1012,7 +1022,9 @@ void EnItem00_Update(Actor* thisx, PlayState* play) {
         return;
     }
 
-    f32 itemRange = (Ring_Get_Equiped() == RI_ATTRACTION_RING) ? 45.0f : (Ring_Get_Equiped() == RI_REPULSION_RING) ? 12.0f : 30.0f;
+    s16 ringEquiped = Ring_Get_Equiped();
+    s16 repulsionRingEquiped = (ringEquiped == RI_REPULSION_RING);
+    f32 itemRange = (ringEquiped == RI_ATTRACTION_RING) ? 45.0f : repulsionRingEquiped ? 12.0f : 30.0f;
 
     if (!((this->actor.xzDistToPlayer <= itemRange) && (this->actor.yDistToPlayer >= -50.0f) &&
           (this->actor.yDistToPlayer <= 50.0f))) {
@@ -1021,7 +1033,18 @@ void EnItem00_Update(Actor* thisx, PlayState* play) {
         }
     }
 
+    //Allows items that have been picked up to destroy themselves even after the item count increases
+    repulsionRingEquiped = repulsionRingEquiped && !Actor_HasParent(&this->actor, play);
+
     if (play->gameOverCtx.state != GAMEOVER_INACTIVE) {
+        return;
+    }
+
+    if (repulsionRingEquiped && isRupee(this->actor.params) && Rupees_GetDisplayNum()+quantityTable[this->actor.params] > Wallet_Capacity_Current()) {
+        return;
+    }
+
+    if (repulsionRingEquiped && ITEM00_ARROWS_SMALL <= this->actor.params && this->actor.params <= ITEM00_ARROWS_LARGE && quantityTable[this->actor.params] + AMMO(ITEM_BOW) > CUR_CAPACITY(UPG_QUIVER)) {
         return;
     }
 
@@ -1046,12 +1069,22 @@ void EnItem00_Update(Actor* thisx, PlayState* play) {
             resourceTimeMultiplier = 4;
             break;
         case ITEM00_STICK:
+            if (repulsionRingEquiped && gSaveContext.inventory.items[ITEM_STICK] != ITEM_NONE) {
+                if (quantityTable[this->actor.params] + AMMO(ITEM_STICK) > CUR_CAPACITY(UPG_STICKS))
+                    return;
+            }
             getItemId = GI_STICKS_1;
             break;
         case ITEM00_NUTS:
+            if (repulsionRingEquiped && gSaveContext.inventory.items[ITEM_NUT] != ITEM_NONE) {
+                if (quantityTable[this->actor.params] + AMMO(ITEM_NUT) > CUR_CAPACITY(UPG_NUTS))
+                    return;
+            }
             getItemId = GI_NUTS_5;
             break;
         case ITEM00_HEART:
+            if (repulsionRingEquiped && quantityTable[ITEM00_HEART] + gSaveContext.health > gSaveContext.healthCapacity)
+                return;
             Item_Give(play, ITEM_HEART);
             break;
         case ITEM00_FLEXIBLE:
@@ -1059,6 +1092,8 @@ void EnItem00_Update(Actor* thisx, PlayState* play) {
             break;
         case ITEM00_BOMBS_A:
         case ITEM00_BOMBS_B:
+            if (repulsionRingEquiped && quantityTable[this->actor.params] + AMMO(ITEM_BOMB) > CUR_CAPACITY(UPG_BOMB_BAG))
+                return;
             Item_Give(play, ITEM_BOMBS_5);
             break;
         case ITEM00_ARROWS_SINGLE:
@@ -1074,6 +1109,8 @@ void EnItem00_Update(Actor* thisx, PlayState* play) {
             Item_Give(play, ITEM_ARROWS_LARGE);
             break;
         case ITEM00_SEEDS:
+            if (repulsionRingEquiped && quantityTable[this->actor.params] + AMMO(ITEM_SLINGSHOT) > CUR_CAPACITY(UPG_BULLET_BAG))
+                return;
             getItemId = GI_SEEDS_5;
             break;
         case ITEM00_SMALL_KEY:
@@ -1089,9 +1126,13 @@ void EnItem00_Update(Actor* thisx, PlayState* play) {
             getItemId = GI_DEFENSE_HEART;
             break;
         case ITEM00_MAGIC_LARGE:
+            if (repulsionRingEquiped && Flags_GetInfTable(INFTABLE_198) && quantityTable[this->actor.params] + gSaveContext.magic >= gSaveContext.magicCapacity && gSaveContext.magicState == MAGIC_STATE_IDLE)
+                return;
             getItemId = GI_MAGIC_LARGE;
             break;
         case ITEM00_MAGIC_SMALL:
+            if (repulsionRingEquiped && Flags_GetInfTable(INFTABLE_198) && quantityTable[this->actor.params] + gSaveContext.magic >= gSaveContext.magicCapacity && gSaveContext.magicState == MAGIC_STATE_IDLE)
+                return;
             getItemId = GI_MAGIC_SMALL;
             break;
         case ITEM00_SHIELD_DEKU:
