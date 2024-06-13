@@ -43,7 +43,7 @@ static ColliderCylinderInit sCylinderInit = {
     },
     {
         ELEMTYPE_UNK0,
-        { 0xFFCFFFFF, 0x00, 0x04 },
+        { 0x20000000, 0x00, 0x10 },
         { 0xFFCFFFFF, 0x00, 0x00 },
         TOUCH_ON | TOUCH_SFX_HARD,
         BUMP_ON,
@@ -91,8 +91,9 @@ void func_80B43AD4(EnYukabyun* this, PlayState* play) {
     this->unk_150 += 0xA0;
     this->actor.shape.rot.y += this->unk_150;
     if (this->unk_150 >= 0x2000) {
-        this->actor.world.rot.y = this->actor.yawTowardsPlayer;
-        this->actor.speedXZ = 10.0f;
+        f32 speed = 10.0f + (this->actor.params/4);
+        this->actor.world.rot.y = aimToPlayerMovement(&this->actor, speed, play);
+        this->actor.speedXZ = speed;
         this->actionfunc = func_80B43B6C;
     }
     Math_StepToF(&this->actor.world.pos.y, this->actor.home.pos.y + 30.0f, 1.0f);
