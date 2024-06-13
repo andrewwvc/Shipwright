@@ -31,7 +31,7 @@ static ColliderCylinderInit sCylinderInit = {
     },
     {
         ELEMTYPE_UNK0,
-        { 0xFFCFFFFF, 0x00, 0x04 },
+        { 0xFFCFFFFF, 0x00, 0x18 },
         { 0x4FC007CA, 0x00, 0x00 },
         TOUCH_ON | TOUCH_SFX_NORMAL,
         BUMP_ON,
@@ -124,8 +124,8 @@ void BgIceTurara_Stalagmite(BgIceTurara* this, PlayState* play) {
 }
 
 void BgIceTurara_Wait(BgIceTurara* this, PlayState* play) {
-    if (this->dyna.actor.xzDistToPlayer < 60.0f) {
-        this->shiverTimer = 10;
+    if (this->dyna.actor.xzDistToPlayer < 80.0f) {
+        this->shiverTimer = 0;
         this->actionFunc = BgIceTurara_Shiver;
     }
 }
@@ -135,26 +135,28 @@ void BgIceTurara_Shiver(BgIceTurara* this, PlayState* play) {
     s16 phi_v0_2;
     f32 sp28;
 
-    if (this->shiverTimer != 0) {
-        this->shiverTimer--;
-    }
+    this->shiverTimer++;
     if (!(this->shiverTimer % 4)) {
         Audio_PlayActorSound2(&this->dyna.actor, NA_SE_EV_ICE_SWING);
     }
-    if (this->shiverTimer == 0) {
+    if (this->dyna.actor.xzDistToPlayer < 30.0f) {
         this->dyna.actor.world.pos.x = this->dyna.actor.home.pos.x;
         this->dyna.actor.world.pos.z = this->dyna.actor.home.pos.z;
         Collider_UpdateCylinder(&this->dyna.actor, &this->collider);
         CollisionCheck_SetAT(play, &play->colChkCtx, &this->collider.base);
         func_8003EBF8(play, &play->colCtx.dyna, this->dyna.bgId);
         this->actionFunc = BgIceTurara_Fall;
-    } else {
+    } else if (this->dyna.actor.xzDistToPlayer < 80.0f) {
         sp28 = Rand_ZeroOne();
         phi_v0_2 = (Rand_ZeroOne() < 0.5f ? -1 : 1);
         this->dyna.actor.world.pos.x = (phi_v0_2 * ((0.5f * sp28) + 0.5f)) + this->dyna.actor.home.pos.x;
         sp28 = Rand_ZeroOne();
         phi_v0_3 = (Rand_ZeroOne() < 0.5f ? -1 : 1);
         this->dyna.actor.world.pos.z = (phi_v0_3 * ((0.5f * sp28) + 0.5f)) + this->dyna.actor.home.pos.z;
+    } else {
+        this->dyna.actor.world.pos.x = this->dyna.actor.home.pos.x;
+        this->dyna.actor.world.pos.z = this->dyna.actor.home.pos.z;
+        this->actionFunc = BgIceTurara_Wait;
     }
 }
 
