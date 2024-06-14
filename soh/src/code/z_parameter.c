@@ -1451,6 +1451,7 @@ Gfx* Gfx_TextureI8(Gfx* displayListHead, void* texture, s16 textureWidth, s16 te
 void Inventory_SwapAgeEquipment(void) {
     s16 i;
     u16 shieldEquipValue;
+    s16 prevEquipedRing = Ring_Get_Equiped();
 
     if (LINK_AGE_IN_YEARS == YEARS_CHILD) {
         
@@ -1658,6 +1659,23 @@ void Inventory_SwapAgeEquipment(void) {
         shieldEquipValue >>= gEquipShifts[EQUIP_TYPE_SHIELD];
         if (!CHECK_OWNED_EQUIP_ALT(EQUIP_TYPE_SHIELD, shieldEquipValue - 1)) {
             gSaveContext.equips.equipment &= gEquipNegMasks[EQUIP_TYPE_SHIELD];
+        }
+    }
+
+    s16 currRing = Ring_Get_Equiped();
+    if (prevEquipedRing != currRing) {
+        if (prevEquipedRing == RI_RING_OF_SILENCE) {
+            Audio_SetGameVolume(SEQ_PLAYER_BGM_MAIN, CVarGetFloat("gMainMusicVolume", 1.0f));
+            Audio_SetGameVolume(SEQ_PLAYER_BGM_SUB, CVarGetFloat("gSubMusicVolume", 1.0f));
+        } else if (currRing == RI_RING_OF_SILENCE) {
+            Audio_SetGameVolume(SEQ_PLAYER_BGM_MAIN, 0.0f);
+            Audio_SetGameVolume(SEQ_PLAYER_BGM_SUB, 0.0f);
+        }
+
+        if (prevEquipedRing == RI_MUTE_RING) {
+            Audio_SetGameVolume(SEQ_PLAYER_SFX, CVarGetFloat("gSFXMusicVolume", 1.0f));
+        } else if (currRing == RI_MUTE_RING) {
+            Audio_SetGameVolume(SEQ_PLAYER_SFX, 0.0f);
         }
     }
 }
