@@ -137,8 +137,7 @@ s16 func_80AA2BD4(PlayState* play, Actor* thisx) {
             if (Message_ShouldAdvance(play)) {
                 if (thisx->textId == RanchMsg+8) {
                     if (play->msgCtx.choiceIndex == 0) {
-                        //gSaveContext.eventChkInf[2] |= 0x0400;
-                        Flags_GetEventChkInf(0x2A);
+                        Flags_SetEventChkInf(0x2A);
                         gSaveContext.MalonRideDay = gSaveContext.totalDays+1;
                         Message_ContinueTextbox(play, RanchMsg+9);
                     } else {
