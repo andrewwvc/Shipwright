@@ -312,7 +312,7 @@ extern "C" void OTRMessage_Init()
     if (gSaveContext.inventory.defenseHearts > 1 && spiritCount > 1)
       mirrorTextEng = "Hmmm... let's see...&You have "+std::to_string(gSaveContext.inventory.defenseHearts)+" heart barriers...&and "+std::to_string(spiritCount)+" pink sprites collected!";
     else if (gSaveContext.inventory.defenseHearts == 0 && spiritCount == 0)
-      mirrorTextEng = "A mirror really does reflect&the nature of your soul, doesn't it?.";
+      mirrorTextEng = "A mirror really does reflect&the nature of your soul, doesn't it?";
     else if (gSaveContext.inventory.defenseHearts == 1 && spiritCount == 0)
       mirrorTextEng = "Hmmm... let's see...&You have "+std::to_string(gSaveContext.inventory.defenseHearts)+" heart barrier collected!";
     else if (gSaveContext.inventory.defenseHearts > 1 && spiritCount == 0)
