@@ -155,6 +155,7 @@ static u8 sCUpPauseOverride = 0;
 
 s16 gSpoilingItems[] = { ITEM_ODD_MUSHROOM, ITEM_FROG, ITEM_EYEDROPS };
 s16 gSpoilingItemReverts[] = { ITEM_COJIRO, ITEM_PRESCRIPTION, ITEM_PRESCRIPTION };
+s16 gSpoilingItemResets[] = { ITEM_COJIRO, ITEM_PRESCRIPTION, ITEM_FROG };
 
 static Color_RGB8 sMagicBorder = {255,255,255};
 static Color_RGB8 sMagicBorder_ori = {255,255,255};
@@ -4226,11 +4227,26 @@ void Interface_DrawEnemyHealthBar(TargetContext* targetCtx, PlayState* play) {
     CLOSE_DISPS(play->state.gfxCtx);
 }
 
+static HorseData tempHorseData;//Set to be restored when quest timer runs out
+static tempHorseFlag = 0;;//Set if there is horse data to be restored
+
+void Horse_SetTempData() {
+    tempHorseFlag = 1;
+    tempHorseData = gSaveContext.horseData;
+}
+
+void Horse_RestoreTempData() {
+    if (tempHorseFlag)
+        gSaveContext.horseData = tempHorseData;
+}
+
+
 void func_80088AA0(s16 arg0) {
     gSaveContext.timerX[1] = 140;
     gSaveContext.timerY[1] = 80;
     D_80125A5C = 0;
     gSaveContext.timer2Value = arg0;
+    Horse_SetTempData();
 
     if (arg0 != 0) {
         gSaveContext.timer2State = 1;
@@ -5441,7 +5457,7 @@ void Interface_Draw(PlayState* play) {
         aButtonColor = (Color_RGB8){ 0, 200, 50 };
     }
 
-    static s16 spoilingItemEntrances[] = { 0x01AD, 0x0153, 0x0153 };
+    static s16 spoilingItemEntrances[] = { 0x01AD, 0x0153, 65 };
     static f32 D_80125B54[] = { -40.0f, -35.0f }; // unused
     static s16 D_80125B5C[] = { 91, 91 };         // unused
     static s16 D_8015FFE0;
@@ -6191,13 +6207,16 @@ void Interface_Draw(PlayState* play) {
             for (svar1 = 0; svar1 < ARRAY_COUNT(gSpoilingItems); svar1++) {
                 if (INV_CONTENT(ITEM_TRADE_ADULT) == gSpoilingItems[svar1]) {
                     gSaveContext.eventInf[0] &= 0x7F80;
+                    Horse_RestoreTempData();
+                    if (svar1 == 2)
+                        func_80088AA0(10);
                     osSyncPrintf("EVENT_INF=%x\n", gSaveContext.eventInf[0]);
                     play->nextEntranceIndex = spoilingItemEntrances[svar1];
-                    INV_CONTENT(gSpoilingItemReverts[svar1]) = gSpoilingItemReverts[svar1];
+                    INV_CONTENT(gSpoilingItemResets[svar1]) = gSpoilingItemResets[svar1];
 
                     for (svar2 = 1; svar2 < ARRAY_COUNT(gSaveContext.equips.buttonItems); svar2++) {
                         if (gSaveContext.equips.buttonItems[svar2] == gSpoilingItems[svar1]) {
-                            gSaveContext.equips.buttonItems[svar2] = gSpoilingItemReverts[svar1];
+                            gSaveContext.equips.buttonItems[svar2] = gSpoilingItemResets[svar1];
                             Interface_LoadItemIcon1(play, svar2);
                         }
                     }
