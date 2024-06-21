@@ -503,6 +503,7 @@ void EnKz_StartTimer(EnKz* this, PlayState* play) {
         if (INV_CONTENT(ITEM_TRADE_ADULT) == ITEM_FROG && !IS_RANDO) {
             func_80088AA0(120); // start timer2 with 2 minutes
             gSaveContext.eventInf[1] &= ~1;
+            EyedropEventClear();
         }
         this->interactInfo.talkState = NPC_TALK_STATE_IDLE;
         this->actionFunc = EnKz_Wait;

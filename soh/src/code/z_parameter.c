@@ -4228,7 +4228,8 @@ void Interface_DrawEnemyHealthBar(TargetContext* targetCtx, PlayState* play) {
 }
 
 static HorseData tempHorseData;//Set to be restored when quest timer runs out
-static tempHorseFlag = 0;;//Set if there is horse data to be restored
+static s8 tempHorseFlag = 0;//Set if there is horse data to be restored
+static s8 tempEyedropEvent = 0;
 
 void Horse_SetTempData() {
     tempHorseFlag = 1;
@@ -4240,6 +4241,21 @@ void Horse_RestoreTempData() {
         gSaveContext.horseData = tempHorseData;
 }
 
+void Horse_ResetTempData() {
+    tempHorseFlag = 0;
+}
+
+void EyedropEventClear() {
+    tempEyedropEvent = 0;
+}
+
+void EyedropEventSet() {
+    tempEyedropEvent = 1;
+}
+
+s16 EyedropEventValue() {
+    return tempEyedropEvent;
+}
 
 void func_80088AA0(s16 arg0) {
     gSaveContext.timerX[1] = 140;
