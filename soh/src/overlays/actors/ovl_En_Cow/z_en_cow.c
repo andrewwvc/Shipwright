@@ -323,7 +323,7 @@ void EnCow_GivePlayerHeartPiece(EnCow* this, PlayState* play) {
 void EnCow_StartGivePlayerHeartPiece(EnCow* this, PlayState* play) {
     if (Actor_ProcessTalkRequest(&this->actor, play)) {
         this->actionFunc = EnCow_GivePlayerHeartPiece;
-        gSaveContext.eventChkInf[1] |= 0x8000;
+        gSaveContext.eventChkInf[2] |= 0x01;
     } else {
         u16 MiscMsg = GetTextID("misc");
         this->actor.flags |= ACTOR_FLAG_WILL_TALK;
@@ -356,7 +356,7 @@ void func_809DF96C(EnCow* this, PlayState* play) {
                         this->actionFunc = EnCow_GivePlayerRandomizedItem;
                         return;
                     }
-                    if (play->sceneNum == SCENE_LINKS_HOUSE && !(gSaveContext.eventChkInf[1] & 0x8000)) {
+                    if (play->sceneNum == SCENE_LINKS_HOUSE && !(gSaveContext.eventChkInf[2] & 0x01)) {
                         this->actionFunc = EnCow_StartGivePlayerHeartPiece;
                         return;
                     }

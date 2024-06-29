@@ -410,7 +410,7 @@ s32 EnGirlA_TryChangeShopItem(EnGirlA* this, PlayState* play) {
             break;
         }
         case SI_PIECE_OF_HEART:
-            if (gSaveContext.itemGetInf[2] & 0x01) {
+            if (gSaveContext.itemGetInf[2] & 0x02) {
                 this->actor.params = SI_SOLD_OUT;
                 return true;
             }
@@ -1034,7 +1034,7 @@ void EnGirlA_ItemGive_PieceOfHeart(PlayState* play, EnGirlA* this) {
         gSaveContext.healthCapacity += 0x10;
         gSaveContext.health += 0x10;
     }
-    gSaveContext.itemGetInf[2] |= 0x01;//For the bazzar night shop
+    gSaveContext.itemGetInf[2] |= 0x02;//For the bazzar night shop
     Rupees_ChangeBy(-this->basePrice);
 }
 
@@ -1042,7 +1042,7 @@ void EnGirlA_BuyEvent_HeartPiece(PlayState* play, EnGirlA* this) {
     GetItemEntry entry = ItemTable_Retrieve(this->getItemId);
     gSaveContext.pendingSale = entry.itemId;
     gSaveContext.pendingSaleMod = entry.modIndex;
-    gSaveContext.itemGetInf[2] |= 0x01;//For the bazzar night shop
+    gSaveContext.itemGetInf[2] |= 0x02;//For the bazzar night shop
     Rupees_ChangeBy(-this->basePrice);
 }
 
