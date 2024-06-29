@@ -581,7 +581,7 @@ u16 func_80A97338(PlayState* play, Actor* thisx) {
 }
 
 #define MSG_CONT(_id) \
-    this->actor.textId=_id;\
+    this->actor.textId=(_id);\
     Message_ContinueTextbox(play,this->actor.textId);
 
 u16 func_80A97610(PlayState* play, Actor* thisx) {

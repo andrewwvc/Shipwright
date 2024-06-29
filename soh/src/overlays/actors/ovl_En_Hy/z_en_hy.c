@@ -597,8 +597,7 @@ u16 func_80A6F810(PlayState* play, Actor* thisx) {
                 else
                     return HylianMsg+20;
             } else {
-                retval = (Flags_GetInfTable(INFTABLE_ENTERED_HYRULE_CASTLE)) ? ((Flags_GetInfTable(INFTABLE_CC)) ? 0x7014 : 0x70A4)
-                                                      : 0x7014;;
+                retval = (Flags_GetInfTable(INFTABLE_ENTERED_HYRULE_CASTLE)) ? ((Flags_GetInfTable(INFTABLE_CC)) ? 0x7014 : 0x70A4) : 0x7014;
                 if (getDayOfCycle() == 3 && (retval == 0x7014))
                     return HylianMsg+15;
                 else
