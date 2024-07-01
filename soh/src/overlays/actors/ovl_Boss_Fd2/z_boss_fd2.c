@@ -360,11 +360,11 @@ void BossFd2_Idle(BossFd2* this, PlayState* play) {
         Animation_MorphToLoop(&this->skelAnime, &gHoleVolvagiaIdleAnim, -5.0f);
     }
     if (this->timers[0] == 0) {
-        if (this->actor.xzDistToPlayer < 200.0f) {
-            BossFd2_SetupClawSwipe(this, play);
-        } else {
+        // if (this->actor.xzDistToPlayer < 200.0f) {
+        //     BossFd2_SetupClawSwipe(this, play);
+        // } else {
             BossFd2_SetupBreatheFire(this, play);
-        }
+        //}
     }
 }
 
