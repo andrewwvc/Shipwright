@@ -2031,9 +2031,16 @@ void Item_DropCollectibleRandom1(PlayState* play, Actor* fromActor, Vec3f* spawn
     }
 }
 
-void Item_DropCollectibleRandom(PlayState* play, Actor* fromActor, Vec3f* spawnPos, s16 params) {
+void Item_DropCollectibleRandomBasic(PlayState* play, Actor* fromActor, Vec3f* spawnPos, s16 params, s16 specialItem, f32 specialChance) {
     if (Rand_ZeroOne() < 0.25f)
         Item_DropCollectibleRandom1(play, fromActor, spawnPos, params, 0);
+    else if (Rand_ZeroOne() < specialChance) {
+        Item_DropCollectible(play, spawnPos, specialItem);
+    }
+}
+
+void Item_DropCollectibleRandom(PlayState* play, Actor* fromActor, Vec3f* spawnPos, s16 params) {
+    Item_DropCollectibleRandomBasic(play, fromActor, spawnPos, params, ITEM00_RUPEE_GREEN, 0.25f);
 }
 
 void Item_DropCollectibleRandomSmall(PlayState* play, Actor* fromActor, Vec3f* spawnPos, s16 params) {

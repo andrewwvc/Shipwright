@@ -22,6 +22,7 @@ typedef struct EnFirefly {
     /* 0x0310 */ f32 maxAltitude;
     /* 0x0314 */ ColliderJntSph collider;
     /* 0x0344 */ ColliderJntSphElement colliderItems[1];
+                 s16 hitBy;
 } EnFirefly; // size = 0x0374
 
 typedef enum {

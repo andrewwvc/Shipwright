@@ -184,6 +184,7 @@ EnItem00* Item_DropCollectible(PlayState* play, Vec3f* spawnPos, s16 params);
 EnItem00* Item_DropCollectible2(PlayState* play, Vec3f* spawnPos, s16 params);
 void EnItem00_CustomItemsParticles(Actor* Parent, PlayState* play, GetItemEntry giEntry);
 void Item_DropCollectibleRandom(PlayState* play, Actor* fromActor, Vec3f* spawnPos, s16 params);
+void Item_DropCollectibleRandomBasic(PlayState* play, Actor* fromActor, Vec3f* spawnPos, s16 params, s16 specialItem, f32 specialChance);
 void Item_DropCollectibleRandom1(PlayState* play, Actor* fromActor, Vec3f* spawnPos, s16 params, s16 mod);
 void Item_DropCollectibleRandomSmall(PlayState* play, Actor* fromActor, Vec3f* spawnPos, s16 params);
 void EffectBlure_ChangeType(EffectBlure* this, int type);

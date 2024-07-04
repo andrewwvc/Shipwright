@@ -461,7 +461,10 @@ void EnFirefly_Die(EnFirefly* this, PlayState* play) {
     Math_StepToF(&this->actor.scale.x, 0.0f, 0.00034f);
     this->actor.scale.y = this->actor.scale.z = this->actor.scale.x;
     if (this->timer == 0) {
-        Item_DropCollectibleRandom(play, &this->actor, &this->actor.world.pos, 0xE0);
+        if (this->hitBy)
+            Item_DropCollectibleRandomBasic(play, &this->actor, &this->actor.world.pos, 0xE0, ITEM00_ARROWS_SMALL, 0.2f);
+        else
+            Item_DropCollectibleRandom(play, &this->actor, &this->actor.world.pos, 0xE0);
         Actor_Kill(&this->actor);
     }
 }
@@ -642,8 +645,11 @@ void EnFirefly_UpdateDamage(EnFirefly* this, PlayState* play) {
     u8 damageEffect;
 
     if (this->collider.base.acFlags & AC_HIT) {
+        u32 elementType = this->collider.elements[0].info.acHitInfo->toucher.dmgFlags;
         this->collider.base.acFlags &= ~AC_HIT;
         Actor_SetDropFlag(&this->actor, &this->collider.elements[0].info, 1);
+        if (elementType & DMG_ARROW)
+            this->hitBy = 1;
 
         if ((this->actor.colChkInfo.damageEffect != 0) || (this->actor.colChkInfo.damage != 0)) {
             if (Actor_ApplyDamage(&this->actor) == 0) {
