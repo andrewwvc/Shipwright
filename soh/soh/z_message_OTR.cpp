@@ -541,7 +541,7 @@ extern "C" void OTRMessage_Init()
     MakeBlueMsgEng(0x409, "Some think that the Gerudo Mask,&owned by a certian salesman,&might be useful to gain&entry to the Gerudo Fortress.^But the naive and obvious&way of using it will&likely not amount to much.");//Hold Targeting
     MakeBlueMsgEng(0x40D, "They say that the Gerudo&currently keep something special&above their highest prison cell.");//Running Man
     MakeBlueMsgEng(0x411, "They say that one part of&the secret directions&to a lost place is:^South&North&West&West");//Gerudo Valley
-    MakeBlueMsgEng(0x41A, "They say that the reward&for completing the Gerudo&Training Grounds has many uses.^And experimenting, in order to&discover what kinds of things it&works on, could pay off well.");//Gerudo Colossus
+    MakeBlueMsgEng(0x41A, "They say that the reward&for completing the Gerudo&Training Grounds has many uses.^The waters of Zora's Fountain&may be affected by it&in surprising ways.");//Gerudo Colossus
     MakeBlueMsgEng(0x420, "They say that the man who rides&on a flying carpet may offer %cseveral%w&different items depending on the&circumstances regarding your meeting.");//Deku Tree
     MakeBlueMsgEng(StoneMsg+0,"There may be something special&behind falls that are %rnot%w water...");
     MakeBlueMsgEng(StoneMsg+2,"They say that many people&would like Hyrule Field to&be cleared of Peahats.");
