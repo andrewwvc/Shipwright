@@ -253,7 +253,7 @@ void EnSyatekiItm_SpawnTargets(EnSyatekiItm* this, PlayState* play) {
             switch (roundIdx) {
                 case SYATEKI_ROUND_BLUE_SEQUENTIAL:
                     if (i == 1) {
-                        this->targets[i]->delayTimer = 30;
+                        this->targets[i]->delayTimer = CVarGetInteger("gNonGyroDifficulty", 0) ? 60 : 30;
                     }
                     break;
                 case SYATEKI_ROUND_GREEN_THROW:

@@ -72,7 +72,7 @@ f32 galleryMultiplierValue() {
                 (((gSaveContext.itemGetInf[0] & 0x4000) || (CUR_UPG_VALUE(UPG_QUIVER) == 0)) ?
                             gSaveContext.galleryMultplierAdult :
                             INITIAL_GALLERY_MULTIPLIER);
-    return 1.5f + mult*0.1;
+    return (CVarGetInteger("gNonGyroDifficulty", 0) ? 1.0f : 1.5f) + mult*0.1;
 }
 
 const ActorInit En_G_Switch_InitVars = {

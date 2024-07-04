@@ -620,7 +620,7 @@ void func_80ADA35C(EnPoSisters* this, PlayState* play) {
     if (this->unk_196 != 0) {
         this->unk_196--;
     }
-    this->actor.world.pos.y += (2.0f + 0.5f * Rand_ZeroOne()) * Math_SinS(this->unk_196 * STOP_PULSE_RATE);
+    this->actor.world.pos.y += (2.0f + 0.5f * Rand_ZeroOne()) * (CVarGetInteger("gNonGyroDifficulty", 0) ? 1 : Math_SinS(this->unk_196 * STOP_PULSE_RATE));
     if (this->unk_22E.a == 255 && this->actionFunc != func_80ADA8C0 && this->actionFunc != func_80ADA7F0) {
         if (this->actionFunc == func_80ADAC70) {
             func_8002F974(&this->actor, NA_SE_EN_PO_AWAY - SFX_FLAG);
@@ -988,7 +988,7 @@ void func_80ADB770(EnPoSisters* this, PlayState* play) {
                     if (orbitRate > 8)
                         orbitRate = 8;
                     this->actor.shape.rot.y +=
-                        (0x580 - (this->unk_19C * 0x180)) * fabsf(Math_SinS(this->unk_196 * STOP_PULSE_RATE))*orbitRate;
+                        (0x580 - (this->unk_19C * 0x180)) * ((CVarGetInteger("gNonGyroDifficulty", 0) ? orbitRate/2 : fabsf(Math_SinS(this->unk_196 * STOP_PULSE_RATE))*orbitRate));
                 }
                 if (this->unk_19A >= START_SPIN_TIME_MEG || this->unk_19A < LATE_SPIN_TIME_MEG) {
                     this->unk_199 |= 0x40;

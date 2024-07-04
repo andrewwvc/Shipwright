@@ -9,7 +9,7 @@
 #include "overlays/actors/ovl_Obj_Syokudai/z_obj_syokudai.h"
 #include "soh/Enhancements/game-interactor/GameInteractor_Hooks.h"
 
-#define FLAGS (ACTOR_FLAG_TARGETABLE | ACTOR_FLAG_HOSTILE | ACTOR_FLAG_IGNORE_QUAKE | ACTOR_FLAG_ARROW_DRAGGABLE)
+#define FLAGS (ACTOR_FLAG_HOSTILE | ACTOR_FLAG_IGNORE_QUAKE | ACTOR_FLAG_ARROW_DRAGGABLE)
 
 void EnFirefly_Init(Actor* thisx, PlayState* play);
 void EnFirefly_Destroy(Actor* thisx, PlayState* play);
@@ -116,7 +116,7 @@ static const f32 SPEED_MULTIPLIER = 1.6f;
 
 static InitChainEntry sInitChain[] = {
     ICHAIN_VEC3F_DIV1000(scale, 5, ICHAIN_CONTINUE),  ICHAIN_F32_DIV1000(gravity, -500, ICHAIN_CONTINUE),
-    ICHAIN_F32(minVelocityY, -4, ICHAIN_CONTINUE),    ICHAIN_U8(targetMode, 10, ICHAIN_CONTINUE),
+    ICHAIN_F32(minVelocityY, -4, ICHAIN_CONTINUE),    ICHAIN_U8(targetMode, 2, ICHAIN_CONTINUE),
     ICHAIN_F32(targetArrowOffset, 4000, ICHAIN_STOP),
 };
 
@@ -157,6 +157,10 @@ void EnFirefly_Init(Actor* thisx, PlayState* play) {
         this->actor.flags |= ACTOR_FLAG_LENS;
         this->actor.draw = EnFirefly_DrawInvisible;
         this->actor.params &= 0x7FFF;
+    }
+
+    if (CVarGetInteger("gNonGyroDifficulty", 0)) {
+        this->actor.flags |= ACTOR_FLAG_TARGETABLE;
     }
 
     if (this->actor.params <= KEESE_FIRE_PERCH) {

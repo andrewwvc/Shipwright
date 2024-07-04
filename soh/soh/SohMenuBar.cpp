@@ -672,6 +672,8 @@ void DrawEnhancementsMenu() {
                 UIWidgets::PaddedText("Bonk Damage Multiplier", true, false);
                 UIWidgets::EnhancementCombobox("gBonkDamageMul", bonkDamageValues, BONK_DAMAGE_NONE);
                 UIWidgets::Tooltip("Modifies damage taken after bonking.");
+                UIWidgets::PaddedEnhancementCheckbox("Balanced for no gyro controls", "gNonGyroDifficulty", true, false);
+                UIWidgets::Tooltip("Make the game easier in ways to compensate for lack of gyro aiming.\nOtherwise enemies/minigames will be harder and expect a gyro controller.");
                 UIWidgets::PaddedEnhancementCheckbox("Spawn with full health", "gFullHealthSpawn", true, false);
                 UIWidgets::Tooltip("Respawn with full health instead of 3 Hearts");
                 UIWidgets::PaddedEnhancementCheckbox("No Random Drops", "gNoRandomDrops", true, false);
