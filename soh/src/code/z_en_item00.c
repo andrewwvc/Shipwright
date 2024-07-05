@@ -2040,7 +2040,7 @@ void Item_DropCollectibleRandomBasic(PlayState* play, Actor* fromActor, Vec3f* s
 }
 
 void Item_DropCollectibleRandom(PlayState* play, Actor* fromActor, Vec3f* spawnPos, s16 params) {
-    Item_DropCollectibleRandomBasic(play, fromActor, spawnPos, params, ITEM00_RUPEE_GREEN, 0.25f);
+    Item_DropCollectibleRandomBasic(play, fromActor, spawnPos, params, ITEM00_RUPEE_GREEN, (Ring_Get_Equiped() == RI_GREED_RING) ? 0.3f : 0.23f);
 }
 
 void Item_DropCollectibleRandomSmall(PlayState* play, Actor* fromActor, Vec3f* spawnPos, s16 params) {
