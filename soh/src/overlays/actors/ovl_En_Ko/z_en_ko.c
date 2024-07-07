@@ -381,12 +381,12 @@ u16 func_80A96FD0(PlayState* play, Actor* thisx) {
         case ENKO_TYPE_CHILD_4:
             if (CHECK_QUEST_ITEM(QUEST_SONG_SARIA)) {
                 if (IS_DAY)
-                    return 0x1097;
+                    return KokiriMsg+39;
                 else
                     return KokiriMsg+12;
             }
             if (Flags_GetEventChkInf(EVENTCHKINF_OBTAINED_ZELDAS_LETTER)) {
-                return 0x1097;
+                return KokiriMsg+39;
             }
             if (CHECK_QUEST_ITEM(QUEST_KOKIRI_EMERALD)) {
                 return 0x1042;
