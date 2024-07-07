@@ -166,7 +166,7 @@ void EnRd_Init(Actor* thisx, PlayState* play) {
     Collider_InitCylinder(play, &this->collider);
     Collider_SetCylinder(play, &this->collider, thisx, &sCylinderInit);
 
-    if (thisx->params >= -2) {
+    if (thisx->params >= -2 || thisx->params == -4) {
         if (thisx->params == 4)
             EnRd_SetupRiseFromGround(this,play);
         else
@@ -212,7 +212,7 @@ void func_80AE2630(PlayState* play, Actor* thisx, s32 arg2) {
 }
 
 void func_80AE269C(EnRd* this, PlayState* play) {
-    if (this->actor.params < -1) {
+    if (this->actor.params < -1 && this->actor.params != -4) {
         func_80AE2B90(this,play);
         return;
     }
