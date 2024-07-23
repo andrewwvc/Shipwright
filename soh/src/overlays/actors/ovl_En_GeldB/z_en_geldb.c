@@ -134,7 +134,7 @@ static ColliderTrisInit sBlockTrisInit = {
         COLTYPE_METAL,
         AT_NONE,
         AC_ON | AC_HARD | AC_TYPE_PLAYER,
-        OC1_NONE,
+        OC1_DOMINANT,
         OC2_NONE,
         COLSHAPE_TRIS,
     },
@@ -290,7 +290,7 @@ s32 EnGeldB_ReactToPlayer(PlayState* play, EnGeldB* this, s16 arg2) {
         if (player->meleeWeaponAnimation == 0x11) {
             EnGeldB_SetupSpinDodge(this, play);
             return true;
-        } else if (play->gameplayFrames & 1) {
+        } else /*if (play->gameplayFrames & 1)*/ {
             EnGeldB_SetupBlock(this);
             return true;
         }
@@ -303,7 +303,7 @@ s32 EnGeldB_ReactToPlayer(PlayState* play, EnGeldB* this, s16 arg2) {
         } else if (player->meleeWeaponAnimation == 0x11) {
             EnGeldB_SetupSpinDodge(this, play);
             return true;
-        } else if ((thisx->xzDistToPlayer < 90.0f) && (play->gameplayFrames & 1)) {
+        } else if ((thisx->xzDistToPlayer < 90.0f) /*&& (play->gameplayFrames & 1)*/) {
             EnGeldB_SetupBlock(this);
             return true;
         } else {
@@ -981,7 +981,7 @@ void EnGeldB_SetupRollBack(EnGeldB* this) {
     this->action = GELDB_ROLL_BACK;
     this->actor.speedXZ = -8.0f;
     Audio_PlayActorSound2(&this->actor, NA_SE_EN_STAL_JUMP);
-    this->actor.shape.rot.y = this->actor.world.rot.y = this->actor.yawTowardsPlayer;
+    this->actor.world.rot.y = this->actor.shape.rot.y;// = this->actor.yawTowardsPlayer;
     EnGeldB_SetupAction(this, EnGeldB_RollBack);
 }
 
@@ -1063,8 +1063,8 @@ void EnGeldB_Damaged(EnGeldB* this, PlayState* play) {
         this->invisible = false;
     }
     Math_SmoothStepToS(&this->actor.shape.rot.y, this->actor.yawTowardsPlayer, 1, 0x1194, 0);
-    if (!EnGeldB_DodgeRanged(play, this) && !EnGeldB_ReactToPlayer(play, this, 0) &&
-        SkelAnime_Update(&this->skelAnime) && (this->actor.bgCheckFlags & 1)) {
+    if (SkelAnime_Update(&this->skelAnime) && (this->actor.bgCheckFlags & 1) &&
+            !EnGeldB_DodgeRanged(play, this) && !EnGeldB_ReactToPlayer(play, this, 0)) { //This is now checking for animation having ended first
         angleToWall = this->actor.wallYaw - this->actor.shape.rot.y;
         if ((this->actor.bgCheckFlags & 8) && (ABS(angleToWall) < 0x2EE0) && (this->actor.xzDistToPlayer < 90.0f)) {
             EnGeldB_SetupJump(this);
@@ -1131,11 +1131,14 @@ void EnGeldB_Block(EnGeldB* this, PlayState* play) {
     s32 pad;
     s16 angleToLink;
     s16 angleFacingLink;
+    s16 isProjectile = EnGeldB_DodgeRanged(play, this);
 
     if (this->timer != 0) {
         this->timer--;
     } else {
-        this->skelAnime.playSpeed = 1.0f;
+        if (!isProjectile && this->projTimer == 0) {
+            this->skelAnime.playSpeed = 1.0f;
+        }
     }
     if (SkelAnime_Update(&this->skelAnime)) {
         angleToLink = this->actor.yawTowardsPlayer - this->actor.shape.rot.y;
@@ -1358,7 +1361,15 @@ void EnGeldB_CollisionCheck(EnGeldB* this, PlayState* play) {
     s32 pad;
     EnItem00* key;
 
-    if (this->blockCollider.base.acFlags & AC_BOUNCED) {
+    if ((this->blockCollider.base.acFlags & AC_BOUNCED) ||
+                ((this->bodyCollider.base.acFlags & AC_HIT) && (this->action == GELDB_BLOCK) && this->bodyCollider.info.acHit->actor &&
+                  (this->bodyCollider.info.acHit->actor->id == ACTOR_EN_ARROW) /*&& (ABS((s16)(this->bodyCollider.info.acHit->actor->world.rot.y-this->actor.world.rot.y) > 0x6000))*/) ||
+                  (this->action == GELDB_ROLL_FORWARD)) {
+        if ((this->blockCollider.base.acFlags & AC_BOUNCED) &&
+                    ((this->blockCollider.elements[0].info.acHitInfo && (this->blockCollider.elements[0].info.acHitInfo->toucher.dmgFlags & DMG_SWORD)) ||
+                     (this->blockCollider.elements[1].info.acHitInfo && (this->blockCollider.elements[1].info.acHitInfo->toucher.dmgFlags & DMG_SWORD)))) {
+            Player_SetShieldRecoveryDefault(play);
+        }
         this->blockCollider.base.acFlags &= ~AC_BOUNCED;
         this->bodyCollider.base.acFlags &= ~AC_HIT;
     } else if ((this->bodyCollider.base.acFlags & AC_HIT) && (this->action >= GELDB_READY) &&
@@ -1401,6 +1412,9 @@ void EnGeldB_Update(Actor* thisx, PlayState* play) {
     s32 pad;
     EnGeldB* this = (EnGeldB*)thisx;
 
+    DECR(this->projTimer);
+    if (isProjectileNotched(play))
+        this->projTimer = 3;
     EnGeldB_CollisionCheck(this, play);
     if (this->actor.colChkInfo.damageEffect != GELDB_DMG_UNK_6) {
         Actor_MoveForward(&this->actor);
@@ -1463,6 +1477,10 @@ void EnGeldB_PostLimbDraw(PlayState* play, s32 limbIndex, Gfx** dList, Vec3s* ro
     static Vec3f swordQuadOffset0 = { -3000.0f, -2000.0f, 1300.0f };
     static Vec3f swordQuadOffset3 = { -3000.0f, -2000.0f, -1300.0f };
     static Vec3f swordQuadOffset2 = { 1000.0f, 1000.0f, 0.0f };
+    static Vec3f swordQuadOffsetB1 = { -3000.0f, -4000.0f, 0.0f };
+    static Vec3f swordQuadOffsetB0 = { -2000.0f, 1000.0f, 0.0f };
+    static Vec3f swordQuadOffsetB3 = { 2000.0f, -4000.0f, 0 };
+    static Vec3f swordQuadOffsetB2 = { 2000.0f, 1000.0f, 0 };
     static Vec3f zeroVec = { 0.0f, 0.0f, 0.0f };
     Vec3f swordTip;
     Vec3f swordHilt;
@@ -1470,10 +1488,17 @@ void EnGeldB_PostLimbDraw(PlayState* play, s32 limbIndex, Gfx** dList, Vec3s* ro
     s32 bodyPart = -1;
 
     if (limbIndex == GELDB_LIMB_R_SWORD) {
-        Matrix_MultVec3f(&swordQuadOffset1, &this->swordCollider.dim.quad[1]);
-        Matrix_MultVec3f(&swordQuadOffset0, &this->swordCollider.dim.quad[0]);
-        Matrix_MultVec3f(&swordQuadOffset3, &this->swordCollider.dim.quad[3]);
-        Matrix_MultVec3f(&swordQuadOffset2, &this->swordCollider.dim.quad[2]);
+        if (this->action != GELDB_SPIN_ATTACK) {
+            Matrix_MultVec3f(&swordQuadOffsetB1, &this->swordCollider.dim.quad[1]);
+            Matrix_MultVec3f(&swordQuadOffsetB0, &this->swordCollider.dim.quad[0]);
+            Matrix_MultVec3f(&swordQuadOffsetB3, &this->swordCollider.dim.quad[3]);
+            Matrix_MultVec3f(&swordQuadOffsetB2, &this->swordCollider.dim.quad[2]);
+        } else {
+            Matrix_MultVec3f(&swordQuadOffset1, &this->swordCollider.dim.quad[1]);
+            Matrix_MultVec3f(&swordQuadOffset0, &this->swordCollider.dim.quad[0]);
+            Matrix_MultVec3f(&swordQuadOffset3, &this->swordCollider.dim.quad[3]);
+            Matrix_MultVec3f(&swordQuadOffset2, &this->swordCollider.dim.quad[2]);
+        }
         Collider_SetQuadVertices(&this->swordCollider, &this->swordCollider.dim.quad[0],
                                  &this->swordCollider.dim.quad[1], &this->swordCollider.dim.quad[2],
                                  &this->swordCollider.dim.quad[3]);
@@ -1619,6 +1644,21 @@ void EnGeldB_Draw(Actor* thisx, PlayState* play) {
 s32 EnGeldB_DodgeRanged(PlayState* play, EnGeldB* this) {
     Actor* actor = Actor_GetProjectileActor(play, &this->actor, 800.0f);
 
+    // if (actor == NULL) {
+    //     actor = Actor_FindNearby(play, &this->actor, ACTOR_EN_BOOM, ACTORCAT_MISC, 100.0f);
+    //     if (actor) {
+    //         s16 angleToFacing = Actor_WorldYawTowardActor(&this->actor, actor) - this->actor.shape.rot.y;
+    //         //if (ABS(angleToFacing) < 0x4000) {
+    //             if (this->action != GELDB_BLOCK)
+    //                 EnGeldB_SetupBlock(this);
+    //         // } else {
+    //         //     EnGeldB_SetupRollBack(this);
+    //         // }
+    //         this->actor.shape.rot.y = Actor_WorldYawTowardActor(&this->actor, actor);
+    //         return true;
+    //     }
+    // }
+
     if (actor != NULL) {
         s16 angleToFacing;
         s16 pad18;
@@ -1630,11 +1670,12 @@ s32 EnGeldB_DodgeRanged(PlayState* play, EnGeldB* this) {
         //! @bug
         // Actor_WorldDistXYZToPoint already sqrtfs the distance, so this actually checks for a
         // distance of 360000. Also it's a double calculation because no f on sqrt.
-        if ((ABS(angleToFacing) < 0x2EE0) && (sqrt(dist) < 600.0)) {
+        if ((ABS(angleToFacing) < 0x2EE0) && (dist < 600.0) || (dist < 60.0)) {
             if (actor->id == ACTOR_ARMS_HOOK) {
                 EnGeldB_SetupJump(this);
             } else {
-                EnGeldB_SetupBlock(this);
+                if (this->action != GELDB_BLOCK)
+                    EnGeldB_SetupBlock(this);
             }
         } else {
             this->actor.world.rot.y = this->actor.shape.rot.y + 0x3FFF;
@@ -1646,6 +1687,35 @@ s32 EnGeldB_DodgeRanged(PlayState* play, EnGeldB* this) {
             }
         }
         return true;
+    } else if (this->projTimer == 2) {
+        s16 angleToFacing;
+        f32 dist;
+
+        angleToFacing = Actor_WorldYawTowardActor(&this->actor, &GET_PLAYER(play)->actor) - this->actor.shape.rot.y;
+        if (ABS(angleToFacing) < 0x2EE0) {
+            if (this->action != GELDB_BLOCK)
+                EnGeldB_SetupBlock(this);
+        } else {
+            this->actor.world.rot.y = this->actor.shape.rot.y + 0x3FFF;
+            if ((ABS(angleToFacing) > 0x5FFF)) {
+                EnGeldB_SetupSidestep(this, play);
+                this->actor.speedXZ *= 3.0f;
+            } else if (ABS(angleToFacing) < 0x5FFF) {
+                EnGeldB_SetupRollBack(this);
+            }
+        }
+        return true;
+    } else {
+        actor = play->actorCtx.actorLists[ACTORCAT_MISC].head;
+        while (actor != NULL) {
+            if ((actor->id != ACTOR_EN_M_FIRE1) || (actor == &this->actor)) {
+                actor = actor->next;
+            } else {
+                if (this->action != GELDB_BLOCK)
+                    EnGeldB_SetupBlock(this);
+                return true;
+            }
+        }
     }
     return false;
 }
