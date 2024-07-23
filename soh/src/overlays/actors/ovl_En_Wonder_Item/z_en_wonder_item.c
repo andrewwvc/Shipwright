@@ -93,9 +93,9 @@ void EnWonderItem_DropCollectible(EnWonderItem* this, PlayState* play, s32 autoC
         } else {
             randomDrop = this->itemDrop - WONDERITEM_DROP_RANDOM;
             if (!autoCollect) {
-                Item_DropCollectibleRandom(play, NULL, &this->actor.world.pos, randomDrop);
+                Item_DropCollectibleRandom1(play, NULL, &this->actor.world.pos, randomDrop, 0);
             } else {
-                Item_DropCollectibleRandom(play, NULL, &this->actor.world.pos, randomDrop | 0x8000);
+                Item_DropCollectibleRandom1(play, NULL, &this->actor.world.pos, randomDrop | 0x8000, 0);
             }
         }
     }
