@@ -127,6 +127,41 @@ static DamageTable sDamageTable = {
     /* Unknown 2     */ DMG_ENTRY(0, 0x0),
 };
 
+static DamageTable sDamageTableAlt = {
+    /* Deku nut      */ DMG_ENTRY(0, 0x0),
+    /* Deku stick    */ DMG_ENTRY(2, 0x0),
+    /* Slingshot     */ DMG_ENTRY(1, 0x0),
+    /* Explosive     */ DMG_ENTRY(2, 0x0),
+    /* Boomerang     */ DMG_ENTRY(1, 0x1),
+    /* Normal arrow  */ DMG_ENTRY(2, 0x0),
+    /* Hammer swing  */ DMG_ENTRY(2, 0x0),
+    /* Hookshot      */ DMG_ENTRY(2, 0x1),
+    /* Kokiri sword  */ DMG_ENTRY(1, 0x0),
+    /* Master sword  */ DMG_ENTRY(2, 0x0),
+    /* Giant's Knife */ DMG_ENTRY(4, 0x0),
+    /* Fire arrow    */ DMG_ENTRY(2, 0x0),
+    /* Ice arrow     */ DMG_ENTRY(2, 0x0),
+    /* Light arrow   */ DMG_ENTRY(2, 0x0),
+    /* Unk arrow 1   */ DMG_ENTRY(2, 0x0),
+    /* Unk arrow 2   */ DMG_ENTRY(2, 0x0),
+    /* Unk arrow 3   */ DMG_ENTRY(2, 0x0),
+    /* Fire magic    */ DMG_ENTRY(0, 0x0),
+    /* Ice magic     */ DMG_ENTRY(0, 0x0),
+    /* Light magic   */ DMG_ENTRY(0, 0x0),
+    /* Shield        */ DMG_ENTRY(0, 0x0),
+    /* Mirror Ray    */ DMG_ENTRY(0, 0x0),
+    /* Kokiri spin   */ DMG_ENTRY(1, 0x0),
+    /* Giant spin    */ DMG_ENTRY(4, 0x0),
+    /* Master spin   */ DMG_ENTRY(2, 0x0),
+    /* Kokiri jump   */ DMG_ENTRY(2, 0x0),
+    /* Giant jump    */ DMG_ENTRY(8, 0x0),
+    /* Master jump   */ DMG_ENTRY(4, 0x0),
+    /* Unknown 1     */ DMG_ENTRY(0, 0x0),
+    /* Unblockable   */ DMG_ENTRY(0, 0x0),
+    /* Hammer jump   */ DMG_ENTRY(4, 0x0),
+    /* Unknown 2     */ DMG_ENTRY(0, 0x0),
+};
+
 s32 sEnPoFieldNumSpawned = 0;
 
 static Vec3f sFieldMiddle = { -1000.0f, 0.0f, 6500.0f };
@@ -175,7 +210,7 @@ void EnPoField_Init(Actor* thisx, PlayState* play) {
         Collider_InitCylinder(play, &this->flameCollider[ii]);
         Collider_SetCylinder(play, &this->flameCollider[ii], &this->actor, &D_80AD70AC);
     }
-    CollisionCheck_SetInfo(&this->actor.colChkInfo, &sDamageTable, &D_80AD70D8);
+    CollisionCheck_SetInfo(&this->actor.colChkInfo, (CVarGetInteger("gNonGyroDifficulty", 0) ? &sDamageTableAlt : &sDamageTable), &D_80AD70D8);
     this->lightNode = LightContext_InsertLight(play, &play->lightCtx, &this->lightInfo);
     Lights_PointGlowSetInfo(&this->lightInfo, this->actor.home.pos.x, this->actor.home.pos.y, this->actor.home.pos.z,
                             255, 255, 255, 0);
@@ -425,7 +460,8 @@ void EnPoField_WaitForSpawn(EnPoField* this, PlayState* play) {
                     }
                 } else if (player->stateFlags1 & 0x800000 || Rand_ZeroOne() < 0.4f) {
                     this->actor.params = EN_PO_FIELD_BIG;
-                    this->actor.colChkInfo.health = 8;
+                    if (!CVarGetInteger("gNonGyroDifficulty", 0))
+                        this->actor.colChkInfo.health = 8;
                     this->spawnFlagIndex = i;
                     spawnDist = 480.0f;
                 } else {
