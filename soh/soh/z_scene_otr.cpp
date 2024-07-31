@@ -303,8 +303,8 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, LUS::ActorEnt
     } },
     { 0x05, { // Water Temple
         { 0x00, {
-            { -1, -1, { ACTOR_EN_OKUTA, -500, 720, -700, 0,24394,0, (2<<8) }},
-            { -1, -1, { ACTOR_EN_OKUTA, 100, 720, -700, 0,24394,0, (2<<8) }},
+            //{ -1, -1, { ACTOR_EN_OKUTA, -500, 720, -700, 0,24394,0, (2<<8) }},
+            //{ -1, -1, { ACTOR_EN_OKUTA, 100, 720, -700, 0,24394,0, (2<<8) }},
         } },
     } },
     { SCENE_SHADOW_TEMPLE, { // Shadow Temple

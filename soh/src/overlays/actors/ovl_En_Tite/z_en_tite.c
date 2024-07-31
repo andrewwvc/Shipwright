@@ -257,7 +257,7 @@ void EnTite_Idle(EnTite* this, PlayState* play) {
     }
     if (this->vIdleTimer > 0) {
         this->vIdleTimer--;
-    } else if ((this->actor.xzDistToPlayer < MAX_DIST) && (this->actor.yDistToPlayer <= VERTICAL_DIST)) {
+    } else if ((this->actor.xzDistToPlayer < MAX_DIST) && (((this->actor.params == TEKTITE_BLUE) ? ABS(this->actor.yDistToPlayer) : this->actor.yDistToPlayer) <= VERTICAL_DIST)) {
         EnTite_SetupTurnTowardPlayer(this);
     }
 }
