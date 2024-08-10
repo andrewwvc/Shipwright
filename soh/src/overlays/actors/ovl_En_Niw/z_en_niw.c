@@ -422,7 +422,8 @@ void EnNiw_ResetAction(EnNiw* this, PlayState* play) {
         case 0x10:
             Actor_ChangeCategory(play, &play->actorCtx, &this->actor, ACTORCAT_NPC);
             this->actor.flags |= (ACTOR_FLAG_TARGETABLE | ACTOR_FLAG_FRIENDLY | ACTOR_FLAG_DRAW_WHILE_CULLED | ACTOR_FLAG_LENS | ACTOR_FLAG_NO_LOCKON);
-            this->path = 1;
+            this->talkState = NPC_TALK_STATE_IDLE;
+            this->path = 0;
             this->actionFunc = EnNiw_BeTalking;
             break;
         default:
@@ -935,12 +936,9 @@ s16 EnNiw_ProcessTalk(PlayState* play, Actor* thisx) {
 }
 
 void EnNiw_BeTalking(EnNiw* this, PlayState* play) {
-    if (this->path > 0 && play->actorCtx.lensActive)
-        this->path = 0;
-        Npc_UpdateTalking(play, &this->actor, &this->path, (f32)this->collider.dim.radius + 70.0f,
-                        EnNiw_ProvideText, EnNiw_ProcessTalk);
-    if (Message_GetState(&play->msgCtx) == TEXT_STATE_NONE)
-        this->path = 1;
+    if (play->actorCtx.lensActive || (this->talkState != NPC_TALK_STATE_IDLE))
+        Npc_UpdateTalking(play, &this->actor, &this->talkState, (f32)this->collider.dim.radius + 70.0f,
+                    EnNiw_ProvideText, EnNiw_ProcessTalk);
 }
 
 void EnNiw_Update(Actor* thisx, PlayState* play) {
