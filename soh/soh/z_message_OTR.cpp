@@ -1122,7 +1122,7 @@ extern "C" void OTRMessage_Init()
     MakeNormalMsgEng(0x1040, "I'll teach you how to use your&%rshield%w. Pressing \xA3 will bring&it up and let you defend&against attacks to your front.^But holding \xA3 will raise your %btension%w,&which may make you look a&little blue, and stop you attacking&until you've released \xA3 for a while.^Using \xA4 targeting, holding up your&shield will let you move around while&defending your face, but may not guard&your legs from low hits.^Without using \xA4 targeting, you will&duck and can move your shield with&the %c\xAA stick%w, which could be useful&and may block some low attacks.^Are you ready for more tips?&\x1B&%gYes please!&Not Now%w\x02");
     MakeNormalMsgEng(KokiriMsg+37, "You seem to be good at attracting&life. So this seems appropriate.");
     MakeNormalMsgEng(KokiriMsg+38, "Ok, here are some advanced&%rshield%w tips!^Holding up your shield while an&enemy leaps over you may make&them difficult to see, and this&can break your \xA4 targeting lock!^So you might want to let&go of \xA3 while an enemy is&overhead if you want to&keep targeting them!^Also, some enemies may have attacks&that hit you from the side, that&will actually get around your shield!^The secret to guarding these?&\xA4 target, but %rdon't%w hold \xA3 or sidestep,&your shield will stay at your side&and guard these tricky moves.^Just remember that if your shield&is tinged %cwhite%w it can block&%corange%w tinged attacks.^Still, be careful though, as some&enemies may be able to force you&into %btension%w with their attacks!^Good luck \x0F!");
-    MakeNormalMsgEng(KokiriMsg+39, "Jumping is going out of style now.&I'm crazy about doing %rbackflips%w!&""\x06""\x32""Can you do one?^They're very useful for jumping&over %clow hitting attacks%w.&Keep that in mind!");
+    MakeNormalMsgEng(KokiriMsg+39, "Jumping is going out of style now.&I'm crazy about doing %rbackflips%w!&""\x06""\x32""Can you do one?^They're very useful for leaping&over %clow hitting attacks%w.&Keep that in mind!");
 
     u16 MidoMsg = TextIDAllocator::Instance->allocateRange("mido", 30);
 
@@ -1264,6 +1264,7 @@ extern "C" void OTRMessage_Init()
     MakeNormalMsgEng(HylianMsg+22, "The woman in the yellow dress&left here a while back.^I hope things go well for her.");
     MakeNormalMsgEng(HylianMsg+23, "It's gotten too late,&I'd better head back.");
     MakeNormalMsgEng(HylianMsg+24, "Oh, I can't go&on like this.");
+    MakeNormalMsgEng(0x5058, "You know, it's interesting to see how&people think about time. The Hylians in&this village look out at the sun&and moon, and see what day it is.^We organize ourselves around that&and base our calendar on the sky.&But the Gorons, who work and live&within the depths of the mountain...^They go about their business as they&see fit. They do not regard the&color of the sky as something&important to their schedules.^Keep this in mind to understand&how they organise things.");
     MakeNormalMsgEng(0x70F0, "Oh, that's %cBlue Fire%w!&I'll buy it for %r"+std::to_string(BEGGAR_REWARD_FIRE)+" Rupees%w!&All sales final, OK?");
     MakeNormalMsgEng(0x70F1, "Oh, a %pFish%w!&I'll buy it for %r"+std::to_string(BEGGAR_REWARD_FISH)+" Rupees%w!&All sales final, OK?");
     MakeNormalMsgEng(0x70F2, "Oh, it's a cute little %gBug%w!&I'll buy it for %r"+std::to_string(BEGGAR_REWARD_BUG)+" Rupee%w!&All sales final, OK?");
