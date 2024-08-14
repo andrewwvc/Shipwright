@@ -399,7 +399,7 @@ typedef enum {
 static DamageTable sDamageTable = {
     /* Deku nut      */ DMG_ENTRY(0, ENZF_DMGEFF_STUN),
     /* Deku stick    */ DMG_ENTRY(2, ENZF_DMGEFF_NONE),
-    /* Slingshot     */ DMG_ENTRY(1, ENZF_DMGEFF_IMMUNE),//ENZF_DMGEFF_PROJECTILE
+    /* Slingshot     */ DMG_ENTRY(1, ENZF_DMGEFF_PROJECTILE),
     /* Explosive     */ DMG_ENTRY(2, ENZF_DMGEFF_NONE),
     /* Boomerang     */ DMG_ENTRY(0, ENZF_DMGEFF_STUN),
     /* Normal arrow  */ DMG_ENTRY(2, ENZF_DMGEFF_IMMUNE),
@@ -408,12 +408,12 @@ static DamageTable sDamageTable = {
     /* Kokiri sword  */ DMG_ENTRY(1, ENZF_DMGEFF_NONE),
     /* Master sword  */ DMG_ENTRY(2, ENZF_DMGEFF_NONE),
     /* Giant's Knife */ DMG_ENTRY(4, ENZF_DMGEFF_NONE),
-    /* Fire arrow    */ DMG_ENTRY(2, ENZF_DMGEFF_IMMUNE),//ENZF_DMGEFF_PROJECTILE
+    /* Fire arrow    */ DMG_ENTRY(2, ENZF_DMGEFF_PROJECTILE),
     /* Ice arrow     */ DMG_ENTRY(4, ENZF_DMGEFF_ICE),
-    /* Light arrow   */ DMG_ENTRY(2, ENZF_DMGEFF_NONE),//ENZF_DMGEFF_PROJECTILE
-    /* Unk arrow 1   */ DMG_ENTRY(2, ENZF_DMGEFF_NONE),//ENZF_DMGEFF_PROJECTILE
-    /* Unk arrow 2   */ DMG_ENTRY(2, ENZF_DMGEFF_NONE),//ENZF_DMGEFF_PROJECTILE
-    /* Unk arrow 3   */ DMG_ENTRY(2, ENZF_DMGEFF_NONE),//ENZF_DMGEFF_PROJECTILE
+    /* Light arrow   */ DMG_ENTRY(2, ENZF_DMGEFF_PROJECTILE),
+    /* Unk arrow 1   */ DMG_ENTRY(2, ENZF_DMGEFF_PROJECTILE),
+    /* Unk arrow 2   */ DMG_ENTRY(2, ENZF_DMGEFF_PROJECTILE),
+    /* Unk arrow 3   */ DMG_ENTRY(2, ENZF_DMGEFF_PROJECTILE),
     /* Fire magic    */ DMG_ENTRY(0, ENZF_DMGEFF_IMMUNE),
     /* Ice magic     */ DMG_ENTRY(3, ENZF_DMGEFF_ICE),
     /* Light magic   */ DMG_ENTRY(0, ENZF_DMGEFF_IMMUNE),
@@ -2569,6 +2569,9 @@ void EnZf_Update(Actor* thisx, PlayState* play) {
     s16 setKeepBack = false;
     if (EnZf_IsOnPlayerPlatform(this,play))
         setKeepBack = true;
+    DECR(this->projTimer);
+    if (isProjectileNotched(play))
+        this->projTimer = 3;
 
     EnZf_UpdateDamage(this, play);
     if (this->actor.colChkInfo.damageEffect != ENZF_DMGEFF_IMMUNE) {
@@ -2932,7 +2935,9 @@ s32 EnZf_DodgeRangedEngaging(PlayState* play, EnZf* this) {
 
     projectileActor = Actor_GetProjectileActor(play, &this->actor, 600.0f);
 
-    if (projectileActor != NULL) {
+    if ((projectileActor != NULL) || (this->projTimer == 2)) {
+        if (projectileActor == NULL)
+            projectileActor = (Actor*)(GET_PLAYER(play));
         yawToProjectile =
             Actor_WorldYawTowardActor(&this->actor, projectileActor) - (s16)(u16)(this->actor.shape.rot.y);
         this->actor.world.rot.y = this->actor.shape.rot.y + 0x3FFF;

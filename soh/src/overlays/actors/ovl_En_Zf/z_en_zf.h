@@ -132,6 +132,7 @@ typedef struct EnZf {
                  f32 stanceTransition;
                  s16 selectionTimer;
                  s16 cautionTimer;
+                 s16 projTimer;
                  //DEBUG
                  //  Vec3f recordedPosition;
                  //  Vec3s recordedRotation;
