@@ -104,6 +104,26 @@ static ColliderCylinderInit sBodyCylInit = {
     { 20, 50, 0, { 0, 0, 0 } },
 };
 
+static ColliderCylinderInit sBlockCylInit = {
+    {
+        COLTYPE_METAL,
+        AT_NONE,
+        AC_ON | AC_HARD | AC_TYPE_PLAYER,
+        OC1_DOMINANT,
+        OC2_NONE,
+        COLSHAPE_CYLINDER,
+    },
+    {
+        ELEMTYPE_UNK1,
+        { 0x00000000, 0x00, 0x00 },
+        { 0xFFC1FFFF, 0x00, 0x00 },
+        TOUCH_NONE,
+        BUMP_ON,
+        OCELEM_ON,
+    },
+    { 10, 50, 0, { 0, 0, 0 } },
+};
+
 static ColliderTrisElementInit sBlockTrisElementsInit[2] = {
     {
         {
@@ -238,7 +258,9 @@ void EnGeldB_Init(Actor* thisx, PlayState* play) {
     SkelAnime_InitFlex(play, &this->skelAnime, &gGerudoRedSkel, &gGerudoRedNeutralAnim, this->jointTable,
                        this->morphTable, GELDB_LIMB_MAX);
     Collider_InitCylinder(play, &this->bodyCollider);
+    Collider_InitCylinder(play, &this->blockCylCollider);
     Collider_SetCylinder(play, &this->bodyCollider, thisx, &sBodyCylInit);
+    Collider_SetCylinder(play, &this->blockCylCollider, thisx, &sBlockCylInit);
     Collider_InitTris(play, &this->blockCollider);
     Collider_SetTris(play, &this->blockCollider, thisx, &sBlockTrisInit, this->blockElements);
     Collider_InitQuad(play, &this->swordCollider);
@@ -269,6 +291,7 @@ void EnGeldB_Destroy(Actor* thisx, PlayState* play) {
     Effect_Delete(play, this->blureIndex);
     Collider_DestroyTris(play, &this->blockCollider);
     Collider_DestroyCylinder(play, &this->bodyCollider);
+    Collider_DestroyCylinder(play, &this->blockCylCollider);
     Collider_DestroyQuad(play, &this->swordCollider);
 
     ResourceMgr_UnregisterSkeleton(&this->skelAnime);
@@ -1361,16 +1384,18 @@ void EnGeldB_CollisionCheck(EnGeldB* this, PlayState* play) {
     s32 pad;
     EnItem00* key;
 
-    if ((this->blockCollider.base.acFlags & AC_BOUNCED) ||
+    if ((this->blockCollider.base.acFlags & AC_BOUNCED) || (this->blockCylCollider.base.acFlags & AC_BOUNCED) ||
                 ((this->bodyCollider.base.acFlags & AC_HIT) && (this->action == GELDB_BLOCK) && this->bodyCollider.info.acHit->actor &&
                   (this->bodyCollider.info.acHit->actor->id == ACTOR_EN_ARROW) /*&& (ABS((s16)(this->bodyCollider.info.acHit->actor->world.rot.y-this->actor.world.rot.y) > 0x6000))*/) ||
                   (this->action == GELDB_ROLL_FORWARD)) {
-        if ((this->blockCollider.base.acFlags & AC_BOUNCED) &&
+        if (((this->blockCollider.base.acFlags & AC_BOUNCED) || (this->blockCylCollider.base.acFlags & AC_BOUNCED)) &&
                     ((this->blockCollider.elements[0].info.acHitInfo && (this->blockCollider.elements[0].info.acHitInfo->toucher.dmgFlags & DMG_SWORD)) ||
-                     (this->blockCollider.elements[1].info.acHitInfo && (this->blockCollider.elements[1].info.acHitInfo->toucher.dmgFlags & DMG_SWORD)))) {
+                     (this->blockCollider.elements[1].info.acHitInfo && (this->blockCollider.elements[1].info.acHitInfo->toucher.dmgFlags & DMG_SWORD)) ||
+                     (this->blockCylCollider.info.acHitInfo && (this->blockCylCollider.info.acHitInfo->toucher.dmgFlags & DMG_SWORD)))) {
             Player_SetShieldRecoveryDefault(play);
         }
         this->blockCollider.base.acFlags &= ~AC_BOUNCED;
+        this->blockCylCollider.base.acFlags &= ~AC_BOUNCED;
         this->bodyCollider.base.acFlags &= ~AC_HIT;
     } else if ((this->bodyCollider.base.acFlags & AC_HIT) && (this->action >= GELDB_READY) &&
                (this->spinAttackState < 2)) {
@@ -1425,6 +1450,9 @@ void EnGeldB_Update(Actor* thisx, PlayState* play) {
         EnGeldB_TurnHead(this, play);
     }
     Collider_UpdateCylinder(&this->actor, &this->bodyCollider);
+    Collider_UpdateCylinder(&this->actor, &this->blockCylCollider);
+    this->blockCylCollider.dim.pos.x += Math_SinS(this->actor.shape.rot.y)*10;
+    this->blockCylCollider.dim.pos.z += Math_CosS(this->actor.shape.rot.y)*10;
     CollisionCheck_SetOC(play, &play->colChkCtx, &this->bodyCollider.base);
     if ((this->action >= GELDB_READY) && (this->spinAttackState < 2) &&
         ((this->actor.colorFilterTimer == 0) || !(this->actor.colorFilterParams & 0x4000))) {
@@ -1432,6 +1460,8 @@ void EnGeldB_Update(Actor* thisx, PlayState* play) {
     }
     if ((this->action == GELDB_BLOCK) && (this->skelAnime.curFrame == 0.0f)) {
         CollisionCheck_SetAC(play, &play->colChkCtx, &this->blockCollider.base);
+        if (isPlayerInStab(play))
+            CollisionCheck_SetAC(play, &play->colChkCtx, &this->blockCylCollider.base);
     }
     if (this->meleeWeaponState > 0) {
         CollisionCheck_SetAT(play, &play->colChkCtx, &this->swordCollider.base);
