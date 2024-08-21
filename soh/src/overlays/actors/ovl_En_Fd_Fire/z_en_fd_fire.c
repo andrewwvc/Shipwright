@@ -175,25 +175,25 @@ void EnFdFire_WaitToDie(EnFdFire* this, PlayState* play) {
         s16 batMax = 2;
         s16 slugModulus = 4;
         s16 slugMax = 4;
-        if (mode == 2) {
-            return;
-        } else if (mode == 1) {
-            batMax = 1;
-            slugModulus = 6;
-            slugMax = 3;
+        if (mode != 2) {
+            if (mode == 1) {
+                batMax = 1;
+                slugModulus = 6;
+                slugMax = 3;
+            }
+            if ((valType % batModulus) == 0) {
+                if (Actor_FindNumberOf(play,&this->actor,ACTOR_EN_FIREFLY,ACTORCAT_ENEMY,1000.0f,NULL,NULL) < batMax) {
+                    Actor_Spawn(&play->actorCtx, play, ACTOR_EN_FIREFLY, this->actor.world.pos.x, this->actor.world.pos.y+30,
+                                            this->actor.world.pos.z, 0, this->actor.world.rot.y, 0, 0x0, false);
+                    this->actionFunc = EnFdFire_Disappear;
+                }
+            } else if ((valType % slugModulus) == 0) {
+                if (Actor_FindNumberOf(play,&this->actor,ACTOR_EN_BW,ACTORCAT_ENEMY,1000.0f,NULL,NULL) < slugMax) {
+                    Actor_Spawn(&play->actorCtx, play, ACTOR_EN_BW, this->actor.world.pos.x, this->actor.world.pos.y,
+                                            this->actor.world.pos.z, 0, this->actor.world.rot.y+0x4000, 0, 0x0/*(valType>>1)*/, false);
+                    this->actionFunc = EnFdFire_Disappear;
+                }
         }
-        if ((valType % batModulus) == 0) {
-            if (Actor_FindNumberOf(play,&this->actor,ACTOR_EN_FIREFLY,ACTORCAT_ENEMY,1000.0f,NULL,NULL) < batMax) {
-                Actor_Spawn(&play->actorCtx, play, ACTOR_EN_FIREFLY, this->actor.world.pos.x, this->actor.world.pos.y+30,
-                                        this->actor.world.pos.z, 0, this->actor.world.rot.y, 0, 0x0, false);
-                this->actionFunc = EnFdFire_Disappear;
-            }
-        }else if ((valType % slugModulus) == 0) {
-            if (Actor_FindNumberOf(play,&this->actor,ACTOR_EN_BW,ACTORCAT_ENEMY,1000.0f,NULL,NULL) < slugMax) {
-                Actor_Spawn(&play->actorCtx, play, ACTOR_EN_BW, this->actor.world.pos.x, this->actor.world.pos.y,
-                                        this->actor.world.pos.z, 0, this->actor.world.rot.y+0x4000, 0, 0x0/*(valType>>1)*/, false);
-                this->actionFunc = EnFdFire_Disappear;
-            }
         }
     }
 
