@@ -1264,6 +1264,8 @@ extern "C" void OTRMessage_Init()
     MakeNormalMsgEng(HylianMsg+22, "The woman in the yellow dress&left here a while back.^I hope things go well for her.");
     MakeNormalMsgEng(HylianMsg+23, "It's gotten too late,&I'd better head back.");
     MakeNormalMsgEng(HylianMsg+24, "Oh, I can't go&on like this.");
+    MakeNormalMsgEng(HylianMsg+25, "The %cZoras%w, the fish people who&live upstream of the river outside&this town, are folk I've heard are&good at keeping tabs on things.^News of anything that happens seems&to spread like wild...water over&there. Gossip runs around fast!^Not like this town where old rumors&seem to be the main order.");
+    MakeNormalMsgEng(HylianMsg+26, "Hey, you want to hear something&funny? I found a rupee sitting&somewhere, and took it!^I couldn't find anyone who'd lost it,&but sometime much later, another,&identical rupee appeared,&in the same spot!^I wonder why. Why would something&appear again, but only after&so much time?");
     MakeNormalMsgEng(0x5058, "You know, it's interesting to see how&people think about time. The Hylians in&this village look out at the sun&and moon, and see what day it is.^We organize ourselves around that&and base our calendar on the sky.&But the Gorons, who work and live&within the depths of the mountain...^They go about their business as they&see fit. They do not regard the&color of the sky as something&important to their schedules.^Keep this in mind to understand&how they organise things.");
     MakeNormalMsgEng(0x70F0, "Oh, that's %cBlue Fire%w!&I'll buy it for %r"+std::to_string(BEGGAR_REWARD_FIRE)+" Rupees%w!&All sales final, OK?");
     MakeNormalMsgEng(0x70F1, "Oh, a %pFish%w!&I'll buy it for %r"+std::to_string(BEGGAR_REWARD_FISH)+" Rupees%w!&All sales final, OK?");

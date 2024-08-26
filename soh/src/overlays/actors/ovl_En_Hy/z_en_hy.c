@@ -469,26 +469,38 @@ u16 func_80A6F810(PlayState* play, Actor* thisx) {
                 return 0x70A0;
             }
         case ENHY_TYPE_COB:
-            if (Flags_GetEventChkInf(EVENTCHKINF_ZELDA_FLED_HYRULE_CASTLE)) {
-                return (Flags_GetInfTable(INFTABLE_C1)) ? 0x7017 : 0x7045;
-            } else {
-                return (Flags_GetInfTable(INFTABLE_C0)) ? 0x7017 : 0x7016;
+            {
+                u16 tempMsg = 0x7017;
+                if ((getDayOfCycle() % 2) == 1) {
+                    tempMsg = HylianMsg+25;
+                }
+                if (Flags_GetEventChkInf(EVENTCHKINF_ZELDA_FLED_HYRULE_CASTLE)) {
+                    return (Flags_GetInfTable(INFTABLE_C1)) ? tempMsg : 0x7045;
+                } else {
+                    return (Flags_GetInfTable(INFTABLE_C0)) ? tempMsg : 0x7016;
+                }
             }
         case ENHY_TYPE_AHG_2:
-            if (play->sceneNum == SCENE_KAKARIKO_CENTER_GUEST_HOUSE) {
-                return 0x5086;
-            } else if (play->sceneNum == SCENE_KAKARIKO_VILLAGE) {
-                return 0x5085;
-            } else if (Flags_GetEventChkInf(EVENTCHKINF_ZELDA_FLED_HYRULE_CASTLE)) {
-                return (Flags_GetInfTable(INFTABLE_C3)) ? 0x701A : 0x7047;
-            } else if (Flags_GetEventChkInf(EVENTCHKINF_TALON_RETURNED_FROM_CASTLE)) {
-                return 0x701A;
-            } else if (Flags_GetEventChkInf(EVENTCHKINF_SPOKE_TO_CHILD_MALON_AT_CASTLE_OR_MARKET)) {
-                return 0x701B;
-            } else if (Flags_GetInfTable(INFTABLE_C2)) {
-                return 0x701C;
-            } else {
-                return 0x701A;
+            {
+                u16 tempMsg = 0x701A;
+                if ((getDayOfCycle() % 2) == 1) {
+                    tempMsg = HylianMsg+26;
+                }
+                if (play->sceneNum == SCENE_KAKARIKO_CENTER_GUEST_HOUSE) {
+                    return 0x5086;
+                } else if (play->sceneNum == SCENE_KAKARIKO_VILLAGE) {
+                    return 0x5085;
+                } else if (Flags_GetEventChkInf(EVENTCHKINF_ZELDA_FLED_HYRULE_CASTLE)) {
+                    return (Flags_GetInfTable(INFTABLE_C3)) ? tempMsg : 0x7047;
+                } else if (Flags_GetEventChkInf(EVENTCHKINF_TALON_RETURNED_FROM_CASTLE)) {
+                    return tempMsg;
+                } else if (Flags_GetEventChkInf(EVENTCHKINF_SPOKE_TO_CHILD_MALON_AT_CASTLE_OR_MARKET)) {
+                    return 0x701B;
+                } else if (Flags_GetInfTable(INFTABLE_C2)) {
+                    return 0x701C;
+                } else {
+                    return tempMsg;
+                }
             }
         case ENHY_TYPE_BOJ_3:
             retval = Flags_GetEventChkInf(EVENTCHKINF_ZELDA_FLED_HYRULE_CASTLE) ? ((Flags_GetInfTable(INFTABLE_C4)) ? 0x7001 : 0x70EB) : 0x7001;
