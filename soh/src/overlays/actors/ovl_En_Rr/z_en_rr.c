@@ -671,18 +671,32 @@ void EnRr_Death(EnRr* this, PlayState* play) {
         dropPos.z = this->actor.world.pos.z;
         switch (this->eatenShield) {
             case 1:
-                Item_DropCollectible(play, &dropPos, ITEM00_SHIELD_DEKU);
+                if (usingBorrowedWallet())
+                    Item_DropCollectible(play, &dropPos, ITEM00_SHIELD_DEKU);
+                else {
+                    Item_DropCollectible(play, &dropPos, ITEM00_RUPEE_RED);
+                    Item_DropCollectible(play, &dropPos, ITEM00_RUPEE_RED);
+                }
                 break;
             case 2:
-                Item_DropCollectible(play, &dropPos, ITEM00_SHIELD_HYLIAN);
+                if (usingBorrowedWallet())
+                    Item_DropCollectible(play, &dropPos, ITEM00_SHIELD_HYLIAN);
+                else
+                    Item_DropCollectible(play, &dropPos, ITEM00_RUPEE_PURPLE);
                 break;
         }
         switch (this->eatenTunic) {
             case 2:
-                Item_DropCollectible(play, &dropPos, ITEM00_TUNIC_GORON);
+                if (usingBorrowedWallet())
+                    Item_DropCollectible(play, &dropPos, ITEM00_TUNIC_GORON);
+                else
+                    Item_DropCollectible(play, &dropPos, ITEM00_RUPEE_ORANGE);
                 break;
             case 3:
-                Item_DropCollectible(play, &dropPos, ITEM00_TUNIC_ZORA);
+                if (usingBorrowedWallet())
+                    Item_DropCollectible(play, &dropPos, ITEM00_TUNIC_ZORA);
+                else
+                    Item_DropCollectible(play, &dropPos, ITEM00_RUPEE_ORANGE);
                 break;
         }
         // "dropped"
@@ -698,7 +712,8 @@ void EnRr_Death(EnRr* this, PlayState* play) {
                 Item_DropCollectible(play, &dropPos, ITEM00_FLEXIBLE);
                 break;
             case RR_DROP_RUPEE_PURPLE:
-                Item_DropCollectible(play, &dropPos, ITEM00_RUPEE_PURPLE);
+                if (!usingBorrowedWallet())
+                    Item_DropCollectible(play, &dropPos, ITEM00_RUPEE_PURPLE);
                 break;
             case RR_DROP_RUPEE_RED:
                 Item_DropCollectible(play, &dropPos, ITEM00_RUPEE_RED);
