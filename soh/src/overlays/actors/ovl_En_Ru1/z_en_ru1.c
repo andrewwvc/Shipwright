@@ -2230,6 +2230,13 @@ void EnRu1_Action41(EnRu1* this, PlayState* play) {
     }
 }
 
+#define RUTO_DATE_PROGRESS_REACHED_BRIDGE 0x1
+#define RUTO_DATE_PROGRESS_MET_OWL 0x2
+#define RUTO_DATE_PROGRESS_ON_ISLAND 0x4
+#define RUTO_DATE_PROGRESS_NOTICED_HIDING 0x8
+#define RUTO_DATE_PROGRESS_NOTICED_HIDING 0x8
+#define RUTO_DATE_PROGRESS_FINISHING 0x10
+
 void EnRu1_DateInfoReset() {
     gSaveContext.infTable[20] &= 0xFF;//Stores only the flags used for Ruto's status in the original game
     gSaveContext.infTable[21] = 0x0;
@@ -2350,7 +2357,7 @@ s32 EnRu1_DateConversation(EnRu1* this, PlayState* play) {
                     this->actor.textId = RutoMsg+0;
                 else if ((gSaveContext.infTable[20] & 0x3000) == 0x2000)
                     this->actor.textId = RutoMsg+13;
-                else if ((this->dateProgress & 0x8) || ((gSaveContext.infTable[20] & 0x3000) == 0x0000))
+                else if ((this->dateProgress & RUTO_DATE_PROGRESS_NOTICED_HIDING) || ((gSaveContext.infTable[20] & 0x3000) == 0x0000))
                     this->actor.textId = RutoMsg+15;
                 else
                     this->actor.textId = RutoMsg+14;
@@ -2538,21 +2545,21 @@ void EnRu1_SpotLink(EnRu1* this, PlayState* play, s16 relTime) {
                 u16 RutoMsg = GetTextID("ruto");
                 Message_StartTextbox(play, RutoMsg+5, NULL);
             } else if (relTime == 0) {
-                if (this->dateProgress & 8)
+                if (this->dateProgress & RUTO_DATE_PROGRESS_NOTICED_HIDING)
                     gSaveContext.infTable[20] |= 0x4000;
                 gSaveContext.infTable[20] |= 0x3000;
                 u16 RutoMsg = GetTextID("ruto");
                 Message_StartTextbox(play, RutoMsg+5, NULL);
             } else if (relTime == 1) {
-                if (this->dateProgress & 8)
+                if (this->dateProgress & RUTO_DATE_PROGRESS_NOTICED_HIDING)
                     gSaveContext.infTable[20] |= 0x4000;
                 gSaveContext.infTable[20] |= 0x1000;
                 u16 RutoMsg = GetTextID("ruto");
                 Message_StartTextbox(play, RutoMsg+5, NULL);
             }
         } else {
-            if (this->actor.xzDistToPlayer < 800 && this->actor.yDistToPlayer+25 > heightMod) {
-                this->dateProgress |= 0x8;//Sets flag to indicate you were noticed behind a pillar before you became visible
+            if ((this->actor.xzDistToPlayer < 800) && (this->actor.yDistToPlayer+25 > heightMod) && (relTime == -1)) {
+                this->dateProgress |= RUTO_DATE_PROGRESS_NOTICED_HIDING;//Sets flag to indicate you were noticed behind a pillar before you became visible
             }
         }
     }
@@ -2736,7 +2743,7 @@ void EnRu1_DateEnd(EnRu1* this, PlayState* play) {
             }
         } else if (this->timer < 0) {
             this->timer++;
-            if (this->dateProgress & 0x10) {
+            if (this->dateProgress & RUTO_DATE_PROGRESS_FINISHING) {
                 Math_ApproachS(&this->alpha, 0, 1, 10);
                 if (this->timer == 0) {
                     Actor_Kill(&this->actor);
@@ -2744,7 +2751,7 @@ void EnRu1_DateEnd(EnRu1* this, PlayState* play) {
             } else {
                 if (this->timer == 0) {
                     this->timer = -30;
-                    this->dateProgress |= 0x10;
+                    this->dateProgress |= RUTO_DATE_PROGRESS_FINISHING;
                     this->drawConfig = 2;
                 }
             }
@@ -2827,37 +2834,37 @@ void EnRu1_Update(Actor* thisx, PlayState* play) {
         Vec3f cPos = this->actor.world.pos;
 
         if (EnRu1_DateConditionsMet()) {
-            if (!(this->dateProgress & 0x1) &&
+            if (!(this->dateProgress & RUTO_DATE_PROGRESS_REACHED_BRIDGE) &&
                 -3120 < cPos.x && cPos.x < -2950 &&
                 -1100 < cPos.y &&
                 4000 < cPos.z) {
 
-                this->dateProgress |= 0x1;
+                this->dateProgress |= RUTO_DATE_PROGRESS_REACHED_BRIDGE;
                 Message_StartTextbox(play, RutoMsg+6, NULL);
             }
 
-            if (!(this->dateProgress & 0x2) &&
+            if (!(this->dateProgress & RUTO_DATE_PROGRESS_MET_OWL) &&
                 -3205 < cPos.x && cPos.x < -2885 &&
                 5915 < cPos.z && cPos.z < 6235 &&
                 (Actor_FindNearby(play,thisx,ACTOR_EN_OWL,ACTORCAT_NPC,300.0f) != NULL)) {
 
-                this->dateProgress |= 0x2;
+                this->dateProgress |= RUTO_DATE_PROGRESS_MET_OWL;
                 gSaveContext.infTable[21] |= 0x40;
                 Message_StartTextbox(play, RutoMsg+7, NULL);
             }
 
-            if (!(this->dateProgress & 0x4) &&
+            if (!(this->dateProgress & RUTO_DATE_PROGRESS_ON_ISLAND) &&
                 EnRu1_IsOnIsland(cPos) &&
                 IS_NIGHT) {
 
-                this->dateProgress |= 0x4;
+                this->dateProgress |= RUTO_DATE_PROGRESS_ON_ISLAND;
                 Message_StartTextbox(play, RutoMsg+8, NULL);
             }
         } else {
             if (IS_DAY && gSaveContext.RutoDateDay == (gSaveContext.totalDays-1)) {
                 Player* player = GET_PLAYER(play);
                 if (EnRu1_HadDateStarted() && !EnRu1_HadDateEnded()) {
-                    if ((this->dateProgress & 0x4) &&
+                    if ((this->dateProgress & RUTO_DATE_PROGRESS_ON_ISLAND) &&
                         (gSaveContext.infTable[21] & 0x0004) &&
                         EnRu1_IsOnIsland(cPos) &&
                         EnRu1_IsOnIsland(player->actor.world.pos) &&
