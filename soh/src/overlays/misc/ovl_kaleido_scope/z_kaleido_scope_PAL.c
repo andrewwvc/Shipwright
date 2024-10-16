@@ -4032,7 +4032,7 @@ void KaleidoScope_Update(PlayState* play)
                         Interface_ChangeAlpha(50);
                         pauseCtx->unk_1EC = 0;
                         pauseCtx->state = 7;
-                    } else if (pauseCtx->pageIndex == PAUSE_QUEST) {
+                    } else if (pauseCtx->pageIndex == PAUSE_QUEST || pauseCtx->pageIndex == PAUSE_EQUIP) {
                         goto handle_navi;
                     }
                     break;
@@ -4152,7 +4152,7 @@ void KaleidoScope_Update(PlayState* play)
 
                 case 11:
                 handle_navi:
-                    {
+                    if (pauseCtx->pageIndex == PAUSE_QUEST) {
                         u16 msg = ElfMessage_GetSpecialNaviText(play);
                         if (msg != 0 && msg != 0x015F) {
                             Interface_SetPauseCUpDisplay(255);
@@ -4162,6 +4162,15 @@ void KaleidoScope_Update(PlayState* play)
                                 Message_StartTextbox(play, msg, NULL);
                                 pauseCtx->unk_1E4 = 10;
                                 ElfMessage_SelectSpecialNaviText(play);
+                            }
+                        }
+                    } else if (pauseCtx->pageIndex == PAUSE_EQUIP) {
+                        if (pauseCtx->cursorY[PAUSE_EQUIP] == 4 && pauseCtx->cursorX[PAUSE_EQUIP] > 0) {
+                            Interface_SetPauseCUpDisplay(255);
+                            if (CHECK_BTN_ALL(input->press.button, BTN_CUP)) {
+                                u16 msg = GetTextID("ring");
+                                Message_StartTextbox(play, msg+Ring_Get_In_Slot(pauseCtx->cursorX[PAUSE_EQUIP]-1), NULL);
+                                pauseCtx->unk_1E4 = 10;
                             }
                         }
                     }

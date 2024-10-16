@@ -477,6 +477,28 @@ extern "C" void OTRMessage_Init()
     MakeBlueMsgEng(0x010D, "%cThis ring's magic looks like it's&so powerful that you wouldn't&be able to remove it here!^%cYou might need to return to&%wyour place%c to unequip it.");
     MakeBlueMsgEng(0x010E, "%cHey, have you tried checking out the&other rings you've been collecting that&are stashed in your place?^%cUse %y\xA7%c or %y\xA8%c on the&%yEquipment Subscreen%c when a ring is&selected to swap out that one.");
 
+    //Rings
+    u16 RingMsg = TextIDAllocator::Instance->allocateRange("ring", 30);
+    MakeNormalMsgEng(RingMsg+0, "%cThis ring seems to make&items easier to pick up.");
+    MakeNormalMsgEng(RingMsg+1, "%cThis ring seems to make it&easier to NOT pick up items.");
+    MakeNormalMsgEng(RingMsg+2, "%cThis ring seems to make&hearts easier to find...&But at what cost?");
+    MakeNormalMsgEng(RingMsg+3, "%cThis ring seems to make&rupees easier to find...&But at what cost?");
+    MakeNormalMsgEng(RingMsg+4, "%cThis ring is for those with great&courage. Be careful when using it.");
+    MakeNormalMsgEng(RingMsg+5, "%cThis ring might aid those who&are deeply fearful of danger.&It will cost a lot of strength though.");
+    MakeNormalMsgEng(RingMsg+6, "%cThis ring might let you perceive&things better while in the woods.");
+    MakeNormalMsgEng(RingMsg+7, "%cThis ring might let you draw the&attention of mountain folk.");
+    MakeNormalMsgEng(RingMsg+8, "%cThis ring might let you uncover&those who live in water more easily.");
+    MakeNormalMsgEng(RingMsg+9, "%cThis ring might aid&my targeting ability.");
+    MakeNormalMsgEng(RingMsg+10, "%cThis ring might make you seem more&friendly to feathered creatures.");
+    MakeNormalMsgEng(RingMsg+11, "%cThis ring might enhance your&ability to sneak around,&regardless of the light.");
+    MakeNormalMsgEng(RingMsg+12, "%cThis ring may greatly enhance&your magic ability.&But are you willing to pay&the price for such power?");
+    MakeNormalMsgEng(RingMsg+13, "%cThis ring contains a simply&abominable dark power.&It scares me, but I won't&stop you from using it.");
+    MakeNormalMsgEng(RingMsg+14, "%cThis ring makes it easier to&avoid damage while rolling.");
+    MakeNormalMsgEng(RingMsg+15, "%cThis ring lets you block out&the noise of the world.");
+    MakeNormalMsgEng(RingMsg+16, "%cThis ring makes it easier&to not lose items.");
+    MakeNormalMsgEng(RingMsg+17, "%cThis ring might let you&attack in fancier ways!");
+    MakeNormalMsgEng(RingMsg+18, "%cThis ring stops you&from making sound.");
+    MakeNormalMsgEng(RingMsg+19, "%cThis ring makes it less&dangerous to face explosives.");
     //Great Fairy Text
     MakeNormalMsgEng(0xE8, "Your magic power has been&enhanced! Now you can gain even&more Magic Capacity!^Collecting %gIcons of Magic%w&will allow for greater enhancement!");
     MakeNormalMsgEng(0xE9, "Your defensive power has been&enhanced! Damage inflicted by &enemies will be reduced by half.^But this only applies to&hearts protected by any&%rHeart Barriers%w you have collected.");
