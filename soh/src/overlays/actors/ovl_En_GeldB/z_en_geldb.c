@@ -886,6 +886,7 @@ void EnGeldB_Slash(EnGeldB* this, PlayState* play) {
     if (this->swordCollider.base.atFlags & AT_BOUNCED) {
         this->meleeWeaponState = -1;
         this->swordCollider.base.atFlags &= ~(AT_HIT | AT_BOUNCED);
+        Player_ResetShieldRecovery(play);
         EnGeldB_SetupRollBack(this);
     } else if (SkelAnime_Update(&this->skelAnime)) {
         if (!Actor_IsFacingPlayer(&this->actor, 0x1554)) {
