@@ -462,7 +462,7 @@ extern "C" void OTRMessage_Init()
     MakeBlueMsgEng(0x0622, "%wFlare Dancer&%cExtinguish its flaming clothes&first... though it seems to&keep them intact by spinning...");
     MakeBlueMsgEng(0x0625, "%wMorpha&%cMaster of the Water Temple. It&has absolute control of water. Pull&out its nucleus and attack it!^%cIf you're having trouble, try&finding ways of using %wdifferent&%y\xA1%c items to defend yourself.^%cIf it is chasing you, don't be&afraid to use whatever part of the&room you need to&to get away from it.");
     MakeBlueMsgEng(0x0628, "%wSpike&%cIt seems just like a stone&when it retracts its spikes...");
-    MakeBlueMsgEng(0x062F, "%wDead Hand&%c\x0F, just try to stay calm...");
+    MakeBlueMsgEng(0x062F, "%wDead Hand&%c\x0F, just try to stay calm...&Spirits are saying that you should&have listened to them before coming.^%cThe dead are tellng you to heed&the advice they wished to give you,&lest you become one of them.&Did they say anything important?");
     MakeBlueMsgEng(0x0635, "%wIron Knuckle&%cBeware of the incredibly strong axe!&You may need to use different dodges&depending on how they attack!");
     MakeBlueMsgEng(0x0657, "%wWhite Wolfos%c&This seems to be a much more&fearsome and powerful Wolfos. It might&be tricky to land attacks on it!^%cWith arms this long, you may&have to block attacks from each&arm with your shield %rdifferently%c!");
     MakeBlueMsgEng(EnemyMsg+0, "%wIron Knuckle&%cBeware of the incredibly strong axe!&You may need to use different dodges&depending on how they attack!^%cYou're an adult now, so if you're&%w\xA4 Targeting%c, hold %w\xA3%c in order to let&high swings pass over your head.");
