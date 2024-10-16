@@ -1338,6 +1338,18 @@ s32 Player_isInsideRSlashAnimation(PlayState* play) {
     return ret;
 }
 
+s32 Player_isInsideShieldStunAnimation(PlayState* play) {
+    Player* this = GET_PLAYER(play);
+    s16 ret = 0;
+
+    for (s32 ii = 0; ii < ARRAY_COUNT(D_808543B4); ii++) {
+        if (this->skelAnime2.animation == D_808543B4[ii] || this->skelAnime2.animation == D_808543BC[ii] || this->skelAnime.animation == D_808543C4[ii])
+            return 1;
+    }
+
+    return ret;
+}
+
 // return type can't be void due to regalloc in func_8084FCAC
 void Player_ZeroSpeedXZ(Player* this) {
     this->actor.speedXZ = 0.0f;
@@ -11099,10 +11111,27 @@ void Player_SetShieldRecoveryDefault(PlayState* play) {
     player->crouchCharge = 0;
 }
 
+void Player_SetShieldRecoveryOverdrive(PlayState* play, u16 frames) {
+    Player* player = GET_PLAYER(play);
+
+    player->shieldRelaxTimer = frames;
+    player->shieldUpTimer = SHIELD_TIME_MAX/2;
+    player->crouchCharge = 0;
+}
+
 void Player_SetShieldRecovery(PlayState* play, u16 frames) {
     Player* player = GET_PLAYER(play);
 
     player->shieldRelaxTimer = frames;
+    player->crouchCharge = 0;
+}
+
+void Player_ResetShieldRecovery(PlayState* play) {
+    Player* player = GET_PLAYER(play);
+
+    player->shieldRelaxTimer = 0;
+    player->shieldUpTimer = 0;
+    player->shieldEntry = 0;
     player->crouchCharge = 0;
 }
 
@@ -11151,16 +11180,20 @@ void Player_UpdateCommon(Player* this, PlayState* play, Input* input) {
         DECR(this->stepTracking);
 
     if (this->stateFlags1 & PLAYER_STATE1_SHIELDING) {
-        if (this->shieldUpTimer < SHIELD_TIME_MAX/2)
-            this->shieldUpTimer++;
-        if (this->shieldRelaxTimer <= SHIELD_TIME_MAX && this->func_82C != func_80843188
-                    && this->skelAnime.animation != D_808543C4[0]) {
-           if ((this->shieldUpTimer > 1 || this->shieldRelaxTimer == 0) && this->shieldEntry == 0) {
-               if (this->shieldRelaxTimer < this->shieldUpTimer*2)
-                   this->shieldRelaxTimer = this->shieldUpTimer*2;
-           }
-           else
-               this->shieldRelaxTimer = SHIELD_TIME_MAX;
+        if (this->shieldRelaxTimer > SHIELD_TIME_MAX) {
+            this->shieldRelaxTimer--;
+        } else if (!Player_isInsideShieldStunAnimation(play)) {
+            if (this->shieldUpTimer < SHIELD_TIME_MAX/2)
+                this->shieldUpTimer++;
+            if (this->shieldRelaxTimer <= SHIELD_TIME_MAX && this->func_82C != func_80843188
+                        && this->skelAnime.animation != D_808543C4[0]) {
+                if ((this->shieldUpTimer > 1 || this->shieldRelaxTimer == 0) && this->shieldEntry == 0) {
+                    if (this->shieldRelaxTimer < this->shieldUpTimer*2)
+                        this->shieldRelaxTimer = this->shieldUpTimer*2;
+                }
+                else
+                    this->shieldRelaxTimer = SHIELD_TIME_MAX;
+            }
         }
     }
     else {
@@ -11171,7 +11204,7 @@ void Player_UpdateCommon(Player* this, PlayState* play, Input* input) {
 
         if (this->shieldRelaxTimer > 0)
             this->shieldRelaxTimer--;
-        if (this->shieldEntry > 0)
+        if (this->shieldEntry > 0 && this->shieldRelaxTimer <= SHIELD_TIME_MAX)
             this->shieldEntry--;
     }
 
