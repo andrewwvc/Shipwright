@@ -512,8 +512,14 @@ void EnOkuta_Die(EnOkuta* this, PlayState* play) {
         Actor_SetScale(&this->actor, (((this->timer - 5) * 0.04f) + 0.8f) * 0.01f);
     } else {
         if (Math_StepToF(&this->actor.scale.x, 0.0f, 0.0005f)) {
+            f32 select = Rand_ZeroOne();
             SoundSource_PlaySfxAtFixedWorldPos(play, &this->actor.world.pos, 30, NA_SE_EN_OCTAROCK_BUBLE);
-            Item_DropCollectibleRandom(play, &this->actor, &this->actor.world.pos, 0x70);
+            if (select < 0.02f)
+                Item_DropCollectible(play, &this->actor.world.pos, ITEM00_RUPEE_BLUE);
+            else if (select < 0.2f)
+                Item_DropCollectible(play, &this->actor.world.pos, ITEM00_RUPEE_GREEN);
+            else
+                Item_DropCollectibleRandom(play, &this->actor, &this->actor.world.pos, 0x70);
             for (i = 0; i < 20; i++) {
                 velocity.x = (Rand_ZeroOne() - 0.5f) * 7.0f;
                 velocity.y = Rand_ZeroOne() * 7.0f;
