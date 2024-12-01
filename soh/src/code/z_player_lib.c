@@ -922,6 +922,11 @@ s32 func_8008F128(Player* this) {
     return Player_HoldsHookshot(this) && (this->heldActor == NULL);
 }
 
+s32 isHoldingProjectile(PlayState* play) {
+    Player* this = GET_PLAYER(play);
+    return  this->heldItemAction >= PLAYER_IA_BOW && this->heldItemAction <= PLAYER_IA_LONGSHOT;
+}
+
 s32 isProjectileNotched(PlayState* play) {
     Player* this = GET_PLAYER(play);
     return  this->heldItemAction >= PLAYER_IA_BOW && this->heldItemAction <= PLAYER_IA_LONGSHOT &&

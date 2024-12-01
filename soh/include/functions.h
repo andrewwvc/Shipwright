@@ -1189,6 +1189,7 @@ s32 isPlayerInVerticalSlash(PlayState* play);
 s32 isPlayerInStab(PlayState* play);
 s32 isPlayerInHorizontalAttack(PlayState* play);
 s32 isPlayerInVerticalAttack(PlayState* play);
+s32 isHoldingProjectile(PlayState* play);
 s32 isProjectileNotched(PlayState* play);
 void Player_SetModelsForHoldingShield(Player* player);
 void Player_SetModels(Player* player, s32 modelGroup);
