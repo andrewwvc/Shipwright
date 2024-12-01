@@ -45,8 +45,9 @@ void EnGeldB_SetupPivot(EnGeldB* this);
 void EnGeldB_SetupRollForward(EnGeldB* this);
 void EnGeldB_SetupCircle(EnGeldB* this);
 void EnGeldB_SetupSpinDodge(EnGeldB* this, PlayState* play);
-void EnGeldB_SetupSlash(EnGeldB* this);
-void EnGeldB_SetupSpinAttack(EnGeldB* this);
+void EnGeldB_SetupSlash(EnGeldB* this, PlayState* play);
+void EnGeldB_SetupBackSlash(EnGeldB* this);
+void EnGeldB_SetupSpinAttack(EnGeldB* this, PlayState* play);
 void EnGeldB_SetupRollBack(EnGeldB* this);
 void EnGeldB_SetupJump(EnGeldB* this);
 void EnGeldB_SetupBlock(EnGeldB* this);
@@ -62,6 +63,7 @@ void EnGeldB_Pivot(EnGeldB* this, PlayState* play);
 void EnGeldB_Circle(EnGeldB* this, PlayState* play);
 void EnGeldB_SpinDodge(EnGeldB* this, PlayState* play);
 void EnGeldB_Slash(EnGeldB* this, PlayState* play);
+void EnGeldB_BackSlash(EnGeldB* this, PlayState* play);
 void EnGeldB_SpinAttack(EnGeldB* this, PlayState* play);
 void EnGeldB_RollBack(EnGeldB* this, PlayState* play);
 void EnGeldB_Stunned(EnGeldB* this, PlayState* play);
@@ -226,6 +228,67 @@ static DamageTable sDamageTable = {
     /* Unknown 2     */ DMG_ENTRY(0, GELDB_DMG_NORMAL),
 };
 
+s16 gGerudoRedSkelslashanimAnimFrameData[475] = {
+	0xfecb, 0x0940, 0xfcd7, 0x0000, 0xffff, 0xbfff, 0x0769, 0xd5a3, 0x88f4, 0xf496, 0x0d0a, 0x3352, 0xba37, 0x013d, 0x014e, 0x0167, 
+	0x0187, 0x01ac, 0x01d4, 0x01fc, 0x021f, 0x0239, 0x0242, 0x0242, 0x0242, 0x0242, 0x0242, 0xfada, 0xfae1, 0xfae9, 0xfaf2, 0xfaf9, 
+	0xfafc, 0xf9d6, 0xf750, 0xf4c9, 0xf3a3, 0xf3a3, 0xf3a3, 0xf3a3, 0xf3a3, 0xf68b, 0xf687, 0xf682, 0xf67e, 0xf67a, 0xf679, 0xf697, 
+	0xf6da, 0xf71d, 0xf73b, 0xf73b, 0xf73b, 0xf73b, 0xf73b, 0x26b8, 0x26a1, 0x2662, 0x25e9, 0x2520, 0x23f5, 0x1f85, 0x16ee, 0x0d26, 
+	0x051d, 0x01c8, 0x01c8, 0x01c8, 0x01c8, 0xf951, 0xf856, 0xf70e, 0xf5c7, 0xf4cb, 0xf466, 0xf56d, 0xf7df, 0xfacb, 0xfd3d, 0xfe44, 
+	0xfe44, 0xfe44, 0xfe44, 0x4676, 0x4746, 0x487b, 0x49f7, 0x4b99, 0x4d44, 0x4ed9, 0x5040, 0x515e, 0x521c, 0x5261, 0x5261, 0x5261, 
+	0x5261, 0x1baf, 0x1ade, 0x19a5, 0x1822, 0x1672, 0x14b4, 0x1304, 0x1181, 0x1048, 0x0f77, 0x0f2a, 0x0f2a, 0x0f2a, 0x0f2a, 0xf833, 
+	0xf87b, 0xf8e6, 0xf96a, 0xf9fe, 0xfa96, 0xfb2a, 0xfbae, 0xfc19, 0xfc61, 0xfc7b, 0xfc7b, 0xfc7b, 0xfc7b, 0x025d, 0x0280, 0x02b3, 
+	0x02f2, 0x0338, 0x0381, 0x03c8, 0x0407, 0x043a, 0x045c, 0x0468, 0x0468, 0x0468, 0x0468, 0x9f5a, 0x0eca, 0xe1d3, 0x0d2e, 0xe15e, 
+	0xdb1b, 0xdb67, 0xdc24, 0xdd1a, 0xde10, 0xdecd, 0xdf19, 0xdf19, 0xdf19, 0x354c, 0x46cf, 0x44b6, 0x287d, 0x2bf3, 0x3039, 0x3197, 
+	0x3281, 0x3310, 0x3359, 0x3374, 0x3377, 0x3377, 0x3377, 0xdc1b, 0x4d0c, 0x242b, 0x5bff, 0x472b, 0x4431, 0x4479, 0x452f, 0x461b, 
+	0x4707, 0x47bc, 0x4805, 0x4805, 0x4805, 0xff94, 0xfca5, 0xf4ae, 0xea34, 0xed80, 0xf0f8, 0xf144, 0xf177, 0xf196, 0xf1a5, 0xf1ab, 
+	0xf1ac, 0xf1ac, 0xf1ac, 0xfa46, 0xefa6, 0xe9ed, 0xf741, 0xf1b7, 0xec2e, 0xecdc, 0xee8f, 0xf0c4, 0xf2f9, 0xf4ab, 0xf559, 0xf559, 
+	0xf559, 0xedd3, 0xf066, 0xf1c9, 0xea1c, 0xe8f4, 0xe8ca, 0xeaae, 0xef69, 0xf58e, 0xfbb4, 0x006f, 0x0253, 0x0253, 0x0253, 0xffe8, 
+	0xff91, 0xfede, 0xfdb3, 0xfc31, 0xfb67, 0xfc5f, 0xfecb, 0x01f2, 0x0518, 0x0784, 0x087c, 0x087c, 0x087c, 0x0005, 0x0018, 0x003f, 
+	0x0080, 0x00d4, 0x0100, 0x000c, 0xfda9, 0xfa90, 0xf777, 0xf516, 0xf422, 0xf422, 0xf422, 0xfdab, 0xfef4, 0x0092, 0x0215, 0x038e, 
+	0x0705, 0x0e48, 0x1843, 0x2329, 0x2d2c, 0x3480, 0x3758, 0x3758, 0x3758, 0x0000, 0xffff, 0xffff, 0x0000, 0xffff, 0x0000, 0xffff, 
+	0x0000, 0x0000, 0xffff, 0xffff, 0xffff, 0x0017, 0x004a, 0x0000, 0xffff, 0xffff, 0x0000, 0xffff, 0x0000, 0xffff, 0x0000, 0x0000, 
+	0xffff, 0x0000, 0xffff, 0xfff3, 0xffd8, 0x0000, 0x0000, 0xffff, 0xffff, 0xffff, 0xffff, 0x0000, 0xffff, 0xffff, 0xffff, 0xffff, 
+	0x0000, 0x003f, 0x00cd, 0xa0a1, 0xa04d, 0x9fe1, 0x9f74, 0x9f20, 0x9eff, 0xa2f2, 0xac5c, 0xb799, 0xc103, 0xc4f6, 0xc4f6, 0xc4f6, 
+	0xc4f6, 0xd94b, 0xd941, 0xd927, 0xd8f5, 0xd8a1, 0xd825, 0xd715, 0xd563, 0xd38e, 0xd216, 0xd17d, 0xd17d, 0xd17d, 0xd17d, 0xe5e4, 
+	0xe633, 0xe698, 0xe6fe, 0xe74c, 0xe76b, 0xe555, 0xe05b, 0xda6a, 0xd570, 0xd35a, 0xd35a, 0xd35a, 0xd35a, 0xce06, 0xcda5, 0xcd26, 
+	0xcca7, 0xcc46, 0xcc1f, 0xcfc4, 0xd877, 0xe2d8, 0xeb8b, 0xef30, 0xef30, 0xef30, 0xef30, 0xed57, 0xed80, 0xedef, 0xeec7, 0xf02c, 
+	0xf240, 0xf615, 0xfba5, 0x0176, 0x060a, 0x07e5, 0x07e5, 0x07e5, 0x07e5, 0xba5d, 0xba62, 0xba69, 0xba6f, 0xba75, 0xba77, 0xb7d9, 
+	0xb19e, 0xaa2d, 0xa3f1, 0xa154, 0xa154, 0xa154, 0xa154, 0x0001, 0x0004, 0x000e, 0x0022, 0x0042, 0x0071, 0x00c2, 0x0131, 0x01a3, 
+	0x01fc, 0x0220, 0x0220, 0x0220, 0x0220, 0x000b, 0x0025, 0x0048, 0x006a, 0x0085, 0x008f, 0xffac, 0xfd8f, 0xfb0b, 0xf8ef, 0xf80c, 
+	0xf80c, 0xf80c, 0xf80c, 0x40f7, 0x4137, 0x418b, 0x41de, 0x421e, 0x4237, 0x40ec, 0x3dd5, 0x3a25, 0x370e, 0x35c2, 0x35c2, 0x35c2, 
+	0x35c2, 0x0674, 0x0649, 0x0612, 0x05da, 0x05af, 0x059e, 0x059e, 0x059e, 0x059e, 0x059e, 0x059e, 0x059e, 0x059e, 0x059e, 0x0003, 
+	0x000c, 0x0016, 0x0021, 0x002a, 0x002d, 0x002d, 0x002d, 0x002d, 0x002d, 0x002d, 0x002d, 0x002d, 0x002d, 0xac7e, 0xacd0, 0xad3b, 
+	0xada6, 0xadf8, 0xae19, 0xae19, 0xae19, 0xae19, 0xae19, 0xae19, 0xae19, 0xae19, 0xae19, };
+
+JointIndex gGerudoRedSkelslashanimAnimJointIndices[24] = {
+	{ 0x0000, 0x0001, 0x0002, },
+	{ 0x000d, 0x001b, 0x0029, },
+	{ 0x0037, 0x0045, 0x0053, },
+	{ 0x0061, 0x006f, 0x007d, },
+	{ 0x0003, 0x0004, 0x0005, },
+	{ 0x0004, 0x0004, 0x0004, },
+	{ 0x0004, 0x0004, 0x0004, },
+	{ 0x008b, 0x0099, 0x00a7, },
+	{ 0x00b5, 0x00c3, 0x00d1, },
+	{ 0x00df, 0x00ed, 0x00fb, },
+	{ 0x0003, 0x0003, 0x0003, },
+	{ 0x0109, 0x0117, 0x0125, },
+	{ 0x0006, 0x0007, 0x0008, },
+	{ 0x0004, 0x0004, 0x0009, },
+	{ 0x0004, 0x0003, 0x000a, },
+	{ 0x0004, 0x0003, 0x0003, },
+	{ 0x0004, 0x0003, 0x0003, },
+	{ 0x0133, 0x0141, 0x014f, },
+	{ 0x0004, 0x0003, 0x000b, },
+	{ 0x0003, 0x0003, 0x000c, },
+	{ 0x015d, 0x016b, 0x0179, },
+	{ 0x0187, 0x0195, 0x01a3, },
+	{ 0x01b1, 0x01bf, 0x01cd, },
+	{ 0x0003, 0x0004, 0x0004, },
+};
+
+AnimationHeader gGerudoRedSkelBackslashAnim = { { 14 }, gGerudoRedSkelslashanimAnimFrameData, gGerudoRedSkelslashanimAnimJointIndices, 13 };
+
 static InitChainEntry sInitChain[] = {
     ICHAIN_F32(targetArrowOffset, 2000, ICHAIN_CONTINUE),
     ICHAIN_VEC3F_DIV1000(scale, 10, ICHAIN_CONTINUE),
@@ -297,6 +360,19 @@ void EnGeldB_Destroy(Actor* thisx, PlayState* play) {
     ResourceMgr_UnregisterSkeleton(&this->skelAnime);
 }
 
+void EnGeldB_SetBlureVal(EnGeldB* this, s16 isSide) {
+    EffectBlure* blur = Effect_GetByIndex(this->blureIndex);
+    if (isSide) {
+        blur->p1StartColor.r = blur->p1EndColor.r = blur->p2StartColor.r = blur->p2EndColor.r = 255;
+        blur->p1StartColor.g = blur->p1EndColor.g = blur->p2StartColor.g = blur->p2EndColor.g = 170;
+        blur->p1StartColor.b = blur->p1EndColor.b = blur->p2StartColor.b = blur->p2EndColor.b = 0;
+    } else {
+        blur->p1StartColor.r = blur->p1EndColor.r = blur->p2StartColor.r = blur->p2EndColor.r = 255;
+        blur->p1StartColor.g = blur->p1EndColor.g = blur->p2StartColor.g = blur->p2EndColor.g = 255;
+        blur->p1StartColor.b = blur->p1EndColor.b = blur->p2StartColor.b = blur->p2EndColor.b = 255;
+    }
+}
+
 s32 EnGeldB_ReactToPlayer(PlayState* play, EnGeldB* this, s16 arg2) {
     Player* player = GET_PLAYER(play);
     Actor* thisx = &this->actor;
@@ -357,7 +433,7 @@ s32 EnGeldB_ReactToPlayer(PlayState* play, EnGeldB* this, s16 arg2) {
 
             if ((thisx->xzDistToPlayer <= 45.0f) && !Actor_OtherIsTargeted(play, thisx) &&
                 ((play->gameplayFrames & 7) || (ABS(angleToFacingLink) < 0x38E0))) {
-                EnGeldB_SetupSlash(this);
+                EnGeldB_SetupSlash(this, play);
                 return true;
             } else {
                 EnGeldB_SetupCircle(this);
@@ -482,7 +558,7 @@ void EnGeldB_Ready(EnGeldB* this, PlayState* play) {
                         (ABS(angleToLink) < 0x38E0)) {
                         EnGeldB_SetupRollForward(this);
                     } else {
-                        EnGeldB_SetupSpinAttack(this);
+                        EnGeldB_SetupSpinAttack(this, play);
                     }
                 } else if (Rand_ZeroOne() > 0.3f) {
                     EnGeldB_SetupAdvance(this, play);
@@ -547,7 +623,7 @@ void EnGeldB_Advance(EnGeldB* this, PlayState* play) {
         } else if (this->actor.xzDistToPlayer < 90.0f) {
             if (!Actor_OtherIsTargeted(play, &this->actor) &&
                 (Rand_ZeroOne() > 0.03f || (this->actor.xzDistToPlayer <= 45.0f && facingAngletoLink < 0x38E0))) {
-                EnGeldB_SetupSlash(this);
+                EnGeldB_SetupSlash(this, play);
             } else if (Actor_OtherIsTargeted(play, &this->actor) && (Rand_ZeroOne() > 0.5f)) {
                 EnGeldB_SetupRollBack(this);
             } else {
@@ -561,7 +637,7 @@ void EnGeldB_Advance(EnGeldB* this, PlayState* play) {
                     if (Rand_ZeroOne() > 0.5f) {
                         EnGeldB_SetupRollForward(this);
                     } else {
-                        EnGeldB_SetupSpinAttack(this);
+                        EnGeldB_SetupSpinAttack(this, play);
                     }
                 } else {
                     EnGeldB_SetupCircle(this);
@@ -610,7 +686,7 @@ void EnGeldB_RollForward(EnGeldB* this, PlayState* play) {
             }
         } else if (!Actor_OtherIsTargeted(play, &this->actor) &&
                    (Rand_ZeroOne() > 0.5f || (ABS(facingAngleToLink) < 0x3FFC))) {
-            EnGeldB_SetupSlash(this);
+            EnGeldB_SetupSlash(this, play);
         } else {
             EnGeldB_SetupAdvance(this, play);
         }
@@ -748,7 +824,7 @@ void EnGeldB_Circle(EnGeldB* this, PlayState* play) {
         }
         if ((Math_CosS(angleBehindLink - this->actor.shape.rot.y) < -0.85f) &&
             !Actor_OtherIsTargeted(play, &this->actor) && (this->actor.xzDistToPlayer <= 45.0f)) {
-            EnGeldB_SetupSlash(this);
+            EnGeldB_SetupSlash(this, play);
         } else if (--this->timer == 0) {
             if (Actor_OtherIsTargeted(play, &this->actor) && (Rand_ZeroOne() > 0.5f)) {
                 EnGeldB_SetupRollBack(this);
@@ -844,7 +920,7 @@ void EnGeldB_SpinDodge(EnGeldB* this, PlayState* play) {
         this->actor.shape.rot.y = this->actor.yawTowardsPlayer;
         if (!EnGeldB_DodgeRanged(play, this)) {
             if (!Actor_OtherIsTargeted(play, &this->actor) && (this->actor.xzDistToPlayer <= 70.0f)) {
-                EnGeldB_SetupSlash(this);
+                EnGeldB_SetupSlash(this, play);
             } else {
                 EnGeldB_SetupRollBack(this);
             }
@@ -858,7 +934,12 @@ void EnGeldB_SpinDodge(EnGeldB* this, PlayState* play) {
     }
 }
 
-void EnGeldB_SetupSlash(EnGeldB* this) {
+void EnGeldB_SetupSlash(EnGeldB* this, PlayState* play) {
+    Player* player = GET_PLAYER(play);
+    if ((player->stateFlags1 & PLAYER_STATE1_SHIELDING) && (Rand_ZeroOne() > 0.4f)) {
+        EnGeldB_SetupBackSlash(this);
+        return;
+    }
     Animation_PlayOnce(&this->skelAnime, &gGerudoRedSlashAnim);
     this->swordCollider.base.atFlags &= ~AT_BOUNCED;
     this->action = GELDB_SLASH;
@@ -916,10 +997,76 @@ void EnGeldB_Slash(EnGeldB* this, PlayState* play) {
     }
 }
 
-void EnGeldB_SetupSpinAttack(EnGeldB* this) {
+void EnGeldB_SetupBackSlash(EnGeldB* this) {
+    Animation_PlayOnce(&this->skelAnime, &gGerudoRedSkelBackslashAnim);
+    this->swordCollider.base.atFlags &= ~AT_BOUNCED;
+    this->action = GELDB_SLASH;
+    this->spinAttackState = 0;
+    this->actor.speedXZ = 0.0f;
+    Audio_StopSfxByPosAndId(&this->actor.projectedPos, NA_SE_EN_GERUDOFT_BREATH);
+    EnGeldB_SetupAction(this, EnGeldB_BackSlash);
+}
+
+void EnGeldB_BackSlash(EnGeldB* this, PlayState* play) {
+    Player* player = GET_PLAYER(play);
+    s16 angleFacingLink = player->actor.shape.rot.y - this->actor.world.rot.y;
+    s16 angleToLink = this->actor.yawTowardsPlayer - this->actor.world.rot.y;
+
+    angleFacingLink = ABS(angleFacingLink);
+    angleToLink = ABS(angleToLink);
+
+    this->actor.speedXZ = 2.0f;
+    if ((s32)this->skelAnime.curFrame == 6) {
+        Audio_PlayActorSound2(&this->actor, NA_SE_EN_GERUDOFT_ATTACK);
+        //Set to side blocking
+        this->meleeWeaponState = 2;
+    }
+    //if ((s32)this->skelAnime.curFrame >= 2){
+        this->actor.shape.rot.y -= 0xA80;
+    //}
+    if (this->swordCollider.base.atFlags & AT_BOUNCED) {
+        this->meleeWeaponState = -1;
+        this->swordCollider.base.atFlags &= ~(AT_HIT | AT_BOUNCED);
+        Player_ResetShieldRecovery(play);
+        EnGeldB_SetupRollBack(this);
+    } else if (SkelAnime_Update(&this->skelAnime)) {
+        this->meleeWeaponState = -1;
+        if (!Actor_IsFacingPlayer(&this->actor, 0x1554)) {
+            EnGeldB_SetupReady(this);
+            this->timer = (Rand_ZeroOne() * 5.0f) + 5.0f;
+            if (angleToLink > 0x4000) {
+                this->lookTimer = 20;
+            }
+        } else if (Rand_ZeroOne() > 0.7f || (this->actor.xzDistToPlayer >= 120.0f)) {
+            EnGeldB_SetupReady(this);
+            this->timer = (Rand_ZeroOne() * 5.0f) + 5.0f;
+        } else {
+            this->actor.world.rot.y = this->actor.yawTowardsPlayer;
+            if (Rand_ZeroOne() > 0.7f) {
+                EnGeldB_SetupSidestep(this, play);
+            } else if (angleFacingLink <= 0x2710) {
+                if (angleToLink > 0x3E80) {
+                    this->actor.world.rot.y = this->actor.yawTowardsPlayer;
+                    EnGeldB_SetupCircle(this);
+                } else {
+                    EnGeldB_ReactToPlayer(play, this, 1);
+                }
+            } else {
+                EnGeldB_SetupCircle(this);
+            }
+        }
+    }
+}
+
+void EnGeldB_SetupSpinAttack(EnGeldB* this, PlayState* play) {
     f32 lastFrame = Animation_GetLastFrame(&gGerudoRedSpinAttackAnim);
 
-    Animation_Change(&this->skelAnime, &gGerudoRedSpinAttackAnim, 1.0f, 0.0f, lastFrame, ANIMMODE_ONCE_INTERP, 0.0f);
+    if (isHoldingProjectile(play)) {
+        EnGeldB_SetupRollForward(this);
+        return;
+    }
+
+    Animation_Change(&this->skelAnime, &gGerudoRedSpinAttackAnim, 1.5f, 0.0f, lastFrame, ANIMMODE_ONCE_INTERP, 0.0f);
     this->swordCollider.base.atFlags &= ~(AT_HIT | AT_BOUNCED);
     this->action = GELDB_SPIN_ATTACK;
     this->spinAttackState = 0;
@@ -953,16 +1100,21 @@ void EnGeldB_SpinAttack(EnGeldB* this, PlayState* play) {
     }
     if ((s32)this->skelAnime.curFrame < 9) {
         this->actor.shape.rot.y = this->actor.world.rot.y = this->actor.yawTowardsPlayer;
-    } else if ((s32)this->skelAnime.curFrame == 13) {
+    } else if ((s32)this->skelAnime.curFrame == 12) {
         Actor_SpawnFloorDustRing(play, &this->actor, &this->leftFootPos, 3.0f, 2, 2.0f, 0, 0, false);
         Actor_SpawnFloorDustRing(play, &this->actor, &this->rightFootPos, 3.0f, 2, 2.0f, 0, 0, false);
         this->meleeWeaponState = 1;
-        this->actor.speedXZ = 10.0f;
+        this->skelAnime.playSpeed = 1.0f;
+        this->actor.speedXZ = 12.0f;
         Audio_PlayActorSound2(&this->actor, NA_SE_EN_GERUDOFT_ATTACK);
     } else if ((s32)this->skelAnime.curFrame == 21) {
         this->actor.speedXZ = 0.0f;
     } else if ((s32)this->skelAnime.curFrame == 24) {
         this->meleeWeaponState = -1;
+    }
+    if (12 < (s32)this->skelAnime.curFrame && (s32)this->skelAnime.curFrame <= 21) {
+        Math_SmoothStepToS(&this->actor.world.rot.y, this->actor.yawTowardsPlayer, 1, 0x200, 0);
+        this->actor.shape.rot.y = this->actor.world.rot.y;
     }
     if (SkelAnime_Update(&this->skelAnime) && (this->spinAttackState < 2)) {
         if (!Actor_IsFacingPlayer(&this->actor, 0x1554)) {
@@ -1013,7 +1165,7 @@ void EnGeldB_RollBack(EnGeldB* this, PlayState* play) {
     if (SkelAnime_Update(&this->skelAnime)) {
         if (!Actor_OtherIsTargeted(play, &this->actor) && (this->actor.xzDistToPlayer < 170.0f) &&
             (this->actor.xzDistToPlayer > 140.0f) && (Rand_ZeroOne() < 0.2f)) {
-            EnGeldB_SetupSpinAttack(this);
+            EnGeldB_SetupSpinAttack(this, play);
         } else if (play->gameplayFrames & 1) {
             EnGeldB_SetupSidestep(this, play);
         } else {
@@ -1095,7 +1247,7 @@ void EnGeldB_Damaged(EnGeldB* this, PlayState* play) {
         } else if (!EnGeldB_DodgeRanged(play, this)) {
             if ((this->actor.xzDistToPlayer <= 45.0f) && !Actor_OtherIsTargeted(play, &this->actor) &&
                 (play->gameplayFrames & 7)) {
-                EnGeldB_SetupSlash(this);
+                EnGeldB_SetupSlash(this, play);
             } else {
                 EnGeldB_SetupRollBack(this);
             }
@@ -1130,7 +1282,7 @@ void EnGeldB_Jump(EnGeldB* this, PlayState* play) {
         this->actor.velocity.y = 0.0f;
         this->actor.world.pos.y = this->actor.floorHeight;
         if (!Actor_OtherIsTargeted(play, &this->actor)) {
-            EnGeldB_SetupSlash(this);
+            EnGeldB_SetupSlash(this, play);
         } else {
             EnGeldB_SetupReady(this);
         }
@@ -1180,7 +1332,7 @@ void EnGeldB_Block(EnGeldB* this, PlayState* play) {
                 angleFacingLink = player->actor.shape.rot.y - this->actor.shape.rot.y;
                 if (!Actor_OtherIsTargeted(play, &this->actor) &&
                     ((play->gameplayFrames & 1) || (ABS(angleFacingLink) < 0x38E0))) {
-                    EnGeldB_SetupSlash(this);
+                    EnGeldB_SetupSlash(this, play);
                 } else {
                     EnGeldB_SetupCircle(this);
                 }
@@ -1311,14 +1463,14 @@ void EnGeldB_Sidestep(EnGeldB* this, PlayState* play) {
                 this->actor.world.rot.y = this->actor.shape.rot.y;
                 if ((this->actor.xzDistToPlayer <= 45.0f) && !Actor_OtherIsTargeted(play, &this->actor) &&
                     (!(play->gameplayFrames & 3) || (ABS(angleFacingPlayer2) < 0x38E0))) {
-                    EnGeldB_SetupSlash(this);
+                    EnGeldB_SetupSlash(this, play);
                 } else if ((210.0f > this->actor.xzDistToPlayer) && (this->actor.xzDistToPlayer > 150.0f) &&
                            !(play->gameplayFrames & 1)) {
                     if (Actor_OtherIsTargeted(play, &this->actor) || (Rand_ZeroOne() > 0.5f) ||
                         (ABS(angleFacingPlayer2) < 0x38E0)) {
                         EnGeldB_SetupRollForward(this);
                     } else {
-                        EnGeldB_SetupSpinAttack(this);
+                        EnGeldB_SetupSpinAttack(this, play);
                     }
                 } else {
                     EnGeldB_SetupAdvance(this, play);
@@ -1386,10 +1538,11 @@ void EnGeldB_CollisionCheck(EnGeldB* this, PlayState* play) {
     EnItem00* key;
 
     if ((this->blockCollider.base.acFlags & AC_BOUNCED) || (this->blockCylCollider.base.acFlags & AC_BOUNCED) ||
-                ((this->bodyCollider.base.acFlags & AC_HIT) && (this->action == GELDB_BLOCK) && this->bodyCollider.info.acHit->actor &&
+                ((this->bodyCollider.base.acFlags & AC_HIT) && (this->action == GELDB_BLOCK || (this->action == GELDB_SPIN_ATTACK && this->meleeWeaponState == 1)) && this->bodyCollider.info.acHit->actor &&
                   (this->bodyCollider.info.acHit->actor->id == ACTOR_EN_ARROW) /*&& (ABS((s16)(this->bodyCollider.info.acHit->actor->world.rot.y-this->actor.world.rot.y) > 0x6000))*/) ||
                   (this->action == GELDB_ROLL_FORWARD)) {
-        if (((this->blockCollider.base.acFlags & AC_BOUNCED) || (this->blockCylCollider.base.acFlags & AC_BOUNCED)) &&
+        Player *player = GET_PLAYER(play);
+        if ((this->action == GELDB_ROLL_FORWARD && player->meleeWeaponState && (this->bodyCollider.base.acFlags & AC_HIT)) || ((this->blockCollider.base.acFlags & AC_BOUNCED) || (this->blockCylCollider.base.acFlags & AC_BOUNCED)) &&
                     ((this->blockCollider.elements[0].info.acHitInfo && (this->blockCollider.elements[0].info.acHitInfo->toucher.dmgFlags & DMG_SWORD)) ||
                      (this->blockCollider.elements[1].info.acHitInfo && (this->blockCollider.elements[1].info.acHitInfo->toucher.dmgFlags & DMG_SWORD)) ||
                      (this->blockCylCollider.info.acHitInfo && (this->blockCylCollider.info.acHitInfo->toucher.dmgFlags & DMG_SWORD)))) {
@@ -1465,6 +1618,9 @@ void EnGeldB_Update(Actor* thisx, PlayState* play) {
             CollisionCheck_SetAC(play, &play->colChkCtx, &this->blockCylCollider.base);
     }
     if (this->meleeWeaponState > 0) {
+        //Sets attack block type based on the attack
+        this->swordCollider.info.toucher.dmgFlags = (this->meleeWeaponState == 2) ? 0x00100000 : 0xFFCFFFFF;
+        EnGeldB_SetBlureVal(this, (this->meleeWeaponState == 2));
         CollisionCheck_SetAT(play, &play->colChkCtx, &this->swordCollider.base);
     }
     if (this->blinkState == 0) {
