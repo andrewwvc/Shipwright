@@ -145,6 +145,7 @@ std::map<uint32_t, ItemMapEntry> itemMapping = {
     ITEM_MAP_ENTRY(ITEM_RING_1),
     ITEM_MAP_ENTRY(ITEM_RING_2),
     ITEM_MAP_ENTRY(ITEM_RING_3),
+    ITEM_MAP_ENTRY(ITEM_BOTTLE_AMMO),
 };
 
 std::map<uint32_t, ItemMapEntry> gregMapping = {

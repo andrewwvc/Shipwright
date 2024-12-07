@@ -1082,6 +1082,8 @@ static s8 sItemActionParams[] = {
     PLAYER_IA_BOMBMINE, //160
     PLAYER_IA_MAGIC_SPELL_15,
     PLAYER_IA_MAGIC_SPELL_16,
+    0,0,0,
+    PLAYER_IA_BOTTLE_AMMO,
 };
 
 static u8 sMaskMemory;
@@ -1096,7 +1098,7 @@ static s32 (*D_80853EDC[])(Player* this, PlayState* play) = {
     func_8083485C, func_8083485C, func_8083485C, func_8083485C, func_8083485C, func_8083485C, func_8083485C,
     func_8083485C, func_8083485C, func_8083485C, func_8083485C, func_8083485C, func_8083485C, func_8083485C,
     func_8083485C, func_8083485C, func_8083485C, func_8083485C, func_8083485C, func_8083485C, func_8083485C,
-    func_8083485C, func_8083485C, func_8083485C, func_8083485C, func_8083485C, func_8083485C, func_8083485C,
+    func_8083485C, func_8083485C, func_8083485C, func_8083485C, func_8083485C, func_8083485C, func_8083485C, func_8083485C,
     func_8083485C, func_8083485C, func_8083485C, func_8083485C, func_8083485C, func_8083485C, func_8083485C,
     func_8083485C, func_8083485C, func_8083485C, func_8083485C, func_8083485C, func_8083485C, func_8083485C,
     func_8083485C, func_8083485C, func_8083485C, func_8083485C, func_8083485C, func_8083485C, func_8083485C,
@@ -1110,7 +1112,7 @@ static void (*D_80853FE8[])(PlayState* play, Player* this) = {
     func_80833770, func_80833770, func_80833770, func_80833770, func_80833770, func_80833770, func_80833770,
     func_80833770, func_80833770, func_80833770, func_80833770, func_80833770, func_80833770, func_80833770,
     func_80833770, func_80833770, func_80833770, func_80833770, func_80833770, func_80833770, func_80833770,
-    func_80833770, func_80833770, func_80833770, func_80833770, func_80833770, func_80833770, func_80833770,
+    func_80833770, func_80833770, func_80833770, func_80833770, func_80833770, func_80833770, func_80833770, func_80833770,
     func_80833770, func_80833770, func_80833770, func_80833770, func_80833770, func_80833770, func_80833770,
     func_80833770, func_80833770, func_80833770, func_80833770, func_80833770, func_80833770, func_80833770,
     func_80833770, func_80833770, func_80833770, func_80833770, func_80833770, func_80833770, func_80833770,
@@ -5323,6 +5325,8 @@ static LinkAnimationHeader* D_80854548[] = {
     &gPlayerAnim_link_normal_take_out,
 };
 
+#define NUM_POTION_ITEMS 6
+
 s32 func_8083B040(Player* this, PlayState* play) {
     s32 sp2C;
     s32 sp28;
@@ -5422,7 +5426,7 @@ s32 func_8083B040(Player* this, PlayState* play) {
 
                 sp2C = Player_ActionToBottle(this, this->itemAction);
                 if (sp2C >= 0) {
-                    if (sp2C == 0xC) {
+                    if (sp2C == (PLAYER_IA_BOTTLE_FAIRY-PLAYER_IA_BOTTLE)) {
                         func_80835DE4(play, this, func_8084EED8, 0);
                         func_808322D0(play, this, &gPlayerAnim_link_bottle_bug_out);
                         func_80835EA4(play, 3);
@@ -13655,7 +13659,7 @@ void func_8084E9AC(Player* this, PlayState* play) {
 
 //Table of values for potion effects
 static u8 D_808549FC[] = {
-    0x01, 0x03, 0x02, 0x04, 0x04,
+    0x01, 0x03, 0x02, 0x04, 0x04, 0x08,
 };
 
 //Seems to handle the effects of the player using 'drinkable' items
@@ -13762,6 +13766,12 @@ void func_8084EAC0(Player* this, PlayState* play) {
 
                     if (sp28 & 4) {
                         gSaveContext.healthAccumulator = 0x50;
+                    }
+                    if (sp28 & 8) {
+                        if (LINK_IS_CHILD)
+                            Item_Give(play, ITEM_SEEDS_30);
+                        else
+                            Item_Give(play, ITEM_ARROWS_LARGE);
                     }
                 }
             }

@@ -78,6 +78,7 @@ u8 sActionModelGroups[] = {
     PLAYER_MODELGROUP_BOTTLE,        // PLAYER_IA_BOTTLE_POTION_GREEN
     PLAYER_MODELGROUP_BOTTLE,        // PLAYER_IA_BOTTLE_MILK_FULL
     PLAYER_MODELGROUP_BOTTLE,        // PLAYER_IA_BOTTLE_MILK_HALF
+    PLAYER_MODELGROUP_BOTTLE,        // PLAYER_IA_BOTTLE_AMMO
     PLAYER_MODELGROUP_BOTTLE,        // PLAYER_IA_BOTTLE_FAIRY
     PLAYER_MODELGROUP_DEFAULT,       // PLAYER_IA_ZELDAS_LETTER
     PLAYER_MODELGROUP_DEFAULT,       // PLAYER_IA_WEIRD_EGG
@@ -963,10 +964,12 @@ s32 Player_HoldsBrokenKnife(Player* this) {
     return (this->heldItemAction == PLAYER_IA_SWORD_BIGGORON) && (gSaveContext.swordHealth <= 0.0f);
 }
 
+#define NUM_BOTTLED_ITEMS 14
+
 s32 Player_ActionToBottle(Player* this, s32 actionParam) {
     s32 bottle = actionParam - PLAYER_IA_BOTTLE;
 
-    if ((bottle >= 0) && (bottle < 13)) {
+    if ((bottle >= 0) && (bottle < NUM_BOTTLED_ITEMS)) {
         return bottle;
     } else {
         return -1;
@@ -1762,7 +1765,7 @@ Gfx* sBottleDLists[] = { gLinkAdultBottleDL, gLinkChildBottleDL };
 Color_RGB8 sBottleColors[] = {
     { 255, 255, 255 }, { 80, 80, 255 },   { 255, 100, 255 }, { 0, 0, 255 }, { 255, 0, 255 },
     { 255, 0, 255 },   { 200, 200, 100 }, { 255, 0, 0 },     { 0, 0, 255 }, { 0, 255, 0 },
-    { 255, 255, 255 }, { 255, 255, 255 }, { 80, 80, 255 },
+    { 255, 255, 255 }, { 255, 255, 255 }, { 80, 80, 255 }, { 80, 80, 255 },
 };
 
 Vec3f sLeftHandArrowVec3 = { 398.0f, 1419.0f, 244.0f };

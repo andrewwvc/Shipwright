@@ -286,6 +286,7 @@ std::vector<std::string> itemNames = {
     "Ring 1",
     "Ring 2",
     "Ring 3",
+    "Bottled Ammo",
 };
 
 std::vector<std::string> questItemNames = {

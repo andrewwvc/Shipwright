@@ -4,7 +4,7 @@
 #include "z64.h"
 #include "segment_symbols.h"
 #define ITEMS_BASE_ICONS 160
-#define ITEMS_EXTRA_ICONS 6
+#define ITEMS_EXTRA_ICONS 7
 #define NUM_EQUIPMENT_ROWS 5
 
 #ifdef __cplusplus

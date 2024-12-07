@@ -592,6 +592,10 @@ static void* iconNameTexturesEx[] = {
     gLandmineItemNameENGTex,
     gNayrusAffectionItemNameENGTex,
     gDinsCrucibleItemNameENGTex,
+    gBluePotionItemNameFRATex,
+    gBluePotionItemNameFRATex,
+    gBluePotionItemNameFRATex,
+    gBluePotionItemNameFRATex,
 };
 
 static void* iconNameTexturesRing[] = {
