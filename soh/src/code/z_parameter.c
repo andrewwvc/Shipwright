@@ -1155,8 +1155,7 @@ void func_80083108(PlayState* play) {
 
                 if (interfaceCtx->restrictions.bottles != 0) {
                     for (i = 1; i < ARRAY_COUNT(gSaveContext.equips.buttonItems); i++) {
-                        if ((gSaveContext.equips.buttonItems[i] >= ITEM_BOTTLE) &&
-                            (gSaveContext.equips.buttonItems[i] <= ITEM_POE)) {
+                        if (Item_IsBottle(gSaveContext.equips.buttonItems[i])) {
                             if (gSaveContext.buttonStatus[BUTTON_STATUS_INDEX(i)] == BTN_ENABLED) {
                                 sp28 = 1;
                             }
@@ -1166,8 +1165,7 @@ void func_80083108(PlayState* play) {
                     }
                 } else if (interfaceCtx->restrictions.bottles == 0) {
                     for (i = 1; i < ARRAY_COUNT(gSaveContext.equips.buttonItems); i++) {
-                        if ((gSaveContext.equips.buttonItems[i] >= ITEM_BOTTLE) &&
-                            (gSaveContext.equips.buttonItems[i] <= ITEM_POE)) {
+                        if (Item_IsBottle(gSaveContext.equips.buttonItems[i])) {
                             if (gSaveContext.buttonStatus[BUTTON_STATUS_INDEX(i)] == BTN_DISABLED) {
                                 sp28 = 1;
                             }
@@ -1304,8 +1302,7 @@ void func_80083108(PlayState* play) {
                     for (i = 1; i < ARRAY_COUNT(gSaveContext.equips.buttonItems); i++) {
                         if ((gSaveContext.equips.buttonItems[i] != ITEM_OCARINA_FAIRY) &&
                             (gSaveContext.equips.buttonItems[i] != ITEM_OCARINA_TIME) &&
-                            !((gSaveContext.equips.buttonItems[i] >= ITEM_BOTTLE) &&
-                              (gSaveContext.equips.buttonItems[i] <= ITEM_POE)) &&
+                            !(Item_IsBottle(gSaveContext.equips.buttonItems[i])) &&
                             !((gSaveContext.equips.buttonItems[i] >= ITEM_SHIELD_DEKU) &&  // Never disable equipment
                               (gSaveContext.equips.buttonItems[i] <= ITEM_BOOTS_HOVER)) && // (tunics/boots) on C-buttons
                             !((gSaveContext.equips.buttonItems[i] >= ITEM_WEIRD_EGG) &&
@@ -1335,8 +1332,7 @@ void func_80083108(PlayState* play) {
                             (gSaveContext.equips.buttonItems[i] != ITEM_NAYRUS_LOVE) &&
                             (gSaveContext.equips.buttonItems[i] != ITEM_OCARINA_FAIRY) &&
                             (gSaveContext.equips.buttonItems[i] != ITEM_OCARINA_TIME) &&
-                            !((gSaveContext.equips.buttonItems[i] >= ITEM_BOTTLE) &&
-                              (gSaveContext.equips.buttonItems[i] <= ITEM_POE)) &&
+                            !(Item_IsBottle(gSaveContext.equips.buttonItems[i])) &&
                             !((gSaveContext.equips.buttonItems[i] >= ITEM_WEIRD_EGG) &&
                               (gSaveContext.equips.buttonItems[i] <= ITEM_CLAIM_CHECK))) {
                             if (gSaveContext.buttonStatus[BUTTON_STATUS_INDEX(i)] == BTN_DISABLED) {
@@ -1525,8 +1521,7 @@ void Inventory_SwapAgeEquipment(void) {
                     gSaveContext.equips.cButtonSlots[i - 1] = gSaveContext.adultEquips.cButtonSlots[i - 1];
                 }
 
-                if (((gSaveContext.equips.buttonItems[i] >= ITEM_BOTTLE) &&
-                     (gSaveContext.equips.buttonItems[i] <= ITEM_POE)) ||
+                if ((Item_IsBottle(gSaveContext.equips.buttonItems[i])) ||
                     ((gSaveContext.equips.buttonItems[i] >= ITEM_WEIRD_EGG) &&
                      (gSaveContext.equips.buttonItems[i] <= ITEM_CLAIM_CHECK))) {
                     osSyncPrintf("Register_Item_Pt(%d)=%d\n", i, gSaveContext.equips.cButtonSlots[i - 1]);
@@ -1576,8 +1571,7 @@ void Inventory_SwapAgeEquipment(void) {
                     gSaveContext.equips.cButtonSlots[i - 1] = gSaveContext.childEquips.cButtonSlots[i - 1];
                 }
 
-                if (((gSaveContext.equips.buttonItems[i] >= ITEM_BOTTLE) &&
-                     (gSaveContext.equips.buttonItems[i] <= ITEM_POE)) ||
+                if ((Item_IsBottle(gSaveContext.equips.buttonItems[i])) ||
                     ((gSaveContext.equips.buttonItems[i] >= ITEM_WEIRD_EGG) &&
                      (gSaveContext.equips.buttonItems[i] <= ITEM_CLAIM_CHECK))) {
                     osSyncPrintf("Register_Item_Pt(%d)=%d\n", i, gSaveContext.equips.cButtonSlots[i - 1]);
@@ -1600,8 +1594,7 @@ void Inventory_SwapAgeEquipment(void) {
                     gSaveContext.equips.cButtonSlots[i - 1] = gSaveContext.childEquips.cButtonSlots[i - 1];
                 }
 
-                if (((gSaveContext.equips.buttonItems[i] >= ITEM_BOTTLE) &&
-                     (gSaveContext.equips.buttonItems[i] <= ITEM_POE)) ||
+                if ((Item_IsBottle(gSaveContext.equips.buttonItems[i])) ||
                     ((gSaveContext.equips.buttonItems[i] >= ITEM_WEIRD_EGG) &&
                      (gSaveContext.equips.buttonItems[i] <= ITEM_CLAIM_CHECK))) {
                     osSyncPrintf("Register_Item_Pt(%d)=%d\n", i, gSaveContext.equips.cButtonSlots[i - 1]);
@@ -1782,7 +1775,7 @@ void GameplayStats_SetTimestamp(PlayState* play, u8 item) {
     }
 
     // Count any bottled item as a bottle
-    if (item >= ITEM_BOTTLE && item <= ITEM_POE) {
+    if (Item_IsBottle(item)) {
         if (gSaveContext.sohStats.itemTimestamp[ITEM_BOTTLE] == 0) {
             gSaveContext.sohStats.itemTimestamp[ITEM_BOTTLE] = time;
         }
@@ -1966,6 +1959,14 @@ void Item_ManageBombchus() {
     }
 
     gSaveContext.extraBombchuAccumulation = 0;
+}
+
+u8 Item_IsBottle(u8 item) {
+    return (item >= ITEM_BOTTLE && item <= ITEM_POE) || (item >= ITEM_BOTTLE_AMMO && item <= ITEM_BOTTLE_AMMO);
+}
+
+u8 Item_IsBottlable(u8 item) {
+    return (item == ITEM_MILK) || (Item_IsBottle(item) && item != ITEM_BOTTLE);
 }
 
 /**
@@ -2508,7 +2509,7 @@ u8 Item_Give(PlayState* play, u8 item) {
                 return Return_Item(item, MOD_NONE, ITEM_NONE);
             }
         }
-    } else if (((item >= ITEM_POTION_RED) && (item <= ITEM_POE)) || (item == ITEM_MILK)) {
+    } else if (Item_IsBottlable(item)) {
         temp = SLOT(item);
 
         if ((item != ITEM_MILK_BOTTLE) && (item != ITEM_LETTER_RUTO)) {
@@ -2961,7 +2962,7 @@ u8 Item_CheckObtainability(u8 item) {
         return ITEM_NONE;
     } else if (item == ITEM_BOTTLE) {
         return ITEM_NONE;
-    } else if (((item >= ITEM_POTION_RED) && (item <= ITEM_POE)) || (item == ITEM_MILK)) {
+    } else if (Item_IsBottlable(item)) {
         temp = SLOT(item);
 
         if ((item != ITEM_MILK_BOTTLE) && (item != ITEM_LETTER_RUTO)) {

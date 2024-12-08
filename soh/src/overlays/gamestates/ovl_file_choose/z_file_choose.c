@@ -185,7 +185,7 @@ void SpriteDraw(FileChooseContext* this, Sprite* sprite, int left, int top, int 
 u8 HasItem(s16 fileIndex, u8 item) {
     for (int i = 0; i < ARRAY_COUNT(Save_GetSaveMetaInfo(fileIndex)->inventoryItems); i += 1) {
         u8 it = Save_GetSaveMetaInfo(fileIndex)->inventoryItems[i];
-        if (it == item || (item == ITEM_BOTTLE && it >= ITEM_BOTTLE && it <= ITEM_POE)) {
+        if (it == item || (item == ITEM_BOTTLE && Item_IsBottle(it))) {
             return 1;
         }
     }

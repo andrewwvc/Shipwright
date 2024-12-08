@@ -938,6 +938,7 @@ u8 gItemAgeReqs[] = {
     AGE_REQ_NONE,   // ITEM_RING_1
     AGE_REQ_NONE,   // ITEM_RING_2
     AGE_REQ_NONE,   // ITEM_RING_3
+    AGE_REQ_NONE,   // ITEM_BOTTLE_AMMO
 };
 
 u8 gAreaGsFlags[] = {

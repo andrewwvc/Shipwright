@@ -1119,6 +1119,8 @@ s16 Ring_Get_In_Slot(s16 slotNum);
 s16 Ring_Get_Equiped(void);
 u16 Ring_SwapRight(u8 ringSlot);
 u16 Ring_SwapLeft(u8 ringSlot);
+u8 Item_IsBottle(u8 item);
+u8 Item_IsBottlable(u8 item);
 u16 Randomizer_Item_Give(PlayState* play, GetItemEntry giEntry);
 u8 Item_CheckObtainability(u8 item);
 void PerformAutosave(PlayState* play, u8 item);
