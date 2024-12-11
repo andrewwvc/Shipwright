@@ -2503,7 +2503,7 @@ u8 Item_Give(PlayState* play, u8 item) {
     } else if (item == ITEM_BOTTLE) {
         temp = SLOT(item);
 
-        for (i = 0; i < 4; i++) {
+        for (i = 0; i < NUM_BOTTLES; i++) {
             if (gSaveContext.inventory.items[temp + i] == ITEM_NONE) {
                 gSaveContext.inventory.items[temp + i] = item;
                 return Return_Item(item, MOD_NONE, ITEM_NONE);
@@ -2518,7 +2518,7 @@ u8 Item_Give(PlayState* play, u8 item) {
                 temp = SLOT(item);
             }
 
-            for (i = 0; i < 4; i++) {
+            for (i = 0; i < NUM_BOTTLES; i++) {
                 if (gSaveContext.inventory.items[temp + i] == ITEM_BOTTLE) {
                     // "Item_Pt(1)=%d Item_Pt(2)=%d Item_Pt(3)=%d   Empty Bottle=%d   Content=%d"
                     osSyncPrintf("Item_Pt(1)=%d Item_Pt(2)=%d Item_Pt(3)=%d   空瓶=%d   中味=%d\n",
@@ -2541,7 +2541,7 @@ u8 Item_Give(PlayState* play, u8 item) {
                 }
             }
         } else {
-            for (i = 0; i < 4; i++) {
+            for (i = 0; i < NUM_BOTTLES; i++) {
                 if (gSaveContext.inventory.items[temp + i] == ITEM_NONE) {
                     gSaveContext.inventory.items[temp + i] = item;
                     break;
@@ -2971,13 +2971,13 @@ u8 Item_CheckObtainability(u8 item) {
                 temp = SLOT(item);
             }
 
-            for (i = 0; i < 4; i++) {
+            for (i = 0; i < NUM_BOTTLES; i++) {
                 if (gSaveContext.inventory.items[temp + i] == ITEM_BOTTLE) {
                     return ITEM_NONE;
                 }
             }
         } else {
-            for (i = 0; i < 4; i++) {
+            for (i = 0; i < NUM_BOTTLES; i++) {
                 if (gSaveContext.inventory.items[temp + i] == ITEM_NONE) {
                     return ITEM_NONE;
                 }
@@ -3041,6 +3041,10 @@ s32 Inventory_HasEmptyBottle(void) {
         return 1;
     } else if (items[SLOT_BOTTLE_4] == ITEM_BOTTLE) {
         return 1;
+    } else if (items[SLOT_BOTTLE_5] == ITEM_BOTTLE) {
+        return 1;
+    } else if (items[SLOT_BOTTLE_6] == ITEM_BOTTLE) {
+        return 1;
     } else {
         return 0;
     }
@@ -3053,7 +3057,9 @@ bool Inventory_HasEmptyBottleSlot(void) {
         items[SLOT_BOTTLE_1] == ITEM_NONE ||
         items[SLOT_BOTTLE_2] == ITEM_NONE ||
         items[SLOT_BOTTLE_3] == ITEM_NONE ||
-        items[SLOT_BOTTLE_4] == ITEM_NONE
+        items[SLOT_BOTTLE_4] == ITEM_NONE ||
+        items[SLOT_BOTTLE_5] == ITEM_NONE ||
+        items[SLOT_BOTTLE_6] == ITEM_NONE
     );
 }
 
@@ -3112,7 +3118,7 @@ s32 Inventory_ConsumeFairy(PlayState* play) {
     s16 i;
     s16 j;
 
-    for (i = 0; i < 4; i++) {
+    for (i = 0; i < NUM_BOTTLES; i++) {
         if (gSaveContext.inventory.items[bottleSlot + i] == ITEM_FAIRY) {
             for (j = 1; j < ARRAY_COUNT(gSaveContext.equips.buttonItems); j++) {
                 if (gSaveContext.equips.buttonItems[j] == ITEM_FAIRY) {

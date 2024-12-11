@@ -760,7 +760,8 @@ void DrawInventoryTab() {
                     // Scan gItemSlots to find legal items for this slot. Bottles are a special case
                     for (int slotIndex = 0; slotIndex < ARRAY_COUNT(gItemSlots); slotIndex++) {
                         int testIndex = (selectedIndex == SLOT_BOTTLE_1 || selectedIndex == SLOT_BOTTLE_2 ||
-                                         selectedIndex == SLOT_BOTTLE_3 || selectedIndex == SLOT_BOTTLE_4)
+                                         selectedIndex == SLOT_BOTTLE_3 || selectedIndex == SLOT_BOTTLE_4 ||
+                                         selectedIndex == SLOT_BOTTLE_5 || selectedIndex == SLOT_BOTTLE_6)
                                             ? SLOT_BOTTLE_1
                                             : selectedIndex;
                         if (gItemSlots[slotIndex] == testIndex) {

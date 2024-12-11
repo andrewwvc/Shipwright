@@ -502,7 +502,7 @@ void KaleidoScope_DrawDebugEditor(PlayState* play) {
                             gSaveContext.inventory.items[i]--;
                         }
                     }
-                } else if ((i >= SLOT_BOTTLE_1) && (i <= SLOT_BOTTLE_4)) {
+                } else if ((i >= SLOT_BOTTLE_1) && (i <= SLOT_BOTTLE_6)) {
                     if (CHECK_BTN_ALL(input->press.button, BTN_CUP)) {
                         Inventory_DeleteItem(ITEM_BOTTLE + i - SLOT_BOTTLE_1, SLOT(ITEM_BOTTLE) + i - SLOT_BOTTLE_1);
                     } else if (CHECK_BTN_ALL(input->press.button, BTN_CLEFT)) {

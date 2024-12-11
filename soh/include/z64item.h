@@ -153,12 +153,12 @@ typedef enum {
     /* 0x13 */ SLOT_BOTTLE_2,
     /* 0x14 */ SLOT_BOTTLE_3,
     /* 0x15 */ SLOT_BOTTLE_4,
-    /* 0x16 */ SLOT_TRADE_ADULT,
-    /* 0x17 */ SLOT_TRADE_CHILD,
+    /* 0x15 */ SLOT_BOTTLE_5,
+    /* 0x15 */ SLOT_BOTTLE_6,
     /* 0x18 */ SLOT_LANDMINE,
     /* 0x19 */ SLOT_RING1,
-    /* 0x1A */ SLOT_PLACEHOLDER1,
-    /* 0x1B */ SLOT_PLACEHOLDER2,
+    /* 0x16 */ SLOT_TRADE_ADULT,
+    /* 0x17 */ SLOT_TRADE_CHILD,
     /* 0x1C */ SLOT_DINS_CRUCIBLE,
     /* 0x1D */ SLOT_NAYRUS_AFFECTION,
     /* 0xF9 */ SLOT_TUNIC_KOKIRI = 0xF9,
@@ -169,6 +169,8 @@ typedef enum {
     /* 0xFE */ SLOT_BOOTS_HOVER,
     /* 0xFF */ SLOT_NONE = 0xFF
 } InventorySlot;
+
+#define NUM_BOTTLES 6
 
 typedef enum {
     /* 0x00 */ ITEM_STICK,
