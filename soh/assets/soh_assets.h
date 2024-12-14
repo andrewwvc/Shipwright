@@ -142,6 +142,12 @@ static const ALIGN_ASSET(2) char gItemIconDinsCrucibleTex[] = dgItemIconDinsCruc
 #define dgDinsCrucibleItemNameENGTex "__OTR__textures/title_static/dins_crucible_item_name_eng"
 static const ALIGN_ASSET(2) char gDinsCrucibleItemNameENGTex[] = dgDinsCrucibleItemNameENGTex;
 
+#define dgItemIconBottleAmmoTex "__OTR__textures/icons/bottle_ammo_icon"
+static const ALIGN_ASSET(2) char gItemIconBottleAmmoTex[] = dgItemIconBottleAmmoTex;
+
+#define dgBottleAmmoItemNameENGTex "__OTR__textures/title_static/gBottleAmmoItemNameENGTex"
+static const ALIGN_ASSET(2) char gBottleAmmoItemNameENGTex[] = dgBottleAmmoItemNameENGTex;
+
 #define dgItemIconRing1Tex "__OTR__textures/icons/ring_icon"
 static const ALIGN_ASSET(2) char gItemIconRing1Tex[] = dgItemIconRing1Tex;
 

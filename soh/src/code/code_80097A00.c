@@ -177,7 +177,7 @@ void* gItemIcons[] = {
     gItemIconRing1Tex,
     gItemIconRing1Tex,
     gItemIconRing1Tex,
-    gItemIconBottleMilkHalfTex,
+    gItemIconBottleAmmoTex,
 };
 
 // Used to map item IDs to inventory slots

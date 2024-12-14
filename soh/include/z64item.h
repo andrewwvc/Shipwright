@@ -484,6 +484,7 @@ typedef enum {
     /* 0x82 */ GI_LANDMINE,
     /* 0x83 */ GI_NAYRUS_AFFECTION,
     /* 0x84 */ GI_DINS_CRUCIBLE,
+    /* 0x0F */ GI_BOTTLE_AMMO,
     /* 0x85 */ GI_RING,
     /* 0x85 */ GI_RING_1,
     /* 0x85 */ GI_RING_2,
@@ -665,6 +666,7 @@ typedef enum {
     /* 0x7E */ GID_SONG_STORM,
     /* 0x7F */ GID_TRIFORCE_PIECE,
     /* 0x80 */ GID_LANDMINE,
+    /* 0x00 */ GID_BOTTLE_AMMO,
     /* 0x81 */ GID_RING_0,
     /* 0x82 */ GID_RING_LAST = GID_RING_0+RING_GI_MAX-RING_GI_MIN,
     /* 0x83 */ GID_MAXIMUM

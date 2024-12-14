@@ -114,6 +114,7 @@ void GetItem_DrawJewelZora(PlayState* play, s16 drawId);
 void GetItem_DrawGenericMusicNote(PlayState* play, s16 drawId);
 void GetItem_DrawTriforcePiece(PlayState* play, s16 drawId);
 void GetItem_DrawLandmine(PlayState* play, s16 drawId);
+void GetItem_DrawSpecialBottled(PlayState* play, s16 drawId);
 void GetItem_DrawRing(PlayState* play, s16 drawId);
 
 typedef struct {
@@ -392,6 +393,7 @@ DrawItemTableEntry sDrawItemTable[] = {
     { GetItem_DrawGenericMusicNote, { gGiSongNoteDL } }, //Song of storms
     { GetItem_DrawTriforcePiece, { gTriforcePiece0DL } }, // Triforce Piece
     { GetItem_DrawLandmine, { gLandmineDL }}, // Land Mine
+    { GetItem_DrawSpecialBottled, { gGiSeedDL, gGiBottleDL } },
     { GetItem_DrawRing, { gGiRing0DL }}, // Ring 0
     { GetItem_DrawRing, { gGiRing0DL }}, // Ring 1
     { GetItem_DrawRing, { gGiRing0DL }}, //
@@ -853,6 +855,34 @@ void GetItem_DrawOpa0Xlu1(PlayState* play, s16 drawId) {
     gSPMatrix(POLY_OPA_DISP++, MATRIX_NEWMTX(play->state.gfxCtx),
               G_MTX_MODELVIEW | G_MTX_LOAD);
     gSPDisplayList(POLY_OPA_DISP++, sDrawItemTable[drawId].dlists[0]);
+
+    Gfx_SetupDL_25Xlu(play->state.gfxCtx);
+    gSPMatrix(POLY_XLU_DISP++, MATRIX_NEWMTX(play->state.gfxCtx),
+              G_MTX_MODELVIEW | G_MTX_LOAD);
+    gSPDisplayList(POLY_XLU_DISP++, sDrawItemTable[drawId].dlists[1]);
+
+    CLOSE_DISPS(play->state.gfxCtx);
+}
+
+f32 gBottledItemTransforms[][2] = {
+    {-8.0f, 0.5f},  //Ammo
+};
+
+void GetItem_DrawSpecialBottled(PlayState* play, s16 drawId) {
+    s32 pad;
+
+    OPEN_DISPS(play->state.gfxCtx);
+
+    Matrix_Push();
+    f32 transHeight = gBottledItemTransforms[drawId-GID_BOTTLE_AMMO][0];
+    f32 sizeScale = gBottledItemTransforms[drawId-GID_BOTTLE_AMMO][1];
+    Matrix_Translate(0.0f, transHeight, 0.0f, MTXMODE_APPLY);
+    Matrix_Scale(sizeScale, sizeScale, sizeScale, MTXMODE_APPLY);
+    Gfx_SetupDL_25Opa(play->state.gfxCtx);
+    gSPMatrix(POLY_OPA_DISP++, MATRIX_NEWMTX(play->state.gfxCtx),
+              G_MTX_MODELVIEW | G_MTX_LOAD);
+    gSPDisplayList(POLY_OPA_DISP++, sDrawItemTable[drawId].dlists[0]);
+    Matrix_Pop();
 
     Gfx_SetupDL_25Xlu(play->state.gfxCtx);
     gSPMatrix(POLY_XLU_DISP++, MATRIX_NEWMTX(play->state.gfxCtx),
