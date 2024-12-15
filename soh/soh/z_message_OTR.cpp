@@ -1298,6 +1298,8 @@ extern "C" void OTRMessage_Init()
     MakeNormalMsgEng(0xF001, "\x08Piece of Heart   300 Rupees&\x09\x1B&%gBuy&Don't buy%w\x02");
     MakeNormalMsgEng(0xF002, "\x08%rProtective Ring    999 Rupees&%wYou're a good customer, so here's&a special offer you'll find useful.&Protects against explosive damage.\x09\x0A")
     MakeNormalMsgEng(0xF003, "\x08""Protective Ring    999 Rupees\x09&&\x1B%gBuy&Don't buy%w");
+    MakeNormalMsgEng(0xF004, "\x08%rBottled Ammo    100 Rupees&%wHere's a bottle containing the&essense of firepower! Magically restores&the ammo of your ranged weapon!\t\n\x02")
+    MakeNormalMsgEng(0xF005, "\x08""Bottled Ammo    100 Rupees\x09&&\x1B%gBuy&Don't buy%w\x02");
 
     u16 RanchMsg = TextIDAllocator::Instance->allocateRange("ranch", 20);
     MakeNormalMsgEng(RanchMsg+0, "Oh, I really can't get to sleep.^Hey, fairy boy, when did&you get in here anyway?&You've been sneaking about,&haven't you?^Hmm...we could go out and play,&but you'd have to be careful&to not wake dad.^I'll see you outside.");

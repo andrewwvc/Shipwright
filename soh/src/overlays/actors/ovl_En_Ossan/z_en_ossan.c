@@ -212,7 +212,7 @@ ShopItem sShopkeeperStores[][8] = {
       { SI_BLUE_FIRE, 50, 76, -20 },
       { SI_RED_POTION_R30, 80, 52, -3 },
       { SI_FAIRY, 80, 76, -3 },
-      { SI_DEKU_NUTS_5, -50, 52, -20 },
+      { SI_BOTTLE_AMMO, -50, 52, -20 },
       { SI_BUGS, -50, 76, -20 },
       { SI_POE, -80, 52, -3 },
       { SI_FISH, -80, 76, -3 } },
@@ -230,7 +230,7 @@ ShopItem sShopkeeperStores[][8] = {
       { SI_BLUE_FIRE, 50, 76, -20 },
       { SI_RED_POTION_R30, 80, 52, -3 },
       { SI_FAIRY, 80, 76, -3 },
-      { SI_DEKU_NUTS_5, -50, 52, -20 },
+      { SI_BOTTLE_AMMO, -50, 52, -20 },
       { SI_BUGS, -50, 76, -20 },
       { SI_POE, -80, 52, -3 },
       { SI_FISH, -80, 76, -3 } },
@@ -321,7 +321,7 @@ static EnOssanGetGirlAParamsFunc sShopItemReplaceFunc[] = {
     ShopItemDisp_Default,   ShopItemDisp_Default,    ShopItemDisp_Default, ShopItemDisp_Default,
     ShopItemDisp_Default,   ShopItemDisp_Default,    ShopItemDisp_Default, ShopItemDisp_Default,
     ShopItemDisp_Default,   ShopItemDisp_Default,    ShopItemDisp_Default, ShopItemDisp_Default,
-    ShopItemDisp_Default
+    ShopItemDisp_Default,   ShopItemDisp_Default
 };
 
 static InitChainEntry sInitChain[] = {

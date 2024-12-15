@@ -90,6 +90,7 @@ typedef enum {
     /* 0x32 */ SI_RANDOMIZED_ITEM,
     /* 0x33 */ SI_PIECE_OF_HEART,
     /* 0x34 */ SI_PROTECTION_RING,
+    /* 0x34 */ SI_BOTTLE_AMMO,
     /* 0x34 */ SI_MAX
 } EnGirlAShopItem;
 

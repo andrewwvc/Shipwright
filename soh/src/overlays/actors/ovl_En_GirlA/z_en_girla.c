@@ -51,6 +51,7 @@ s32 EnGirlA_CanBuy_Poe(PlayState* play, EnGirlA* this);
 s32 EnGirlA_CanBuy_Fairy(PlayState* play, EnGirlA* this);
 s32 EnGirlA_CanBuy_Randomizer(PlayState* play, EnGirlA* this);
 s32 EnGirlA_CanBuy_HeartPiece(PlayState* play, EnGirlA* this);
+s32 EnGirlA_CanBuy_ExtraBottledItem(PlayState* play, EnGirlA* this);
 
 void EnGirlA_ItemGive_DekuNuts(PlayState* play, EnGirlA* this);
 void EnGirlA_ItemGive_Arrows(PlayState* play, EnGirlA* this);
@@ -144,7 +145,10 @@ static char* sShopItemDescriptions[] = {
     "赤クスリ      ", // "Red medicine"
     "赤クスリ      ", // "Red medicine"
     "Random Item  ",  // "Random Item"
-    "ハートの欠片  "  // "Random Item"
+    "ハートの欠片  ",  // "Piece of Heart"
+    "Protection Ring",
+    "Bottled Ammo",
+    "Max Item"
 };
 
 static s16 sMaskShopItems[8] = {
@@ -326,7 +330,9 @@ static ShopItemEntry shopItemEntries[] = {
     { OBJECT_B_HEART, GID_HEART_PIECE, NULL, 300, 1, 0xF000, 0xF001, GI_HEART_PIECE, EnGirlA_CanBuy_HeartPiece,
       EnGirlA_ItemGive_PieceOfHeart, EnGirlA_BuyEvent_HeartPiece },
     { OBJECT_GI_KEY, GID_RING_0+RI_PROTECTION_RING, NULL, 999, 1, 0xF002, 0xF003, GI_RING+RI_PROTECTION_RING, EnGirlA_CanBuy_HeartPiece,
-      EnGirlA_ItemGive_Ring, EnGirlA_BuyEvent_Ring}
+      EnGirlA_ItemGive_Ring, EnGirlA_BuyEvent_Ring},
+    { OBJECT_GI_BOTTLE, GID_BOTTLE_AMMO, NULL, 100, 1, 0xF004, 0xF005, GI_BOTTLE_AMMO, EnGirlA_CanBuy_ExtraBottledItem,
+      EnGirlA_ItemGive_BottledItem, EnGirlA_BuyEvent_ShieldDiscount }
 };
 
 // Defines the Hylian Shield discount amount
@@ -797,6 +803,19 @@ s32 EnGirlA_CanBuy_Fairy(PlayState* play, EnGirlA* this) {
     return CANBUY_RESULT_SUCCESS;
 }
 
+s32 EnGirlA_CanBuy_ExtraBottledItem(PlayState* play, EnGirlA* this) {
+    if (!Inventory_HasEmptyBottle()) {
+        return CANBUY_RESULT_NEED_BOTTLE;
+    }
+    if (Rupees_GetNum() < this->basePrice) {
+        return CANBUY_RESULT_NEED_RUPEES;
+    }
+    if (Item_CheckObtainability(ITEM_BOTTLE_AMMO) == ITEM_NONE) {
+        return CANBUY_RESULT_SUCCESS_FANFARE;
+    }
+    return CANBUY_RESULT_SUCCESS;
+}
+
 s32 EnGirlA_CanBuy_Randomizer(PlayState* play, EnGirlA* this) {
     ShopItemIdentity shopItemIdentity = Randomizer_IdentifyShopItem(play->sceneNum, this->randoSlotIndex);
     GetItemEntry getItemEntry = Randomizer_GetItemFromKnownCheckWithoutObtainabilityCheck(shopItemIdentity.randomizerCheck, shopItemIdentity.ogItemId);
@@ -995,6 +1014,9 @@ void EnGirlA_ItemGive_BottledItem(PlayState* play, EnGirlA* this) {
             break;
         case SI_FAIRY:
             Item_Give(play, ITEM_FAIRY);
+            break;
+        case SI_BOTTLE_AMMO:
+            Item_Give(play, ITEM_BOTTLE_AMMO);
             break;
     }
     Rupees_ChangeBy(-this->basePrice);
