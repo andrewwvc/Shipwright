@@ -320,7 +320,7 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, LUS::ActorEnt
             { -1, -1, { ACTOR_EN_FIREFLY, 3560,-365,-1105, 0,-10700,0, 0x4}},
             { -1, -1, { ACTOR_EN_FIREFLY, 3090,-365,-742, 0,-17000,0, 0x4}},
             { -1, -1, { ACTOR_EN_FIREFLY, 3090,-365,-1105, 0,0,0, 0x4}},
-            //{ -1, -1, { ACTOR_EN_POH, 3020,-500,-970, 0,0,0, 0x0}}
+            { -1, -1, { ACTOR_EN_POH, 3370,-500,-800, 0,0,0, 0x210}},
         } },
         { 0x07, {
             { -1, 0, { ACTOR_EN_RD, 3498,-543,721, 0,-32768,0, 32764}},

@@ -216,10 +216,19 @@ void EnPoh_Init(Actor* thisx, PlayState* play) {
     this->visibilityTimer = Rand_S16Offset(700, 300);
     this->trackingDir = 0;
     this->decisionTimer = 0;
-    this->hasBeenAttacked = false;
+    if (this->actor.params & 0x10){
+        this->hasBeenAttacked = true;
+        this->actor.params &= ~0x10;
+    } else {
+        this->hasBeenAttacked = false;
+    }
     this->lightNode = LightContext_InsertLight(play, &play->lightCtx, &this->lightInfo);
     Lights_PointGlowSetInfo(&this->lightInfo, this->actor.home.pos.x, this->actor.home.pos.y, this->actor.home.pos.z,
                             255, 255, 255, 0);
+    if (this->actor.params & 0xF00) {
+        this->colliderSph.elements[0].info.toucher.damage *= (this->actor.params >> 8);
+        this->actor.params &= ~0xF00;
+    }
     if (this->actor.params >= 4) {
         this->actor.params = EN_POH_NORMAL;
     }
@@ -250,6 +259,10 @@ void EnPoh_Init(Actor* thisx, PlayState* play) {
     }
     if (this->actor.params < EN_POH_SHARP) {
         this->objectIdx = Object_GetIndex(&play->objectCtx, OBJECT_POH);
+        if (this->objectIdx < 0) {
+            Object_Spawn(&play->objectCtx, OBJECT_POH);
+            this->objectIdx = Object_GetIndex(&play->objectCtx, OBJECT_POH);
+        }
         this->infoIdx = EN_POH_INFO_NORMAL;
         this->actor.naviEnemyId = 0x44;
     } else {
@@ -701,7 +714,7 @@ void EnPoh_Engaging(EnPoh* this, PlayState* play) {
     s8 atTargetHeight = EnPoh_MoveAtPlayerHeight(this, play);
     if (this->actionTimer == 0 && this->lightColor.a == 255) {
         EnPoh_SetupDisappear(this);
-    } else if (this->actor.xzDistToPlayer < ActionRange) {
+    } else if ((this->actor.xzDistToPlayer < ActionRange) || (LINK_IS_ADULT && isPlayerInSpinAttack(play) && this->actor.xzDistToPlayer < NearEscapeRange)) {
         if (isPlayerInSpinAttack(play) || (Player_IsFacingActor(&this->actor, 0x2000, play) && this->actor.xzDistToPlayer < 120.0f &&
                                             (isPlayerInBasicHorizontalSlash(play) || (player->meleeWeaponAnimation == PLAYER_MWA_HAMMER_SIDE && player->meleeWeaponState)))) {
             this->actor.speedXZ = -6.5;
@@ -767,7 +780,10 @@ void EnPoh_NormalApparate(EnPoh* this, PlayState* play) {
         this->lightColor.a = 255;
         this->visibilityTimer = Rand_S16Offset(700, 300);
         this->actor.flags |= ACTOR_FLAG_TARGETABLE;
-        EnPoh_SetupIdle(this);
+        if (this->hasBeenAttacked)
+            EnPoh_SetupTrickyApproach(this);
+        else
+            EnPoh_SetupIdle(this);
     } else if (this->skelAnime.curFrame > 10.0f) {
         this->lightColor.a = ((this->skelAnime.curFrame - 10.0f) * 0.05f) * 255.0f;
     }
