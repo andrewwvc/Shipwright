@@ -203,7 +203,7 @@ void EnDh_SetupWait(EnDh* this) {
 
 void EnDh_Wait(EnDh* this, PlayState* play) {
     Player* player = GET_PLAYER(play);
-    f32 undeadSpawnDist = 100.0f;
+    f32 undeadSpawnDist = LINK_IS_CHILD ? 100.0f : 120.0f;
     f32 undeadSpawnSpacing = 50.0f;
     s16 endstop = LINK_IS_CHILD ? 2 : 1;
     s16 spawnUndeadCondiiton = (LINK_IS_ADULT && this->actor.colChkInfo.health < 15) || (LINK_IS_CHILD && this->actor.colChkInfo.health < 21);
@@ -228,16 +228,30 @@ void EnDh_Wait(EnDh* this, PlayState* play) {
                 this->dirtWaveHeight = Math_SinS(this->dirtWavePhase) * 55.0f;
                 this->dirtWaveAlpha = (s16)(Math_SinS(this->dirtWavePhase) * 255.0f);
                 EnDh_SpawnDebris(play, this, &this->actor.world.pos, this->dirtWaveSpread, 4, 2.05f, 1.2f);
-                if (spawnUndeadCondiiton) {
-                    for (int ii = -2; ii <= endstop; ii++) {
+                if (LINK_IS_CHILD) {
+                    if (spawnUndeadCondiiton) {
+                        for (int ii = -2; ii <= endstop; ii++) {
+                            Vec3f spawnPos;
+                            spawnPos.x = player->actor.world.pos.x+Math_SinS(this->actor.yawTowardsPlayer+0x4000)*undeadSpawnDist+Math_SinS(this->actor.yawTowardsPlayer)*undeadSpawnSpacing*ii;
+                            spawnPos.y = player->actor.world.pos.y;
+                            spawnPos.z = player->actor.world.pos.z+Math_CosS(this->actor.yawTowardsPlayer+0x4000)*undeadSpawnDist+Math_CosS(this->actor.yawTowardsPlayer)*undeadSpawnSpacing*ii;
+                            EnDh_SpawnDebris(play, this,&spawnPos, 60, 4, 1.35f, 1.0f);
+                            spawnPos.x = player->actor.world.pos.x-Math_SinS(this->actor.yawTowardsPlayer+0x4000)*undeadSpawnDist+Math_SinS(this->actor.yawTowardsPlayer)*undeadSpawnSpacing*ii;
+                            spawnPos.y = player->actor.world.pos.y;
+                            spawnPos.z = player->actor.world.pos.z-Math_CosS(this->actor.yawTowardsPlayer+0x4000)*undeadSpawnDist+Math_CosS(this->actor.yawTowardsPlayer)*undeadSpawnSpacing*ii;
+                            EnDh_SpawnDebris(play, this,&spawnPos, 60, 4, 1.35f, 1.0f);
+                        }
+                    }
+                } else {
+                    if (spawnUndeadCondiiton) {
                         Vec3f spawnPos;
-                        spawnPos.x = player->actor.world.pos.x+Math_SinS(this->actor.yawTowardsPlayer+0x4000)*undeadSpawnDist+Math_SinS(this->actor.yawTowardsPlayer)*undeadSpawnSpacing*ii;
+                        spawnPos.x = player->actor.world.pos.x+Math_SinS(this->actor.yawTowardsPlayer+0x4000)*undeadSpawnDist;
                         spawnPos.y = player->actor.world.pos.y;
-                        spawnPos.z = player->actor.world.pos.z+Math_CosS(this->actor.yawTowardsPlayer+0x4000)*undeadSpawnDist+Math_CosS(this->actor.yawTowardsPlayer)*undeadSpawnSpacing*ii;
+                        spawnPos.z = player->actor.world.pos.z+Math_CosS(this->actor.yawTowardsPlayer+0x4000)*undeadSpawnDist;
                         EnDh_SpawnDebris(play, this,&spawnPos, 60, 4, 1.35f, 1.0f);
-                        spawnPos.x = player->actor.world.pos.x-Math_SinS(this->actor.yawTowardsPlayer+0x4000)*undeadSpawnDist+Math_SinS(this->actor.yawTowardsPlayer)*undeadSpawnSpacing*ii;
+                        spawnPos.x = player->actor.world.pos.x-Math_SinS(this->actor.yawTowardsPlayer+0x4000)*undeadSpawnDist;
                         spawnPos.y = player->actor.world.pos.y;
-                        spawnPos.z = player->actor.world.pos.z-Math_CosS(this->actor.yawTowardsPlayer+0x4000)*undeadSpawnDist+Math_CosS(this->actor.yawTowardsPlayer)*undeadSpawnSpacing*ii;
+                        spawnPos.z = player->actor.world.pos.z-Math_CosS(this->actor.yawTowardsPlayer+0x4000)*undeadSpawnDist;
                         EnDh_SpawnDebris(play, this,&spawnPos, 60, 4, 1.35f, 1.0f);
                     }
                 }
@@ -249,25 +263,47 @@ void EnDh_Wait(EnDh* this, PlayState* play) {
                 }
                 break;
             case 2:
-                if (spawnUndeadCondiiton) {
-                    for (int ii = -2; ii <= endstop; ii++) {
+                if (LINK_IS_CHILD) {
+                    if (spawnUndeadCondiiton) {
+                        for (int ii = -2; ii <= endstop; ii++) {
+                            Vec3f spawnPos;
+                            spawnPos.x = player->actor.world.pos.x+Math_SinS(this->actor.yawTowardsPlayer+0x4000)*undeadSpawnDist+Math_SinS(this->actor.yawTowardsPlayer)*undeadSpawnSpacing*ii;
+                            spawnPos.y = player->actor.world.pos.y;
+                            spawnPos.z = player->actor.world.pos.z+Math_CosS(this->actor.yawTowardsPlayer+0x4000)*undeadSpawnDist+Math_CosS(this->actor.yawTowardsPlayer)*undeadSpawnSpacing*ii;
+                            Actor_Spawn(&play->actorCtx,play,ACTOR_EN_RD, spawnPos.x,
+                                                                        spawnPos.y,
+                                                                        spawnPos.z,
+                                                                        0,this->actor.yawTowardsPlayer-0x4000,0,
+                                                                        0x4, false);
+                            spawnPos.x = player->actor.world.pos.x-Math_SinS(this->actor.yawTowardsPlayer+0x4000)*undeadSpawnDist+Math_SinS(this->actor.yawTowardsPlayer)*undeadSpawnSpacing*ii;
+                            spawnPos.y = player->actor.world.pos.y;
+                            spawnPos.z = player->actor.world.pos.z-Math_CosS(this->actor.yawTowardsPlayer+0x4000)*undeadSpawnDist+Math_CosS(this->actor.yawTowardsPlayer)*undeadSpawnSpacing*ii;
+                            Actor_Spawn(&play->actorCtx,play,ACTOR_EN_RD, spawnPos.x,
+                                                                        spawnPos.y,
+                                                                        spawnPos.z,
+                                                                        0,this->actor.yawTowardsPlayer+0x4000,0,
+                                                                        0x4, false);
+                        }
+                    }
+                } else {
+                    if (spawnUndeadCondiiton) {
                         Vec3f spawnPos;
-                        spawnPos.x = player->actor.world.pos.x+Math_SinS(this->actor.yawTowardsPlayer+0x4000)*undeadSpawnDist+Math_SinS(this->actor.yawTowardsPlayer)*undeadSpawnSpacing*ii;
+                        spawnPos.x = player->actor.world.pos.x+Math_SinS(this->actor.yawTowardsPlayer+0x4000)*undeadSpawnDist;
                         spawnPos.y = player->actor.world.pos.y;
-                        spawnPos.z = player->actor.world.pos.z+Math_CosS(this->actor.yawTowardsPlayer+0x4000)*undeadSpawnDist+Math_CosS(this->actor.yawTowardsPlayer)*undeadSpawnSpacing*ii;
-                        Actor_Spawn(&play->actorCtx,play,ACTOR_EN_RD, spawnPos.x,
-                                                                    spawnPos.y,
-                                                                    spawnPos.z,
-                                                                    0,this->actor.yawTowardsPlayer-0x4000,0,
-                                                                    0x4, false);
-                        spawnPos.x = player->actor.world.pos.x-Math_SinS(this->actor.yawTowardsPlayer+0x4000)*undeadSpawnDist+Math_SinS(this->actor.yawTowardsPlayer)*undeadSpawnSpacing*ii;
+                        spawnPos.z = player->actor.world.pos.z+Math_CosS(this->actor.yawTowardsPlayer+0x4000)*undeadSpawnDist;
+                        Actor_Spawn(&play->actorCtx,play,ACTOR_EN_SKB, spawnPos.x,
+                                                                        spawnPos.y,
+                                                                        spawnPos.z,
+                                                                        0,this->actor.yawTowardsPlayer-0x4000,0,
+                                                                        0x0, false);
+                        spawnPos.x = player->actor.world.pos.x-Math_SinS(this->actor.yawTowardsPlayer+0x4000)*undeadSpawnDist;
                         spawnPos.y = player->actor.world.pos.y;
-                        spawnPos.z = player->actor.world.pos.z-Math_CosS(this->actor.yawTowardsPlayer+0x4000)*undeadSpawnDist+Math_CosS(this->actor.yawTowardsPlayer)*undeadSpawnSpacing*ii;
-                        Actor_Spawn(&play->actorCtx,play,ACTOR_EN_RD, spawnPos.x,
-                                                                    spawnPos.y,
-                                                                    spawnPos.z,
-                                                                    0,this->actor.yawTowardsPlayer+0x4000,0,
-                                                                    0x4, false);
+                        spawnPos.z = player->actor.world.pos.z-Math_CosS(this->actor.yawTowardsPlayer+0x4000)*undeadSpawnDist;
+                        Actor_Spawn(&play->actorCtx,play,ACTOR_EN_SKB, spawnPos.x,
+                                                                        spawnPos.y,
+                                                                        spawnPos.z,
+                                                                        0,this->actor.yawTowardsPlayer+0x4000,0,
+                                                                        0x0, false);
                     }
                 }
                 EnDh_SetupWalk(this);

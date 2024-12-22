@@ -203,7 +203,7 @@ void EnSkb_Destroy(Actor* thisx, PlayState* play) {
 
 void func_80AFCD60(EnSkb* this, PlayState* play) {
     // Don't despawn stallchildren during daytime when enemy randomizer is enabled.
-    if (IS_DAY && !CVarGetInteger("gRandomizedEnemies", 0)) {
+    if (IS_DAY && !CVarGetInteger("gRandomizedEnemies", 0) && (play->sceneNum > SCENE_GERUDO_TRAINING_GROUND)) {
         func_80AFCF48(this);
     } else if ((this->altTarget && Actor_ActorAIsFacingActorB(&this->actor, this->altTarget, 0x11C7)) && (this->walkTimer < 1) &&
                (this->altTarget && this->distToTarget < this->closenessBias*(60.0f + (this->actor.params * 6.0f)))) {
@@ -260,8 +260,11 @@ void func_80AFCFF0(EnSkb* this, PlayState* play) {
     }
 }
 
+#define STAL_SLOW_SPEED_CONDITIONS (isPlayerInSpinAttack(play) || (this->altTarget != player) || (player->stateFlags2 & PLAYER_STATE2_GRABBED_BY_ENEMY))
+
 void func_80AFD0A4(EnSkb* this, PlayState* play) {
-    f32 speedMod = (isPlayerInSpinAttack(play) || (this->altTarget != GET_PLAYER(play))) ? 1.0f : SPEED_MULT;
+    Player* player = GET_PLAYER(play);
+    f32 speedMod = STAL_SLOW_SPEED_CONDITIONS ? 1.0f : SPEED_MULT;
     Animation_Change(&this->skelAnime, &gStalchildWalkingAnim, 0.96000004f*speedMod, 0.0f,
                      Animation_GetLastFrame(&gStalchildWalkingAnim), ANIMMODE_LOOP, -4.0f);
     this->unk_280 = 4;
@@ -302,7 +305,7 @@ void EnSkb_Advance(EnSkb* this, PlayState* play) {
         }
     }
     // Don't despawn stallchildren during daytime or when a stalchildren walks too far away from his "home" when enemy randomizer is enabled.
-    if ((this->altTarget && Math_Vec3f_DistXZ(&this->actor.home.pos, &this->altTarget->world.pos) > 800.0f) || (!this->altTarget && (Math_Vec3f_DistXZ(&this->actor.home.pos, &player->actor.world.pos) > 800.0f || IS_DAY) && !CVarGetInteger("gRandomizedEnemies", 0))) {
+    if ((this->altTarget && Math_Vec3f_DistXZ(&this->actor.home.pos, &this->altTarget->world.pos) > 800.0f) || (!this->altTarget && (Math_Vec3f_DistXZ(&this->actor.home.pos, &player->actor.world.pos) > 800.0f || (IS_DAY && (play->sceneNum > SCENE_GERUDO_TRAINING_GROUND))) && !CVarGetInteger("gRandomizedEnemies", 0))) {
         func_80AFCF48(this);
     } else if ((this->altTarget && Actor_ActorAIsFacingActorB(&this->actor, this->altTarget, 0x11C7))  && (this->walkTimer < 1) &&
                 (this->altTarget && this->distToTarget < this->closenessBias*(60.0f + (this->actor.params * 6.0f)))) {
