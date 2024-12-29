@@ -1269,6 +1269,52 @@ Gfx* KaleidoScope_DrawPageSections(Gfx* gfx, Vtx* vertices, void** textures) {
     return gfx;
 }
 
+#define EXT_TEX_ROWS 6
+
+Gfx* KaleidoScope_DrawPageSectionsExtended(Gfx* gfx, Vtx* vertices, void** textures, u16 rows) {
+    s32 i;
+    s32 j;
+
+
+    i = 0;
+    s16 vertsLeft = rows*12;
+    s16 prevVerts = 0;
+    s16 currentVerts;
+    while (vertsLeft > 0) {
+        j = 0;
+        if (vertsLeft > 32)
+            currentVerts = 32;
+        else
+            currentVerts = vertsLeft;
+
+        vertsLeft -= currentVerts;
+        gSPVertex(gfx++, vertices+prevVerts, currentVerts, 0);
+        prevVerts += currentVerts;
+
+        while (j < currentVerts) {
+            s16 extraRows = rows-5;
+            s16 rowOffset = i%rows;
+            if (rowOffset >= 4) {
+                rowOffset -= extraRows;
+                if (rowOffset <= 0) {//Causes the middle three rows to repeat
+                     rowOffset = 3-((3-rowOffset)%3);
+                 }
+            }
+            s16 rowGraphicBaseIdx = (i/rows)*5+rowOffset;
+            gDPPipeSync(gfx++);
+
+            gDPLoadTextureBlock(gfx++, textures[rowGraphicBaseIdx], G_IM_FMT_IA, G_IM_SIZ_8b, 80, 32, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                                G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+            gSP1Quadrangle(gfx++, j, j + 2, j + 3, j + 1, 0);
+
+            j += 4;
+            i++;
+        }
+    }
+
+    return gfx;
+}
+
 static uint8_t mapBlendMask[MAP_48x85_TEX_WIDTH * MAP_48x85_TEX_HEIGHT];
 
 void KaleidoScope_DrawPages(PlayState* play, GraphicsContext* gfxCtx) {
@@ -1474,8 +1520,8 @@ void KaleidoScope_DrawPages(PlayState* play, GraphicsContext* gfxCtx) {
             gSPMatrix(POLY_KAL_DISP++, MATRIX_NEWMTX(gfxCtx),
                       G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
-            POLY_KAL_DISP = KaleidoScope_DrawPageSections(POLY_KAL_DISP, pauseCtx->equipPageVtx,
-                                                          sEquipmentTexs[gSaveContext.language]);
+            POLY_KAL_DISP = KaleidoScope_DrawPageSectionsExtended(POLY_KAL_DISP, pauseCtx->equipPageVtx,
+                                                          sEquipmentTexs[gSaveContext.language], EXT_TEX_ROWS);
 
             KaleidoScope_DrawEquipment(play);
         }
@@ -1609,8 +1655,8 @@ void KaleidoScope_DrawPages(PlayState* play, GraphicsContext* gfxCtx) {
                 gSPMatrix(POLY_KAL_DISP++, MATRIX_NEWMTX(gfxCtx),
                           G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
-                POLY_KAL_DISP = KaleidoScope_DrawPageSections(POLY_KAL_DISP, pauseCtx->equipPageVtx,
-                                                              sEquipmentTexs[gSaveContext.language]);
+                POLY_KAL_DISP = KaleidoScope_DrawPageSectionsExtended(POLY_KAL_DISP, pauseCtx->equipPageVtx,
+                                                              sEquipmentTexs[gSaveContext.language], EXT_TEX_ROWS);
 
                 KaleidoScope_DrawEquipment(play);
 
@@ -2563,7 +2609,7 @@ static s16 D_8082B0E4[] = {
     0x0019, 0x000D, 0x0001, 0x0001, 0x000D, 0x0015, 0x000F, 0x000D, 0x000C, 0x0001, 0x0000,
 };
 
-s16 func_80823A0C(PlayState* play, Vtx* vtx, s16 arg2, s16 arg3) {
+s16 KaleidoScope_SetupMenuBackground(PlayState* play, Vtx* vtx, s16 arg2, s16 arg3, s16 rows) {
     static s16 D_8082B110 = 0;
     static s16 D_8082B114 = 1;
     static s16 D_8082B118 = 0;
@@ -2584,7 +2630,7 @@ s16 func_80823A0C(PlayState* play, Vtx* vtx, s16 arg2, s16 arg3) {
     for (phi_t1 = 0, phi_t3 = 0; phi_t3 < 3; phi_t3++) {
         phi_t0 += 80;
 
-        for (phi_a1 = 80, phi_a2 = 0; phi_a2 < 5; phi_a2++, phi_t1 += 4, phi_a1 -= 32) {
+        for (phi_a1 = 80, phi_a2 = 0; phi_a2 < rows; phi_a2++, phi_t1 += 4, phi_a1 -= 32) {
             vtx[phi_t1 + 0].v.ob[0] = vtx[phi_t1 + 2].v.ob[0] = phi_t0;
 
             vtx[phi_t1 + 1].v.ob[0] = vtx[phi_t1 + 3].v.ob[0] = vtx[phi_t1 + 0].v.ob[0] + 80;
@@ -2734,6 +2780,10 @@ s16 func_80823A0C(PlayState* play, Vtx* vtx, s16 arg2, s16 arg3) {
     return phi_t1;
 }
 
+s16 func_80823A0C(PlayState* play, Vtx* vtx, s16 arg2, s16 arg3) {
+    return KaleidoScope_SetupMenuBackground(play, vtx, arg2, arg3, 5);
+}
+
 static s16 D_8082B11C[] = { 0, 4, 8, 12, 24, 32, 56 };
 
 static s16 D_8082B12C[] = { -114, 12, 44, 76 };
@@ -2776,8 +2826,8 @@ void KaleidoScope_InitVertices(PlayState* play, GraphicsContext* gfxCtx) {
     pauseCtx->itemPageVtx = Graph_Alloc(gfxCtx, 60 * sizeof(Vtx));
     func_80823A0C(play, pauseCtx->itemPageVtx, 0, 0);
 
-    pauseCtx->equipPageVtx = Graph_Alloc(gfxCtx, 60 * sizeof(Vtx));
-    func_80823A0C(play, pauseCtx->equipPageVtx, 1, 0);
+    pauseCtx->equipPageVtx = Graph_Alloc(gfxCtx, EXT_TEX_ROWS*12 * sizeof(Vtx));
+    KaleidoScope_SetupMenuBackground(play, pauseCtx->equipPageVtx, 1, 0, EXT_TEX_ROWS);
 
     if (!sInDungeonScene) {
         pauseCtx->mapPageVtx = Graph_Alloc(gfxCtx, 248 * sizeof(Vtx));
