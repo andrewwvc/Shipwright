@@ -121,6 +121,24 @@ static const ALIGN_ASSET(2) char gFileSelLanguageGERTex[] = dgFileSelLanguageGER
 #define dgEmptyTexture "__OTR__textures/virtual/gEmptyTexture"
 static const ALIGN_ASSET(2) char gEmptyTexture[] = dgEmptyTexture;
 
+#define dgPauseSelectItem04ExtTex "__OTR__textures/icons/pause_select_item_0_4_ext"
+static const ALIGN_ASSET(2) char gPauseSelectItem04ExtTex[] = dgPauseSelectItem04ExtTex;
+
+#define dgPauseSelectItem14ExtTex "__OTR__textures/icons/pause_select_item_1_4_ext"
+static const ALIGN_ASSET(2) char gPauseSelectItem14ExtTex[] = dgPauseSelectItem14ExtTex;
+
+#define dgPauseSelectItem24ExtTex "__OTR__textures/icons/pause_select_item_2_4_ext"
+static const ALIGN_ASSET(2) char gPauseSelectItem24ExtTex[] = dgPauseSelectItem24ExtTex;
+
+#define dgPauseSelectItem06ExtTex "__OTR__textures/icons/pause_select_item_0_6_ext"
+static const ALIGN_ASSET(2) char gPauseSelectItem06ExtTex[] = dgPauseSelectItem06ExtTex;
+
+#define dgPauseSelectItem16ExtTex "__OTR__textures/icons/pause_select_item_1_6_ext"
+static const ALIGN_ASSET(2) char gPauseSelectItem16ExtTex[] = dgPauseSelectItem16ExtTex;
+
+#define dgPauseSelectItem26ExtTex "__OTR__textures/icons/pause_select_item_2_6_ext"
+static const ALIGN_ASSET(2) char gPauseSelectItem26ExtTex[] = dgPauseSelectItem26ExtTex;
+
 #define dgItemIconLandmineTex "__OTR__textures/icons/land_mine_icon"
 static const ALIGN_ASSET(2) char gItemIconLandmineTex[] = dgItemIconLandmineTex;
 

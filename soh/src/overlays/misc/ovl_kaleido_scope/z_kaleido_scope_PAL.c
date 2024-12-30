@@ -90,6 +90,33 @@ static void* sSelectItemENGTexs[] = {
     gPauseSelectItem13Tex,    gPauseSelectItem14Tex,    gPauseSelectItem20ENGTex, gPauseSelectItem21Tex,
     gPauseSelectItem22Tex,    gPauseSelectItem23Tex,    gPauseSelectItem24Tex,
 };
+static void* sSelectItemExtENGTexs[] = {
+    gPauseSelectItem00ENGTex, gPauseSelectItem10ENGTex, gPauseSelectItem20ENGTex,
+    gPauseSelectItem01Tex,    gPauseSelectItem11Tex,    gPauseSelectItem21Tex,
+    gPauseSelectItem02Tex,    gPauseSelectItem12Tex,    gPauseSelectItem22Tex,
+    gPauseSelectItem03Tex,    gPauseSelectItem13Tex,    gPauseSelectItem23Tex,
+    gPauseSelectItem04ExtTex, gPauseSelectItem14ExtTex, gPauseSelectItem24ExtTex,
+    gPauseSelectItem02Tex,    gPauseSelectItem12Tex,    gPauseSelectItem24ExtTex,
+    gPauseSelectItem06ExtTex, gPauseSelectItem16ExtTex, gPauseSelectItem26ExtTex,
+};
+static void* sSelectItemExtGERTexs[] = {
+    gPauseSelectItem00GERTex, gPauseSelectItem10GERTex, gPauseSelectItem20GERTex,
+    gPauseSelectItem01Tex,    gPauseSelectItem11Tex,    gPauseSelectItem21Tex,
+    gPauseSelectItem02Tex,    gPauseSelectItem12Tex,    gPauseSelectItem22Tex,
+    gPauseSelectItem03Tex,    gPauseSelectItem13Tex,    gPauseSelectItem23Tex,
+    gPauseSelectItem04ExtTex, gPauseSelectItem14ExtTex, gPauseSelectItem24ExtTex,
+    gPauseSelectItem02Tex,    gPauseSelectItem12Tex,    gPauseSelectItem24ExtTex,
+    gPauseSelectItem06ExtTex, gPauseSelectItem16ExtTex, gPauseSelectItem26ExtTex,
+};
+static void* sSelectItemExtFRATexs[] = {
+    gPauseSelectItem00FRATex, gPauseSelectItem10FRATex, gPauseSelectItem20FRATex,
+    gPauseSelectItem01Tex,    gPauseSelectItem11Tex,    gPauseSelectItem21Tex,
+    gPauseSelectItem02Tex,    gPauseSelectItem12Tex,    gPauseSelectItem22Tex,
+    gPauseSelectItem03Tex,    gPauseSelectItem13Tex,    gPauseSelectItem23Tex,
+    gPauseSelectItem04ExtTex, gPauseSelectItem14ExtTex, gPauseSelectItem24ExtTex,
+    gPauseSelectItem02Tex,    gPauseSelectItem12Tex,    gPauseSelectItem24ExtTex,
+    gPauseSelectItem06ExtTex, gPauseSelectItem16ExtTex, gPauseSelectItem26ExtTex,
+};
 static void* sMapENGTexs[] = {
     gPauseMap00Tex,    gPauseMap01Tex, gPauseMap02Tex, gPauseMap03Tex, gPauseMap04Tex,
     gPauseMap10ENGTex, gPauseMap11Tex, gPauseMap12Tex, gPauseMap13Tex, gPauseMap14Tex,
@@ -194,6 +221,12 @@ static void* sSelectItemTexs[] = {
     sSelectItemENGTexs,
     sSelectItemGERTexs,
     sSelectItemFRATexs,
+};
+
+static void* sSelectItemExtTexs[] = {
+    sSelectItemExtENGTexs,
+    sSelectItemExtGERTexs,
+    sSelectItemExtFRATexs,
 };
 
 static void* sMapTexs[] = {
@@ -1315,6 +1348,55 @@ Gfx* KaleidoScope_DrawPageSectionsExtended(Gfx* gfx, Vtx* vertices, void** textu
     return gfx;
 }
 
+Gfx* KaleidoScope_DrawPageSectionsExtra(Gfx* gfx, Vtx* vertices, void** textures, u16 rows) {
+    //s32 i;
+    s32 j;
+    s32 selection;
+
+
+    //i = 0;
+    selection = 0;
+    s16 vertsLeft = rows*12;
+    s16 prevVerts = 0;
+    s16 currentVerts;
+    while (vertsLeft > 0) {
+        j = 0;
+        if (vertsLeft > 32)
+            currentVerts = 32;
+        else
+            currentVerts = vertsLeft;
+
+        vertsLeft -= currentVerts;
+        gSPVertex(gfx++, vertices+prevVerts, currentVerts, 0);
+        prevVerts += currentVerts;
+
+        while (j < currentVerts) {
+            s16 rowOffset = selection/3;
+            if (rowOffset == rows-1) {
+                rowOffset = 6;
+            } else if (rowOffset >= 5) {
+                rowOffset = 5;
+            }
+            s16 rowGraphicBaseIdx = rowOffset*3+(selection%3);
+            gDPPipeSync(gfx++);
+
+            gDPLoadTextureBlock(gfx++, textures[rowGraphicBaseIdx], G_IM_FMT_IA, G_IM_SIZ_8b, 80, 32, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                                G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+            gSP1Quadrangle(gfx++, j, j + 2, j + 3, j + 1, 0);
+
+            j += 4;
+            if (selection < (rows-1)*3) {
+                selection += 3;
+            } else {
+                selection -= (rows-1)*3;
+                selection += 1;
+            }
+        }
+    }
+
+    return gfx;
+}
+
 static uint8_t mapBlendMask[MAP_48x85_TEX_WIDTH * MAP_48x85_TEX_HEIGHT];
 
 void KaleidoScope_DrawPages(PlayState* play, GraphicsContext* gfxCtx) {
@@ -1501,8 +1583,8 @@ void KaleidoScope_DrawPages(PlayState* play, GraphicsContext* gfxCtx) {
             gSPMatrix(POLY_KAL_DISP++, MATRIX_NEWMTX(gfxCtx),
                       G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
-            POLY_KAL_DISP = KaleidoScope_DrawPageSections(POLY_KAL_DISP, pauseCtx->itemPageVtx,
-                                                          sSelectItemTexs[gSaveContext.language]);
+            POLY_KAL_DISP = KaleidoScope_DrawPageSectionsExtra(POLY_KAL_DISP, pauseCtx->itemPageVtx,
+                                                          sSelectItemExtTexs[gSaveContext.language], EXT_TEX_ROWS);
 
             KaleidoScope_DrawItemSelect(play);
         }
@@ -1588,8 +1670,8 @@ void KaleidoScope_DrawPages(PlayState* play, GraphicsContext* gfxCtx) {
                 gSPMatrix(POLY_KAL_DISP++, MATRIX_NEWMTX(gfxCtx),
                           G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
-                POLY_KAL_DISP = KaleidoScope_DrawPageSections(POLY_KAL_DISP, pauseCtx->itemPageVtx,
-                                                              sSelectItemTexs[gSaveContext.language]);
+                POLY_KAL_DISP = KaleidoScope_DrawPageSectionsExtra(POLY_KAL_DISP, pauseCtx->itemPageVtx,
+                                                              sSelectItemExtTexs[gSaveContext.language], EXT_TEX_ROWS);
 
                 KaleidoScope_DrawItemSelect(play);
                 break;
@@ -2823,8 +2905,8 @@ void KaleidoScope_InitVertices(PlayState* play, GraphicsContext* gfxCtx) {
         pauseCtx->offsetY = 80;
     }
 
-    pauseCtx->itemPageVtx = Graph_Alloc(gfxCtx, 60 * sizeof(Vtx));
-    func_80823A0C(play, pauseCtx->itemPageVtx, 0, 0);
+    pauseCtx->itemPageVtx = Graph_Alloc(gfxCtx, EXT_TEX_ROWS*12 * sizeof(Vtx));
+    KaleidoScope_SetupMenuBackground(play, pauseCtx->itemPageVtx, 0, 0, EXT_TEX_ROWS);
 
     pauseCtx->equipPageVtx = Graph_Alloc(gfxCtx, EXT_TEX_ROWS*12 * sizeof(Vtx));
     KaleidoScope_SetupMenuBackground(play, pauseCtx->equipPageVtx, 1, 0, EXT_TEX_ROWS);
