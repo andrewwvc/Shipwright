@@ -6,6 +6,7 @@
 #define ITEMS_BASE_ICONS 160
 #define ITEMS_EXTRA_ICONS 7
 #define NUM_EQUIPMENT_ROWS 5
+#define NUM_EQUIPMENT_COLUMNS 4
 
 #ifdef __cplusplus
 extern "C"
