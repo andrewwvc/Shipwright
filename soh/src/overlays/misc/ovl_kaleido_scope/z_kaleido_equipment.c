@@ -236,11 +236,18 @@ void KaleidoScope_DrawEquipment(PlayState* play) {
                         }
                     } else {
                         pauseCtx->cursorX[PAUSE_EQUIP] = cursorX;
-                        pauseCtx->cursorY[PAUSE_EQUIP] += 1;
+                        if (pauseCtx->cursorY[PAUSE_EQUIP] >= cursorY){
+                            pauseCtx->cursorY[PAUSE_EQUIP] += 1;
 
-                        if (pauseCtx->cursorY[PAUSE_EQUIP] >= NUM_EQUIPMENT_ROWS) {
-                            pauseCtx->cursorY[PAUSE_EQUIP] = 0;
+                            if (pauseCtx->cursorY[PAUSE_EQUIP] >= ((4 > (cursorY+1)) ? 4 : (cursorY+1))) {
+                                pauseCtx->cursorY[PAUSE_EQUIP] = cursorY-1;
+                            }
+                        } else {
+                            pauseCtx->cursorY[PAUSE_EQUIP] -= 1;
                         }
+
+                        if (pauseCtx->cursorY[PAUSE_EQUIP] < 0)
+                            pauseCtx->cursorY[PAUSE_EQUIP] = cursorY;
 
                         pauseCtx->cursorPoint[PAUSE_EQUIP] =
                             pauseCtx->cursorX[PAUSE_EQUIP] + (pauseCtx->cursorY[PAUSE_EQUIP] * 4);
@@ -270,11 +277,18 @@ void KaleidoScope_DrawEquipment(PlayState* play) {
                         }
                     } else {
                         pauseCtx->cursorX[PAUSE_EQUIP] = cursorX;
-                        pauseCtx->cursorY[PAUSE_EQUIP] += 1;
+                        if (pauseCtx->cursorY[PAUSE_EQUIP] >= cursorY){
+                            pauseCtx->cursorY[PAUSE_EQUIP] += 1;
 
-                        if (pauseCtx->cursorY[PAUSE_EQUIP] >= NUM_EQUIPMENT_ROWS) {
-                            pauseCtx->cursorY[PAUSE_EQUIP] = 0;
+                            if (pauseCtx->cursorY[PAUSE_EQUIP] >= ((4 > (cursorY+1)) ? 4 : (cursorY+1))) {
+                                pauseCtx->cursorY[PAUSE_EQUIP] = cursorY-1;
+                            }
+                        } else {
+                            pauseCtx->cursorY[PAUSE_EQUIP] -= 1;
                         }
+
+                        if (pauseCtx->cursorY[PAUSE_EQUIP] < 0)
+                            pauseCtx->cursorY[PAUSE_EQUIP] = cursorY;
 
                         pauseCtx->cursorPoint[PAUSE_EQUIP] =
                             pauseCtx->cursorX[PAUSE_EQUIP] + (pauseCtx->cursorY[PAUSE_EQUIP] * 4);
