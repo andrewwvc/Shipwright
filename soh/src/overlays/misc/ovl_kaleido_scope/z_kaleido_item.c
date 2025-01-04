@@ -362,12 +362,16 @@ void KaleidoScope_DrawItemSelect(PlayState* play) {
             }
         } else if (pauseCtx->cursorSpecialPos == PAUSE_CURSOR_PAGE_LEFT) {
             if ((pauseCtx->stickRelX > 30) || (dpad && CHECK_BTN_ALL(input->press.button, BTN_DRIGHT))) {
+                s16 searchStage = 0;
                 pauseCtx->nameDisplayTimer = 0;
                 pauseCtx->cursorSpecialPos = 0;
 
                 Audio_PlaySoundGeneral(NA_SE_SY_CURSOR, &D_801333D4, 4, &D_801333E0, &D_801333E0, &D_801333E8);
 
                 cursorPoint = cursorX = cursorY = 0;
+                cursorX = 0;
+                cursorY = pauseCtx->itemSlotScrollY;
+                cursorPoint = pauseCtx->itemSlotScrollY*6;
                 while (true) {
                     if (gSaveContext.inventory.items[cursorPoint] != ITEM_NONE) {
                         pauseCtx->cursorPoint[PAUSE_ITEM] = cursorPoint;
@@ -377,17 +381,29 @@ void KaleidoScope_DrawItemSelect(PlayState* play) {
                         break;
                     }
 
-                    cursorY = cursorY + 1;
-                    cursorPoint = cursorPoint + 6;
-                    if (cursorY < NUM_ITEM_SLOT_LINES_TOTAL) {
+                    if (searchStage == 0) {
+                        if (cursorY < pauseCtx->itemSlotScrollY+3) {
+                            cursorY = cursorY + 1;
+                            cursorPoint = cursorPoint + 6;
+                        } else {
+                            searchStage = 1;
+                            cursorY = 0;
+                            cursorPoint = cursorX;
+                        }
                         continue;
-                    }
-
-                    cursorY = 0;
-                    cursorPoint = cursorX + 1;
-                    cursorX = cursorPoint;
-                    if (cursorX < 6) {
-                        continue;
+                    } else {
+                        cursorY = cursorY + 1;
+                        cursorPoint = cursorPoint + 6;
+                        if (cursorY < NUM_ITEM_SLOT_LINES_REGULAR) {
+                            continue;
+                        }
+                        searchStage = 0;
+                        cursorY = pauseCtx->itemSlotScrollY;
+                        cursorX += 1;
+                        cursorPoint = pauseCtx->itemSlotScrollY*6+cursorX;
+                        if (cursorX < NUM_EQUIPMENT_COLUMNS) {
+                            continue;
+                        }
                     }
 
                     KaleidoScope_MoveCursorToSpecialPos(play, PAUSE_CURSOR_PAGE_RIGHT);
@@ -396,13 +412,15 @@ void KaleidoScope_DrawItemSelect(PlayState* play) {
             }
         } else {
             if ((pauseCtx->stickRelX < -30) || (dpad && CHECK_BTN_ALL(input->press.button, BTN_DLEFT))) {
+                s16 searchStage = 0;
                 pauseCtx->nameDisplayTimer = 0;
                 pauseCtx->cursorSpecialPos = 0;
 
                 Audio_PlaySoundGeneral(NA_SE_SY_CURSOR, &D_801333D4, 4, &D_801333E0, &D_801333E0, &D_801333E8);
 
-                cursorPoint = cursorX = 5;
-                cursorY = 0;
+                cursorX = 5;
+                cursorY = pauseCtx->itemSlotScrollY;
+                cursorPoint = pauseCtx->itemSlotScrollY*6+cursorX;
                 while (true) {
                     if (gSaveContext.inventory.items[cursorPoint] != ITEM_NONE) {
                         pauseCtx->cursorPoint[PAUSE_ITEM] = cursorPoint;
@@ -412,17 +430,29 @@ void KaleidoScope_DrawItemSelect(PlayState* play) {
                         break;
                     }
 
-                    cursorY = cursorY + 1;
-                    cursorPoint = cursorPoint + 6;
-                    if (cursorY < NUM_ITEM_SLOT_LINES_TOTAL) {
+                    if (searchStage == 0) {
+                        if (cursorY < pauseCtx->itemSlotScrollY+3) {
+                            cursorY = cursorY + 1;
+                            cursorPoint = cursorPoint + 6;
+                        } else {
+                            searchStage = 1;
+                            cursorY = 0;
+                            cursorPoint = cursorX;
+                        }
                         continue;
-                    }
-
-                    cursorY = 0;
-                    cursorPoint = cursorX - 1;
-                    cursorX = cursorPoint;
-                    if (cursorX >= 0) {
-                        continue;
+                    } else {
+                        cursorY = cursorY + 1;
+                        cursorPoint = cursorPoint + 6;
+                        if (cursorY < NUM_ITEM_SLOT_LINES_REGULAR) {
+                            continue;
+                        }
+                        searchStage = 0;
+                        cursorY = pauseCtx->itemSlotScrollY;
+                        cursorX -= 1;
+                        cursorPoint = pauseCtx->itemSlotScrollY*6+cursorX;
+                        if (cursorX >= 0) {
+                            continue;
+                        }
                     }
 
                     KaleidoScope_MoveCursorToSpecialPos(play, PAUSE_CURSOR_PAGE_LEFT);
