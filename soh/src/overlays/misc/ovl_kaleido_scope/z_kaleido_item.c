@@ -295,11 +295,18 @@ void KaleidoScope_DrawItemSelect(PlayState* play) {
                             }
                         } else {
                             pauseCtx->cursorX[PAUSE_ITEM] = cursorX;
-                            pauseCtx->cursorY[PAUSE_ITEM] += 1;
+                            if (pauseCtx->cursorY[PAUSE_ITEM] >= cursorY) {
+                                pauseCtx->cursorY[PAUSE_ITEM] += 1;
 
-                            if (pauseCtx->cursorY[PAUSE_ITEM] >= NUM_ITEM_SLOT_LINES_TOTAL) {
-                                pauseCtx->cursorY[PAUSE_ITEM] = 0;
+                                if (pauseCtx->cursorY[PAUSE_ITEM] >= ((NUM_ITEM_SLOT_LINES_REGULAR > (cursorY-1)) ? NUM_ITEM_SLOT_LINES_REGULAR : (cursorY-1))) {
+                                    pauseCtx->cursorY[PAUSE_ITEM] = cursorY-1;
+                                }
+                            } else {
+                                pauseCtx->cursorY[PAUSE_ITEM] -= 1;
                             }
+
+                            if (pauseCtx->cursorY[PAUSE_ITEM] < 0)
+                                pauseCtx->cursorY[PAUSE_ITEM] = cursorY;
 
                             pauseCtx->cursorPoint[PAUSE_ITEM] =
                                 pauseCtx->cursorX[PAUSE_ITEM] + (pauseCtx->cursorY[PAUSE_ITEM] * 6);
@@ -327,11 +334,18 @@ void KaleidoScope_DrawItemSelect(PlayState* play) {
                             }
                         } else {
                             pauseCtx->cursorX[PAUSE_ITEM] = cursorX;
-                            pauseCtx->cursorY[PAUSE_ITEM] += 1;
+                            if (pauseCtx->cursorY[PAUSE_ITEM] >= cursorY) {
+                                pauseCtx->cursorY[PAUSE_ITEM] += 1;
 
-                            if (pauseCtx->cursorY[PAUSE_ITEM] >= NUM_ITEM_SLOT_LINES_TOTAL) {
-                                pauseCtx->cursorY[PAUSE_ITEM] = 0;
+                                if (pauseCtx->cursorY[PAUSE_ITEM] >= ((NUM_ITEM_SLOT_LINES_REGULAR > (cursorY-1)) ? NUM_ITEM_SLOT_LINES_REGULAR : (cursorY-1))) {
+                                    pauseCtx->cursorY[PAUSE_ITEM] = cursorY-1;
+                                }
+                            } else {
+                                pauseCtx->cursorY[PAUSE_ITEM] -= 1;
                             }
+
+                            if (pauseCtx->cursorY[PAUSE_ITEM] < 0)
+                                pauseCtx->cursorY[PAUSE_ITEM] = cursorY;
 
                             pauseCtx->cursorPoint[PAUSE_ITEM] =
                                 pauseCtx->cursorX[PAUSE_ITEM] + (pauseCtx->cursorY[PAUSE_ITEM] * 6);
