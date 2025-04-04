@@ -102,7 +102,12 @@ u16 func_80AA2AA0(PlayState* play, Actor* thisx) {
         }
     }
     if ((gSaveContext.eventChkInf[2] & (1 << 11))) {
-        return RanchMsg+12;
+        if (((gSaveContext.eventChkInf[2] & (1 << 12))) ||//Has received reward
+                (!(player->stateFlags1 & 0x800000))) {        //Or is not on Epona
+            return RanchMsg+12;//Malon either thnaks you or gives reward
+        } else {
+            return RanchMsg+14;//Malon invites you to get off Epona (avoids bug where you fall off Epona)
+        }
     }
     if ((gSaveContext.eventChkInf[1] & 0x4000) && (gSaveContext.eventChkInf[2] & 0x0200) && !(gSaveContext.eventChkInf[2] & 0x0400) && (gSaveContext.MalonRideDay < gSaveContext.totalDays)) {
         return RanchMsg+8;

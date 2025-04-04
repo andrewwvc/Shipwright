@@ -1316,6 +1316,7 @@ extern "C" void OTRMessage_Init()
     MakeNormalMsgEng(RanchMsg+11, "\x08Oops. Missed that one.\016<\x02");
     MakeNormalMsgEng(RanchMsg+12, "I really enjoyed that.");
     MakeNormalMsgEng(RanchMsg+13, "It would be nice if Epona&had a special treat&once in a while.^She really deserves it,&don't you think.");
+    MakeNormalMsgEng(RanchMsg+14, "Nice to see you again!&If you got off Epona now&we could speak eye to eye.^I'd like that.");
 
     u16 ZoraMsg = TextIDAllocator::Instance->allocateRange("zora", 30);
 
