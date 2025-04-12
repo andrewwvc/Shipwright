@@ -424,7 +424,7 @@ extern "C" void OTRMessage_Init()
     //Get Item Text
     MakeBlueMsgEng(0x810, "You received an Icon of Magic Power!&This will increase your magic capacity.&It looks awfully like an ordinary&magic jar though.");
     MakeBlueMsgEng(0x811, "You received some Horse Food!&This will add a boost&to Epona's stamina.&Carrots are delicious!");
-    MakeBlueMsgEng(0x812, "You received a Heart Barrier! This&will protect one of your hearts,&if you find someone with powerful&enough magic to activate it.");
+    MakeBlueMsgEng(0x812, "You received a Heart Barrier! This&will protect one of your hearts,&if you find someone with powerful&enough magic to activate it...");
     MakeBlueMsgEng(0x813, "You received a King's Wallet!&This can carry enough money&for a king! I don't even&know how much it can carry!");
     MakeBlueMsgEng(0x814, "\x13\xA0You received the Landmine! Place&it down. Then when an enemy&approaches...KAPAW...BOOM!");
     MakeBlueMsgEng(0x815, "\x13\xA1You received Nayru's Affection!&Use it to restore 2 hearts&each time you cast it!");
@@ -501,8 +501,8 @@ extern "C" void OTRMessage_Init()
     MakeNormalMsgEng(RingMsg+18, "%cThis ring stops you&from making sound.");
     MakeNormalMsgEng(RingMsg+19, "%cThis ring makes it less&dangerous to face explosives.");
     //Great Fairy Text
-    MakeNormalMsgEng(0xE8, "Your magic power has been&enhanced! Now you can gain even&more Magic Capacity!^Collecting %gIcons of Magic%w&will allow for greater enhancement!");
-    MakeNormalMsgEng(0xE9, "Your defensive power has been&enhanced! Damage inflicted by &enemies will be reduced by half.^But this only applies to&hearts protected by any&%rHeart Barriers%w you have collected.");
+    MakeNormalMsgEng(0xE8, "\x1A""Your magic power has been&enhanced! Now you can gain even&more Magic Capacity!^Collecting %gIcons of Magic%w&will allow for greater enhancement!");
+    MakeNormalMsgEng(0xE9, "\x1A""The defensive power of your %gKokiri&Tunic%w has been enhanced! Damage&inflicted by enemies will be reduced&by %chalf%w, when you wear it!^But this only applies to&hearts protected by any&%rHeart Barriers%w you have collected.&Collect more to protect more hearts.");
 
     //Sheik Text
     MakeNormalMsgEng(0x700F, "To find and save the sages,&you need another skill...&Head to Kakariko Village!^Then you may be able to&protect those you care about.");
@@ -1414,6 +1414,7 @@ extern "C" void OTRMessage_Init()
     MakeNormalMsgEng(MiscMsg+12, "Thank you very much!^What I'm selling is...\x14\x02%rA Ring%w!\x14\x01""^I can see that you've come far&and under harsh circumstances.&Maybe what I've given you is...&perhaps unfitting.");
     MakeNormalMsgEng(MiscMsg+13, "\x06\x41Well Come!^I am selling stuff, strange and&rare, from all over the world to&everybody.&Today's special is...^A fantasic, lovely thing!&Who could resist!&I won't tell you what it is until&I see the money....^How about %r2000 Rupees%w?&\x09\x1B&%gBuy&Don't buy%w\x02");
     MakeNormalMsgEng(MiscMsg+14, "Thank you very much!^What I'm selling is...&\x14\x02%rA means of protecting your life%w!\x14\x01""^I can see that you've come far&and under harsh circumstances.&I believe you might be the&rare soul who appreciates this.");
+    MakeNormalMsgEng(MiscMsg+15, "\x1A""Oh, I would love to be able&to upgrade your %cdefensive power%w.&However, you don't seem to have any&%rHeart Barriers%w. Too bad...\x0B\x02");
 
     u16 GerudoMsg = TextIDAllocator::Instance->allocateRange("gerudo", 10);
     MakeNormalMsgEng(GerudoMsg+0, "Heh, since you're clearly a master,&the only thing left is&to try for a perfect score,&if you can!\x0B\x02");

@@ -95,6 +95,7 @@ void BgDyYoseizo_Init(Actor* thisx, PlayState* play2) {
     this->grownHeight = this->vanishHeight + 40.0f;
     this->actor.focus.pos = this->actor.world.pos;
     this->giveDefenseHearts = false;
+    this->defenseHeartsTempStore = 0;
 
     if (play->sceneNum == SCENE_GREAT_FAIRYS_FOUNTAIN_MAGIC) {
         // "Great Fairy Fountain"
@@ -113,7 +114,8 @@ void BgDyYoseizo_Init(Actor* thisx, PlayState* play2) {
 void BgDyYoseizo_Destroy(Actor* thisx, PlayState* play) {
     BgDyYoseizo* this = (BgDyYoseizo*)thisx;
     ResourceMgr_UnregisterSkeleton(&this->skelAnime);
-    if (this->giveDefenseHearts)
+    if ((play->sceneNum == SCENE_GREAT_FAIRYS_FOUNTAIN_MAGIC) && (this->fountainType == FAIRY_UPGRADE_HALF_DAMAGE) &&
+                this->defenseHeartsTempStore > 0)
         gSaveContext.inventory.defenseHearts = this->defenseHeartsTempStore;
 }
 
@@ -274,8 +276,9 @@ void BgDyYoseizo_ChooseType(BgDyYoseizo* this, PlayState* play) {
                 }
                 break;
             case FAIRY_UPGRADE_HALF_DAMAGE:
-                if (!gSaveContext.isDoubleDefenseAcquired) {
+                if (!gSaveContext.isDoubleDefenseAcquired && (gSaveContext.inventory.defenseHearts > 0)) {
                     // "Damage halved"
+                    //This will conditionally trigger ONLY if Link has obtained AT LEAST one defense heart
                     osSyncPrintf(VT_FGCOL(PURPLE) " ☆☆☆☆☆ ダメージ半減 ☆☆☆☆☆ \n" VT_RST);
                     this->givingSpell = true;
                     givingReward = true;
@@ -405,7 +408,12 @@ void BgDyYoseizo_SetupGreetPlayer_NoReward(BgDyYoseizo* this, PlayState* play) {
                          -10.0f);
     }
 
-    this->actor.textId = 0xDB;
+    if (play->sceneNum == SCENE_GREAT_FAIRYS_FOUNTAIN_MAGIC && this->fountainType == FAIRY_UPGRADE_HALF_DAMAGE &&
+                !gSaveContext.isDoubleDefenseAcquired)
+        this->actor.textId = GetTextID("misc")+15;
+    else
+        this->actor.textId = 0xDB;
+
     this->dialogState = TEXT_STATE_EVENT;
     Message_StartTextbox(play, this->actor.textId, NULL);
     BgDyYoseizo_SpawnParticles(this, play, 0);
@@ -757,6 +765,10 @@ void BgDyYoseizo_Give_Reward(BgDyYoseizo* this, PlayState* play) {
                 Interface_ChangeAlpha(9);
                 break;
             case FAIRY_UPGRADE_HALF_DAMAGE:
+                if (!gSaveContext.isDoubleDefenseAcquired) {
+                    this->defenseHeartsTempStore = gSaveContext.inventory.defenseHearts; //Revert this to 20 to disable the use of defense barrier rewards
+                    gSaveContext.inventory.defenseHearts = 0;
+                }
                 gSaveContext.isDoubleDefenseAcquired = true;
                 Interface_ChangeAlpha(9);
                 break;
@@ -814,8 +826,8 @@ void BgDyYoseizo_Give_Reward(BgDyYoseizo* this, PlayState* play) {
 
     if ((play->sceneNum == SCENE_GREAT_FAIRYS_FOUNTAIN_MAGIC) && (play->csCtx.npcActions[0]->action == 18) && !this->giveDefenseHearts) {
         this->giveDefenseHearts = true;
-        this->defenseHeartsTempStore = gSaveContext.inventory.defenseHearts; //Revert this to 20 to disable the use of defense barrier rewards
-        gSaveContext.inventory.defenseHearts = 0;
+        Inventory_ChangeEquipment(EQUIP_TYPE_TUNIC, EQUIP_VALUE_TUNIC_KOKIRI);
+        Player_SetEquipmentData(play, player);
     }
 
     if (this->giveDefenseHearts) {
