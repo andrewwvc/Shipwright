@@ -5696,6 +5696,10 @@ void func_8083BCD0(Player* this, PlayState* play, s32 arg2) {
     Player_PlaySfx(&this->actor, ((arg2 << 0xE) == 0x8000) ? NA_SE_PL_ROLL : NA_SE_PL_SKIP);
 }
 
+s32 Player_ShouldPerformJumpAttack(Player* this, s32 controlDirection) {
+    return Player_GetMeleeWeaponHeld(this) && func_808365C8(this) && (controlDirection < 0);
+}
+
 s32 func_8083BDBC(Player* this, PlayState* play) {
     s32 sp2C;
 
@@ -5713,7 +5717,7 @@ s32 func_8083BDBC(Player* this, PlayState* play) {
                         func_8083BC04(this, play);
                     }
                 } else {
-                    if (Player_GetMeleeWeaponHeld(this) && func_808365C8(this) && (sp2C < 0)) {
+                    if (Player_ShouldPerformJumpAttack(this, sp2C)) {
                         //Performs Jumping Attack
                         if (this->shieldRelaxTimer == 0)
                             func_8083BA90(play, this, (Ring_Get_Equiped() == RI_ACROBAT_RING) ? 16 : 17, 5.0f, 5.0f);
@@ -10337,10 +10341,18 @@ void func_808473D4(PlayState* play, Player* this) {
                           ((D_808535E4 != 7) && (func_80833B2C(this) ||
                                                  ((play->roomCtx.curRoom.behaviorType1 != ROOM_BEHAVIOR_TYPE1_2) &&
                                                   !(this->stateFlags1 & PLAYER_STATE1_SHIELDING) && (sp20 == 0))))))) {
-                        doAction = DO_ACTION_ATTACK;
+                        if (Player_ShouldPerformJumpAttack(this, sp20)) {
+                            doAction = DO_ACTION_ATTACK;
+                        } else {
+                            doAction = DO_ACTION_ROLL;
+                        }
                     } else if ((play->roomCtx.curRoom.behaviorType1 != ROOM_BEHAVIOR_TYPE1_2) &&
                                func_80833BCC(this) && (sp20 > 0)) {
-                        doAction = DO_ACTION_JUMP;
+                        if (sp20 == 2) {
+                            doAction = DO_ACTION_JUMP;
+                        } else {
+                            doAction = DO_ACTION_HOP;
+                        }
                     } else if ((this->heldItemAction >= PLAYER_IA_SWORD_MASTER) ||
                                ((this->stateFlags2 & PLAYER_STATE2_NAVI_OUT) &&
                                 (play->actorCtx.targetCtx.arrowPointedActor == NULL))) {

@@ -231,3 +231,9 @@ static const ALIGN_ASSET(2) char gMuteRingItemNameENG[] = dgMuteRingItemNameENG;
 
 #define dgProtectionRingItemNameENG "__OTR__textures/title_static/gProtectionRingItemNameENG"
 static const ALIGN_ASSET(2) char gProtectionRingItemNameENG[] = dgProtectionRingItemNameENG;
+
+#define dgHopDoActionENGTex "__OTR__textures/buttons/gHopDoActionENGTex"
+static const ALIGN_ASSET(2) char gHopDoActionENGTex[] = dgHopDoActionENGTex;
+
+#define dgRollDoActionENGTex "__OTR__textures/buttons/gRollDoActionENGTex"
+static const ALIGN_ASSET(2) char gRollDoActionENGTex[] = dgRollDoActionENGTex;

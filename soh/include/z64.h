@@ -733,7 +733,9 @@ typedef enum {
     /* 0x1A */ DO_ACTION_6,
     /* 0x1B */ DO_ACTION_7,
     /* 0x1C */ DO_ACTION_8,
-    /* 0x1D */ DO_ACTION_MAX
+    /* 0x1D */ DO_ACTION_HOP,
+    /* 0x1E */ DO_ACTION_ROLL,
+    /* 0x1F */ DO_ACTION_MAX
 } DoAction;
 
 typedef struct {

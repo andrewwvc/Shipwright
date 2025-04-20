@@ -210,6 +210,8 @@ static const char* actionsTbl[] =
     gNum6DoActionENGTex,
     gNum7DoActionENGTex,
     gNum8DoActionENGTex,
+    gHopDoActionENGTex,
+    gRollDoActionENGTex,
 };
 
 // original name: "alpha_change"
@@ -3162,7 +3164,8 @@ void Interface_LoadActionLabel(InterfaceContext* interfaceCtx, u16 action, s16 l
     char* doAction = actionsTbl[action];
 
     static char newName[4][512];
-    if (gSaveContext.language != LANGUAGE_ENG) {
+    if (gSaveContext.language != LANGUAGE_ENG && action < DO_ACTION_HOP) {
+        //NOTE: Checking if action is less than Hop here is ONLY currently added because of the lack of non ENG translation
         size_t length = strlen(doAction);
         strcpy(newName[loadOffset], doAction);
         if (gSaveContext.language == LANGUAGE_FRA) {
@@ -3227,7 +3230,8 @@ void Interface_LoadActionLabelB(PlayState* play, u16 action) {
     char* doAction = actionsTbl[action];
     static char newName[512];
 
-    if (gSaveContext.language != LANGUAGE_ENG) {
+    if (gSaveContext.language != LANGUAGE_ENG && action < DO_ACTION_HOP) {
+        //NOTE: Checking if action is less than Hop here is ONLY currently added because of the lack of non ENG translation
         size_t length = strlen(doAction);
         strcpy(newName, doAction);
         if (gSaveContext.language == LANGUAGE_FRA) {
