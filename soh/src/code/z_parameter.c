@@ -4060,6 +4060,67 @@ void Interface_DrawMagicBar(PlayState* play) {
     CLOSE_DISPS(play->state.gfxCtx);
 }
 
+void Interface_DrawTensionBar(PlayState* play) {
+    Player* player = GET_PLAYER(play);
+    InterfaceContext* interfaceCtx = &play->interfaceCtx;
+    s16 X_Margins_BtnB;
+    s16 Y_Margins_BtnB;
+    s16 BBtn_Size = 32;
+    int BBtnScaled = BBtn_Size * 0.95f;
+    if (CVarGetInteger("gBBtnPosType", 0) != 0) {
+        BBtnScaled = BBtn_Size * CVarGetFloat("gBBtnScale", 0.95f);
+    }
+    int BBtn_factor = (1 << 10) * BBtn_Size / BBtnScaled;
+    if (CVarGetInteger("gBBtnUseMargins", 0) != 0) {
+        if (CVarGetInteger("gBBtnPosType", 0) == 0) {X_Margins_BtnB = Right_HUD_Margin;};
+        Y_Margins_BtnB = (Top_HUD_Margin*-1);
+    } else {
+        X_Margins_BtnB = 0;
+        Y_Margins_BtnB = 0;
+    }
+    s16 PosX_BtnB_ori = OTRGetRectDimensionFromRightEdge(R_ITEM_BTN_X(0)+X_Margins_BtnB);
+    s16 PosY_BtnB_ori = R_ITEM_BTN_Y(0)+Y_Margins_BtnB;
+    s16 PosX_BtnB;
+    s16 PosY_BtnB;
+    if (CVarGetInteger("gBBtnPosType", 0) != 0) {
+        PosY_BtnB = CVarGetInteger("gBBtnPosY", 0)+Y_Margins_BtnB;
+        if (CVarGetInteger("gBBtnPosType", 0) == 1) {//Anchor Left
+            if (CVarGetInteger("gBBtnUseMargins", 0) != 0) {X_Margins_BtnB = Left_HUD_Margin;};
+            PosX_BtnB = OTRGetDimensionFromLeftEdge(CVarGetInteger("gBBtnPosX", 0)+X_Margins_BtnB);
+        } else if (CVarGetInteger("gBBtnPosType", 0) == 2) {//Anchor Right
+            if (CVarGetInteger("gBBtnUseMargins", 0) != 0) {X_Margins_BtnB = Right_HUD_Margin;};
+            PosX_BtnB = OTRGetDimensionFromRightEdge(CVarGetInteger("gBBtnPosX", 0)+X_Margins_BtnB);
+        } else if (CVarGetInteger("gBBtnPosType", 0) == 3) {//Anchor None
+            PosX_BtnB = CVarGetInteger("gBBtnPosX", 0);
+        } else if (CVarGetInteger("gBBtnPosType", 0) == 4) {//Hidden
+           PosX_BtnB = -9999;
+        }
+    } else {
+        PosY_BtnB = PosY_BtnB_ori;
+        PosX_BtnB = PosX_BtnB_ori;
+    }
+
+    s16 tensionBarY = PosY_BtnB+30;
+    s16 startingX = PosX_BtnB+4;
+    u8 greenTinge = (player->shieldRelaxTimer >= SHIELD_TIME_MAX) ? (40+(player->shieldRelaxTimer-SHIELD_TIME_MAX)*8):0;
+    Color_RGB8 tensionBarFillColor = {0,greenTinge,250};
+
+    OPEN_DISPS(play->state.gfxCtx);
+
+    // Fill the whole bar with the tension color
+    gDPSetPrimColor(OVERLAY_DISP++, 0, 0, tensionBarFillColor.r, tensionBarFillColor.g, tensionBarFillColor.b, interfaceCtx->magicAlpha);
+
+    gDPLoadMultiBlock_4b(OVERLAY_DISP++, gMagicMeterFillTex, 0, G_TX_RENDERTILE, G_IM_FMT_I, 16, 16, 0,
+                            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
+                            G_TX_NOLOD, G_TX_NOLOD);
+
+    gSPWideTextureRectangle(OVERLAY_DISP++, startingX << 2, (tensionBarY + 3) << 2,
+                        (startingX + player->shieldRelaxTimer) << 2, (tensionBarY + 10) << 2, G_TX_RENDERTILE, 0,
+                        0, 1 << 10, 1 << 10);
+
+    CLOSE_DISPS(play->state.gfxCtx);
+}
+
 static Vtx sEnemyHealthVtx[16];
 static Mtx sEnemyHealthMtx[2];
 
@@ -5737,6 +5798,8 @@ void Interface_Draw(PlayState* play) {
         if (fullUi || gSaveContext.magicState > MAGIC_STATE_IDLE) {
             Interface_DrawMagicBar(play);
         }
+
+        Interface_DrawTensionBar(play);
 
         Minimap_Draw(play);
 

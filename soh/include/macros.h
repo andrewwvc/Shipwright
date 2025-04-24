@@ -331,6 +331,7 @@ extern GraphicsContext* __gfxCtx;
 // #region SOH [S-Edition]
 #define UNDERWATER_FREE_EQUIP_USE 1
 #define DAMAGE_BASE_VAL 0x8
+#define SHIELD_TIME_MAX 14
 #define DOUBLE_DEFENSE_IS_ACTIVE (gSaveContext.isDoubleDefenseAcquired && (CUR_EQUIP_VALUE(EQUIP_TYPE_TUNIC) == EQUIP_VALUE_TUNIC_KOKIRI))
 // #endregion
 
