@@ -167,13 +167,13 @@ DnsItemEntry* EnDns_GrottoExitToItemEntry(s16 entranceNum) {
         case 258:
         case 537:
         case 541:
-        case 686:
         case 777:
         case 972:
         case 1376:
         case 1540:
         return &D_BuyRingAcrobat;
         case 343:
+        case 686:
         case 888:
         case 1071:
         case 1492:
@@ -200,13 +200,13 @@ u16 EnDns_GrottoExitToTextEntry(s16 entranceNum) {
         case 258:
         case 537:
         case 541:
-        case 686:
         case 777:
         case 972:
         case 1376:
         case 1540:
         return 0x10E2;
         case 343:
+        case 686:
         case 888:
         case 1071:
         case 1492:
