@@ -13302,7 +13302,10 @@ s32 func_8084DFF4(PlayState* play, Player* this) {
     s32 temp1;
     s32 temp2;
     static s32 equipItem;
+    static s16 equipGi;
     static bool equipNow;
+    static bool exchangeRing;
+    static bool noRingSwapNeed = false;
 
     if (this->getItemId == GI_NONE && this->getItemEntry.objectId == OBJECT_INVALID) {
         return 1;
@@ -13319,6 +13322,8 @@ s32 func_8084DFF4(PlayState* play, Player* this) {
         equipNow = CVarGetInteger("gAskToEquip", 0) && giEntry.modIndex == MOD_NONE &&
                     equipItem >= ITEM_SWORD_KOKIRI && equipItem <= ITEM_TUNIC_ZORA &&
                     CHECK_AGE_REQ_ITEM(equipItem);
+        exchangeRing = (RING_ITEM_MIN <= equipItem && equipItem <= RING_ITEM_MAX);
+        equipGi = giEntry.getItemId;
 
         play->msgCtx.unk_E3D0 = giEntry.getItemId;//Value to be given to z_message_PAL.c to look up icon color table
         Message_StartTextbox(play, giEntry.textId, &this->actor);
@@ -13331,6 +13336,19 @@ s32 func_8084DFF4(PlayState* play, Player* this) {
                     gSaveContext.swordHealth = 8;
                 }
                 if (RING_ITEM_MIN <= giEntry.itemId && giEntry.itemId <= RING_ITEM_MAX) {
+                    noRingSwapNeed = false;
+                    for (s16 ii = 0; ii < 3; ii++) {
+                        u32 flag = OWNED_EQUIP_FLAG(EQUIP_TYPE_RING, ii);
+                        if (gSaveContext.inventory.equipment & flag) {
+                            if (Ring_Get_In_Slot(ii) == giEntry.getItemId-RING_GI_MIN) {
+                                noRingSwapNeed = true;
+                                break;
+                            }
+                        } else {
+                            noRingSwapNeed = true;
+                            break;
+                        }
+                    }
                     Ring_Give(play, giEntry.getItemId);
                 }
                 Item_Give(play, giEntry.itemId);
@@ -13397,6 +13415,54 @@ s32 func_8084DFF4(PlayState* play, Player* this) {
         equipNow = false;
         Message_CloseTextbox(play);
         play->msgCtx.msgMode = MSGMODE_TEXT_DONE;
+    } else if (exchangeRing && Message_ShouldAdvance(play) &&
+                ((Message_GetState(&play->msgCtx) == TEXT_STATE_CHOICE) ||
+                 (Message_GetState(&play->msgCtx) == TEXT_STATE_EVENT))) {
+        bool isDone = false;
+        u16 MiscMsg = GetTextID("misc");
+        if (Message_GetState(&play->msgCtx) == TEXT_STATE_CHOICE) {
+            if (play->msgCtx.textId == MiscMsg+17) {
+                s16 prevRing = Ring_Get_Equiped();
+                if (play->msgCtx.choiceIndex == CUR_EQUIP_VALUE(EQUIP_TYPE_RING)-1)
+                    Inventory_ChangeEquipment(EQUIP_TYPE_RING, EQUIP_VALUE_RINGS_NONE);
+                gSaveContext.inventory.ringEquips[play->msgCtx.choiceIndex] = equipGi-RING_GI_MIN+1;
+                s16 currRing = Ring_Get_Equiped();
+                if (prevRing != currRing) {
+                    if (prevRing == RI_RING_OF_SILENCE) {
+                        Audio_SetGameVolume(SEQ_PLAYER_BGM_MAIN, CVarGetFloat("gMainMusicVolume", 1.0f));
+                        Audio_SetGameVolume(SEQ_PLAYER_BGM_SUB, CVarGetFloat("gSubMusicVolume", 1.0f));
+                    } else if (currRing == RI_RING_OF_SILENCE) {
+                        Audio_SetGameVolume(SEQ_PLAYER_BGM_MAIN, 0.0f);
+                        Audio_SetGameVolume(SEQ_PLAYER_BGM_SUB, 0.0f);
+                    }
+
+                    if (prevRing == RI_MUTE_RING) {
+                        Audio_SetGameVolume(SEQ_PLAYER_SFX, CVarGetFloat("gSFXMusicVolume", 1.0f));
+                    } else if (currRing == RI_MUTE_RING) {
+                        Audio_SetGameVolume(SEQ_PLAYER_SFX, 0.0f);
+                    }
+                }
+                isDone = true;
+            } else {
+                if (play->msgCtx.choiceIndex == 0) {
+                    Message_ContinueTextbox(play, MiscMsg+17);
+                } else {
+                    isDone = true;
+                }
+            }
+        } else if (TEXT_STATE_EVENT) {
+            if (noRingSwapNeed) {
+                isDone = true;
+            } else {
+                Message_ContinueTextbox(play, MiscMsg+16);
+            }
+        }
+
+        if (isDone) {
+            exchangeRing = false;
+            Message_CloseTextbox(play);
+            play->msgCtx.msgMode = MSGMODE_TEXT_DONE;
+        }
     } else {
         if (Message_GetState(&play->msgCtx) == TEXT_STATE_CLOSING) {
             if (this->getItemId == GI_GAUNTLETS_SILVER && !IS_RANDO) {

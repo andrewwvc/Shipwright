@@ -429,7 +429,7 @@ extern "C" void OTRMessage_Init()
     MakeBlueMsgEng(0x814, "\x13\xA0You received the Landmine! Place&it down. Then when an enemy&approaches...KAPAW...BOOM!");
     MakeBlueMsgEng(0x815, "\x13\xA1You received Nayru's Affection!&Use it to restore 2 hearts&each time you cast it!");
     MakeBlueMsgEng(0x816, "\x13\xA2You received Din's Crucible!&Use it to forge a movable stone block!");
-    MakeBlueMsgEng(0x817, "\x13\xA3You received a ring! On the&%yEquipment Subscreen%w select&the slot the ring is in with&%b\x9F%w to %requip%w or %runequip%w it.^\x13\xA3You may find and own many more&ring types than you can carry in&your slots at one time, so feel&free to swap them out!^\x13\xA3While in a %rsafe place%w, like&%byour house%w, use %y\xA7%w or %y\xA8%w while&the cursor is on a ring slot to &%ccycle between the rings you own%w.");
+    MakeBlueMsgEng(0x817, "\x13\xA3You received a ring! On the&%yEquipment Subscreen%w select&the slot the ring is in with&%b\x9F%w to %requip%w or %runequip%w it.^\x13\xA3You may find and own many more&ring types than you can carry in&your slots at one time, so feel&free to swap them out!^\x13\xA3While in a %rsafe place%w, like&%byour house%w, use %y\xA7%w or %y\xA8%w while&the cursor is on a ring slot to &%ccycle between the rings you own%w.\x0B\x02");
     MakeBlueMsgEng(0x818, "\x13\xA6You received some %yBottled&Ammo%w! This will restore your&supply of bullets or arrows,&depending on age. Don't ask how.");
 
     MakeBlueMsgEng(0x7,  "\x13\x48You got a&%rDeku Seed Bullet Bag%w.&This bag can hold up to %y"+std::to_string(CAPACITY(UPG_BULLET_BAG,2))+"%w&slingshot bullets.");
@@ -1415,6 +1415,8 @@ extern "C" void OTRMessage_Init()
     MakeNormalMsgEng(MiscMsg+13, "\x06\x41Well Come!^I am selling stuff, strange and&rare, from all over the world to&everybody.&Today's special is...^A fantasic, lovely thing!&Who could resist!&I won't tell you what it is until&I see the money....^How about %r2000 Rupees%w?&\x09\x1B&%gBuy&Don't buy%w\x02");
     MakeNormalMsgEng(MiscMsg+14, "Thank you very much!^What I'm selling is...&\x14\x02%rA means of protecting your life%w!\x14\x01""^I can see that you've come far&and under harsh circumstances.&I believe you might be the&rare soul who appreciates this.");
     MakeNormalMsgEng(MiscMsg+15, "\x1A""Oh, I would love to be able&to upgrade your %cdefensive power%w.&However, you don't seem to have any&%rHeart Barriers%w. Too bad...\x0B\x02");
+    MakeBlueMsgEng(MiscMsg+16, "Do you want to swap this ring&and carry it now?\x1B&%gYes please!&Not Now%w\x02");
+    MakeBlueMsgEng(MiscMsg+17, "What slot will you replace?\x1C&%g1st Ring&2nd Ring&3rd Ring%w\x02");
 
     u16 GerudoMsg = TextIDAllocator::Instance->allocateRange("gerudo", 10);
     MakeNormalMsgEng(GerudoMsg+0, "Heh, since you're clearly a master,&the only thing left is&to try for a perfect score,&if you can!\x0B\x02");
