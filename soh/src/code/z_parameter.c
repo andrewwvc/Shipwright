@@ -1659,21 +1659,7 @@ void Inventory_SwapAgeEquipment(void) {
     }
 
     s16 currRing = Ring_Get_Equiped();
-    if (prevEquipedRing != currRing) {
-        if (prevEquipedRing == RI_RING_OF_SILENCE) {
-            Audio_SetGameVolume(SEQ_PLAYER_BGM_MAIN, CVarGetFloat("gMainMusicVolume", 1.0f));
-            Audio_SetGameVolume(SEQ_PLAYER_BGM_SUB, CVarGetFloat("gSubMusicVolume", 1.0f));
-        } else if (currRing == RI_RING_OF_SILENCE) {
-            Audio_SetGameVolume(SEQ_PLAYER_BGM_MAIN, 0.0f);
-            Audio_SetGameVolume(SEQ_PLAYER_BGM_SUB, 0.0f);
-        }
-
-        if (prevEquipedRing == RI_MUTE_RING) {
-            Audio_SetGameVolume(SEQ_PLAYER_SFX, CVarGetFloat("gSFXMusicVolume", 1.0f));
-        } else if (currRing == RI_MUTE_RING) {
-            Audio_SetGameVolume(SEQ_PLAYER_SFX, 0.0f);
-        }
-    }
+    Ring_Handle_Swap(prevEquipedRing,currRing);
 }
 
 void Interface_InitHorsebackArchery(PlayState* play) {
@@ -1934,6 +1920,24 @@ u16 Ring_SwapLeft(u8 ringSlot) {
     }
 
     return gSaveContext.inventory.ringEquips[ringSlot] = temp;
+}
+
+void Ring_Handle_Swap(s16 prevRing, s16 currRing) {
+    if (prevRing != currRing) {
+        if (prevRing == RI_RING_OF_SILENCE) {
+            Audio_SetGameVolume(SEQ_PLAYER_BGM_MAIN, CVarGetFloat("gMainMusicVolume", 1.0f));
+            Audio_SetGameVolume(SEQ_PLAYER_BGM_SUB, CVarGetFloat("gSubMusicVolume", 1.0f));
+        } else if (currRing == RI_RING_OF_SILENCE) {
+            Audio_SetGameVolume(SEQ_PLAYER_BGM_MAIN, 0.0f);
+            Audio_SetGameVolume(SEQ_PLAYER_BGM_SUB, 0.0f);
+        }
+
+        if (prevRing == RI_MUTE_RING) {
+            Audio_SetGameVolume(SEQ_PLAYER_SFX, CVarGetFloat("gSFXMusicVolume", 1.0f));
+        } else if (currRing == RI_MUTE_RING) {
+            Audio_SetGameVolume(SEQ_PLAYER_SFX, 0.0f);
+        }
+    }
 }
 
 static u16 BombchuFlags[] = {ITEMGETINF_03, ITEMGETINF_06, ITEMGETINF_07, ITEMGETINF_0A};

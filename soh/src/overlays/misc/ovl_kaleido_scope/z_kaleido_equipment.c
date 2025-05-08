@@ -714,21 +714,7 @@ void KaleidoScope_DrawEquipment(PlayState* play) {
 
     //Deal with ring changes
     s16 currRing = Ring_Get_Equiped();
-    if (prevEquipedRing != currRing) {
-        if (prevEquipedRing == RI_RING_OF_SILENCE) {
-            Audio_SetGameVolume(SEQ_PLAYER_BGM_MAIN, CVarGetFloat("gMainMusicVolume", 1.0f));
-            Audio_SetGameVolume(SEQ_PLAYER_BGM_SUB, CVarGetFloat("gSubMusicVolume", 1.0f));
-        } else if (currRing == RI_RING_OF_SILENCE) {
-            Audio_SetGameVolume(SEQ_PLAYER_BGM_MAIN, 0.0f);
-            Audio_SetGameVolume(SEQ_PLAYER_BGM_SUB, 0.0f);
-        }
-
-        if (prevEquipedRing == RI_MUTE_RING) {
-            Audio_SetGameVolume(SEQ_PLAYER_SFX, CVarGetFloat("gSFXMusicVolume", 1.0f));
-        } else if (currRing == RI_MUTE_RING) {
-            Audio_SetGameVolume(SEQ_PLAYER_SFX, 0.0f);
-        }
-    }
+    Ring_Handle_Swap(prevEquipedRing,currRing);
 
     for (rowStart = 0, i = 0, point = 4; i < NUM_EQUIPMENT_ROWS; i++, rowStart += 4, point += 16) {
 

@@ -13427,21 +13427,7 @@ s32 func_8084DFF4(PlayState* play, Player* this) {
                     Inventory_ChangeEquipment(EQUIP_TYPE_RING, EQUIP_VALUE_RINGS_NONE);
                 gSaveContext.inventory.ringEquips[play->msgCtx.choiceIndex] = equipGi-RING_GI_MIN+1;
                 s16 currRing = Ring_Get_Equiped();
-                if (prevRing != currRing) {
-                    if (prevRing == RI_RING_OF_SILENCE) {
-                        Audio_SetGameVolume(SEQ_PLAYER_BGM_MAIN, CVarGetFloat("gMainMusicVolume", 1.0f));
-                        Audio_SetGameVolume(SEQ_PLAYER_BGM_SUB, CVarGetFloat("gSubMusicVolume", 1.0f));
-                    } else if (currRing == RI_RING_OF_SILENCE) {
-                        Audio_SetGameVolume(SEQ_PLAYER_BGM_MAIN, 0.0f);
-                        Audio_SetGameVolume(SEQ_PLAYER_BGM_SUB, 0.0f);
-                    }
-
-                    if (prevRing == RI_MUTE_RING) {
-                        Audio_SetGameVolume(SEQ_PLAYER_SFX, CVarGetFloat("gSFXMusicVolume", 1.0f));
-                    } else if (currRing == RI_MUTE_RING) {
-                        Audio_SetGameVolume(SEQ_PLAYER_SFX, 0.0f);
-                    }
-                }
+                Ring_Handle_Swap(prevRing,currRing);
                 isDone = true;
             } else {
                 if (play->msgCtx.choiceIndex == 0) {
