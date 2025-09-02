@@ -4070,6 +4070,10 @@ void Interface_DrawTensionBar(PlayState* play) {
     s16 Y_Margins_BtnB;
     s16 BBtn_Size = 32;
     int BBtnScaled = BBtn_Size * 0.95f;
+
+    if (!player->shieldRelaxTimer && !player->shieldEntry)
+        return;
+
     if (CVarGetInteger("gBBtnPosType", 0) != 0) {
         BBtnScaled = BBtn_Size * CVarGetFloat("gBBtnScale", 0.95f);
     }
@@ -4103,12 +4107,34 @@ void Interface_DrawTensionBar(PlayState* play) {
         PosX_BtnB = PosX_BtnB_ori;
     }
 
-    s16 tensionBarY = PosY_BtnB+30;
-    s16 startingX = PosX_BtnB+4;
+    s16 tensionBarY = PosY_BtnB+32;
+    s16 startingX = PosX_BtnB+6;
+    s16 tensionBarBorderLength = (player->shieldRelaxTimer >= SHIELD_TIME_MAX) ? player->shieldRelaxTimer : SHIELD_TIME_MAX;
     u8 greenTinge = (player->shieldRelaxTimer >= SHIELD_TIME_MAX) ? (40+(player->shieldRelaxTimer-SHIELD_TIME_MAX)*8):0;
     Color_RGB8 tensionBarFillColor = {0,greenTinge,250};
 
     OPEN_DISPS(play->state.gfxCtx);
+
+    Gfx_SetupDL_39Overlay(play->state.gfxCtx);
+
+    gDPSetPrimColor(OVERLAY_DISP++, 0, 0, sMagicBorder.r, sMagicBorder.g, sMagicBorder.b, interfaceCtx->magicAlpha);
+    gDPSetEnvColor(OVERLAY_DISP++, 100, 50, 50, 255);
+
+    OVERLAY_DISP = Gfx_TextureIA8(OVERLAY_DISP, gMagicMeterEndTex, 8, 16, startingX-(R_MAGIC_FILL_X-R_MAGIC_BAR_X), tensionBarY, 8, 16, 1 << 10, 1 << 10);
+
+    OVERLAY_DISP = Gfx_TextureIA8(OVERLAY_DISP, gMagicMeterMidTex, 24, 16, startingX, tensionBarY, tensionBarBorderLength, 16, 1 << 10, 1 << 10);
+
+    gDPLoadTextureBlock(OVERLAY_DISP++, gMagicMeterEndTex, G_IM_FMT_IA, G_IM_SIZ_8b, 8, 16, 0,
+                        G_TX_MIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 3, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+
+    gSPWideTextureRectangle(OVERLAY_DISP++, ((startingX + tensionBarBorderLength)) << 2, tensionBarY << 2,
+                        ((startingX + tensionBarBorderLength) + 8) << 2, (tensionBarY + 16) << 2, G_TX_RENDERTILE,
+                        256, 0, 1 << 10, 1 << 10);
+
+    gDPPipeSync(OVERLAY_DISP++);
+    gDPSetCombineLERP(OVERLAY_DISP++, PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, 0, 0, 0, PRIMITIVE, PRIMITIVE,
+                        ENVIRONMENT, TEXEL0, ENVIRONMENT, 0, 0, 0, PRIMITIVE);
+    gDPSetEnvColor(OVERLAY_DISP++, 0, 0, 0, 255);
 
     // Fill the whole bar with the tension color
     gDPSetPrimColor(OVERLAY_DISP++, 0, 0, tensionBarFillColor.r, tensionBarFillColor.g, tensionBarFillColor.b, interfaceCtx->magicAlpha);
