@@ -604,8 +604,25 @@ static ActorDBInit EnPartnerInit = {
 };
 extern "C" s16 gEnPartnerId;
 
+#include "src/overlays/actors/ovl_Bg_Water_Pillar/z_bg_water_pillar.h"
+static ActorDBInit BgWaterPillarInit = {
+    "Bg_Water_Pillar",
+    "WaterPillar",
+    ACTORCAT_PROP,
+    ACTOR_FLAG_UPDATE_WHILE_CULLED,
+    OBJECT_SPOT16_OBJ,
+    sizeof(BgWaterPillar),
+    (ActorFunc)BgWaterPillar_Init,
+    (ActorFunc)BgWaterPillar_Destroy,
+    (ActorFunc)BgWaterPillar_Update,
+    (ActorFunc)BgWaterPillar_Draw,
+    nullptr,
+};
+static s16 BgWaterPillarId;
+
 void ActorDB::AddBuiltInCustomActors() {
     gEnPartnerId = ActorDB::Instance->AddEntry(EnPartnerInit).entry.id;
+    BgWaterPillarId = ActorDB::Instance->AddEntry(BgWaterPillarInit).entry.id;
 }
 
 extern "C" ActorDBEntry* ActorDB_Retrieve(const int id) {

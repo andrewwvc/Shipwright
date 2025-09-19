@@ -56,6 +56,7 @@ const std::vector<FlagTable> flagTables = {
         { 0x1E, "Won the Cow in Malon's Race" },
         { 0x1F, "Spoke to Navi on the Quest Status screen" },
         { 0x20, "Obtained Cow Heart Piece" },
+        { 0x22, "Bombed Zora's Domain/Lake Shortcut" },
         { 0x23, "Bombed Dodongo's Cavern Entrance" },
         { 0x25, "Used Dodongo's Cavern Blue Warp" },
         { 0x28, "Meeting young Malon at night" },

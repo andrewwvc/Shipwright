@@ -36,6 +36,7 @@
 #include "soh/resource/type/scenecommand/SetEchoSettings.h"
 #include "soh/resource/type/scenecommand/SetAlternateHeaders.h"
 #include "SaveManager.h"
+#include "ActorDB.h"
 
 using json = nlohmann::json;
 
@@ -275,7 +276,7 @@ bool Scene_CommandSpawnList(PlayState* play, LUS::ISceneCommand* cmd) {
 #define ROTZ_TSUBO_ITEM00(val) ((val >> 5) & 0x7)
 
 
-const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, LUS::ActorEntry>>>> sceneActorOverrides = {
+std::map<u16, std::map<u16, std::vector<std::tuple<int, int, LUS::ActorEntry>>>> sceneActorOverrides = {
     { 0x01, { // Dodongo's Cavern
         { 0x03, {
             { -1, 4, { ACTOR_EN_ITEM00, 4266,100,-1575, 0, -21299, 0, 0x100+(uint16_t)ITEM00_HEART_PIECE  }},
@@ -526,11 +527,17 @@ const std::map<u16, std::map<u16, std::vector<std::tuple<int, int, LUS::ActorEnt
             { 1, 34, { ACTOR_EN_SHOPNUTS, -853,769,1196, 0,0,0, 0xB}},
         } },
     } },
-    { 0x57, { // Lake Hylia
+    { SCENE_LAKE_HYLIA, { // Lake Hylia
         { 0x00, {
+            { -1, -1, { 471, -920,-1556,3680, 0,0,0, 0x0000 }}, //Id Exists to be changed by custom actor id retrieval
             { -1, -1, { ACTOR_EN_RU1, -918,-1336,3560, 0,0x7FFF,0, 0xB }},
             { 2, -1, { ACTOR_EN_NY, -215,-2147,6194, 0,0x7FFF,0, 0x1 }}, { 3, -1, { ACTOR_EN_NY, -215,-2147,6194, 0,0x7FFF,0, 0x1 }},
             { 2, -1, { ACTOR_EN_NY, -1877,-2089,6120, 0,0x0,0, 0x1 }}, { 3, -1, { ACTOR_EN_NY, -1877,-2089,6120, 0,0x0,0, 0x1 }},
+        } },
+    } },
+    { SCENE_ZORAS_DOMAIN, { // Zora's Domain
+        { 0x01, {
+            { -1, -1, { 471, -193,-230,-206, 0,-25850,0, 0x0000 }}, //Id Exists to be changed by custom actor id retrieval
         } },
     } },
     { SCENE_ZORAS_RIVER, { // Zora's River
@@ -655,6 +662,12 @@ bool Scene_CommandActorList(PlayState* play, LUS::ISceneCommand* cmd) {
     // LUS::SetActorList* cmdActor = std::static_pointer_cast<LUS::SetActorList>(cmd);
     LUS::SetActorList* cmdActor = (LUS::SetActorList*)cmd;
     std::vector<LUS::ActorEntry> copy = cmdActor->actorList;
+
+    s16 waterPillarID = ActorDB::Instance->RetrieveId("Bg_Water_Pillar");
+    auto& roomChange = sceneActorOverrides.at(SCENE_ZORAS_DOMAIN).at(0x1).at(0);
+    std::get<2>(roomChange).id = waterPillarID;
+    auto& roomChange2 = sceneActorOverrides.at(SCENE_LAKE_HYLIA).at(0x0).at(0);
+    std::get<2>(roomChange2).id = waterPillarID;
 
     //Handles static entry overrides
     if (!(IsGameMasterQuest() && ((play->sceneNum >= 0 && play->sceneNum <= 9) || play->sceneNum == 11 || play->sceneNum == 13))) {

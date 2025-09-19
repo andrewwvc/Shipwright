@@ -1343,6 +1343,7 @@ extern "C" void OTRMessage_Init()
     MakeNormalMsgEng(ZoraMsg+19, "The water that comes directly from&Zora's Fountain is incredibly fresh.^As long as there's nothing tainting it,&it should be the purest water&in all the land.");
     MakeNormalMsgEng(ZoraMsg+20, "Apparently, we Zoras have an&affinity for the Moon unique&to all the races in Hyrule.^I can't say I feel much for it&myself though, even if others might.");
     MakeNormalMsgEng(ZoraMsg+21, "Ohhh, I'm revived...&Was it you who saved me?&Don't be so nervous!^I...well I wanted to give&you a %bZora tunic%w to aid you&with breathing under water.^But there seems to be nothing&I can do about that right now.&So all I can do is ask you to&listen to my troubles.");
+    MakeNormalMsgEng(ZoraMsg+22, "Hmm... I've been wanting to travel to&%bLake Hylia%w, but this big rock has&fallen on the entrance to the passage&I normally go through to get there.&^What trouble! You'd probably need&%rsomething powerful%w to break it, like&the %yspecial crop%w I hear the rock&people from the mountain have.");
 
     u16 RutoMsg = TextIDAllocator::Instance->allocateRange("ruto", 30);
 

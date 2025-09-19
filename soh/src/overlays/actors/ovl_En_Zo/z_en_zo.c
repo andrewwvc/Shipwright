@@ -445,13 +445,11 @@ u16 func_80B61024(PlayState* play, Actor* thisx) {
                 }
             }
             if (CHECK_QUEST_ITEM(QUEST_ZORA_SAPPHIRE)) {
-                return 0x402D;
+                return ZoraMsg+20;
             }
-            if (Flags_GetEventChkInf(EVENTCHKINF_OBTAINED_RUTOS_LETTER)) {
-                return (Flags_GetInfTable(INFTABLE_129)) ? 0x400B : 0x402F;
-            }
+
             if (Flags_GetEventChkInf(EVENTCHKINF_SPOKE_TO_A_ZORA)) {
-                return 0x400A;
+                return 0x400C;
             }
             break;
 
@@ -461,11 +459,17 @@ u16 func_80B61024(PlayState* play, Actor* thisx) {
                     return ZoraMsg+8;
                 }
             }
+            if (!Flags_GetEventChkInf(EVENTCHKINF_22)) {
+                return ZoraMsg+22;
+            }
             if (CHECK_QUEST_ITEM(QUEST_ZORA_SAPPHIRE)) {
-                return ZoraMsg+20;
+                return 0x402D;
+            }
+            if (Flags_GetEventChkInf(EVENTCHKINF_OBTAINED_RUTOS_LETTER)) {
+                return (Flags_GetInfTable(INFTABLE_129)) ? 0x400B : 0x402F;
             }
             if (Flags_GetEventChkInf(EVENTCHKINF_SPOKE_TO_A_ZORA)) {
-                return 0x400C;
+                return 0x400A;
             }
             break;
 
