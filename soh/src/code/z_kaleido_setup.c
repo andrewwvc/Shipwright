@@ -114,7 +114,7 @@ void KaleidoSetup_Init(PlayState* play) {
     pauseCtx->cursorSlot[PAUSE_QUEST] = 0;
     pauseCtx->cursorSlot[PAUSE_EQUIP] = pauseCtx->cursorPoint[PAUSE_EQUIP];
 
-    pauseCtx->infoPanelOffsetY = -40;
+    pauseCtx->infoPanelOffsetY = -50;
     pauseCtx->nameDisplayTimer = 0;
     pauseCtx->nameColorSet = 0;
     pauseCtx->cursorColorSet = 4;
@@ -122,6 +122,10 @@ void KaleidoSetup_Init(PlayState* play) {
     pauseCtx->cursorSpecialPos = 0;
 
     pauseCtx->randoQuestMode = 0;
+    pauseCtx->equipSlotScrollY = 0;
+    pauseCtx->equipScrollOffsetY = 0;
+    pauseCtx->itemSlotScrollY = 0;
+    pauseCtx->itemScrollOffsetY = 0;
 
     View_Init(&pauseCtx->view, play->state.gfxCtx);
 }

@@ -161,6 +161,7 @@ typedef struct BossGanon {
     /* 0x0718 */ s16 organAlpha;
     /* 0x071A */ u8 useOpenHand;
     /* 0x071B */ u8 windowShatterState;
+                 s8 numBigChargeSeries;
 } BossGanon; // size = 0x71C
 
 #endif

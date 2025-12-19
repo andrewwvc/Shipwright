@@ -3,8 +3,7 @@
 #include "soh/Enhancements/game-interactor/GameInteractor_Hooks.h"
 #include "soh/ResourceManagerHelpers.h"
 
-#define FLAGS \
-    (ACTOR_FLAG_ATTENTION_ENABLED | ACTOR_FLAG_HOSTILE | ACTOR_FLAG_IGNORE_QUAKE | ACTOR_FLAG_CAN_ATTACH_TO_ARROW)
+#define FLAGS (/*ACTOR_FLAG_ATTENTION_ENABLED |*/ ACTOR_FLAG_HOSTILE | ACTOR_FLAG_IGNORE_QUAKE | ACTOR_FLAG_CAN_ATTACH_TO_ARROW)
 
 void EnCrow_Init(Actor* thisx, PlayState* play);
 void EnCrow_Destroy(Actor* thisx, PlayState* play);
@@ -99,6 +98,7 @@ static DamageTable sDamageTable = {
 };
 
 static u32 sDeathCount = 0;
+static u32 sDeathCountBig = 0;
 
 static InitChainEntry sInitChain[] = {
     ICHAIN_F32(uncullZoneScale, 3000, ICHAIN_CONTINUE),
@@ -108,6 +108,16 @@ static InitChainEntry sInitChain[] = {
 };
 
 static Vec3f sHeadVec = { 2500.0f, 0.0f, 0.0f };
+
+u32 EnCrow_ExportDeathCount() {
+    return sDeathCount;
+}
+
+u32 EnCrow_ExportDeathCountBig() {
+    return sDeathCountBig;
+}
+
+#define MALON_DEFENSE_CONDITIONS ((gSaveContext.eventChkInf[2] & 0x0100) && sDeathCountBig && (play->sceneNum == SCENE_LON_LON_RANCH))
 
 void EnCrow_Init(Actor* thisx, PlayState* play) {
     EnCrow* this = (EnCrow*)thisx;
@@ -120,6 +130,7 @@ void EnCrow_Init(Actor* thisx, PlayState* play) {
     CollisionCheck_SetInfo(&this->actor.colChkInfo, &sDamageTable, &sColChkInfoInit);
     ActorShape_Init(&this->actor.shape, 2000.0f, ActorShadow_DrawCircle, 20.0f);
     sDeathCount = 0;
+    sDeathCountBig = 0;
     EnCrow_SetupFlyIdle(this);
 }
 
@@ -142,8 +153,8 @@ void EnCrow_SetupFlyIdle(EnCrow* this) {
 
 void EnCrow_SetupDiveAttack(EnCrow* this) {
     this->timer = 300;
-    this->actor.speedXZ = 4.0f;
-    this->skelAnime.playSpeed = 2.0f;
+    this->actor.speedXZ = 8.0f;
+    this->skelAnime.playSpeed = 4.0f;
     this->actionFunc = EnCrow_DiveAttack;
 }
 
@@ -239,7 +250,7 @@ void EnCrow_FlyIdle(EnCrow* this, PlayState* play) {
 
     SkelAnime_Update(&this->skelAnime);
     skelanimeUpdated = Animation_OnFrame(&this->skelAnime, 0.0f);
-    this->actor.speedXZ = (Rand_ZeroOne() * 1.5f) + 3.0f;
+    this->actor.speedXZ = (Rand_ZeroOne() * 1.5f) + 3.5f;
 
     if (this->actor.bgCheckFlags & 8) {
         this->aimRotY = this->actor.wallYaw;
@@ -363,9 +374,13 @@ void EnCrow_Die(EnCrow* this, PlayState* play) {
             sDeathCount++;
             Item_DropCollectibleRandom(play, &this->actor, &this->actor.world.pos, 0);
         } else {
-            Item_DropCollectible(play, &this->actor.world.pos, ITEM00_RUPEE_RED);
+            sDeathCountBig++;
+            if (MALON_DEFENSE_CONDITIONS && (sDeathCountBig == 1) && !Flags_GetCollectible(play,1))
+                Item_DropCollectible(play, &this->actor.world.pos, 0x100+ITEM00_HEART_PIECE);
+            else
+                Item_DropCollectible(play, &this->actor.world.pos, ITEM00_RUPEE_RED);
         }
-        if (!CVarGetInteger(CVAR_ENHANCEMENT("RandomizedEnemies"), 0)) {
+        if (!CVarGetInteger(CVAR_ENHANCEMENT("RandomizedEnemies"), 0) && !MALON_DEFENSE_CONDITIONS) {
             EnCrow_SetupRespawn(this);
         } else {
             Actor_Kill(this);
@@ -460,6 +475,10 @@ void EnCrow_Update(Actor* thisx, PlayState* play) {
         Actor_UpdateBgCheckInfo(play, &this->actor, 12.0f * scale, 25.0f * scale, 50.0f * scale, 7);
     } else {
         height = 0.0f;
+    }
+
+    if (MALON_DEFENSE_CONDITIONS && (this->actionFunc != EnCrow_Die)) {
+        EnCrow_SetupDie(this);
     }
 
     this->collider.elements[0].dim.worldSphere.center.x = this->actor.world.pos.x;

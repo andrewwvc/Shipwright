@@ -6,7 +6,8 @@ typedef enum {
     /* 1 */ EQUIP_TYPE_SHIELD,
     /* 2 */ EQUIP_TYPE_TUNIC,
     /* 3 */ EQUIP_TYPE_BOOTS,
-    /* 4 */ EQUIP_TYPE_MAX
+    /* 4 */ EQUIP_TYPE_RING,
+    /* 5 */ EQUIP_TYPE_MAX
 } EquipmentType;
 
 // `EquipInv*` enums are for Inventory.equipment (for example used in the `CHECK_OWNED_EQUIP` macro)
@@ -35,6 +36,12 @@ typedef enum {
     /* 1 */ EQUIP_INV_BOOTS_IRON,
     /* 2 */ EQUIP_INV_BOOTS_HOVER
 } EquipInvBoots;
+
+typedef enum {
+    /* 0 */ EQUIP_INV_RINGS_1,
+    /* 1 */ EQUIP_INV_RINGS_2,
+    /* 2 */ EQUIP_INV_RINGS_3
+} EquipInvRings;
 
 // `EquipValue*` enums are for ItemEquips.equipment (for example used in the `CUR_EQUIP_VALUE` macro)
 
@@ -69,6 +76,14 @@ typedef enum {
     /* 3 */ EQUIP_VALUE_BOOTS_HOVER,
     /* 4 */ EQUIP_VALUE_BOOTS_MAX
 } EquipValueBoots;
+
+typedef enum {
+    /* 0 */ EQUIP_VALUE_RINGS_NONE,
+    /* 1 */ EQUIP_VALUE_RINGS_1,
+    /* 2 */ EQUIP_VALUE_RINGS_2,
+    /* 3 */ EQUIP_VALUE_RINGS_3,
+    /* 4 */ EQUIP_VALUE_RINGS_MAX,
+} EquipValueRings;
 
 typedef enum {
     /* 0x00 */ UPG_QUIVER,
@@ -140,12 +155,18 @@ typedef enum {
     /* 0x15 */ SLOT_BOTTLE_4,
     /* 0x16 */ SLOT_TRADE_ADULT,
     /* 0x17 */ SLOT_TRADE_CHILD,
-    /* 0x18 */ SLOT_TUNIC_KOKIRI,
-    /* 0x19 */ SLOT_TUNIC_GORON,
-    /* 0x1A */ SLOT_TUNIC_ZORA,
-    /* 0x1B */ SLOT_BOOTS_KOKIRI,
-    /* 0x1C */ SLOT_BOOTS_IRON,
-    /* 0x1D */ SLOT_BOOTS_HOVER,
+    /* 0x18 */ SLOT_LANDMINE,
+    /* 0x19 */ SLOT_RING1,
+    /* 0x1A */ SLOT_PLACEHOLDER1,
+    /* 0x1B */ SLOT_PLACEHOLDER2,
+    /* 0x1C */ SLOT_DINS_CRUCIBLE,
+    /* 0x1D */ SLOT_NAYRUS_AFFECTION,
+    /* 0xF9 */ SLOT_TUNIC_KOKIRI = 0xF9,
+    /* 0xFA */ SLOT_TUNIC_GORON,
+    /* 0xFB */ SLOT_TUNIC_ZORA,
+    /* 0xFC */ SLOT_BOOTS_KOKIRI,
+    /* 0xFD */ SLOT_BOOTS_IRON,
+    /* 0xFE */ SLOT_BOOTS_HOVER,
     /* 0xFF */ SLOT_NONE = 0xFF
 } InventorySlot;
 
@@ -306,6 +327,17 @@ typedef enum {
     /* 0x99 */ ITEM_STICK_UPGRADE_30,
     /* 0x9A */ ITEM_NUT_UPGRADE_30,
     /* 0x9B */ ITEM_NUT_UPGRADE_40,
+    /* 0x9C */ ITEM_EXTRA_MAGIC,
+    /* 0x9D */ ITEM_EPONA_BOOST,
+    /* 0x9E */ ITEM_DEFENSE_HEART,
+    /* 0x9F */ ITEM_WALLET_KING,
+    /* 0xA0 */ ITEM_LANDMINE,
+    /* 0xA1 */ ITEM_NAYRUS_AFFECTION,
+    /* 0xA2 */ ITEM_DINS_CRUCIBLE,
+    /* 0xA3 */ ITEM_RING_1,
+    /* 0xA4 */ ITEM_RING_2,
+    /* 0xA5 */ ITEM_RING_3,
+    /* 0xA5 */ ITEM_BOTTLE_AMMO,
     /* 0xFC */ ITEM_LAST_USED = 0xFC,
     /* 0xFE */ ITEM_NONE_FE = 0xFE,
     /* 0xFF */ ITEM_NONE = 0xFF
@@ -326,8 +358,11 @@ typedef enum {
     EQUIP_FLAG_BOOTS_HOVER = 1 << 14,
 } EquipmentFlag;
 
+#define ITEM_MAX ITEM_BOTTLE_AMMO
 #define ITEM_TRADE_CHILD ITEM_WEIRD_EGG
 #define ITEM_TRADE_ADULT ITEM_POCKET_EGG
+#define RING_ITEM_MIN ITEM_RING_1
+#define RING_ITEM_MAX ITEM_RING_3
 
 // Get Item result may vary depending on context (chest/shop/scrub/drop)
 typedef enum {
@@ -457,8 +492,64 @@ typedef enum {
     /* 0x7B */ GI_BULLET_BAG_50,
     /* 0x7C */ GI_ICE_TRAP, // freezes link when opened from a chest
     /* 0x7D */ GI_TEXT_0,   // no model appears over Link, shows text id 0 (pocket egg)
-    /* 0x84 */ GI_MAX
+    /* 0x7E */ GI_EXTRA_MAGIC,
+    /* 0x7F */ GI_EPONA_BOOST,
+    /* 0x80 */ GI_DEFENSE_HEART,
+    /* 0x81 */ GI_WALLET_KING,
+    /* 0x82 */ GI_LANDMINE,
+    /* 0x83 */ GI_NAYRUS_AFFECTION,
+    /* 0x84 */ GI_DINS_CRUCIBLE,
+    /* 0x0F */ GI_BOTTLE_AMMO,
+    /* 0x85 */ GI_RING,
+    /* 0x85 */ GI_RING_1,
+    /* 0x85 */ GI_RING_2,
+    /* 0x85 */ GI_RING_3,
+    /* 0x85 */ GI_RING_4,
+    /* 0x85 */ GI_RING_5,
+    /* 0x85 */ GI_RING_6,
+    /* 0x85 */ GI_RING_7,
+    /* 0x85 */ GI_RING_8,
+    /* 0x85 */ GI_RING_9,
+    /* 0x85 */ GI_RING_10,
+    /* 0x85 */ GI_RING_11,
+    /* 0x85 */ GI_RING_12,
+    /* 0x85 */ GI_RING_13,
+    /* 0x85 */ GI_RING_14,
+    /* 0x85 */ GI_RING_15,
+    /* 0x85 */ GI_RING_16,
+    /* 0x85 */ GI_RING_17,
+    /* 0x85 */ GI_RING_18,
+    /* 0x85 */ GI_RING_19,
+    /* 0x86 */ GI_MAX
 } GetItemID;
+
+#define RING_GI_MIN GI_RING
+#define RING_GI_MAX GI_RING_19
+
+typedef enum {
+    /* 00 */ RI_ATTRACTION_RING,//Makes items easier to pick up
+    /* 01 */ RI_REPULSION_RING,
+    /* 02 */ RI_LOVE_RING,//Increases heart drop rate, no rupees
+    /* 03 */ RI_GREED_RING,//Increases rupee drop rate, no hearts
+    /* 04 */ RI_BRAVERY_RING,//Slightly increases weapon damage, doubles damage taken
+    /* 05 */ RI_COWARDS_RING,//Slightly degreases damage taken from strong hits, reduces offensive damage
+    /* 06 */ RI_WOOD_RING,//Lets you see Kokiri from afar
+    /* 07 */ RI_MOUNTAIN_RING,//Makes Gorons wake up from afar
+    /* 08 */ RI_FOUNTAIN_RING,//Lets you see Zora from afar
+    /* 09 */ RI_FOCUS_RING,//Lets you Z-target from a slightly larger range
+    /* 10 */ RI_FEATHER_RING,//Cuccus are no longer your foes...
+    /* 11 */ RI_SNEAK_RING,//You are as stealthy during daytime as you are at night
+    /* 12 */ RI_SORCERERS_RING,//This cannot be equipped when not selected.
+    /* 13 */ RI_WITCHS_RING,//Magic use drains hearts isntead of the magic bar
+    /* 14 */ RI_NIMBLE_RING,//Increases roll effectiveness/invincibility
+    /* 15 */ RI_RING_OF_SILENCE,//Silences all music
+    /* 16 */ RI_RING_OF_PERSISTENCE,//Renders no image
+    /* 17 */ RI_ACROBAT_RING,//Alters jump attack
+    /* 18 */ RI_MUTE_RING,//You cannot speak or yell
+    /* 19 */ RI_PROTECTION_RING,//Protects you from explosion damage
+} RingID;
+
+#define WITCH_RING_MULTIPLIER 2
 
 typedef enum {
     /* 0x00 */ GID_BOTTLE,
@@ -578,19 +669,23 @@ typedef enum {
     /* 0x72 */ GID_BULLET_BAG_50,
     /* 0x73 */ GID_SWORD_KOKIRI,
     /* 0x74 */ GID_SKULL_TOKEN_2,
-    /* 0x74 */ GID_KOKIRI_EMERALD,
-    /* 0x74 */ GID_GORON_RUBY,
-    /* 0x74 */ GID_ZORA_SAPPHIRE,
-    /* 0x75 */ GID_SONG_GENERIC,
-    /* 0x76 */ GID_SONG_ZELDA,
-    /* 0x77 */ GID_SONG_EPONA,
-    /* 0x78 */ GID_SONG_SARIA,
-    /* 0x79 */ GID_SONG_SUN,
-    /* 0x7A */ GID_SONG_TIME,
-    /* 0x7B */ GID_SONG_STORM,
-    /* 0x7C */ GID_TRIFORCE_PIECE,
+    /* 0x75 */ GID_KOKIRI_EMERALD,
+    /* 0x76 */ GID_GORON_RUBY,
+    /* 0x77 */ GID_ZORA_SAPPHIRE,
+    /* 0x78 */ GID_SONG_GENERIC,
+    /* 0x79 */ GID_SONG_ZELDA,
+    /* 0x7A */ GID_SONG_EPONA,
+    /* 0x7B */ GID_SONG_SARIA,
+    /* 0x7C */ GID_SONG_SUN,
+    /* 0x7D */ GID_SONG_TIME,
+    /* 0x7E */ GID_SONG_STORM,
+    /* 0x7F */ GID_TRIFORCE_PIECE,
     /*      */ GID_FISHING_POLE,
-    /* 0x7C */ GID_MAXIMUM
+    /* 0x80 */ GID_LANDMINE,
+    /* 0x00 */ GID_BOTTLE_AMMO,
+    /* 0x81 */ GID_RING_0,
+    /* 0x82 */ GID_RING_LAST = GID_RING_0+RING_GI_MAX-RING_GI_MIN,
+    /* 0x83 */ GID_MAXIMUM
 
 } GetItemDrawID;
 
@@ -625,7 +720,8 @@ typedef enum {
     /* 0x1B */ EXCH_ITEM_POE,
     /* 0x1C */ EXCH_ITEM_BIG_POE,
     /* 0x1D */ EXCH_ITEM_LETTER_RUTO,
-    /* 0x1E */ EXCH_ITEM_MAX
+    /* 0x1E */ EXCH_ITEM_FAIRY = 35,
+    /* 0x1F */ EXCH_ITEM_MAX
 } ExchangeItemID;
 
 #endif

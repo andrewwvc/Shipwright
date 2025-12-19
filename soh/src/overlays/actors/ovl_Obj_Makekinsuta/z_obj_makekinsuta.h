@@ -15,4 +15,6 @@ typedef struct ObjMakekinsuta {
     /* 0x152  */ s16 unk_152;
 } ObjMakekinsuta; // size = 0x0154
 
+s32 ObjMakekinsuta_CanReceiveInsect(Actor* this);
+
 #endif

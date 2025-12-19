@@ -64,6 +64,7 @@ typedef struct EnFhgFire {
     /* 0x01FC */ u8 lensFlareOn;
     /* 0x01FE */ s16 lensFlareTimer;
     /* 0x0200 */ f32 lensFlareScale;
+    /*        */ f32 speedLimit;
 } EnFhgFire; // size = 0x0204
 
 #endif

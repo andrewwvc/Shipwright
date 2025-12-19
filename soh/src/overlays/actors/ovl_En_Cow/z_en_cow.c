@@ -109,6 +109,8 @@ void EnCow_Init(Actor* thisx, PlayState* play) {
     EnCow* this = (EnCow*)thisx;
     s32 pad;
 
+    thisx->world.rot.z = thisx->shape.rot.z = 0;
+
     ActorShape_Init(&this->actor.shape, 0.0f, ActorShadow_DrawCircle, 72.0f);
     switch (this->actor.params) {
         case 0:
@@ -226,6 +228,8 @@ void func_809DF7D8(EnCow* this, PlayState* play) {
         this->actor.flags &= ~ACTOR_FLAG_TALK_OFFER_AUTO_ACCEPTED;
         Message_CloseTextbox(play);
         this->actionFunc = func_809DF778;
+        this->actor.home.rot.z = 1;
+        insertSpawnResource(this->actor.entryNum, DEFAULT_RESOURCE_TIME);
         Actor_OfferGetItem(&this->actor, play, GI_MILK, 10000.0f, 100.0f);
     }
 }
@@ -253,6 +257,54 @@ void func_809DF8FC(EnCow* this, PlayState* play) {
     func_809DF494(this, play);
 }
 
+// bool EnCow_HasBeenMilked(EnCow* this, PlayState* play) {
+//     CowIdentity cowIdentity = Randomizer_IdentifyCow(play->sceneNum, this->actor.world.pos.x, this->actor.world.pos.z);
+//     return Flags_GetRandomizerInf(cowIdentity.randomizerInf);
+// }
+//
+// void EnCow_GivePlayerRandomizedItem(EnCow* this, PlayState* play) {
+//     if (!EnCow_HasBeenMilked(this, play)) {
+//         CowIdentity cowIdentity = Randomizer_IdentifyCow(play->sceneNum, this->actor.world.pos.x, this->actor.world.pos.z);
+//         GetItemEntry itemEntry = Randomizer_GetItemFromKnownCheck(cowIdentity.randomizerCheck, GI_MILK);
+//         GiveItemEntryFromActor(&this->actor, play, itemEntry, 10000.0f, 100.0f);
+//     } else {
+//         // once we've gotten the rando reward from the cow,
+//         // return them to the their default action function
+//         this->actionFunc = func_809DF96C;
+//     }
+// }
+
+void EnCow_GiveHeart(EnCow* this, PlayState* play) {
+    if (Actor_HasParent(&this->actor, play)) {
+        this->actor.parent = NULL;
+        this->actionFunc = func_809DF730;
+    } else {
+        func_8002F434(&this->actor, play, GI_HEART_PIECE, 10000.0f, 100.0f);
+    }
+}
+
+void EnCow_GivePlayerHeartPiece(EnCow* this, PlayState* play) {
+    if ((Message_GetState(&play->msgCtx) == TEXT_STATE_EVENT) && Message_ShouldAdvance(play)) {
+        this->actor.flags &= ~ACTOR_FLAG_TALK_OFFER_AUTO_ACCEPTED;
+        Message_CloseTextbox(play);
+        this->actionFunc = EnCow_GiveHeart;
+        func_8002F434(&this->actor, play, GI_HEART_PIECE, 10000.0f, 100.0f);
+    }
+}
+
+void EnCow_StartGivePlayerHeartPiece(EnCow* this, PlayState* play) {
+    if (Actor_ProcessTalkRequest(&this->actor, play)) {
+        this->actionFunc = EnCow_GivePlayerHeartPiece;
+        gSaveContext.eventChkInf[2] |= 0x01;
+    } else {
+        u16 MiscMsg = GetTextID("misc");
+        this->actor.flags |= ACTOR_FLAG_TALK_OFFER_AUTO_ACCEPTED;
+        func_8002F2CC(&this->actor, play, 170.0f);
+        this->actor.textId = MiscMsg;
+    }
+    func_809DF494(this, play);
+}
+
 void func_809DF96C(EnCow* this, PlayState* play) {
     if ((play->msgCtx.ocarinaMode == OCARINA_MODE_00) || (play->msgCtx.ocarinaMode == OCARINA_MODE_04)) {
         if (DREG(53) != 0) {
@@ -264,13 +316,30 @@ void func_809DF96C(EnCow* this, PlayState* play) {
                     (ABS((s16)(this->actor.yawTowardsPlayer - this->actor.shape.rot.y)) < 0x61A8)) {
                     DREG(53) = 0;
                     if (GameInteractor_Should(VB_GIVE_ITEM_FROM_COW, true, this)) {
-                        this->actionFunc = func_809DF8FC;
-                        this->actor.flags |= ACTOR_FLAG_TALK_OFFER_AUTO_ACCEPTED;
-                        func_8002F2CC(&this->actor, play, 170.0f);
-                        this->actor.textId = 0x2006;
+                        if (play->sceneNum == SCENE_LINKS_HOUSE && !(gSaveContext.eventChkInf[2] & 0x01)) {
+                            this->actionFunc = EnCow_StartGivePlayerHeartPiece;
+                            return;
+                        }
+                        if (this->actor.home.rot.z != 1) {
+                            this->actionFunc = func_809DF8FC;
+                            this->actor.flags |= ACTOR_FLAG_TALK_OFFER_AUTO_ACCEPTED;
+                            func_8002F2CC(&this->actor, play, 170.0f);
+                            this->actor.textId = 0x2006;
+                        }
                     } else {
                         return;
                     }
+
+                    // if (play->sceneNum == SCENE_LINKS_HOUSE && !(gSaveContext.eventChkInf[2] & 0x01)) {
+                    //     this->actionFunc = EnCow_StartGivePlayerHeartPiece;
+                    //     return;
+                    // }
+                    // if (this->actor.home.rot.z != 1) {
+                    //     this->actionFunc = func_809DF8FC;
+                    //     this->actor.flags |= ACTOR_FLAG_WILL_TALK;
+                    //     func_8002F2CC(&this->actor, play, 170.0f);
+                    //     this->actor.textId = 0x2006;
+                    // }
                 } else {
                     this->unk_276 |= 4;
                 }

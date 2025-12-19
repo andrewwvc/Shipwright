@@ -55,6 +55,9 @@ typedef struct EnRu1 {
     /* 0x0364 */ Vec3f unk_364;
     /* 0x0370 */ f32 unk_370;
     /* 0x0374 */ NpcInteractInfo interactInfo;
+                 s32 timer;
+                 s16 expressionState;
+                 u32 dateProgress;
 } EnRu1; // size = 0x039C
 
 typedef enum {
@@ -75,5 +78,8 @@ typedef enum {
     /* 14 */ RUTO_CHILD_HEAD,
     /* 15 */ RUTO_CHILD_TORSO
 } RutoLimb;
+
+void DetectAndPerformDateInfoReset(void);
+s32 EnRu1_DateConditionsMet(void);
 
 #endif

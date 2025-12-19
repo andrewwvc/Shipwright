@@ -73,6 +73,7 @@ void EnBb_SetupFlameTrail(EnBb* this);
 void EnBb_FlameTrail(EnBb* this, PlayState* play);
 
 void EnBb_SetupDeath(EnBb* this, PlayState* play);
+void EnBb_SetupInstantDeath(EnBb* this, PlayState* play);
 void EnBb_Death(EnBb* this, PlayState* play);
 
 void EnBb_Damage(EnBb* this, PlayState* play);
@@ -90,6 +91,7 @@ void EnBb_SetupWhite(PlayState* play, EnBb* this);
 void EnBb_White(EnBb* this, PlayState* play);
 
 void EnBb_InitGreen(EnBb* this, PlayState* play);
+void EnBb_SetupGreen(EnBb* this);
 void EnBb_Green(EnBb* this, PlayState* play);
 
 void EnBb_Stunned(EnBb* this, PlayState* play);
@@ -98,17 +100,17 @@ static DamageTable sDamageTableBlueGreen = {
     /* Deku nut      */ DMG_ENTRY(0, 0xF),
     /* Deku stick    */ DMG_ENTRY(2, 0x0),
     /* Slingshot     */ DMG_ENTRY(1, 0x0),
-    /* Explosive     */ DMG_ENTRY(2, 0xA),
+    /* Explosive     */ DMG_ENTRY(2, 0xB),
     /* Boomerang     */ DMG_ENTRY(0, 0xF),
-    /* Normal arrow  */ DMG_ENTRY(2, 0xE),
+    /* Normal arrow  */ DMG_ENTRY(2, 0x0),
     /* Hammer swing  */ DMG_ENTRY(2, 0xA),
     /* Hookshot      */ DMG_ENTRY(0, 0xF),
     /* Kokiri sword  */ DMG_ENTRY(1, 0x0),
     /* Master sword  */ DMG_ENTRY(2, 0x0),
     /* Giant's Knife */ DMG_ENTRY(4, 0x0),
-    /* Fire arrow    */ DMG_ENTRY(2, 0xE),
-    /* Ice arrow     */ DMG_ENTRY(4, 0xC),
-    /* Light arrow   */ DMG_ENTRY(4, 0xB),
+    /* Fire arrow    */ DMG_ENTRY(2, 0x0),
+    /* Ice arrow     */ DMG_ENTRY(4, 0x0),
+    /* Light arrow   */ DMG_ENTRY(4, 0xA),
     /* Unk arrow 1   */ DMG_ENTRY(0, 0x0),
     /* Unk arrow 2   */ DMG_ENTRY(0, 0x0),
     /* Unk arrow 3   */ DMG_ENTRY(0, 0x0),
@@ -120,9 +122,9 @@ static DamageTable sDamageTableBlueGreen = {
     /* Kokiri spin   */ DMG_ENTRY(1, 0x0),
     /* Giant spin    */ DMG_ENTRY(4, 0x0),
     /* Master spin   */ DMG_ENTRY(2, 0x0),
-    /* Kokiri jump   */ DMG_ENTRY(2, 0x0),
-    /* Giant jump    */ DMG_ENTRY(8, 0x0),
-    /* Master jump   */ DMG_ENTRY(4, 0x0),
+    /* Kokiri jump   */ DMG_ENTRY(2, 0xB),
+    /* Giant jump    */ DMG_ENTRY(8, 0xB),
+    /* Master jump   */ DMG_ENTRY(4, 0xB),
     /* Unknown 1     */ DMG_ENTRY(0, 0x6),
     /* Unblockable   */ DMG_ENTRY(0, 0x0),
     /* Hammer jump   */ DMG_ENTRY(4, 0xA),
@@ -265,23 +267,25 @@ Actor* EnBb_FindExplosive(PlayState* play, EnBb* this, f32 range) {
     return NULL;
 }
 
+#define LENGTH_EXT 3
+
 void EnBb_SpawnFlameTrail(PlayState* play, EnBb* this, s16 startAtZero) {
     EnBb* now = this;
     EnBb* next;
     s32 i;
 
-    for (i = 0; i < 5; i++) {
-        next = (EnBb*)Actor_Spawn(&play->actorCtx, play, ACTOR_EN_BB, this->actor.world.pos.x, this->actor.world.pos.y,
-                                  this->actor.world.pos.z, 0, 0, 0, 0, true);
+    for (i = 0; i < 5*LENGTH_EXT; i++) {
+        next = (EnBb*)Actor_Spawn(&play->actorCtx, play, ACTOR_EN_BB, this->actor.world.pos.x,
+                                  this->actor.world.pos.y, this->actor.world.pos.z, 0, 0, 0, 0, true);
         if (next != NULL) {
             now->actor.child = &next->actor;
             next->actor.parent = &now->actor;
             next->targetActor = &this->actor;
             next->vTrailIdx = i + 1;
             next->actor.scale.x = 1.0f;
-            next->vTrailMaxAlpha = next->flamePrimAlpha = 255 - (i * 40);
-            next->flameScaleY = next->actor.scale.y = 0.8f - (i * 0.075f);
-            next->flameScaleX = next->actor.scale.z = 1.0f - (i * 0.094f);
+            next->vTrailMaxAlpha = next->flamePrimAlpha = 255 - (i * 40/LENGTH_EXT);
+            next->flameScaleY = next->actor.scale.y = 0.8f - (i * 0.075f/LENGTH_EXT);
+            next->flameScaleX = next->actor.scale.z = 1.0f - (i * 0.094f/LENGTH_EXT);
             if (startAtZero) {
                 next->flamePrimAlpha = 0;
                 next->flameScaleY = next->flameScaleX = 0.0f;
@@ -310,6 +314,8 @@ void EnBb_KillFlameTrail(EnBb* this) {
     this->actor.child = NULL;
 }
 
+static const s16 GREEN_BOB_MAGNITUDE = 20;
+
 void EnBb_Init(Actor* thisx, PlayState* play) {
     EffectBlureInit1 blureInit;
     s32 pad;
@@ -336,9 +342,9 @@ void EnBb_Init(Actor* thisx, PlayState* play) {
         this->flameScaleY = 80.0f;
         this->flameScaleX = 100.0f;
         this->collider.elements[0].info.toucherFlags = TOUCH_ON | TOUCH_SFX_HARD;
-        this->collider.elements[0].info.toucher.dmgFlags = 0xFFCFFFFF;
-        this->collider.elements[0].info.toucher.damage = 8;
-        this->bobSize = this->actionState * 20.0f;
+        this->collider.elements[0].info.toucher.dmgFlags = 0x20000000;//0xFFCFFFFF
+        this->collider.elements[0].info.toucher.damage = 0x10;
+        this->bobSize = this->actionState * GREEN_BOB_MAGNITUDE;
         this->flamePrimAlpha = 255;
         this->moveMode = BBMOVE_NORMAL;
         Actor_SetScale(thisx, 0.01f);
@@ -356,6 +362,7 @@ void EnBb_Init(Actor* thisx, PlayState* play) {
                 thisx->colChkInfo.damageTable = &sDamageTableRed;
                 this->flameEnvColor.r = 255;
                 this->collider.elements[0].info.toucher.effect = 1;
+                thisx->world.pos.y += 50.0f;
                 EnBb_SetupRed(play, this);
                 break;
             case ENBB_WHITE:
@@ -386,10 +393,9 @@ void EnBb_Init(Actor* thisx, PlayState* play) {
                 Actor_SetScale(thisx, 0.03f);
             case ENBB_GREEN:
                 thisx->naviEnemyId = 0x1E;
-                this->bobSize = (this->actionState & 0xF) * 20.0f;
+                this->bobSize = (this->actionState & 0xF) * GREEN_BOB_MAGNITUDE;
                 thisx->colChkInfo.damageTable = &sDamageTableBlueGreen;
                 this->flameEnvColor.g = 255;
-                thisx->colChkInfo.health = 1;
 
                 EnBb_InitGreen(this, play);
                 break;
@@ -397,6 +403,11 @@ void EnBb_Init(Actor* thisx, PlayState* play) {
         thisx->focus.pos = thisx->world.pos;
     } else {
         EnBb_SetupFlameTrail(this);
+        this->collider.elements[0].info.toucherFlags = TOUCH_ON;
+        this->collider.elements[0].info.toucher.dmgFlags = 0x20000000;
+        this->collider.elements[0].info.toucher.damage = 0x10;
+        this->collider.elements[0].info.toucher.effect = 1;
+        Actor_SetScale(thisx, 0.03f);
     }
     this->collider.elements[0].dim.worldSphere.radius =
         this->collider.elements[0].dim.modelSphere.radius * this->collider.elements[0].dim.scale;
@@ -511,6 +522,13 @@ void EnBb_Death(EnBb* this, PlayState* play) {
     Actor_Kill(&this->actor);
 }
 
+void EnBb_SetupInstantDeath(EnBb* this, PlayState* play) {
+    if (this->actor.params == ENBB_RED) {
+        EnBb_KillFlameTrail(this);
+    }
+    EnBb_SetupDeath(this, play);
+}
+
 void EnBb_SetupDamage(EnBb* this) {
     this->action = BB_DAMAGE;
     Audio_PlayActorSound2(&this->actor, NA_SE_EN_BUBLE_DAMAGE);
@@ -532,8 +550,12 @@ void EnBb_SetupDamage(EnBb* this) {
 void EnBb_Damage(EnBb* this, PlayState* play) {
     Math_SmoothStepToF(&this->actor.speedXZ, 0.0f, 1.0f, 0.5f, 0.0f);
     if (this->actor.speedXZ == 0.0f) {
-        this->actor.shape.yOffset = 200.0f;
-        EnBb_SetupDown(this);
+        if (this->actor.params == ENBB_GREEN || this->actor.params == ENBB_GREEN_BIG)
+            EnBb_SetupGreen(this);
+        else {
+            this->actor.shape.yOffset = 200.0f;
+            EnBb_SetupDown(this);
+        }
     }
 }
 
@@ -755,7 +777,7 @@ void EnBb_Down(EnBb* this, PlayState* play) {
 
 void EnBb_SetupRed(PlayState* play, EnBb* this) {
     Animation_PlayLoop(&this->skelAnime, &object_Bb_Anim_000184);
-    if (this->action == BB_DOWN) {
+    if (this->actionState == BBRED_ATTACK) {
         this->actor.speedXZ = 5.0f;
         this->actor.gravity = -1.0f;
         this->actor.velocity.y = 16.0f;
@@ -763,6 +785,7 @@ void EnBb_SetupRed(PlayState* play, EnBb* this) {
         this->timer = 0;
         this->moveMode = BBMOVE_NORMAL;
         this->actor.bgCheckFlags &= ~1;
+        EnBb_SpawnFlameTrail(play, this, true);
     } else {
         this->actor.colChkInfo.health = 4;
         this->timer = 0;
@@ -774,6 +797,7 @@ void EnBb_SetupRed(PlayState* play, EnBb* this) {
         this->actor.bgCheckFlags &= ~1;
         this->actor.flags &= ~ACTOR_FLAG_ATTENTION_ENABLED;
     }
+    this->bobPhase = 0;
     this->action = BB_RED;
     EnBb_SetupAction(this, EnBb_Red);
 }
@@ -808,12 +832,13 @@ void EnBb_Red(EnBb* this, PlayState* play) {
                 this->moveMode = BBMOVE_NORMAL;
                 this->actor.flags |= ACTOR_FLAG_ATTENTION_ENABLED;
             }
-            this->bobPhase += Rand_ZeroOne();
+
             Math_SmoothStepToF(&this->flameScaleY, 80.0f, 1.0f, 10.0f, 0.0f);
             Math_SmoothStepToF(&this->flameScaleX, 100.0f, 1.0f, 10.0f, 0.0f);
             if (this->actor.bgCheckFlags & 8) {
-                yawDiff = this->actor.world.rot.y - this->actor.wallYaw;
+                s16 yawDiff = this->actor.world.rot.y - this->actor.wallYaw;
                 if (ABS(yawDiff) > 0x4000) {
+                    this->bobPhase = 0;
                     this->actor.world.rot.y =
                         this->actor.wallYaw + this->actor.wallYaw - this->actor.world.rot.y - 0x8000;
                 }
@@ -828,10 +853,15 @@ void EnBb_Red(EnBb* this, PlayState* play) {
                     this->actor.flags &= ~ACTOR_FLAG_ATTENTION_ENABLED;
                 } else {
                     this->actor.velocity.y *= -1.06f;
-                    if (this->actor.velocity.y > 13.0f) {
-                        this->actor.velocity.y = 13.0f;
+                    if (this->actor.velocity.y > 10.0f) {
+                        this->actor.velocity.y = 8.0f;
+                    } else if (this->actor.velocity.y < 6.0f) {
+                        this->actor.velocity.y = 6.0f;
                     }
-                    this->actor.world.rot.y = Math_SinF(this->bobPhase) * 65535.0f;
+                    if (ABS(yawDiff) > 0x4000 && this->bobPhase < 3.5f) {
+                        this->actor.world.rot.y += (yawDiff > 0) ? 0x4000 : -0x4000;
+                        this->bobPhase = this->bobPhase + 1;
+                    }
                 }
                 this->actor.bgCheckFlags &= ~1;
             }
@@ -1152,7 +1182,8 @@ void EnBb_CollisionCheck(EnBb* this, PlayState* play) {
                 EnBb_SetupDown(this);
                 return;
             }
-            this->actionVar2 = 1;
+            if (!(this->actor.params == ENBB_GREEN || this->actor.params == ENBB_GREEN_BIG))
+                this->actionVar2 = 1;
         }
     }
     if (this->collider.base.acFlags & AC_HIT) {
@@ -1175,7 +1206,8 @@ void EnBb_CollisionCheck(EnBb* this, PlayState* play) {
             case 8:
             case 9:
             case 15:
-                if (this->action != BB_STUNNED) {
+                if (this->action != BB_STUNNED && (((this->action == BB_DOWN) && (this->timer < 190)) ||
+                                                   ((this->actor.params != ENBB_WHITE) && (this->flameScaleX < 20.0f)))) {
                     Actor_ApplyDamage(&this->actor);
                     EnBb_SetupStunned(this);
                 }
@@ -1184,11 +1216,18 @@ void EnBb_CollisionCheck(EnBb* this, PlayState* play) {
             block_15:
                 if ((this->dmgEffect == 14) || (this->dmgEffect == 12) || (this->dmgEffect == 11) ||
                     (this->dmgEffect == 10) || (this->dmgEffect == 7) || (this->dmgEffect == 5)) {
-                    if ((this->action != BB_DOWN) || (this->timer < 190)) {
-                        Actor_ApplyDamage(&this->actor);
-                    }
-                    if ((this->action != BB_DOWN) && (this->actor.params != ENBB_WHITE)) {
-                        EnBb_SetupDown(this);
+                    if ((this->actor.params == ENBB_GREEN || this->actor.params == ENBB_GREEN_BIG) && this->actionState == BBGREEN_FLAME_ON) {
+                        this->actionVar2 = 4;
+                        Actor_SetColorFilter(&this->actor, 0x4000, 0xFF, 0, 4);
+                        return;
+                    } else {
+                        if ((this->action != BB_DOWN) || (this->timer < 190)) {
+                            if (this->actor.params != ENBB_BLUE || this->action == BB_DOWN || (this->dmgEffect == 10))
+                                Actor_ApplyDamage(&this->actor);
+                        }
+                        if ((this->action != BB_DOWN) && (this->actor.params > ENBB_WHITE)) {
+                            EnBb_SetupDown(this);
+                        }
                     }
                 } else {
                     if (((this->action == BB_DOWN) && (this->timer < 190)) ||
@@ -1256,7 +1295,7 @@ void EnBb_Update(Actor* thisx, PlayState* play2) {
             this->actor.world.pos.y + (this->actor.shape.yOffset * this->actor.scale.y);
         this->collider.elements->dim.worldSphere.center.z = this->actor.world.pos.z;
 
-        if ((this->action > BB_KILL) && ((this->actor.speedXZ != 0.0f) || (this->action == BB_GREEN))) {
+        if ((this->action > BB_KILL) && ((this->actor.speedXZ != 0.0f) || (this->action == BB_GREEN) || (this->action == BB_FLAME_TRAIL))) {
             CollisionCheck_SetAT(play, &play->colChkCtx, &this->collider.base);
         }
         if ((this->action > BB_FLAME_TRAIL) &&

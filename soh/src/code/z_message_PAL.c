@@ -837,6 +837,8 @@ f32 sFontWidths[144] = {
     14.0f, // ?
 };
 
+extern s16 gRingColors[][2][3];
+
 u16 Message_DrawItemIcon(PlayState* play, u16 itemId, Gfx** p, u16 i) {
     s32 pad;
     Gfx* gfx = *p;
@@ -847,16 +849,23 @@ u16 Message_DrawItemIcon(PlayState* play, u16 itemId, Gfx** p, u16 i) {
     // clang-format on
 
     gDPPipeSync(gfx++);
-    gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
-    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, msgCtx->textColorAlpha);
+    if (RING_ITEM_MIN <= itemId && itemId <= RING_ITEM_MAX) {
+        s16 ringTypeIndex = msgCtx->unk_E3D0 - GI_RING;//Value passed in through z_player.c
+        gDPSetCombineMode(gfx++,G_CC_BLENDPEDECALA, G_CC_BLENDPEDECALA);
+        gDPSetPrimColor(gfx++, 0, 0, gRingColors[ringTypeIndex][0][0], gRingColors[ringTypeIndex][0][1], gRingColors[ringTypeIndex][0][2], msgCtx->textColorAlpha);
+        gDPSetEnvColor(gfx++, gRingColors[ringTypeIndex][1][0], gRingColors[ringTypeIndex][1][1], gRingColors[ringTypeIndex][1][2], msgCtx->textColorAlpha);
+    } else {
+        gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+        gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, msgCtx->textColorAlpha);
+    }
 
     // Invalidate icon texture as it may have changed from the last time a text box had an icon
     gSPInvalidateTexCache(gfx++, (uintptr_t)msgCtx->textboxSegment + MESSAGE_STATIC_TEX_SIZE);
 
-    if (itemId >= ITEM_MEDALLION_FOREST) {
-        gDPLoadTextureBlock(gfx++, (uintptr_t)msgCtx->textboxSegment + MESSAGE_STATIC_TEX_SIZE, G_IM_FMT_RGBA,
-                            G_IM_SIZ_32b, 24, 24, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-                            G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+    if (itemId >= ITEM_MEDALLION_FOREST && itemId < ITEM_EXTRA_MAGIC) {
+        gDPLoadTextureBlock(gfx++, (uintptr_t)msgCtx->textboxSegment + MESSAGE_STATIC_TEX_SIZE, G_IM_FMT_RGBA, G_IM_SIZ_32b,
+                            24, 24, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
+                            G_TX_NOLOD, G_TX_NOLOD);
     } else {
         gDPLoadTextureBlock(gfx++, (uintptr_t)msgCtx->textboxSegment + MESSAGE_STATIC_TEX_SIZE, G_IM_FMT_RGBA,
                             G_IM_SIZ_32b, 32, 32, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -962,7 +971,6 @@ void Message_DrawTextJPN(PlayState* play, Gfx** gfxP) {
         msgCtx->textColorR = msgCtx->textColorG = msgCtx->textColorB = 255;
     }
 
-    msgCtx->unk_E3D0 = 0;
     charTexIdx = 0;
 
     gTextSpeed = CVarGetInteger(CVAR_ENHANCEMENT("TextSpeed"), 1);
@@ -1322,7 +1330,6 @@ void Message_DrawText(PlayState* play, Gfx** gfxP) {
 
     Cosmetics_MaybeSetTextColor(msgCtx, MSGCOL_DEFAULT);
 
-    msgCtx->unk_E3D0 = 0;
     charTexIdx = 0;
 
     gTextSpeed = CVarGetInteger(CVAR_ENHANCEMENT("TextSpeed"), 1);
@@ -1648,7 +1655,7 @@ void Message_LoadItemIcon(PlayState* play, u16 itemId, s16 y) {
         interfaceCtx->mapPalette[30] = 0xFF;
         interfaceCtx->mapPalette[31] = 0xFF;
     }
-    if (itemId < ITEM_MEDALLION_FOREST) {
+    if (itemId < ITEM_MEDALLION_FOREST || ITEM_EXTRA_MAGIC >= ITEM_EXTRA_MAGIC) {
         R_TEXTBOX_ICON_XPOS = R_TEXT_INIT_XPOS - sIconItem32XOffsets[language];
         R_TEXTBOX_ICON_YPOS = y + 6;
         R_TEXTBOX_ICON_SIZE = 32;
@@ -2652,7 +2659,7 @@ void Message_Decode(PlayState* play) {
             msgCtx->msgBufDecoded[++decodedBufPos] = font->msgBuf[msgCtx->msgBufPos + 1];
             osSyncPrintf("ITEM_NO=(%d) (%d)\n", msgCtx->msgBufDecoded[decodedBufPos],
                          font->msgBuf[msgCtx->msgBufPos + 1]);
-            Message_LoadItemIcon(play, font->msgBuf[msgCtx->msgBufPos + 1], R_TEXTBOX_Y + 10);
+            Message_LoadItemIcon(play, msgCtx->msgBufDecoded[decodedBufPos], R_TEXTBOX_Y + 10);
         } else if (temp_s2 == MESSAGE_BACKGROUND) {
             msgCtx->textboxBackgroundIdx = font->msgBuf[msgCtx->msgBufPos + 1] * 2;
             msgCtx->textboxBackgroundForeColorIdx = (font->msgBuf[msgCtx->msgBufPos + 2] & 0xF0) >> 4;
@@ -2715,7 +2722,7 @@ void Message_OpenText(PlayState* play, u16 textId) {
 
     sDisplayNextMessageAsEnglish = false;
 
-    if (msgCtx->msgMode == MSGMODE_NONE) {
+    if (msgCtx->msgMode == MSGMODE_NONE && play->pauseCtx.state == 0) {
         gSaveContext.unk_13EE = gSaveContext.unk_13EA;
     }
     if (YREG(15) == 0x10) {
@@ -2824,6 +2831,7 @@ void Message_OpenText(PlayState* play, u16 textId) {
         }
         msgCtx->msgLength = font->msgLength = GetEquipNowMessage(font->msgBuf, font->msgOffset, sizeof(font->msgBuf));
     } else {
+        textId = msgCtx->textId;//Allows text substitution from CustomMessage_RetrieveIfExists to propagate
         if (gSaveContext.language == LANGUAGE_JPN) {
             Message_FindMessageJPN(play, textId);
         } else {
@@ -2870,7 +2878,7 @@ void Message_OpenText(PlayState* play, u16 textId) {
         msgCtx->textboxColorAlphaCurrent = 0;
     }
     msgCtx->choiceNum = msgCtx->textUnskippable = msgCtx->textboxEndType = 0;
-    msgCtx->msgBufPos = msgCtx->unk_E3D0 = msgCtx->textDrawPos = 0;
+    msgCtx->msgBufPos = msgCtx->textDrawPos = 0;
 }
 
 void Message_StartTextbox(PlayState* play, u16 textId, Actor* actor) {
@@ -2904,7 +2912,7 @@ void Message_ContinueTextbox(PlayState* play, u16 textId) {
     msgCtx->textboxColorAlphaCurrent = msgCtx->textboxColorAlphaTarget;
     msgCtx->msgMode = MSGMODE_TEXT_CONTINUING;
     msgCtx->stateTimer = 3;
-    msgCtx->textboxEndType = msgCtx->msgBufPos = msgCtx->unk_E3D0 = msgCtx->textDrawPos = msgCtx->textDelayTimer = 0;
+    msgCtx->textboxEndType = msgCtx->msgBufPos = msgCtx->textDrawPos = msgCtx->textDelayTimer = 0;
     msgCtx->textColorAlpha = 255;
 
     if (YREG(31) == 0 && play->interfaceCtx.unk_1FA == 0) {
@@ -4681,7 +4689,9 @@ void Message_Update(PlayState* play) {
             osSyncPrintf(VT_RST);
             msgCtx->msgLength = 0;
             msgCtx->msgMode = MSGMODE_NONE;
-            interfaceCtx->unk_1FA = interfaceCtx->unk_1FC = 0;
+            if (play->pauseCtx.state == 0) {
+                interfaceCtx->unk_1FA = interfaceCtx->unk_1FC = 0;
+            }
             msgCtx->textId = msgCtx->stateTimer = 0;
 
             if (msgCtx->textboxEndType == TEXTBOX_ENDTYPE_PERSISTENT) {

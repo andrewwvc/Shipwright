@@ -5427,10 +5427,10 @@ void Randomizer::CreateCustomMessages() {
                   "Vous obtenez un %rPaquet de&Haricots Magiques%w! Trouvez&un endroit approprié pour un&jardin et "
                   "plantez-les.^Attendez ensuite que quelque&chose d'amusant se produise!"),
         GIMESSAGE(RG_TYCOON_WALLET, ITEM_WALLET_GIANT,
-                  "You got a %rTycoon's Wallet%w!&It's gigantic! Now you can carry&up to %y999 rupees%w!",
-                  "Du erhältst die %rGoldene&Geldbörse%w! Die größte aller&Geldbörsen! Jetzt kannst Du bis&zu %y999 "
+                  "You got a %rTycoon's Wallet%w!&It's gigantic! Now you can carry&up to %"+std::to_string(CAPACITY(UPG_WALLET,3))+" rupees%w!",
+                  "Du erhältst die %rGoldene&Geldbörse%w! Die größte aller&Geldbörsen! Jetzt kannst Du bis&zu %"+std::to_string(CAPACITY(UPG_WALLET,3))+" "
                   "Rubine%w mit Dir führen!",
-                  "Vous obtenez la %rBourse de Magnat%w!&Elle peut contenir jusqu'à %y999 rubis%w!&C'est gigantesque!"),
+                  "Vous obtenez la %rBourse de Magnat%w!&Elle peut contenir jusqu'à %"+std::to_string(CAPACITY(UPG_WALLET,3))+" rubis%w!&C'est gigantesque!"),
         GIMESSAGE(RG_CHILD_WALLET, ITEM_WALLET_ADULT,
                   "You got a %rChild's Wallet%w!&Now you can carry&up to %y99 rupees%w!",
                   "Du erhältst die %rKindergeldbörse%w!&Jetzt kannst Du bis&zu %y99 Rubine%w mit Dir führen!",

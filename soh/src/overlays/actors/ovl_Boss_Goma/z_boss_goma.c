@@ -26,7 +26,8 @@ typedef enum {
     VISUALSTATE_DEFAULT,     // main: greenish cyan, blinks with dark gray every 16 frames; eye: white
     VISUALSTATE_DEFEATED,    // main/eye: dark gray
     VISUALSTATE_STUNNED = 4, // main: greenish cyan, alternates with blue; eye: greenish cyan
-    VISUALSTATE_HIT          // main: greenish cyan, alternates with red; eye: greenish cyan
+    VISUALSTATE_HIT,         // main: greenish cyan, alternates with red; eye: greenish cyan
+    VISUALSTATE_TARGET       // main: bluish cyan, alternates with blue; eye: blue
 } GohmaVisualState;
 
 void BossGoma_Init(Actor* thisx, PlayState* play);
@@ -336,7 +337,7 @@ void BossGoma_Init(Actor* thisx, PlayState* play) {
     this->actor.world.pos.y = -300.0f; // ceiling
     this->actor.gravity = 0.0f;
     BossGoma_SetupEncounter(this, play);
-    this->actor.colChkInfo.health = 10;
+    this->actor.colChkInfo.health = 20;
     this->actor.colChkInfo.mass = MASS_IMMOVABLE;
     Collider_InitJntSph(play, &this->collider);
     Collider_SetJntSph(play, &this->collider, &this->actor, &sColliderJntSphInit, this->colliderItems);
@@ -348,7 +349,7 @@ void BossGoma_Init(Actor* thisx, PlayState* play) {
                                WARP_DUNGEON_CHILD);
         }
         if (GameInteractor_Should(VB_SPAWN_HEART_CONTAINER, true)) {
-            Actor_Spawn(&play->actorCtx, play, ACTOR_ITEM_B_HEART, 141.0f, -640.0f, -84.0f, 0, 0, 0, 0, true);
+            Actor_Spawn(&play->actorCtx, play, ACTOR_EN_ITEM00, 141.0f, -640.0f, -84.0f, 0, 0, 0, 0x1F00+(uint16_t)ITEM00_HEART_PIECE, true);
         }
     }
 
@@ -1076,6 +1077,14 @@ void BossGoma_Defeated(BossGoma* this, PlayState* play) {
             this->defeatedCameraEyeDist = sqrtf(SQ(dx) + SQ(dz));
             this->defeatedCameraEyeAngle = Math_FAtan2F(dx, dz);
             this->timer = 270;
+
+            Actor* act1 = play->actorCtx.actorLists[ACTORCAT_ENEMY].head;
+            while (act1 != NULL) {
+                if (ACTOR_BOSS_GOMA == act1->id && &this->actor != act1) {
+                    ((EnGoma*)act1)->actor.colChkInfo.health = 0;
+                }
+                act1 = act1->next;
+            }
             break;
 
         case 1:
@@ -1125,8 +1134,8 @@ void BossGoma_Defeated(BossGoma* this, PlayState* play) {
                 this->decayingProgress = 0;
                 this->subCameraFollowSpeed = 0.0f;
                 if (GameInteractor_Should(VB_SPAWN_HEART_CONTAINER, true)) {
-                    Actor_Spawn(&play->actorCtx, play, ACTOR_ITEM_B_HEART, this->actor.world.pos.x,
-                                this->actor.world.pos.y, this->actor.world.pos.z, 0, 0, 0, 0, true);
+                    Actor_Spawn(&play->actorCtx, play, ACTOR_EN_ITEM00, this->actor.world.pos.x,
+                            this->actor.world.pos.y, this->actor.world.pos.z, 0, 0, 0, 0x4000+0x1F00+(uint16_t)ITEM00_HEART_PIECE, true);
                 }
             }
             break;
@@ -1274,7 +1283,7 @@ void BossGoma_FloorAttackPosture(BossGoma* this, PlayState* play) {
     }
 
     if (Animation_OnFrame(&this->skelanime, Animation_GetLastFrame(&gGohmaPrepareAttackAnim))) {
-        if (this->actor.xzDistToPlayer < 250.0f) {
+        if (this->actor.xzDistToPlayer < 200.0f) {
             BossGoma_SetupFloorPrepareAttack(this);
         } else {
             BossGoma_SetupFloorMain(this);
@@ -1565,14 +1574,12 @@ void BossGoma_CeilingIdle(BossGoma* this, PlayState* play) {
         if (CVarGetInteger(CVAR_ENHANCEMENT("RandomizedEnemies"), 0)) {
             nearbyEnTest = Actor_FindNearby(play, &this->actor, -1, ACTORCAT_ENEMY, 8000.0f);
         }
-        if (this->childrenGohmaState[0] == 0 && this->childrenGohmaState[1] == 0 && this->childrenGohmaState[2] == 0) {
-            // if no child gohma has been spawned
+        if (this->childrenGohmaState[0] == 0 || this->childrenGohmaState[1] == 0 || this->childrenGohmaState[2] == 0) {
+            // if not all child gohma have been spawned
             BossGoma_SetupCeilingPrepareSpawnGohmas(this);
-        } else if ((this->childrenGohmaState[0] < 0 && this->childrenGohmaState[1] < 0 &&
-                    this->childrenGohmaState[2] < 0) ||
+        } else if ((this->childrenGohmaState[0] < 0 || this->childrenGohmaState[1] < 0 || this->childrenGohmaState[2] < 0) ||
                    (nearbyEnTest == NULL && CVarGetInteger(CVAR_ENHANCEMENT("RandomizedEnemies"), 0))) {
-            // In authentic gameplay, check if all baby Ghomas are dead. In Enemy Randomizer, check if there's no
-            // enemies alive.
+            // In authentic gameplay, check if all baby Ghomas are dead. In Enemy Randomizer, check if there's no enemies alive.
             BossGoma_SetupFallJump(this);
         } else {
             for (i = 0; i < ARRAY_COUNT(this->childrenGohmaState); i++) {
@@ -1587,6 +1594,11 @@ void BossGoma_CeilingIdle(BossGoma* this, PlayState* play) {
             // if all children gohmas have been spawned
             BossGoma_SetupCeilingMoveToCenter(this);
         }
+    }
+
+    if (this->childrenGohmaState[0] == 1 && this->childrenGohmaState[1] == 1 && this->childrenGohmaState[2] == 1) {
+        this->eyeState = EYESTATE_IRIS_FOLLOW_NO_IFRAMES;
+        this->visualState = VISUALSTATE_TARGET;
     }
 }
 
@@ -1618,6 +1630,10 @@ void BossGoma_FloorMain(BossGoma* this, PlayState* play) {
 
     if (this->frameCount % 64 == 0) {
         Audio_PlayActorSound2(&this->actor, NA_SE_EN_GOMA_CRY2);
+    }
+
+    if (this->childrenGohmaState[0] == -1 && this->childrenGohmaState[1] == -1 && this->childrenGohmaState[2] == -1) {
+        this->patienceTimer = 0;
     }
 
     if (!this->doNotMoveThisFrame) {
@@ -1682,7 +1698,11 @@ void BossGoma_WallClimb(BossGoma* this, PlayState* play) {
     if (this->actor.world.pos.y > -320.0f) {
         BossGoma_SetupCeilingMoveToCenter(this);
         // allow new spawns
-        this->childrenGohmaState[0] = this->childrenGohmaState[1] = this->childrenGohmaState[2] = 0;
+        for (s16 ii = 0; ii < 3; ii++) {
+            if (this->childrenGohmaState[ii] == -1)
+                this->childrenGohmaState[ii] = 0;
+        }
+        //this->childrenGohmaState[0] = this->childrenGohmaState[1] = this->childrenGohmaState[2] = 0;
     }
 }
 
@@ -1722,6 +1742,11 @@ void BossGoma_CeilingMoveToCenter(BossGoma* this, PlayState* play) {
         fabsf(-350.0f - this->actor.world.pos.z) < 100.0f) {
         BossGoma_SetupCeilingIdle(this);
     }
+
+    if (this->childrenGohmaState[0] == 1 && this->childrenGohmaState[1] == 1 && this->childrenGohmaState[2] == 1) {
+        this->eyeState = EYESTATE_IRIS_FOLLOW_NO_IFRAMES;
+        this->visualState = VISUALSTATE_TARGET;
+    }
 }
 
 /**
@@ -1749,9 +1774,9 @@ void BossGoma_UpdateEye(BossGoma* this, PlayState* play) {
             }
         }
 
-        if (this->childrenGohmaState[0] > 0 || this->childrenGohmaState[1] > 0 || this->childrenGohmaState[2] > 0) {
-            this->eyeClosedTimer = 7;
-        }
+        // if (this->childrenGohmaState[0] > 0 || this->childrenGohmaState[1] > 0 || this->childrenGohmaState[2] > 0) {
+        //     this->eyeClosedTimer = 7;
+        // }
 
         if (this->eyeClosedTimer != 0) {
             this->eyeClosedTimer--;
@@ -1831,8 +1856,8 @@ void BossGoma_UpdateHit(BossGoma* this, PlayState* play) {
             (this->collider.elements[0].info.bumperFlags & BUMP_HIT)) {
             this->collider.elements[0].info.bumperFlags &= ~BUMP_HIT;
 
-            if (this->actionFunc == BossGoma_CeilingMoveToCenter || this->actionFunc == BossGoma_CeilingIdle ||
-                this->actionFunc == BossGoma_CeilingPrepareSpawnGohmas) {
+            if (this->actionFunc == BossGoma_CeilingMoveToCenter || this->actionFunc == BossGoma_CeilingIdle /*||
+                this->actionFunc == BossGoma_CeilingPrepareSpawnGohmas*/) {
                 BossGoma_SetupFallStruckDown(this);
                 Audio_PlayActorSound2(&this->actor, NA_SE_EN_GOMA_DAM2);
             } else if (this->actionFunc == BossGoma_FloorStunned &&
@@ -1851,7 +1876,7 @@ void BossGoma_UpdateHit(BossGoma* this, PlayState* play) {
 
                 this->invincibilityFrames = 10;
             } else if (this->actionFunc != BossGoma_FloorStunned && this->patienceTimer != 0 &&
-                       (acHitInfo->toucher.dmgFlags & 0x00000005)) {
+                       (CollisionCheck_GetSwordDamage(acHitInfo->toucher.dmgFlags, play) /* & 0x00000005*/)) {
                 Audio_PlayActorSound2(&this->actor, NA_SE_EN_GOMA_DAM2);
                 Audio_StopSfxById(NA_SE_EN_GOMA_CRY1);
                 this->invincibilityFrames = 10;
@@ -1875,10 +1900,12 @@ void BossGoma_UpdateMainEnvColor(BossGoma* this) {
     static f32 colors1[][3] = {
         { 255.0f, 17.0f, 0.0f },  { 0.0f, 255.0f, 170.0f }, { 50.0f, 50.0f, 50.0f },
         { 0.0f, 255.0f, 170.0f }, { 0.0f, 255.0f, 170.0f }, { 0.0f, 255.0f, 170.0f },
+        { 0.0f, 170.0f, 255.0f }
     };
     static f32 colors2[][3] = {
         { 255.0f, 17.0f, 0.0f },  { 0.0f, 255.0f, 170.0f }, { 50.0f, 50.0f, 50.0f },
         { 0.0f, 255.0f, 170.0f }, { 0.0f, 0.0f, 255.0f },   { 255.0f, 17.0f, 0.0f },
+        { 0.0f, 0.0f, 255.0f }
     };
 
     if (this->visualState == VISUALSTATE_DEFAULT && this->frameCount & 0x10) {
@@ -1906,6 +1933,7 @@ void BossGoma_UpdateEyeEnvColor(BossGoma* this) {
     static f32 targetEyeEnvColors[][3] = {
         { 255.0f, 17.0f, 0.0f },  { 255.0f, 255.0f, 255.0f }, { 50.0f, 50.0f, 50.0f },
         { 0.0f, 255.0f, 170.0f }, { 0.0f, 255.0f, 170.0f },   { 0.0f, 255.0f, 170.0f },
+        { 0.0f, 0.0f, 255.0f }
     };
 
     Math_ApproachF(&this->eyeEnvColor[0], targetEyeEnvColors[this->visualState][0], 0.5f, 20.0f);

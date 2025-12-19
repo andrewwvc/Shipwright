@@ -102,10 +102,20 @@ typedef struct BossGanon2 {
     /* 0x0410 */ Vec3f unk_410;
     /* 0x041C */ f32 unk_41C;
     /* 0x0420 */ f32 unk_420;
+                 s16 isTrackingLink;
+                 s16 attackTrackingMode;
+                 f32 agressionRange;
+                 s16 agressionTimer;
     /* 0x0424 */ ColliderJntSph unk_424;
-    /* 0x0444 */ ColliderJntSph unk_444;
+    /* 0x0424 */ ColliderJntSph swordSpheres1;
+    /* 0x0424 */ ColliderJntSph swordSpheres2;
+    /* 0x0444 */ ColliderTris unk_444;
+    /* 0x0444 */ ColliderTris unk_445;
     /* 0x0464 */ ColliderJntSphElement unk_464[16];
-    /* 0x0864 */ ColliderJntSphElement unk_864[2];
+    /* 0x0464 */ ColliderJntSphElement swordSphereElement1[4];
+    /* 0x0464 */ ColliderJntSphElement swordSphereElement2[8];
+    /* 0x0864 */ ColliderTrisElement unk_864[2];
+    /* 0x0864 */ ColliderTrisElement unk_865[2];
 } BossGanon2; // size = 0x08E4
 
 #endif

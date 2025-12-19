@@ -9,6 +9,7 @@
 #include "objects/object_gla/object_gla.h"
 #include "soh/Enhancements/randomizer/randomizer_entrance.h"
 #include "soh/Enhancements/game-interactor/GameInteractor_Hooks.h"
+#include "overlays/actors/ovl_En_Bom/z_en_bom.h"
 #include <assert.h>
 #include "soh/OTRGlobals.h"
 #include "soh/ResourceManagerHelpers.h"
@@ -85,7 +86,7 @@ static ColliderCylinderInit sCylinderInit = {
     {
         ELEMTYPE_UNK0,
         { 0x00000000, 0x00, 0x00 },
-        { 0x000007A2, 0x00, 0x00 },
+        { 0x00000782, 0x00, 0x00 },
         TOUCH_NONE,
         BUMP_ON,
         OCELEM_ON,
@@ -187,7 +188,7 @@ void EnGe2_Destroy(Actor* thisx, PlayState* play) {
 s32 Ge2_DetectPlayerInAction(PlayState* play, EnGe2* this) {
     f32 visionScale;
 
-    visionScale = (!IS_DAY ? 0.75f : 1.5f);
+    visionScale = ((!IS_DAY || Ring_Get_Equiped() == RI_SNEAK_RING) ? 1.0f : 1.5f);
 
     if ((250.0f * visionScale) < this->actor.xzDistToPlayer) {
         return 0;
@@ -209,7 +210,7 @@ s32 Ge2_DetectPlayerInUpdate(PlayState* play, EnGe2* this, Vec3f* pos, s16 yRot,
     CollisionPoly* outPoly;
     f32 visionScale;
 
-    visionScale = (!IS_DAY ? 0.75f : 1.5f);
+    visionScale = ((!IS_DAY || Ring_Get_Equiped() == RI_SNEAK_RING) ? 0.75f : 1.5f);
 
     if ((250.0f * visionScale) < this->actor.xzDistToPlayer) {
         return 0;
@@ -230,9 +231,10 @@ s32 Ge2_DetectPlayerInUpdate(PlayState* play, EnGe2* this, Vec3f* pos, s16 yRot,
 }
 
 s32 EnGe2_CheckCarpentersFreed(void) {
-    if (CHECK_FLAG_ALL(gSaveContext.eventChkInf[EVENTCHKINF_CARPENTERS_FREE_INDEX] &
+    if ((CHECK_FLAG_ALL(gSaveContext.eventChkInf[EVENTCHKINF_CARPENTERS_FREE_INDEX] &
                            (EVENTCHKINF_CARPENTERS_FREE_MASK_ALL | 0xF0),
-                       EVENTCHKINF_CARPENTERS_FREE_MASK_ALL)) {
+                       EVENTCHKINF_CARPENTERS_FREE_MASK_ALL)) &&
+                       LINK_IS_ADULT) {
         return 1;
     }
     return 0;
@@ -246,7 +248,7 @@ void EnGe2_CaptureClose(EnGe2* this, PlayState* play) {
     } else {
         func_8006D074(play);
 
-        if ((INV_CONTENT(ITEM_HOOKSHOT) == ITEM_NONE) || (INV_CONTENT(ITEM_LONGSHOT) == ITEM_NONE)) {
+        if ((INV_CONTENT(ITEM_HOOKSHOT) == ITEM_NONE) || (INV_CONTENT(ITEM_LONGSHOT) == ITEM_NONE) || LINK_IS_CHILD) {
             play->nextEntranceIndex = ENTR_GERUDO_VALLEY_1;
         } else if (Flags_GetEventChkInf(EVENTCHKINF_WATCHED_GANONS_CASTLE_COLLAPSE_CAUGHT_BY_GERUDO)) {
             play->nextEntranceIndex = ENTR_GERUDOS_FORTRESS_18;
@@ -276,7 +278,7 @@ void EnGe2_CaptureCharge(EnGe2* this, PlayState* play) {
     } else {
         func_8006D074(play);
 
-        if ((INV_CONTENT(ITEM_HOOKSHOT) == ITEM_NONE) || (INV_CONTENT(ITEM_LONGSHOT) == ITEM_NONE)) {
+        if ((INV_CONTENT(ITEM_HOOKSHOT) == ITEM_NONE) || (INV_CONTENT(ITEM_LONGSHOT) == ITEM_NONE || LINK_IS_CHILD)) {
             play->nextEntranceIndex = ENTR_GERUDO_VALLEY_1;
         } else if (Flags_GetEventChkInf(EVENTCHKINF_WATCHED_GANONS_CASTLE_COLLAPSE_CAUGHT_BY_GERUDO)) {
             play->nextEntranceIndex = ENTR_GERUDOS_FORTRESS_18;
@@ -497,6 +499,7 @@ void EnGe2_SetupCapturePlayer(EnGe2* this, PlayState* play) {
     this->stateFlags |= GE2_STATE_CAPTURING;
     this->actor.speedXZ = 0.0f;
     EnGe2_ChangeAction(this, GE2_ACTION_CAPTURETURN);
+    play->damagePlayer(play, -0x20);
     Player_SetCsActionWithHaltedActors(play, &this->actor, 95);
     Sfx_PlaySfxCentered(NA_SE_SY_FOUND);
     Message_StartTextbox(play, 0x6000, &this->actor);
@@ -562,6 +565,10 @@ void EnGe2_UpdateAfterTalk(Actor* thisx, PlayState* play) {
     EnGe2_MoveAndBlink(this, play);
 }
 
+u8 isHighExplosion(Actor* actor, PlayState* play) {
+    return (actor->params == 1) && ((EnBom*)actor)->forceStaticExplosion;
+}
+
 void EnGe2_Update(Actor* thisx, PlayState* play) {
     EnGe2* this = (EnGe2*)thisx;
     s32 paramsType;
@@ -570,7 +577,8 @@ void EnGe2_Update(Actor* thisx, PlayState* play) {
 
     if ((this->stateFlags & GE2_STATE_KO) || (this->stateFlags & GE2_STATE_CAPTURING)) {
         this->actionFunc(this, play);
-    } else if (this->collider.base.acFlags & 2) {
+    } else if ((this->collider.base.acFlags & 2) || Actor_FindNearby(play,&this->actor,ACTOR_EN_GO2,ACTORCAT_NPC,100.0f) ||
+                Actor_FindNumberOf(play, thisx, ACTOR_EN_BOM, ACTORCAT_EXPLOSIVE, 72.0f, NULL, isHighExplosion)) {
         if ((this->collider.info.acHitInfo != NULL) && (this->collider.info.acHitInfo->toucher.dmgFlags & 0x80)) {
             Actor_SetColorFilter(&this->actor, 0, 120, 0, 400);
             this->actor.update = EnGe2_UpdateStunned;

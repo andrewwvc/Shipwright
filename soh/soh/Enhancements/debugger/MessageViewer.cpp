@@ -249,7 +249,7 @@ void MessageDebug_StartTextBox(const char* tableId, uint16_t textId, uint8_t lan
         msgCtx->textboxColorAlphaCurrent = 0;
     }
     msgCtx->choiceNum = msgCtx->textUnskippable = msgCtx->textboxEndType = 0;
-    msgCtx->msgBufPos = msgCtx->unk_E3D0 = msgCtx->textDrawPos = 0;
+    msgCtx->msgBufPos = msgCtx->textDrawPos = 0;
     msgCtx->talkActor = &player->actor;
     msgCtx->msgMode = MSGMODE_TEXT_START;
     msgCtx->stateTimer = 0;

@@ -2,6 +2,7 @@
 #include "textures/icon_item_static/icon_item_static.h"
 #include "textures/icon_item_24_static/icon_item_24_static.h"
 #include "textures/parameter_static/parameter_static.h"
+#include "soh_assets.h"
 
 // Bit Flag array in which gBitFlags[n] is literally (1 << n)
 u32 gBitFlags[] = {
@@ -11,26 +12,26 @@ u32 gBitFlags[] = {
     (1 << 24), (1 << 25), (1 << 26), (1 << 27), (1 << 28), (1 << 29), (1 << 30), (1 << 31),
 };
 
-u16 gEquipMasks[] = { 0x000F, 0x00F0, 0x0F00, 0xF000 };
-u16 gEquipNegMasks[] = { 0xFFF0, 0xFF0F, 0xF0FF, 0x0FFF };
+u32 gEquipMasks[] = { 0x000F, 0x00F0, 0x0F00, 0xF000, 0xF0000};
+u32 gEquipNegMasks[] = { 0xFFFFFFF0, 0xFFFFFF0F, 0xFFFFF0FF, 0xFFFF0FFF,  0xFFF0FFFF};
 u32 gUpgradeMasks[] = {
     0x00000007, 0x00000038, 0x000001C0, 0x00000E00, 0x00003000, 0x0001C000, 0x000E0000, 0x00700000,
 };
 u32 gUpgradeNegMasks[] = {
     0xFFFFFFF8, 0xFFFFFFC7, 0xFFFFFE3F, 0xFFFFF1FF, 0xFFFFCFFF, 0xFFFE3FFF, 0xFFF1FFFF, 0xFF8FFFFF,
 };
-u8 gEquipShifts[] = { 0, 4, 8, 12 };
+u8 gEquipShifts[] = { 0, 4, 8, 12, 16};
 u8 gUpgradeShifts[] = { 0, 3, 6, 9, 12, 14, 17, 20 };
 
 u16 gUpgradeCapacities[][4] = {
-    { 0, 30, 40, 50 },     // Quivers
-    { 0, 20, 30, 40 },     // Bomb Bags
+    { 0, 15, 20, 25 },     // Quivers
+    { 0, 8, 12, 16 },     // Bomb Bags
     { 0, 0, 0, 0 },        // Unused (Scale)
     { 0, 0, 0, 0 },        // Unused (Strength)
-    { 99, 200, 500, 999 }, // Wallets
-    { 0, 30, 40, 50 },     // Deku Seed Bullet Bags
-    { 0, 10, 20, 30 },     // Deku Stick Upgrades
-    { 0, 20, 30, 40 },     // Deku Nut Upgrades
+    { 99, 250, 999, 9999 }, // Wallets
+    { 0, 20, 30, 40 },     // Deku Seed Bullet Bags
+    { 0, 8, 12, 16 },     // Deku Stick Upgrades
+    { 0, 5, 8, 12 },     // Deku Nut Upgrades
 };
 
 u32 gGsFlagsMasks[] = { 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000 };
@@ -167,6 +168,16 @@ void* gItemIcons[] = {
     gOcarinaBtnIconCLeftTex,
     gOcarinaBtnIconCRightTex,
     gOcarinaBtnIconATex,
+    0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,
+    gItemIconLandmineTex,
+    gItemIconNayrusAffectionTex,
+    gItemIconDinsCrucibleTex,
+    gItemIconRing1Tex,
+    gItemIconRing1Tex,
+    gItemIconRing1Tex,
+    gItemIconBottleAmmoTex,
 };
 
 // Used to map item IDs to inventory slots
@@ -180,18 +191,31 @@ u8 gItemSlots[] = {
     SLOT_TRADE_CHILD, SLOT_TRADE_CHILD,  SLOT_TRADE_CHILD, SLOT_TRADE_CHILD, SLOT_TRADE_CHILD, SLOT_TRADE_CHILD,
     SLOT_TRADE_CHILD, SLOT_TRADE_CHILD,  SLOT_TRADE_CHILD, SLOT_TRADE_ADULT, SLOT_TRADE_ADULT, SLOT_TRADE_ADULT,
     SLOT_TRADE_ADULT, SLOT_TRADE_ADULT,  SLOT_TRADE_ADULT, SLOT_TRADE_ADULT, SLOT_TRADE_ADULT, SLOT_TRADE_ADULT,
-    SLOT_TRADE_ADULT, SLOT_TRADE_ADULT,
+    SLOT_TRADE_ADULT, SLOT_TRADE_ADULT,  SLOT_ARROW_FIRE,  SLOT_ARROW_ICE,   SLOT_ARROW_LIGHT, SLOT_NONE,
+
+    SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,
+    SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,
+    SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,
+    SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,
+    SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,
+    SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,
+    SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,
+    SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,
+    SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,
+    SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,SLOT_NONE,
+
+    SLOT_LANDMINE,  SLOT_NAYRUS_AFFECTION, SLOT_DINS_CRUCIBLE, SLOT_NONE,SLOT_NONE,SLOT_NONE, SLOT_BOTTLE_1,
 };
 
-void Inventory_ChangeEquipment(s16 equipment, u16 value) {
+void Inventory_ChangeEquipment(s32 equipment, u32 value) {
     gSaveContext.equips.equipment &= gEquipNegMasks[equipment];
     gSaveContext.equips.equipment |= value << gEquipShifts[equipment];
 }
 
-u8 Inventory_DeleteEquipment(PlayState* play, s16 equipment) {
+u8 Inventory_DeleteEquipment(PlayState* play, s32 equipment) {
     Player* player = GET_PLAYER(play);
     s32 pad;
-    u16 equipValue = gSaveContext.equips.equipment & gEquipMasks[equipment];
+    u32 equipValue = gSaveContext.equips.equipment & gEquipMasks[equipment];
 
     // "Erasing equipment item = %d  zzz=%d"
     osSyncPrintf("装備アイテム抹消 = %d  zzz=%d\n", equipment, equipValue);

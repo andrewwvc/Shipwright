@@ -25,6 +25,10 @@ typedef struct EnGoroiwa {
     /* 0x01D0 */ s16 pathDirection;
     /* 0x01D2 */ u8 isInKokiri;
     /* 0x01D3 */ u8 stateFlags;
+                 s16 platformParams;
+                 u8 platformSet;
 } EnGoroiwa; // size = 0x01D4
+
+void EnGoroiwa_Annihilate(EnGoroiwa* this, PlayState* play);
 
 #endif

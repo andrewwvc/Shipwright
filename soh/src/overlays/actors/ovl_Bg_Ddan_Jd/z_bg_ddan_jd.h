@@ -17,4 +17,9 @@ typedef struct BgDdanJd {
     /* 0x016C */ f32 targetY;
 } BgDdanJd; // size = 0x0170
 
+#define FAST_PILLAR_PARAMS 0x1000
+#define STATIC_PILLAR_PARAMS 0x2000
+#define DROP_PILLAR_PARAMS 0x4000
+#define RAISED_PILLAR_PARAMS 0x4100
+
 #endif

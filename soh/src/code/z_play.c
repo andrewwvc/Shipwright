@@ -2,6 +2,7 @@
 #include "vt.h"
 
 #include <string.h>
+#include <stdlib.h>
 
 #include "soh/Enhancements/gameconsole.h"
 #include "soh/frame_interpolation.h"
@@ -246,6 +247,10 @@ void Play_Destroy(GameState* thisx) {
 
     disableBetaQuest();
 
+    if (play->setupActorList)
+        free(play->setupActorList);
+    play->setupActorList = NULL;
+
     gPlayState = NULL;
 }
 
@@ -399,6 +404,7 @@ void Play_Init(GameState* thisx) {
         GameInteractor_ExecuteOnExitGame(gSaveContext.fileNum);
         return;
     }
+    play->setupActorList = NULL;
 
     gPlayState = play;
 
@@ -518,7 +524,7 @@ void Play_Init(GameState* thisx) {
             gSaveContext.totalDays++;
             gSaveContext.bgsDayCount++;
             gSaveContext.dogIsLost = true;
-
+            Environment_UpdateDataOnDayChange();
             if (Inventory_ReplaceItem(play, ITEM_WEIRD_EGG, ITEM_CHICKEN) || Inventory_HatchPocketCucco(play)) {
                 GameInteractor_ExecuteOnCuccoOrChickenHatch();
                 Message_StartTextbox(play, 0x3066, NULL);
@@ -1164,7 +1170,8 @@ void Play_Update(PlayState* play) {
                 PLAY_LOG(3580);
 
                 play->gameplayFrames++;
-                func_800AA178(true);
+                gSaveContext.savedFrameCount++;
+                func_800AA178(true);//TODO - Test how this affects rumble
 
                 // Gameplay stat tracking
                 if (!gSaveContext.ship.stats.gameComplete &&
@@ -1267,6 +1274,7 @@ void Play_Update(PlayState* play) {
             if ((play->pauseCtx.state != 0) || (play->pauseCtx.debugState != 0)) {
                 PLAY_LOG(3721);
                 KaleidoScopeCall_Update(play);
+                Message_Update(play);
             } else if (play->gameOverCtx.state != GAMEOVER_INACTIVE) {
                 PLAY_LOG(3727);
                 GameOver_Update(play);
@@ -1316,6 +1324,7 @@ skip:
         }
 
         Camera_Update(play->cameraPtrs[play->nextCamera]);
+        //lusprintf(0,0,0,"\nCamera\nSetting: %d,\nMode: %d", play->cameraPtrs[play->nextCamera]->setting, play->cameraPtrs[play->nextCamera]->mode);
 
         PLAY_LOG(3814);
     }

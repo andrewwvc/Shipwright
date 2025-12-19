@@ -36,7 +36,7 @@ static ColliderCylinderInit D_80AA0420 = {
     },
     {
         ELEMTYPE_UNK2,
-        { 0x00000001, 0x00, 0x00 },
+        { 0x00000001, 0x00, DAMAGE_BASE_VAL },
         { 0xFFCFFFFF, 0x00, 0x00 },
         TOUCH_ON | TOUCH_SFX_NONE,
         BUMP_ON,
@@ -45,8 +45,8 @@ static ColliderCylinderInit D_80AA0420 = {
     { 200, 200, 0, { 0, 0, 0 } },
 };
 
-static u32 D_80AA044C[] = { 0x01000000, 0x00400000, 0x00800000 };
-static u32 D_80AA0458[] = { 0x08000000, 0x02000000, 0x04000000 };
+static u32 D_80AA044C[] = { DMG_SPIN_MASTER, DMG_SPIN_KOKIRI, DMG_SPIN_GIANT, DMG_DEKU_STICK, DMG_HAMMER_SWING };
+static u32 D_80AA0458[] = { DMG_JUMP_MASTER, DMG_JUMP_KOKIRI, DMG_JUMP_GIANT, DMG_DEKU_STICK, DMG_HAMMER_JUMP };
 
 static u16 sSfxIds[] = {
     NA_SE_IT_ROLLING_CUT_LV2,
@@ -148,6 +148,10 @@ void func_80A9F350(EnMThunder* this, PlayState* play) {
     }
 }
 
+static const f32 NORMAL_SPIN_TIME = 0.01f;
+static const f32 BLUE_SPIN_TIME = 0.07f;
+static const f32 ORANGE_SPIN_TIME = 0.79f;
+
 void func_80A9F408(EnMThunder* this, PlayState* play) {
     Player* player = GET_PLAYER(play);
     Actor* child = this->actor.child;
@@ -157,7 +161,7 @@ void func_80A9F408(EnMThunder* this, PlayState* play) {
     this->actor.shape.rot.y = player->actor.shape.rot.y + 0x8000;
 
     if (this->unk_1CA == 0) {
-        if (player->unk_858 >= 0.1f) {
+        if (player->unk_858 >= NORMAL_SPIN_TIME) {
             if ((gSaveContext.magicState != MAGIC_STATE_IDLE) ||
                 (((this->actor.params & 0xFF00) >> 8) &&
                  !(Magic_RequestChange(play, (this->actor.params & 0xFF00) >> 8, MAGIC_CONSUME_WAIT_PREVIEW)))) {
@@ -173,7 +177,7 @@ void func_80A9F408(EnMThunder* this, PlayState* play) {
         }
     }
 
-    if (player->unk_858 >= 0.1f) {
+    if (player->unk_858 >= NORMAL_SPIN_TIME) {
         func_800AA000(0.0f, (s32)(player->unk_858 * 150.0f) & 0xFF, 2, (s32)(player->unk_858 * 150.0f) & 0xFF);
     }
 
@@ -182,8 +186,8 @@ void func_80A9F408(EnMThunder* this, PlayState* play) {
             child->parent = NULL;
         }
 
-        if (player->unk_858 <= 0.15f) {
-            if ((player->unk_858 >= 0.1f) && (player->meleeWeaponAnimation >= 0x18)) {
+        if (player->unk_858 <= BLUE_SPIN_TIME) {
+            if ((player->unk_858 >= NORMAL_SPIN_TIME) && (player->meleeWeaponAnimation >= 0x18)) {
                 Audio_PlaySoundGeneral(NA_SE_IT_ROLLING_CUT, &player->actor.projectedPos, 4,
                                        &gSfxDefaultFreqAndVolScale, &gSfxDefaultFreqAndVolScale, &gSfxDefaultReverb);
                 Audio_PlaySoundGeneral(NA_SE_IT_SWORD_SWING_HARD, &player->actor.projectedPos, 4,
@@ -194,9 +198,12 @@ void func_80A9F408(EnMThunder* this, PlayState* play) {
         } else {
             player->stateFlags2 &= ~PLAYER_STATE2_SPIN_ATTACKING;
             if ((this->actor.params & 0xFF00) >> 8) {
-                gSaveContext.magicState = MAGIC_STATE_CONSUME_SETUP;
+                if (Ring_Get_Equiped() == RI_WITCHS_RING)
+                    gSaveContext.magicState = MAGIC_STATE_METER_FLASH_3;
+                else
+                    gSaveContext.magicState = MAGIC_STATE_CONSUME_SETUP;
             }
-            if (player->unk_858 < 0.85f) {
+            if (player->unk_858 < ORANGE_SPIN_TIME) {
                 this->collider.info.toucher.dmgFlags = D_80AA044C[this->unk_1C7];
                 this->unk_1C6 = 1;
                 this->unk_1C9 = ((this->unk_1C7 == 1) ? 2 : 4);
@@ -223,27 +230,27 @@ void func_80A9F408(EnMThunder* this, PlayState* play) {
         return;
     }
 
-    if (player->unk_858 > 0.15f) {
+    if (player->unk_858 > BLUE_SPIN_TIME) {
         this->unk_1C8 = 255;
         if (this->actor.child == NULL) {
             Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, ACTOR_EFF_DUST, this->actor.world.pos.x,
                                this->actor.world.pos.y, this->actor.world.pos.z, 0, this->actor.shape.rot.y, 0,
                                this->unk_1C7 + 2);
         }
-        this->unk_1BC += ((((player->unk_858 - 0.15f) * 1.5f) - this->unk_1BC) * 0.5f);
+        this->unk_1BC += ((((player->unk_858 - BLUE_SPIN_TIME) * 1.5f) - this->unk_1BC) * 0.5f);
 
-    } else if (player->unk_858 > .1f) {
-        this->unk_1C8 = (s32)((player->unk_858 - .1f) * 255.0f * 20.0f);
-        this->unk_1AC = (player->unk_858 - .1f) * 10.0f;
+    } else if (player->unk_858 > NORMAL_SPIN_TIME) {
+        this->unk_1C8 = (s32)((player->unk_858 - NORMAL_SPIN_TIME) * 255.0f * 20.0f);
+        this->unk_1AC = (player->unk_858 - NORMAL_SPIN_TIME) * 10.0f;
     } else {
         this->unk_1C8 = 0;
     }
 
-    if (player->unk_858 > 0.85f) {
+    if (player->unk_858 > ORANGE_SPIN_TIME) {
         func_800F4254(&player->actor.projectedPos, 2);
-    } else if (player->unk_858 > 0.15f) {
+    } else if (player->unk_858 > BLUE_SPIN_TIME) {
         func_800F4254(&player->actor.projectedPos, 1);
-    } else if (player->unk_858 > 0.1f) {
+    } else if (player->unk_858 > NORMAL_SPIN_TIME) {
         func_800F4254(&player->actor.projectedPos, 0);
     }
 
@@ -383,7 +390,7 @@ void EnMThunder_Draw(Actor* thisx, PlayState* play2) {
             break;
     }
 
-    if (this->unk_1B8 >= 0.85f) {
+    if (this->unk_1B8 >= ORANGE_SPIN_TIME) {
         phi_f14 = (D_80AA046C[(play->gameplayFrames & 7)] * 6.0f) + 1.0f;
         if (CVarGetInteger(CVAR_COSMETIC("SpinAttack.Level2Primary.Changed"), 0)) {
             Color_RGB8 color =

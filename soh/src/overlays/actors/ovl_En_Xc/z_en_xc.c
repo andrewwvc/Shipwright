@@ -2194,7 +2194,9 @@ void EnXc_InitTempleOfTime(EnXc* this, PlayState* play) {
             func_80B3EBF0(this, play);
         } else if (GameInteractor_Should(VB_BE_ELIGIBLE_FOR_PRELUDE_OF_LIGHT,
                                          !Flags_GetEventChkInf(EVENTCHKINF_LEARNED_PRELUDE_OF_LIGHT) &&
-                                             Flags_GetEventChkInf(EVENTCHKINF_USED_FOREST_TEMPLE_BLUE_WARP))) {
+                                             (Flags_GetEventChkInf(EVENTCHKINF_USED_FOREST_TEMPLE_BLUE_WARP) ||//Allows any of the first 3 rescued sages to let you use the pedestal
+                                                Flags_GetEventChkInf(EVENTCHKINF_USED_FIRE_TEMPLE_BLUE_WARP) ||
+                                                Flags_GetEventChkInf(EVENTCHKINF_USED_WATER_TEMPLE_BLUE_WARP)))) {
             Flags_SetEventChkInf(EVENTCHKINF_LEARNED_PRELUDE_OF_LIGHT);
             if (GameInteractor_Should(VB_GIVE_ITEM_PRELUDE_OF_LIGHT, true)) {
                 Item_Give(play, ITEM_SONG_PRELUDE);

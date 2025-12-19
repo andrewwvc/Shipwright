@@ -35,6 +35,7 @@
 #include "src/overlays/actors/ovl_Door_Shutter/z_door_shutter.h"
 #include "src/overlays/actors/ovl_Door_Gerudo/z_door_gerudo.h"
 #include "src/overlays/actors/ovl_En_Elf/z_en_elf.h"
+#include "src/overlays/actors/ovl_Boss_Fd/z_boss_fd.h"
 #include "objects/object_link_boy/object_link_boy.h"
 #include "objects/object_link_child/object_link_child.h"
 #include "soh_assets.h"
@@ -306,7 +307,10 @@ void RegisterDaytimeGoldSkultullas() {
 bool IsHyperBossesActive() {
     return CVarGetInteger(CVAR_ENHANCEMENT("HyperBosses"), 0) ||
            (IS_BOSS_RUSH &&
-            gSaveContext.ship.quest.data.bossRush.options[BR_OPTIONS_HYPERBOSSES] == BR_CHOICE_HYPERBOSSES_YES);
+            gSaveContext.ship.quest.data.bossRush.options[BR_OPTIONS_HYPERBOSSES] == BR_CHOICE_HYPERBOSSES_YES) ||
+            (actor->id == ACTOR_BOSS_FD && (((BossFd*)actor)->work[BFD_ACTION_STATE] == BOSSFD_FLY_CHASE ||
+                                    (((BossFd*)actor)->work[BFD_ACTION_STATE] == BOSSFD_FLY_HOLE && (((BossFd*)actor)->work[BFD_FLY_COUNT] & 1)))) ||
+                (actor->id == ACTOR_BOSS_FD2);
 }
 
 void UpdateHyperBossesState() {

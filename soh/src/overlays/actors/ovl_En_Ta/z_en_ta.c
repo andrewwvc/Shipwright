@@ -517,7 +517,7 @@ void EnTa_IdleAtRanch(EnTa* this, PlayState* play) {
 }
 
 s32 func_80B14DD8(void) {
-    if (gSaveContext.rupees < 30) {
+    if (Rupees_GetNum() < 30) {
         return 0;
     } else if (!Inventory_HasEmptyBottle()) {
         return 1;
@@ -924,7 +924,7 @@ void func_80B15FE8(EnTa* this, PlayState* play) {
                 }
                 break;
             case 1:
-                if (gSaveContext.rupees < 10) {
+                if (Rupees_GetNum() < 10) {
                     Message_ContinueTextbox(play, 0x85);
                     EnTa_SetupAction(this, func_80B15034, EnTa_AnimRunToEnd);
                 } else {
@@ -956,7 +956,7 @@ void func_80B161C0(EnTa* this, PlayState* play) {
     if (Message_GetState(&play->msgCtx) == TEXT_STATE_CHOICE && Message_ShouldAdvance(play)) {
         switch (play->msgCtx.choiceIndex) {
             case 0:
-                if (gSaveContext.rupees < price) {
+                if (Rupees_GetNum() < price) {
                     Message_ContinueTextbox(play, 0x85);
                     EnTa_SetupAction(this, func_80B15034, EnTa_AnimRunToEnd);
                 } else {

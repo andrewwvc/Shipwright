@@ -32,6 +32,14 @@ typedef enum {
     /* 4 */ EFF_FWORK_MAX
 } EffectFWork;
 
+typedef enum {
+    /* 0x01 */ PT_SIDE = 1,
+    /* 0x02 */ PT_HORIZONTAL,
+    /* 0x03 */ PT_VERTICAL,
+    /* 0x04 */ PT_STAR,
+    /* 0x05 */ PT_COVER,
+} PatternType;
+
 typedef struct {
     /* 0x0000 */ u8 type;
     /* 0x0001 */ u8 frame;
@@ -143,7 +151,7 @@ typedef struct BossTw {
     /* 0x0530 */ Vec3f unk_530;
     /* 0x053C */ f32 beamReflectionPitch;
     /* 0x0540 */ f32 beamReflectionYaw;
-    /* 0x0544 */ f32 unused_544;
+    /* 0x0544 */ Vec3f storedPosition;
     /* 0x0548 */ f32 beamReflectionDist;
     /* 0x054C */ Vec3f unk_54C;
     /* 0x0558 */ Vec3f unk_558;
@@ -159,22 +167,19 @@ typedef struct BossTw {
     /* 0x05FE */ s16 csSfxTimer;
     /* 0x0600 */ Vec3f subCamEye;
     /* 0x060C */ Vec3f subCamAt;
-    /* 0x0618 */ char unused_618[0xC];
     /* 0x0624 */ Vec3f subCamEye2;
     /* 0x0630 */ Vec3f subCamAt2;
-    /* 0x063C */ char unused_63C[0x18];
     /* 0x0654 */ Vec3f subCamEyeStep;
     /* 0x0660 */ Vec3f subCamAtStep;
     /* 0x066C */ Vec3f subCamEyeTarget;
-    /* 0x0678 */ char unused_678[0xC];
     /* 0x0684 */ Vec3f subCamAtTarget;
-    /* 0x0690 */ char unused_690[0xC];
     /* 0x069C */ f32 subCamUpdateRate;
     /* 0x06A0 */ f32 subCamDistStep;
     /* 0x06A4 */ f32 subCamDist;
-    /* 0x06A8 */ char unused_6A8[4];
     /* 0x06AC */ f32 subCamYaw;
     /* 0x06B0 */ f32 subCamYawStep;
+                 s16 patternIndex;
+                 s16 selectionIndex;
 } BossTw; // size = 0x06B4
 
 #endif

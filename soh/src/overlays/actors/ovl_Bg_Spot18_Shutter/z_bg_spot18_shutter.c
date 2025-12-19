@@ -48,7 +48,7 @@ void BgSpot18Shutter_Init(Actor* thisx, PlayState* play) {
 
     if (param == 0) {
         if (LINK_AGE_IN_YEARS == YEARS_ADULT) {
-            if (Flags_GetInfTable(INFTABLE_GORON_CITY_DOORS_UNLOCKED)) {
+            if (true) {//Changed from: Flags_GetInfTable(INFTABLE_GORON_CITY_DOORS_UNLOCKED)
                 this->actionFunc = func_808B95AC;
                 this->dyna.actor.world.pos.y += 180.0f;
             } else {

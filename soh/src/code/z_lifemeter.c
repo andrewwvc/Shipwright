@@ -350,11 +350,10 @@ s16 getHealthMeterXOffset() {
                                                70.0f);
         } else if (CVarGetInteger(CVAR_COSMETIC("HUD.HeartsCount.PosType"), 0) == ANCHOR_RIGHT) {
             X_Margins = Right_LM_Margin;
-            return OTRGetDimensionFromRightEdge(CVarGetInteger(CVAR_COSMETIC("HUD.HeartsCount.PosX"), 0) + X_Margins +
-                                                70.0f);
+            return OTRGetDimensionFromRightEdge(CVarGetInteger(CVAR_COSMETIC("HUD.HeartsCount.PosX"), 0)+X_Margins+70.0f);
         } else if (CVarGetInteger(CVAR_COSMETIC("HUD.HeartsCount.PosType"), 0) == ANCHOR_NONE) {
-            return CVarGetInteger(CVAR_COSMETIC("HUD.HeartsCount.PosX"), 0) + 70.0f;
-        } else if (CVarGetInteger(CVAR_COSMETIC("HUD.HeartsCount.PosType"), 0) == HIDDEN) {
+            return CVarGetInteger(CVAR_COSMETIC("HUD.HeartsCount.PosX"), 0)+70.0f;
+        } else if (CVarGetInteger(CVAR_COSMETIC("HUD.HeartsCount.PosType"), 0)  == HIDDEN) {
             return -9999;
         }
     } else {
@@ -400,8 +399,8 @@ void HealthMeter_Draw(PlayState* play) {
     f32 sp144 = interfaceCtx->unk_22A * 0.1f;
     s32 curCombineModeSet = 0;
     u8* curBgImgLoaded = NULL;
-    s32 ddHeartCountMinusOne = gSaveContext.isDoubleDefenseAcquired ? totalHeartCount - 1 : -1;
-    f32 HeartsScale = 0.7f;
+    s32 ddHeartCountMinusOne = DOUBLE_DEFENSE_IS_ACTIVE ? (totalHeartCount > gSaveContext.inventory.defenseHearts ? gSaveContext.inventory.defenseHearts: totalHeartCount) - 1 : -1;
+    f32 HeartsScale = 0.7f; 
     if (CVarGetInteger(CVAR_COSMETIC("HUD.HeartsCount.PosType"), 0) != ORIGINAL_LOCATION) {
         HeartsScale = CVarGetFloat(CVAR_COSMETIC("HUD.HeartsCount.Scale"), 0.7f);
     }

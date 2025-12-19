@@ -6,9 +6,11 @@
 
 typedef enum {
     /* 0x00 */ WMT_TIMER,
-    /* 0x01 */ WMT_PROXIMITY,
+    /* 0x01 */ WMT_PROXIMITY_TIMED,
     /* 0x02 */ WMT_FLAG,
-    /* 0x03 */ WMT_SHADOWTAG
+    /* 0x03 */ WMT_SHADOWTAG,
+    /* 0x04 */ WMT_PROXIMITY,
+    /* 0x05 */ WMT_FLAG_TIMED
 } WallmasType;
 
 struct EnWallmas;

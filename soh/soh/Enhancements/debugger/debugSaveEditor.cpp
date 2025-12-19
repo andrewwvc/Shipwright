@@ -176,6 +176,9 @@ void DrawInfoTab() {
     if (gSaveContext.health > gSaveContext.healthCapacity) {
         gSaveContext.health = gSaveContext.healthCapacity; // Clamp health to new max
     }
+    const uint16_t healthMin = 0;
+    const uint16_t healthMax = gSaveContext.healthCapacity;
+    const uint16_t heartsGreatestMax = 20;
     int32_t health = (int32_t)gSaveContext.health;
     if (SliderInt("Health", &health,
                   intSliderOptionsBase.Tooltip("Current health. 16 units per full heart")
@@ -183,13 +186,16 @@ void DrawInfoTab() {
                       .Max(gSaveContext.healthCapacity))) {
         gSaveContext.health = (int16_t)health;
     }
+    // ImGui::SetNextItemWidth(ImGui::GetFontSize() * 15);
+    // ImGui::SliderScalar("Health", ImGuiDataType_S16, &gSaveContext.health, &healthMin, &healthMax);
+    // UIWidgets::InsertHelpHoverText("Current health. 16 units per full heart");
 
     bool isDoubleDefenseAcquired = gSaveContext.isDoubleDefenseAcquired != 0;
     if (Checkbox("Double Defense", &isDoubleDefenseAcquired,
                  checkboxOptionsBase.Tooltip("Is double defense unlocked?"))) {
         gSaveContext.isDoubleDefenseAcquired = isDoubleDefenseAcquired;
-        gSaveContext.inventory.defenseHearts =
-            gSaveContext.isDoubleDefenseAcquired ? 20 : 0; // Set to get the border drawn in the UI
+        //gSaveContext.inventory.defenseHearts =
+        //    gSaveContext.isDoubleDefenseAcquired ? 20 : 0; // Set to get the border drawn in the UI
     }
     if (Combobox("Magic Level", &gSaveContext.magicLevel, magicLevelMap,
                  comboboxOptionsBase.Tooltip("Current magic level"))) {
@@ -197,6 +203,82 @@ void DrawInfoTab() {
         gSaveContext.isDoubleMagicAcquired = gSaveContext.magicLevel == 2;
     }
     gSaveContext.magicCapacity = gSaveContext.magicLevel * 0x30; // Set to get the bar drawn in the UI
+    //TODO - ADD GUI
+    // UIWidgets::InsertHelpHoverText("Is double defense unlocked?");
+    //
+    // int8_t defenseHeartNum = gSaveContext.inventory.defenseHearts;
+    // if (ImGui::SliderScalar("Defense Hearts", ImGuiDataType_S8, &defenseHeartNum,&healthMin,&heartsGreatestMax)) {
+    //     gSaveContext.inventory.defenseHearts = defenseHeartNum;
+    // }
+    // UIWidgets::InsertHelpHoverText("Number of hearts protected by double defense");
+    //
+    // std::string magicName;
+    // if (gSaveContext.magicLevel == 2) {
+    //     if (gSaveContext.extraMagicPower == 2)
+    //         magicName = "Double+2";
+    //     else if (gSaveContext.extraMagicPower == 1)
+    //         magicName = "Double+1";
+    //     else
+    //         magicName = "Double+0";
+    // } else if (gSaveContext.magicLevel == 1) {
+    //     if (gSaveContext.extraMagicPower == 2)
+    //         magicName = "Single+2";
+    //     else if (gSaveContext.extraMagicPower == 1)
+    //         magicName = "Single+1";
+    //     else
+    //         magicName = "Single+0";
+    // } else {
+    //     magicName = "None";
+    // }
+    // ImGui::SetNextItemWidth(ImGui::GetFontSize() * 6);
+    // if (ImGui::BeginCombo("Magic Level", magicName.c_str())) {
+    //     if (ImGui::Selectable("Double+2")) {
+    //         gSaveContext.magicLevel = 2;
+    //         gSaveContext.isMagicAcquired = true;
+    //         gSaveContext.isDoubleMagicAcquired = true;
+    //         gSaveContext.extraMagicPower = 2;
+    //     }
+    //     if (ImGui::Selectable("Double+1")) {
+    //         gSaveContext.magicLevel = 2;
+    //         gSaveContext.isMagicAcquired = true;
+    //         gSaveContext.isDoubleMagicAcquired = true;
+    //         gSaveContext.extraMagicPower = 1;
+    //     }
+    //     if (ImGui::Selectable("Double+0")) {
+    //         gSaveContext.magicLevel = 2;
+    //         gSaveContext.isMagicAcquired = true;
+    //         gSaveContext.isDoubleMagicAcquired = true;
+    //         gSaveContext.extraMagicPower = 0;
+    //     }
+    //     if (ImGui::Selectable("Single+2")) {
+    //         gSaveContext.magicLevel = 1;
+    //         gSaveContext.isMagicAcquired = true;
+    //         gSaveContext.isDoubleMagicAcquired = false;
+    //         gSaveContext.extraMagicPower = 2;
+    //     }
+    //     if (ImGui::Selectable("Single+1")) {
+    //         gSaveContext.magicLevel = 1;
+    //         gSaveContext.isMagicAcquired = true;
+    //         gSaveContext.isDoubleMagicAcquired = false;
+    //         gSaveContext.extraMagicPower = 1;
+    //     }
+    //     if (ImGui::Selectable("Single+0")) {
+    //         gSaveContext.magicLevel = 1;
+    //         gSaveContext.isMagicAcquired = true;
+    //         gSaveContext.isDoubleMagicAcquired = false;
+    //         gSaveContext.extraMagicPower = 0;
+    //     }
+    //     if (ImGui::Selectable("None")) {
+    //         gSaveContext.magicLevel = 0;
+    //         gSaveContext.isMagicAcquired = false;
+    //         gSaveContext.isDoubleMagicAcquired = false;
+    //         gSaveContext.extraMagicPower = 0;
+    //     }
+    //
+    //     ImGui::EndCombo();
+    // }
+    // UIWidgets::InsertHelpHoverText("Current magic level");
+    // gSaveContext.magicCapacity = Inferface_CalculateMaxMagic(); // Set to get the bar drawn in the UI
     if (gSaveContext.magic > gSaveContext.magicCapacity) {
         gSaveContext.magic = gSaveContext.magicCapacity; // Clamp magic to new max
     }
@@ -209,7 +291,17 @@ void DrawInfoTab() {
         gSaveContext.magic = (int8_t)magic;
     }
 
+
     PushStyleInput(THEME_COLOR);
+    //TODO - ADD GUI
+    // const uint16_t boostMin = 6;
+    // const uint16_t boostGreatestMax = 16;
+    // int8_t boostNum = gSaveContext.maxBoosts;
+    // if (ImGui::SliderScalar("Boost Carrots", ImGuiDataType_U8, &boostNum,&boostMin,&boostGreatestMax)) {
+    //     gSaveContext.maxBoosts = boostNum;
+    // }
+    // UIWidgets::InsertHelpHoverText("Number of stamina boosts available to Epona");
+
     ImGui::InputScalar("Rupees", ImGuiDataType_S16, &gSaveContext.rupees);
     Tooltip("Current rupees");
     PopStyleInput();
@@ -255,6 +347,22 @@ void DrawInfoTab() {
     PopStyleInput();
 
     PushStyleInput(THEME_COLOR);
+    //TODO - ADD GUI
+    // ImGui::InputScalar("Goron Trade Day", ImGuiDataType_S32, &gSaveContext.goronTimeDay);
+    // UIWidgets::InsertHelpHoverText("The day a Goron left to go shopping");
+    //
+    // ImGui::InputScalar("Saria Date Day", ImGuiDataType_S32, &gSaveContext.SariaDateDay);
+    // UIWidgets::InsertHelpHoverText("The specific date Saria will come around");
+    //
+    // ImGui::InputScalar("Ruto Date Day", ImGuiDataType_S32, &gSaveContext.RutoDateDay);
+    // UIWidgets::InsertHelpHoverText("The specific date Ruto will meet you");
+    //
+    // ImGui::InputScalar("Malon Play Day", ImGuiDataType_S32, &gSaveContext.MalonPlayDay);
+    // UIWidgets::InsertHelpHoverText("The specific date Malon has come out at night");
+    //
+    // ImGui::InputScalar("Malon Ride Day", ImGuiDataType_S32, &gSaveContext.MalonRideDay);
+    // UIWidgets::InsertHelpHoverText("The specific date Malon has chosen to ride in the field");
+
     ImGui::InputScalar("Entrance Index", ImGuiDataType_S32, &gSaveContext.entranceIndex);
     Tooltip("From which entrance did Link arrive?");
     PopStyleInput();
@@ -419,7 +527,7 @@ void DrawInventoryTab() {
         "Restrict to valid items", &restrictToValid,
         checkboxOptionsBase.Tooltip("Restricts items and ammo to only what is possible to legally acquire in-game"));
 
-    for (int32_t y = 0; y < 4; y++) {
+    for (int32_t y = 0; y < NUM_ITEM_SLOT_LINES_TOTAL; y++) {
         for (int32_t x = 0; x < 6; x++) {
             int32_t index = x + y * 6;
             static int32_t selectedIndex = -1;
@@ -465,7 +573,7 @@ void DrawInventoryTab() {
                 std::vector<ItemMapEntry> possibleItems;
                 if (restrictToValid) {
                     // Scan gItemSlots to find legal items for this slot. Bottles are a special case
-                    for (int slotIndex = 0; slotIndex < 56; slotIndex++) {
+                    for (int slotIndex = 0; slotIndex < ARRAY_COUNT(gItemSlots); slotIndex++) {
                         int testIndex = (selectedIndex == SLOT_BOTTLE_1 || selectedIndex == SLOT_BOTTLE_2 ||
                                          selectedIndex == SLOT_BOTTLE_3 || selectedIndex == SLOT_BOTTLE_4)
                                             ? SLOT_BOTTLE_1
@@ -933,6 +1041,12 @@ void DrawFlagsTab() {
                             case RANDOMIZER_INF:
                                 DrawFlagTableArray16(flagTable, j, gSaveContext.ship.randomizerInf[j]);
                                 break;
+                            case NPC_WEEK_EVENT:
+                                DrawFlagTableArray16(flagTable, j, gSaveContext.NPCWeekEvents[j]);
+                                break;
+                            case RANDOMIZER_INF:
+                                DrawFlagTableArray16(flagTable, j, gSaveContext.randomizerInf[j]);
+                                break;
                         }
                     },
                     flagTable.name);
@@ -1055,6 +1169,7 @@ void DrawEquipmentTab() {
         ITEM_SHIELD_DEKU,  ITEM_SHIELD_HYLIAN, ITEM_SHIELD_MIRROR, ITEM_NONE,
         ITEM_TUNIC_KOKIRI, ITEM_TUNIC_GORON,   ITEM_TUNIC_ZORA,    ITEM_NONE,
         ITEM_BOOTS_KOKIRI, ITEM_BOOTS_IRON,    ITEM_BOOTS_HOVER,   ITEM_NONE,
+        ITEM_RING_1,       ITEM_RING_2,        ITEM_RING_3,        ITEM_NONE,
     };
     for (int32_t i = 0; i < equipmentValues.size(); i++) {
         // Skip over unused 4th slots for shields, boots, and tunics
@@ -1136,13 +1251,16 @@ void DrawEquipmentTab() {
     // There is no icon for child wallet, so default to a text list
     // this was const, but I needed to append to it depending in rando settings.
     std::vector<std::string> walletNamesImpl = {
-        "Child (99)",
-        "Adult (200)",
-        "Giant (500)",
+        "Child ("+std::to_string(CAPACITY(UPG_WALLET,0))+")",
+        "Adult ("+std::to_string(CAPACITY(UPG_WALLET,1))+")",
+        "Giant ("+std::to_string(CAPACITY(UPG_WALLET,2))+")",
     };
     // only display Tycoon wallet if you're in a save file that would allow it.
     if (IS_RANDO && OTRGlobals::Instance->gRandomizer->GetRandoSettingValue(RSK_INCLUDE_TYCOON_WALLET)) {
-        const std::string walletName = "Tycoon (999)";
+        const std::string walletName = "Tycoon ("+std::to_string(CAPACITY(UPG_WALLET,3))+")";
+        walletNamesImpl.push_back(walletName);
+    } else {
+        const std::string walletName = "King's ("+std::to_string(CAPACITY(UPG_WALLET,3))+")";
         walletNamesImpl.push_back(walletName);
     }
     // copy it to const value for display in ImGui.
@@ -1151,19 +1269,31 @@ void DrawEquipmentTab() {
 
     const std::vector<std::string> stickNames = {
         "None",
-        "10",
-        "20",
-        "30",
+        std::to_string(CAPACITY(UPG_STICKS,1)),
+        std::to_string(CAPACITY(UPG_STICKS,2)),
+        std::to_string(CAPACITY(UPG_STICKS,3)),
     };
     DrawUpgrade("Deku Stick Capacity", UPG_STICKS, stickNames);
 
     const std::vector<std::string> nutNames = {
         "None",
-        "20",
-        "30",
-        "40",
+        std::to_string(CAPACITY(UPG_NUTS,1)),
+        std::to_string(CAPACITY(UPG_NUTS,2)),
+        std::to_string(CAPACITY(UPG_NUTS,3)),
     };
+
     DrawUpgrade("Deku Nut Capacity", UPG_NUTS, nutNames);
+
+    //TODO - ADD GUI
+    // for (int32_t ii = 0; ii < ARRAY_COUNT(gSaveContext.inventory.ringEquips); ii++) {
+    //     const std::string ringName = "Ring Slot "+std::to_string(ii);
+    //     ImGui::InputScalar(ringName.c_str(), ImGuiDataType_U8, &gSaveContext.inventory.ringEquips[ii]);
+    // }
+    //
+    // for (int32_t ii = 0; ii < ARRAY_COUNT(gSaveContext.inventory.rings); ii++) {
+    //     const std::string ringName = "Ring Type "+std::to_string(ii+1);
+    //     ImGui::InputScalar(ringName.c_str(), ImGuiDataType_U8, &gSaveContext.inventory.rings[ii]);
+    // }
 }
 
 // Draws a toggleable icon for a quest item that is faded when disabled
@@ -1339,6 +1469,7 @@ void DrawPlayerTab() {
         const char* curShield;
         const char* curTunic;
         const char* curBoots;
+        const char* curRing;
 
         switch (player->currentSwordItemId) {
             case ITEM_SWORD_KOKIRI:
@@ -1406,6 +1537,23 @@ void DrawPlayerTab() {
                 break;
         }
 
+        switch (player->currentRing) {
+            case 0:
+                curRing = "None";
+                break;
+            case 1:
+                curRing = "Ring 1";
+                break;
+            case 2:
+                curRing = "Ring 2";
+                break;
+            case 3:
+                curRing = "Ring 3";
+                break;
+            default:
+                break;
+        }
+
         ImGui::PushItemWidth(ImGui::GetFontSize() * 6);
         PushStyleInput(THEME_COLOR);
         DrawGroupWithBorder(
@@ -1458,6 +1606,8 @@ void DrawPlayerTab() {
         ImGui::InputScalar("Gravity", ImGuiDataType_Float, &player->actor.gravity);
         InsertHelpHoverText("Rate at which Link falls. Default -4.0f");
         PopStyleInput();
+        //TODO - ADD GUI
+        //DrawGroupWithBorder([&]() {ImGui::Text("Scene: %i, Room: %i, Setup: %i", gPlayState->sceneNum, gPlayState->roomCtx.curRoom.num, gSaveContext.sceneSetupIndex);});
 
         PushStyleCombobox(THEME_COLOR);
         if (ImGui::BeginCombo("Link Age on Load", gPlayState->linkAgeOnLoad == 0 ? "Adult" : "Child")) {
@@ -1574,6 +1724,26 @@ void DrawPlayerTab() {
             },
             "Current Equipment");
         ImGui::SameLine();
+
+        if (ImGui::BeginCombo("Rings", curRing)) {
+            if (ImGui::Selectable("None")) {
+                player->currentRing = 1;
+                Inventory_ChangeEquipment(EQUIP_TYPE_RING, EQUIP_VALUE_RINGS_NONE);
+            }
+            if (ImGui::Selectable("Ring 1")) {
+                player->currentRing = 1;
+                Inventory_ChangeEquipment(EQUIP_TYPE_RING, EQUIP_VALUE_RINGS_1);
+            }
+            if (ImGui::Selectable("Ring 2")) {
+                player->currentRing = 2;
+                Inventory_ChangeEquipment(EQUIP_TYPE_BOOTS, EQUIP_VALUE_RINGS_2);
+            }
+            if (ImGui::Selectable("Ring 3")) {
+                player->currentRing = 3;
+                Inventory_ChangeEquipment(EQUIP_TYPE_BOOTS, EQUIP_VALUE_RINGS_3);
+            }
+            ImGui::EndCombo();
+        }
 
         ImU16 one = 1;
         DrawGroupWithBorder(

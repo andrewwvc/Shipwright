@@ -1,4 +1,6 @@
 #include "util.h"
+#include "variables.h"
+#include "macros.h"
 
 #include <string.h>
 #include <vector>
@@ -193,15 +195,15 @@ std::vector<std::string> itemNames = {
     "Kokiri Boots",
     "Iron Boots",
     "Hover Boots",
-    "Bullet Bag (30)",
-    "Bullet Bag (40)",
-    "Bullet Bag (50)",
-    "Quiver (30)",
-    "Big Quiver (40)",
-    "Biggest Quiver (50)",
-    "Bomb Bag (20)",
-    "Big Bomb Bag (30)",
-    "Biggest Bomb Bag (40)",
+    "Bullet Bag ("+std::to_string(CAPACITY(UPG_BULLET_BAG,1))+")",
+    "Bullet Bag ("+std::to_string(CAPACITY(UPG_BULLET_BAG,2))+")",
+    "Bullet Bag ("+std::to_string(CAPACITY(UPG_BULLET_BAG,3))+")",
+    "Quiver ("+std::to_string(CAPACITY(UPG_QUIVER,1))+")",
+    "Big Quiver ("+std::to_string(CAPACITY(UPG_QUIVER,2))+")",
+    "Biggest Quiver ("+std::to_string(CAPACITY(UPG_QUIVER,3))+")",
+    "Bomb Bag ("+std::to_string(CAPACITY(UPG_BOMB_BAG,1))+")",
+    "Big Bomb Bag ("+std::to_string(CAPACITY(UPG_BOMB_BAG,2))+")",
+    "Biggest Bomb Bag ("+std::to_string(CAPACITY(UPG_BOMB_BAG,3))+")",
     "Goron's Bracelet",
     "Silver Gauntlets",
     "Golden Gauntlets",
@@ -278,6 +280,17 @@ std::vector<std::string> itemNames = {
     "Deku Stick Upgrade (30)",
     "Deku Nut Upgrade (30)",
     "Deku Nut Upgrade (40)",
+    "Icon of Magic",
+    "Stamina Boost",
+    "Heart Barrier",
+    "King's Wallet",
+    "Land Mine",
+    "Nayru's Affection",
+    "Din's Crucible",
+    "Ring 1",
+    "Ring 2",
+    "Ring 3",
+    "Bottled Ammo",
 };
 
 std::vector<std::string> questItemNames = {

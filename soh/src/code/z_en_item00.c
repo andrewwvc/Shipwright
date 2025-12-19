@@ -77,6 +77,7 @@ static void* sItemDropTex[] = {
 };
 
 static u8 sItemDropIds[] = {
+    //1
     ITEM00_RUPEE_GREEN,
     ITEM00_RUPEE_BLUE,
     0xFF,
@@ -93,6 +94,7 @@ static u8 sItemDropIds[] = {
     ITEM00_SEEDS,
     0xFF,
     ITEM00_RUPEE_BLUE,
+    //2
     ITEM00_RUPEE_GREEN,
     ITEM00_MAGIC_SMALL,
     ITEM00_RUPEE_GREEN,
@@ -109,6 +111,7 @@ static u8 sItemDropIds[] = {
     0xFF,
     0xFF,
     ITEM00_MAGIC_SMALL,
+    //3
     ITEM00_RUPEE_GREEN,
     ITEM00_RUPEE_GREEN,
     ITEM00_MAGIC_SMALL,
@@ -125,6 +128,7 @@ static u8 sItemDropIds[] = {
     0xFF,
     ITEM00_FLEXIBLE,
     ITEM00_MAGIC_SMALL,
+    //4
     ITEM00_RUPEE_GREEN,
     ITEM00_RUPEE_GREEN,
     ITEM00_NUTS,
@@ -141,6 +145,7 @@ static u8 sItemDropIds[] = {
     0xFF,
     0xFF,
     0xFF,
+    //5
     ITEM00_RUPEE_GREEN,
     ITEM00_RUPEE_GREEN,
     ITEM00_SEEDS,
@@ -157,6 +162,7 @@ static u8 sItemDropIds[] = {
     0xFF,
     0xFF,
     ITEM00_MAGIC_SMALL,
+    //6
     ITEM00_RUPEE_GREEN,
     ITEM00_MAGIC_SMALL,
     ITEM00_RUPEE_GREEN,
@@ -173,6 +179,7 @@ static u8 sItemDropIds[] = {
     ITEM00_SEEDS,
     0xFF,
     ITEM00_MAGIC_SMALL,
+    //7
     ITEM00_RUPEE_GREEN,
     ITEM00_RUPEE_BLUE,
     0xFF,
@@ -189,6 +196,7 @@ static u8 sItemDropIds[] = {
     ITEM00_FLEXIBLE,
     0xFF,
     ITEM00_MAGIC_LARGE,
+    //8
     ITEM00_RUPEE_GREEN,
     0xFF,
     ITEM00_RUPEE_BLUE,
@@ -205,6 +213,7 @@ static u8 sItemDropIds[] = {
     0xFF,
     0xFF,
     ITEM00_MAGIC_LARGE,
+    //9 - Arrows
     ITEM00_ARROWS_LARGE,
     ITEM00_ARROWS_MEDIUM,
     ITEM00_ARROWS_MEDIUM,
@@ -221,6 +230,7 @@ static u8 sItemDropIds[] = {
     ITEM00_ARROWS_MEDIUM,
     ITEM00_ARROWS_LARGE,
     ITEM00_ARROWS_LARGE,
+    //10 - Magic
     ITEM00_MAGIC_LARGE,
     ITEM00_MAGIC_SMALL,
     ITEM00_MAGIC_SMALL,
@@ -237,6 +247,7 @@ static u8 sItemDropIds[] = {
     ITEM00_MAGIC_SMALL,
     ITEM00_MAGIC_SMALL,
     ITEM00_MAGIC_LARGE,
+    //11 - Bombs
     ITEM00_BOMBS_A,
     0xFF,
     ITEM00_BOMBS_A,
@@ -253,6 +264,7 @@ static u8 sItemDropIds[] = {
     ITEM00_BOMBS_A,
     0xFF,
     ITEM00_BOMBS_A,
+    //12 - Hearts
     ITEM00_HEART,
     ITEM00_HEART,
     ITEM00_HEART,
@@ -269,6 +281,7 @@ static u8 sItemDropIds[] = {
     ITEM00_HEART,
     ITEM00_HEART,
     ITEM00_HEART,
+    //13 - Large Rupees
     ITEM00_RUPEE_RED,
     ITEM00_RUPEE_BLUE,
     ITEM00_RUPEE_BLUE,
@@ -285,6 +298,7 @@ static u8 sItemDropIds[] = {
     ITEM00_RUPEE_RED,
     ITEM00_RUPEE_RED,
     ITEM00_RUPEE_RED,
+    //14 - Forest Items
     ITEM00_SEEDS,
     0xFF,
     ITEM00_NUTS,
@@ -301,6 +315,7 @@ static u8 sItemDropIds[] = {
     ITEM00_NUTS,
     ITEM00_HEART,
     ITEM00_SEEDS,
+    //15 - Hearts 'n Seeds
     ITEM00_HEART,
     0xFF,
     ITEM00_SEEDS,
@@ -320,14 +335,117 @@ static u8 sItemDropIds[] = {
 };
 
 static u8 sDropQuantities[] = {
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-    1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1, 3, 3, 3, 1, 1, 3, 1, 3, 1, 1, 1, 3, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 0, 0, 0, 0,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1,
+    3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+    3, 3, 3, 1, 3, 3, 3, 1, 1, 3, 1, 3, 1, 1, 1, 3,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1,
+    0, 0, 0, 0,
 };
+
+static u8 sDropQuantitiesAlt[] = {
+    //Green rupee section
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //9 - Arrows
+    0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //10 - Magic
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //11 - Bombs
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //12 - Hearts
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //13 - Large Rupees
+    0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //14 - Forest Items
+    1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //15 - Hearts 'n Seeds
+    1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //Garbage
+    0, 0, 0, 1
+};
+
+static u8 sDropQuantitiesHearts[] = {
+    //Green rupee section
+    0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //9 - Arrows
+    0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //10 - Magic
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //11 - Bombs
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //12 - Hearts
+    1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
+    //13 - Large Rupees
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //14 - Forest Items
+    1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //15 - Hearts 'n Seeds
+    1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //Garbage
+    0, 0, 0, 1
+};
+
+static u8 sDropQuantitiesGreed[] = {
+    //Green rupee section
+    1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //9 - Arrows
+    0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //10 - Magic
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //11 - Bombs
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //12 - Hearts
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //13 - Large Rupees
+    1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //14 - Forest Items
+    1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //15 - Hearts 'n Seeds
+    0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //Garbage
+    0, 0, 0, 1
+};
+
+static s16 quantityTable[] = {1, 5, 20, //2
+                            16, 5, 1, 1, 1,//7
+                            5, 10, 30,//10
+                            5, 5, 1, //13
+                            12, 24, 5, 1, 112, //18
+                            200, 50, //20
+                            1,1,1,1,1, //25
+                            5 //26
+                            };
 
 void EnItem00_SetupAction(EnItem00* this, EnItem00ActionFunc actionFunc) {
     this->actionFunc = actionFunc;
@@ -345,6 +463,15 @@ void EnItem00_SetObjectDependency(EnItem00* this, PlayState* play, s16 objectInd
     }
 }
 
+s16 isRupee(s16 itemVal) {
+    return (ITEM00_RUPEE_GREEN <= itemVal && itemVal <= ITEM00_RUPEE_RED) || itemVal == ITEM00_RUPEE_PURPLE || itemVal == ITEM00_RUPEE_ORANGE;
+}
+
+s16 isMinor(s16 itemVal) {
+    return (ITEM00_RUPEE_GREEN <= itemVal && itemVal <= ITEM00_ARROWS_SINGLE || ITEM00_ARROWS_SMALL <= itemVal && itemVal <= ITEM00_SEEDS ||
+            ITEM00_FLEXIBLE <= itemVal && itemVal <= ITEM00_RUPEE_PURPLE);
+}
+
 void EnItem00_Init(Actor* thisx, PlayState* play) {
     EnItem00* this = (EnItem00*)thisx;
     s32 pad;
@@ -354,6 +481,7 @@ void EnItem00_Init(Actor* thisx, PlayState* play) {
     this->randoCheck = (RandomizerCheck)RC_UNKNOWN_CHECK;
     this->itemEntry = (GetItemEntry)GET_ITEM_NONE;
     s16 spawnParam8000 = this->actor.params & 0x8000;
+    s16 spawnParam4000 = this->actor.params & 0x4000;
     s32 pad1;
 
     this->ogParams = this->actor.params;
@@ -362,7 +490,8 @@ void EnItem00_Init(Actor* thisx, PlayState* play) {
 
     this->actor.params &= 0xFF;
 
-    if (GameInteractor_Should(VB_ITEM00_DESPAWN, Flags_GetCollectible(play, this->collectibleFlag), this)) {
+    //if (GameInteractor_Should(VB_ITEM00_DESPAWN, Flags_GetCollectible(play, this->collectibleFlag), this)) {
+    if (!(isRupee(this->actor.params) && usingBorrowedWallet()) && Flags_GetCollectible(play, this->collectibleFlag)) {
         Actor_Kill(&this->actor);
         return;
     }
@@ -392,6 +521,12 @@ void EnItem00_Init(Actor* thisx, PlayState* play) {
             yOffset = 650.0f;
             Actor_SetScale(&this->actor, 0.02f);
             this->scale = 0.02f;
+            if (play->sceneNum == 0x3E && play->roomCtx.curRoom.num == 0x07) {
+                this->actor.flags |= ACTOR_FLAG_REACT_TO_LENS;
+            }
+            if (spawnParam4000) {
+                Actor_SetScale(&this->actor, 0.00f);
+            }
             break;
         case ITEM00_HEART:
             this->actor.home.rot.z = Rand_CenteredFloat(65535.0f);
@@ -401,6 +536,12 @@ void EnItem00_Init(Actor* thisx, PlayState* play) {
             break;
         case ITEM00_HEART_CONTAINER:
             yOffset = 430.0f;
+            this->unk_158 = 0;
+            Actor_SetScale(&this->actor, 0.02f);
+            this->scale = 0.02f;
+            break;
+        case ITEM00_DEFENSE_HEART:
+            yOffset = 830.0f;
             this->unk_158 = 0;
             Actor_SetScale(&this->actor, 0.02f);
             this->scale = 0.02f;
@@ -477,6 +618,17 @@ void EnItem00_Init(Actor* thisx, PlayState* play) {
             yOffset = 320.0f;
             Actor_SetScale(&this->actor, 0.03f);
             this->scale = 0.03f;
+        case ITEM00_MAX:
+            Actor_Kill(&this->actor);
+            return;
+            break;
+        default:
+            if (ITEM00_RING_0 <= this->actor.params && this->actor.params <= ITEM00_RING_LAST) {
+                this->unk_158 = 0;
+                Actor_SetScale(&this->actor, 0.03f);
+                this->scale = 0.03f;
+                yOffset = 200.0f;
+            }
             break;
         case ITEM00_SOH_GIVE_ITEM_ENTRY:
         case ITEM00_SOH_GIVE_ITEM_ENTRY_GI:
@@ -569,6 +721,7 @@ void EnItem00_Init(Actor* thisx, PlayState* play) {
             break;
         case ITEM00_HEART_PIECE:
         case ITEM00_HEART_CONTAINER:
+        case ITEM00_DEFENSE_HEART:
         case ITEM00_SHIELD_DEKU:
         case ITEM00_SHIELD_HYLIAN:
         case ITEM00_TUNIC_ZORA:
@@ -596,8 +749,20 @@ void EnItem00_Destroy(Actor* thisx, PlayState* play) {
 
 void func_8001DFC8(EnItem00* this, PlayState* play) {
     if ((this->actor.params <= ITEM00_RUPEE_RED) || ((this->actor.params == ITEM00_HEART) && (this->unk_15A < 0)) ||
-        (this->actor.params == ITEM00_HEART_PIECE)) {
+            (this->actor.params == ITEM00_HEART_PIECE) || (this->actor.params == ITEM00_DEFENSE_HEART)) {
         this->actor.shape.rot.y += 960;
+    } else if (ITEM00_RING_0 <= this->actor.params && this->actor.params <= ITEM00_RING_LAST) {
+        if (this->unk_15A >= 0) {
+            f32 sinVal = ABS(Math_SinS(this->actor.shape.rot.x));
+            f32 rotMultiplier = (1+sinVal*sinVal);
+            s16 yRot = (ABS(this->actor.shape.rot.x) == 0x4000) ? 0 : 1000*SQ(rotMultiplier*rotMultiplier);
+            this->actor.shape.rot.y += yRot;
+            this->actor.shape.rot.z -= yRot*sinVal*0.99f;
+            Math_SmoothStepToS(&this->actor.world.rot.x, 0, 2, 2500, 500);
+            Math_SmoothStepToS(&this->actor.shape.rot.x, this->actor.world.rot.x - 0x4000, 2, 100, 50);
+        } else {
+            this->actor.shape.rot.y += 960;
+        }
     } else {
         if ((this->actor.params >= ITEM00_SHIELD_DEKU) && (this->actor.params < ITEM00_BOMBS_SPECIAL)) {
             if (this->unk_15A == -1) {
@@ -623,14 +788,16 @@ void func_8001DFC8(EnItem00* this, PlayState* play) {
 
     if (this->unk_154 == 0) {
         if ((this->actor.params != ITEM00_SMALL_KEY) && (this->actor.params != ITEM00_HEART_PIECE) &&
-            (this->actor.params != ITEM00_HEART_CONTAINER)) {
+            (this->actor.params != ITEM00_HEART_CONTAINER) && (this->actor.params  != ITEM00_DEFENSE_HEART) &&
+            (this->actor.params < ITEM00_RING_0 || ITEM00_RING_LAST < this->actor.params)) {
             this->unk_154 = -1;
         }
     }
 
     if (this->unk_15A == 0) {
         if ((this->actor.params != ITEM00_SMALL_KEY) && (this->actor.params != ITEM00_HEART_PIECE) &&
-            (this->actor.params != ITEM00_HEART_CONTAINER)) {
+            (this->actor.params != ITEM00_HEART_CONTAINER) && (this->actor.params  != ITEM00_DEFENSE_HEART) &&
+            (this->actor.params < ITEM00_RING_0 || ITEM00_RING_LAST < this->actor.params)) {
             Actor_Kill(&this->actor);
         }
     }
@@ -783,7 +950,7 @@ void EnItem00_Update(Actor* thisx, PlayState* play) {
 
     if (this->unk_15A > 0) {
         this->unk_15A--;
-        if (CVarGetInteger(CVAR_CHEAT("DropsDontDie"), 0) && (this->unk_154 <= 0)) {
+        if ((CVarGetInteger(CVAR_CHEAT("DropsDontDie"), 0) || (Ring_Get_Equiped() == RI_RING_OF_PERSISTENCE)) && (this->unk_154 <= 0)) {
             this->unk_15A++;
         }
     }
@@ -847,12 +1014,19 @@ void EnItem00_Update(Actor* thisx, PlayState* play) {
         return;
     }
 
-    if (!((this->actor.xzDistToPlayer <= 30.0f) && (this->actor.yDistToPlayer >= -50.0f) &&
+    s16 ringEquiped = Ring_Get_Equiped();
+    s16 repulsionRingEquiped = (ringEquiped == RI_REPULSION_RING);
+    f32 itemRange = (ringEquiped == RI_ATTRACTION_RING) ? 45.0f : repulsionRingEquiped ? 12.0f : 30.0f;
+
+    if (!((this->actor.xzDistToPlayer <= itemRange) && (this->actor.yDistToPlayer >= -50.0f) &&
           (this->actor.yDistToPlayer <= 50.0f))) {
         if (!Actor_HasParent(&this->actor, play)) {
             return;
         }
     }
+
+    //Allows items that have been picked up to destroy themselves even after the item count increases
+    repulsionRingEquiped = repulsionRingEquiped && !Actor_HasParent(&this->actor, play);
 
     if (play->gameOverCtx.state != GAMEOVER_INACTIVE) {
         return;
@@ -862,6 +1036,15 @@ void EnItem00_Update(Actor* thisx, PlayState* play) {
         return;
     }
 
+    if (repulsionRingEquiped && isRupee(this->actor.params) && Rupees_GetDisplayNum()+quantityTable[this->actor.params] > Wallet_Capacity_Current()) {
+        return;
+    }
+
+    if (repulsionRingEquiped && ITEM00_ARROWS_SMALL <= this->actor.params && this->actor.params <= ITEM00_ARROWS_LARGE && quantityTable[this->actor.params] + AMMO(ITEM_BOW) > CUR_CAPACITY(UPG_QUIVER)) {
+        return;
+    }
+
+    s32 resourceTimeMultiplier = 1;
     switch (this->actor.params) {
         case ITEM00_RUPEE_GREEN:
             Item_Give(play, ITEM_RUPEE_GREEN);
@@ -871,20 +1054,33 @@ void EnItem00_Update(Actor* thisx, PlayState* play) {
             break;
         case ITEM00_RUPEE_RED:
             Item_Give(play, ITEM_RUPEE_RED);
+            resourceTimeMultiplier = 2;
             break;
         case ITEM00_RUPEE_PURPLE:
             Item_Give(play, ITEM_RUPEE_PURPLE);
+            resourceTimeMultiplier = 3;
             break;
         case ITEM00_RUPEE_ORANGE:
             Item_Give(play, ITEM_RUPEE_GOLD);
+            resourceTimeMultiplier = 4;
             break;
         case ITEM00_STICK:
+            if (repulsionRingEquiped && gSaveContext.inventory.items[ITEM_STICK] != ITEM_NONE) {
+                if (quantityTable[this->actor.params] + AMMO(ITEM_STICK) > CUR_CAPACITY(UPG_STICKS))
+                    return;
+            }
             getItemId = GI_STICKS_1;
             break;
         case ITEM00_NUTS:
+            if (repulsionRingEquiped && gSaveContext.inventory.items[ITEM_NUT] != ITEM_NONE) {
+                if (quantityTable[this->actor.params] + AMMO(ITEM_NUT) > CUR_CAPACITY(UPG_NUTS))
+                    return;
+            }
             getItemId = GI_NUTS_5;
             break;
         case ITEM00_HEART:
+            if (repulsionRingEquiped && quantityTable[ITEM00_HEART] + gSaveContext.health > gSaveContext.healthCapacity)
+                return;
             Item_Give(play, ITEM_HEART);
             break;
         case ITEM00_FLEXIBLE:
@@ -892,6 +1088,8 @@ void EnItem00_Update(Actor* thisx, PlayState* play) {
             break;
         case ITEM00_BOMBS_A:
         case ITEM00_BOMBS_B:
+            if (repulsionRingEquiped && quantityTable[this->actor.params] + AMMO(ITEM_BOMB) > CUR_CAPACITY(UPG_BOMB_BAG))
+                return;
             Item_Give(play, ITEM_BOMBS_5);
             break;
         case ITEM00_ARROWS_SINGLE:
@@ -907,6 +1105,8 @@ void EnItem00_Update(Actor* thisx, PlayState* play) {
             Item_Give(play, ITEM_ARROWS_LARGE);
             break;
         case ITEM00_SEEDS:
+            if (repulsionRingEquiped && quantityTable[this->actor.params] + AMMO(ITEM_SLINGSHOT) > CUR_CAPACITY(UPG_BULLET_BAG))
+                return;
             getItemId = GI_SEEDS_5;
             break;
         case ITEM00_SMALL_KEY:
@@ -918,10 +1118,17 @@ void EnItem00_Update(Actor* thisx, PlayState* play) {
         case ITEM00_HEART_CONTAINER:
             getItemId = GI_HEART_CONTAINER;
             break;
+        case ITEM00_DEFENSE_HEART:
+            getItemId = GI_DEFENSE_HEART;
+            break;
         case ITEM00_MAGIC_LARGE:
+            if (repulsionRingEquiped && Flags_GetInfTable(INFTABLE_198) && quantityTable[this->actor.params] + gSaveContext.magic >= gSaveContext.magicCapacity && gSaveContext.magicState == MAGIC_STATE_IDLE)
+                return;
             getItemId = GI_MAGIC_LARGE;
             break;
         case ITEM00_MAGIC_SMALL:
+            if (repulsionRingEquiped && Flags_GetInfTable(INFTABLE_198) && quantityTable[this->actor.params] + gSaveContext.magic >= gSaveContext.magicCapacity && gSaveContext.magicState == MAGIC_STATE_IDLE)
+                return;
             getItemId = GI_MAGIC_SMALL;
             break;
         case ITEM00_SHIELD_DEKU:
@@ -941,7 +1148,15 @@ void EnItem00_Update(Actor* thisx, PlayState* play) {
         case ITEM00_BOMBCHU:
             Item_Give(play, ITEM_BOMBCHUS_5);
             break;
+        default:
+            if (ITEM00_RING_0 <= this->actor.params && this->actor.params <= ITEM00_RING_LAST) {
+                resourceTimeMultiplier = 3;
+                getItemId = GI_RING + this->actor.params - ITEM00_RING_0;
+            }
+            break;
     }
+
+    insertSpawnResource(this->actor.entryNum, DEFAULT_RESOURCE_TIME*resourceTimeMultiplier);
 
     params = &this->actor.params;
 
@@ -952,6 +1167,7 @@ void EnItem00_Update(Actor* thisx, PlayState* play) {
     switch (*params) {
         case ITEM00_HEART_PIECE:
         case ITEM00_HEART_CONTAINER:
+        case ITEM00_DEFENSE_HEART:
         case ITEM00_SMALL_KEY:
         case ITEM00_SHIELD_DEKU:
         case ITEM00_SHIELD_HYLIAN:
@@ -962,6 +1178,14 @@ void EnItem00_Update(Actor* thisx, PlayState* play) {
                 Actor_Kill(&this->actor);
             }
             return;
+        default:
+            if (ITEM00_RING_0 <= this->actor.params && this->actor.params <= ITEM00_RING_LAST) {
+                if (Actor_HasParent(&this->actor, play)) {
+                    Flags_SetCollectible(play, this->collectibleFlag);
+                    Actor_Kill(&this->actor);
+                }
+                return;
+            }
     }
 
     if ((*params <= ITEM00_RUPEE_RED) || (*params == ITEM00_RUPEE_ORANGE)) {
@@ -1052,6 +1276,7 @@ void EnItem00_Draw(Actor* thisx, PlayState* play) {
                     EnItem00_DrawHeartPiece(this, play);
                 }
                 break;
+            case ITEM00_DEFENSE_HEART:
             case ITEM00_HEART_CONTAINER:
                 EnItem00_DrawHeartContainer(this, play);
                 break;
@@ -1176,6 +1401,13 @@ void EnItem00_Draw(Actor* thisx, PlayState* play) {
                 GetItem_Draw(play, GID_TUNIC_GORON);
                 break;
             case ITEM00_FLEXIBLE:
+                break;
+            default:
+                if (ITEM00_RING_0 <= this->actor.params && this->actor.params <= ITEM00_RING_LAST) {
+                    mtxScale = 8.0f;
+                    Matrix_Scale(mtxScale, mtxScale, mtxScale, MTXMODE_APPLY);
+                    GetItem_Draw(play, GID_RING_0 + this->actor.params - ITEM00_RING_0);
+                }
                 break;
         }
     }
@@ -1573,6 +1805,8 @@ s16 func_8001F404(s16 dropId) {
 
 // External functions used by other actors to drop collectibles, which usually results in spawning an En_Item00 actor.
 
+#define HEART_DROPS_DISABLED (CVarGetInteger(CVAR_ENHANCEMENT("NoHeartDrops"), 0) || (Ring_Get_Equiped() == RI_GREED_RING))
+
 EnItem00* Item_DropCollectible(PlayState* play, Vec3f* spawnPos, s16 params) {
     s32 pad[2];
     EnItem00* spawnedActor = NULL;
@@ -1582,9 +1816,8 @@ EnItem00* Item_DropCollectible(PlayState* play, Vec3f* spawnPos, s16 params) {
 
     params &= 0x3FFF;
 
-    if ((params & 0x00FF) == ITEM00_HEART && CVarGetInteger(CVAR_ENHANCEMENT("NoHeartDrops"), 0)) {
-        return NULL;
-    }
+    if ((params & 0x00FF) == ITEM00_HEART && HEART_DROPS_DISABLED) { return NULL; }
+    if (isRupee(params & 0x00FF) && (Ring_Get_Equiped() == RI_LOVE_RING)) { return NULL; }
 
     if (((params & 0x00FF) == ITEM00_FLEXIBLE) && !param4000) {
         // TODO: Prevent the cast to EnItem00 here since this is a different actor (En_Elf)
@@ -1601,16 +1834,24 @@ EnItem00* Item_DropCollectible(PlayState* play, Vec3f* spawnPos, s16 params) {
             spawnedActor = (EnItem00*)Actor_Spawn(&play->actorCtx, play, ACTOR_EN_ITEM00, spawnPos->x, spawnPos->y,
                                                   spawnPos->z, 0, 0, 0, params | param8000 | param3F00, true);
             if ((spawnedActor != NULL) && !param8000) {
+                Player* player = GET_PLAYER(play);
+                f32 x, z;
+                s16 angle;
+                z = spawnPos->z - player->actor.world.pos.z;
+                x = spawnPos->x - player->actor.world.pos.x;
+                angle = Math_Atan2S(z, x);
                 spawnedActor->actor.velocity.y = !param4000 ? 8.0f : -2.0f;
                 spawnedActor->actor.speedXZ = 2.0f;
                 spawnedActor->actor.gravity = -0.9f;
-                spawnedActor->actor.world.rot.y = Rand_CenteredFloat(65536.0f);
+                spawnedActor->actor.world.rot.y = ((Ring_Get_Equiped() == RI_REPULSION_RING)) ? angle : Rand_CenteredFloat(65536.0f);
                 Actor_SetScale(&spawnedActor->actor, 0.0f);
                 EnItem00_SetupAction(spawnedActor, func_8001E304);
                 spawnedActor->unk_15A = 220;
                 if ((spawnedActor->actor.params != ITEM00_SMALL_KEY) &&
                     (spawnedActor->actor.params != ITEM00_HEART_PIECE) &&
-                    (spawnedActor->actor.params != ITEM00_HEART_CONTAINER)) {
+                    (spawnedActor->actor.params != ITEM00_HEART_CONTAINER) &&
+                    (spawnedActor->actor.params != ITEM00_DEFENSE_HEART) &&
+                    (spawnedActor->actor.params < ITEM00_RING_0 || ITEM00_RING_LAST < spawnedActor->actor.params)) {
                     spawnedActor->actor.room = -1;
                 }
                 spawnedActor->actor.flags |= ACTOR_FLAG_UPDATE_CULLING_DISABLED;
@@ -1629,10 +1870,9 @@ EnItem00* Item_DropCollectible2(PlayState* play, Vec3f* spawnPos, s16 params) {
 
     params &= 0x3FFF;
 
-    if ((params & 0x00FF) == ITEM00_HEART && CVarGetInteger(CVAR_ENHANCEMENT("NoHeartDrops"), 0)) {
-        return NULL;
-    }
-
+    if ((params & 0x00FF) == ITEM00_HEART && HEART_DROPS_DISABLED) { return NULL; }
+    if (isRupee(params & 0x00FF) && (Ring_Get_Equiped() == RI_LOVE_RING)) { return NULL; }
+    
     if (((params & 0x00FF) == ITEM00_FLEXIBLE) && !param4000) {
         // TODO: Prevent the cast to EnItem00 here since this is a different actor (En_Elf)
         spawnedActor = (EnItem00*)Actor_Spawn(&play->actorCtx, play, ACTOR_EN_ELF, spawnPos->x, spawnPos->y + 40.0f,
@@ -1645,10 +1885,17 @@ EnItem00* Item_DropCollectible2(PlayState* play, Vec3f* spawnPos, s16 params) {
             spawnedActor = (EnItem00*)Actor_Spawn(&play->actorCtx, play, ACTOR_EN_ITEM00, spawnPos->x, spawnPos->y,
                                                   spawnPos->z, 0, 0, 0, params | param8000 | param3F00, true);
             if ((spawnedActor != NULL) && !param8000) {
+                Player* player = GET_PLAYER(play);
+                f32 x, z;
+                s16 angle;
+                z = spawnPos->z - player->actor.world.pos.z;
+                x = spawnPos->x - player->actor.world.pos.x;
+                angle = Math_Atan2S(z, x);
+
                 spawnedActor->actor.velocity.y = 0.0f;
                 spawnedActor->actor.speedXZ = 0.0f;
                 spawnedActor->actor.gravity = param4000 ? 0.0f : -0.9f;
-                spawnedActor->actor.world.rot.y = Rand_CenteredFloat(65536.0f);
+                spawnedActor->actor.world.rot.y = ((Ring_Get_Equiped() == RI_REPULSION_RING)) ? angle : Rand_CenteredFloat(65536.0f);
                 spawnedActor->actor.flags |= ACTOR_FLAG_UPDATE_CULLING_DISABLED;
             }
         }
@@ -1657,7 +1904,7 @@ EnItem00* Item_DropCollectible2(PlayState* play, Vec3f* spawnPos, s16 params) {
     return spawnedActor;
 }
 
-void Item_DropCollectibleRandom(PlayState* play, Actor* fromActor, Vec3f* spawnPos, s16 params) {
+void Item_DropCollectibleRandom1(PlayState* play, Actor* fromActor, Vec3f* spawnPos, s16 params, s16 mod) {
     s32 pad;
     EnItem00* spawnedActor;
     s16 dropQuantity;
@@ -1697,7 +1944,7 @@ void Item_DropCollectibleRandom(PlayState* play, Actor* fromActor, Vec3f* spawnP
                 dropTableIndex = 1;
             }
         }
-        if (fromActor->dropFlag & 0x20) {
+        if (fromActor->dropFlag & 0x20 && (Rand_ZeroOne() <= 0.01f)) {
             dropId = ITEM00_RUPEE_PURPLE;
         } else {
             dropId = sItemDropIds[params + dropTableIndex];
@@ -1713,13 +1960,11 @@ void Item_DropCollectibleRandom(PlayState* play, Actor* fromActor, Vec3f* spawnP
             EffectSsDeadSound_SpawnStationary(play, spawnPos, NA_SE_EV_BUTTERFRY_TO_FAIRY, true,
                                               DEADSOUND_REPEAT_MODE_OFF, 40);
             return;
-        } else if (gSaveContext.health <= 0x30 &&
-                   !CVarGetInteger(CVAR_ENHANCEMENT("NoHeartDrops"), 0)) { // 3 hearts or less
+        } else if (gSaveContext.health <= 0x30 && !HEART_DROPS_DISABLED) { // 3 hearts or less
             params = 0xB * 0x10;
             dropTableIndex = 0x0;
             dropId = ITEM00_HEART;
-        } else if (gSaveContext.health <= 0x50 &&
-                   !CVarGetInteger(CVAR_ENHANCEMENT("NoHeartDrops"), 0)) { // 5 hearts or less
+        } else if (gSaveContext.health <= 0x50 && !HEART_DROPS_DISABLED) { // 5 hearts or less
             params = 0xA * 0x10;
             dropTableIndex = 0x0;
             dropId = ITEM00_HEART;
@@ -1739,11 +1984,11 @@ void Item_DropCollectibleRandom(PlayState* play, Actor* fromActor, Vec3f* spawnP
             params = 0xA * 0x10;
             dropTableIndex = 0x0;
             dropId = ITEM00_ARROWS_MEDIUM;
-        } else if (AMMO(ITEM_BOMB) < 6) {
+        } else if (AMMO(ITEM_BOMB) < 2) {
             params = 0xD * 0x10;
             dropTableIndex = 0x0;
             dropId = ITEM00_BOMBS_A;
-        } else if (gSaveContext.rupees < 11) {
+        } else if (Rupees_GetDisplayNum() < 11) {
             params = 0xA * 0x10;
             dropTableIndex = 0x0;
             dropId = ITEM00_RUPEE_RED;
@@ -1752,11 +1997,26 @@ void Item_DropCollectibleRandom(PlayState* play, Actor* fromActor, Vec3f* spawnP
         }
     }
 
-    if (dropId != 0xFF && (!CVarGetInteger(CVAR_ENHANCEMENT("NoHeartDrops"), 0) || dropId != ITEM00_HEART)) {
-        dropQuantity = sDropQuantities[params + dropTableIndex];
+    f32 specialRand = Rand_ZeroOne();
+    if ((Ring_Get_Equiped() == RI_GREED_RING) && isMinor(dropId) && !isRupee(dropId) && specialRand < 0.2f) {
+        if (specialRand < 0.02f)
+            dropId = ITEM00_RUPEE_BLUE;
+        else
+            dropId = ITEM00_RUPEE_GREEN;
+    }
+
+    if (dropId != 0xFF && (!HEART_DROPS_DISABLED || dropId != ITEM00_HEART) && (!(Ring_Get_Equiped() == RI_LOVE_RING) || !isRupee(dropId))) {
+        //Provide the regular variety of drops when in Kokiri Village prior to the Deku Tree's death, change this afterwards to reduced drops
+        if (mod)
+            dropQuantity = (Ring_Get_Equiped() == RI_LOVE_RING) ? sDropQuantitiesHearts[params + dropTableIndex] : (Ring_Get_Equiped() == RI_GREED_RING)? sDropQuantitiesGreed[params + dropTableIndex] : !(DEKU_TREE_DEAD) ? sDropQuantities[params + dropTableIndex] : sDropQuantitiesAlt[params + dropTableIndex];
+        else
+            dropQuantity = sDropQuantities[params + dropTableIndex];
         while (dropQuantity > 0) {
             if (!param8000) {
                 dropId = func_8001F404(dropId);
+                if ((Ring_Get_Equiped() == RI_LOVE_RING) && isMinor(dropId) && !isRupee(dropId) && Rand_ZeroOne() < 0.2f) {
+                    dropId = ITEM00_HEART;
+                }
                 if (dropId != 0xFF) {
                     spawnedActor = (EnItem00*)Actor_Spawn(&play->actorCtx, play, ACTOR_EN_ITEM00, spawnPos->x,
                                                           spawnPos->y, spawnPos->z, 0, 0, 0, dropId, true);
@@ -1764,13 +2024,15 @@ void Item_DropCollectibleRandom(PlayState* play, Actor* fromActor, Vec3f* spawnP
                         spawnedActor->actor.velocity.y = 8.0f;
                         spawnedActor->actor.speedXZ = 2.0f;
                         spawnedActor->actor.gravity = -0.9f;
-                        spawnedActor->actor.world.rot.y = Rand_ZeroOne() * 40000.0f;
+                        spawnedActor->actor.world.rot.y = ((Ring_Get_Equiped() == RI_REPULSION_RING)) && fromActor ? -fromActor->yawTowardsPlayer : Rand_ZeroOne() * 40000.0f;
                         Actor_SetScale(&spawnedActor->actor, 0.0f);
                         EnItem00_SetupAction(spawnedActor, func_8001E304);
                         spawnedActor->actor.flags |= ACTOR_FLAG_UPDATE_CULLING_DISABLED;
                         if ((spawnedActor->actor.params != ITEM00_SMALL_KEY) &&
                             (spawnedActor->actor.params != ITEM00_HEART_PIECE) &&
-                            (spawnedActor->actor.params != ITEM00_HEART_CONTAINER)) {
+                            (spawnedActor->actor.params != ITEM00_HEART_CONTAINER) &&
+                            (spawnedActor->actor.params != ITEM00_DEFENSE_HEART) &&
+                            (spawnedActor->actor.params < ITEM00_RING_0 || ITEM00_RING_LAST < spawnedActor->actor.params)) {
                             spawnedActor->actor.room = -1;
                         }
                         spawnedActor->unk_15A = 220;
@@ -1786,4 +2048,21 @@ void Item_DropCollectibleRandom(PlayState* play, Actor* fromActor, Vec3f* spawnP
             dropQuantity--;
         }
     }
+}
+
+void Item_DropCollectibleRandomBasic(PlayState* play, Actor* fromActor, Vec3f* spawnPos, s16 params, s16 specialItem, f32 specialChance) {
+    if (Rand_ZeroOne() < 0.25f)
+        Item_DropCollectibleRandom1(play, fromActor, spawnPos, params, 0);
+    else if (Rand_ZeroOne() < specialChance) {
+        Item_DropCollectible(play, spawnPos, specialItem);
+    }
+}
+
+void Item_DropCollectibleRandom(PlayState* play, Actor* fromActor, Vec3f* spawnPos, s16 params) {
+    Item_DropCollectibleRandomBasic(play, fromActor, spawnPos, params, ITEM00_RUPEE_GREEN, (Ring_Get_Equiped() == RI_GREED_RING) ? 0.3f : 0.23f);
+}
+
+void Item_DropCollectibleRandomSmall(PlayState* play, Actor* fromActor, Vec3f* spawnPos, s16 params) {
+    if (Rand_ZeroOne() < 0.5f)
+        Item_DropCollectibleRandom1(play, fromActor, spawnPos, params, 1);
 }

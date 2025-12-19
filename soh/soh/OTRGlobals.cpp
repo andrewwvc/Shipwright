@@ -138,10 +138,16 @@ void SoH_ProcessDroppedFiles(std::string filePath);
 OTRGlobals* OTRGlobals::Instance;
 SaveManager* SaveManager::Instance;
 CustomMessageManager* CustomMessageManager::Instance;
+TextIDAllocator* TextIDAllocator::Instance;
 ItemTableManager* ItemTableManager::Instance;
 GameInteractor* GameInteractor::Instance;
 AudioCollection* AudioCollection::Instance;
 SpeechSynthesizer* SpeechSynthesizer::Instance;
+std::unordered_map<uint16_t, uint16_t>* textIDSubstitutionTable;
+std::map<ActorSpawnResource,int> UsedResources = {};
+std::map<ActorSpawnResource,int> AlternateResourcePool = {};
+std::map<int,ActorSpawnResource> TempResourceEntries = {};
+std::map<ActorSpawnResource,int> UsedPinkSpirits = {};
 
 extern "C" char** cameraStrings;
 std::vector<std::shared_ptr<std::string>> cameraStdStrings;
@@ -536,6 +542,8 @@ uint32_t OTRGlobals::GetInterpolationFPS() {
     return CVarGetInteger(CVAR_SETTING("InterpolationFPS"), 20);
 }
 
+extern "C" void createFishString(int num);
+extern "C" void createRupeeScoreString(int score);
 extern "C" void OTRMessage_Init();
 extern "C" void AudioMgr_CreateNextAudioBuffer(s16* samples, u32 num_samples);
 extern "C" void AudioPlayer_Play(const uint8_t* buf, uint32_t len);
@@ -634,7 +642,7 @@ extern "C" void VanillaItemTable_Init() {
         GET_ITEM(ITEM_POTION_RED,       OBJECT_GI_LIQUID,        GID_POTION_RED,       0x43, 0x80, CHEST_ANIM_LONG,  ITEM_CATEGORY_JUNK,            MOD_NONE, GI_POTION_RED),
         GET_ITEM(ITEM_POTION_GREEN,     OBJECT_GI_LIQUID,        GID_POTION_GREEN,     0x44, 0x80, CHEST_ANIM_LONG,  ITEM_CATEGORY_JUNK,            MOD_NONE, GI_POTION_GREEN),
         GET_ITEM(ITEM_POTION_BLUE,      OBJECT_GI_LIQUID,        GID_POTION_BLUE,      0x45, 0x80, CHEST_ANIM_LONG,  ITEM_CATEGORY_JUNK,            MOD_NONE, GI_POTION_BLUE),
-        GET_ITEM(ITEM_FAIRY,            OBJECT_GI_BOTTLE,        GID_BOTTLE,           0x46, 0x80, CHEST_ANIM_LONG,  ITEM_CATEGORY_JUNK,            MOD_NONE, GI_FAIRY),
+        GET_ITEM(ITEM_FAIRY,            OBJECT_GI_SOUL,          GID_FAIRY,            0x46, 0x80, CHEST_ANIM_LONG,  ITEM_CATEGORY_JUNK,            MOD_NONE, GI_FAIRY),
         GET_ITEM(ITEM_MILK_BOTTLE,      OBJECT_GI_MILK,          GID_MILK,             0x98, 0x80, CHEST_ANIM_LONG,  ITEM_CATEGORY_MAJOR,           MOD_NONE, GI_MILK_BOTTLE),
         GET_ITEM(ITEM_LETTER_RUTO,      OBJECT_GI_BOTTLE_LETTER, GID_LETTER_RUTO,      0x99, 0x80, CHEST_ANIM_LONG,  ITEM_CATEGORY_MAJOR,           MOD_NONE, GI_LETTER_RUTO),
         GET_ITEM(ITEM_BEAN,             OBJECT_GI_BEAN,          GID_BEAN,             0x48, 0x80, CHEST_ANIM_SHORT, ITEM_CATEGORY_MAJOR,           MOD_NONE, GI_BEAN),
@@ -679,8 +687,8 @@ extern "C" void VanillaItemTable_Init() {
         GET_ITEM(ITEM_HEART_CONTAINER,  OBJECT_GI_HEARTS,        GID_HEART_CONTAINER,  0xC6, 0x80, CHEST_ANIM_LONG,  ITEM_CATEGORY_LESSER,          MOD_NONE, GI_HEART_CONTAINER),
         GET_ITEM(ITEM_HEART_PIECE_2,    OBJECT_GI_HEARTS,        GID_HEART_PIECE,      0xC2, 0x80, CHEST_ANIM_LONG,  ITEM_CATEGORY_LESSER,          MOD_NONE, GI_HEART_PIECE),
         GET_ITEM(ITEM_KEY_BOSS,         OBJECT_GI_BOSSKEY,       GID_KEY_BOSS,         0xC7, 0x80, CHEST_ANIM_LONG,  ITEM_CATEGORY_BOSS_KEY,        MOD_NONE, GI_KEY_BOSS),
-        GET_ITEM(ITEM_COMPASS,          OBJECT_GI_COMPASS,       GID_COMPASS,          0x67, 0x80, CHEST_ANIM_LONG,  ITEM_CATEGORY_LESSER,          MOD_NONE, GI_COMPASS),
-        GET_ITEM(ITEM_DUNGEON_MAP,      OBJECT_GI_MAP,           GID_DUNGEON_MAP,      0x66, 0x80, CHEST_ANIM_LONG,  ITEM_CATEGORY_LESSER,          MOD_NONE, GI_MAP),
+        GET_ITEM(ITEM_COMPASS,          OBJECT_GI_COMPASS,       GID_COMPASS,          0x67, 0x80, CHEST_ANIM_SHORT,  ITEM_CATEGORY_LESSER,          MOD_NONE, GI_COMPASS),
+        GET_ITEM(ITEM_DUNGEON_MAP,      OBJECT_GI_MAP,           GID_DUNGEON_MAP,      0x66, 0x80, CHEST_ANIM_SHORT,  ITEM_CATEGORY_LESSER,          MOD_NONE, GI_MAP),
         GET_ITEM(ITEM_KEY_SMALL,        OBJECT_GI_KEY,           GID_KEY_SMALL,        0x60, 0x80, CHEST_ANIM_SHORT, ITEM_CATEGORY_SMALL_KEY,       MOD_NONE, GI_KEY_SMALL),
         GET_ITEM(ITEM_MAGIC_SMALL,      OBJECT_GI_MAGICPOT,      GID_MAGIC_SMALL,      0x52, 0x6F, CHEST_ANIM_SHORT, ITEM_CATEGORY_JUNK,            MOD_NONE, GI_MAGIC_SMALL),
         GET_ITEM(ITEM_MAGIC_LARGE,      OBJECT_GI_MAGICPOT,      GID_MAGIC_LARGE,      0x52, 0x6E, CHEST_ANIM_SHORT, ITEM_CATEGORY_JUNK,            MOD_NONE, GI_MAGIC_LARGE),
@@ -741,6 +749,34 @@ extern "C" void VanillaItemTable_Init() {
         GET_ITEM(ITEM_BULLET_BAG_50,    OBJECT_GI_DEKUPOUCH,     GID_BULLET_BAG_50,    0x6C, 0x80, CHEST_ANIM_LONG,  ITEM_CATEGORY_LESSER,          MOD_NONE, GI_BULLET_BAG_50),
         GET_ITEM_NONE,
         GET_ITEM_NONE,
+        GET_ITEM(ITEM_EXTRA_MAGIC,      OBJECT_GI_MAGICPOT,      GID_MAGIC_LARGE,      0x810, 0x80, CHEST_ANIM_LONG, ITEM_CATEGORY_LESSER,          MOD_NONE, GI_EXTRA_MAGIC),
+        GET_ITEM(ITEM_EPONA_BOOST,      OBJECT_GI_BUTTERFLY,     GID_BUTTERFLY,        0x811, 0x80, CHEST_ANIM_LONG, ITEM_CATEGORY_LESSER,          MOD_NONE, GI_EPONA_BOOST),
+        GET_ITEM(ITEM_DEFENSE_HEART,    OBJECT_GI_HEARTS,        GID_HEART_CONTAINER,  0x812, 0x80, CHEST_ANIM_LONG, ITEM_CATEGORY_LESSER,          MOD_NONE, GI_DEFENSE_HEART),
+        GET_ITEM(ITEM_WALLET_KING,      OBJECT_GI_PURSE,         GID_WALLET_GIANT,     0x813, 0x80, CHEST_ANIM_LONG, ITEM_CATEGORY_MAJOR,           MOD_NONE, GI_WALLET_KING),
+        GET_ITEM(ITEM_LANDMINE,         OBJECT_GI_BOMB_2,        GID_LANDMINE,         0x814, 0x80, CHEST_ANIM_LONG, ITEM_CATEGORY_MAJOR,           MOD_NONE, GI_LANDMINE),
+        GET_ITEM(ITEM_NAYRUS_AFFECTION, OBJECT_GI_GODDESS,       GID_NAYRUS_LOVE,      0x815, 0x80, CHEST_ANIM_LONG, ITEM_CATEGORY_MAJOR,           MOD_NONE, GI_NAYRUS_AFFECTION),
+        GET_ITEM(ITEM_DINS_CRUCIBLE,    OBJECT_GI_GODDESS,       GID_DINS_FIRE,        0x816, 0x80, CHEST_ANIM_LONG, ITEM_CATEGORY_MAJOR,           MOD_NONE, GI_DINS_CRUCIBLE),
+        GET_ITEM(ITEM_BOTTLE_AMMO,      OBJECT_GI_BOTTLE,        GID_BOTTLE_AMMO,      0x818, 0x80, CHEST_ANIM_SHORT,ITEM_CATEGORY_JUNK,            MOD_NONE, GI_BOTTLE_AMMO),
+        GET_ITEM(ITEM_RING_1,           OBJECT_GI_KEY,           GID_RING_0,           0x817, 0x80, CHEST_ANIM_SHORT,ITEM_CATEGORY_LESSER,          MOD_NONE, GI_RING),
+        GET_ITEM(ITEM_RING_1,           OBJECT_GI_KEY,           GID_RING_0+1,         0x817, 0x80, CHEST_ANIM_SHORT,ITEM_CATEGORY_LESSER,          MOD_NONE, GI_RING_1),
+        GET_ITEM(ITEM_RING_1,           OBJECT_GI_KEY,           GID_RING_0+2,         0x817, 0x80, CHEST_ANIM_SHORT,ITEM_CATEGORY_LESSER,          MOD_NONE, GI_RING_2),
+        GET_ITEM(ITEM_RING_1,           OBJECT_GI_KEY,           GID_RING_0+3,         0x817, 0x80, CHEST_ANIM_SHORT,ITEM_CATEGORY_LESSER,          MOD_NONE, GI_RING_3),
+        GET_ITEM(ITEM_RING_1,           OBJECT_GI_KEY,           GID_RING_0+4,         0x817, 0x80, CHEST_ANIM_SHORT,ITEM_CATEGORY_LESSER,          MOD_NONE, GI_RING_4),
+        GET_ITEM(ITEM_RING_1,           OBJECT_GI_KEY,           GID_RING_0+5,         0x817, 0x80, CHEST_ANIM_SHORT,ITEM_CATEGORY_LESSER,          MOD_NONE, GI_RING_5),
+        GET_ITEM(ITEM_RING_1,           OBJECT_GI_KEY,           GID_RING_0+6,         0x817, 0x80, CHEST_ANIM_SHORT,ITEM_CATEGORY_LESSER,          MOD_NONE, GI_RING_6),
+        GET_ITEM(ITEM_RING_1,           OBJECT_GI_KEY,           GID_RING_0+7,         0x817, 0x80, CHEST_ANIM_SHORT,ITEM_CATEGORY_LESSER,          MOD_NONE, GI_RING_7),
+        GET_ITEM(ITEM_RING_1,           OBJECT_GI_KEY,           GID_RING_0+8,         0x817, 0x80, CHEST_ANIM_SHORT,ITEM_CATEGORY_LESSER,          MOD_NONE, GI_RING_8),
+        GET_ITEM(ITEM_RING_1,           OBJECT_GI_KEY,           GID_RING_0+9,         0x817, 0x80, CHEST_ANIM_SHORT,ITEM_CATEGORY_LESSER,          MOD_NONE, GI_RING_9),
+        GET_ITEM(ITEM_RING_1,           OBJECT_GI_KEY,           GID_RING_0+10,         0x817, 0x80, CHEST_ANIM_SHORT,ITEM_CATEGORY_LESSER,          MOD_NONE, GI_RING_10),
+        GET_ITEM(ITEM_RING_1,           OBJECT_GI_KEY,           GID_RING_0+11,         0x817, 0x80, CHEST_ANIM_SHORT,ITEM_CATEGORY_LESSER,          MOD_NONE, GI_RING_11),
+        GET_ITEM(ITEM_RING_1,           OBJECT_GI_KEY,           GID_RING_0+12,         0x817, 0x80, CHEST_ANIM_SHORT,ITEM_CATEGORY_LESSER,          MOD_NONE, GI_RING_12),
+        GET_ITEM(ITEM_RING_1,           OBJECT_GI_KEY,           GID_RING_0+13,         0x817, 0x80, CHEST_ANIM_SHORT,ITEM_CATEGORY_LESSER,          MOD_NONE, GI_RING_13),
+        GET_ITEM(ITEM_RING_1,           OBJECT_GI_KEY,           GID_RING_0+14,         0x817, 0x80, CHEST_ANIM_SHORT,ITEM_CATEGORY_LESSER,          MOD_NONE, GI_RING_14),
+        GET_ITEM(ITEM_RING_1,           OBJECT_GI_KEY,           GID_RING_0+15,         0x817, 0x80, CHEST_ANIM_SHORT,ITEM_CATEGORY_LESSER,          MOD_NONE, GI_RING_15),
+        GET_ITEM(ITEM_RING_1,           OBJECT_GI_KEY,           GID_RING_0+16,         0x817, 0x80, CHEST_ANIM_SHORT,ITEM_CATEGORY_LESSER,          MOD_NONE, GI_RING_16),
+        GET_ITEM(ITEM_RING_1,           OBJECT_GI_KEY,           GID_RING_0+17,         0x817, 0x80, CHEST_ANIM_SHORT,ITEM_CATEGORY_LESSER,          MOD_NONE, GI_RING_17),
+        GET_ITEM(ITEM_RING_1,           OBJECT_GI_KEY,           GID_RING_0+18,         0x817, 0x80, CHEST_ANIM_SHORT,ITEM_CATEGORY_LESSER,          MOD_NONE, GI_RING_18),
+        GET_ITEM(ITEM_RING_1,           OBJECT_GI_KEY,           GID_RING_0+19,         0x817, 0x80, CHEST_ANIM_SHORT,ITEM_CATEGORY_LESSER,          MOD_NONE, GI_RING_19),
         GET_ITEM_NONE // GI_MAX - if you need to add to this table insert it before this entry.
         // clang-format on
     };
@@ -1084,6 +1120,18 @@ bool PathTestCleanup(FILE* tfile) {
     } catch (std::filesystem::filesystem_error const& ex) { return false; }
     return true;
 }
+extern "C" uint16_t GetTextID(const char* name) {
+    return TextIDAllocator::Instance->getId(name);
+}
+
+extern "C" uint16_t RetrieveTextSubstitution(uint16_t textID) {
+    std::unordered_map<uint16_t,uint16_t>::const_iterator iter = textIDSubstitutionTable->find(textID);
+    if (iter != textIDSubstitutionTable->end()) {
+        return iter->second;
+    }
+    return textID;
+}
+
 
 void CheckAndCreateModFolder() {
     try {
@@ -1205,6 +1253,7 @@ extern "C" void InitOTR() {
 
     OTRGlobals::Instance = new OTRGlobals();
     CustomMessageManager::Instance = new CustomMessageManager();
+    TextIDAllocator::Instance = new TextIDAllocator();
     ItemTableManager::Instance = new ItemTableManager();
     GameInteractor::Instance = new GameInteractor();
     SaveManager::Instance = new SaveManager();
@@ -1237,6 +1286,9 @@ extern "C" void InitOTR() {
     CrowdControl::Instance = new CrowdControl();
     Sail::Instance = new Sail();
 #endif
+
+    
+    textIDSubstitutionTable = new std::unordered_map<uint16_t, uint16_t>();
 
     OTRMessage_Init();
     OTRAudio_Init();
@@ -2426,6 +2478,49 @@ extern "C" int CustomMessage_RetrieveIfExists(PlayState* play) {
                 CustomMessageManager::Instance->RetrieveMessage(customMessageTableID, textId, MF_AUTO_FORMAT);
         } else if (textId == TEXT_MASK_SHOP_SIGN && ctx->GetOption(RSK_MASK_SHOP_HINT)) {
             messageEntry = ctx->GetHint(RH_MASK_SHOP_HINT)->GetHintMessage(MF_AUTO_FORMAT);
+        }
+    } else {
+        if (Player_GetMask(play) == PLAYER_MASK_TRUTH) {
+            s16 actorParams;
+
+            // if we're in a generic grotto
+            if (play->sceneNum == 62 && textId == 0x418 && msgCtx->talkActor->params == 14360) {
+                // look for the chest in the actorlist to determine
+                // which grotto we're in
+                int numOfActorLists =
+                    sizeof(play->actorCtx.actorLists) / sizeof(play->actorCtx.actorLists[0]);
+                for (int i = 0; i < numOfActorLists; i++) {
+                    if (play->actorCtx.actorLists[i].length) {
+                        if (play->actorCtx.actorLists[i].head->id == 10) {
+                            // set the params for the hint check to be negative chest params
+                            actorParams = play->actorCtx.actorLists[i].head->params & 0x1F;
+                        }
+                    }
+                }
+
+                uint16_t newTextId = GetTextID("stone")+actorParams;
+                uint16_t substituteID = RetrieveTextSubstitution(newTextId);
+                if (newTextId == substituteID) {
+                    messageEntry = CustomMessageManager::Instance->RetrieveMessage(questMessageTableID, newTextId);
+                } else {
+                    textId = msgCtx->textId = substituteID;
+                }
+                if (messageEntry.GetTextBoxType() == TEXTBOX_TYPE_MISSING) {
+                    messageEntry = CustomMessageManager::Instance->RetrieveMessage(questMessageTableID, textId);
+                }
+            } else {
+                uint16_t substituteID = RetrieveTextSubstitution(textId);
+                if (substituteID == textId)
+                    messageEntry = CustomMessageManager::Instance->RetrieveMessage(questMessageTableID, substituteID);
+                else
+                    textId = msgCtx->textId = substituteID;
+            }
+        } else {
+            uint16_t substituteID = RetrieveTextSubstitution(textId);
+            if (substituteID == textId)
+                messageEntry = CustomMessageManager::Instance->RetrieveMessage(questMessageTableID, substituteID);
+            else
+                textId = msgCtx->textId = substituteID;
         }
     }
     if (textId == TEXT_GS_NO_FREEZE || textId == TEXT_GS_FREEZE) {

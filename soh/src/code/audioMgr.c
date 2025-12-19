@@ -108,12 +108,13 @@ void AudioMgr_Init(AudioMgr* audioMgr, void* stack, OSPri pri, OSId id, SchedCon
         AudioLoad_SetDmaHandler(DmaMgr_DmaHandler);
         Audio_InitSound();
         osSendMesgPtr(&audioMgr->unk_C8, NULL, OS_MESG_BLOCK);
-
+        
         Audio_SetGameVolume(SEQ_PLAYER_BGM_MAIN,
-                            ((float)CVarGetInteger(CVAR_SETTING("Volume.MainMusic"), 100) / 100.0f));
-        Audio_SetGameVolume(SEQ_PLAYER_BGM_SUB, ((float)CVarGetInteger(CVAR_SETTING("Volume.SubMusic"), 100) / 100.0f));
+                            (Ring_Get_Equiped() == RI_RING_OF_SILENCE) ? 0.0f : ((float)CVarGetInteger(CVAR_SETTING("Volume.MainMusic"), 100) / 100.0f));
+        Audio_SetGameVolume(SEQ_PLAYER_BGM_SUB,
+                            (Ring_Get_Equiped() == RI_RING_OF_SILENCE) ? 0.0f : ((float)CVarGetInteger(CVAR_SETTING("Volume.SubMusic"), 100) / 100.0f));
         Audio_SetGameVolume(SEQ_PLAYER_FANFARE, ((float)CVarGetInteger(CVAR_SETTING("Volume.Fanfare"), 100) / 100.0f));
-        Audio_SetGameVolume(SEQ_PLAYER_SFX, ((float)CVarGetInteger(CVAR_SETTING("Volume.SFX"), 100) / 100.0f));
+        Audio_SetGameVolume(SEQ_PLAYER_SFX, (Ring_Get_Equiped() == RI_MUTE_RING) ? 0.0f : ((float)CVarGetInteger(CVAR_SETTING("Volume.SFX"), 100) / 100.0f));
 
         // Removed due to crash
         // IrqMgr_AddClient(audioMgr->irqMgr, &irqClient, &audioMgr->unk_74);

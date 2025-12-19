@@ -1298,6 +1298,19 @@ void Environment_Update(PlayState* play, EnvironmentContext* envCtx, LightContex
     }
 }
 
+u8 Moon_Colors[][2][3] = {
+    {{245,255,225}, {100,90,50}},
+    {{220,180,120}, {65,60,20}},
+    {{180,100,50},  {40,10,10}},
+    {{30,35,30},    {10,10,10}},
+    {{40,45,140},   {10,20,50}},
+    {{140,160,220}, {30,30,80}},
+};
+
+s32 getDayOfCycle() {
+    return gSaveContext.totalDays%DAYS_IN_CYCLE;
+}
+
 void Environment_DrawSunAndMoon(PlayState* play) {
     f32 alpha;
     f32 color;
@@ -1388,6 +1401,8 @@ void Environment_DrawSunAndMoon(PlayState* play) {
 
         alpha = temp * 255.0f;
 
+        s32 day = getDayOfCycle();
+
         if (alpha > 0.0f) {
             gSPMatrix(POLY_OPA_DISP++, MATRIX_NEWMTX(play->state.gfxCtx), G_MTX_LOAD);
             Gfx_SetupDL_51Opa(play->state.gfxCtx);
@@ -1397,8 +1412,10 @@ void Environment_DrawSunAndMoon(PlayState* play) {
                 gDPSetPrimColor(POLY_OPA_DISP++, 0, 0, moonColor.r, moonColor.g, moonColor.b, alpha);
                 gDPSetEnvColor(POLY_OPA_DISP++, moonColor.r / 2, moonColor.g / 2, moonColor.b / 2, alpha);
             } else {
-                gDPSetPrimColor(POLY_OPA_DISP++, 0, 0, 240, 255, 180, alpha);
-                gDPSetEnvColor(POLY_OPA_DISP++, 80, 70, 20, alpha);
+            //gDPSetPrimColor(POLY_OPA_DISP++, 0, 0, 240, 255, 180, alpha);
+            gDPSetPrimColor(POLY_OPA_DISP++, 0, 0, Moon_Colors[day][0][0], Moon_Colors[day][0][1], Moon_Colors[day][0][2], alpha);
+            //gDPSetEnvColor(POLY_OPA_DISP++, 80, 70, 20, alpha);
+            gDPSetEnvColor(POLY_OPA_DISP++, Moon_Colors[day][1][0], Moon_Colors[day][1][1], Moon_Colors[day][1][2], alpha);
             }
             gSPDisplayList(POLY_OPA_DISP++, gMoonDL);
         }
@@ -2095,6 +2112,9 @@ void func_80075B44(PlayState* play) {
                 gSaveContext.dogIsLost = true;
                 Sfx_PlaySfxCentered(NA_SE_EV_CHICKEN_CRY_M);
                 if ((Inventory_ReplaceItem(play, ITEM_WEIRD_EGG, ITEM_CHICKEN) || Inventory_HatchPocketCucco(play)) &&
+                Environment_UpdateDataOnDayChange();
+                Sfx_PlaySfxCentered(NA_SE_EV_CHICKEN_CRY_M);
+                if ((Inventory_ReplaceItem(play, ITEM_WEIRD_EGG, ITEM_CHICKEN) || Inventory_HatchPocketCucco(play)) &&
                     play->csCtx.state == 0 && !Player_InCsMode(play)) {
                     GameInteractor_ExecuteOnCuccoOrChickenHatch();
                     Message_StartTextbox(play, 0x3066, NULL);
@@ -2488,6 +2508,14 @@ void Environment_ClearBgsDayCount(void) {
 
 s32 Environment_GetTotalDays(void) {
     return gSaveContext.totalDays;
+}
+
+void Environment_UpdateDataOnDayChange(void) {
+    if (getDayOfCycle() == 0) {
+        for (int flag = 0; flag < ARRAY_COUNT(gSaveContext.NPCWeekEvents); flag++) {
+            gSaveContext.NPCWeekEvents[flag] = 0;
+        }
+    }
 }
 
 void Environment_ForcePlaySequence(u16 seqId) {

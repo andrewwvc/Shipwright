@@ -9,6 +9,8 @@
 #include <soh/GameVersions.h>
 #include "soh/ResourceManagerHelpers.h"
 #include <string.h>
+#include "soh_assets.h"
+//#include <GameVersions.h>
 
 #define FLAGS (ACTOR_FLAG_UPDATE_CULLING_DISABLED | ACTOR_FLAG_DRAW_CULLING_DISABLED)
 
@@ -585,6 +587,10 @@ void EnMag_DrawInner(Actor* thisx, PlayState* play, Gfx** gfxP) {
 
         EnMag_DrawTextureI8(&gfx, gTitleTheLegendOfTextTex, 72, 8, 153 + LOGO_X_SHIFT, 72, 72, 8, 1024, 1024);
         EnMag_DrawTextureI8(&gfx, gTitleOcarinaOfTimeTMTextTex, 96, 8, 151 + LOGO_X_SHIFT, 126, 96, 8, 1024, 1024);
+
+        gDPPipeSync(gfx++);
+        gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, (s16)this->subAlpha);
+        EnMag_DrawImageRGBA32(&gfx, 185, 145, gTitleSeditionSubtitleTex, 128, 32);
 
         if (isMQ) {
             gDPPipeSync(gfx++);

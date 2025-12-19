@@ -41,6 +41,8 @@ const uint32_t defaultImGuiScale = 1;
 
 const float imguiScaleOptionToValue[4] = { 0.75f, 1.0f, 1.5f, 2.0f };
 
+const std::string questMessageTableID = "QuestOverrides";
+
 class OTRGlobals {
   public:
     static OTRGlobals* Instance;
@@ -82,6 +84,7 @@ class OTRGlobals {
 #endif
 
 #ifndef __cplusplus
+uint16_t GetTextID(const char* name);
 void InitOTR(void);
 void DeinitOTR(void);
 void VanillaItemTable_Init();

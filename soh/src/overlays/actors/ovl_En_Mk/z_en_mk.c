@@ -99,8 +99,12 @@ void func_80AACA94(EnMk* this, PlayState* play) {
         this->actor.parent = NULL;
         if (GameInteractor_Should(VB_TRADE_TIMER_EYEDROPS, true, this)) {
             this->actionFunc = func_80AACA40;
-            func_80088AA0(240);
+            func_80088AA0(180);
+        // this->actionFunc = func_80AACA40;
+        // if (!IS_RANDO) {
+        //     func_80088AA0(180);
             gSaveContext.eventInf[1] &= ~1;
+            EyedropEventSet();
         }
     } else {
         Actor_OfferGetItem(&this->actor, play, GI_EYEDROPS, 10000.0f, 50.0f);
@@ -261,11 +265,19 @@ void EnMk_Wait(EnMk* this, PlayState* play) {
                         }
                         break;
                     case EXCH_ITEM_FROG:
-                        player->actor.textId = 0x4019;
-                        this->actionFunc = func_80AACEE8;
-                        Animation_Change(&this->skelAnime, &object_mk_Anim_000368, 1.0f, 0.0f,
+                        if (EyedropEventValue()) {
+                            Message_ContinueTextbox(play, 0x4030);
+                            player->exchangeItemId = EXCH_ITEM_NONE;
+                            this->actionFunc = func_80AACB6C;
+                            Animation_Change(&this->skelAnime, &object_mk_Anim_000D88, 1.0f, 0.0f,
+                                        Animation_GetLastFrame(&object_mk_Anim_000D88), ANIMMODE_LOOP, -4.0f);
+                        } else {
+                            player->actor.textId = 0x4019;
+                            this->actionFunc = func_80AACEE8;
+                            Animation_Change(&this->skelAnime, &object_mk_Anim_000368, 1.0f, 0.0f,
                                          Animation_GetLastFrame(&object_mk_Anim_000368), ANIMMODE_ONCE, -4.0f);
-                        this->flags &= ~2;
+                            this->flags &= ~2;
+                        }
                         gSaveContext.subTimerState = 0;
                         Sfx_PlaySfxCentered(NA_SE_SY_TRE_BOX_APPEAR);
                         break;
