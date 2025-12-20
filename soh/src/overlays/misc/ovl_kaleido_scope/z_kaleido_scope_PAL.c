@@ -2986,7 +2986,7 @@ static const char* gPageVtxColorCvars[][4] = {
     },
 };
 
-s16 KaleidoScope_SetupMenuBackground(PlayState* play, Vtx* vtx, s16 arg2, s16 arg3, s16 rows) {
+s16 KaleidoScope_SetupMenuBackground(PlayState* play, Vtx* vtx, s16 pageIndex, s16 arg3, s16 rows) {
     static s16 D_8082B110 = 0;
     static s16 D_8082B114 = 1;
     static s16 D_8082B118 = 0;

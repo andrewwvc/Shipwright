@@ -324,7 +324,7 @@ static ShopItemEntry shopItemEntries[] = {
       EnGirlA_ItemGive_BottledItem, EnGirlA_BuyEvent_ShieldDiscount },
     /* SI_RANDOMIZED_ITEM */
     { OBJECT_INVALID, GID_MAXIMUM, NULL, 40, 1, 0x9100, 0x9100 + NUM_SHOP_ITEMS, GI_NONE, EnGirlA_CanBuy_Randomizer,
-      EnGirlA_ItemGive_Randomizer, NULL }
+      EnGirlA_ItemGive_Randomizer, NULL },
       //EnGirlA_ItemGive_Randomizer, EnGirlA_BuyEvent_Randomizer },
     /* SI_PIECE_OF_HEART */
     { OBJECT_B_HEART, GID_HEART_PIECE, NULL, 300, 1, 0xF000, 0xF001, GI_HEART_PIECE, EnGirlA_CanBuy_HeartPiece,
@@ -519,15 +519,15 @@ void EnGirlA_InitItem(EnGirlA* this, PlayState* play) {
 
 
     if (!IS_RANDO || Randomizer_GetSettingValue(RSK_SHOPSANITY) == RO_SHOPSANITY_OFF) {
-        //this->objBankIndex = Object_GetIndex(&play->objectCtx, shopItemEntries[params].objID);
+        //this->requiredObjectSlot = Object_GetIndex(&play->objectCtx, shopItemEntries[params].objID);
         if (Object_IsLoaded(&play->objectCtx, shopItemEntries[params].objID) && (params != SI_SOLD_OUT && play->sceneNum == SCENE_KOKIRI_SHOP)) {
-            this->objBankIndex = Object_GetIndex(&play->objectCtx, shopItemEntries[params].objID);
+            this->requiredObjectSlot = Object_GetIndex(&play->objectCtx, shopItemEntries[params].objID);
         } else {
-            this->objBankIndex = Object_Spawn(&play->objectCtx, shopItemEntries[params].objID);
+            this->requiredObjectSlot = Object_Spawn(&play->objectCtx, shopItemEntries[params].objID);
         }
     } else
     // #region [Randomizer]
-    {
+    if (IS_RANDO && !Randomizer_GetSettingValue(RSK_SHOPSANITY) == RO_SHOPSANITY_OFF) {
         s16 objectId = shopItemEntries[params].objID;
 
         if (params == SI_RANDOMIZED_ITEM) {
@@ -1139,8 +1139,8 @@ void EnGirlA_ItemGive_Randomizer(PlayState* play, EnGirlA* this) {
 
 void EnGirlA_ItemGive_PieceOfHeart(PlayState* play, EnGirlA* this) {
     GetItemEntry entry = ItemTable_Retrieve(this->getItemId);
-    gSaveContext.pendingSale = entry.itemId;
-    gSaveContext.pendingSaleMod = entry.modIndex;
+    gSaveContext.ship.pendingSale = entry.itemId;
+    gSaveContext.ship.pendingSaleMod = entry.modIndex;
     Item_Give(play, ITEM_HEART_PIECE);
     gSaveContext.healthAccumulator = 0x140;
     if ((s32)(gSaveContext.inventory.questItems & 0xF0000000) == 0x40000000) {
@@ -1154,16 +1154,16 @@ void EnGirlA_ItemGive_PieceOfHeart(PlayState* play, EnGirlA* this) {
 
 void EnGirlA_BuyEvent_HeartPiece(PlayState* play, EnGirlA* this) {
     GetItemEntry entry = ItemTable_Retrieve(this->getItemId);
-    gSaveContext.pendingSale = entry.itemId;
-    gSaveContext.pendingSaleMod = entry.modIndex;
+    gSaveContext.ship.pendingSale = entry.itemId;
+    gSaveContext.ship.pendingSaleMod = entry.modIndex;
     gSaveContext.itemGetInf[2] |= 0x02;//For the bazzar night shop
     Rupees_ChangeBy(-this->basePrice);
 }
 
 void EnGirlA_ItemGive_Ring(PlayState* play, EnGirlA* this) {
     GetItemEntry entry = ItemTable_Retrieve(this->getItemId);
-    gSaveContext.pendingSale = entry.itemId;
-    gSaveContext.pendingSaleMod = entry.modIndex;
+    gSaveContext.ship.pendingSale = entry.itemId;
+    gSaveContext.ship.pendingSaleMod = entry.modIndex;
     Ring_Give(play, entry.getItemId);
     Item_Give(play, entry.itemId);
     Rupees_ChangeBy(-this->basePrice);
@@ -1171,8 +1171,8 @@ void EnGirlA_ItemGive_Ring(PlayState* play, EnGirlA* this) {
 
 void EnGirlA_BuyEvent_Ring(PlayState* play, EnGirlA* this) {
     GetItemEntry entry = ItemTable_Retrieve(this->getItemId);
-    gSaveContext.pendingSale = entry.itemId;
-    gSaveContext.pendingSaleMod = entry.modIndex;
+    gSaveContext.ship.pendingSale = entry.itemId;
+    gSaveContext.ship.pendingSaleMod = entry.modIndex;
     Rupees_ChangeBy(-this->basePrice);
 }
 

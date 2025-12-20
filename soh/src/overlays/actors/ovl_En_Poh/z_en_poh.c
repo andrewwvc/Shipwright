@@ -1250,7 +1250,7 @@ void EnPoh_UpdateLiving(Actor* thisx, PlayState* play) {
     EnPo_CollisionCheck(this, play);
     EnPoh_UpdateVisibility(this);
     this->actionFunc(this, play);
-    Actor_MoveForward(&this->actor);
+    Actor_MoveXZGravity(&this->actor);
     if (this->actionFunc == EnPoh_Attack && this->actionTimer < 10) {
         this->actor.flags |= ACTOR_FLAG_SFX_FOR_PLAYER_BODY_HIT;
         CollisionCheck_SetAT(play, &play->colChkCtx, &this->colliderSph.base);

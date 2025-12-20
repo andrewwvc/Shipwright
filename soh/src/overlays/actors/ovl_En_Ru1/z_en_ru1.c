@@ -1745,7 +1745,7 @@ void func_80AEEBB4(EnRu1* this, PlayState* play) {
 
 void EnRu1_ExpressDiscomfort(EnRu1* this, PlayState* play) {
     if (!this->expressionState) {
-        func_80078914(&this->actor.projectedPos, NA_SE_VO_RT_CRASH);
+        Sfx_PlaySfxAtPos(&this->actor.projectedPos, NA_SE_VO_RT_CRASH);
         this->expressionState = 2;
         if (EnRu1_DateConditionsMet() && !(gSaveContext.infTable[20] & 0x600)) {
             gSaveContext.infTable[20] |= 0x200;
@@ -1757,7 +1757,7 @@ void EnRu1_DetectExpressHarm(EnRu1* this, PlayState* play) {
     Player* player = GET_PLAYER(play);
     if (player->invincibilityTimer > 0 && !(this->expressionState & 1)) {
         this->expressionState = 1;
-        func_80078914(&this->actor.projectedPos, NA_SE_VO_RT_UNBALLANCE);
+        Sfx_PlaySfxAtPos(&this->actor.projectedPos, NA_SE_VO_RT_UNBALLANCE);
         if (EnRu1_DateConditionsMet() && !(gSaveContext.infTable[20] & 0x400)) {
             gSaveContext.infTable[20] |= 0x200;
             gSaveContext.infTable[20] |= 0x400;
@@ -2463,7 +2463,7 @@ s32 func_80AEFE38(EnRu1* this, PlayState* play) {
     } else if (func_80AEB174(play)) {
         u16 RutoMsg = GetTextID("ruto");
         if (this->actor.textId == RutoMsg+18) {
-            func_8002F434(&this->actor, play, GI_HEART_PIECE, this->actor.xzDistToPlayer + 1.0f, fabsf(this->actor.yDistToPlayer) + 1.0f);
+            Actor_OfferGetItem(&this->actor, play, GI_HEART_PIECE, this->actor.xzDistToPlayer + 1.0f, fabsf(this->actor.yDistToPlayer) + 1.0f);
             Message_CloseTextbox(play);
             gSaveContext.infTable[19] |= 0x1;
             this->action = 50;
@@ -2480,7 +2480,7 @@ void EnRu1_GiveItem(EnRu1* this, PlayState* play) {
         this->actor.parent = NULL;
         this->action = 44;
     } else {
-        func_8002F434(&this->actor, play, GI_HEART_PIECE, this->actor.xzDistToPlayer + 1.0f, fabsf(this->actor.yDistToPlayer) + 1.0f);
+        Actor_OfferGetItem(&this->actor, play, GI_HEART_PIECE, this->actor.xzDistToPlayer + 1.0f, fabsf(this->actor.yDistToPlayer) + 1.0f);
     }
 }
 
@@ -2630,7 +2630,7 @@ void EnRu1_DateStart(EnRu1* this, PlayState* play) {
     if (this->actor.speedXZ == 1.0f) {
         EnRu1_SpotLink(this, play, -1);
     }
-    Actor_MoveForward(&this->actor);
+    Actor_MoveXZGravity(&this->actor);
     if (this->actor.world.pos.y <= -1336)
         this->actor.world.pos.y = -1336;
 }
@@ -2771,7 +2771,7 @@ void EnRu1_DateEnd(EnRu1* this, PlayState* play) {
         this->actor.gravity = -((kREG(23) * 0.01f) + 1.3f);
         func_80AEAECC(this, play);
     }
-    Actor_MoveForward(&this->actor);
+    Actor_MoveXZGravity(&this->actor);
 }
 
 void EnRu1_LakeDateSpawn(EnRu1* this, PlayState* play) {

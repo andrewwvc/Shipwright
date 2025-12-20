@@ -541,9 +541,9 @@ Vec3f sGetItemRefPos;
 s32 sLeftHandType;
 s32 sRightHandType;
 
-extern void func_80844E68(Player* this, PlayState* play);
-extern void func_80845000(Player* this, PlayState* play);
-extern void func_80845308(Player* this, PlayState* play);
+extern void Player_Action_80844E68(Player* this, PlayState* play);
+extern void Player_Action_80845000(Player* this, PlayState* play);
+extern void Player_Action_80845308(Player* this, PlayState* play);
 
 void Player_SetBootData(PlayState* play, Player* this) {
     s32 currentBoots;
@@ -624,7 +624,7 @@ s32 Player_IsChildWithHylianShield(Player* this) {
 }
 
 s32 Player_IsInCrouchBlock(Player* this) {
-    return ((this->stateFlags1 & PLAYER_STATE1_SHIELDING) && ((this->unk_6AE & 0xC1) == 0xC1) &&
+    return ((this->stateFlags1 & PLAYER_STATE1_SHIELDING) && ((this->unk_6AE_rotFlags & 0xC1) == 0xC1) &&
         (strcmp(this->skelAnime.animation, gPlayerAnim_link_normal_defense_wait) == 0 || strcmp(this->skelAnime.animation, gPlayerAnim_link_normal_defense_wait_free) == 0));
 }
 
@@ -683,7 +683,7 @@ s32 isPlayerInBasicVerticalSlash(PlayState* play) {
 s32 isPlayerInSpinAttack(PlayState* play) {
     Player* player = GET_PLAYER(play);
 
-    if (player->func_674 == func_80844E68 || player->func_674 == func_80845000 || player->func_674 == func_80845308)
+    if (player->actionFunc == Player_Action_80844E68 || player->actionFunc == Player_Action_80845000 || player->actionFunc == Player_Action_80845308)
         return 1;
 
     if (player->meleeWeaponState == 0)
@@ -1754,7 +1754,7 @@ void Player_UpdateShieldCollider(PlayState* play, Player* this, ColliderQuad* co
 
     s16 stepVal = IN_SUB_STEP_MOTION;
 
-    if ((this->stateFlags1 & PLAYER_STATE1_SHIELDING) || (this->unk_664 != NULL && CUR_EQUIP_VALUE(EQUIP_TYPE_SHIELD) && !Player_isInSwordAnimation(play) && !Player_isInReboundAnimation(play) && stepVal && (!this->stepTracking) && (this->invincibilityTimer == 0))) {
+    if ((this->stateFlags1 & PLAYER_STATE1_SHIELDING) || (this->focusActor != NULL && CUR_EQUIP_VALUE(EQUIP_TYPE_SHIELD) && !Player_isInSwordAnimation(play) && !Player_isInReboundAnimation(play) && stepVal && (!this->stepTracking) && (this->invincibilityTimer == 0))) {
         Vec3f quadDest[4];
 
         this->shieldQuad.base.colType = shieldColTypes[this->currentShield];

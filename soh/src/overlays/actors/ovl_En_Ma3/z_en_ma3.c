@@ -213,7 +213,7 @@ s16 func_80AA2BD4(PlayState* play, Actor* thisx) {
                     }
                 } else if (thisx->textId == RanchMsg+13) {
                     ((EnMa3*)thisx)->actionFunc = EnMa3_Give_Reward;
-                    func_8002F434(thisx, play, GI_EPONA_BOOST, 100.0f, 100.0f);
+                    Actor_OfferGetItem(thisx, play, GI_EPONA_BOOST, 100.0f, 100.0f);
                 }
             }
             break;
@@ -343,7 +343,7 @@ void EnMa3_Give_Reward(EnMa3* this, PlayState* play) {
         gSaveContext.eventChkInf[2] &= ~(1 << 11);
 
     } else {
-        func_8002F434(this, play, GI_EPONA_BOOST, 100.0f, 100.0f);
+        Actor_OfferGetItem(this, play, GI_EPONA_BOOST, 100.0f, 100.0f);
     }
 }
 

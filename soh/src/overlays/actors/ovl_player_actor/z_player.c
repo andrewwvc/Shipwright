@@ -45,7 +45,7 @@
 // Some player animations are played at this reduced speed, for reasons yet unclear.
 // This is called "adjusted" for now.
 #define PLAYER_ANIM_ADJUSTED_SPEED (2.0f / 3.0f)
-#define RESIDUAL_SHIELD_ACTIVE ((this->cylinder.base.ocFlags1 & OC1_FIRM) && (this->shieldQuad.info.bumper.dmgFlags == 0x00100000) && (this->stateFlags1 & PLAYER_STATE1_ENEMY_TARGET) && !(this->actor.flags & ACTOR_FLAG_TALK))
+#define RESIDUAL_SHIELD_ACTIVE ((this->cylinder.base.ocFlags1 & OC1_FIRM) && (this->shieldQuad.info.bumper.dmgFlags == 0x00100000) && (this->stateFlags1 & PLAYER_STATE1_HOSTILE_LOCK_ON) && !(this->actor.flags & ACTOR_FLAG_TALK))
 #define UNDERWATER_SPEED_MODIFIER (1.0/3.0)
 
 typedef enum {
@@ -1640,9 +1640,9 @@ static LinkAnimationHeader* D_808543D4[] = {
 
 s32 Player_isRangedWeaponReady(PlayState* play) {
     Player* this = GET_PLAYER(play);
-    return (isProjectileNotched(play) || this->skelAnime2.animation == &gPlayerAnim_link_bow_bow_wait || this->skelAnime2.animation == &gPlayerAnim_link_hook_wait ||
-                this->skelAnime2.animation == &gPlayerAnim_link_bow_walk2ready || this->skelAnime2.animation == &gPlayerAnim_link_hook_walk2ready ||
-                this->skelAnime2.animation == &gPlayerAnim_link_bow_bow_ready || this->skelAnime2.animation == &gPlayerAnim_link_bow_bow_shoot_next);
+    return (isProjectileNotched(play) || this->upperSkelAnime.animation == &gPlayerAnim_link_bow_bow_wait || this->upperSkelAnime.animation == &gPlayerAnim_link_hook_wait ||
+                this->upperSkelAnime.animation == &gPlayerAnim_link_bow_walk2ready || this->upperSkelAnime.animation == &gPlayerAnim_link_hook_walk2ready ||
+                this->upperSkelAnime.animation == &gPlayerAnim_link_bow_bow_ready || this->upperSkelAnime.animation == &gPlayerAnim_link_bow_bow_shoot_next);
 }
 
 s32 Player_isInSwordAnimation(PlayState* play) {
@@ -1674,7 +1674,7 @@ s32 Player_isInsideShieldStunAnimation(PlayState* play) {
     s16 ret = 0;
 
     for (s32 ii = 0; ii < ARRAY_COUNT(D_808543B4); ii++) {
-        if (this->skelAnime2.animation == D_808543B4[ii] || this->skelAnime2.animation == D_808543BC[ii] || this->skelAnime.animation == D_808543C4[ii])
+        if (this->upperSkelAnime.animation == D_808543B4[ii] || this->upperSkelAnime.animation == D_808543BC[ii] || this->skelAnime.animation == D_808543C4[ii])
             return 1;
     }
 
@@ -4720,7 +4720,7 @@ static LinkAnimationHeader* D_808544B0[] = {
 };
 
 void Player_ForceStun(PlayState* play, Player* this, s32 arg2, f32 arg3, f32 arg4, s16 knockbackAngle, s32 invTimer) {
-    LinkAnimationHeader* sp2C = NULL;
+    LinkAnimationHeader* anim = NULL;
     LinkAnimationHeader** sp28;
 
     this->unk_890 = 0;
@@ -4729,7 +4729,7 @@ void Player_ForceStun(PlayState* play, Player* this, s32 arg2, f32 arg3, f32 arg
 
     sp28 = D_808544B0;
 
-    Player_SetupAction(play, this, func_8084370C, 0);
+    Player_SetupAction(play, this, Player_Action_8084370C, 0);
     func_80833C3C(this);
 
     // if (this->actor.colChkInfo.damage < 5) {
@@ -4744,11 +4744,11 @@ void Player_ForceStun(PlayState* play, Player* this, s32 arg2, f32 arg3, f32 arg
         sp28 += 2;
     }
 
-    if (func_8008E9C4(this)) {
+    if (Player_CheckHostileLockOn(this)) {
         sp28 += 1;
     }
 
-    sp2C = *sp28;
+    anim = *sp28;
 
     this->actor.shape.rot.y += knockbackAngle;
     this->yaw = this->actor.shape.rot.y;
@@ -4761,69 +4761,69 @@ void Player_ForceStun(PlayState* play, Player* this, s32 arg2, f32 arg3, f32 arg
 
     this->stateFlags1 |= PLAYER_STATE1_DAMAGED;
 
-    if (sp2C != NULL) {
-        func_808322D0(play, this, sp2C);
+    if (anim != NULL) {
+        Player_AnimPlayOnceAdjusted(play, this, anim);
     }
 }
 
 void func_80837C0C(PlayState* play, Player* this, s32 damageResponseType, f32 speed, f32 yVelocity, s16 yRot,
                    s32 invincibilityTimer) {
-    LinkAnimationHeader* sp2C = NULL;
+    LinkAnimationHeader* anim = NULL;
     LinkAnimationHeader** sp28;
 
     if (this->stateFlags1 & PLAYER_STATE1_ON_HORSE) {
         s32 tookDamage = func_80837B18(play, this, 0 - this->actor.colChkInfo.damage);
-        func_80832698(this, NA_SE_VO_LI_DAMAGE_S);
+        Player_PlayVoiceSfx(this, NA_SE_VO_LI_DAMAGE_S);
         Player_PlaySfx(&this->actor, NA_SE_PL_DAMAGE);
         this->unk_890 = 0;
         if (tookDamage) {
-            func_80837AE0(this, invincibilityTimer);
+            Player_SetIntangibility(this, invincibilityTimer);
 
-            if (((damageResponseType == 1) || (damageResponseType == 2)) && !(this->stateFlags1 & PLAYER_STATE1_IN_WATER)) {
+            if (((damageResponseType == PLAYER_HIT_RESPONSE_KNOCKBACK_LARGE) || (damageResponseType == PLAYER_HIT_RESPONSE_KNOCKBACK_SMALL)) && !(this->stateFlags1 & PLAYER_STATE1_IN_WATER)) {
                 Player_ForcedUnmountHorse(play,this);
                 yRot -= this->actor.shape.rot.y;
 
-                Player_SetupAction(play, this, func_8084377C, 0);
+                Player_SetupAction(play, this, Player_Action_8084377C, 0);
 
                 this->stateFlags3 |= PLAYER_STATE3_MIDAIR;
 
                 Player_RequestRumble(this, 255, 20, 150, 0);
                 func_80832224(this);
 
-                if (damageResponseType == 2) {
-                    this->unk_850 = 4;
+                if (damageResponseType == PLAYER_HIT_RESPONSE_KNOCKBACK_SMALL) {
+                    this->av2.actionVar2 = 4;
 
                     this->actor.speedXZ = 3.0f;
                     this->linearVelocity = 3.0f;
                     this->actor.velocity.y = 6.0f;
 
-                    func_80832C2C(play, this, D_80853914[PLAYER_ANIMGROUP_damage_run][this->modelAnimType]);
-                    func_80832698(this, NA_SE_VO_LI_DAMAGE_S);
+                    Player_AnimChangeFreeze(play, this, D_80853914[PLAYER_ANIMGROUP_damage_run][this->modelAnimType]);
+                    Player_PlayVoiceSfx(this, NA_SE_VO_LI_DAMAGE_S);
                 } else {
                     this->actor.speedXZ = speed;
                     this->linearVelocity = speed;
                     this->actor.velocity.y = yVelocity;
 
                     if (ABS(yRot) > 0x4000) {
-                        sp2C = &gPlayerAnim_link_normal_front_downA;
+                        anim = &gPlayerAnim_link_normal_front_downA;
                     } else {
-                        sp2C = &gPlayerAnim_link_normal_back_downA;
+                        anim = &gPlayerAnim_link_normal_back_downA;
                     }
 
                     if ((this->actor.category != ACTORCAT_PLAYER) && (this->actor.colChkInfo.health == 0)) {
-                        func_80832698(this, NA_SE_VO_BL_DOWN);
+                        Player_PlayVoiceSfx(this, NA_SE_VO_BL_DOWN);
                     } else {
-                        func_80832698(this, NA_SE_VO_LI_FALL_L);
+                        Player_PlayVoiceSfx(this, NA_SE_VO_LI_FALL_L);
                     }
                 }
 
                 this->hoverBootsTimer = 0;
                 this->actor.bgCheckFlags &= ~1;
 
-                this->actor.shape.rot.y += arg5;
+                this->actor.shape.rot.y += yRot;
                 this->yaw = this->actor.shape.rot.y;
                 this->actor.world.rot.y = this->actor.shape.rot.y;
-                if (ABS(arg5) > 0x4000) {
+                if (ABS(yRot) > 0x4000) {
                     this->actor.shape.rot.y += 0x8000;
                 }
 
@@ -4831,8 +4831,8 @@ void func_80837C0C(PlayState* play, Player* this, s32 damageResponseType, f32 sp
 
                 this->stateFlags1 |= PLAYER_STATE1_DAMAGED;
 
-                if (sp2C != NULL) {
-                    func_808322D0(play, this, sp2C);
+                if (anim != NULL) {
+                    Player_AnimPlayOnceAdjusted(play, this, anim);
                 }
             }
         }
@@ -5202,7 +5202,7 @@ s32 func_808382DC(Player* this, PlayState* play) {
                      SurfaceType_IsWallDamage(&play->colCtx, this->actor.floorPoly, this->actor.floorBgId) &&
                      (this->floorTypeTimer >= D_808544F4[sp48])) ||
                     ((sp48 == 0)) ||
-                    ((sp48 == 1) && ((this->currentTunic != PLAYER_TUNIC_GORON && CVAR_CHEAT("SuperTunic"), 0) == 0) ||
+                    ((sp48 == 1) && ((this->currentTunic != PLAYER_TUNIC_GORON && CVarGetInteger(CVAR_CHEAT("SuperTunic"), 0) == 0) ||
                                      (this->floorTypeTimer >= D_808544F4[sp48])))) {
                     this->floorTypeTimer = 0;
                     this->actor.colChkInfo.damage = 4;
@@ -6415,7 +6415,7 @@ s32 Player_ActionHandler_13(Player* this, PlayState* play) {
                             //if (mido)
                             //    func_80853148(play,mido);
                             sp2C = this->itemAction - PLAYER_IA_ZELDAS_LETTER;
-                            Player_SetupActionPreserveItemAction(play, this, func_8084F104, 0);
+                            Player_SetupActionPreserveItemAction(play, this, Player_Action_ExchangeItem, 0);
 
                             if (sp2C >= 0) {
                                 if (this->getItemEntry.objectId == OBJECT_INVALID) {
@@ -6433,7 +6433,7 @@ s32 Player_ActionHandler_13(Player* this, PlayState* play) {
                             } else {
                                 sp2C = sp28 + 0x18;
                             }
-                            this->av1.actionVar1; = 1;
+                            this->av1.actionVar1 = 1;
                             u16 MidoMsg = GetTextID("mido");
                             this->actor.textId = MidoMsg+2;
                             func_80835EA4(play, 1);
@@ -6449,7 +6449,7 @@ s32 Player_ActionHandler_13(Player* this, PlayState* play) {
                             func_80832224(this);
                             return 1;
                         }
-                        Player_SetupActionPreserveItemAction(play, this, func_8084EFC0, 0);
+                        Player_SetupActionPreserveItemAction(play, this, Player_Action_8084EFC0, 0);
                         Player_AnimPlayOnceAdjusted(play, this, &gPlayerAnim_link_bottle_fish_out);
                         func_80835EA4(play, (sp2C == 1) ? 1 : 5);
                     } else {
@@ -10458,7 +10458,9 @@ void Player_Action_80844E68(Player* this, PlayState* play) {
 
     f32 oldSpeed = this->skelAnime.playSpeed;
     this->skelAnime.playSpeed *= INITIAL_CHARGE_RATE;
-    if (this->unk_850 != 0) this->skelAnime.playSpeed = oldSpeed;
+    if (this->av2.actionVar2 != 0) {
+        this->skelAnime.playSpeed = oldSpeed;
+    }
     if (LinkAnimation_Update(play, &this->skelAnime)) {//LinkAnimation_Update returns 1 if an animation has reached a finished state, and 0 otherwise
         this->skelAnime.playSpeed = oldSpeed;
         Player_FinishAnimMovement(this);
@@ -12522,8 +12524,8 @@ void Player_UpdateCommon(Player* this, PlayState* play, Input* input) {
         } else if (!Player_isInsideShieldStunAnimation(play)) {
             if (this->shieldUpTimer < SHIELD_TIME_MAX/2)
                 this->shieldUpTimer++;
-            if (this->shieldRelaxTimer <= SHIELD_TIME_MAX && this->func_82C != func_80843188
-                        && this->skelAnime.animation != D_808543C4[0]) {
+            if (this->shieldRelaxTimer <= SHIELD_TIME_MAX && this->upperActionFunc != Player_Action_80843188 &&
+                        this->skelAnime.animation != D_808543C4[0]) {
                 if ((this->shieldUpTimer > 1 || this->shieldRelaxTimer == 0) && this->shieldEntry == 0) {
                     if (this->shieldRelaxTimer < this->shieldUpTimer*2)
                         this->shieldRelaxTimer = this->shieldUpTimer*2;
@@ -15440,8 +15442,8 @@ void Player_Action_8084EFC0(Player* this, PlayState* play) {
         s16 parameters = dropInfo->actorParams;
 
         if (dropInfo->actorId == ACTOR_EN_ICE_HONO && play->roomCtx.curRoom.behaviorType2 == ROOM_BEHAVIOR_TYPE2_3) {
-            if (gSaveContext.timer1State != 0)
-                gSaveContext.timer1Value = 16*20;
+            if (gSaveContext.timerState != 0)
+                gSaveContext.timerSeconds = 16*20;
         }
 
         //Changes the insect spawn to a special drop if you're in Mido's place and it's full of bugs
@@ -15972,7 +15974,7 @@ void Player_Action_808502D0(Player* this, PlayState* play) {
 
                 if (this->stateFlags1 & PLAYER_STATE1_IN_WATER) {
                     func_8083A060(this, play);
-                    LinkAnimation_PlayOnceSetSpeedInterp(play, &this->skelAnime, sp3C, UNDERWATER_SPEED_MODIFIER*D_808535E8);
+                    LinkAnimation_PlayOnceSetSpeedInterp(play, &this->skelAnime, sp3C, UNDERWATER_SPEED_MODIFIER*sWaterSpeedFactor);
                     //func_8083328C(play, this, anim);//PlayOnceSetSpeed
                 } else {
                     func_8083A098(this, sp3C, play);//Allow the next state to follow
@@ -16195,7 +16197,7 @@ void Player_Action_808507F4(Player* this, PlayState* play) {
                 if ((this->av1.actionVar1 == 2) && LinkAnimation_OnFrame(&this->skelAnime, 30.0f)) {
                     this->stateFlags1 &= ~(PLAYER_STATE1_IN_ITEM_CS | PLAYER_STATE1_IN_CUTSCENE);
                 }
-            } else if ((isFastFarores ? 10 : D_80854A7C[this->avi.actionVar1]) < this->av2.actionVar2++) {
+            } else if ((isFastFarores ? 10 : D_80854A7C[this->av1.actionVar1]) < this->av2.actionVar2++) {
                 LinkAnimation_PlayOnceSetSpeed(play, &this->skelAnime, D_80854A70[this->av1.actionVar1],
                                                0.83f * (isFastFarores ? 2 : baseAnimSpeed));
                 this->yaw = this->actor.shape.rot.y;

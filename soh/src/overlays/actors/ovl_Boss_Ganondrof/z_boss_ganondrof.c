@@ -649,27 +649,27 @@ void BossGanondrof_SetupReturn(BossGanondrof* this, PlayState* play) {
     this->actionFunc = BossGanondrof_Return;
 }
 
-void BossGanondrof_Return(BossGanondrof* this, PlayState* play) {
-    SkelAnime_Update(&this->skelAnime);
-    if (Animation_OnFrame(&this->skelAnime, 5.0f)) {
-        Audio_PlayActorSound2(&this->actor, NA_SE_EN_FANTOM_VOICE);
+void BossGanondrof_Return(BossGanondrof* thisz, PlayState* play) {
+    SkelAnime_Update(&thisz->skelAnime);
+    if (Animation_OnFrame(&thisz->skelAnime, 5.0f)) {
+        Audio_PlayActorSound2(&thisz->actor, NA_SE_EN_FANTOM_VOICE);
         osSyncPrintf("VOISE               2  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
         osSyncPrintf("VOISE               2  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
     }
 
-    if (Animation_OnFrame(&this->skelAnime, this->fwork[GND_END_FRAME])) {
-        BossGanondrof_SetupNeutral(this, 0.0f);
+    if (Animation_OnFrame(&thisz->skelAnime, thisz->fwork[GND_END_FRAME])) {
+        BossGanondrof_SetupNeutral(thisz, 0.0f);
     }
 
-    this->actor.world.pos.x += this->actor.velocity.x;
-    this->actor.world.pos.z += this->actor.velocity.z;
-    Math_ApproachZeroF(&this->actor.velocity.x, 1.0f, 0.5f);
-    Math_ApproachZeroF(&this->actor.velocity.z, 1.0f, 0.5f);
-    this->actor.world.pos.y += 2.0f * Math_SinS(this->work[GND_VARIANCE_TIMER] * 1500);
-    if (this->returnSuccess) {
-        this->returnSuccess = false;
-        BossGanondrof_SetupReturn(this, play);
-        this->timers[0] = 100;
+    thisz->actor.world.pos.x += thisz->actor.velocity.x;
+    thisz->actor.world.pos.z += thisz->actor.velocity.z;
+    Math_ApproachZeroF(&thisz->actor.velocity.x, 1.0f, 0.5f);
+    // Math_ApproachZeroF(&thisz->actor.velocity.z, 1.0f, 0.5f);
+    thisz->actor.world.pos.y += 2.0f * Math_SinS(thisz->work[GND_VARIANCE_TIMER] * 1500);
+    if (thisz->returnSuccess) {
+        thisz->returnSuccess = false;
+        BossGanondrof_SetupReturn(thisz, play);
+        thisz->timers[0] = 100;
     }
 }
 
@@ -690,37 +690,37 @@ void BossGanondrof_SetupStunned(BossGanondrof* this, PlayState* play) {
     this->actor.velocity.z = 0.0f;
 }
 
-void BossGanondrof_Stunned(BossGanondrof* this, PlayState* play) {
+void BossGanondrof_Stunned(BossGanondrof* thisz, PlayState* play) {
     osSyncPrintf("DAMAGE   .................................\n");
-    SkelAnime_Update(&this->skelAnime);
-    this->actor.gravity = -0.2f;
-    if (this->actor.world.pos.y <= 5.0f) {
-        if (this->work[GND_ACTION_STATE] == STUNNED_FALL) {
-            this->fwork[GND_END_FRAME] = Animation_GetLastFrame(&gPhantomGanonStunnedAnim);
-            Animation_MorphToLoop(&this->skelAnime, &gPhantomGanonStunnedAnim, -10.0f);
-            this->work[GND_ACTION_STATE] = STUNNED_GROUND;
+    SkelAnime_Update(&thisz->skelAnime);
+    thisz->actor.gravity = -0.2f;
+    if (thisz->actor.world.pos.y <= 5.0f) {
+        if (thisz->work[GND_ACTION_STATE] == STUNNED_FALL) {
+            thisz->fwork[GND_END_FRAME] = Animation_GetLastFrame(&gPhantomGanonStunnedAnim);
+            Animation_MorphToLoop(&thisz->skelAnime, &gPhantomGanonStunnedAnim, -10.0f);
+            thisz->work[GND_ACTION_STATE] = STUNNED_GROUND;
         }
 
-        this->actor.velocity.y = 0.0f;
-        this->actor.gravity = 0.0f;
-        if (Animation_OnFrame(&this->skelAnime, this->fwork[GND_END_FRAME])) {
-            Audio_PlayActorSound2(&this->actor, NA_SE_EN_FANTOM_DAMAGE2);
+        thisz->actor.velocity.y = 0.0f;
+        thisz->actor.gravity = 0.0f;
+        if (Animation_OnFrame(&thisz->skelAnime, thisz->fwork[GND_END_FRAME])) {
+            Audio_PlayActorSound2(&thisz->actor, NA_SE_EN_FANTOM_DAMAGE2);
         }
 
-        this->actor.flags |= ACTOR_FLAG_HOOKSHOT_PULLS_PLAYER;
+        thisz->actor.flags |= ACTOR_FLAG_HOOKSHOT_PULLS_PLAYER;
     }
 
-    osSyncPrintf("TIME0 %d ********************************************\n", this->timers[0]);
-    if (this->timers[0] == 0) {
-        BossGanondrof_SetupNeutral(this, -5.0f);
-        this->timers[0] = 30;
-        this->timers[2] = 30;
-        this->flyMode = GND_FLY_NEUTRAL;
-        this->actor.velocity.y = 0.0f;
-        this->actor.gravity = 0.0f;
+    osSyncPrintf("TIME0 %d ********************************************\n", thisz->timers[0]);
+    if (thisz->timers[0] == 0) {
+        BossGanondrof_SetupNeutral(thisz, -5.0f);
+        thisz->timers[0] = 30;
+        thisz->timers[2] = 30;
+        thisz->flyMode = GND_FLY_NEUTRAL;
+        thisz->actor.velocity.y = 0.0f;
+        thisz->actor.gravity = 0.0f;
     }
 
-    Actor_MoveXZGravity(&this->actor);
+    Actor_MoveXZGravity(&thisz->actor);
 }
 
 void BossGanondrof_SetupBlock(BossGanondrof* this, PlayState* play) {

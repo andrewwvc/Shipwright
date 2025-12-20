@@ -644,7 +644,7 @@ bool Scene_CommandActorList(PlayState* play, SOH::ISceneCommand* cmd) {
     std::vector<SOH::ActorEntry> copy = cmdActor->actorList;
 
     //Handles static entry overrides
-    if (!(IsGameMasterQuest() && ((play->sceneNum >= 0 && play->sceneNum <= 9) || play->sceneNum == 11 || play->sceneNum == 13))) {
+    if (!(ResourceMgr_IsGameMasterQuest() && ((play->sceneNum >= 0 && play->sceneNum <= 9) || play->sceneNum == 11 || play->sceneNum == 13))) {
         if (sceneActorOverrides.find(play->sceneNum) != sceneActorOverrides.end() &&
                 sceneActorOverrides.at(play->sceneNum).find(play->roomCtx.curRoom.num) != sceneActorOverrides.at(play->sceneNum).end()) {
             auto& roomOverrides = sceneActorOverrides.at(play->sceneNum).at(play->roomCtx.curRoom.num);

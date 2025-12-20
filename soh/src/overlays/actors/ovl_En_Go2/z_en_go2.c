@@ -639,7 +639,7 @@ u16 EnGo2_GetTextIdGoronCityEntrance(PlayState* play, EnGo2* this) {
         else
             return GoronMsg+12;
     }
-    if (((!IS_RANDO && CHECK_QUEST_ITEM(QUEST_MEDALLION_FIRE)) ||
+    if ((!IS_RANDO && CHECK_QUEST_ITEM(QUEST_MEDALLION_FIRE)) ||
          (IS_RANDO && GameInteractor_Should(VB_GORONS_CONSIDER_FIRE_TEMPLE_FINISHED, CHECK_QUEST_ITEM(QUEST_MEDALLION_FIRE))) && LINK_IS_ADULT) {
         return GoronMsg+17;
     } else if ((!IS_RANDO && CHECK_QUEST_ITEM(QUEST_GORON_RUBY)) ||
@@ -1230,7 +1230,7 @@ s32 func_80A44AB0(EnGo2* this, PlayState* play) {
             (this->actionFunc != EnGo2_ContinueRolling)) {
             return false;
         } else {
-            if (!IS_REFINED_ROLLING && (this->collider.base.acFlags & 2) {
+            if (!IS_REFINED_ROLLING && (this->collider.base.acFlags & 2)) {
                 Audio_PlaySoundGeneral(NA_SE_SY_CORRECT_CHIME, &gSfxDefaultPos, 4, &gSfxDefaultFreqAndVolScale, &gSfxDefaultFreqAndVolScale, &gSfxDefaultReverb);
                 this->actor.flags &= ~ACTOR_FLAG_SFX_FOR_PLAYER_BODY_HIT;
                 this->collider.base.acFlags &= ~0x2;

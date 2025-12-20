@@ -2492,7 +2492,7 @@ s16 EnTest_WillJumpbackLand(EnTest* this, PlayState* play) {
 
 s16 EnTest_SetupJumpBackExtended(EnTest* this, PlayState* play, s16 forced) {
     Player *player = GET_PLAYER(play);
-    if (!forced && IS_ELITE && ((this->actor.flags & ACTOR_FLAG_TARGETABLE) || (this->variant & DARK_PARAM)) && (this->actor.xzDistToPlayer < 130.0f && Actor_IsFacingPlayer(&this->actor, 0xC00)) && (Player_isInSwordAnimation(play) || Rand_ZeroOne() > 0.6f)) {
+    if (!forced && IS_ELITE && ((this->actor.flags & ACTOR_FLAG_ATTENTION_ENABLED) || (this->variant & DARK_PARAM)) && (this->actor.xzDistToPlayer < 130.0f && Actor_IsFacingPlayer(&this->actor, 0xC00)) && (Player_isInSwordAnimation(play) || Rand_ZeroOne() > 0.6f)) {
         if (player->meleeWeaponState >= PLAYER_MWA_STAB_1H && PLAYER_MWA_STAB_COMBO_2H <= player->meleeWeaponState) {
             return EnTest_SetupCrossoverJump(this,play);
         } else

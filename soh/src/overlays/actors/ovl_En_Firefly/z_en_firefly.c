@@ -160,7 +160,7 @@ void EnFirefly_Init(Actor* thisx, PlayState* play) {
     }
 
     if (CVarGetInteger("gNonGyroDifficulty", 0)) {
-        this->actor.flags |= ACTOR_FLAG_TARGETABLE;
+        this->actor.flags |= ACTOR_FLAG_ATTENTION_ENABLED;
     }
 
     if (this->actor.params <= KEESE_FIRE_PERCH) {

@@ -897,7 +897,7 @@ void KaleidoScope_DrawEquipment(PlayState* play) {
     //                 32, 32, 0);
     //             gSPGrayscale(POLY_OPA_DISP++, false);
     for (rowStart = 0, j = 0, temp = 0, i = 0; i < NUM_EQUIPMENT_ROWS; i++, rowStart += 4, j += 16) {
-        gSPVertex(POLY_KAL_DISP++, &pauseCtx->equipVtx[j], 16, 0);
+        gSPVertex(POLY_OPA_DISP++, &pauseCtx->equipVtx[j], 16, 0);
         bool drawGreyItems = !CVarGetInteger(CVAR_CHEAT("TimelessEquipment"), 0);
         if (i < 4) {
             if (LINK_AGE_IN_YEARS == YEARS_CHILD) {
@@ -910,31 +910,31 @@ void KaleidoScope_DrawEquipment(PlayState* play) {
                         (sChildUpgradeItemBases[i] + CUR_UPG_VALUE(sChildUpgrades[i]) - 1) == ITEM_GAUNTLETS_GOLD) ||
                         (CVarGetInteger(CVAR_ENHANCEMENT("ToggleStrength"), 0) &&
                          CVarGetInteger(CVAR_ENHANCEMENT("StrengthDisabled"), 0) && sChildUpgrades[i] == UPG_STRENGTH)) { // Grey Out the Gauntlets
-                        gDPSetGrayscaleColor(POLY_KAL_DISP++, 109, 109, 109, 255);
-                        gSPGrayscale(POLY_KAL_DISP++, true);
+                        gDPSetGrayscaleColor(POLY_OPA_DISP++, 109, 109, 109, 255);
+                        gSPGrayscale(POLY_OPA_DISP++, true);
                     }
                     KaleidoScope_DrawQuadTextureRGBA32(play->state.gfxCtx, gItemIcons[sChildUpgradeItemBases[i] + point - 1], 32, 32, 0);
-                    gSPGrayscale(POLY_KAL_DISP++, false);
+                    gSPGrayscale(POLY_OPA_DISP++, false);
                 }
             } else {
                 if ((i == 0) && (CUR_UPG_VALUE(sAdultUpgrades[i]) == 0)) { // If the player doesn't have the bow, load the current slingshot ammo upgrade instead.
                     if (drawGreyItems) {
-                        gDPSetGrayscaleColor(POLY_KAL_DISP++, 109, 109, 109, 255); // Grey Out Slingshot Bullet Bags
-                        gSPGrayscale(POLY_KAL_DISP++, true);
+                        gDPSetGrayscaleColor(POLY_OPA_DISP++, 109, 109, 109, 255); // Grey Out Slingshot Bullet Bags
+                        gSPGrayscale(POLY_OPA_DISP++, true);
                     }
                     KaleidoScope_DrawQuadTextureRGBA32(play->state.gfxCtx, gItemIcons[sChildUpgradeItemBases[i] + CUR_UPG_VALUE(sChildUpgrades[i]) - 1], 32, 32, 0);
-                    gSPGrayscale(POLY_KAL_DISP++, false);
+                    gSPGrayscale(POLY_OPA_DISP++, false);
                 } else if (CUR_UPG_VALUE(sAdultUpgrades[i]) != 0) {
                     if ((drawGreyItems &&
                         ((sAdultUpgradeItemBases[i] + CUR_UPG_VALUE(sAdultUpgrades[i]) - 1) == ITEM_BRACELET &&
                             !(IS_RANDO) && !CVarGetInteger(CVAR_ENHANCEMENT("ToggleStrength"), 0))) ||
                         (CVarGetInteger(CVAR_ENHANCEMENT("ToggleStrength"), 0) &&
                          CVarGetInteger(CVAR_ENHANCEMENT("StrengthDisabled"), 0) && sAdultUpgrades[i] == UPG_STRENGTH)) { // Grey Out the Goron Bracelet when Not Randomized
-                        gDPSetGrayscaleColor(POLY_KAL_DISP++, 109, 109, 109, 255);
-                        gSPGrayscale(POLY_KAL_DISP++, true);
+                        gDPSetGrayscaleColor(POLY_OPA_DISP++, 109, 109, 109, 255);
+                        gSPGrayscale(POLY_OPA_DISP++, true);
                     }
                     KaleidoScope_DrawQuadTextureRGBA32(play->state.gfxCtx, gItemIcons[sAdultUpgradeItemBases[i] + CUR_UPG_VALUE(sAdultUpgrades[i]) - 1], 32, 32, 0);
-                    gSPGrayscale(POLY_KAL_DISP++, false);
+                    gSPGrayscale(POLY_OPA_DISP++, false);
                 }
             }
         }
@@ -954,9 +954,9 @@ void KaleidoScope_DrawEquipment(PlayState* play) {
             } else if (gBitFlags[bit] & gSaveContext.inventory.equipment) {
                 if (i == 4 && gSaveContext.inventory.ringEquips[k]) {
                     s16 ringTypeIndex = gSaveContext.inventory.ringEquips[k]-1;
-                    gDPSetCombineMode(POLY_KAL_DISP++,G_CC_BLENDPEDECALA, G_CC_BLENDPEDECALA);
-                    gDPSetPrimColor(POLY_KAL_DISP++, 0, 0, gRingColors[ringTypeIndex][0][0], gRingColors[ringTypeIndex][0][1], gRingColors[ringTypeIndex][0][2], pauseCtx->alpha);
-                    gDPSetEnvColor(POLY_KAL_DISP++, gRingColors[ringTypeIndex][1][0], gRingColors[ringTypeIndex][1][1], gRingColors[ringTypeIndex][1][2], pauseCtx->alpha);
+                    gDPSetCombineMode(POLY_OPA_DISP++,G_CC_BLENDPEDECALA, G_CC_BLENDPEDECALA);
+                    gDPSetPrimColor(POLY_OPA_DISP++, 0, 0, gRingColors[ringTypeIndex][0][0], gRingColors[ringTypeIndex][0][1], gRingColors[ringTypeIndex][0][2], pauseCtx->alpha);
+                    gDPSetEnvColor(POLY_OPA_DISP++, gRingColors[ringTypeIndex][1][0], gRingColors[ringTypeIndex][1][1], gRingColors[ringTypeIndex][1][2], pauseCtx->alpha);
                 }
                 KaleidoScope_DrawQuadTextureRGBA32(play->state.gfxCtx, gItemIcons[itemId], 32, 32, point);
             }

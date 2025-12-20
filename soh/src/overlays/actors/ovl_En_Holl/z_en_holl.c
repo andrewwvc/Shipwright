@@ -194,7 +194,7 @@ void EnHoll_TeleportBack(EnHoll* this, PlayState* play) {
     s32 transitionActorIdx;
     f32 moveDist;
 
-    func_8002DBD0(&this->actor, &vec, &player->actor.world.pos);
+    Actor_WorldToActorCoords(&this->actor, &vec, &player->actor.world.pos);
     this->side = (vec.z < 0.0f) ? 0 : 1;
     absZ = fabsf(vec.z);
     if (vec.y > PLANE_Y_MIN && vec.y < PLANE_Y_MAX && fabsf(vec.x) < PLANE_HALFWIDTH &&

@@ -608,7 +608,7 @@ void Elf_GiveDefense(EnElf* this, PlayState* play) {
         gSaveContext.spiritDefenseHeartsGiven++;
         this->actionFunc = func_80A03610;
     } else {
-        func_8002F434(&this->actor, play, GI_DEFENSE_HEART, 100.0f, 50.0f);
+        Actor_OfferGetItem(&this->actor, play, GI_DEFENSE_HEART, 100.0f, 50.0f);
     }
 }
 
@@ -687,7 +687,7 @@ void func_80A0329C(EnElf* this, PlayState* play) {
 
                 if ((gSaveContext.spiritDefenseHeartsGiven+1)*10 <= countCollection() &&
                         Actor_FindNumberOf(play,&this->actor,ACTOR_EN_ELF,ACTORCAT_ITEMACTION, 500.0f, NULL, isGivingDefense) < 1) {
-                    func_8002F434(&this->actor, play, GI_DEFENSE_HEART, 100.0f, 50.0f);
+                    Actor_OfferGetItem(&this->actor, play, GI_DEFENSE_HEART, 100.0f, 50.0f);
                     EnElf_SetupAction(this, Elf_GiveDefense);
                 } else {
                     EnElf_SetupAction(this, func_80A03610);

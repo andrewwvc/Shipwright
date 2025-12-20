@@ -1771,7 +1771,7 @@ void BossDodongo_DeathCutscene(BossDodongo* this, PlayState* play) {
             BossDodongo_DropPillars();
             this->items[1].dim.modelSphere.radius = 60;
             this->items[2].dim.modelSphere.radius = 60;
-            gSaveContext.sohStats.itemTimestamp[TIMESTAMP_DEFEAT_KING_DODONGO] = GAMEPLAYSTAT_TOTAL_TIME;
+            gSaveContext.ship.stats.itemTimestamp[TIMESTAMP_DEFEAT_KING_DODONGO] = GAMEPLAYSTAT_TOTAL_TIME;
             //BossRush_HandleCompleteBoss(play);
             GameInteractor_ExecuteOnBossDefeat(&this->actor);
             break;

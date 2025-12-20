@@ -279,7 +279,7 @@ void EnCow_GiveHeart(EnCow* this, PlayState* play) {
         this->actor.parent = NULL;
         this->actionFunc = func_809DF730;
     } else {
-        func_8002F434(&this->actor, play, GI_HEART_PIECE, 10000.0f, 100.0f);
+        Actor_OfferGetItem(&this->actor, play, GI_HEART_PIECE, 10000.0f, 100.0f);
     }
 }
 
@@ -288,7 +288,7 @@ void EnCow_GivePlayerHeartPiece(EnCow* this, PlayState* play) {
         this->actor.flags &= ~ACTOR_FLAG_TALK_OFFER_AUTO_ACCEPTED;
         Message_CloseTextbox(play);
         this->actionFunc = EnCow_GiveHeart;
-        func_8002F434(&this->actor, play, GI_HEART_PIECE, 10000.0f, 100.0f);
+        Actor_OfferGetItem(&this->actor, play, GI_HEART_PIECE, 10000.0f, 100.0f);
     }
 }
 

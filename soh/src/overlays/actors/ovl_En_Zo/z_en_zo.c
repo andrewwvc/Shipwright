@@ -724,7 +724,7 @@ void EnZo_DetectPlayerInitially(EnZo* this, PlayState* play) {
         this->alpha = 255.0f;
         this->actionFunc = EnZo_Standing;
     } else {
-        this->actor.flags &= ~ACTOR_FLAG_TARGETABLE;
+        this->actor.flags &= ~ACTOR_FLAG_ATTENTION_ENABLED;
         this->actionFunc = EnZo_Submerged;
     }
 }

@@ -4179,7 +4179,7 @@ s32 Actor_OtherIsTargeted(PlayState* play, Actor* actor) {
 s32 Actor_SameIsTargeted(PlayState* play, Actor* actor) {
     Player* player = GET_PLAYER(play);
 
-    if ((player->stateFlags1 & 0x10) && !actor->isTargeted && player->unk_664 && (actor->id == player->unk_664->id)) {
+    if ((player->stateFlags1 & 0x10) && !actor->isTargeted && player->focusActor && (actor->id == player->focusActor->id)) {
         return true;
     } else {
         return false;

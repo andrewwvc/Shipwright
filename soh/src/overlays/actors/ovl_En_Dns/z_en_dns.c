@@ -169,7 +169,7 @@ DnsItemEntry* EnDns_GrottoExitToItemEntry(s16 entranceNum) {
         case 1492:
         return &D_BuyRing;
         default:
-        return &D_809F04A0;
+        return &sItemBombs;
     }
 }
 

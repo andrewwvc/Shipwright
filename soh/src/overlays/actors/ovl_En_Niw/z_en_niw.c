@@ -903,7 +903,7 @@ s16 EnNiw_GiveItem(EnNiw* this, PlayState* play) {
         this->actionFunc = EnNiw_BeTalking;
         gSaveContext.infTable[29] |= 0x8000;
     } else {
-        func_8002F434(this, play, GI_HEART_PIECE, 250.0f, 250.0f);
+        Actor_OfferGetItem(this, play, GI_HEART_PIECE, 250.0f, 250.0f);
     }
 }
 
@@ -923,7 +923,7 @@ s16 EnNiw_ProcessTalk(PlayState* play, Actor* thisx) {
             if (Message_ShouldAdvance(play)) {
                 if (thisx->textId == MiscMsg+2) {
                     gSaveContext.infTable[29] |= 0x8000;
-                    func_8002F434(this, play, GI_HEART_PIECE, 250.0f, 250.0f);
+                    Actor_OfferGetItem(this, play, GI_HEART_PIECE, 250.0f, 250.0f);
                     this->actionFunc = EnNiw_GiveItem;
                 }
                 Message_CloseTextbox(play);

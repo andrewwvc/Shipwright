@@ -992,7 +992,7 @@ void func_80ADB770(EnPoSisters* this, PlayState* play) {
         }
     }
     if (this->unk_195 == 0) {
-        if (this->actor.isTargeted && (GET_PLAYER(play)->stateFlags1 & PLAYER_STATE1_TARGETING) && this->unk_19A >= LATE_SPIN_TIME_MEG) {
+        if (this->actor.isTargeted && (GET_PLAYER(play)->stateFlags1 & PLAYER_STATE1_Z_TARGETING) && this->unk_19A >= LATE_SPIN_TIME_MEG) {
             Audio_PlayActorSound2(&this->actor, NA_SE_EN_PO_LAUGH2);
             func_80AD9C24(this, play);
         } else if (this->unk_19A >= START_SPIN_TIME_MEG || (this->unk_19A < LATE_SPIN_TIME_MEG && this->unk_19A >= 16)) {

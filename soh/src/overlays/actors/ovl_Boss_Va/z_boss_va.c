@@ -2072,7 +2072,6 @@ void BossVa_ZapperAttack(BossVa* this, PlayState* play) {
     playerToArmYaw = Math_Vec3f_Yaw(&playerPosTop, &this->armTip);
     playerShapeYawDiff = playerToArmYaw - this->actor.shape.rot.y;
 
-    if ((sp8E >= ABS(tmp17) || this->burst) && !(sBodyState & 0x80) && !(player->stateFlags1 & PLAYER_STATE1_DAMAGED)) {
     if ((yawDiffThreshold >= ABS(playerShapeYawDiff) || this->burst) && !(sBodyState & 0x80) && !(player->stateFlags1 & PLAYER_STATE1_DAMAGED)) {
 
         if (!this->burst) {

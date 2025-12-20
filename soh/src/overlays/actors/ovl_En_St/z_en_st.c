@@ -487,9 +487,9 @@ s32 EnSt_CheckHitBackside(EnSt* this, PlayState* play) {
     Audio_PlayActorSound2(&this->actor, NA_SE_EN_STALWALL_DEAD);
     GameInteractor_ExecuteOnEnemyDefeat(&this->actor);
     if (this->actor.params & SKULLTULA_PARAM_BIG) {
-        gSaveContext.sohStats.count[COUNT_ENEMIES_DEFEATED_SKULLTULA_BIG]++;
+        gSaveContext.ship.stats.count[COUNT_ENEMIES_DEFEATED_SKULLTULA_BIG]++;
     } else {
-        gSaveContext.sohStats.count[COUNT_ENEMIES_DEFEATED_SKULLTULA]++;
+        gSaveContext.ship.stats.count[COUNT_ENEMIES_DEFEATED_SKULLTULA]++;
     }
 
     if (flags & 0x1F820) {

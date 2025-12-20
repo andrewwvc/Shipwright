@@ -718,7 +718,7 @@ s16 func_80A97738(PlayState* play, Actor* thisx) {
             if (Message_ShouldAdvance(play)) {
                 if ((ENKO_TYPE == ENKO_TYPE_CHILD_1 && this->actor.textId == KokiriMsg+37 && !(gSaveContext.itemGetInf[1] & 0x10))
                                 || (ENKO_TYPE == ENKO_TYPE_CHILD_2 && this->actor.textId == KokiriMsg+7)) {
-                    func_8002F434(this, play, GI_HEART_PIECE, 100.0f, 100.0f);
+                    Actor_OfferGetItem(this, play, GI_HEART_PIECE, 100.0f, 100.0f);
                     this->actionFunc = heart_give;
                     return NPC_TALK_STATE_ITEM_GIVEN;
                 }
@@ -1433,7 +1433,7 @@ void heart_give(EnKo* this, PlayState* play) {
         else if (ENKO_TYPE == ENKO_TYPE_CHILD_2)
             gSaveContext.itemGetInf[2] |= 0x01;
     } else {
-        func_8002F434(this, play, GI_HEART_PIECE, 100.0f, 100.0f);
+        Actor_OfferGetItem(this, play, GI_HEART_PIECE, 100.0f, 100.0f);
     }
 }
 

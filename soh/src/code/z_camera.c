@@ -3200,16 +3200,16 @@ s32 Camera_Battle4(Camera* camera) {
 s32 Camera_Battle5(Camera* camera) {
     s32 isInVolley = false;
     s32 isExitingVolley = false;
-    if (camera->player->unk_664 && (camera->player->unk_664->id == ACTOR_BOSS_GANONDROF) && sCameraSettings[camera->setting].cameraModes[camera->mode].values->val != ALT_HEIGHT)
-        isInVolley = (((BossGanondrof*)(camera->player->unk_664))->actionFunc == BossGanondrof_Return);
+    if (camera->player->focusActor && (camera->player->focusActor->id == ACTOR_BOSS_GANONDROF) && sCameraSettings[camera->setting].cameraModes[camera->mode].values->val != ALT_HEIGHT)
+        isInVolley = (((BossGanondrof*)(camera->player->focusActor))->actionFunc == BossGanondrof_Return);
 
-    if (camera->player->unk_664 && (camera->player->unk_664->id == ACTOR_BOSS_GANONDROF) && sCameraSettings[camera->setting].cameraModes[camera->mode].values->val == ALT_HEIGHT)
-        isExitingVolley = (((BossGanondrof*)(camera->player->unk_664))->actionFunc == BossGanondrof_Stunned);
+    if (camera->player->focusActor && (camera->player->focusActor->id == ACTOR_BOSS_GANONDROF) && sCameraSettings[camera->setting].cameraModes[camera->mode].values->val == ALT_HEIGHT)
+        isExitingVolley = (((BossGanondrof*)(camera->player->focusActor))->actionFunc == BossGanondrof_Stunned);
 
     if (RELOAD_PARAMS || isInVolley || isExitingVolley) {
         CameraModeValue* values = sCameraSettings[camera->setting].cameraModes[camera->mode].values;
         f32 yNormal = (1.0f + PCT(OREG(46))) - (PCT(OREG(46)));
-        if (camera->player->unk_664){
+        if (camera->player->focusActor){
             if (isInVolley) {
                 (values[0]).val = ALT_HEIGHT; //200;
                 (values[1]).val =  250; //100; //250;

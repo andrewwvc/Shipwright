@@ -620,7 +620,6 @@ void EnFr_Idle(EnFr* this, PlayState* play) {
             player->actor.world.pos.z = this->actor.world.pos.z; // z = -1220.0f
             player->yaw = player->actor.world.rot.y = player->actor.shape.rot.y = this->actor.world.rot.y;
             this->reward = GI_NONE;
-            this->getItemEntry = (GetItemEntry)GET_ITEM_NONE;
             this->actionFunc = EnFr_Activate;
         } else if (EnFr_IsAboveAndWithin30DistXZ(player, this)) {
             player->unk_6A8 = &this->actor;

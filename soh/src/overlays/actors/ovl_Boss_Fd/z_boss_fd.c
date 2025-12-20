@@ -1695,8 +1695,8 @@ void BossFd_UpdateEffects(BossFd* this, PlayState* play) {
                     func_8002F6D4(play, NULL, 5.0f, effect->kbAngle, 0.0f, 0x0);
                     player->invincibilityTimer = prevPlayerInvincibilityTimer;
                     if (player->bodyIsBurning == false) {
-                        for (i2 = 0; i2 < ARRAY_COUNT(player->flameTimers); i2++) {
-                            player->flameTimers[i2] = Rand_S16Offset(0, 200);
+                        for (i2 = 0; i2 < ARRAY_COUNT(player->bodyFlameTimers); i2++) {
+                            player->bodyFlameTimers[i2] = Rand_S16Offset(0, 200);
                         }
                         player->bodyIsBurning = true;
                     }

@@ -1038,14 +1038,14 @@ void DrawFlagsTab() {
                             case EVENT_INF:
                                 DrawFlagTableArray16(flagTable, j, gSaveContext.eventInf[j]);
                                 break;
-                            case RANDOMIZER_INF:
-                                DrawFlagTableArray16(flagTable, j, gSaveContext.ship.randomizerInf[j]);
+                            case NPC_GORON:
+                                DrawFlagTableArray16(flagTable, j, gSaveContext.goronTimeStatus);
                                 break;
                             case NPC_WEEK_EVENT:
                                 DrawFlagTableArray16(flagTable, j, gSaveContext.NPCWeekEvents[j]);
                                 break;
                             case RANDOMIZER_INF:
-                                DrawFlagTableArray16(flagTable, j, gSaveContext.randomizerInf[j]);
+                                DrawFlagTableArray16(flagTable, j, gSaveContext.ship.randomizerInf[j]);
                                 break;
                         }
                     },

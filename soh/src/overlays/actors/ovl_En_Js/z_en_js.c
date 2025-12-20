@@ -142,8 +142,8 @@ void func_80A89160(EnJs* this, PlayState* play) {
     } else {
         s16 itemToGive = SELL_BARRIER_CONDITION ? GI_DEFENSE_HEART : SELL_RING_CONDITION ? GI_RING+RI_COWARDS_RING : GI_BOMBCHUS_10;
         GetItemEntry itemEntry = ItemTable_Retrieve(itemToGive);
-        gSaveContext.pendingSale = itemEntry.itemId;
-        gSaveContext.pendingSaleMod = itemEntry.modIndex;
+        gSaveContext.ship.pendingSale = itemEntry.itemId;
+        gSaveContext.ship.pendingSaleMod = itemEntry.modIndex;
         Actor_OfferGetItem(&this->actor, play, itemToGive, 10000.0f, 50.0f);
     }
 }

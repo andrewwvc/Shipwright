@@ -1605,6 +1605,7 @@ void Rando_Inventory_SwapAgeEquipment(void) {
 void Inventory_SwapAgeEquipment(void) {
     s16 i;
     u16 shieldEquipValue;
+    s16 prevEquipedRing = Ring_Get_Equiped();
 
     if (IS_RANDO) {
         Rando_Inventory_SwapAgeEquipment();
@@ -5427,7 +5428,7 @@ void Interface_DrawAmmoCount(PlayState* play, s16 button, s16 alpha) {
 
     if (GameInteractor_Should(VB_DRAW_AMMO_COUNT,((i == ITEM_STICK) || (i == ITEM_NUT) || (i == ITEM_BOMB) || (i == ITEM_BOW) ||
         ((i >= ITEM_BOW_ARROW_FIRE) && (i <= ITEM_BOW_ARROW_LIGHT)) || (i == ITEM_SLINGSHOT) || (i == ITEM_BOMBCHU) ||
-        (i == ITEM_BEAN) || (i == ITEM_LANDMINE)), &i) {
+        (i == ITEM_BEAN) || (i == ITEM_LANDMINE)), &i)) {
 
         if ((i >= ITEM_BOW_ARROW_FIRE) && (i <= ITEM_BOW_ARROW_LIGHT)) {
             i = ITEM_BOW;
@@ -6786,7 +6787,6 @@ void Interface_Draw(PlayState* play) {
                                             Message_StartTextbox(play, MiscMsg+7, NULL);
                                         } else {
                                             Message_StartTextbox(play, 0x71B0, NULL);
->>>>>>> andrewwvc/pre-water-pillar
                                         }
                                         Player_SetCsActionWithHaltedActors(play, NULL, 8);
                                     } else {
@@ -6915,7 +6915,7 @@ void Interface_Draw(PlayState* play) {
                 if (gSaveContext.subTimerState != 0)
                     OVERLAY_DISP =
                     Gfx_TextureIA8(OVERLAY_DISP, gClockIconTex, 16, 16, svar5_2, svar2_2 + 2, 16, 16, 1 << 10, 1 << 10);
-                if (gSaveContext.timer1State != 0)
+                if (gSaveContext.timerState != 0)
                     OVERLAY_DISP =
                     Gfx_TextureIA8(OVERLAY_DISP, gClockIconTex, 16, 16, svar5, (gSaveContext.subTimerState != 0) ? svar2+20+2 : svar2 + 2, 16, 16, 1 << 10, 1 << 10);
 

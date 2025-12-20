@@ -532,7 +532,7 @@ void EnGe1_KnockedOut_GateGuard(EnGe1* this, PlayState* play) {
     s32 effectAngle;
     Vec3f effectPos;
 
-    this->actor.flags &= ~ACTOR_FLAG_TARGETABLE;
+    this->actor.flags &= ~ACTOR_FLAG_ATTENTION_ENABLED;
 
     effectAngle = (play->state.frames) * 0x2800;
     effectPos.x = this->actor.focus.pos.x + (Math_CosS(effectAngle) * 5.0f);
