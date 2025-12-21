@@ -2501,24 +2501,24 @@ extern "C" int CustomMessage_RetrieveIfExists(PlayState* play) {
                 uint16_t newTextId = GetTextID("stone")+actorParams;
                 uint16_t substituteID = RetrieveTextSubstitution(newTextId);
                 if (newTextId == substituteID) {
-                    messageEntry = CustomMessageManager::Instance->RetrieveMessage(questMessageTableID, newTextId);
+                    messageEntry = CustomMessageManager::Instance->RetrieveMessage(questMessageTableID, newTextId, MF_FORMATTED);
                 } else {
                     textId = msgCtx->textId = substituteID;
                 }
                 if (messageEntry.GetTextBoxType() == TEXTBOX_TYPE_MISSING) {
-                    messageEntry = CustomMessageManager::Instance->RetrieveMessage(questMessageTableID, textId);
+                    messageEntry = CustomMessageManager::Instance->RetrieveMessage(questMessageTableID, textId, MF_FORMATTED);
                 }
             } else {
                 uint16_t substituteID = RetrieveTextSubstitution(textId);
                 if (substituteID == textId)
-                    messageEntry = CustomMessageManager::Instance->RetrieveMessage(questMessageTableID, substituteID);
+                    messageEntry = CustomMessageManager::Instance->RetrieveMessage(questMessageTableID, substituteID, MF_FORMATTED);
                 else
                     textId = msgCtx->textId = substituteID;
             }
         } else {
             uint16_t substituteID = RetrieveTextSubstitution(textId);
             if (substituteID == textId)
-                messageEntry = CustomMessageManager::Instance->RetrieveMessage(questMessageTableID, substituteID);
+                messageEntry = CustomMessageManager::Instance->RetrieveMessage(questMessageTableID, substituteID, MF_FORMATTED);
             else
                 textId = msgCtx->textId = substituteID;
         }
