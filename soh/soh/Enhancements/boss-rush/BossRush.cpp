@@ -428,12 +428,14 @@ void BossRush_InitSave() {
     }
 
     // Set consumable counts
-    std::array<s8, 16> brAmmo = { 5, 5, CAPACITY(1,UPG_BOMB_BAG), 10, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    std::array<s8, 16> brAmmo = { 5, 5, static_cast<s8>(CAPACITY(1,UPG_BOMB_BAG)), 10, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
     if (gSaveContext.ship.quest.data.bossRush.options[BR_OPTIONS_AMMO] == BR_CHOICE_AMMO_FULL) {
-        brAmmo = { CAPACITY(UPG_STICKS,2), CAPACITY(UPG_NUTS,2), CAPACITY(UPG_BOMB_BAG,2), CAPACITY(UPG_QUIVER,2), 0, 0, CAPACITY(UPG_BULLET_BAG,2), 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        brAmmo = { static_cast<s8>(CAPACITY(UPG_STICKS,2)), static_cast<s8>(CAPACITY(UPG_NUTS,2)), static_cast<s8>(CAPACITY(UPG_BOMB_BAG,2)),
+                    static_cast<s8>(CAPACITY(UPG_QUIVER,2)), 0, 0, static_cast<s8>(CAPACITY(UPG_BULLET_BAG,2)), 0, 0, 0, 0, 0, 0, 0, 0, 0 };
     } else if (gSaveContext.ship.quest.data.bossRush.options[BR_OPTIONS_AMMO] == BR_CHOICE_AMMO_MAXED) {
-        brAmmo = { CAPACITY(UPG_STICKS,3), CAPACITY(UPG_NUTS,3), CAPACITY(UPG_BOMB_BAG,3), CAPACITY(UPG_QUIVER,3), 0, 0, CAPACITY(UPG_BULLET_BAG,3), 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        brAmmo = { static_cast<s8>(CAPACITY(UPG_STICKS,3)), static_cast<s8>(CAPACITY(UPG_NUTS,3)), static_cast<s8>(CAPACITY(UPG_BOMB_BAG,3)),
+                    static_cast<s8>(CAPACITY(UPG_QUIVER,3)), 0, 0, static_cast<s8>(CAPACITY(UPG_BULLET_BAG,3)), 0, 0, 0, 0, 0, 0, 0, 0, 0 };
     }
 
     for (int ammo = 0; ammo < ARRAY_COUNT(gSaveContext.inventory.ammo); ammo++) {

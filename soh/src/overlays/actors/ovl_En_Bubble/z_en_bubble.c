@@ -74,10 +74,10 @@ static Color_RGBA8 sEffectPrimColor = { 255, 255, 255, 255 };
 
 static Color_RGBA8 sEffectEnvColor = { 150, 150, 150, 0 };
 
-static const MovementSpeedBase = 6.0f;
-static const MovementSpeedAug = 7.2000001f;
-static const MovementSpeedYBase = 3.0f;
-static const MovementSpeedYAug = 3.6000001f;
+static const float MovementSpeedBase = 6.0f;
+static const float MovementSpeedAug = 7.2000001f;
+static const float MovementSpeedYBase = 3.0f;
+static const float MovementSpeedYAug = 3.6000001f;
 
 void EnBubble_SetDimensions(EnBubble* this, f32 dim) {
     f32 a;
