@@ -159,7 +159,7 @@ void EnFirefly_Init(Actor* thisx, PlayState* play) {
         this->actor.params &= 0x7FFF;
     }
 
-    if (CVarGetInteger("gNonGyroDifficulty", 0)) {
+    if (CVarGetInteger(CVAR_ENHANCEMENT("NonGyroDifficulty"), 0)) {
         this->actor.flags |= ACTOR_FLAG_ATTENTION_ENABLED;
     }
 

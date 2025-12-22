@@ -275,7 +275,7 @@ void EnOkuta_SetupWaitToAppear(EnOkuta* this) {
 void EnOkuta_SetupAppear(EnOkuta* this, PlayState* play) {
     this->actor.draw = EnOkuta_Draw;
     this->actor.shape.rot.y = this->actor.yawTowardsPlayer;
-    if (SPIKE_SHOT || CVarGetInteger("gNonGyroDifficulty", 0))
+    if (SPIKE_SHOT || CVarGetInteger(CVAR_ENHANCEMENT("NonGyroDifficulty"), 0))
         this->actor.flags |= ACTOR_FLAG_ATTENTION_ENABLED;
     Animation_PlayOnce(&this->skelAnime, &gOctorokAppearAnim);
     EnOkuta_SpawnBubbles(this, play);

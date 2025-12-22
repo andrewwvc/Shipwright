@@ -210,7 +210,7 @@ void EnPoField_Init(Actor* thisx, PlayState* play) {
         Collider_InitCylinder(play, &this->flameCollider[ii]);
         Collider_SetCylinder(play, &this->flameCollider[ii], &this->actor, &D_80AD70AC);
     }
-    CollisionCheck_SetInfo(&this->actor.colChkInfo, (CVarGetInteger("gNonGyroDifficulty", 0) ? &sDamageTableAlt : &sDamageTable), &D_80AD70D8);
+    CollisionCheck_SetInfo(&this->actor.colChkInfo, (CVarGetInteger(CVAR_ENHANCEMENT("NonGyroDifficulty"), 0) ? &sDamageTableAlt : &sDamageTable), &D_80AD70D8);
     this->lightNode = LightContext_InsertLight(play, &play->lightCtx, &this->lightInfo);
     Lights_PointGlowSetInfo(&this->lightInfo, this->actor.home.pos.x, this->actor.home.pos.y, this->actor.home.pos.z,
                             255, 255, 255, 0);
@@ -462,7 +462,7 @@ void EnPoField_WaitForSpawn(EnPoField* this, PlayState* play) {
                     }
                 } else if (player->stateFlags1 & PLAYER_STATE1_ON_HORSE || Rand_ZeroOne() < 0.4f) {
                     this->actor.params = EN_PO_FIELD_BIG;
-                    if (!CVarGetInteger("gNonGyroDifficulty", 0))
+                    if (!CVarGetInteger(CVAR_ENHANCEMENT("NonGyroDifficulty"), 0))
                         this->actor.colChkInfo.health = 8;
                     this->spawnFlagIndex = i;
                     spawnDist = 480.0f;

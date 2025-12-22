@@ -1064,6 +1064,10 @@ void SohMenu::AddMenuEnhancements() {
                      .ComboMap(bonkDamageValues)
                      .DefaultIndex(BONK_DAMAGE_NONE)
                      .Tooltip("Modifies Damage taken after Bonking."));
+    AddWidget(path, "Balanced for no gyro controls", WIDGET_CVAR_CHECKBOX)
+        .CVar(CVAR_ENHANCEMENT("NonGyroDifficulty"))
+        .Options(CheckboxOptions().Tooltip("Make the game easier in ways to compensate for lack of gyro aiming.\n"
+                                           "Otherwise enemies/minigames will be harder and expect a gyro controller."));
     AddWidget(path, "Spawn with Full Health", WIDGET_CVAR_CHECKBOX)
         .CVar(CVAR_ENHANCEMENT("FullHealthSpawn"))
         .Options(CheckboxOptions().Tooltip("Respawn with Full Health instead of 3 hearts."));
