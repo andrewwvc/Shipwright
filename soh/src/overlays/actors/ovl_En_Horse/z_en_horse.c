@@ -10,6 +10,7 @@
 #include "objects/object_horse/object_horse.h"
 #include "objects/object_hni/object_hni.h"
 #include "scenes/overworld/spot09/spot09_scene.h"
+#include "soh/OTRGlobals.h"
 #include <assert.h>
 
 #define FLAGS ACTOR_FLAG_UPDATE_CULLING_DISABLED
