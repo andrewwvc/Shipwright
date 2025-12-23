@@ -181,6 +181,7 @@ static const std::unordered_map<int32_t, const char*> enhancementPresetList = {
     { ENHANCEMENT_PRESET_VANILLA_PLUS, "Vanilla Plus" },
     { ENHANCEMENT_PRESET_ENHANCED, "Enhanced" },
     { ENHANCEMENT_PRESET_RANDOMIZER, "Randomizer" },
+    { ENHANCEMENT_PRESET_S_EDITION, "S-Edition" },
 };
 
 class SohMenu : public Ship::Menu {

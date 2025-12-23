@@ -44,7 +44,7 @@ const std::vector<PresetEntry> vanillaPlusPresetEntries = {
     PRESET_ENTRY_S32(CVAR_ENHANCEMENT("GravediggingTourFix"), 1),
     PRESET_ENTRY_S32(CVAR_ENHANCEMENT("FixFloorSwitches"), 1),
     PRESET_ENTRY_S32(CVAR_ENHANCEMENT("FixZoraHintDialogue"), 1), PRESET_ENTRY_S32(CVAR_ENHANCEMENT("FixVineFall"), 1),
-    PRESET_ENTRY_S32(CVAR_ENHANCEMENT("EnemySpawnsOverWaterboxes"), 1),
+    //PRESET_ENTRY_S32(CVAR_ENHANCEMENT("EnemySpawnsOverWaterboxes"), 1),
     PRESET_ENTRY_S32(CVAR_ENHANCEMENT("FixSawSoftlock"), 1), PRESET_ENTRY_S32(CVAR_ENHANCEMENT("DekuNutUpgradeFix"), 1),
     PRESET_ENTRY_S32(CVAR_ENHANCEMENT("FixGrokenGiantsKnife"), 1), PRESET_ENTRY_S32(CVAR_ENHANCEMENT("FixMenuLR"), 1),
     PRESET_ENTRY_S32(CVAR_ENHANCEMENT("FixDungeonMinimapIcon"), 1),
@@ -70,6 +70,73 @@ const std::vector<PresetEntry> vanillaPlusPresetEntries = {
 
     // Cheats
     // NONE
+};
+
+const std::vector<PresetEntry> sEditionPresetEntries = {
+    // D-pad Support in text and file select
+    //PRESET_ENTRY_S32(CVAR_ENHANCEMENT("DpadInText"), 1),
+    // Play Ocarina with D-pad
+    //PRESET_ENTRY_S32(CVAR_ENHANCEMENT("DpadOcarina"), 1),
+    // Play Ocarina with Right Stick
+    //PRESET_ENTRY_S32(CVAR_ENHANCEMENT("RStickOcarina"), 1),
+    // D-pad as Equip Items
+    PRESET_ENTRY_S32(CVAR_ENHANCEMENT("DpadEquips"), 1),
+    // Prevent Dropped Ocarina Inputs
+    PRESET_ENTRY_S32(CVAR_ENHANCEMENT("DpadNoDropOcarinaInput"), 1),
+    // Right Stick Aiming
+    //PRESET_ENTRY_S32(CVAR_ENHANCEMENT("RightStickAiming"), 1),
+
+    // Text Speed (1 to 5)
+    PRESET_ENTRY_S32(CVAR_ENHANCEMENT("TextSpeed"), 2),
+    // Skip Text
+    PRESET_ENTRY_S32(CVAR_ENHANCEMENT("SkipText"), 1),
+    // Faster Block Push (+0 to +5)
+    PRESET_ENTRY_S32(CVAR_ENHANCEMENT("FasterBlockPush"), 2),
+    // Better Owl
+    PRESET_ENTRY_S32(CVAR_ENHANCEMENT("BetterOwl"), 1),
+
+    // Assignable Tunics and Boots
+    PRESET_ENTRY_S32(CVAR_ENHANCEMENT("AssignableTunicsAndBoots"), 1),
+    // Inject Item Counts in messages
+    //PRESET_ENTRY_S32(CVAR_ENHANCEMENT("InjectItemCounts"), 1),
+
+    // Dynamic Wallet Icon
+    //PRESET_ENTRY_S32(CVAR_ENHANCEMENT("DynamicWalletIcon"), 1),
+
+    // Fix L&R Pause menu
+    PRESET_ENTRY_S32(CVAR_ENHANCEMENT("FixMenuLR"), 1),
+    // Fix Dungeon entrances
+    PRESET_ENTRY_S32(CVAR_ENHANCEMENT("FixDungeonMinimapIcon"), 1),
+    // Fix Two Handed idle animations
+    PRESET_ENTRY_S32(CVAR_ENHANCEMENT("TwoHandedIdle"), 1),
+    // Fix the Gravedigging Tour Glitch
+    PRESET_ENTRY_S32(CVAR_ENHANCEMENT("GravediggingTourFix"), 1),
+    // Fix Deku Nut upgrade
+    PRESET_ENTRY_S32(CVAR_ENHANCEMENT("DekuNutUpgradeFix"), 1),
+    // Fix Navi text HUD position
+    PRESET_ENTRY_S32(CVAR_ENHANCEMENT("NaviTextFix"), 1),
+    // Extend Silver Rupee Jingle
+    PRESET_ENTRY_S32(CVAR_ENHANCEMENT("SilverRupeeJingleExtend"), 1),
+    // Instant Putaway
+    PRESET_ENTRY_S32(CVAR_ENHANCEMENT("InstantPutaway"), 1),
+    // Let you place Bomchus without entering FPS mode
+    PRESET_ENTRY_S32(CVAR_ENHANCEMENT("DisableFirstPersonChus"), 1),
+    //Light arrows light up suns
+    PRESET_ENTRY_S32(CVAR_ENHANCEMENT("SunlightArrows"), 1),
+
+    //Disable model swaps
+    PRESET_ENTRY_S32(CVAR_ENHANCEMENT("DisableLOD"), 1),
+    //Disable draw Distance
+    PRESET_ENTRY_S32(CVAR_ENHANCEMENT("DisableDrawDistance"), 1),
+    // Red Ganon blood
+    PRESET_ENTRY_S32(CVAR_ENHANCEMENT("RedGanonBlood"), 1),
+    //Make paths appear without z-fighting
+    PRESET_ENTRY_S32(CVAR_ENHANCEMENT("SceneSpecificDirtPathFix"), ZFIGHT_FIX_CONSISTENT_VANISH),
+    //Fix credit music timing
+    PRESET_ENTRY_S32(CVAR_ENHANCEMENT("CreditsFix"), 1),
+    PRESET_ENTRY_S32(CVAR_ENHANCEMENT("FixCameraDrift"), 1),
+    PRESET_ENTRY_S32(CVAR_ENHANCEMENT("FixCameraSwing"), 1),
+    PRESET_ENTRY_S32(CVAR_ENHANCEMENT("AuthenticLogo"), 1)
 };
 
 const std::vector<PresetEntry> enhancedPresetEntries = {
@@ -612,6 +679,12 @@ const std::map<PresetType, PresetTypeDefinition> presetTypes = {
                 "A baseline set of enhancements for playing randomizer. Includes many quality of life options and "
                 "options to speed up gameplay.",
                 randomizerPresetEntries } },
+            { ENHANCEMENT_PRESET_S_EDITION,
+              {
+                  "S-Edition Presets",
+                  "Recomended for playing S-Edition, will make quests and combat play as intended.",
+                  sEditionPresetEntries,
+              } },
         } } },
     { PRESET_TYPE_RANDOMIZER,
       { { CVAR_PREFIX_RANDOMIZER_SETTING, CVAR_PREFIX_RANDOMIZER_ENHANCEMENT },
