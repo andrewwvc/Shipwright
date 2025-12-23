@@ -6,6 +6,7 @@
 
 #include "z_en_ma3.h"
 #include "objects/object_ma2/object_ma2.h"
+#include "soh/OTRGlobals.h"
 
 #define FLAGS                                                                                  \
     (ACTOR_FLAG_ATTENTION_ENABLED | ACTOR_FLAG_FRIENDLY | ACTOR_FLAG_UPDATE_CULLING_DISABLED | \

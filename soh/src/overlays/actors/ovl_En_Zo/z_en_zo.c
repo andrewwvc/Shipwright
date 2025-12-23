@@ -9,6 +9,7 @@
 
 #include "soh/frame_interpolation.h"
 #include "soh/ResourceManagerHelpers.h"
+#include "soh/OTRGlobals.h"
 
 #include "src/overlays/actors/ovl_En_Ru1/z_en_ru1.h"
 

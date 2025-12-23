@@ -337,7 +337,7 @@ static InitChainEntry sInitChain[] = {
     ICHAIN_F32(targetArrowOffset, 5300, ICHAIN_STOP),
 };
 
-static const WALK_SPEED = 1.8f;
+static const float WALK_SPEED = 1.8f;
 
 void EnMb_SetupAction(EnMb* this, EnMbActionFunc actionFunc) {
     this->actionFunc = actionFunc;
