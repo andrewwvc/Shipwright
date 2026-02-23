@@ -57,7 +57,7 @@ static ColliderJntSphElementInit sJntSphElementsInit[1] = {
     {
         {
             ELEMTYPE_UNK0,
-            { 0x00000008, 0x00, 0x08 },
+            { 0x00000008, 0x00, DAMAGE_BASE_VAL*2 },
             { 0x00000000, 0x00, 0x00 },
             TOUCH_ON | TOUCH_SFX_NONE,
             BUMP_NONE,
@@ -199,8 +199,8 @@ void EnBom_Explode(EnBom* this, PlayState* play) {
         func_800AA000(this->actor.xzDistToPlayer, 0xFF, 0x14, 0x96);
     }
 
-    if (CVarGetInteger(CVAR_ENHANCEMENT("StaticExplosionRadius"), 0)) {
-        // 72 is the maximum radius of an OoT bomb explosion
+    if (this->forceStaticExplosion || CVarGetInteger(CVAR_ENHANCEMENT("StaticExplosionRadius"), 0)) {
+        //72 is the maximum radius of an OoT bomb explosion
         this->explosionCollider.elements[0].dim.worldSphere.radius = 72;
     } else {
         this->explosionCollider.elements[0].dim.worldSphere.radius += this->actor.shape.rot.z + 8;

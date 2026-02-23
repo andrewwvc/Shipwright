@@ -35,6 +35,37 @@ when set, gets cleared next EnBox_Update call and clip to the floor
 */
 #define ENBOX_MOVE_STICK_TO_GROUND (1 << 4)
 
+s16 EnBox_GiveGrottoReplacementID(EnBox* this) {
+    switch (this->dyna.actor.params) {
+        case 0x59A0:
+        return GI_RING+RI_LOVE_RING;
+
+        case 0x59B4:
+        return GI_RUPEE_GOLD;
+
+        case 0x59A3:
+        return GI_RUPEE_PURPLE;
+
+        case 0x59C2:
+        return GI_RUPEE_GOLD;
+
+        case 0x59C8:
+        return GI_RUPEE_PURPLE;
+
+        case 0x59C9:
+        return GI_RING+RI_MOUNTAIN_RING;
+
+        case 0x59CC:
+        return GI_RUPEE_GOLD;
+
+        default:
+        return ((this->dyna.actor.params >> 5 & 0x7F) | ((this->dyna.actor.home.rot.z & 0x0F00) >> 1));
+    }
+}
+
+#define ENBOX_ITEM_ID ((play->sceneNum == SCENE_GROTTOS && play->roomCtx.curRoom.num == 0) ? EnBox_GiveGrottoReplacementID(this) : \
+                        ((this->dyna.actor.params >> 5 & 0x7F) | ((this->dyna.actor.home.rot.z & 0x0F00) >> 1)))
+
 typedef enum {
     ENBOX_STATE_0, // waiting for player near / player available / player ? (IDLE)
     ENBOX_STATE_1, // used only temporarily, maybe "player is ready" ?
@@ -135,10 +166,35 @@ void EnBox_Init(Actor* thisx, PlayState* play2) {
     this->iceSmokeTimer = 0;
     this->unk_1FB = ENBOX_STATE_0;
     this->dyna.actor.gravity = -5.5f;
-    this->switchFlag = this->dyna.actor.world.rot.z;
+    this->switchFlag = (this->dyna.actor.world.rot.z & 0xFF);
     this->dyna.actor.minVelocityY = -50.0f;
 
     if (play) {} // helps the compiler store play2 into s1
+
+    if (IS_RANDO) {
+        this->getItemEntry = Randomizer_GetItemFromActor(this->dyna.actor.id, play->sceneNum, this->dyna.actor.params, this->dyna.actor.params >> 5 & 0x7F);
+    } else {
+        this->getItemEntry = ItemTable_RetrieveEntry(MOD_NONE, ENBOX_ITEM_ID);
+    }
+
+    if (this->getItemEntry.itemId == ITEM_COMPASS || this->getItemEntry.itemId == ITEM_DUNGEON_MAP) {
+        switch (this->type) {
+            case ENBOX_TYPE_BIG_DEFAULT:
+            case ENBOX_TYPE_DECORATED_BIG:
+                this->type = ENBOX_TYPE_SMALL;
+                break;
+            case ENBOX_TYPE_ROOM_CLEAR_BIG:
+                this->type = ENBOX_TYPE_ROOM_CLEAR_SMALL;
+                break;
+            case ENBOX_TYPE_SWITCH_FLAG_BIG:
+            case ENBOX_TYPE_SWITCH_FLAG_FALL_BIG:
+                this->type = ENBOX_TYPE_SWITCH_FLAG_FALL_SMALL;
+                break;
+            case ENBOX_TYPE_4:
+                this->type = ENBOX_TYPE_6;
+                break;
+        }
+    }
 
     if (Flags_GetTreasure(play, this->dyna.actor.params & 0x1F)) {
         this->alpha = 255;
@@ -190,18 +246,20 @@ void EnBox_Init(Actor* thisx, PlayState* play2) {
     }
 
     this->dyna.actor.world.rot.y += 0x8000;
-    this->dyna.actor.home.rot.z = this->dyna.actor.world.rot.z = this->dyna.actor.shape.rot.z = 0;
+    //this->dyna.actor.home.rot.z =
+    this->dyna.actor.world.rot.z = this->dyna.actor.shape.rot.z = 0;
 
     SkelAnime_Init(play, &this->skelanime, &gTreasureChestSkel, anim, this->jointTable, this->morphTable, 5);
     Animation_Change(&this->skelanime, anim, 1.5f, animFrameStart, endFrame, ANIMMODE_ONCE, 0.0f);
 
-    this->getItemEntry = ItemTable_RetrieveEntry(MOD_NONE, this->dyna.actor.params >> 5 & 0x7F);
-    if (IS_RANDO) {
-        RandomizerCheck rc = Randomizer_GetCheckFromActor(this->dyna.actor.id, play->sceneNum, this->dyna.actor.params);
-        if (rc != RC_UNKNOWN_CHECK) {
-            this->getItemEntry = Randomizer_GetItemFromKnownCheck(rc, this->dyna.actor.params >> 5 & 0x7F);
-        }
-    }
+    // TODO - MERGE possibly needed for rando
+    // this->getItemEntry = ItemTable_RetrieveEntry(MOD_NONE, this->dyna.actor.params >> 5 & 0x7F);
+    // if (IS_RANDO) {
+    //     RandomizerCheck rc = Randomizer_GetCheckFromActor(this->dyna.actor.id, play->sceneNum, this->dyna.actor.params);
+    //     if (rc != RC_UNKNOWN_CHECK) {
+    //         this->getItemEntry = Randomizer_GetItemFromKnownCheck(rc, this->dyna.actor.params >> 5 & 0x7F);
+    //     }
+    // }
 
     EnBox_UpdateSizeAndTexture(this, play);
     // For SOH we spawn a chest actor instead of rendering the object from scratch for forest boss
@@ -451,8 +509,52 @@ void EnBox_WaitOpen(EnBox* this, PlayState* play) {
         player = GET_PLAYER(play);
         Actor_WorldToActorCoords(&this->dyna.actor, &sp4C, &player->actor.world.pos);
         if (sp4C.z > -50.0f && sp4C.z < 0.0f && fabsf(sp4C.y) < 10.0f && fabsf(sp4C.x) < 20.0f &&
-            Player_IsFacingActor(&this->dyna.actor, 0x3000, play)) {
-            Actor_OfferGetItemNearby(&this->dyna.actor, play, -(this->dyna.actor.params >> 5 & 0x7F));
+            Player_IsFacingActor(&this->dyna.actor, 0x3000, play) && !(player->stateFlags1 & PLAYER_STATE1_IN_WATER)) {
+            // GetItemEntry sItem = Randomizer_GetItemFromActor(this->dyna.actor.id, play->sceneNum, this->dyna.actor.params, this->dyna.actor.params >> 5 & 0x7F);
+            // GetItemEntry blueRupee = ItemTable_RetrieveEntry(MOD_NONE, GI_RUPEE_BLUE);
+            
+            // RANDO TODO treasure chest game rando
+            // if (Randomizer_GetSettingValue(RSK_SHUFFLE_CHEST_MINIGAME)) {
+            //     if (IS_RANDO && play->sceneNum == 16 && (this->dyna.actor.params & 0x60) != 0x20) {
+            //         if((this->dyna.actor.params & 0xF) < 2) {
+            //             if(Flags_GetCollectible(play, 0x1B)) {
+            //                 sItem = blueRupee;
+            //             }
+            //         }
+            //         if((this->dyna.actor.params & 0xF) >= 2 && (this->dyna.actor.params & 0xF) < 4) {
+            //             if(Flags_GetCollectible(play, 0x1C)) {
+            //                 sItem = blueRupee;
+            //             }
+            //         }
+            //         if((this->dyna.actor.params & 0xF) >= 4 && (this->dyna.actor.params & 0xF) < 6) {
+            //             if(Flags_GetCollectible(play, 0x1D)) {
+            //                 sItem = blueRupee;
+            //             }
+            //         }
+            //         if((this->dyna.actor.params & 0xF) >= 6 && (this->dyna.actor.params & 0xF) < 8) {
+            //             if(Flags_GetCollectible(play, 0x1E)) {
+            //                 sItem = blueRupee;
+            //             }
+            //         }
+            //         if((this->dyna.actor.params & 0xF) >= 8 && (this->dyna.actor.params & 0xF) < 10) {
+            //             if(Flags_GetCollectible(play, 0x1F)) {
+            //                 sItem = blueRupee;
+            //             }
+            //         }
+            //     }
+            // }
+            // Chests need to have a negative getItemId in order to not immediately give their item
+            // when approaching.
+            // if (IS_RANDO) {
+            //     if (!usingBorrowedWallet()) {
+            //         sItem.getItemId = 0 - sItem.getItemId;
+            //         sItem.getItemFrom = ITEM_FROM_CHEST;
+            //         GiveItemEntryFromActorWithFixedRange(&this->dyna.actor, play, sItem);
+            //     }
+            // } else {
+                if (!usingBorrowedWallet())
+                    Actor_OfferGetItemNearby(&this->dyna.actor, play, -(ENBOX_ITEM_ID));
+            // }
         }
         if (Flags_GetTreasure(play, this->dyna.actor.params & 0x1F)) {
             EnBox_SetupAction(this, EnBox_Open);

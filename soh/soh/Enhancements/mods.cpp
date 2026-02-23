@@ -15,6 +15,7 @@
 #include "soh/Enhancements/randomizer/hook_handlers.h"
 
 #include "src/overlays/actors/ovl_Obj_Switch/z_obj_switch.h"
+#include "src/overlays/actors/ovl_Boss_Fd/z_boss_fd.h"
 #include "objects/object_link_boy/object_link_boy.h"
 #include "objects/object_link_child/object_link_child.h"
 #include "soh_assets.h"
@@ -217,7 +218,12 @@ void UpdateHyperBossesState() {
                                       actor->id == ACTOR_BOSS_GANON2;  // Ganon
 
                 // Don't apply during cutscenes because it causes weird behaviour and/or crashes on some bosses.
-                if (IsHyperBossesActive() && isBossActor && !Player_InBlockingCsMode(gPlayState, player)) {
+                if ((IsHyperBossesActive() || (actor->id == ACTOR_BOSS_FD &&
+                                                    (((BossFd*)actor)->work[BFD_ACTION_STATE] == BOSSFD_FLY_CHASE ||
+                                                            (((BossFd*)actor)->work[BFD_ACTION_STATE] == BOSSFD_FLY_HOLE &&
+                                                                    (((BossFd*)actor)->work[BFD_FLY_COUNT] & 1)))) ||
+                                            (actor->id == ACTOR_BOSS_FD2)) &&
+                            isBossActor && !Player_InBlockingCsMode(gPlayState, player)) {
                     // Barinade needs to be updated in sequence to avoid unintended behaviour.
                     if (actor->id == ACTOR_BOSS_VA) {
                         // params -1 is BOSSVA_BODY

@@ -54,7 +54,7 @@ const ActorInit En_Kusa_InitVars = {
     NULL,
 };
 
-static s16 sObjectIds[] = { OBJECT_GAMEPLAY_FIELD_KEEP, OBJECT_KUSA, OBJECT_KUSA };
+static s16 sObjectIds[] = { OBJECT_GAMEPLAY_FIELD_KEEP, OBJECT_KUSA, OBJECT_KUSA, OBJECT_GAMEPLAY_FIELD_KEEP};
 
 static ColliderCylinderInit sCylinderInit = {
     {
@@ -124,6 +124,8 @@ s32 EnKusa_SnapToFloor(EnKusa* this, PlayState* play, f32 yOffset) {
     }
 }
 
+#define RECEIVE_SEEDS (!DEKU_TREE_DEAD || (AMMO(ITEM_SLINGSHOT) < 6) || (Rand_ZeroOne() < 0.2f))
+
 void EnKusa_DropCollectible(EnKusa* this, PlayState* play) {
     s16 dropParams;
 
@@ -131,6 +133,7 @@ void EnKusa_DropCollectible(EnKusa* this, PlayState* play) {
         return;
     }
 
+    insertSpawnResource(this->actor.entryNum, 1000);
     switch (this->actor.params & 3) {
         case ENKUSA_TYPE_0:
         case ENKUSA_TYPE_2:
@@ -139,17 +142,22 @@ void EnKusa_DropCollectible(EnKusa* this, PlayState* play) {
             if (dropParams >= 0xD) {
                 dropParams = 0;
             }
-            Item_DropCollectibleRandom(play, NULL, &this->actor.world.pos, dropParams << 4);
+            Item_DropCollectibleRandomSmall(play, NULL, &this->actor.world.pos, dropParams << 4);
             break;
         case ENKUSA_TYPE_1:
             if (CVarGetInteger(CVAR_ENHANCEMENT("NoRandomDrops"), 0)) {
             } else if (CVarGetInteger(CVAR_ENHANCEMENT("NoHeartDrops"), 0)) {
-                Item_DropCollectible(play, &this->actor.world.pos, ITEM00_SEEDS);
+                if (RECEIVE_SEEDS)
+                    Item_DropCollectible(play, &this->actor.world.pos, ITEM00_SEEDS);
             } else if (Rand_ZeroOne() < 0.5f) {
-                Item_DropCollectible(play, &this->actor.world.pos, ITEM00_SEEDS);
+                if (RECEIVE_SEEDS)
+                    Item_DropCollectible(play, &this->actor.world.pos, ITEM00_SEEDS);
             } else {
-                Item_DropCollectible(play, &this->actor.world.pos, ITEM00_HEART);
+                if (gSaveContext.health <= 0x30)
+                    Item_DropCollectible(play, &this->actor.world.pos, ITEM00_HEART);
             }
+            break;
+        case ENKUSA_TYPE_3:
             break;
     }
 }
@@ -324,7 +332,7 @@ void EnKusa_Main(EnKusa* this, PlayState* play) {
             EnKusa_SpawnBugs(this, play);
         }
 
-        if ((this->actor.params & 3) == ENKUSA_TYPE_0) {
+        if ((this->actor.params & 3) == ENKUSA_TYPE_0 || (this->actor.params & 3) == ENKUSA_TYPE_3) {
             Actor_Kill(&this->actor);
             return;
         }
@@ -394,6 +402,7 @@ void EnKusa_Fall(EnKusa* this, PlayState* play) {
         switch (this->actor.params & 3) {
             case ENKUSA_TYPE_0:
             case ENKUSA_TYPE_2:
+            case ENKUSA_TYPE_3:
                 Actor_Kill(&this->actor);
                 break;
 
@@ -436,6 +445,7 @@ void EnKusa_Fall(EnKusa* this, PlayState* play) {
 void EnKusa_SetupCut(EnKusa* this) {
     switch (this->actor.params & 3) {
         case ENKUSA_TYPE_2:
+        case ENKUSA_TYPE_3:
             EnKusa_SetupAction(this, EnKusa_DoNothing);
             break;
         case ENKUSA_TYPE_1:
@@ -508,7 +518,7 @@ void EnKusa_Update(Actor* thisx, PlayState* play) {
 }
 
 void EnKusa_Draw(Actor* thisx, PlayState* play) {
-    static Gfx* dLists[] = { gFieldBushDL, object_kusa_DL_000140, object_kusa_DL_000140 };
+    static Gfx* dLists[] = { gFieldBushDL, object_kusa_DL_000140, object_kusa_DL_000140, gFieldBushDL };
     EnKusa* this = (EnKusa*)thisx;
 
     if (this->actor.flags & ACTOR_FLAG_GRASS_DESTROYED) {

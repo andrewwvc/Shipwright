@@ -4,6 +4,7 @@
 #include <libultraship/libultra.h>
 #include "z64math.h"
 #include "z64audio.h"
+#include "z64item.h"
 #include "soh/Enhancements/randomizer/randomizerTypes.h"
 #include "soh/Enhancements/gameplaystats.h"
 #include "soh/Enhancements/randomizer/randomizer_entrance.h"
@@ -35,22 +36,37 @@ typedef enum {
 #define MAGIC_NORMAL_METER 0x30
 #define MAGIC_DOUBLE_METER (2 * MAGIC_NORMAL_METER)
 
+#define SLOTS_PER_LINE 6
+#define NUM_ITEM_SLOT_LINES_REGULAR 4
+#define NUM_ITEM_SLOT_LINES_EXTRA 1
+#define NUM_ITEM_SLOT_LINES_TOTAL (NUM_ITEM_SLOT_LINES_REGULAR+NUM_ITEM_SLOT_LINES_EXTRA)
+#define NUM_ITEM_SLOTS_REGULAR (SLOTS_PER_LINE*NUM_ITEM_SLOT_LINES_REGULAR)
+#define NUM_ITEM_SLOTS_EXTRA (SLOTS_PER_LINE*NUM_ITEM_SLOT_LINES_EXTRA)
+#define NUM_ITEM_SLOTS_TOTAL (SLOTS_PER_LINE*NUM_ITEM_SLOT_LINES_TOTAL)
+
+#define NUM_RING_TYPES RING_GI_MAX+1-RING_GI_MIN
+#define NUM_RING_EQUIPS EQUIP_VALUE_RINGS_MAX-1
+
+#define NUM_EQUIPMENT_BUTTONS 7
+
 typedef struct {
-    /* 0x00 */ u8 buttonItems[8]; // SOH [Enhancements] Changed from 4 to 8 to support Dpad equips
-    /* 0x04 */ u8 cButtonSlots[7]; // SOH [Enhancements] Changed from 3 to 7 to support Dpad equips
-    /* 0x08 */ u16 equipment; // a mask where each nibble corresponds to a type of equipment `EquipmentType`, and each nibble is a piece `EquipValue*`
+    /* 0x00 */ u8 buttonItems[NUM_EQUIPMENT_BUTTONS+1]; // SOH [Enhancements] Changed from 4 to 8 to support Dpad equips
+    /* 0x04 */ u8 cButtonSlots[NUM_EQUIPMENT_BUTTONS]; // SOH [Enhancements] Changed from 3 to 7 to support Dpad equips
+    /* 0x08 */ u32 equipment; // a mask where each nibble corresponds to a type of equipment `EquipmentType`, and each nibble is a piece `EquipValue*`
 } ItemEquips; // size = 0x0A
 
 typedef struct {
-    /* 0x00 */ u8 items[24];
+    /* 0x00 */ u8 items[NUM_ITEM_SLOTS_TOTAL];
     /* 0x18 */ s8 ammo[16];
-    /* 0x28 */ u16 equipment; // a mask where each nibble corresponds to a type of equipment `EquipmentType`, and each bit to an owned piece `EquipInv*`
+    /* 0x28 */ u32 equipment; // a mask where each nibble corresponds to a type of equipment `EquipmentType`, and each bit to an owned piece `EquipInv*`
     /* 0x2C */ u32 upgrades;
     /* 0x30 */ u32 questItems;
     /* 0x34 */ u8 dungeonItems[20];
     /* 0x48 */ s8 dungeonKeys[19];
     /* 0x5B */ s8 defenseHearts;
     /* 0x5C */ s16 gsTokens;
+    /* 0x5D */ u8 rings[NUM_RING_TYPES];
+    /*      */ u16 ringEquips[NUM_RING_EQUIPS];
 } Inventory; // size = 0x5E
 
 typedef struct {
@@ -306,6 +322,28 @@ typedef struct {
     /* 0x1422 */ s16 sunsSongState; // controls the effects of suns song
     /* 0x1424 */ s16 healthAccumulator;
     /*        */ ShipSaveContextData ship;
+    // #region SOH [NPC Mod]
+    /*        */ u32 savedFrameCount;
+    /*        */ u16 goronTimeStatus;
+    /*        */ s32 goronTimeDay;
+    /*        */ s32 SariaDateDay;
+    /*        */ s32 RutoDateDay;
+    /*        */ u16 NPCWeekEvents[4];
+    /*        */ s32 MalonPlayDay;
+    /*        */ s32 MalonRideDay;
+    /*        */ u8 maxBoosts;
+    /*        */ u8 extraMagicPower;
+    /*        */ u16 galleryMultplierChild;
+    /*        */ u16 galleryMultplierAdult;
+    /*        */ s32 galleryTimeChild;
+    /*        */ s32 galleryTimeAdult;
+    /*        */ u16 guardRupeesUsed;
+    /*        */ u16 diveRupeesUsed;
+    /*        */ s16 rupeeCollectionScore;
+    /*        */ u8 spiritDefenseHeartsGiven;
+    /*        */ s16 extraBombchuAccumulation;
+
+    // #endregion
 } SaveContext; // size = 0x1428
 
 typedef enum {
@@ -582,6 +620,7 @@ typedef enum {
 
 // 0xDA-0xDE
 #define EVENTCHKINF_SKULLTULA_REWARD_INDEX 13
+#define EVENTCHKINF_SKULLTULA_REWARD_INDEX_2 12
 #define EVENTCHKINF_SKULLTULA_REWARD_10_SHIFT 10
 #define EVENTCHKINF_SKULLTULA_REWARD_20_SHIFT 11
 #define EVENTCHKINF_SKULLTULA_REWARD_30_SHIFT 12

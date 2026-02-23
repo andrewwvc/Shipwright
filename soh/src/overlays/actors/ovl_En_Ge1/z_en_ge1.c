@@ -18,6 +18,7 @@
 #define GE1_STATE_GIVE_QUIVER (1 << 1)
 #define GE1_STATE_IDLE_ANIM (1 << 2)
 #define GE1_STATE_STOP_FIDGET (1 << 3)
+#define GE1_STATE_GIVE_CARROT (1 << 4)
 
 typedef enum {
     /* 00 */ GE1_HAIR_BOB,
@@ -41,8 +42,10 @@ void EnGe1_GetReaction_ValleyFloor(EnGe1* this, PlayState* play);
 void EnGe1_CheckForCard_GTGGuard(EnGe1* this, PlayState* play);
 void EnGe1_CheckGate_GateOp(EnGe1* this, PlayState* play);
 void EnGe1_GetReaction_GateGuard(EnGe1* this, PlayState* play);
+void EnGe1_KnockedOut_GateGuard(EnGe1* this, PlayState* play);
 void EnGe1_TalkAfterGame_Archery(EnGe1* this, PlayState* play);
 void EnGe1_Wait_Archery(EnGe1* this, PlayState* play);
+void EnGe1_StopAnimation(EnGe1* this);
 void EnGe1_CueUpAnimation(EnGe1* this);
 void EnGe1_StopFidget(EnGe1* this);
 
@@ -219,6 +222,10 @@ void EnGe1_SetAnimationIdle(EnGe1* this) {
 }
 
 s32 EnGe1_CheckCarpentersFreed(void) {
+    if (LINK_IS_CHILD) {
+        return 1;
+    }
+
     u16 carpenterFlags = gSaveContext.eventChkInf[9];
     if (!((carpenterFlags & 1) && (carpenterFlags & 2) && (carpenterFlags & 4) && (carpenterFlags & 8))) {
         return 0;
@@ -378,7 +385,7 @@ void EnGe1_OfferOpen_GTGGuard(EnGe1* this, PlayState* play) {
 
         switch (play->msgCtx.choiceIndex) {
             case 0:
-                if (gSaveContext.rupees < 10) {
+                if (Rupees_GetNum() < 10) {
                     Message_ContinueTextbox(play, 0x6016);
                     this->actionFunc = EnGe1_RefuseEntryTooPoor_GTGGuard;
                 } else {
@@ -492,7 +499,31 @@ void EnGe1_GetReaction_GateGuard(EnGe1* this, PlayState* play) {
         this->animation = &gGerudoWhiteDismissiveAnim;
         Animation_Change(&this->skelAnime, &gGerudoWhiteDismissiveAnim, 1.0f, 0.0f,
                          Animation_GetLastFrame(&gGerudoWhiteDismissiveAnim), ANIMMODE_ONCE, -8.0f);
+    } else if (Actor_FindNearby(play,&this->actor,ACTOR_EN_GO2,ACTORCAT_NPC,100.0f)) {
+        EnGe1_SetAnimationIdle(this);
+        this->animFunc = EnGe1_StopAnimation;
+        this->actionFunc = EnGe1_KnockedOut_GateGuard;
+        Audio_PlayActorSound2(&this->actor, NA_SE_EN_GERUDOFT_DEAD);
+        this->actor.shape.rot.x -= 0x4000;
     }
+}
+
+void EnGe1_KnockedOut_GateGuard(EnGe1* this, PlayState* play) {
+    static Vec3f effectVelocity = { 0.0f, -0.05f, 0.0f };
+    static Vec3f effectAccel = { 0.0f, -0.025f, 0.0f };
+    static Color_RGBA8 effectPrimColor = { 255, 255, 255, 0 };
+    static Color_RGBA8 effectEnvColor = { 255, 150, 0, 0 };
+    s32 effectAngle;
+    Vec3f effectPos;
+
+    this->actor.flags &= ~ACTOR_FLAG_ATTENTION_ENABLED;
+
+    effectAngle = (play->state.frames) * 0x2800;
+    effectPos.x = this->actor.focus.pos.x + (Math_CosS(effectAngle) * 5.0f);
+    effectPos.y = this->actor.focus.pos.y + 10.0f;
+    effectPos.z = this->actor.focus.pos.z + (Math_SinS(effectAngle) * 5.0f);
+    EffectSsKiraKira_SpawnDispersed(play, &effectPos, &effectVelocity, &effectAccel, &effectPrimColor,
+                                    &effectEnvColor, 1000, 16);
 }
 
 // Archery functions
@@ -517,7 +548,10 @@ void EnGe1_WaitTillItemGiven_Archery(EnGe1* this, PlayState* play) {
         if (this->stateFlags & GE1_STATE_GIVE_QUIVER) {
             Flags_SetItemGetInf(ITEMGETINF_0F);
         } else {
-            Flags_SetInfTable(INFTABLE_190);
+            if (!Flags_GetInfTable(INFTABLE_190))
+                Flags_SetInfTable(INFTABLE_190);
+            else if ((this->stateFlags & GE1_STATE_GIVE_CARROT))
+                Flags_SetInfTable(0x180);
         }
     } else {
         if (this->stateFlags & GE1_STATE_GIVE_QUIVER) {
@@ -531,7 +565,10 @@ void EnGe1_WaitTillItemGiven_Archery(EnGe1* this, PlayState* play) {
                     break;
             }
         } else {
-            getItemId = GI_HEART_PIECE;
+            if (this->stateFlags & GE1_STATE_GIVE_CARROT)
+                getItemId = GI_EPONA_BOOST;
+            else
+                getItemId = GI_HEART_PIECE;
         }
         Actor_OfferGetItem(&this->actor, play, getItemId, 10000.0f, 50.0f);
     }
@@ -560,7 +597,10 @@ void EnGe1_BeginGiveItem_Archery(EnGe1* this, PlayState* play) {
                 break;
         }
     } else {
-        getItemId = GI_HEART_PIECE;
+        if (this->stateFlags & GE1_STATE_GIVE_CARROT)
+            getItemId = GI_EPONA_BOOST;
+        else
+            getItemId = GI_HEART_PIECE;
     }
 
     if (GameInteractor_Should(VB_GIVE_ITEM_FROM_HORSEBACK_ARCHERY, true, this)) {
@@ -597,7 +637,7 @@ void EnGe1_BeginGame_Archery(EnGe1* this, PlayState* play) {
 
         switch (play->msgCtx.choiceIndex) {
             case 0:
-                if (gSaveContext.rupees < 20) {
+                if (Rupees_GetNum() < 20) {
                     Message_ContinueTextbox(play, 0x85);
                     this->actionFunc = EnGe1_TalkTooPoor_Archery;
                 } else {
@@ -664,16 +704,26 @@ void EnGe1_TalkAfterGame_Archery(EnGe1* this, PlayState* play) {
         this->actor.textId = 0x6046;
         this->actionFunc = EnGe1_TalkWinPrize_Archery;
         this->stateFlags &= ~GE1_STATE_GIVE_QUIVER;
+        this->stateFlags &= ~GE1_STATE_GIVE_CARROT;
     } else if (gSaveContext.minigameScore < 1500) {
         this->actor.textId = 0x6047;
         this->actionFunc = EnGe1_TalkNoPrize_Archery;
-    } else if (Flags_GetItemGetInf(ITEMGETINF_0F)) {
-        this->actor.textId = 0x6047;
-        this->actionFunc = EnGe1_TalkNoPrize_Archery;
-    } else {
+    } else if (!Flags_GetItemGetInf(ITEMGETINF_0F)) {
         this->actor.textId = 0x6044;
         this->actionFunc = EnGe1_TalkWinPrize_Archery;
         this->stateFlags |= GE1_STATE_GIVE_QUIVER;
+        this->stateFlags &= ~GE1_STATE_GIVE_CARROT;
+    } else if (gSaveContext.minigameScore < 2000) {
+        this->actor.textId = 0x6047;
+        this->actionFunc = EnGe1_TalkNoPrize_Archery;
+    } else if (!(gSaveContext.infTable[24] & 1)) {
+        this->actor.textId = 0x6046;
+        this->actionFunc = EnGe1_TalkWinPrize_Archery;
+        this->stateFlags &= ~GE1_STATE_GIVE_QUIVER;
+        this->stateFlags |= GE1_STATE_GIVE_CARROT;
+    } else {
+        this->actor.textId = 0x6047;
+        this->actionFunc = EnGe1_TalkNoPrize_Archery;
     }
 }
 
@@ -694,7 +744,11 @@ void EnGe1_Wait_Archery(EnGe1* this, PlayState* play) {
     } else {
         if (Flags_GetEventChkInf(EVENTCHKINF_PLAYED_HORSEBACK_ARCHERY)) {
             if (Flags_GetInfTable(INFTABLE_190)) {
-                textId = 0x6042;
+                u16 Gerudo = GetTextID("gerudo");
+                if (Flags_GetItemGetInf(ITEMGETINF_0F))
+                    textId = Gerudo;
+                else
+                    textId = 0x6042;
             } else {
                 textId = 0x6043;
             }
@@ -757,10 +811,14 @@ void EnGe1_Update(Actor* thisx, PlayState* play) {
     }
     this->unk_2A2.x = this->unk_2A2.y = this->unk_2A2.z = 0;
 
-    if (DECR(this->blinkTimer) == 0) {
-        this->blinkTimer = Rand_S16Offset(60, 60);
+    if (this->animFunc == EnGe1_StopAnimation) {
+        this->eyeIndex = 1;
+    } else {
+        if (DECR(this->blinkTimer) == 0) {
+            this->blinkTimer = Rand_S16Offset(60, 60);
+        }
+        this->eyeIndex = this->blinkTimer;
     }
-    this->eyeIndex = this->blinkTimer;
 
     if (this->eyeIndex >= 3) {
         this->eyeIndex = 0;
@@ -768,6 +826,9 @@ void EnGe1_Update(Actor* thisx, PlayState* play) {
 }
 
 // Animation functions
+
+void EnGe1_StopAnimation(EnGe1* this) {
+}
 
 void EnGe1_CueUpAnimation(EnGe1* this) {
     if (SkelAnime_Update(&this->skelAnime)) {
@@ -787,6 +848,9 @@ void EnGe1_StopFidget(EnGe1* this) {
 s32 EnGe1_OverrideLimbDraw(PlayState* play, s32 limbIndex, Gfx** dList, Vec3f* pos, Vec3s* rot, void* thisx) {
     s32 pad;
     EnGe1* this = (EnGe1*)thisx;
+
+    if (this->animFunc == EnGe1_StopAnimation)
+        return 0;
 
     if (limbIndex == GE1_LIMB_HEAD) {
         rot->x += this->headRot.y;

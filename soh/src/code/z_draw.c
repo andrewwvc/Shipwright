@@ -115,6 +115,9 @@ void GetItem_DrawJewelZora(PlayState* play, s16 drawId);
 void GetItem_DrawGenericMusicNote(PlayState* play, s16 drawId);
 void GetItem_DrawTriforcePiece(PlayState* play, s16 drawId);
 void GetItem_DrawFishingPole(PlayState* play, s16 drawId);
+void GetItem_DrawLandmine(PlayState* play, s16 drawId);
+void GetItem_DrawSpecialBottled(PlayState* play, s16 drawId);
+void GetItem_DrawRing(PlayState* play, s16 drawId);
 
 typedef struct {
     /* 0x00 */ void (*drawFunc)(PlayState*, s16);
@@ -392,6 +395,28 @@ DrawItemTableEntry sDrawItemTable[] = {
     { GetItem_DrawGenericMusicNote, { gGiSongNoteDL } },  // Song of storms
     { GetItem_DrawTriforcePiece, { gTriforcePiece0DL } }, // Triforce Piece
     { GetItem_DrawFishingPole, { gFishingPoleGiDL } },    // Fishing Pole
+    { GetItem_DrawLandmine, { gLandmineDL }}, // Land Mine
+    { GetItem_DrawSpecialBottled, { gGiSeedDL, gGiBottleDL } },
+    { GetItem_DrawRing, { gGiRing0DL }}, // Ring 0
+    { GetItem_DrawRing, { gGiRing0DL }}, // Ring 1
+    { GetItem_DrawRing, { gGiRing0DL }}, //
+    { GetItem_DrawRing, { gGiRing0DL }}, //
+    { GetItem_DrawRing, { gGiRing0DL }}, //
+    { GetItem_DrawRing, { gGiRing0DL }}, //
+    { GetItem_DrawRing, { gGiRing0DL }}, //
+    { GetItem_DrawRing, { gGiRing0DL }}, //
+    { GetItem_DrawRing, { gGiRing0DL }}, //
+    { GetItem_DrawRing, { gGiRing0DL }}, //
+    { GetItem_DrawRing, { gGiRing0DL }}, //
+    { GetItem_DrawRing, { gGiRing0DL }}, //
+    { GetItem_DrawRing, { gGiRing0DL }}, //
+    { GetItem_DrawRing, { gGiRing0DL }}, //
+    { GetItem_DrawRing, { gGiRing0DL }}, //
+    { GetItem_DrawRing, { gGiRing0DL }}, //
+    { GetItem_DrawRing, { gGiRing0DL }}, //
+    { GetItem_DrawRing, { gGiRing0DL }}, //
+    { GetItem_DrawRing, { gGiRing0DL }}, //
+    { GetItem_DrawRing, { gGiRing0DL }}, //
 };
 
 /**
@@ -515,6 +540,24 @@ void GetItem_DrawMaskOrBombchu(PlayState* play, s16 drawId) {
     gSPMatrix(POLY_OPA_DISP++, MATRIX_NEWMTX(play->state.gfxCtx), G_MTX_MODELVIEW | G_MTX_LOAD);
     gSPDisplayList(POLY_OPA_DISP++, sDrawItemTable[drawId].dlists[0]);
 
+    CLOSE_DISPS(play->state.gfxCtx);
+}
+
+void GetItem_DrawLandmine(PlayState* play, s16 drawId) {
+    OPEN_DISPS(play->state.gfxCtx);
+    Matrix_Push();
+    Matrix_RotateZYX(0x4000, 0, 0, MTXMODE_APPLY);
+    Matrix_Translate(0.0f, -6.0f, 0.0f, MTXMODE_APPLY);
+    Matrix_Scale(0.03f, 0.03f, 0.03f, MTXMODE_APPLY);
+
+    Gfx_SetupDL_26Opa(play->state.gfxCtx);
+    gSPMatrix(POLY_OPA_DISP++, MATRIX_NEWMTX(play->state.gfxCtx),
+              G_MTX_MODELVIEW | G_MTX_LOAD);
+
+    gDPSetEnvColor(POLY_OPA_DISP++, 15, 0, 90, 255);
+    gSPDisplayList(POLY_OPA_DISP++, sDrawItemTable[drawId].dlists[0]);
+
+    Matrix_Pop();
     CLOSE_DISPS(play->state.gfxCtx);
 }
 
@@ -784,6 +827,72 @@ void GetItem_DrawOpa0Xlu1(PlayState* play, s16 drawId) {
     Gfx_SetupDL_25Xlu(play->state.gfxCtx);
     gSPMatrix(POLY_XLU_DISP++, MATRIX_NEWMTX(play->state.gfxCtx), G_MTX_MODELVIEW | G_MTX_LOAD);
     gSPDisplayList(POLY_XLU_DISP++, sDrawItemTable[drawId].dlists[1]);
+
+    CLOSE_DISPS(play->state.gfxCtx);
+}
+
+f32 gBottledItemTransforms[][2] = {
+    {-8.0f, 0.5f},  //Ammo
+};
+
+void GetItem_DrawSpecialBottled(PlayState* play, s16 drawId) {
+    s32 pad;
+
+    OPEN_DISPS(play->state.gfxCtx);
+
+    Matrix_Push();
+    f32 transHeight = gBottledItemTransforms[drawId-GID_BOTTLE_AMMO][0];
+    f32 sizeScale = gBottledItemTransforms[drawId-GID_BOTTLE_AMMO][1];
+    Matrix_Translate(0.0f, transHeight, 0.0f, MTXMODE_APPLY);
+    Matrix_Scale(sizeScale, sizeScale, sizeScale, MTXMODE_APPLY);
+    Gfx_SetupDL_25Opa(play->state.gfxCtx);
+    gSPMatrix(POLY_OPA_DISP++, MATRIX_NEWMTX(play->state.gfxCtx),
+              G_MTX_MODELVIEW | G_MTX_LOAD);
+    gSPDisplayList(POLY_OPA_DISP++, sDrawItemTable[drawId].dlists[0]);
+    Matrix_Pop();
+
+    Gfx_SetupDL_25Xlu(play->state.gfxCtx);
+    gSPMatrix(POLY_XLU_DISP++, MATRIX_NEWMTX(play->state.gfxCtx),
+              G_MTX_MODELVIEW | G_MTX_LOAD);
+    gSPDisplayList(POLY_XLU_DISP++, sDrawItemTable[drawId].dlists[1]);
+
+    CLOSE_DISPS(play->state.gfxCtx);
+}
+
+s16 gRingColors[][2][3] = {
+    {{255,255,255},{12,21,26}},  //Default dull blue
+    {{255,255,255},{60,8,8}},  //Crimson
+    {{255,0,100},{30,10,10}},
+    {{135,255,135},{20,60,20}},
+    {{0,0,100},{100,0,100}},
+    {{0,0,0},{12,21,80}},
+    {{120,90,10},{22,14,2}},
+    {{180,140,20},{42,32,6}},
+    {{0,255,255},{0,0,40}},
+    {{200,200,200},{80,60,5}},
+    {{160,160,160},{255,255,255}},  //Bright white
+    {{60,60,60},{0,0,0}},  //Default dull blue
+    {{255,150,0},{0,100,120}},
+    {{20,10,0},{100,21,26}},
+    {{240,240,20},{80,80,20}},  //Bright yellow
+    {{255,255,255},{12,110,90}},
+    {{255,100,100},{15,61,12}},
+    {{255,150,0},{80,0,0}},
+    {{90,90,255},{60,60,0}},  //Default dull blue
+    {{80,0,140},{25,25,25}},
+};
+
+void GetItem_DrawRing(PlayState* play, s16 drawId) {
+    OPEN_DISPS(play->state.gfxCtx);
+
+    s16 color_slot = drawId-GID_RING_0;
+
+    Gfx_SetupDL_25Opa(play->state.gfxCtx);
+    gSPMatrix(POLY_OPA_DISP++, MATRIX_NEWMTX(play->state.gfxCtx),
+              G_MTX_MODELVIEW | G_MTX_LOAD);
+    gDPSetPrimColor(POLY_OPA_DISP++, 0, 0, gRingColors[color_slot][0][0], gRingColors[color_slot][0][1], gRingColors[color_slot][0][2], 255);
+    gDPSetEnvColor(POLY_OPA_DISP++, gRingColors[color_slot][1][0], gRingColors[color_slot][1][1], gRingColors[color_slot][1][2], 255);
+    gSPDisplayList(POLY_OPA_DISP++, sDrawItemTable[drawId].dlists[0]);
 
     CLOSE_DISPS(play->state.gfxCtx);
 }

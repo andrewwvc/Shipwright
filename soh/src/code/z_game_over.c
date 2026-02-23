@@ -31,9 +31,12 @@ void GameOver_Update(PlayState* play) {
         case GAMEOVER_DEATH_START:
             Message_CloseTextbox(play);
 
+            RupeeQuest_PrepareEnd();
             gSaveContext.timerState = 0;
             gSaveContext.subTimerState = 0;
             gSaveContext.eventInf[1] &= ~1;
+            ElfMessage_ResetPersistantElfMessages();
+            changeToNormalWallet();
 
             // search inventory for spoiling items and revert if necessary
             if (GameInteractor_Should(VB_REVERT_SPOILING_ITEMS, true)) {

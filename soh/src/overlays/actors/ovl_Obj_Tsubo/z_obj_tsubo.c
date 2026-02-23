@@ -86,10 +86,36 @@ static InitChainEntry sInitChain[] = {
 
 void ObjTsubo_SpawnCollectible(ObjTsubo* this, PlayState* play) {
     s16 dropParams = this->actor.params & 0x1F;
+    s16 collectibleFlag = (((this->actor.params >> 9) & 0x3F) << 8);
+    s16 collectedFlag = ((this->actor.params & 0x20) >> 5);
+    s16 lowSpawnFlag = ((this->actor.params & 0x40) >> 6);
+    s16 highDropParams = ((this->actor.home.rot.z & 0x7) <<5 );
+
+    if (collectedFlag) {
+        s16 isSetToMax = 1;
+        if (lowSpawnFlag) {
+            isSetToMax = 0;
+            collectibleFlag = 0;
+            if (ITEM00_ARROWS_SMALL <= dropParams && dropParams <= ITEM00_ARROWS_LARGE && (AMMO(ITEM_BOW) == 0)) {
+                dropParams = ITEM00_ARROWS_SMALL;
+            } else {
+                isSetToMax = 1;
+                collectibleFlag = (((this->actor.params >> 9) & 0x3F) << 8);
+            }
+        }
+
+        if (isSetToMax) {
+            dropParams = ITEM00_MAX;
+        }
+    }
 
     if (GameInteractor_Should(VB_POT_DROP_ITEM,
-                              (dropParams >= ITEM00_RUPEE_GREEN) && (dropParams <= ITEM00_BOMBS_SPECIAL), this)) {
-        Item_DropCollectible(play, &this->actor.world.pos, (dropParams | (((this->actor.params >> 9) & 0x3F) << 8)));
+                              (dropParams >= ITEM00_RUPEE_GREEN) && (dropParams <= ITEM00_MAX), this)) {
+        EnItem00* item = Item_DropCollectible(play, &this->actor.world.pos,
+                             (dropParams | highDropParams | collectibleFlag));
+        if (item) {
+            item->actor.entryNum = this->actor.entryNum;
+        }
     }
 }
 

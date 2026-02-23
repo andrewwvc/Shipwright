@@ -131,7 +131,11 @@ void EnMs_Talk(EnMs* this, PlayState* play) {
         switch (play->msgCtx.choiceIndex) {
             case 0: // yes
                 if (!GameInteractor_Should(VB_BE_ELIGIBLE_FOR_MAGIC_BEANS_PURCHASE,
-                                           (gSaveContext.rupees >= sPrices[BEANS_BOUGHT]), this)) {
+                                           (Rupees_GetNum() >= sPrices[BEANS_BOUGHT]), this)) {
+                // if (Rupees_GetNum() <
+                //     ((IS_RANDO && Randomizer_GetSettingValue(RSK_SHUFFLE_MAGIC_BEANS))
+                //          ? 60
+                //          : sPrices[BEANS_BOUGHT])) {
                     Message_ContinueTextbox(play, 0x4069); // not enough rupees text
                     return;
                 }

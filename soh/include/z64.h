@@ -38,8 +38,8 @@
 #define _SOH64
 #endif
 
-#define AUDIO_HEAP_SIZE  0x380000
-#define SYSTEM_HEAP_SIZE (1024 * 1024 * 4)
+#define AUDIO_HEAP_SIZE  0x3800000
+#define SYSTEM_HEAP_SIZE (16 * 1024 * 1024 * 4)
 
 #ifdef __cplusplus
 namespace LUS
@@ -738,7 +738,9 @@ typedef enum {
     /* 0x1A */ DO_ACTION_6,
     /* 0x1B */ DO_ACTION_7,
     /* 0x1C */ DO_ACTION_8,
-    /* 0x1D */ DO_ACTION_MAX
+    /* 0x1D */ DO_ACTION_HOP,
+    /* 0x1E */ DO_ACTION_ROLL,
+    /* 0x1F */ DO_ACTION_MAX
 } DoAction;
 
 typedef struct {
@@ -928,7 +930,11 @@ typedef struct {
     // #region SOH [Randomizer]
     /* 0x02C0 */ u8     randoQuestMode; // 0 = Off (normal quest menu); 1 = On (Misc Collectibles menu)
     // #endregion
-} PauseContext; // size = 0x2C1
+                 s16    equipSlotScrollY;
+                 s16    equipScrollOffsetY;
+                 s16    itemSlotScrollY;
+                 s16    itemScrollOffsetY;
+} PauseContext; // size = 0x2C9
 
 typedef enum {
     /* 00 */ GAMEOVER_INACTIVE,

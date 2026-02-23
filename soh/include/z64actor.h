@@ -265,7 +265,12 @@ typedef struct Actor {
     /* 0x130 */ ActorFunc update; // Update Routine. Called by `Actor_UpdateAll`
     /* 0x134 */ ActorFunc draw; // Draw Routine. Called by `Actor_Draw`
     /* 0x138 */ ActorResetFunc reset;
-    /* 0x13C */ char dbgPad[0x10]; // Padding that only exists in the debug rom
+    // #region SOH [General]
+    /*       */ u8 maximumHealth; // Max health value for use with health bars, set on actor init
+    // #endregion
+    /* 0x13C */ Vec3f teleportVec;
+    /* 0x148 */ u8 isTeleported;
+    /* 0x149 */ s16 entryNum;
 } Actor; // size = 0x14C
 
 typedef enum {
@@ -357,10 +362,13 @@ typedef enum {
     /* 0x18 */ ITEM00_TUNIC_GORON,
     /* 0x19 */ ITEM00_BOMBS_SPECIAL,
     /* 0x1A */ ITEM00_BOMBCHU,
+    /* 0x1B */ ITEM00_DEFENSE_HEART,
+    /* 0x1C */ ITEM00_RING_0,
+    /*      */ ITEM00_RING_LAST = ITEM00_RING_0+19,
     /* 0x1B */ ITEM00_SOH_DUMMY,
     /* 0x1C */ ITEM00_SOH_GIVE_ITEM_ENTRY,
     /* 0x1D */ ITEM00_SOH_GIVE_ITEM_ENTRY_GI,
-    /* 0x1E */ ITEM00_MAX,
+               ITEM00_MAX,
     /* 0xFF */ ITEM00_NONE = 0xFF
 } Item00Type;
 

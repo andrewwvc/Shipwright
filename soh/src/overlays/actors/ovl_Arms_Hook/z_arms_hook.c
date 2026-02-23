@@ -35,7 +35,7 @@ static ColliderQuadInit sQuadInit = {
     },
     {
         ELEMTYPE_UNK2,
-        { 0x00000080, 0x00, 0x01 },
+        { 0x00000080, 0x00, DAMAGE_BASE_VAL },
         { 0xFFCFFFFF, 0x00, 0x00 },
         TOUCH_ON | TOUCH_NEAREST | TOUCH_SFX_NORMAL,
         BUMP_NONE,

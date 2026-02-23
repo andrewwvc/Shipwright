@@ -20,7 +20,14 @@ typedef struct BgSpot08Iceblock {
     /* 0x0192 */ s16 bobIncrFast;
     /* 0x0194 */ f32 sinkOffset;
     /* 0x0198 */ f32 bobOffset;
+                 s8 targetSize;
+                 s8 isThawing;
+                 WaterBox* water;//Optional, only needs to be used by dynamically created iceblocks, or thse in settings where the water can move
+
 } BgSpot08Iceblock; // size = 0x019C
+
+s8 BgSpot08Iceblock_freeze(Actor* thisx);
+s8 BgSpot08Iceblock_thaw(Actor* thisx);
 
 // Params
 /**

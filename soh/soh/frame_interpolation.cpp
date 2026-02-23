@@ -115,6 +115,137 @@ union Data {
         MtxF src;
     } matrix_put;
 
+    //TODO - DELETE
+    // union Data {
+    //     Data() {
+    //     }
+    //
+    //     struct {
+    //         MtxF src;
+    //     } matrix_put;
+    //
+    //     struct {
+    //         MtxF mf;
+    //         u8 mode;
+    //     } matrix_mult;
+    //
+    //     struct {
+    //         f32 x, y, z;
+    //         u8 mode;
+    //     } matrix_translate, matrix_scale;
+    //
+    //     struct {
+    //         u32 coord;
+    //         f32 value;
+    //         u8 mode;
+    //     } matrix_rotate_1_coord;
+    //
+    //     struct {
+    //         s16 x, y, z;
+    //         u8 mode;
+    //     } matrix_rotate_zyx;
+    //
+    //     struct {
+    //         Vec3f translation;
+    //         Vec3s rotation;
+    //     } matrix_translate_rotate_zyx;
+    //
+    //     struct {
+    //         f32 translateX, translateY, translateZ;
+    //         Vec3s rot;
+    //         //MtxF mtx;
+    //         bool has_mtx;
+    //     } matrix_set_translate_rotate_yxz;
+    //
+    //     struct {
+    //         MtxF src;
+    //         Mtx* dest;
+    //     } matrix_mtxf_to_mtx;
+    //
+    //     struct {
+    //         Mtx* dest;
+    //         MtxF src;
+    //         bool has_adjusted;
+    //     } matrix_to_mtx;
+    //
+    //     struct {
+    //         MtxF mf;
+    //     } matrix_replace_rotation;
+    //
+    //     struct {
+    //         f32 angle;
+    //         Vec3f axis;
+    //         u8 mode;
+    //     } matrix_rotate_axis;
+    //
+    //     struct {
+    //         label key;
+    //         size_t idx;
+    //     } open_child;
+    // };
+    //
+    // struct Path {
+    //     map<label, vector<Path>> children;
+    //     map<Op, vector<Data>> ops;
+    //     vector<pair<Op, size_t>> items;
+    // };
+    //
+    // struct Recording {
+    //     Path root_path;
+    // };
+    //
+    // bool is_recording;
+    // vector<Path*> current_path;
+    // vector<Path*> parallel_path;
+    // uint32_t camera_epoch;
+    // uint32_t previous_camera_epoch;
+    // uint8_t forceViewBool = 0;
+    // Vec3f forceViewDelta = {0.0f,0.0f,0.0f};
+    // Recording current_recording;
+    // Recording previous_recording;
+    //
+    // bool next_is_actor_pos_rot_matrix;
+    // bool has_inv_actor_mtx;
+    // MtxF inv_actor_mtx;
+    // size_t inv_actor_mtx_path_index;
+    //
+    // Data& append(Op op) {
+    //     auto& m = current_path.back()->ops[op];
+    //     current_path.back()->items.emplace_back(op, m.size());
+    //     return m.emplace_back();
+    // }
+    //
+    // Data& obtainParallel(Op op, u8* isValid) {
+    //     auto& m = current_path.back()->ops[op];
+    //     parallel_path.clear();
+    //     parallel_path.push_back(&previous_recording.root_path);
+    //
+    //     for (auto iter = current_path.begin(); *iter != current_path.back(); iter++) {
+    //         Data* existingChild = &(*iter)->ops[Op::OpenChild].back();
+    //         label l = existingChild->open_child.key;
+    //         auto foundChild = parallel_path.back()->children.find(l);
+    //         if (foundChild != parallel_path.back()->children.end()) {
+    //             parallel_path.push_back(&foundChild->second[existingChild->open_child.idx]);
+    //         } else {
+    //             *isValid = false;
+    //             return current_path.back()->ops[op].back();
+    //         }
+    //     }
+    //
+    //     *isValid = true;
+    //     auto& n = parallel_path.back()->ops[op];
+    //     return n[m.size()-1];
+    // }
+    //
+    // struct InterpolateCtx {
+    //     float step;
+    //     float w;
+    //     unordered_map<Mtx*, MtxF> mtx_replacements;
+    //     MtxF tmp_mtxf, tmp_mtxf2;
+    //     Vec3f tmp_vec3f;
+    //     Vec3s tmp_vec3s;
+    //     MtxF actor_mtx;
+
     struct {
         MtxF mf;
         u8 mode;
@@ -185,10 +316,26 @@ struct Recording {
     Path root_path;
 };
 
+//TODO - DELETE
+// bool is_recording;
+// vector<Path*> current_path;
+// uint32_t camera_epoch;
+// uint32_t previous_camera_epoch;
+// Recording current_recording;
+// Recording previous_recording;
+//
+// bool next_is_actor_pos_rot_matrix;
+// bool has_inv_actor_mtx;
+// MtxF inv_actor_mtx;
+// size_t inv_actor_mtx_path_index;
+
 bool is_recording;
 vector<Path*> current_path;
+vector<Path*> parallel_path;
 uint32_t camera_epoch;
 uint32_t previous_camera_epoch;
+uint8_t forceViewBool = 0;
+Vec3f forceViewDelta = {0.0f,0.0f,0.0f};
 Recording current_recording;
 Recording previous_recording;
 
@@ -201,6 +348,28 @@ Data& append(Op op) {
     auto& m = current_path.back()->ops[op];
     current_path.back()->items.emplace_back(op, m.size());
     return m.emplace_back();
+}
+
+Data& obtainParallel(Op op, u8* isValid) {
+    auto& m = current_path.back()->ops[op];
+    parallel_path.clear();
+    parallel_path.push_back(&previous_recording.root_path);
+
+    for (auto iter = current_path.begin(); *iter != current_path.back(); iter++) {
+        Data* existingChild = &(*iter)->ops[Op::OpenChild].back();
+        label l = existingChild->open_child.key;
+        auto foundChild = parallel_path.back()->children.find(l);
+        if (foundChild != parallel_path.back()->children.end()) {
+            parallel_path.push_back(&foundChild->second[existingChild->open_child.idx]);
+        } else {
+            *isValid = false;
+            return current_path.back()->ops[op].back();
+        }
+    }
+
+    *isValid = true;
+    auto& n = parallel_path.back()->ops[op];
+    return n[m.size()-1];
 }
 
 struct InterpolateCtx {
@@ -456,6 +625,8 @@ void FrameInterpolation_StartRecord(void) {
     current_recording = {};
     current_path.clear();
     current_path.push_back(&current_recording.root_path);
+    parallel_path.clear();
+    parallel_path.push_back(&previous_recording.root_path);
     if (OTRGlobals::Instance->GetInterpolationFPS() != 20) {
         is_recording = true;
     }
@@ -487,6 +658,23 @@ void FrameInterpolation_RecordCloseChild(void) {
 
 void FrameInterpolation_DontInterpolateCamera(void) {
     camera_epoch = previous_camera_epoch + 1;
+}
+
+void FrameInterpolation_ForceViewChange(Vec3f* delta) {
+    forceViewBool = 1;
+    forceViewDelta = *delta;
+}
+
+u8 FrameInterpolation_ShouldViewChange() {
+    return forceViewBool;
+}
+
+Vec3f FrameInterpolation_GetViewDelta() {
+    return forceViewDelta;
+}
+
+void FrameInterpolation_ResetViewChange() {
+    forceViewBool = 0;
 }
 
 int FrameInterpolation_GetCameraEpoch(void) {
@@ -568,10 +756,45 @@ void FrameInterpolation_RecordMatrixSetTranslateRotateYXZ(f32 translateX, f32 tr
     }
 }
 
+void FrameInterpolation_RecordMatrixSetFalsifiedTranslateRotateYXZ(f32 translateX, f32 translateY, f32 translateZ, Vec3s* rot, Vec3f* posDelta) {
+    if (!is_recording)
+        return;
+    auto& d = append(Op::MatrixSetTranslateRotateYXZ).matrix_set_translate_rotate_yxz = { translateX, translateY, translateZ,
+                                                                                          *rot };
+    u8 isValid;
+    auto& p = obtainParallel(Op::MatrixSetTranslateRotateYXZ, &isValid);
+    if (isValid) {
+        p.matrix_set_translate_rotate_yxz.translateX += posDelta->x;
+        p.matrix_set_translate_rotate_yxz.translateY += posDelta->y;
+        p.matrix_set_translate_rotate_yxz.translateZ += posDelta->z;
+    }
+
+    if (next_is_actor_pos_rot_matrix) {
+        d.has_mtx = true;
+        //d.mtx = *Matrix_GetCurrent();
+        invert_matrix((const float *)Matrix_GetCurrent()->mf, (float *)inv_actor_mtx.mf);
+        next_is_actor_pos_rot_matrix = false;
+        has_inv_actor_mtx = true;
+        inv_actor_mtx_path_index = current_path.size();
+    }
+}
+
 void FrameInterpolation_RecordMatrixMtxFToMtx(MtxF* src, Mtx* dest) {
     if (!is_recording)
         return;
     append(Op::MatrixMtxFToMtx).matrix_mtxf_to_mtx = { *src, dest };
+}
+
+void FrameInterpolation_FalsifiedRecordMatrixMtxFToMtx(MtxF* src, Mtx* dest, MtxF* mtxReplace) {
+    if (!is_recording)
+        return;
+    append(Op::MatrixMtxFToMtx).matrix_mtxf_to_mtx = { *src, dest };
+
+    u8 isValid;
+    auto& p = obtainParallel(Op::MatrixMtxFToMtx, &isValid);
+    if (isValid) {
+        Matrix_MtxFCopy(&p.matrix_mtxf_to_mtx.src,mtxReplace);
+    }
 }
 
 void FrameInterpolation_RecordMatrixToMtx(Mtx* dest, char* file, s32 line) {

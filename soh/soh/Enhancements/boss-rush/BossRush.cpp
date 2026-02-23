@@ -565,6 +565,8 @@ void BossRush_HandleCompleteBoss(PlayState* play) {
     }
 }
 
+#define DEFAULT_ITEMS_TO_SET 24
+
 extern "C" void BossRush_InitSave() {
 
     // Set player name to Lonk for the few textboxes that show up during Boss Rush. Player can't input their own name.
@@ -587,6 +589,7 @@ extern "C" void BossRush_InitSave() {
         gSaveContext.isDoubleMagicAcquired = 1;
         gSaveContext.magicLevel = 2;
         gSaveContext.magic = 96;
+        gSaveContext.extraMagicPower = 2;
     }
 
     // Set health
@@ -635,10 +638,11 @@ extern "C" void BossRush_InitSave() {
     }
 
     // Set items
-    std::array<u8, 24> brItems = {
-        ITEM_STICK,       ITEM_NUT,      ITEM_BOMB, ITEM_BOW,  ITEM_NONE,      ITEM_NONE, ITEM_SLINGSHOT, ITEM_NONE,
-        ITEM_NONE,        ITEM_HOOKSHOT, ITEM_NONE, ITEM_NONE, ITEM_BOOMERANG, ITEM_LENS, ITEM_NONE,      ITEM_HAMMER,
-        ITEM_ARROW_LIGHT, ITEM_NONE,     ITEM_NONE, ITEM_NONE, ITEM_NONE,      ITEM_NONE, ITEM_NONE,      ITEM_NONE,
+    std::array<u8, DEFAULT_ITEMS_TO_SET> brItems = {
+        ITEM_STICK,     ITEM_NUT,  ITEM_BOMB, ITEM_BOW,      ITEM_NONE,        ITEM_NONE,
+        ITEM_SLINGSHOT, ITEM_NONE, ITEM_NONE, ITEM_HOOKSHOT, ITEM_NONE,        ITEM_NONE,
+        ITEM_BOOMERANG, ITEM_LENS, ITEM_NONE, ITEM_HAMMER,   ITEM_ARROW_LIGHT, ITEM_NONE,
+        ITEM_NONE,      ITEM_NONE, ITEM_NONE, ITEM_NONE,     ITEM_NONE,        ITEM_NONE,
     };
 
     if (gSaveContext.ship.quest.data.bossRush.options[BR_OPTIONS_LONGSHOT] == BR_CHOICE_LONGSHOT_YES) {
@@ -669,17 +673,19 @@ extern "C" void BossRush_InitSave() {
         brItems[23] = ITEM_MASK_BUNNY;
     }
 
-    for (int item = 0; item < ARRAY_COUNT(gSaveContext.inventory.items); item++) {
+    for (int item = 0; item < DEFAULT_ITEMS_TO_SET; item++) {
         gSaveContext.inventory.items[item] = brItems[item];
     }
 
     // Set consumable counts
-    std::array<s8, 16> brAmmo = { 5, 5, 10, 10, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    std::array<s8, 16> brAmmo = { 5, 5, static_cast<s8>(CAPACITY(1,UPG_BOMB_BAG)), 10, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
     if (gSaveContext.ship.quest.data.bossRush.options[BR_OPTIONS_AMMO] == BR_CHOICE_AMMO_FULL) {
-        brAmmo = { 10, 20, 20, 30, 0, 0, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        brAmmo = { static_cast<s8>(CAPACITY(UPG_STICKS,2)), static_cast<s8>(CAPACITY(UPG_NUTS,2)), static_cast<s8>(CAPACITY(UPG_BOMB_BAG,2)),
+                    static_cast<s8>(CAPACITY(UPG_QUIVER,2)), 0, 0, static_cast<s8>(CAPACITY(UPG_BULLET_BAG,2)), 0, 0, 0, 0, 0, 0, 0, 0, 0 };
     } else if (gSaveContext.ship.quest.data.bossRush.options[BR_OPTIONS_AMMO] == BR_CHOICE_AMMO_MAXED) {
-        brAmmo = { 30, 40, 40, 50, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        brAmmo = { static_cast<s8>(CAPACITY(UPG_STICKS,3)), static_cast<s8>(CAPACITY(UPG_NUTS,3)), static_cast<s8>(CAPACITY(UPG_BOMB_BAG,3)),
+                    static_cast<s8>(CAPACITY(UPG_QUIVER,3)), 0, 0, static_cast<s8>(CAPACITY(UPG_BULLET_BAG,3)), 0, 0, 0, 0, 0, 0, 0, 0, 0 };
     }
 
     for (int ammo = 0; ammo < ARRAY_COUNT(gSaveContext.inventory.ammo); ammo++) {
@@ -701,8 +707,10 @@ extern "C" void BossRush_InitSave() {
     }
 
     // Upgrades
-    u8 upgradeLevel = 1;
-    if (gSaveContext.ship.quest.data.bossRush.options[BR_OPTIONS_AMMO] == BR_CHOICE_AMMO_MAXED) {
+    uint8_t upgradeLevel = 1;
+    if (gSaveContext.ship.quest.data.bossRush.options[BR_OPTIONS_AMMO] == BR_CHOICE_AMMO_FULL) {
+        upgradeLevel = 2;
+    } else if (gSaveContext.ship.quest.data.bossRush.options[BR_OPTIONS_AMMO] == BR_CHOICE_AMMO_MAXED) {
         upgradeLevel = 3;
     }
     Inventory_ChangeUpgrade(UPG_QUIVER, upgradeLevel);

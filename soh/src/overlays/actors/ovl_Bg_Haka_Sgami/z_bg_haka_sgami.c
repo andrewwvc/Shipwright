@@ -43,7 +43,7 @@ static ColliderTrisElementInit sTrisElementsInit[4] = {
     {
         {
             ELEMTYPE_UNK2,
-            { 0x20000000, 0x00, 0x04 },
+            { 0x20000000, 0x00, 0x20 },
             { 0x00000000, 0x00, 0x00 },
             TOUCH_ON | TOUCH_SFX_NORMAL,
             BUMP_NONE,
@@ -54,7 +54,7 @@ static ColliderTrisElementInit sTrisElementsInit[4] = {
     {
         {
             ELEMTYPE_UNK2,
-            { 0x20000000, 0x00, 0x04 },
+            { 0x20000000, 0x00, 0x20 },
             { 0x00000000, 0x00, 0x00 },
             TOUCH_ON | TOUCH_SFX_NORMAL,
             BUMP_NONE,
@@ -65,7 +65,7 @@ static ColliderTrisElementInit sTrisElementsInit[4] = {
     {
         {
             ELEMTYPE_UNK2,
-            { 0x20000000, 0x00, 0x04 },
+            { 0x20000000, 0x00, 0x20 },
             { 0x00000000, 0x00, 0x00 },
             TOUCH_ON | TOUCH_SFX_NORMAL,
             BUMP_NONE,
@@ -76,7 +76,7 @@ static ColliderTrisElementInit sTrisElementsInit[4] = {
     {
         {
             ELEMTYPE_UNK2,
-            { 0x20000000, 0x00, 0x04 },
+            { 0x20000000, 0x00, 0x20 },
             { 0x00000000, 0x00, 0x00 },
             TOUCH_ON | TOUCH_SFX_NORMAL,
             BUMP_NONE,
@@ -227,7 +227,7 @@ void BgHakaSgami_Spin(BgHakaSgami* this, PlayState* play) {
         this->timer--;
     }
 
-    this->actor.shape.rot.y += ((s16)(512.0f * sinf(this->timer * (M_PI / 16.0f))) + 0x400) >> 1;
+    this->actor.shape.rot.y += ((s16)(512.0f * sinf(this->timer * (M_PI / 8.0f))) + 0x400) >> 1;
 
     if (this->timer == 0) {
         this->timer = SCYTHE_SPIN_TIME;

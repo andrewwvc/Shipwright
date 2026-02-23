@@ -4850,7 +4850,7 @@ void Fishing_HandleOwnerDialog(Fishing* this, PlayState* play) {
 
                 switch (play->msgCtx.choiceIndex) {
                     case 0:
-                        if (gSaveContext.rupees >= 20) {
+                        if (Rupees_GetNum() >= 20) {
                             Rupees_ChangeBy(-20);
                             if (func_800AA148() == 0) {
                                 this->actor.textId = 0x407C;
@@ -5110,8 +5110,8 @@ void Fishing_HandleOwnerDialog(Fishing* this, PlayState* play) {
                         }
                     }
                 } else {
-                    getItemId = GI_RUPEE_PURPLE;
-                    sFishOnHandLength = 0.0f; // doesn't record loach
+                    getItemId = GI_RING+RI_SNEAK_RING;
+                    sFishOnHandLength = 0.0f;
                 }
 
                 this->actor.parent = NULL;

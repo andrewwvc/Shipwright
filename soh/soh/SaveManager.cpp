@@ -27,6 +27,9 @@
 #include <mutex>
 
 extern "C" SaveContext gSaveContext;
+extern std::map<ActorSpawnResource,int> UsedResources;
+extern std::map<ActorSpawnResource,int> UsedPinkSpirits;
+
 using namespace std::string_literals;
 
 void SaveManager::WriteSaveFile(const std::filesystem::path& savePath, const uintptr_t addr, void* dramAddr,
@@ -117,10 +120,14 @@ SaveManager::SaveManager() {
     AddLoadFunction("base", 2, LoadBaseVersion2);
     AddLoadFunction("base", 3, LoadBaseVersion3);
     AddLoadFunction("base", 4, LoadBaseVersion4);
-    AddSaveFunction("base", 4, SaveBase, true, SECTION_PARENT_NONE);
+    AddLoadFunction("base", 100, LoadBaseVersionSpecial4);
+    AddSaveFunction("base", 100, SaveBase, true, SECTION_PARENT_NONE);
 
     AddLoadFunction("randomizer", 1, LoadRandomizer);
     AddSaveFunction("randomizer", 1, SaveRandomizer, true, SECTION_PARENT_NONE);
+
+    AddLoadFunction("persistence", 1, LoadPersistenceVersion1);
+    AddSaveFunction("persistence", 1, SavePersistence, true, SECTION_PARENT_NONE);
 
     AddInitFunction(InitFileImpl);
 
@@ -521,6 +528,11 @@ void SaveManager::InitFileImpl(bool isDebug) {
         InitFileNormal();
     }
 }
+#define OLD_EQUIP_LENGTH 9
+#define OLD_EQUIP_START_SLOT 0x18
+#define OLD_EQUIP_END_SLOT (0x18+OLD_EQUIP_LENGTH)
+const static u8 INITIAL_BOOSTS = 6;
+const static u16 INITIAL_MULTIPLIER = INITIAL_GALLERY_MULTIPLIER;
 
 void SaveManager::InitFileNormal() {
     gSaveContext.totalDays = 0;
@@ -596,6 +608,12 @@ void SaveManager::InitFileNormal() {
     }
     gSaveContext.inventory.defenseHearts = 0;
     gSaveContext.inventory.gsTokens = 0;
+    for (int ii = 0; ii < NUM_RING_TYPES; ii++) {
+        gSaveContext.inventory.rings[ii] = 0;
+    }
+    for (int ii = 0; ii < ARRAY_COUNT(gSaveContext.inventory.ringEquips); ii++) {
+        gSaveContext.inventory.ringEquips[ii] = 0;
+    }
     for (int scene = 0; scene < ARRAY_COUNT(gSaveContext.sceneFlags); scene++) {
         gSaveContext.sceneFlags[scene].chest = 0;
         gSaveContext.sceneFlags[scene].swch = 0;
@@ -674,6 +692,30 @@ void SaveManager::InitFileNormal() {
 
     // Init with normal quest unless only an MQ rom is provided
     gSaveContext.ship.quest.id = OTRGlobals::Instance->HasOriginal() ? QUEST_NORMAL : QUEST_MASTER;
+
+    gSaveContext.savedFrameCount = 0;
+    gSaveContext.goronTimeStatus = 0;
+    gSaveContext.goronTimeDay = gSaveContext.totalDays;
+    gSaveContext.SariaDateDay = 0;
+    gSaveContext.RutoDateDay = 0;
+    for (int flag = 0; flag < ARRAY_COUNT(gSaveContext.NPCWeekEvents); flag++) {
+        gSaveContext.NPCWeekEvents[flag] = 0;
+    }
+    gSaveContext.MalonPlayDay = 0;
+    gSaveContext.MalonRideDay = 0;
+    gSaveContext.maxBoosts = INITIAL_BOOSTS;
+    gSaveContext.extraMagicPower = 0;
+    gSaveContext.galleryMultplierChild = INITIAL_MULTIPLIER;
+    gSaveContext.galleryMultplierAdult = INITIAL_MULTIPLIER;
+    gSaveContext.galleryTimeChild = 0;
+    gSaveContext.galleryTimeAdult = 0;
+    gSaveContext.guardRupeesUsed = 0;
+    gSaveContext.diveRupeesUsed = 0;
+    gSaveContext.rupeeCollectionScore = 0;
+    gSaveContext.spiritDefenseHeartsGiven = 0;
+    gSaveContext.extraBombchuAccumulation = 0;
+    UsedResources = {};
+    UsedPinkSpirits = {};
 
     // RANDOTODO (ADD ITEMLOCATIONS TO GSAVECONTEXT)
 }
@@ -1902,6 +1944,20 @@ void SaveManager::LoadBaseVersion3() {
         SaveManager::Instance->LoadData("tempCollectFlags", gSaveContext.ship.backupFW.tempCollectFlags);
     });
     SaveManager::Instance->LoadData("dogParams", gSaveContext.dogParams);
+
+    SaveManager::Instance->LoadData("savedFrameCount", gSaveContext.savedFrameCount);
+    SaveManager::Instance->LoadData("goronTimeStatus", gSaveContext.goronTimeStatus);
+    SaveManager::Instance->LoadData("goronTimeDay", gSaveContext.goronTimeDay);
+    SaveManager::Instance->LoadData("SariaDateDay", gSaveContext.SariaDateDay);
+    SaveManager::Instance->LoadData("RutoDateDay", gSaveContext.RutoDateDay);
+    SaveManager::Instance->LoadData("MalonPlayDay", gSaveContext.MalonPlayDay);
+    SaveManager::Instance->LoadData("MalonRideDay", gSaveContext.MalonRideDay);
+    SaveManager::Instance->LoadData("maxBoosts", gSaveContext.maxBoosts, INITIAL_BOOSTS);
+    SaveManager::Instance->LoadData("extraMagicPower", gSaveContext.extraMagicPower);
+    SaveManager::Instance->LoadData("galleryMultplierChild", gSaveContext.galleryMultplierChild, INITIAL_MULTIPLIER);
+    SaveManager::Instance->LoadData("galleryMultplierAdult", gSaveContext.galleryMultplierAdult, INITIAL_MULTIPLIER);
+    SaveManager::Instance->LoadData("galleryTimeChild", gSaveContext.galleryTimeChild);
+    SaveManager::Instance->LoadData("galleryTimeAdult", gSaveContext.galleryTimeAdult);
 }
 
 void SaveManager::LoadBaseVersion4() {
@@ -1969,9 +2025,22 @@ void SaveManager::LoadBaseVersion4() {
         });
         SaveManager::Instance->LoadData("equipment", gSaveContext.equips.equipment);
     });
+    //Moves equpment slot numbers to the end section so that items slots are contiguous
+    u8 *slotLists[3];
+    slotLists[0] = gSaveContext.childEquips.cButtonSlots;
+    slotLists[1] = gSaveContext.adultEquips.cButtonSlots;
+    slotLists[2] = gSaveContext.equips.cButtonSlots;
+    for (size_t ii = 0; ii < NUM_EQUIPMENT_BUTTONS; ii++) {
+        for (size_t jj = 0; jj < 3; jj++) {
+            if (OLD_EQUIP_START_SLOT <= slotLists[jj][ii] && slotLists[jj][ii] <= OLD_EQUIP_END_SLOT)
+                slotLists[jj][ii] += (SLOT_TUNIC_KOKIRI-OLD_EQUIP_START_SLOT);
+            else if (OLD_EQUIP_END_SLOT < slotLists[jj][ii] && slotLists[jj][ii] < SLOT_NONE)
+                slotLists[jj][ii] -= 6;
+        }
+    }
     SaveManager::Instance->LoadStruct("inventory", []() {
         SaveManager::Instance->LoadArray("items", ARRAY_COUNT(gSaveContext.inventory.items), [](size_t i) {
-            SaveManager::Instance->LoadData("", gSaveContext.inventory.items[i]);
+            SaveManager::Instance->LoadData("", gSaveContext.inventory.items[i], static_cast<uint8_t>(ITEM_NONE));
         });
         SaveManager::Instance->LoadArray("ammo", ARRAY_COUNT(gSaveContext.inventory.ammo), [](size_t i) {
             SaveManager::Instance->LoadData("", gSaveContext.inventory.ammo[i]);
@@ -1987,6 +2056,12 @@ void SaveManager::LoadBaseVersion4() {
         });
         SaveManager::Instance->LoadData("defenseHearts", gSaveContext.inventory.defenseHearts);
         SaveManager::Instance->LoadData("gsTokens", gSaveContext.inventory.gsTokens);
+        SaveManager::Instance->LoadArray("rings", ARRAY_COUNT(gSaveContext.inventory.rings), [](size_t i) {
+            SaveManager::Instance->LoadData("", gSaveContext.inventory.rings[i], static_cast<uint8_t>(0));
+        });
+        SaveManager::Instance->LoadArray("ringEquips", ARRAY_COUNT(gSaveContext.inventory.ringEquips), [](size_t i) {
+            SaveManager::Instance->LoadData("", gSaveContext.inventory.ringEquips[i], static_cast<uint16_t>(0));
+        });
     });
     SaveManager::Instance->LoadArray("sceneFlags", ARRAY_COUNT(gSaveContext.sceneFlags), [](size_t i) {
         SaveManager::Instance->LoadStruct("", [&i]() {
@@ -2084,6 +2159,252 @@ void SaveManager::LoadBaseVersion4() {
     SaveManager::Instance->LoadData("dogParams", gSaveContext.dogParams);
     SaveManager::Instance->LoadData("filenameLanguage", gSaveContext.ship.filenameLanguage);
     SaveManager::Instance->LoadData("maskMemory", gSaveContext.ship.maskMemory);
+
+    SaveManager::Instance->LoadData("savedFrameCount", gSaveContext.savedFrameCount);
+    SaveManager::Instance->LoadData("goronTimeStatus", gSaveContext.goronTimeStatus);
+    SaveManager::Instance->LoadData("goronTimeDay", gSaveContext.goronTimeDay);
+    SaveManager::Instance->LoadData("SariaDateDay", gSaveContext.SariaDateDay);
+    SaveManager::Instance->LoadData("RutoDateDay", gSaveContext.RutoDateDay);
+    SaveManager::Instance->LoadArray("NPCWeekEvents", ARRAY_COUNT(gSaveContext.NPCWeekEvents), [](size_t i) {
+        SaveManager::Instance->LoadData("", gSaveContext.NPCWeekEvents[i]);
+    });
+    SaveManager::Instance->LoadData("MalonPlayDay", gSaveContext.MalonPlayDay);
+    SaveManager::Instance->LoadData("MalonRideDay", gSaveContext.MalonRideDay);
+    SaveManager::Instance->LoadData("maxBoosts", gSaveContext.maxBoosts, INITIAL_BOOSTS);
+    SaveManager::Instance->LoadData("extraMagicPower", gSaveContext.extraMagicPower);
+    SaveManager::Instance->LoadData("galleryMultplierChild", gSaveContext.galleryMultplierChild, INITIAL_MULTIPLIER);
+    SaveManager::Instance->LoadData("galleryMultplierAdult", gSaveContext.galleryMultplierAdult, INITIAL_MULTIPLIER);
+    SaveManager::Instance->LoadData("galleryTimeChild", gSaveContext.galleryTimeChild);
+    SaveManager::Instance->LoadData("galleryTimeAdult", gSaveContext.galleryTimeAdult);
+    SaveManager::Instance->LoadData("guardRupeesUsed", gSaveContext.guardRupeesUsed);
+    SaveManager::Instance->LoadData("diveRupeesUsed", gSaveContext.diveRupeesUsed);
+    SaveManager::Instance->LoadData("rupeeCollectionScore", gSaveContext.rupeeCollectionScore);
+    SaveManager::Instance->LoadData("spiritDefenseHeartsGiven", gSaveContext.spiritDefenseHeartsGiven);
+    SaveManager::Instance->LoadData("extraBombchuAccumulation", gSaveContext.extraBombchuAccumulation);
+    SaveManager::Instance->LoadData("UsedPinkSpirits", UsedPinkSpirits, {});
+}
+void SaveManager::LoadBaseVersionSpecial4() {
+    SaveManager::Instance->LoadData("entranceIndex", gSaveContext.entranceIndex);
+    SaveManager::Instance->LoadData("linkAge", gSaveContext.linkAge);
+    SaveManager::Instance->LoadData("cutsceneIndex", gSaveContext.cutsceneIndex);
+    SaveManager::Instance->LoadData("dayTime", gSaveContext.dayTime);
+    SaveManager::Instance->LoadData("nightFlag", gSaveContext.nightFlag);
+    SaveManager::Instance->LoadData("totalDays", gSaveContext.totalDays);
+    SaveManager::Instance->LoadData("bgsDayCount", gSaveContext.bgsDayCount);
+    SaveManager::Instance->LoadData("deaths", gSaveContext.deaths);
+    SaveManager::Instance->LoadArray("playerName", ARRAY_COUNT(gSaveContext.playerName),
+                                     [](size_t i) { SaveManager::Instance->LoadData("", gSaveContext.playerName[i]); });
+    int isRando = 0;
+    SaveManager::Instance->LoadData("n64ddFlag", isRando);
+    if (isRando) {
+        gSaveContext.ship.quest.id = QUEST_RANDOMIZER;
+    }
+    SaveManager::Instance->LoadData("healthCapacity", gSaveContext.healthCapacity);
+    SaveManager::Instance->LoadData("health", gSaveContext.health);
+    SaveManager::Instance->LoadData("magicLevel", gSaveContext.magicLevel);
+    SaveManager::Instance->LoadData("magic", gSaveContext.magic);
+    SaveManager::Instance->LoadData("rupees", gSaveContext.rupees);
+    SaveManager::Instance->LoadData("swordHealth", gSaveContext.swordHealth);
+    SaveManager::Instance->LoadData("naviTimer", gSaveContext.naviTimer);
+    SaveManager::Instance->LoadData("isMagicAcquired", gSaveContext.isMagicAcquired);
+    SaveManager::Instance->LoadData("isDoubleMagicAcquired", gSaveContext.isDoubleMagicAcquired);
+    SaveManager::Instance->LoadData("isDoubleDefenseAcquired", gSaveContext.isDoubleDefenseAcquired);
+    SaveManager::Instance->LoadData("bgsFlag", gSaveContext.bgsFlag);
+    SaveManager::Instance->LoadData("ocarinaGameRoundNum", gSaveContext.ocarinaGameRoundNum);
+    SaveManager::Instance->LoadStruct("childEquips", []() {
+        SaveManager::Instance->LoadArray(
+            "buttonItems", ARRAY_COUNT(gSaveContext.childEquips.buttonItems), [](size_t i) {
+                SaveManager::Instance->LoadData("", gSaveContext.childEquips.buttonItems[i],
+                                                static_cast<uint8_t>(ITEM_NONE));
+            });
+        SaveManager::Instance->LoadArray(
+            "cButtonSlots", ARRAY_COUNT(gSaveContext.childEquips.cButtonSlots), [](size_t i) {
+                SaveManager::Instance->LoadData("", gSaveContext.childEquips.cButtonSlots[i],
+                                                static_cast<uint8_t>(SLOT_NONE));
+            });
+        SaveManager::Instance->LoadData("equipment", gSaveContext.childEquips.equipment);
+    });
+    SaveManager::Instance->LoadStruct("adultEquips", []() {
+        SaveManager::Instance->LoadArray(
+            "buttonItems", ARRAY_COUNT(gSaveContext.adultEquips.buttonItems), [](size_t i) {
+                SaveManager::Instance->LoadData("", gSaveContext.adultEquips.buttonItems[i],
+                                                static_cast<uint8_t>(ITEM_NONE));
+            });
+        SaveManager::Instance->LoadArray(
+            "cButtonSlots", ARRAY_COUNT(gSaveContext.adultEquips.cButtonSlots), [](size_t i) {
+                SaveManager::Instance->LoadData("", gSaveContext.adultEquips.cButtonSlots[i],
+                                                static_cast<uint8_t>(SLOT_NONE));
+            });
+        SaveManager::Instance->LoadData("equipment", gSaveContext.adultEquips.equipment);
+    });
+    SaveManager::Instance->LoadData("unk_54", gSaveContext.unk_54);
+    SaveManager::Instance->LoadData("savedSceneNum", gSaveContext.savedSceneNum);
+    SaveManager::Instance->LoadStruct("equips", []() {
+        SaveManager::Instance->LoadArray("buttonItems", ARRAY_COUNT(gSaveContext.equips.buttonItems), [](size_t i) {
+            SaveManager::Instance->LoadData("", gSaveContext.equips.buttonItems[i], static_cast<uint8_t>(ITEM_NONE));
+        });
+        SaveManager::Instance->LoadArray("cButtonSlots", ARRAY_COUNT(gSaveContext.equips.cButtonSlots), [](size_t i) {
+            SaveManager::Instance->LoadData("", gSaveContext.equips.cButtonSlots[i], static_cast<uint8_t>(SLOT_NONE));
+        });
+        SaveManager::Instance->LoadData("equipment", gSaveContext.equips.equipment);
+    });
+    //Moves equpment slot numbers to the end section so that items slots are contiguous
+    u8 *slotLists[3];
+    slotLists[0] = gSaveContext.childEquips.cButtonSlots;
+    slotLists[1] = gSaveContext.adultEquips.cButtonSlots;
+    slotLists[2] = gSaveContext.equips.cButtonSlots;
+    for (size_t ii = 0; ii < NUM_EQUIPMENT_BUTTONS; ii++) {
+        for (size_t jj = 0; jj < 3; jj++) {
+            if (OLD_EQUIP_START_SLOT <= slotLists[jj][ii] && slotLists[jj][ii] <= OLD_EQUIP_END_SLOT)
+                slotLists[jj][ii] += (SLOT_TUNIC_KOKIRI-OLD_EQUIP_START_SLOT);
+            else if (OLD_EQUIP_END_SLOT < slotLists[jj][ii] && slotLists[jj][ii] < SLOT_NONE)
+                slotLists[jj][ii] -= OLD_EQUIP_LENGTH;
+        }
+    }
+    SaveManager::Instance->LoadStruct("inventory", []() {
+        SaveManager::Instance->LoadArray("items", ARRAY_COUNT(gSaveContext.inventory.items), [](size_t i) {
+            SaveManager::Instance->LoadData("", gSaveContext.inventory.items[i], static_cast<uint8_t>(ITEM_NONE));
+        });
+        SaveManager::Instance->LoadArray("ammo", ARRAY_COUNT(gSaveContext.inventory.ammo), [](size_t i) {
+            SaveManager::Instance->LoadData("", gSaveContext.inventory.ammo[i]);
+        });
+        SaveManager::Instance->LoadData("equipment", gSaveContext.inventory.equipment);
+        SaveManager::Instance->LoadData("upgrades", gSaveContext.inventory.upgrades);
+        SaveManager::Instance->LoadData("questItems", gSaveContext.inventory.questItems);
+        SaveManager::Instance->LoadArray(
+            "dungeonItems", ARRAY_COUNT(gSaveContext.inventory.dungeonItems),
+            [](size_t i) { SaveManager::Instance->LoadData("", gSaveContext.inventory.dungeonItems[i]); });
+        SaveManager::Instance->LoadArray("dungeonKeys", ARRAY_COUNT(gSaveContext.inventory.dungeonKeys), [](size_t i) {
+            SaveManager::Instance->LoadData("", gSaveContext.inventory.dungeonKeys[i]);
+        });
+        SaveManager::Instance->LoadData("defenseHearts", gSaveContext.inventory.defenseHearts);
+        SaveManager::Instance->LoadData("gsTokens", gSaveContext.inventory.gsTokens);
+        SaveManager::Instance->LoadArray("rings", ARRAY_COUNT(gSaveContext.inventory.rings), [](size_t i) {
+            SaveManager::Instance->LoadData("", gSaveContext.inventory.rings[i], static_cast<uint8_t>(0));
+        });
+        SaveManager::Instance->LoadArray("ringEquips", ARRAY_COUNT(gSaveContext.inventory.ringEquips), [](size_t i) {
+            SaveManager::Instance->LoadData("", gSaveContext.inventory.ringEquips[i], static_cast<uint16_t>(0));
+        });
+    });
+    SaveManager::Instance->LoadArray("sceneFlags", ARRAY_COUNT(gSaveContext.sceneFlags), [](size_t i) {
+        SaveManager::Instance->LoadStruct("", [&i]() {
+            SaveManager::Instance->LoadData("chest", gSaveContext.sceneFlags[i].chest);
+            SaveManager::Instance->LoadData("swch", gSaveContext.sceneFlags[i].swch);
+            SaveManager::Instance->LoadData("clear", gSaveContext.sceneFlags[i].clear);
+            SaveManager::Instance->LoadData("collect", gSaveContext.sceneFlags[i].collect);
+            SaveManager::Instance->LoadData("unk", gSaveContext.sceneFlags[i].unk);
+            SaveManager::Instance->LoadData("rooms", gSaveContext.sceneFlags[i].rooms);
+            SaveManager::Instance->LoadData("floors", gSaveContext.sceneFlags[i].floors);
+        });
+    });
+    SaveManager::Instance->LoadStruct("fw", []() {
+        SaveManager::Instance->LoadStruct("pos", []() {
+            SaveManager::Instance->LoadData("x", gSaveContext.fw.pos.x);
+            SaveManager::Instance->LoadData("y", gSaveContext.fw.pos.y);
+            SaveManager::Instance->LoadData("z", gSaveContext.fw.pos.z);
+        });
+        SaveManager::Instance->LoadData("yaw", gSaveContext.fw.yaw);
+        SaveManager::Instance->LoadData("playerParams", gSaveContext.fw.playerParams);
+        SaveManager::Instance->LoadData("entranceIndex", gSaveContext.fw.entranceIndex);
+        SaveManager::Instance->LoadData("roomIndex", gSaveContext.fw.roomIndex);
+        SaveManager::Instance->LoadData("set", gSaveContext.fw.set);
+        SaveManager::Instance->LoadData("tempSwchFlags", gSaveContext.fw.tempSwchFlags);
+        SaveManager::Instance->LoadData("tempCollectFlags", gSaveContext.fw.tempCollectFlags);
+    });
+    SaveManager::Instance->LoadArray("gsFlags", ARRAY_COUNT(gSaveContext.gsFlags),
+                                     [](size_t i) { SaveManager::Instance->LoadData("", gSaveContext.gsFlags[i]); });
+    SaveManager::Instance->LoadArray("highScores", ARRAY_COUNT(gSaveContext.highScores),
+                                     [](size_t i) { SaveManager::Instance->LoadData("", gSaveContext.highScores[i]); });
+    SaveManager::Instance->LoadArray("eventChkInf", ARRAY_COUNT(gSaveContext.eventChkInf), [](size_t i) {
+        SaveManager::Instance->LoadData("", gSaveContext.eventChkInf[i]);
+    });
+    SaveManager::Instance->LoadArray("itemGetInf", ARRAY_COUNT(gSaveContext.itemGetInf),
+                                     [](size_t i) { SaveManager::Instance->LoadData("", gSaveContext.itemGetInf[i]); });
+    SaveManager::Instance->LoadArray("infTable", ARRAY_COUNT(gSaveContext.infTable),
+                                     [](size_t i) { SaveManager::Instance->LoadData("", gSaveContext.infTable[i]); });
+    SaveManager::Instance->LoadData("worldMapAreaData", gSaveContext.worldMapAreaData);
+    SaveManager::Instance->LoadData("scarecrowLongSongSet", gSaveContext.scarecrowLongSongSet);
+    SaveManager::Instance->LoadArray("scarecrowLongSong", ARRAY_COUNT(gSaveContext.scarecrowLongSong), [](size_t i) {
+        SaveManager::Instance->LoadStruct("", [&i]() {
+            SaveManager::Instance->LoadData("noteIdx", gSaveContext.scarecrowLongSong[i].noteIdx);
+            SaveManager::Instance->LoadData("unk_01", gSaveContext.scarecrowLongSong[i].unk_01);
+            SaveManager::Instance->LoadData("unk_02", gSaveContext.scarecrowLongSong[i].unk_02);
+            SaveManager::Instance->LoadData("volume", gSaveContext.scarecrowLongSong[i].volume);
+            SaveManager::Instance->LoadData("vibrato", gSaveContext.scarecrowLongSong[i].vibrato);
+            SaveManager::Instance->LoadData("tone", gSaveContext.scarecrowLongSong[i].tone);
+            SaveManager::Instance->LoadData("semitone", gSaveContext.scarecrowLongSong[i].semitone);
+        });
+    });
+    SaveManager::Instance->LoadData("scarecrowSpawnSongSet", gSaveContext.scarecrowSpawnSongSet);
+    SaveManager::Instance->LoadArray("scarecrowSpawnSong", ARRAY_COUNT(gSaveContext.scarecrowSpawnSong), [](size_t i) {
+        SaveManager::Instance->LoadStruct("", [&i]() {
+            SaveManager::Instance->LoadData("noteIdx", gSaveContext.scarecrowSpawnSong[i].noteIdx);
+            SaveManager::Instance->LoadData("unk_01", gSaveContext.scarecrowSpawnSong[i].unk_01);
+            SaveManager::Instance->LoadData("unk_02", gSaveContext.scarecrowSpawnSong[i].unk_02);
+            SaveManager::Instance->LoadData("volume", gSaveContext.scarecrowSpawnSong[i].volume);
+            SaveManager::Instance->LoadData("vibrato", gSaveContext.scarecrowSpawnSong[i].vibrato);
+            SaveManager::Instance->LoadData("tone", gSaveContext.scarecrowSpawnSong[i].tone);
+            SaveManager::Instance->LoadData("semitone", gSaveContext.scarecrowSpawnSong[i].semitone);
+        });
+    });
+    SaveManager::Instance->LoadStruct("horseData", []() {
+        SaveManager::Instance->LoadData("scene", gSaveContext.horseData.scene);
+        SaveManager::Instance->LoadStruct("pos", []() {
+            SaveManager::Instance->LoadData("x", gSaveContext.horseData.pos.x);
+            SaveManager::Instance->LoadData("y", gSaveContext.horseData.pos.y);
+            SaveManager::Instance->LoadData("z", gSaveContext.horseData.pos.z);
+        });
+        SaveManager::Instance->LoadData("angle", gSaveContext.horseData.angle);
+    });
+
+    SaveManager::Instance->LoadArray("randomizerInf", ARRAY_COUNT(gSaveContext.ship.randomizerInf), [](size_t i) {
+        SaveManager::Instance->LoadData("", gSaveContext.ship.randomizerInf[i]);
+    });
+    int isMQ = 0;
+    SaveManager::Instance->LoadData("isMasterQuest", isMQ);
+    if (isMQ) {
+        gSaveContext.ship.quest.id = QUEST_MASTER;
+    }
+    SaveManager::Instance->LoadStruct("backupFW", []() {
+        SaveManager::Instance->LoadStruct("pos", []() {
+            SaveManager::Instance->LoadData("x", gSaveContext.ship.backupFW.pos.x);
+            SaveManager::Instance->LoadData("y", gSaveContext.ship.backupFW.pos.y);
+            SaveManager::Instance->LoadData("z", gSaveContext.ship.backupFW.pos.z);
+        });
+        SaveManager::Instance->LoadData("yaw", gSaveContext.ship.backupFW.yaw);
+        SaveManager::Instance->LoadData("playerParams", gSaveContext.ship.backupFW.playerParams);
+        SaveManager::Instance->LoadData("entranceIndex", gSaveContext.ship.backupFW.entranceIndex);
+        SaveManager::Instance->LoadData("roomIndex", gSaveContext.ship.backupFW.roomIndex);
+        SaveManager::Instance->LoadData("set", gSaveContext.ship.backupFW.set);
+        SaveManager::Instance->LoadData("tempSwchFlags", gSaveContext.ship.backupFW.tempSwchFlags);
+        SaveManager::Instance->LoadData("tempCollectFlags", gSaveContext.ship.backupFW.tempCollectFlags);
+    });
+    SaveManager::Instance->LoadData("dogParams", gSaveContext.dogParams);
+    SaveManager::Instance->LoadData("filenameLanguage", gSaveContext.ship.filenameLanguage);
+    SaveManager::Instance->LoadData("maskMemory", gSaveContext.ship.maskMemory);
+
+    SaveManager::Instance->LoadData("savedFrameCount", gSaveContext.savedFrameCount);
+    SaveManager::Instance->LoadData("goronTimeStatus", gSaveContext.goronTimeStatus);
+    SaveManager::Instance->LoadData("goronTimeDay", gSaveContext.goronTimeDay);
+    SaveManager::Instance->LoadData("SariaDateDay", gSaveContext.SariaDateDay);
+    SaveManager::Instance->LoadData("RutoDateDay", gSaveContext.RutoDateDay);
+    SaveManager::Instance->LoadArray("NPCWeekEvents", ARRAY_COUNT(gSaveContext.NPCWeekEvents), [](size_t i) {
+        SaveManager::Instance->LoadData("", gSaveContext.NPCWeekEvents[i]);
+    });
+    SaveManager::Instance->LoadData("MalonPlayDay", gSaveContext.MalonPlayDay);
+    SaveManager::Instance->LoadData("MalonRideDay", gSaveContext.MalonRideDay);
+    SaveManager::Instance->LoadData("maxBoosts", gSaveContext.maxBoosts, INITIAL_BOOSTS);
+    SaveManager::Instance->LoadData("extraMagicPower", gSaveContext.extraMagicPower);
+    SaveManager::Instance->LoadData("galleryMultplierChild", gSaveContext.galleryMultplierChild, INITIAL_MULTIPLIER);
+    SaveManager::Instance->LoadData("galleryMultplierAdult", gSaveContext.galleryMultplierAdult, INITIAL_MULTIPLIER);
+    SaveManager::Instance->LoadData("galleryTimeChild", gSaveContext.galleryTimeChild);
+    SaveManager::Instance->LoadData("galleryTimeAdult", gSaveContext.galleryTimeAdult);
+    SaveManager::Instance->LoadData("guardRupeesUsed", gSaveContext.guardRupeesUsed);
+    SaveManager::Instance->LoadData("diveRupeesUsed", gSaveContext.diveRupeesUsed);
+    SaveManager::Instance->LoadData("rupeeCollectionScore", gSaveContext.rupeeCollectionScore);
+    SaveManager::Instance->LoadData("spiritDefenseHeartsGiven", gSaveContext.spiritDefenseHeartsGiven);
+    SaveManager::Instance->LoadData("extraBombchuAccumulation", gSaveContext.extraBombchuAccumulation);
+    SaveManager::Instance->LoadData("UsedPinkSpirits", UsedPinkSpirits, {});
 }
 
 void SaveManager::SaveBase(SaveContext* saveContext, int sectionID, bool fullSave) {
@@ -2111,6 +2432,19 @@ void SaveManager::SaveBase(SaveContext* saveContext, int sectionID, bool fullSav
     SaveManager::Instance->SaveData("isDoubleDefenseAcquired", saveContext->isDoubleDefenseAcquired);
     SaveManager::Instance->SaveData("bgsFlag", saveContext->bgsFlag);
     SaveManager::Instance->SaveData("ocarinaGameRoundNum", saveContext->ocarinaGameRoundNum);
+    //Moves equipment slot numbers back to their original save file format, compatable with previous saves
+    u8 *slotLists[3];
+    slotLists[0] = saveContext->childEquips.cButtonSlots;
+    slotLists[1] = saveContext->adultEquips.cButtonSlots;
+    slotLists[2] = saveContext->equips.cButtonSlots;
+    for (size_t ii = 0; ii < NUM_EQUIPMENT_BUTTONS; ii++) {
+        for (size_t jj = 0; jj < 3; jj++) {
+            if (SLOT_TUNIC_KOKIRI <= slotLists[jj][ii] && slotLists[jj][ii] < SLOT_NONE)
+                slotLists[jj][ii] -= (SLOT_TUNIC_KOKIRI-OLD_EQUIP_START_SLOT);
+            else if (OLD_EQUIP_START_SLOT <= slotLists[jj][ii] && slotLists[jj][ii] < SLOT_TUNIC_KOKIRI)
+                slotLists[jj][ii] += OLD_EQUIP_LENGTH;
+        }
+    }
     SaveManager::Instance->SaveStruct("childEquips", [&]() {
         SaveManager::Instance->SaveArray(
             "buttonItems", ARRAY_COUNT(saveContext->childEquips.buttonItems),
@@ -2140,6 +2474,15 @@ void SaveManager::SaveBase(SaveContext* saveContext, int sectionID, bool fullSav
         });
         SaveManager::Instance->SaveData("equipment", saveContext->equips.equipment);
     });
+    //Moves equpment slot numbers to the end section so that items slots are contiguous
+    for (size_t ii = 0; ii < NUM_EQUIPMENT_BUTTONS; ii++) {
+        for (size_t jj = 0; jj < 3; jj++) {
+            if (OLD_EQUIP_START_SLOT <= slotLists[jj][ii] && slotLists[jj][ii] <= OLD_EQUIP_END_SLOT)
+                slotLists[jj][ii] += (SLOT_TUNIC_KOKIRI-OLD_EQUIP_START_SLOT);
+            else if (OLD_EQUIP_END_SLOT < slotLists[jj][ii] && slotLists[jj][ii] < SLOT_NONE)
+                slotLists[jj][ii] -= 6;
+        }
+    }
     SaveManager::Instance->SaveStruct("inventory", [&]() {
         SaveManager::Instance->SaveArray("items", ARRAY_COUNT(saveContext->inventory.items), [&](size_t i) {
             SaveManager::Instance->SaveData("", saveContext->inventory.items[i]);
@@ -2158,6 +2501,12 @@ void SaveManager::SaveBase(SaveContext* saveContext, int sectionID, bool fullSav
         });
         SaveManager::Instance->SaveData("defenseHearts", saveContext->inventory.defenseHearts);
         SaveManager::Instance->SaveData("gsTokens", saveContext->inventory.gsTokens);
+        SaveManager::Instance->SaveArray("rings", ARRAY_COUNT(saveContext->inventory.rings), [&](size_t i) {
+            SaveManager::Instance->SaveData("", saveContext->inventory.rings[i]);
+        });
+        SaveManager::Instance->SaveArray("ringEquips", ARRAY_COUNT(saveContext->inventory.ringEquips), [&](size_t i) {
+            SaveManager::Instance->SaveData("", saveContext->inventory.ringEquips[i]);
+        });
     });
     SaveManager::Instance->SaveArray("sceneFlags", ARRAY_COUNT(saveContext->sceneFlags), [&](size_t i) {
         SaveManager::Instance->SaveStruct("", [&]() {
@@ -2253,6 +2602,38 @@ void SaveManager::SaveBase(SaveContext* saveContext, int sectionID, bool fullSav
     SaveManager::Instance->SaveData("dogParams", saveContext->dogParams);
     SaveManager::Instance->SaveData("filenameLanguage", saveContext->ship.filenameLanguage);
     SaveManager::Instance->SaveData("maskMemory", saveContext->ship.maskMemory);
+    //SaveManager::Instance->SaveData("isMasterQuest", gSaveContext.isMasterQuest);
+
+    SaveManager::Instance->SaveData("savedFrameCount", saveContext->savedFrameCount);
+    SaveManager::Instance->SaveData("goronTimeStatus", saveContext->goronTimeStatus);
+    SaveManager::Instance->SaveData("goronTimeDay", saveContext->goronTimeDay);
+    SaveManager::Instance->SaveData("SariaDateDay", saveContext->SariaDateDay);
+    SaveManager::Instance->SaveArray("NPCWeekEvents", ARRAY_COUNT(saveContext->NPCWeekEvents), [&](size_t i) {
+        SaveManager::Instance->SaveData("", saveContext->NPCWeekEvents[i]);
+    });
+    SaveManager::Instance->SaveData("RutoDateDay", saveContext->RutoDateDay);
+    SaveManager::Instance->SaveData("MalonPlayDay", saveContext->MalonPlayDay);
+    SaveManager::Instance->SaveData("MalonRideDay", saveContext->MalonRideDay);
+    SaveManager::Instance->SaveData("maxBoosts", saveContext->maxBoosts);
+    SaveManager::Instance->SaveData("extraMagicPower", saveContext->extraMagicPower);
+    SaveManager::Instance->SaveData("galleryMultplierChild", saveContext->galleryMultplierChild);
+    SaveManager::Instance->SaveData("galleryMultplierAdult", saveContext->galleryMultplierAdult);
+    SaveManager::Instance->SaveData("galleryTimeChild", saveContext->galleryTimeChild);
+    SaveManager::Instance->SaveData("galleryTimeAdult", saveContext->galleryTimeAdult);
+    SaveManager::Instance->SaveData("guardRupeesUsed", saveContext->guardRupeesUsed);
+    SaveManager::Instance->SaveData("diveRupeesUsed", saveContext->diveRupeesUsed);
+    SaveManager::Instance->SaveData("rupeeCollectionScore", saveContext->rupeeCollectionScore);
+    SaveManager::Instance->SaveData("spiritDefenseHeartsGiven", gSaveContext.spiritDefenseHeartsGiven);
+    SaveManager::Instance->SaveData("extraBombchuAccumulation", gSaveContext.extraBombchuAccumulation);
+    SaveManager::Instance->SaveData("UsedPinkSpirits", UsedPinkSpirits);
+}
+
+void SaveManager::LoadPersistenceVersion1() {
+    SaveManager::Instance->LoadData("usedResources", UsedResources, {});
+}
+
+void SaveManager::SavePersistence(SaveContext* saveContext, int sectionID, bool fullSave) {
+    SaveManager::Instance->SaveData("usedResources", UsedResources);
 }
 
 // Load a string into a char array based on size and ensuring it is null terminated when overflowed

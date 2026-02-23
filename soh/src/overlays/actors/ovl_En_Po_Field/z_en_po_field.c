@@ -12,9 +12,7 @@
 
 #include <string.h>
 
-#define FLAGS                                                                                 \
-    (ACTOR_FLAG_ATTENTION_ENABLED | ACTOR_FLAG_HOSTILE | ACTOR_FLAG_UPDATE_CULLING_DISABLED | \
-     ACTOR_FLAG_DRAW_CULLING_DISABLED | ACTOR_FLAG_IGNORE_QUAKE)
+#define FLAGS (ACTOR_FLAG_HOSTILE | ACTOR_FLAG_UPDATE_CULLING_DISABLED | ACTOR_FLAG_DRAW_CULLING_DISABLED | ACTOR_FLAG_IGNORE_QUAKE)
 
 void EnPoField_Init(Actor* thisx, PlayState* play);
 void EnPoField_Destroy(Actor* thisx, PlayState* play);
@@ -84,7 +82,7 @@ static ColliderCylinderInit D_80AD70AC = {
     },
     {
         ELEMTYPE_UNK0,
-        { 0xFFCFFFFF, 0x01, 0x04 },
+        { 0xFFCFFFFF, 0x01, 0x10 },
         { 0x00000000, 0x00, 0x00 },
         TOUCH_ON | TOUCH_SFX_NONE,
         BUMP_NONE,
@@ -96,6 +94,41 @@ static ColliderCylinderInit D_80AD70AC = {
 static CollisionCheckInfoInit D_80AD70D8 = { 4, 25, 50, 40 };
 
 static DamageTable sDamageTable = {
+    /* Deku nut      */ DMG_ENTRY(0, 0x0),
+    /* Deku stick    */ DMG_ENTRY(2, 0x0),
+    /* Slingshot     */ DMG_ENTRY(1, 0x0),
+    /* Explosive     */ DMG_ENTRY(2, 0x0),
+    /* Boomerang     */ DMG_ENTRY(1, 0x1),
+    /* Normal arrow  */ DMG_ENTRY(2, 0x0),
+    /* Hammer swing  */ DMG_ENTRY(2, 0x0),
+    /* Hookshot      */ DMG_ENTRY(2, 0x1),
+    /* Kokiri sword  */ DMG_ENTRY(1, 0x0),
+    /* Master sword  */ DMG_ENTRY(2, 0x0),
+    /* Giant's Knife */ DMG_ENTRY(4, 0x0),
+    /* Fire arrow    */ DMG_ENTRY(2, 0x0),
+    /* Ice arrow     */ DMG_ENTRY(2, 0x0),
+    /* Light arrow   */ DMG_ENTRY(2, 0x0),
+    /* Unk arrow 1   */ DMG_ENTRY(4, 0x0),
+    /* Unk arrow 2   */ DMG_ENTRY(2, 0x0),
+    /* Unk arrow 3   */ DMG_ENTRY(2, 0x0),
+    /* Fire magic    */ DMG_ENTRY(0, 0x0),
+    /* Ice magic     */ DMG_ENTRY(0, 0x0),
+    /* Light magic   */ DMG_ENTRY(0, 0x0),
+    /* Shield        */ DMG_ENTRY(0, 0x0),
+    /* Mirror Ray    */ DMG_ENTRY(0, 0x0),
+    /* Kokiri spin   */ DMG_ENTRY(1, 0x0),
+    /* Giant spin    */ DMG_ENTRY(4, 0x0),
+    /* Master spin   */ DMG_ENTRY(2, 0x0),
+    /* Kokiri jump   */ DMG_ENTRY(2, 0x0),
+    /* Giant jump    */ DMG_ENTRY(8, 0x0),
+    /* Master jump   */ DMG_ENTRY(4, 0x0),
+    /* Unknown 1     */ DMG_ENTRY(0, 0x0),
+    /* Unblockable   */ DMG_ENTRY(0, 0x0),
+    /* Hammer jump   */ DMG_ENTRY(4, 0x0),
+    /* Unknown 2     */ DMG_ENTRY(0, 0x0),
+};
+
+static DamageTable sDamageTableAlt = {
     /* Deku nut      */ DMG_ENTRY(0, 0x0),
     /* Deku stick    */ DMG_ENTRY(2, 0x0),
     /* Slingshot     */ DMG_ENTRY(1, 0x0),
@@ -173,9 +206,11 @@ void EnPoField_Init(Actor* thisx, PlayState* play) {
     SkelAnime_Init(play, &this->skelAnime, &gPoeFieldSkel, &gPoeFieldFloatAnim, this->jointTable, this->morphTable, 10);
     Collider_InitCylinder(play, &this->collider);
     Collider_SetCylinder(play, &this->collider, &this->actor, &D_80AD7080);
-    Collider_InitCylinder(play, &this->flameCollider);
-    Collider_SetCylinder(play, &this->flameCollider, &this->actor, &D_80AD70AC);
-    CollisionCheck_SetInfo(&this->actor.colChkInfo, &sDamageTable, &D_80AD70D8);
+    for (s16 ii = 0; ii < PO_FIELD_NO_FLAMES; ii++) {
+        Collider_InitCylinder(play, &this->flameCollider[ii]);
+        Collider_SetCylinder(play, &this->flameCollider[ii], &this->actor, &D_80AD70AC);
+    }
+    CollisionCheck_SetInfo(&this->actor.colChkInfo, (CVarGetInteger(CVAR_ENHANCEMENT("NonGyroDifficulty"), 0) ? &sDamageTableAlt : &sDamageTable), &D_80AD70D8);
     this->lightNode = LightContext_InsertLight(play, &play->lightCtx, &this->lightInfo);
     Lights_PointGlowSetInfo(&this->lightInfo, this->actor.home.pos.x, this->actor.home.pos.y, this->actor.home.pos.z,
                             255, 255, 255, 0);
@@ -188,7 +223,8 @@ void EnPoField_Destroy(Actor* thisx, PlayState* play) {
 
     if (this->actor.params != 0xFF) {
         LightContext_RemoveLight(play, &play->lightCtx, this->lightNode);
-        Collider_DestroyCylinder(play, &this->flameCollider);
+        for (s16 ii = 0; ii < PO_FIELD_NO_FLAMES; ii++)
+            Collider_DestroyCylinder(play, &this->flameCollider[ii]);
         Collider_DestroyCylinder(play, &this->collider);
     }
 
@@ -426,6 +462,8 @@ void EnPoField_WaitForSpawn(EnPoField* this, PlayState* play) {
                     }
                 } else if (player->stateFlags1 & PLAYER_STATE1_ON_HORSE || Rand_ZeroOne() < 0.4f) {
                     this->actor.params = EN_PO_FIELD_BIG;
+                    if (!CVarGetInteger(CVAR_ENHANCEMENT("NonGyroDifficulty"), 0))
+                        this->actor.colChkInfo.health = 8;
                     this->spawnFlagIndex = i;
                     spawnDist = 480.0f;
                 } else {
@@ -481,7 +519,7 @@ void EnPoField_CirclePlayer(EnPoField* this, PlayState* play) {
         this->actionTimer--;
     }
     if (ABS(temp_v1) < 16) {
-        this->actor.world.rot.y += 512.0f * fabsf(Math_SinS(this->unk_194 * 0x800));
+        this->actor.world.rot.y += 1024.0f * fabsf(Math_SinS(this->unk_194 * 0x800));
     }
     Math_ApproachF(&this->scaleModifier, 180.0f, 0.5f, 10.0f);
     Math_ApproachF(&this->actor.home.pos.x, player->actor.world.pos.x, 0.2f, 6.0f);
@@ -750,9 +788,11 @@ void EnPoField_TestForDamage(EnPoField* this, PlayState* play) {
 
 void EnPoField_SpawnFlame(EnPoField* this) {
     if (this->flameTimer == 0) {
-        this->flamePosition.x = this->lightInfo.params.point.x;
-        this->flamePosition.y = this->lightInfo.params.point.y;
-        this->flamePosition.z = this->lightInfo.params.point.z;
+        for (s16 ii = 0; ii < PO_FIELD_NO_FLAMES; ii++) {
+            this->flamePosition[ii].x = this->lightInfo.params.point.x;
+            this->flamePosition[ii].y = this->lightInfo.params.point.y;
+            this->flamePosition[ii].z = this->lightInfo.params.point.z;
+        }
         this->flameTimer = 70;
         this->flameRotation = this->actor.shape.rot.y;
     }
@@ -763,22 +803,30 @@ void EnPoField_UpdateFlame(EnPoField* this, PlayState* play) {
         if (this->flameTimer != 0) {
             this->flameTimer--;
         }
-        if (this->flameCollider.base.atFlags & AT_HIT) {
-            this->flameCollider.base.atFlags &= ~AT_HIT;
-            this->flameTimer = 19;
+        for (s16 ii = 0; ii < PO_FIELD_NO_FLAMES; ii++) {
+            if (this->flameCollider[ii].base.atFlags & AT_HIT) {
+                for (s16 ii = 0; ii < PO_FIELD_NO_FLAMES; ii++)
+                    this->flameCollider[ii].base.atFlags &= ~AT_HIT;
+                this->flameTimer = 19;
+                break;
+            }
         }
         if (this->flameTimer < 20) {
             Math_StepToF(&this->flameScale, 0.0f, 0.00015f);
             return;
         }
         if (Math_StepToF(&this->flameScale, 0.003f, 0.0006f) != 0) {
-            this->flamePosition.x += 2.5f * Math_SinS(this->flameRotation);
-            this->flamePosition.z += 2.5f * Math_CosS(this->flameRotation);
+            for (s16 ii = 0; ii < PO_FIELD_NO_FLAMES; ii++) {
+                this->flamePosition[ii].x += 1.5f * ii * Math_SinS(this->flameRotation);
+                this->flamePosition[ii].z += 1.8f * ii * Math_CosS(this->flameRotation);
+            }
         }
-        this->flameCollider.dim.pos.x = this->flamePosition.x;
-        this->flameCollider.dim.pos.y = this->flamePosition.y;
-        this->flameCollider.dim.pos.z = this->flamePosition.z;
-        CollisionCheck_SetAT(play, &play->colChkCtx, &this->flameCollider.base);
+        for (s16 ii = 0; ii < PO_FIELD_NO_FLAMES; ii++) {
+            this->flameCollider[ii].dim.pos.x = this->flamePosition[ii].x;
+            this->flameCollider[ii].dim.pos.y = this->flamePosition[ii].y;
+            this->flameCollider[ii].dim.pos.z = this->flamePosition[ii].z;
+            CollisionCheck_SetAT(play, &play->colChkCtx, &this->flameCollider[ii].base);
+        }
     }
 }
 
@@ -794,18 +842,23 @@ void EnPoField_DrawFlame(EnPoField* this, PlayState* play) {
             Gfx_TwoTexScroll(play->state.gfxCtx, 0, 0, 0, 32, 64, 1, 0, (play->gameplayFrames * -20) % 512, 32, 128));
         sp4C = this->flameScale * 85000.0f;
         gDPSetPrimColor(POLY_XLU_DISP++, 0x80, 0x80, 255, 255, 0, sp4C);
-        Matrix_Translate(this->flamePosition.x, this->flamePosition.y, this->flamePosition.z, MTXMODE_NEW);
-        Matrix_RotateY((s16)(Camera_GetCamDirYaw(GET_ACTIVE_CAM(play)) + 0x8000) * (M_PI / 0x8000), MTXMODE_APPLY);
-        if (this->flameTimer >= 20) {
-            gDPSetEnvColor(POLY_XLU_DISP++, 255, 0, 0, 0);
-            Matrix_Scale(this->flameScale, this->flameScale, this->flameScale, MTXMODE_APPLY);
-        } else {
-            gDPSetEnvColor(POLY_XLU_DISP++, sp4C, 0, 0, 0);
-            Matrix_Scale((this->flameScale * 0.7f) + 0.00090000004f, (0.003f - this->flameScale) + 0.003f, 0.003f,
-                         MTXMODE_APPLY);
+        for (s16 ii = 0; ii < PO_FIELD_NO_FLAMES; ii++) {
+            Matrix_Push();
+            Matrix_Translate(this->flamePosition[ii].x, this->flamePosition[ii].y, this->flamePosition[ii].z, MTXMODE_NEW);
+            Matrix_RotateY((s16)(Camera_GetCamDirYaw(GET_ACTIVE_CAM(play)) + 0x8000) * (M_PI / 0x8000), MTXMODE_APPLY);
+            if (this->flameTimer >= 20) {
+                gDPSetEnvColor(POLY_XLU_DISP++, 255, 0, 0, 0);
+                Matrix_Scale(this->flameScale, this->flameScale, this->flameScale, MTXMODE_APPLY);
+            } else {
+                gDPSetEnvColor(POLY_XLU_DISP++, sp4C, 0, 0, 0);
+                Matrix_Scale((this->flameScale * 0.7f) + 0.00090000004f, (0.003f - this->flameScale) + 0.003f, 0.003f,
+                            MTXMODE_APPLY);
+            }
+            gSPMatrix(POLY_XLU_DISP++, MATRIX_NEWMTX(play->state.gfxCtx),
+                    G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+            gSPDisplayList(POLY_XLU_DISP++, gEffFire1DL);
+            Matrix_Pop();
         }
-        gSPMatrix(POLY_XLU_DISP++, MATRIX_NEWMTX(play->state.gfxCtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-        gSPDisplayList(POLY_XLU_DISP++, gEffFire1DL);
         CLOSE_DISPS(play->state.gfxCtx);
     }
 }

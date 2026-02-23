@@ -13,6 +13,7 @@ SetTransitionActorListFactory::ReadResource(std::shared_ptr<Ship::ResourceInitDa
     ReadCommandId(setTransitionActorList, reader);
 
     setTransitionActorList->numTransitionActors = reader->ReadUInt32();
+    setTransitionActorList->modificationState = 0;
     setTransitionActorList->transitionActorList.reserve(setTransitionActorList->numTransitionActors);
     for (uint32_t i = 0; i < setTransitionActorList->numTransitionActors; i++) {
         TransitionActorEntry entry;

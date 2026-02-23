@@ -289,6 +289,8 @@ void EnSw_Init(Actor* thisx, PlayState* play) {
             break;
         default:
             Actor_ChangeCategory(play, &play->actorCtx, &this->actor, ACTORCAT_ENEMY);
+            if (!CVarGetInteger(CVAR_ENHANCEMENT("NonGyroDifficulty"), 0))
+                this->actor.flags &= ~ACTOR_FLAG_ATTENTION_ENABLED;
             this->actor.naviEnemyId = 0x1F;
             break;
     }

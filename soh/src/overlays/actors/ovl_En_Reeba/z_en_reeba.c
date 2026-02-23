@@ -93,7 +93,7 @@ static ColliderCylinderInit sCylinderInit = {
     },
     {
         ELEMTYPE_UNK0,
-        { 0xFFCFFFFF, 0x08, 0x08 },
+        { 0xFFCFFFFF, 0x08, 0x10 },
         { 0xFFCFFFFF, 0x00, 0x00 },
         TOUCH_ON | TOUCH_SFX_NORMAL,
         BUMP_ON | BUMP_HOOKABLE,
@@ -484,6 +484,7 @@ void func_80AE5C38(EnReeba* this, PlayState* play) {
                 Item_DropCollectibleRandom(play, &this->actor, &pos, 0xE0);
             } else {
                 Item_DropCollectibleRandom(play, &this->actor, &pos, 0xC0);
+                Item_DropCollectible(play, &pos, ITEM00_RING_0+RI_WITCHS_RING);
             }
 
             if (this->actor.parent != NULL) {

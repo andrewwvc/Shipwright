@@ -10,11 +10,13 @@ static u8 D_808C7000[] = {
     1, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0,
 };
 
+#define DD_DAMAGE_BODY 0x08
+
 static ColliderJntSphElementInit sJntSphElementsInit[19] = {
     {
         {
             ELEMTYPE_UNK3,
-            { 0xFFCFFFFF, 0x00, 0x04 },
+            { 0xFFCFFFFF, 0x00, DD_DAMAGE_BODY },
             { 0xFFCFFFFF, 0x00, 0x00 },
             TOUCH_ON | TOUCH_SFX_NORMAL,
             BUMP_ON,
@@ -25,29 +27,29 @@ static ColliderJntSphElementInit sJntSphElementsInit[19] = {
     {
         {
             ELEMTYPE_UNK3,
-            { 0xFFCFFFFF, 0x00, 0x04 },
+            { 0x20000000, 0x00, DD_DAMAGE_BODY },
             { 0xFFCFFFFF, 0x00, 0x00 },
             TOUCH_ON | TOUCH_SFX_NORMAL,
             BUMP_ON,
             OCELEM_ON,
         },
-        { 33, { { 2000, -2000, 0 }, 60 }, 100 },
+        { 33, { { 2000, -2000, 0 }, 150 }, 100 },
     },
     {
         {
             ELEMTYPE_UNK2,
-            { 0xFFCFFFFF, 0x00, 0x04 },
+            { 0x20000000, 0x00, DD_DAMAGE_BODY },
             { 0xFFCFFFFF, 0x00, 0x00 },
             TOUCH_ON | TOUCH_SFX_NORMAL,
             BUMP_ON,
             OCELEM_ON,
         },
-        { 1, { { 0, 0, 0 }, 60 }, 100 },
+        { 1, { { 0, 0, 0 }, 150 }, 100 },
     },
     {
         {
             ELEMTYPE_UNK2,
-            { 0xFFCFFFFF, 0x00, 0x04 },
+            { 0xFFCFFFFF, 0x00, DD_DAMAGE_BODY },
             { 0xFFCFFFFF, 0x00, 0x00 },
             TOUCH_ON | TOUCH_SFX_NORMAL,
             BUMP_ON,
@@ -58,7 +60,7 @@ static ColliderJntSphElementInit sJntSphElementsInit[19] = {
     {
         {
             ELEMTYPE_UNK2,
-            { 0xFFCFFFFF, 0x00, 0x04 },
+            { 0xFFCFFFFF, 0x00, DD_DAMAGE_BODY },
             { 0xFFCFFFFF, 0x00, 0x00 },
             TOUCH_ON | TOUCH_SFX_NORMAL,
             BUMP_ON,
@@ -69,7 +71,7 @@ static ColliderJntSphElementInit sJntSphElementsInit[19] = {
     {
         {
             ELEMTYPE_UNK2,
-            { 0xFFCFFFFF, 0x00, 0x04 },
+            { 0xFFCFFFFF, 0x00, DD_DAMAGE_BODY },
             { 0xFFCFFFFF, 0x00, 0x00 },
             TOUCH_ON | TOUCH_SFX_NORMAL,
             BUMP_ON,
@@ -80,7 +82,7 @@ static ColliderJntSphElementInit sJntSphElementsInit[19] = {
     {
         {
             ELEMTYPE_UNK2,
-            { 0xFFCFFFFF, 0x00, 0x04 },
+            { 0xFFCFFFFF, 0x00, DD_DAMAGE_BODY },
             { 0xFFCFFFFF, 0x00, 0x00 },
             TOUCH_ON | TOUCH_SFX_NORMAL,
             BUMP_ON,
@@ -91,7 +93,7 @@ static ColliderJntSphElementInit sJntSphElementsInit[19] = {
     {
         {
             ELEMTYPE_UNK2,
-            { 0xFFCFFFFF, 0x00, 0x04 },
+            { 0xFFCFFFFF, 0x00, DD_DAMAGE_BODY },
             { 0xFFCFFFFF, 0x00, 0x00 },
             TOUCH_ON | TOUCH_SFX_NORMAL,
             BUMP_ON,
@@ -102,7 +104,7 @@ static ColliderJntSphElementInit sJntSphElementsInit[19] = {
     {
         {
             ELEMTYPE_UNK2,
-            { 0xFFCFFFFF, 0x00, 0x04 },
+            { 0xFFCFFFFF, 0x00, DD_DAMAGE_BODY },
             { 0xFFCFFFFF, 0x00, 0x00 },
             TOUCH_ON | TOUCH_SFX_NORMAL,
             BUMP_ON,
@@ -113,7 +115,7 @@ static ColliderJntSphElementInit sJntSphElementsInit[19] = {
     {
         {
             ELEMTYPE_UNK2,
-            { 0xFFCFFFFF, 0x00, 0x04 },
+            { 0xFFCFFFFF, 0x00, DD_DAMAGE_BODY },
             { 0xFFCFFFFF, 0x00, 0x00 },
             TOUCH_ON | TOUCH_SFX_NORMAL,
             BUMP_ON,
@@ -124,7 +126,7 @@ static ColliderJntSphElementInit sJntSphElementsInit[19] = {
     {
         {
             ELEMTYPE_UNK2,
-            { 0xFFCFFFFF, 0x00, 0x04 },
+            { 0xFFCFFFFF, 0x00, DD_DAMAGE_BODY },
             { 0xFFCFFFFF, 0x00, 0x00 },
             TOUCH_ON | TOUCH_SFX_NORMAL,
             BUMP_ON,
@@ -135,7 +137,7 @@ static ColliderJntSphElementInit sJntSphElementsInit[19] = {
     {
         {
             ELEMTYPE_UNK2,
-            { 0xFFCFFFFF, 0x00, 0x04 },
+            { 0xFFCFFFFF, 0x00, DD_DAMAGE_BODY },
             { 0xFFCFFFFF, 0x00, 0x00 },
             TOUCH_ON | TOUCH_SFX_NORMAL,
             BUMP_ON,
@@ -146,7 +148,7 @@ static ColliderJntSphElementInit sJntSphElementsInit[19] = {
     {
         {
             ELEMTYPE_UNK2,
-            { 0xFFCFFFFF, 0x00, 0x04 },
+            { 0xFFCFFFFF, 0x00, DD_DAMAGE_BODY },
             { 0xFFCFFFFF, 0x00, 0x00 },
             TOUCH_ON | TOUCH_SFX_NORMAL,
             BUMP_ON,
@@ -157,7 +159,7 @@ static ColliderJntSphElementInit sJntSphElementsInit[19] = {
     {
         {
             ELEMTYPE_UNK2,
-            { 0xFFCFFFFF, 0x00, 0x04 },
+            { 0xFFCFFFFF, 0x00, DD_DAMAGE_BODY },
             { 0xFFCFFFFF, 0x00, 0x00 },
             TOUCH_ON | TOUCH_SFX_NORMAL,
             BUMP_ON,
@@ -168,7 +170,7 @@ static ColliderJntSphElementInit sJntSphElementsInit[19] = {
     {
         {
             ELEMTYPE_UNK2,
-            { 0xFFCFFFFF, 0x00, 0x04 },
+            { 0xFFCFFFFF, 0x00, DD_DAMAGE_BODY },
             { 0xFFCFFFFF, 0x00, 0x00 },
             TOUCH_ON | TOUCH_SFX_NORMAL,
             BUMP_ON,
@@ -179,7 +181,7 @@ static ColliderJntSphElementInit sJntSphElementsInit[19] = {
     {
         {
             ELEMTYPE_UNK2,
-            { 0xFFCFFFFF, 0x00, 0x04 },
+            { 0xFFCFFFFF, 0x00, DD_DAMAGE_BODY },
             { 0xFFCFFFFF, 0x00, 0x00 },
             TOUCH_ON | TOUCH_SFX_NORMAL,
             BUMP_ON,
@@ -190,7 +192,7 @@ static ColliderJntSphElementInit sJntSphElementsInit[19] = {
     {
         {
             ELEMTYPE_UNK2,
-            { 0xFFCFFFFF, 0x00, 0x04 },
+            { 0xFFCFFFFF, 0x00, DD_DAMAGE_BODY },
             { 0xFFCFFFFF, 0x00, 0x00 },
             TOUCH_ON | TOUCH_SFX_NORMAL,
             BUMP_ON,
@@ -201,7 +203,7 @@ static ColliderJntSphElementInit sJntSphElementsInit[19] = {
     {
         {
             ELEMTYPE_UNK2,
-            { 0xFFCFFFFF, 0x00, 0x04 },
+            { 0xFFCFFFFF, 0x00, DD_DAMAGE_BODY },
             { 0xFFCFFFFF, 0x00, 0x00 },
             TOUCH_ON | TOUCH_SFX_NORMAL,
             BUMP_ON,
@@ -212,7 +214,7 @@ static ColliderJntSphElementInit sJntSphElementsInit[19] = {
     {
         {
             ELEMTYPE_UNK2,
-            { 0xFFCFFFFF, 0x00, 0x04 },
+            { 0xFFCFFFFF, 0x00, DD_DAMAGE_BODY },
             { 0xFFCFFFFF, 0x00, 0x00 },
             TOUCH_ON | TOUCH_SFX_NORMAL,
             BUMP_ON,

@@ -3,6 +3,10 @@
 
 #include "z64.h"
 #include "segment_symbols.h"
+#define ITEMS_BASE_ICONS 160
+#define ITEMS_EXTRA_ICONS 7
+#define NUM_EQUIPMENT_ROWS 5
+#define NUM_EQUIPMENT_COLUMNS 4
 
 #ifdef __cplusplus
 extern "C"
@@ -94,19 +98,19 @@ extern "C"
 	extern Gfx gCullFrontDList[];
 	extern Gfx gEmptyDL[];
 	extern u32 gBitFlags[32];
-	extern u16 gEquipMasks[4];
-	extern u16 gEquipNegMasks[4];
+	extern u32 gEquipMasks[NUM_EQUIPMENT_ROWS];
+	extern u32 gEquipNegMasks[NUM_EQUIPMENT_ROWS];
 	extern u32 gUpgradeMasks[8];
 	extern u32 gUpgradeNegMasks[8];
-	extern u8 gEquipShifts[4];
+	extern u8 gEquipShifts[NUM_EQUIPMENT_ROWS];
 	extern u8 gUpgradeShifts[8];
 	extern u16 gUpgradeCapacities[8][4];
 	extern u32 gGsFlagsMasks[4];
 	extern u32 gGsFlagsShifts[4];
-	extern void* gItemIcons[0x82];
+	extern void* gItemIcons[ITEMS_BASE_ICONS+ITEMS_EXTRA_ICONS];
 	extern u8 gItemAgeReqs[];
 	extern u8 gSlotAgeReqs[];
-	extern u8 gItemSlots[56];
+	extern u8 gItemSlots[ITEMS_BASE_ICONS+ITEMS_EXTRA_ICONS];
 	extern void (*gSceneCmdHandlers[SCENE_CMD_ID_MAX])(PlayState*, SceneCmd*);
 	extern s16 gLinkObjectIds[2];
 	extern u32 gObjectTableSize;

@@ -112,6 +112,7 @@ typedef enum PlayerItemAction {
     /* 0x11 */ PLAYER_IA_LONGSHOT,
     /* 0x12 */ PLAYER_IA_BOMB,
     /* 0x13 */ PLAYER_IA_BOMBCHU,
+               PLAYER_IA_BOMBMINE,
     /* 0x14 */ PLAYER_IA_BOOMERANG,
     /* 0x15 */ PLAYER_IA_MAGIC_SPELL_15,
     /* 0x16 */ PLAYER_IA_MAGIC_SPELL_16,
@@ -134,6 +135,7 @@ typedef enum PlayerItemAction {
     /* 0x27 */ PLAYER_IA_BOTTLE_POTION_GREEN,
     /* 0x28 */ PLAYER_IA_BOTTLE_MILK_FULL,
     /* 0x29 */ PLAYER_IA_BOTTLE_MILK_HALF,
+    /*      */ PLAYER_IA_BOTTLE_AMMO,
     /* 0x2A */ PLAYER_IA_BOTTLE_FAIRY,
     /* 0x2B */ PLAYER_IA_ZELDAS_LETTER,
     /* 0x2C */ PLAYER_IA_WEIRD_EGG,
@@ -159,6 +161,15 @@ typedef enum PlayerItemAction {
     /* 0x40 */ PLAYER_IA_MASK_GERUDO,
     /* 0x41 */ PLAYER_IA_MASK_TRUTH,
     /* 0x42 */ PLAYER_IA_LENS_OF_TRUTH,
+    /* 0x43 */ PLAYER_IA_SHIELD_DEKU,
+    /* 0x44 */ PLAYER_IA_SHIELD_HYLIAN,
+    /* 0x45 */ PLAYER_IA_SHIELD_MIRROR,
+    /* 0x46 */ PLAYER_IA_TUNIC_KOKIRI,
+    /* 0x47 */ PLAYER_IA_TUNIC_GORON,
+    /* 0x48 */ PLAYER_IA_TUNIC_ZORA,
+    /* 0x49 */ PLAYER_IA_BOOTS_KOKIRI,
+    /* 0x4A */ PLAYER_IA_BOOTS_IRON,
+    /* 0x4B */ PLAYER_IA_BOOTS_HOVER,
     /* 0x43 */ PLAYER_IA_MAX
 } PlayerItemAction;
 
@@ -754,6 +765,7 @@ typedef struct Player {
     /* 0x014D */ s8 currentSwordItemId;
     /* 0x014E */ s8 currentShield; // current shield from `PlayerShield`
     /* 0x014F */ s8 currentBoots; // current boots from `PlayerBoots`
+    /*        */ s8 currentRing; // current ring
     /* 0x0150 */ s8 heldItemButton; // Button index for the item currently used
     /* 0x0151 */ s8 heldItemAction; // Item action for the item currently used
     /* 0x0152 */ u8 heldItemId; // Item id for the item currently used
@@ -946,6 +958,24 @@ typedef struct Player {
     /*        */ u8 ivanFloating;
     /*        */ u8 ivanDamageMultiplier;
     // #endregion
+    // #region SOH [NPC Mod]
+    /*        */ u16 sCurrentSecretIndex;
+    // #endregion
+    // #region SOH [Combat Mod]
+                 u8         shieldRelaxTimer;
+                 u8         shieldUpTimer;
+                 u8         shieldEntry;
+                 u8         crossoverState;
+                 u8         unsheathing;
+                 s16        crouchCharge;
+                 Vec3f      entryDiff;
+                 s16        stepTracking;
+    // #endregion
 } Player; // size = 0xA94
 
+#define PLAYER_MAX_SIDESTEP_SHIELD_SPEED 1.5f
+#define SUB_STEP_SPEED ABS(this->linearVelocity*Math_SinS(this->actor.shape.rot.y-this->actor.world.rot.y))
+#define IN_SUB_STEP_MOTION (SUB_STEP_SPEED < PLAYER_MAX_SIDESTEP_SHIELD_SPEED)
+
+s32 Player_isRangedWeaponReady(PlayState* play);
 #endif

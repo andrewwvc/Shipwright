@@ -21,6 +21,7 @@ void func_80AA2018(EnMa2* this, PlayState* play);
 void func_80AA204C(EnMa2* this, PlayState* play);
 void func_80AA20E4(EnMa2* this, PlayState* play);
 void func_80AA21C8(EnMa2* this, PlayState* play);
+void EnMa2_FreeRiding(EnMa2* this, PlayState* play);
 
 const ActorInit En_Ma2_InitVars = {
     ACTOR_EN_MA2,
@@ -101,6 +102,7 @@ s16 func_80AA1A38(PlayState* play, Actor* thisx) {
                 case 0x2051:
                     Flags_SetInfTable(INFTABLE_8C);
                     ret = NPC_TALK_STATE_ACTION;
+                    Item_DropCollectible(play, &thisx->world.pos, ITEM00_RING_0+RI_MUTE_RING);
                     break;
                 case 0x2053:
                     Flags_SetInfTable(INFTABLE_8D);
@@ -144,13 +146,22 @@ u16 func_80AA1B58(EnMa2* this, PlayState* play) {
     if (LINK_IS_CHILD) {
         return 0;
     }
+    if (play->sceneNum == SCENE_HYRULE_FIELD) {
+        return 4;
+    }
     if (!Flags_GetEventChkInf(EVENTCHKINF_EPONA_OBTAINED) && (play->sceneNum == SCENE_STABLE) && IS_DAY &&
         (this->actor.shape.rot.z == 5)) {
         return 1;
     }
     if (!Flags_GetEventChkInf(EVENTCHKINF_EPONA_OBTAINED) && (play->sceneNum == SCENE_LON_LON_RANCH) && IS_NIGHT &&
         (this->actor.shape.rot.z == 6)) {
-        return 2;
+        if ((gSaveContext.eventChkInf[2] & 0x0400) && gSaveContext.MalonRideDay == gSaveContext.totalDays)//Prevent Malon from appearing in this form at night if she's out riding
+            return 0;
+        else {
+            if (!gSaveContext.inventory.rings[RI_MUTE_RING] && Flags_GetInfTable(INFTABLE_8C))
+                Item_DropCollectible(play, &this->actor.world.pos, ITEM00_RING_0+RI_MUTE_RING);
+            return 2;
+        }
     }
     if (!Flags_GetEventChkInf(EVENTCHKINF_EPONA_OBTAINED) || (play->sceneNum != SCENE_LON_LON_RANCH)) {
         return 0;
@@ -159,7 +170,13 @@ u16 func_80AA1B58(EnMa2* this, PlayState* play) {
         return 3;
     }
     if ((this->actor.shape.rot.z == 8) && IS_NIGHT) {
-        return 3;
+        if ((gSaveContext.eventChkInf[2] & 0x0400) && gSaveContext.MalonRideDay == gSaveContext.totalDays)//Prevent Malon from appearing in this form at night if she's out riding
+            return 0;
+        else {
+            if (!gSaveContext.inventory.rings[RI_MUTE_RING] && Flags_GetInfTable(INFTABLE_8C))
+                Item_DropCollectible(play, &this->actor.world.pos, ITEM00_RING_0+RI_MUTE_RING);
+            return 3;
+        }
     }
     return 0;
 }
@@ -216,11 +233,13 @@ void EnMa2_Init(Actor* thisx, PlayState* play) {
     EnMa2* this = (EnMa2*)thisx;
     s32 pad;
 
-    ActorShape_Init(&this->actor.shape, 0.0f, ActorShadow_DrawCircle, 18.0f);
+    if ((this->actor.params & 0xF) != 0xB)
+        ActorShape_Init(&this->actor.shape, 0.0f, ActorShadow_DrawCircle, 18.0f);
     SkelAnime_InitFlex(play, &this->skelAnime, &gMalonAdultSkel, NULL, NULL, NULL, 0);
     Collider_InitCylinder(play, &this->collider);
     Collider_SetCylinder(play, &this->collider, &this->actor, &sCylinderInit);
     CollisionCheck_SetInfo2(&this->actor.colChkInfo, DamageTable_Get(22), &sColChkInfoInit);
+    this->rideActor = NULL;
 
     switch (func_80AA1B58(this, play)) {
         case 1:
@@ -239,6 +258,10 @@ void EnMa2_Init(Actor* thisx, PlayState* play) {
             }
             this->actionFunc = func_80AA2018;
             break;
+        case 4:
+            EnMa2_ChangeAnim(this, ENMA2_ANIM_2);
+            this->actionFunc = EnMa2_FreeRiding;
+            break;
         case 0:
             Actor_Kill(&this->actor);
             return;
@@ -248,6 +271,10 @@ void EnMa2_Init(Actor* thisx, PlayState* play) {
     Actor_SetScale(&this->actor, 0.01f);
     this->actor.targetMode = 6;
     this->interactInfo.talkState = NPC_TALK_STATE_IDLE;
+    if ((this->actor.params & 0xF) == 0xB) {
+        this->collider.base.ocFlags1 &= ~OC1_ON;
+        this->actor.flags &= ~ACTOR_FLAG_ATTENTION_ENABLED;
+    }
 }
 
 void EnMa2_Destroy(Actor* thisx, PlayState* play) {
@@ -262,6 +289,9 @@ void func_80AA2018(EnMa2* this, PlayState* play) {
         this->actor.flags &= ~ACTOR_FLAG_TALK_OFFER_AUTO_ACCEPTED;
         this->interactInfo.talkState = NPC_TALK_STATE_IDLE;
     }
+}
+
+void EnMa2_FreeRiding(EnMa2* this, PlayState* play) {
 }
 
 void func_80AA204C(EnMa2* this, PlayState* play) {
@@ -322,15 +352,42 @@ void EnMa2_Update(Actor* thisx, PlayState* play) {
     this->actionFunc(this, play);
     func_80AA1DB4(this, play);
     func_80AA1AE4(this, play);
-    if (this->actionFunc != func_80AA20E4) {
+    if (this->actionFunc != func_80AA20E4 && this->actor.params != 0xB) {
         Npc_UpdateTalking(play, &this->actor, &this->interactInfo.talkState, (f32)this->collider.dim.radius + 30.0f,
-                          func_80AA19A0, func_80AA1A38);
+                      func_80AA19A0, func_80AA1A38);
     }
 }
 
 s32 EnMa2_OverrideLimbDraw(PlayState* play, s32 limbIndex, Gfx** dList, Vec3f* pos, Vec3s* rot, void* thisx) {
     EnMa2* this = (EnMa2*)thisx;
     Vec3s vec;
+
+    if (this->actor.params == 0xB) {
+        if (limbIndex == MALON_ADULT_ROOT_LIMB) {
+            Matrix_Translate(0.0f, -2500.0f, 0.0f, MTXMODE_APPLY);
+        }
+
+        if (limbIndex == MALON_ADULT_LEFT_LEG_LIMB) {
+            Vec3f rotPole2 = {0.0f,0.0f,1.0f};
+            Matrix_RotateAxis(-M_PI/4, &rotPole2, MTXMODE_APPLY);
+            Vec3f rotPole1 = {0.0f,1.0f,0.0f};
+            Matrix_RotateAxis(-M_PI/6, &rotPole1, MTXMODE_APPLY);
+        }
+
+        if (limbIndex == MALON_ADULT_RIGHT_LEG_LIMB) {
+            Vec3f rotPole2 = {0.0f,0.0f,1.0f};
+            Matrix_RotateAxis(-M_PI/6, &rotPole2, MTXMODE_APPLY);
+            Vec3f rotPole1 = {0.0f,1.0f,0.0f};
+            Matrix_RotateAxis(M_PI/6, &rotPole1, MTXMODE_APPLY);
+        }
+
+        if (limbIndex == MALON_ADULT_DRESS_LIMB) {
+            Vec3f rotPole = {0.0f,0.0f,1.0f};
+            Matrix_RotateAxis(-M_PI/8, &rotPole, MTXMODE_APPLY);
+            Matrix_Translate(-800.0f, -1000.0f, 0.0f, MTXMODE_APPLY);
+            Matrix_Scale(1.0f, 1.34, 1.3f, MTXMODE_APPLY);
+        }
+    }
 
     if ((limbIndex == MALON_ADULT_LEFT_THIGH_LIMB) || (limbIndex == MALON_ADULT_RIGHT_THIGH_LIMB)) {
         *dList = NULL;

@@ -52,6 +52,9 @@ static ColliderCylinderInit sCylinderInit = {
     { 30, 40, 0, { 0, 0, 0 } },
 };
 
+#define SELL_BARRIER_CONDITION (play->curSpawn == 0x1 && !Flags_GetItemGetInf(0x33))
+#define SELL_RING_CONDITION (IS_NIGHT)
+
 void En_Js_SetupAction(EnJs* this, EnJsActionFunc actionFunc) {
     this->actionFunc = actionFunc;
 }
@@ -123,7 +126,10 @@ void func_80A890C0(EnJs* this, PlayState* play) {
 
 void func_80A8910C(EnJs* this, PlayState* play) {
     if (Actor_TextboxIsClosing(&this->actor, play)) {
-        this->actor.textId = 0x6078;
+        s16 MiscMsg = GetTextID("misc");
+        this->actor.textId = SELL_BARRIER_CONDITION ? MiscMsg+14 : SELL_RING_CONDITION ? MiscMsg+12 : 0x6078;
+        if (SELL_BARRIER_CONDITION)
+            Flags_SetItemGetInf(0x33);
         En_Js_SetupAction(this, func_80A890C0);
         this->actor.flags |= ACTOR_FLAG_TALK_OFFER_AUTO_ACCEPTED;
     }
@@ -134,10 +140,11 @@ void func_80A89160(EnJs* this, PlayState* play) {
         this->actor.parent = NULL;
         En_Js_SetupAction(this, func_80A8910C);
     } else {
-        GetItemEntry itemEntry = ItemTable_Retrieve(GI_BOMBCHUS_10);
+        s16 itemToGive = SELL_BARRIER_CONDITION ? GI_DEFENSE_HEART : SELL_RING_CONDITION ? GI_RING+RI_COWARDS_RING : GI_BOMBCHUS_10;
+        GetItemEntry itemEntry = ItemTable_Retrieve(itemToGive);
         gSaveContext.ship.pendingSale = itemEntry.itemId;
         gSaveContext.ship.pendingSaleMod = itemEntry.modIndex;
-        Actor_OfferGetItem(&this->actor, play, GI_BOMBCHUS_10, 10000.0f, 50.0f);
+        Actor_OfferGetItem(&this->actor, play, itemToGive, 10000.0f, 50.0f);
     }
 }
 
@@ -145,7 +152,7 @@ void func_80A891C4(EnJs* this, PlayState* play) {
     if (Message_GetState(&play->msgCtx) == TEXT_STATE_CHOICE && Message_ShouldAdvance(play)) {
         switch (play->msgCtx.choiceIndex) {
             case 0: // yes
-                if (GameInteractor_Should(VB_CHECK_RANDO_PRICE_OF_CARPET_SALESMAN, gSaveContext.rupees < 200, this)) {
+                if (GameInteractor_Should(VB_CHECK_RANDO_PRICE_OF_CARPET_SALESMAN, Rupees_GetNum() < 200, this)) {
                     Message_ContinueTextbox(play, 0x6075);
                     func_80A89008(this);
                 } else {
@@ -175,7 +182,8 @@ void func_80A89294(EnJs* this) {
 }
 
 void func_80A89304(EnJs* this, PlayState* play) {
-    if (func_80A88F64(this, play, 0x6077)) {
+    s16 MiscMsg = GetTextID("misc");
+    if (func_80A88F64(this, play, SELL_BARRIER_CONDITION ? MiscMsg+13 : SELL_RING_CONDITION ? MiscMsg+11 : 0x6077)) {
         func_80A89294(this);
     }
 }

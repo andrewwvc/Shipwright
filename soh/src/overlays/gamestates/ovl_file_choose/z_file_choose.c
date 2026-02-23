@@ -214,7 +214,7 @@ void SpriteDraw(FileChooseContext* this, Sprite* sprite, int left, int top, int 
 u8 HasItem(s16 fileIndex, u8 item) {
     for (int i = 0; i < ARRAY_COUNT(Save_GetSaveMetaInfo(fileIndex)->inventoryItems); i += 1) {
         u8 it = Save_GetSaveMetaInfo(fileIndex)->inventoryItems[i];
-        if (it == item || (item == ITEM_BOTTLE && it >= ITEM_BOTTLE && it <= ITEM_POE)) {
+        if (it == item || (item == ITEM_BOTTLE && Item_IsBottle(it))) {
             return 1;
         }
     }
@@ -2427,6 +2427,7 @@ void FileChoose_DrawWindowContents(GameState* thisx) {
                 FileChoose_DrawTextureI8(this->state.gfxCtx, gTitleOcarinaOfTimeTMTextTex, 96, 8, 154, 163, 96, 8, 1024,
                                          1024);
                 FileChoose_DrawImageRGBA32(this->state.gfxCtx, 160, 135, gTitleZeldaShieldLogoTex, 160, 160);
+                FileChoose_DrawImageRGBA32(this->state.gfxCtx, 182, 180, gTitleSeditionSubtitleTex, 128, 32);
                 break;
 
             case QUEST_MASTER:
@@ -3260,6 +3261,11 @@ void FileChoose_LoadGame(GameState* thisx) {
     osSyncPrintf(VT_RST);
 
     gSaveContext.naviTimer = 0;
+    ElfMessage_ResetPersistantElfMessages();
+    changeToNormalWallet();
+    Audio_SetGameVolume(SEQ_PLAYER_BGM_MAIN, (Ring_Get_Equiped() == RI_RING_OF_SILENCE) ? 0.0f : CVarGetFloat("gMainMusicVolume", 1.0f));
+    Audio_SetGameVolume(SEQ_PLAYER_BGM_SUB, (Ring_Get_Equiped() == RI_RING_OF_SILENCE) ? 0.0f : CVarGetFloat("gSubMusicVolume", 1.0f));
+    Audio_SetGameVolume(SEQ_PLAYER_SFX, (Ring_Get_Equiped() == RI_MUTE_RING) ? 0.0f : CVarGetFloat("gSFXMusicVolume", 1.0f));
 
     GameInteractor_ExecuteOnLoadGame(gSaveContext.fileNum);
 }

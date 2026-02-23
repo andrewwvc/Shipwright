@@ -124,6 +124,7 @@ u16 EnKz_GetText(PlayState* play, Actor* thisx) {
 s16 func_80A9C6C0(PlayState* play, Actor* thisx) {
     EnKz* this = (EnKz*)thisx;
     s16 talkState = NPC_TALK_STATE_TALKING;
+    u16 ZoraMsg = GetTextID("zora");
 
     switch (Message_GetState(&play->msgCtx)) {
         case TEXT_STATE_DONE:
@@ -161,6 +162,9 @@ s16 func_80A9C6C0(PlayState* play, Actor* thisx) {
                         Flags_SetInfTable(INFTABLE_139);
                         break;
                 }
+            }
+            if (this->actor.textId == ZoraMsg+21) {
+                gSaveContext.infTable[19] |= 0x200;
             }
             break;
         case TEXT_STATE_DONE_FADING:
@@ -272,6 +276,7 @@ s32 func_80A9C95C(PlayState* play, EnKz* this, s16* talkState, f32 unkf, NpcGetT
 
 void func_80A9CB18(EnKz* this, PlayState* play) {
     Player* player = GET_PLAYER(play);
+    u16 ZoraMsg = GetTextID("zora");
 
     if (CVarGetInteger(CVAR_ENHANCEMENT("EarlyEyeballFrog"), 0)) {
         f32 yaw;
@@ -316,11 +321,20 @@ void func_80A9CB18(EnKz* this, PlayState* play) {
                 this->actor.textId = CHECK_QUEST_ITEM(QUEST_SONG_SERENADE) ? 0x4045 : 0x401A;
                 player->actor.textId = this->actor.textId;
             } else {
-                this->actor.textId =
-                    GameInteractor_Should(VB_KING_ZORA_TUNIC_CHECK,
-                                          CHECK_OWNED_EQUIP(EQUIP_TYPE_TUNIC, EQUIP_INV_TUNIC_ZORA), this)
-                        ? 0x401F
-                        : 0x4012;
+                // TODO - DELETE
+                // this->actor.textId =
+                //     GameInteractor_Should(VB_KING_ZORA_TUNIC_CHECK,
+                //                           CHECK_OWNED_EQUIP(EQUIP_TYPE_TUNIC, EQUIP_INV_TUNIC_ZORA), this)
+                //         ? 0x401F
+                //         : 0x4012;
+
+                // if (!IS_RANDO) {
+                //     this->actor.textId = CHECK_OWNED_EQUIP(EQUIP_TYPE_TUNIC, EQUIP_INV_TUNIC_ZORA) ? ZoraMsg+21 : ZoraMsg+21;
+                // } else {
+                //     this->actor.textId = ZoraMsg+21;
+                // }
+
+                this->actor.textId = ZoraMsg+21;
                 player->actor.textId = this->actor.textId;
             }
         }
@@ -519,8 +533,9 @@ void EnKz_SetupGetItem(EnKz* this, PlayState* play) {
 void EnKz_StartTimer(EnKz* this, PlayState* play) {
     if ((Message_GetState(&play->msgCtx) == TEXT_STATE_DONE) && Message_ShouldAdvance(play)) {
         if (GameInteractor_Should(VB_TRADE_TIMER_FROG, INV_CONTENT(ITEM_TRADE_ADULT) == ITEM_FROG)) {
-            func_80088AA0(180); // start timer2 with 3 minutes
+            func_80088AA0(120); // start timer2 with 2 minutes
             gSaveContext.eventInf[1] &= ~1;
+            EyedropEventClear();
         }
         this->interactInfo.talkState = NPC_TALK_STATE_IDLE;
         this->actionFunc = EnKz_Wait;

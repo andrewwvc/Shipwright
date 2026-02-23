@@ -213,7 +213,7 @@ ShopItem sShopkeeperStores[][8] = {
       { SI_BLUE_FIRE, 50, 76, -20 },
       { SI_RED_POTION_R30, 80, 52, -3 },
       { SI_FAIRY, 80, 76, -3 },
-      { SI_DEKU_NUTS_5, -50, 52, -20 },
+      { SI_BOTTLE_AMMO, -50, 52, -20 },
       { SI_BUGS, -50, 76, -20 },
       { SI_POE, -80, 52, -3 },
       { SI_FISH, -80, 76, -3 } },
@@ -231,7 +231,7 @@ ShopItem sShopkeeperStores[][8] = {
       { SI_BLUE_FIRE, 50, 76, -20 },
       { SI_RED_POTION_R30, 80, 52, -3 },
       { SI_FAIRY, 80, 76, -3 },
-      { SI_DEKU_NUTS_5, -50, 52, -20 },
+      { SI_BOTTLE_AMMO, -50, 52, -20 },
       { SI_BUGS, -50, 76, -20 },
       { SI_POE, -80, 52, -3 },
       { SI_FISH, -80, 76, -3 } },
@@ -298,6 +298,15 @@ ShopItem sShopkeeperStores[][8] = {
       { SI_KEATON_MASK, -50, 76, -20 },
       { SI_BUNNY_HOOD, -80, 52, -3 },
       { SI_SPOOKY_MASK, -80, 76, -3 } },
+
+      { { SI_HYLIAN_SHIELD, 50, 52, -20 },
+      { SI_BOMBS_5_R25, 50, 76, -20 },
+      { SI_DEKU_NUTS_5, 80, 52, -3 },
+      { SI_PIECE_OF_HEART, 80, 76, -3 },
+      { SI_ARROWS_10, -50, 52, -20 },
+      { SI_ARROWS_50, -50, 76, -20 },
+      { SI_DEKU_STICK, -80, 52, -3 },
+      { SI_ARROWS_30, -80, 76, -3 } },
 };
 static EnOssanGetGirlAParamsFunc sShopItemReplaceFunc[] = {
     ShopItemDisp_Default,   ShopItemDisp_Default,    ShopItemDisp_Default, ShopItemDisp_Default,
@@ -312,7 +321,8 @@ static EnOssanGetGirlAParamsFunc sShopItemReplaceFunc[] = {
     ShopItemDisp_GoronMask, ShopItemDisp_GerudoMask, ShopItemDisp_Default, ShopItemDisp_Default,
     ShopItemDisp_Default,   ShopItemDisp_Default,    ShopItemDisp_Default, ShopItemDisp_Default,
     ShopItemDisp_Default,   ShopItemDisp_Default,    ShopItemDisp_Default, ShopItemDisp_Default,
-    ShopItemDisp_Default,   ShopItemDisp_Default,
+    ShopItemDisp_Default,   ShopItemDisp_Default,    ShopItemDisp_Default, ShopItemDisp_Default,
+    ShopItemDisp_Default,   ShopItemDisp_Default
 };
 
 static InitChainEntry sInitChain[] = {
@@ -506,10 +516,15 @@ void EnOssan_TalkKokiriShopkeeper(PlayState* play) {
 }
 
 void EnOssan_TalkBazaarShopkeeper(PlayState* play) {
-    if (play->curSpawn == 0) {
-        Message_ContinueTextbox(play, 0x9D);
+    if (IS_DAY) {
+        if (play->curSpawn == 0) {
+            Message_ContinueTextbox(play, 0x9D);
+        } else {
+            Message_ContinueTextbox(play, 0x9C);
+        }
     } else {
-        Message_ContinueTextbox(play, 0x9C);
+        u16 HylianMsg = GetTextID("hylian");
+        Message_ContinueTextbox(play, HylianMsg+1);
     }
 }
 
@@ -888,7 +903,7 @@ u8 EnOssan_CursorLeft(EnOssan* this, u8 cursorIndex, u8 shelfSlotMax) {
 void EnOssan_TryPaybackMask(EnOssan* this, PlayState* play) {
     s16 price = sMaskPaymentPrice[this->happyMaskShopState];
 
-    if (gSaveContext.rupees < price) {
+    if (Rupees_GetNum() < price) {
         Message_ContinueTextbox(play, 0x70A8);
         this->happyMaskShopkeeperEyeIdx = 1;
         this->happyMaskShopState = OSSAN_HAPPY_STATE_ANGRY;
@@ -1029,6 +1044,20 @@ void EnOssan_State_FacingShopkeeper(EnOssan* this, PlayState* play, Player* play
 void EnOssan_State_TalkingToShopkeeper(EnOssan* this, PlayState* play, Player* player) {
     if ((Message_GetState(&play->msgCtx) == TEXT_STATE_EVENT) && Message_ShouldAdvance(play)) {
         EnOssan_StartShopping(play, this);
+    } else if ((Message_GetState(&play->msgCtx) == TEXT_STATE_CHOICE)) {
+        if (Message_ShouldAdvance(play)) {
+            //Messages for the Bomchu shop owner
+            u16 MiscMsg = GetTextID("misc");
+            switch (play->msgCtx.choiceIndex) {
+                case 0:
+                    Message_ContinueTextbox(play, MiscMsg+9);
+                    break;
+                case 1:
+                    Message_ContinueTextbox(play, MiscMsg+10);
+                    break;
+            }
+            Sfx_PlaySfxCentered(NA_SE_SY_DECIDE);
+        }
     }
 }
 
@@ -1736,6 +1765,8 @@ void EnOssan_State_GiveItemWithFanfare(EnOssan* this, PlayState* play, Player* p
     Actor_OfferGetItem(&this->actor, play, this->shelfSlots[this->cursorIndex]->getItemId, 120.0f, 120.0f);
 }
 
+void EnGirlA_InitItem(EnGirlA* this, PlayState* play);
+
 void EnOssan_State_ItemPurchased(EnOssan* this, PlayState* play, Player* player) {
     EnGirlA* item;
     EnGirlA* itemTemp;
@@ -1760,6 +1791,13 @@ void EnOssan_State_ItemPurchased(EnOssan* this, PlayState* play, Player* player)
         }
         item = this->shelfSlots[this->cursorIndex];
         item->buyEventFunc(play, item);
+        //Handle the case where selling out bombchu stock should cause a ring to appear
+        if ((this->actor.params == OSSAN_TYPE_BOMBCHUS) && (this->cursorIndex != 7) &&
+                        Flags_GetItemGetInf(ITEMGETINF_05) &&Flags_GetItemGetInf(ITEMGETINF_04) && Flags_GetItemGetInf(ITEMGETINF_08) && Flags_GetItemGetInf(ITEMGETINF_09)) {
+            item = this->shelfSlots[7];
+            item->actor.params = SI_PROTECTION_RING;
+            EnGirlA_InitItem(item, play);
+        }
         this->stateFlag = OSSAN_STATE_CONTINUE_SHOPPING_PROMPT;
         Message_ContinueTextbox(play, 0x6B);
     }
@@ -1872,7 +1910,10 @@ void EnOssan_PositionSelectedItem(EnOssan* this) {
     f32 tz;
 
     i = this->cursorIndex;
-    shopItem = &sShopkeeperStores[this->actor.params][i];
+    if (this->actor.params == OSSAN_TYPE_BAZAAR && IS_NIGHT)
+        shopItem = &sShopkeeperStores[OSSAN_TYPE_BAZAAR_NIGHT][i];
+    else
+        shopItem = &sShopkeeperStores[this->actor.params][i];
     item = this->shelfSlots[i];
 
     i2 = i >> 2;
@@ -2126,8 +2167,13 @@ void EnOssan_InitBombchuShopkeeper(EnOssan* this, PlayState* play) {
 
 u16 EnOssan_SetupHelloDialog(EnOssan* this) {
     this->happyMaskShopState = OSSAN_HAPPY_STATE_NONE;
+    u16 MiscMsg = GetTextID("misc");
     // mask shop messages
     if (this->actor.params == OSSAN_TYPE_MASK) {
+        if (usingBorrowedWallet()) {
+            this->happyMaskShopState = OSSAN_HAPPY_STATE_ANGRY;
+            return MiscMsg+5;
+        }
         if (INV_CONTENT(ITEM_TRADE_CHILD) == ITEM_SOLD_OUT) {
             if (Flags_GetItemGetInf(ITEMGETINF_3B)) {
                 if (!Flags_GetEventChkInf(EVENTCHKINF_PAID_BACK_BUNNY_HOOD_FEE)) {
@@ -2212,7 +2258,11 @@ void EnOssan_InitActionFunc(EnOssan* this, PlayState* play) {
         this->actor.world.pos.y += sShopkeeperPositionOffsets[this->actor.params].y;
         this->actor.world.pos.z += sShopkeeperPositionOffsets[this->actor.params].z;
 
-        items = sShopkeeperStores[this->actor.params];
+        //items = sShopkeeperStores[this->actor.params];
+        if (this->actor.params == OSSAN_TYPE_BAZAAR && IS_NIGHT)
+            items = &sShopkeeperStores[OSSAN_TYPE_BAZAAR_NIGHT];
+        else
+            items = &sShopkeeperStores[this->actor.params];
 
         ActorShape_Init(&this->actor.shape, 0.0f, ActorShadow_DrawCircle, 20.0f);
         sInitFuncs[this->actor.params](this, play);

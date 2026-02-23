@@ -190,7 +190,7 @@ void func_80ACE5C8(EnPart* this, PlayState* play) {
                     player->invincibilityTimer = 0;
                 } else {
                     player->invincibilityTimer = 0;
-                    play->damagePlayer(play, -8);
+                    play->damagePlayer(play, -0x20);
                 }
             }
             func_8002F71C(play, this->actor.parent, (650.0f - this->actor.parent->xzDistToPlayer) * 0.04f + 4.0f,
@@ -310,6 +310,12 @@ void EnPart_Draw(Actor* thisx, PlayState* play) {
     } else if ((thisx->params == 10) && ((strcmp((const char*)this->displayList, object_tite_DL_002FF0) == 0) ||
                                          (thisx->parent != NULL && thisx->parent->id == ACTOR_EN_TITE))) {
         // #endregion
+    //CANDIDATE RESTORATION
+    // } else if ((thisx->params == 9) && (strcmp((const char*)this->displayList, object_tite_DL_002FF0) == 0)) {
+    //     gSPSegment(POLY_OPA_DISP++, 0x08, object_tite_Tex_001300);
+    //     gSPSegment(POLY_OPA_DISP++, 0x09, object_tite_Tex_001700);
+    //     gSPSegment(POLY_OPA_DISP++, 0x0A, object_tite_Tex_001900);
+    // } else if ((thisx->params == 10) && (strcmp((const char*)this->displayList, object_tite_DL_002FF0) == 0)) {
         gSPSegment(POLY_OPA_DISP++, 0x08, object_tite_Tex_001B00);
         gSPSegment(POLY_OPA_DISP++, 0x09, object_tite_Tex_001F00);
         gSPSegment(POLY_OPA_DISP++, 0x0A, object_tite_Tex_002100);

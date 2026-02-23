@@ -41,6 +41,9 @@ static const ALIGN_ASSET(2) char gSkullTreasureChestSideAndTopTex[] = dgSkullTre
 #define dgTitleRandomizerSubtitleTex "__OTR__objects/object_mag/gTitleRandomizerSubtitleTex"
 static const ALIGN_ASSET(2) char gTitleRandomizerSubtitleTex[] = dgTitleRandomizerSubtitleTex;
 
+#define dgTitleSeditionSubtitleTex "__OTR__objects/object_mag/gTitleSeditionSubtitleTex"
+static const ALIGN_ASSET(2) char gTitleSeditionSubtitleTex[] = dgTitleSeditionSubtitleTex;
+
 #define dgTitleBossRushSubtitleTex "__OTR__objects/object_mag/gTitleBossRushSubtitleTex"
 static const ALIGN_ASSET(2) char gTitleBossRushSubtitleTex[] = dgTitleBossRushSubtitleTex;
 
@@ -459,3 +462,120 @@ static const ALIGN_ASSET(2) char gShipLogoDL[] = dgShipLogoDL;
 
 #define dnintendo_rogo_static_Tex_LUS_000000 "__OTR__textures/nintendo_rogo_static/nintendo_rogo_static_Tex_LUS_000000"
 static const ALIGN_ASSET(2) char nintendo_rogo_static_Tex_LUS_000000[] = dnintendo_rogo_static_Tex_LUS_000000;
+
+#define dgPauseSelectItem04ExtTex "__OTR__textures/icons/pause_select_item_0_4_ext"
+static const ALIGN_ASSET(2) char gPauseSelectItem04ExtTex[] = dgPauseSelectItem04ExtTex;
+
+#define dgPauseSelectItem14ExtTex "__OTR__textures/icons/pause_select_item_1_4_ext"
+static const ALIGN_ASSET(2) char gPauseSelectItem14ExtTex[] = dgPauseSelectItem14ExtTex;
+
+#define dgPauseSelectItem24ExtTex "__OTR__textures/icons/pause_select_item_2_4_ext"
+static const ALIGN_ASSET(2) char gPauseSelectItem24ExtTex[] = dgPauseSelectItem24ExtTex;
+
+#define dgPauseSelectItem06ExtTex "__OTR__textures/icons/pause_select_item_0_6_ext"
+static const ALIGN_ASSET(2) char gPauseSelectItem06ExtTex[] = dgPauseSelectItem06ExtTex;
+
+#define dgPauseSelectItem16ExtTex "__OTR__textures/icons/pause_select_item_1_6_ext"
+static const ALIGN_ASSET(2) char gPauseSelectItem16ExtTex[] = dgPauseSelectItem16ExtTex;
+
+#define dgPauseSelectItem26ExtTex "__OTR__textures/icons/pause_select_item_2_6_ext"
+static const ALIGN_ASSET(2) char gPauseSelectItem26ExtTex[] = dgPauseSelectItem26ExtTex;
+
+#define dgItemIconLandmineTex "__OTR__textures/icons/land_mine_icon"
+static const ALIGN_ASSET(2) char gItemIconLandmineTex[] = dgItemIconLandmineTex;
+
+#define dgLandmineItemNameENGTex "__OTR__textures/title_static/land_mine_item_name_eng"
+static const ALIGN_ASSET(2) char gLandmineItemNameENGTex[] = dgLandmineItemNameENGTex;
+
+#define dgLandmineDL "__OTR__objects/object_landmine/gBombshellDL"
+static const ALIGN_ASSET(2) char gLandmineDL[] = dgLandmineDL;
+
+#define dgItemIconNayrusAffectionTex "__OTR__textures/icons/nayrus_affection_icon"
+static const ALIGN_ASSET(2) char gItemIconNayrusAffectionTex[] = dgItemIconNayrusAffectionTex;
+
+#define dgNayrusAffectionItemNameENGTex "__OTR__textures/title_static/nayrus_affection_item_name_eng"
+static const ALIGN_ASSET(2) char gNayrusAffectionItemNameENGTex[] = dgNayrusAffectionItemNameENGTex;
+
+#define dgItemIconDinsCrucibleTex "__OTR__textures/icons/dins_crucible_icon"
+static const ALIGN_ASSET(2) char gItemIconDinsCrucibleTex[] = dgItemIconDinsCrucibleTex;
+
+#define dgDinsCrucibleItemNameENGTex "__OTR__textures/title_static/dins_crucible_item_name_eng"
+static const ALIGN_ASSET(2) char gDinsCrucibleItemNameENGTex[] = dgDinsCrucibleItemNameENGTex;
+
+#define dgItemIconBottleAmmoTex "__OTR__textures/icons/bottle_ammo_icon"
+static const ALIGN_ASSET(2) char gItemIconBottleAmmoTex[] = dgItemIconBottleAmmoTex;
+
+#define dgBottleAmmoItemNameENGTex "__OTR__textures/title_static/gBottleAmmoItemNameENGTex"
+static const ALIGN_ASSET(2) char gBottleAmmoItemNameENGTex[] = dgBottleAmmoItemNameENGTex;
+
+#define dgItemIconRing1Tex "__OTR__textures/icons/ring_icon"
+static const ALIGN_ASSET(2) char gItemIconRing1Tex[] = dgItemIconRing1Tex;
+
+#define dgGiRing0DL "__OTR__objects/object_ring_0/gGiRing0DL"
+static const ALIGN_ASSET(2) char gGiRing0DL[] = dgGiRing0DL;
+
+#define dgAttractionRingItemNameENG "__OTR__textures/title_static/gAttractionRingItemNameENG"
+static const ALIGN_ASSET(2) char gAttractionRingItemNameENG[] = dgAttractionRingItemNameENG;
+
+#define dgRepulsionRingItemNameENG "__OTR__textures/title_static/gRepulsionRingItemNameENG"
+static const ALIGN_ASSET(2) char gRepulsionRingItemNameENG[] = dgRepulsionRingItemNameENG;
+
+#define dgLoveRingItemNameENG "__OTR__textures/title_static/gLoveRingItemNameENG"
+static const ALIGN_ASSET(2) char gLoveRingItemNameENG[] = dgLoveRingItemNameENG;
+
+#define dgGreedRingItemNameENG "__OTR__textures/title_static/gGreedRingItemNameENG"
+static const ALIGN_ASSET(2) char gGreedRingItemNameENG[] = dgGreedRingItemNameENG;
+
+#define dgBraveryRingItemNameENG "__OTR__textures/title_static/gBraveryRingItemNameENG"
+static const ALIGN_ASSET(2) char gBraveryRingItemNameENG[] = dgBraveryRingItemNameENG;
+
+#define dgCowardsRingItemNameENG "__OTR__textures/title_static/gCowardsRingItemNameENG"
+static const ALIGN_ASSET(2) char gCowardsRingItemNameENG[] = dgCowardsRingItemNameENG;
+
+#define dgWoodRingItemNameENG "__OTR__textures/title_static/gWoodRingItemNameENG"
+static const ALIGN_ASSET(2) char gWoodRingItemNameENG[] = dgWoodRingItemNameENG;
+
+#define dgMountainRingItemNameENG "__OTR__textures/title_static/gMountainRingItemNameENG"
+static const ALIGN_ASSET(2) char gMountainRingItemNameENG[] = dgMountainRingItemNameENG;
+
+#define dgFountainRingItemNameENG "__OTR__textures/title_static/gFountainRingItemNameENG"
+static const ALIGN_ASSET(2) char gFountainRingItemNameENG[] = dgFountainRingItemNameENG;
+
+#define dgFocusRingItemNameENG "__OTR__textures/title_static/gFocusRingItemNameENG"
+static const ALIGN_ASSET(2) char gFocusRingItemNameENG[] = dgFocusRingItemNameENG;
+
+#define dgFeatherRingItemNameENG "__OTR__textures/title_static/gFeatherRingItemNameENG"
+static const ALIGN_ASSET(2) char gFeatherRingItemNameENG[] = dgFeatherRingItemNameENG;
+
+#define dgSneakRingItemNameENG "__OTR__textures/title_static/gSneakRingItemNameENG"
+static const ALIGN_ASSET(2) char gSneakRingItemNameENG[] = dgSneakRingItemNameENG;
+
+#define dgSorcerersRingItemNameENG "__OTR__textures/title_static/gSorcerersRingItemNameENG"
+static const ALIGN_ASSET(2) char gSorcerersRingItemNameENG[] = dgSorcerersRingItemNameENG;
+
+#define dgWitchsRingItemNameENG "__OTR__textures/title_static/gWitchsRingItemNameENG"
+static const ALIGN_ASSET(2) char gWitchsRingItemNameENG[] = dgWitchsRingItemNameENG;
+
+#define dgNimbleRingItemNameENG "__OTR__textures/title_static/gNimbleRingItemNameENG"
+static const ALIGN_ASSET(2) char gNimbleRingItemNameENG[] = dgNimbleRingItemNameENG;
+
+#define dgRingOfSilenceItemNameENG "__OTR__textures/title_static/gRingOfSilenceItemNameENG"
+static const ALIGN_ASSET(2) char gRingOfSilenceItemNameENG[] = dgRingOfSilenceItemNameENG;
+
+#define dgRingOfPersistenceItemNameENG "__OTR__textures/title_static/gRingOfPersistenceItemNameENG"
+static const ALIGN_ASSET(2) char gRingOfPersistenceItemNameENG[] = dgRingOfPersistenceItemNameENG;
+
+#define dgAcrobatRingItemNameENG "__OTR__textures/title_static/gAcrobatRingItemNameENG"
+static const ALIGN_ASSET(2) char gAcrobatRingItemNameENG[] = dgAcrobatRingItemNameENG;
+
+#define dgMuteRingItemNameENG "__OTR__textures/title_static/gMuteRingItemNameENG"
+static const ALIGN_ASSET(2) char gMuteRingItemNameENG[] = dgMuteRingItemNameENG;
+
+#define dgProtectionRingItemNameENG "__OTR__textures/title_static/gProtectionRingItemNameENG"
+static const ALIGN_ASSET(2) char gProtectionRingItemNameENG[] = dgProtectionRingItemNameENG;
+
+#define dgHopDoActionENGTex "__OTR__textures/buttons/gHopDoActionENGTex"
+static const ALIGN_ASSET(2) char gHopDoActionENGTex[] = dgHopDoActionENGTex;
+
+#define dgRollDoActionENGTex "__OTR__textures/buttons/gRollDoActionENGTex"
+static const ALIGN_ASSET(2) char gRollDoActionENGTex[] = dgRollDoActionENGTex;

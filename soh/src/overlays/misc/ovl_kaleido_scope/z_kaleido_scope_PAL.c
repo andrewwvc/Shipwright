@@ -22,6 +22,8 @@
 #include "soh/ResourceManagerHelpers.h"
 #include "soh/SaveManager.h"
 #include "soh/Enhancements/kaleido.h"
+#include "soh_assets.h"
+
 
 static void* sEquipmentFRATexs[] = {
     gPauseEquipment00FRATex, gPauseEquipment01Tex, gPauseEquipment02Tex, gPauseEquipment03Tex, gPauseEquipment04Tex,
@@ -89,6 +91,33 @@ static void* sSelectItemENGTexs[] = {
     gPauseSelectItem04Tex,    gPauseSelectItem10ENGTex, gPauseSelectItem11Tex,    gPauseSelectItem12Tex,
     gPauseSelectItem13Tex,    gPauseSelectItem14Tex,    gPauseSelectItem20ENGTex, gPauseSelectItem21Tex,
     gPauseSelectItem22Tex,    gPauseSelectItem23Tex,    gPauseSelectItem24Tex,
+};
+static void* sSelectItemExtENGTexs[] = {
+    gPauseSelectItem00ENGTex, gPauseSelectItem10ENGTex, gPauseSelectItem20ENGTex,
+    gPauseSelectItem01Tex,    gPauseSelectItem11Tex,    gPauseSelectItem21Tex,
+    gPauseSelectItem02Tex,    gPauseSelectItem12Tex,    gPauseSelectItem22Tex,
+    gPauseSelectItem03Tex,    gPauseSelectItem13Tex,    gPauseSelectItem23Tex,
+    gPauseSelectItem04ExtTex, gPauseSelectItem14ExtTex, gPauseSelectItem24ExtTex,
+    gPauseSelectItem02Tex,    gPauseSelectItem12Tex,    gPauseSelectItem24ExtTex,
+    gPauseSelectItem06ExtTex, gPauseSelectItem16ExtTex, gPauseSelectItem26ExtTex,
+};
+static void* sSelectItemExtGERTexs[] = {
+    gPauseSelectItem00GERTex, gPauseSelectItem10GERTex, gPauseSelectItem20GERTex,
+    gPauseSelectItem01Tex,    gPauseSelectItem11Tex,    gPauseSelectItem21Tex,
+    gPauseSelectItem02Tex,    gPauseSelectItem12Tex,    gPauseSelectItem22Tex,
+    gPauseSelectItem03Tex,    gPauseSelectItem13Tex,    gPauseSelectItem23Tex,
+    gPauseSelectItem04ExtTex, gPauseSelectItem14ExtTex, gPauseSelectItem24ExtTex,
+    gPauseSelectItem02Tex,    gPauseSelectItem12Tex,    gPauseSelectItem24ExtTex,
+    gPauseSelectItem06ExtTex, gPauseSelectItem16ExtTex, gPauseSelectItem26ExtTex,
+};
+static void* sSelectItemExtFRATexs[] = {
+    gPauseSelectItem00FRATex, gPauseSelectItem10FRATex, gPauseSelectItem20FRATex,
+    gPauseSelectItem01Tex,    gPauseSelectItem11Tex,    gPauseSelectItem21Tex,
+    gPauseSelectItem02Tex,    gPauseSelectItem12Tex,    gPauseSelectItem22Tex,
+    gPauseSelectItem03Tex,    gPauseSelectItem13Tex,    gPauseSelectItem23Tex,
+    gPauseSelectItem04ExtTex, gPauseSelectItem14ExtTex, gPauseSelectItem24ExtTex,
+    gPauseSelectItem02Tex,    gPauseSelectItem12Tex,    gPauseSelectItem24ExtTex,
+    gPauseSelectItem06ExtTex, gPauseSelectItem16ExtTex, gPauseSelectItem26ExtTex,
 };
 static void* sMapENGTexs[] = {
     gPauseMap00Tex,    gPauseMap01Tex, gPauseMap02Tex, gPauseMap03Tex, gPauseMap04Tex,
@@ -224,6 +253,12 @@ static void* sSelectItemTexs[] = {
     sSelectItemGERTexs,
     sSelectItemFRATexs,
     sSelectItemJPNTexs,
+};
+
+static void* sSelectItemExtTexs[] = {
+    sSelectItemExtENGTexs,
+    sSelectItemExtGERTexs,
+    sSelectItemExtFRATexs,
 };
 
 static void* sMapTexs[] = {
@@ -746,6 +781,42 @@ static void* iconNameTextures[] = {
     gBiggoronsSwordItemNameJPNTex,
 };
 
+static void* iconNameTexturesEx[] = {
+    gLandmineItemNameENGTex,
+    gNayrusAffectionItemNameENGTex,
+    gDinsCrucibleItemNameENGTex,
+    gBottleAmmoItemNameENGTex,
+    gBottleAmmoItemNameENGTex,
+    gBottleAmmoItemNameENGTex,
+    gBottleAmmoItemNameENGTex,
+};
+
+static void* iconNameTexturesRing[] = {
+    gKokiriEmeraldItemNameFRATex,
+    gAttractionRingItemNameENG,
+    gRepulsionRingItemNameENG,
+    gLoveRingItemNameENG,
+    gGreedRingItemNameENG,
+    gBraveryRingItemNameENG,
+    gCowardsRingItemNameENG,
+    gWoodRingItemNameENG,
+    gMountainRingItemNameENG,
+    gFountainRingItemNameENG,
+    gFocusRingItemNameENG,
+    gFeatherRingItemNameENG,
+    gSneakRingItemNameENG,
+    gSorcerersRingItemNameENG,
+    gWitchsRingItemNameENG,
+    gNimbleRingItemNameENG,
+    gRingOfSilenceItemNameENG,
+    gRingOfPersistenceItemNameENG,
+    gAcrobatRingItemNameENG,
+    gMuteRingItemNameENG,
+    gProtectionRingItemNameENG,
+    gSongOfTimeItemNameFRATex,
+    gSongOfStormsItemNameFRATex,
+};
+
 // SOH [NTSC] - Fit in JPN textures, resulting in changes to offsets when indexed
 static void* mapNameTextures[] = {
     // LANGUAGE_ENG
@@ -965,6 +1036,12 @@ u8 gSlotAgeReqs[] = {
     AGE_REQ_NONE,  // SLOT_BOTTLE_4
     AGE_REQ_ADULT, // SLOT_TRADE_ADULT
     AGE_REQ_CHILD, // SLOT_TRADE_CHILD
+    AGE_REQ_NONE,
+    AGE_REQ_NONE,
+    AGE_REQ_NONE,
+    AGE_REQ_NONE,
+    AGE_REQ_NONE,
+    AGE_REQ_NONE,
 };
 
 u8 gEquipAgeReqs[][4] = {
@@ -992,96 +1069,117 @@ u8 gEquipAgeReqs[][4] = {
         AGE_REQ_ADULT, // EQUIP_TYPE_BOOTS EQUIP_VALUE_BOOTS_IRON
         AGE_REQ_ADULT  // EQUIP_TYPE_BOOTS EQUIP_VALUE_BOOTS_HOVER
     },
+    {
+        AGE_REQ_NONE,   // 0 UPG_SCALE
+        AGE_REQ_NONE,   // EQUIP_TYPE_BOOTS EQUIP_VALUE_BOOTS_KOKIRI
+        AGE_REQ_NONE,  // EQUIP_TYPE_BOOTS EQUIP_VALUE_BOOTS_IRON
+        AGE_REQ_NONE   // EQUIP_TYPE_BOOTS EQUIP_VALUE_BOOTS_HOVER
+    },
 
 };
 
 u8 gItemAgeReqs[] = {
-    AGE_REQ_CHILD, // ITEM_DEKU_STICK
-    AGE_REQ_NONE,  // ITEM_DEKU_NUT
-    AGE_REQ_NONE,  // ITEM_BOMB
-    AGE_REQ_ADULT, // ITEM_BOW
-    AGE_REQ_ADULT, // ITEM_ARROW_FIRE
-    AGE_REQ_NONE,  // ITEM_DINS_FIRE
-    AGE_REQ_CHILD, // ITEM_SLINGSHOT
-    AGE_REQ_NONE,  // ITEM_OCARINA_FAIRY
-    AGE_REQ_NONE,  // ITEM_OCARINA_OF_TIME
-    AGE_REQ_NONE,  // ITEM_BOMBCHU
-    AGE_REQ_ADULT, // ITEM_HOOKSHOT
-    AGE_REQ_ADULT, // ITEM_LONGSHOT
-    AGE_REQ_ADULT, // ITEM_ARROW_ICE
-    AGE_REQ_NONE,  // ITEM_FARORES_WIND
-    AGE_REQ_CHILD, // ITEM_BOOMERANG
-    AGE_REQ_NONE,  // ITEM_LENS_OF_TRUTH
-    AGE_REQ_CHILD, // ITEM_MAGIC_BEAN
-    AGE_REQ_ADULT, // ITEM_HAMMER
-    AGE_REQ_ADULT, // ITEM_ARROW_LIGHT
-    AGE_REQ_NONE,  // ITEM_NAYRUS_LOVE
-    AGE_REQ_NONE,  // ITEM_BOTTLE_EMPTY
-    AGE_REQ_NONE,  // ITEM_BOTTLE_POTION_RED
-    AGE_REQ_NONE,  // ITEM_BOTTLE_POTION_GREEN
-    AGE_REQ_NONE,  // ITEM_BOTTLE_POTION_BLUE
-    AGE_REQ_NONE,  // ITEM_BOTTLE_FAIRY
-    AGE_REQ_NONE,  // ITEM_BOTTLE_FISH
-    AGE_REQ_NONE,  // ITEM_BOTTLE_MILK_FULL
-    AGE_REQ_NONE,  // ITEM_BOTTLE_RUTOS_LETTER
-    AGE_REQ_NONE,  // ITEM_BOTTLE_BLUE_FIRE
-    AGE_REQ_NONE,  // ITEM_BOTTLE_BUG
-    AGE_REQ_NONE,  // ITEM_BOTTLE_BIG_POE
-    AGE_REQ_NONE,  // ITEM_BOTTLE_MILK_HALF
-    AGE_REQ_NONE,  // ITEM_BOTTLE_POE
-    AGE_REQ_CHILD, // ITEM_WEIRD_EGG
-    AGE_REQ_CHILD, // ITEM_CHICKEN
-    AGE_REQ_CHILD, // ITEM_ZELDAS_LETTER
-    AGE_REQ_CHILD, // ITEM_MASK_KEATON
-    AGE_REQ_CHILD, // ITEM_MASK_SKULL
-    AGE_REQ_CHILD, // ITEM_MASK_SPOOKY
-    AGE_REQ_CHILD, // ITEM_MASK_BUNNY_HOOD
-    AGE_REQ_CHILD, // ITEM_MASK_GORON
-    AGE_REQ_CHILD, // ITEM_MASK_ZORA
-    AGE_REQ_CHILD, // ITEM_MASK_GERUDO
-    AGE_REQ_CHILD, // ITEM_MASK_TRUTH
-    AGE_REQ_CHILD, // ITEM_SOLD_OUT
-    AGE_REQ_ADULT, // ITEM_POCKET_EGG
-    AGE_REQ_ADULT, // ITEM_POCKET_CUCCO
-    AGE_REQ_ADULT, // ITEM_COJIRO
-    AGE_REQ_ADULT, // ITEM_ODD_MUSHROOM
-    AGE_REQ_ADULT, // ITEM_ODD_POTION
-    AGE_REQ_ADULT, // ITEM_POACHERS_SAW
-    AGE_REQ_ADULT, // ITEM_BROKEN_GORONS_SWORD
-    AGE_REQ_ADULT, // ITEM_PRESCRIPTION
-    AGE_REQ_ADULT, // ITEM_EYEBALL_FROG
-    AGE_REQ_ADULT, // ITEM_EYE_DROPS
-    AGE_REQ_ADULT, // ITEM_CLAIM_CHECK
-    AGE_REQ_ADULT, // ITEM_BOW_FIRE
-    AGE_REQ_ADULT, // ITEM_BOW_ICE
-    AGE_REQ_ADULT, // ITEM_BOW_LIGHT
-    AGE_REQ_CHILD, // ITEM_SWORD_KOKIRI
-    AGE_REQ_ADULT, // ITEM_SWORD_MASTER
-    AGE_REQ_ADULT, // ITEM_SWORD_BIGGORON
-    AGE_REQ_CHILD, // ITEM_SHIELD_DEKU
-    AGE_REQ_NONE,  // ITEM_SHIELD_HYLIAN
-    AGE_REQ_ADULT, // ITEM_SHIELD_MIRROR
-    AGE_REQ_NONE,  // ITEM_TUNIC_KOKIRI
-    AGE_REQ_ADULT, // ITEM_TUNIC_GORON
-    AGE_REQ_ADULT, // ITEM_TUNIC_ZORA
-    AGE_REQ_NONE,  // ITEM_BOOTS_KOKIRI
-    AGE_REQ_ADULT, // ITEM_BOOTS_IRON
-    AGE_REQ_ADULT, // ITEM_BOOTS_HOVER
-    AGE_REQ_CHILD, // ITEM_BULLET_BAG_30
-    AGE_REQ_CHILD, // ITEM_BULLET_BAG_40
-    AGE_REQ_CHILD, // ITEM_BULLET_BAG_50
-    AGE_REQ_ADULT, // ITEM_QUIVER_30
-    AGE_REQ_ADULT, // ITEM_QUIVER_40
-    AGE_REQ_ADULT, // ITEM_QUIVER_50
-    AGE_REQ_NONE,  // ITEM_BOMB_BAG_20
-    AGE_REQ_NONE,  // ITEM_BOMB_BAG_30
-    AGE_REQ_NONE,  // ITEM_BOMB_BAG_40
-    AGE_REQ_CHILD, // ITEM_STRENGTH_GORONS_BRACELET
-    AGE_REQ_ADULT, // ITEM_STRENGTH_SILVER_GAUNTLETS
-    AGE_REQ_ADULT, // ITEM_STRENGTH_GOLD_GAUNTLETS
-    AGE_REQ_NONE,  // ITEM_SCALE_SILVER
-    AGE_REQ_NONE,  // ITEM_SCALE_GOLDEN
-    AGE_REQ_ADULT, // ITEM_GIANTS_KNIFE
+    AGE_REQ_CHILD,  // ITEM_DEKU_STICK
+    AGE_REQ_NONE,   // ITEM_DEKU_NUT
+    AGE_REQ_NONE,   // ITEM_BOMB
+    AGE_REQ_ADULT,  // ITEM_BOW
+    AGE_REQ_ADULT,  // ITEM_ARROW_FIRE
+    AGE_REQ_NONE,   // ITEM_DINS_FIRE
+    AGE_REQ_CHILD,  // ITEM_SLINGSHOT
+    AGE_REQ_NONE,   // ITEM_OCARINA_FAIRY
+    AGE_REQ_NONE,   // ITEM_OCARINA_OF_TIME
+    AGE_REQ_NONE,   // ITEM_BOMBCHU
+    AGE_REQ_ADULT,  // ITEM_HOOKSHOT
+    AGE_REQ_ADULT,  // ITEM_LONGSHOT
+    AGE_REQ_ADULT,  // ITEM_ARROW_ICE
+    AGE_REQ_NONE,   // ITEM_FARORES_WIND
+    AGE_REQ_CHILD,  // ITEM_BOOMERANG
+    AGE_REQ_NONE,   // ITEM_LENS_OF_TRUTH
+    AGE_REQ_CHILD,  // ITEM_MAGIC_BEAN
+    AGE_REQ_ADULT,  // ITEM_HAMMER
+    AGE_REQ_ADULT,  // ITEM_ARROW_LIGHT
+    AGE_REQ_NONE,   // ITEM_NAYRUS_LOVE
+    AGE_REQ_NONE,   // ITEM_BOTTLE_EMPTY
+    AGE_REQ_NONE,   // ITEM_BOTTLE_POTION_RED
+    AGE_REQ_NONE,   // ITEM_BOTTLE_POTION_GREEN
+    AGE_REQ_NONE,   // ITEM_BOTTLE_POTION_BLUE
+    AGE_REQ_NONE,   // ITEM_BOTTLE_FAIRY
+    AGE_REQ_NONE,   // ITEM_BOTTLE_FISH
+    AGE_REQ_NONE,   // ITEM_BOTTLE_MILK_FULL
+    AGE_REQ_NONE,   // ITEM_BOTTLE_RUTOS_LETTER
+    AGE_REQ_NONE,   // ITEM_BOTTLE_BLUE_FIRE
+    AGE_REQ_NONE,   // ITEM_BOTTLE_BUG
+    AGE_REQ_NONE,   // ITEM_BOTTLE_BIG_POE
+    AGE_REQ_NONE,   // ITEM_BOTTLE_MILK_HALF
+    AGE_REQ_NONE,   // ITEM_BOTTLE_POE
+    AGE_REQ_CHILD,  // ITEM_WEIRD_EGG
+    AGE_REQ_CHILD,  // ITEM_CHICKEN
+    AGE_REQ_CHILD,  // ITEM_ZELDAS_LETTER
+    AGE_REQ_CHILD,  // ITEM_MASK_KEATON
+    AGE_REQ_CHILD,  // ITEM_MASK_SKULL
+    AGE_REQ_CHILD,  // ITEM_MASK_SPOOKY
+    AGE_REQ_CHILD,  // ITEM_MASK_BUNNY_HOOD
+    AGE_REQ_CHILD,  // ITEM_MASK_GORON
+    AGE_REQ_CHILD,  // ITEM_MASK_ZORA
+    AGE_REQ_CHILD,  // ITEM_MASK_GERUDO
+    AGE_REQ_CHILD,  // ITEM_MASK_TRUTH
+    AGE_REQ_CHILD,  // ITEM_SOLD_OUT
+    AGE_REQ_ADULT,  // ITEM_POCKET_EGG
+    AGE_REQ_ADULT,  // ITEM_POCKET_CUCCO
+    AGE_REQ_ADULT,  // ITEM_COJIRO
+    AGE_REQ_ADULT,  // ITEM_ODD_MUSHROOM
+    AGE_REQ_ADULT,  // ITEM_ODD_POTION
+    AGE_REQ_ADULT,  // ITEM_POACHERS_SAW
+    AGE_REQ_ADULT,  // ITEM_BROKEN_GORONS_SWORD
+    AGE_REQ_ADULT,  // ITEM_PRESCRIPTION
+    AGE_REQ_ADULT,  // ITEM_EYEBALL_FROG
+    AGE_REQ_ADULT,  // ITEM_EYE_DROPS
+    AGE_REQ_ADULT,  // ITEM_CLAIM_CHECK
+    AGE_REQ_ADULT,  // ITEM_BOW_FIRE
+    AGE_REQ_ADULT,  // ITEM_BOW_ICE
+    AGE_REQ_ADULT,  // ITEM_BOW_LIGHT
+    AGE_REQ_CHILD,  // ITEM_SWORD_KOKIRI
+    AGE_REQ_ADULT,  // ITEM_SWORD_MASTER
+    AGE_REQ_ADULT,  // ITEM_SWORD_BIGGORON
+    AGE_REQ_CHILD,  // ITEM_SHIELD_DEKU
+    AGE_REQ_NONE,   // ITEM_SHIELD_HYLIAN
+    AGE_REQ_ADULT,  // ITEM_SHIELD_MIRROR
+    AGE_REQ_NONE,   // ITEM_TUNIC_KOKIRI
+    AGE_REQ_ADULT,  // ITEM_TUNIC_GORON
+    AGE_REQ_ADULT,  // ITEM_TUNIC_ZORA
+    AGE_REQ_NONE,   // ITEM_BOOTS_KOKIRI
+    AGE_REQ_ADULT,  // ITEM_BOOTS_IRON
+    AGE_REQ_ADULT,  // ITEM_BOOTS_HOVER
+    AGE_REQ_CHILD,  // ITEM_BULLET_BAG_30
+    AGE_REQ_CHILD,  // ITEM_BULLET_BAG_40
+    AGE_REQ_CHILD,  // ITEM_BULLET_BAG_50
+    AGE_REQ_ADULT,  // ITEM_QUIVER_30
+    AGE_REQ_ADULT,  // ITEM_QUIVER_40
+    AGE_REQ_ADULT,  // ITEM_QUIVER_50
+    AGE_REQ_NONE,   // ITEM_BOMB_BAG_20
+    AGE_REQ_NONE,   // ITEM_BOMB_BAG_30
+    AGE_REQ_NONE,   // ITEM_BOMB_BAG_40
+    AGE_REQ_CHILD,  // ITEM_STRENGTH_GORONS_BRACELET
+    AGE_REQ_ADULT,  // ITEM_STRENGTH_SILVER_GAUNTLETS
+    AGE_REQ_ADULT,  // ITEM_STRENGTH_GOLD_GAUNTLETS
+    AGE_REQ_NONE,   // ITEM_SCALE_SILVER
+    AGE_REQ_NONE,   // ITEM_SCALE_GOLDEN
+    AGE_REQ_ADULT,  // ITEM_GIANTS_KNIFE
+    AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE,
+    AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE,
+    AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE,
+    AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE,
+    AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE,
+    AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE,
+    AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE,
+    AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE, AGE_REQ_NONE,
+    AGE_REQ_NONE,   // ITEM_LANDMINE
+    AGE_REQ_NONE,   // ITEM_NAYRUS_AFFECTION
+    AGE_REQ_NONE,   // ITEM_DINS_CRUCIBLE
+    AGE_REQ_NONE,   // ITEM_RING_1
+    AGE_REQ_NONE,   // ITEM_RING_2
+    AGE_REQ_NONE,   // ITEM_RING_3
+    AGE_REQ_NONE,   // ITEM_BOTTLE_AMMO
 };
 
 u8 gAreaGsFlags[] = {
@@ -1231,7 +1329,7 @@ void KaleidoScope_SetDefaultCursor(PlayState* play) {
                         break;
                     }
                     i++;
-                    if (i >= 24) {
+                    if (i >= NUM_ITEM_SLOTS_TOTAL) {
                         i = 0;
                     }
                     if (i == s) {
@@ -1419,6 +1517,101 @@ Gfx* KaleidoScope_DrawPageSections(Gfx* gfx, Vtx* vertices, void** textures) {
     return gfx;
 }
 
+#define EXT_TEX_ROWS 6
+
+Gfx* KaleidoScope_DrawPageSectionsExtended(Gfx* gfx, Vtx* vertices, void** textures, u16 rows) {
+    s32 i;
+    s32 j;
+
+
+    i = 0;
+    s16 vertsLeft = rows*12;
+    s16 prevVerts = 0;
+    s16 currentVerts;
+    while (vertsLeft > 0) {
+        j = 0;
+        if (vertsLeft > 32)
+            currentVerts = 32;
+        else
+            currentVerts = vertsLeft;
+
+        vertsLeft -= currentVerts;
+        gSPVertex(gfx++, vertices+prevVerts, currentVerts, 0);
+        prevVerts += currentVerts;
+
+        while (j < currentVerts) {
+            s16 extraRows = rows-5;
+            s16 rowOffset = i%rows;
+            if (rowOffset >= 4) {
+                rowOffset -= extraRows;
+                if (rowOffset <= 0) {//Causes the middle three rows to repeat
+                     rowOffset = 3-((3-rowOffset)%3);
+                 }
+            }
+            s16 rowGraphicBaseIdx = (i/rows)*5+rowOffset;
+            gDPPipeSync(gfx++);
+
+            gDPLoadTextureBlock(gfx++, textures[rowGraphicBaseIdx], G_IM_FMT_IA, G_IM_SIZ_8b, 80, 32, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                                G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+            gSP1Quadrangle(gfx++, j, j + 2, j + 3, j + 1, 0);
+
+            j += 4;
+            i++;
+        }
+    }
+
+    return gfx;
+}
+
+Gfx* KaleidoScope_DrawPageSectionsExtra(Gfx* gfx, Vtx* vertices, void** textures, u16 rows) {
+    //s32 i;
+    s32 j;
+    s32 selection;
+
+
+    //i = 0;
+    selection = 0;
+    s16 vertsLeft = rows*12;
+    s16 prevVerts = 0;
+    s16 currentVerts;
+    while (vertsLeft > 0) {
+        j = 0;
+        if (vertsLeft > 32)
+            currentVerts = 32;
+        else
+            currentVerts = vertsLeft;
+
+        vertsLeft -= currentVerts;
+        gSPVertex(gfx++, vertices+prevVerts, currentVerts, 0);
+        prevVerts += currentVerts;
+
+        while (j < currentVerts) {
+            s16 rowOffset = selection/3;
+            if (rowOffset == rows-1) {
+                rowOffset = 6;
+            } else if (rowOffset >= 5) {
+                rowOffset = 5;
+            }
+            s16 rowGraphicBaseIdx = rowOffset*3+(selection%3);
+            gDPPipeSync(gfx++);
+
+            gDPLoadTextureBlock(gfx++, textures[rowGraphicBaseIdx], G_IM_FMT_IA, G_IM_SIZ_8b, 80, 32, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                                G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+            gSP1Quadrangle(gfx++, j, j + 2, j + 3, j + 1, 0);
+
+            j += 4;
+            if (selection < (rows-1)*3) {
+                selection += 3;
+            } else {
+                selection -= (rows-1)*3;
+                selection += 1;
+            }
+        }
+    }
+
+    return gfx;
+}
+
 void KaleidoScope_DrawPages(PlayState* play, GraphicsContext* gfxCtx) {
     static Color_RGB8 D_8082ACF4[12] = {
         { 0, 0, 0 }, { 0, 0, 0 },     { 0, 0, 0 },    { 0, 0, 0 }, { 255, 255, 0 }, { 0, 0, 0 },
@@ -1594,11 +1787,12 @@ void KaleidoScope_DrawPages(PlayState* play, GraphicsContext* gfxCtx) {
             Matrix_Translate(0.0f, (f32)WREG(2) / 100.0f, -(f32)WREG(3) / 100.0f, MTXMODE_NEW);
             Matrix_Scale(0.78f, 0.78f, 0.78f, MTXMODE_APPLY);
             Matrix_RotateX(-pauseCtx->unk_1F4 / 100.0f, MTXMODE_APPLY);
+            Matrix_Translate(0.0f, pauseCtx->itemScrollOffsetY, 0.0f, MTXMODE_APPLY);
 
             gSPMatrix(POLY_OPA_DISP++, MATRIX_NEWMTX(gfxCtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
-            POLY_OPA_DISP = KaleidoScope_DrawPageSections(POLY_OPA_DISP, pauseCtx->itemPageVtx,
-                                                          sSelectItemTexs[gSaveContext.language]);
+            POLY_OPA_DISP = KaleidoScope_DrawPageSectionsExtra(POLY_OPA_DISP, pauseCtx->itemPageVtx,
+                                                          sSelectItemExtTexs[gSaveContext.language], EXT_TEX_ROWS);
 
             KaleidoScope_DrawItemSelect(play);
         }
@@ -1611,11 +1805,12 @@ void KaleidoScope_DrawPages(PlayState* play, GraphicsContext* gfxCtx) {
             Matrix_Scale(0.78f, 0.78f, 0.78f, MTXMODE_APPLY);
             Matrix_RotateZ(pauseCtx->unk_1F8 / 100.0f, MTXMODE_APPLY);
             Matrix_RotateY(1.57f, MTXMODE_APPLY);
+            Matrix_Translate(0.0f, pauseCtx->equipScrollOffsetY, 0.0f, MTXMODE_APPLY);
 
             gSPMatrix(POLY_OPA_DISP++, MATRIX_NEWMTX(gfxCtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
-            POLY_OPA_DISP = KaleidoScope_DrawPageSections(POLY_OPA_DISP, pauseCtx->equipPageVtx,
-                                                          sEquipmentTexs[gSaveContext.language]);
+            POLY_OPA_DISP = KaleidoScope_DrawPageSectionsExtended(POLY_OPA_DISP, pauseCtx->equipPageVtx,
+                                                          sEquipmentTexs[gSaveContext.language], EXT_TEX_ROWS);
 
             KaleidoScope_DrawEquipment(play);
         }
@@ -1680,11 +1875,12 @@ void KaleidoScope_DrawPages(PlayState* play, GraphicsContext* gfxCtx) {
                 Matrix_Translate(0.0f, (f32)WREG(2) / 100.0f, -(f32)WREG(3) / 100.0f, MTXMODE_NEW);
                 Matrix_Scale(0.78f, 0.78f, 0.78f, MTXMODE_APPLY);
                 Matrix_RotateX(-pauseCtx->unk_1F4 / 100.0f, MTXMODE_APPLY);
+                Matrix_Translate(0.0f, pauseCtx->itemScrollOffsetY, 0.0f, MTXMODE_APPLY);
 
                 gSPMatrix(POLY_OPA_DISP++, MATRIX_NEWMTX(gfxCtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
-                POLY_OPA_DISP = KaleidoScope_DrawPageSections(POLY_OPA_DISP, pauseCtx->itemPageVtx,
-                                                              sSelectItemTexs[gSaveContext.language]);
+                POLY_OPA_DISP = KaleidoScope_DrawPageSectionsExtra(POLY_OPA_DISP, pauseCtx->itemPageVtx,
+                                                              sSelectItemExtTexs[gSaveContext.language], EXT_TEX_ROWS);
 
                 KaleidoScope_DrawItemSelect(play);
                 break;
@@ -1748,11 +1944,12 @@ void KaleidoScope_DrawPages(PlayState* play, GraphicsContext* gfxCtx) {
                 Matrix_Scale(0.78f, 0.78f, 0.78f, MTXMODE_APPLY);
                 Matrix_RotateZ(pauseCtx->unk_1F8 / 100.0f, MTXMODE_APPLY);
                 Matrix_RotateY(1.57f, MTXMODE_APPLY);
+                Matrix_Translate(0.0f, pauseCtx->equipScrollOffsetY, 0.0f, MTXMODE_APPLY);
 
                 gSPMatrix(POLY_OPA_DISP++, MATRIX_NEWMTX(gfxCtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
-                POLY_OPA_DISP = KaleidoScope_DrawPageSections(POLY_OPA_DISP, pauseCtx->equipPageVtx,
-                                                              sEquipmentTexs[gSaveContext.language]);
+                POLY_OPA_DISP = KaleidoScope_DrawPageSectionsExtended(POLY_OPA_DISP, pauseCtx->equipPageVtx,
+                                                              sEquipmentTexs[gSaveContext.language], EXT_TEX_ROWS);
 
                 KaleidoScope_DrawEquipment(play);
 
@@ -2415,12 +2612,52 @@ void KaleidoScope_DrawInfoPanel(PlayState* play) {
                     return;
                 }
 
-                // gSPDisplayList(POLY_OPA_DISP++, gAButtonIconDL);
-                gDPSetPrimColor(POLY_OPA_DISP++, 0, 0, aButtonColor.r, aButtonColor.g, aButtonColor.b, 255);
-                gDPLoadTextureBlock(POLY_OPA_DISP++, gABtnSymbolTex, G_IM_FMT_IA, G_IM_SIZ_8b, 24, 16, 0,
-                                    G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP, 4, 4, G_TX_NOLOD,
-                                    G_TX_NOLOD);
-                gSP1Quadrangle(POLY_OPA_DISP++, 0, 2, 3, 1, 0);
+                if (RINGS_SWAPPABLE_REQ) {
+                    s16 PosX; // General Pos of C button icon
+                    if (gSaveContext.language == LANGUAGE_ENG) {
+                        PosX = 112;
+                    } else if (gSaveContext.language == LANGUAGE_GER) {
+                        PosX = 175;
+                    } else { // French
+                        PosX = 98;
+                    }
+                    s16 PosY = 200 - pauseCtx->infoPanelOffsetY; //General Pos of C button icon
+                    s16 icon_w = 46; // Original texture size
+                    s16 icon_h = 16;
+                    s32 icon_x_offset;
+                    s16 icon_w_crop = 17.0f; //Left
+                    s16 modPosX = PosX;
+                    int height = icon_h * 1.0f; //Adjust Height with scale
+                    int width = icon_w * 1.0f; //Adjust Width with scale
+                    int width_crop = icon_w_crop * 1.0f; //Adjust Width with scale
+                    int height_factor = (1 << 10) * icon_h / height;
+                    int width_factor = (1 << 10) * icon_w / width;
+                    int texOffsetS = 0;
+                    gDPSetPrimColor(POLY_OPA_DISP++, 0, 0, cButtonsColor.r, cButtonsColor.g, cButtonsColor.b, 255);
+                    for (s16 i=0; i < 2; i++) {
+                        if (i == 0) {
+                            modPosX = PosX + icon_w_crop + 1;
+                            texOffsetS = 1000;
+                            icon_x_offset = width_crop*3-3;
+                            gDPSetPrimColor(POLY_OPA_DISP++, 0, 0, cRightButtonColor.r, cRightButtonColor.g, cRightButtonColor.b, 255);
+                        } else if (i == 1) {
+                            modPosX = PosX;
+                            texOffsetS = 0;
+                            icon_x_offset = width_crop;
+                            gDPSetPrimColor(POLY_OPA_DISP++, 0, 0, cLeftButtonColor.r, cLeftButtonColor.g, cLeftButtonColor.b, 255);
+                        }
+                        gDPLoadTextureBlock(POLY_OPA_DISP++, gCBtnSymbolsTex, G_IM_FMT_IA, G_IM_SIZ_8b, icon_w, icon_h, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+                        //gSPScisTextureRectangle(POLY_OPA_DISP++,PosX << 2, PosY << 2, (PosX + icon_x_offset) << 2, (PosY + height) << 2, G_TX_RENDERTILE, 0, 0, width_factor, height_factor);
+                        gSPWideTextureRectangle(POLY_OPA_DISP++, modPosX << 2, PosY << 2, (modPosX + icon_x_offset) << 2, (PosY + height) << 2, G_TX_WRAP, texOffsetS, 0, width_factor, height_factor);
+                    }
+                } else {
+                    //gSPDisplayList(POLY_OPA_DISP++, gAButtonIconDL);
+                    gDPSetPrimColor(POLY_OPA_DISP++, 0, 0, aButtonColor.r, aButtonColor.g, aButtonColor.b, 255);
+                    gDPLoadTextureBlock(POLY_OPA_DISP++, gABtnSymbolTex, G_IM_FMT_IA, G_IM_SIZ_8b,24, 16, 0,
+                                        G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP, 4, 4, G_TX_NOLOD,
+                                        G_TX_NOLOD);
+                    gSP1Quadrangle(POLY_OPA_DISP++, 0, 2, 3, 1, 0);
+                }
 
                 gDPPipeSync(POLY_OPA_DISP++);
                 gDPSetPrimColor(POLY_OPA_DISP++, 0, 0, 255, 255, 255, 255);
@@ -2458,7 +2695,14 @@ void KaleidoScope_UpdateNamePanel(PlayState* play) {
         }
 
         if (pauseCtx->namedItem != PAUSE_ITEM_NONE) {
-            if ((pauseCtx->pageIndex == PAUSE_MAP) && !sInDungeonScene) {
+            if (ITEM_LANDMINE <= pauseCtx->namedItem && pauseCtx->namedItem < ITEM_LAST_USED) {
+                const char* textureName;
+                if (RING_ITEM_MIN <= pauseCtx->namedItem && pauseCtx->namedItem <= RING_ITEM_MAX)
+                    textureName = iconNameTexturesRing[gSaveContext.inventory.ringEquips[pauseCtx->namedItem-RING_ITEM_MIN]];
+                else
+                    textureName = iconNameTexturesEx[pauseCtx->namedItem-ITEM_LANDMINE];
+                memcpy(pauseCtx->nameSegment, textureName, strlen(textureName) + 1);
+            } else if ((pauseCtx->pageIndex == PAUSE_MAP) && !sInDungeonScene) {
                 // #region SOH [NTSC] - There's a lot of OOB/Incorrect accesses that can occur so make sure sp2A selects
                 // something valid
                 sp2A %= 12;
@@ -2742,7 +2986,7 @@ static const char* gPageVtxColorCvars[][4] = {
     },
 };
 
-s16 func_80823A0C(PlayState* play, Vtx* vtx, s16 pageIndex, s16 arg3) {
+s16 KaleidoScope_SetupMenuBackground(PlayState* play, Vtx* vtx, s16 pageIndex, s16 arg3, s16 rows) {
     static s16 D_8082B110 = 0;
     static s16 D_8082B114 = 1;
     static s16 D_8082B118 = 0;
@@ -2801,7 +3045,7 @@ s16 func_80823A0C(PlayState* play, Vtx* vtx, s16 pageIndex, s16 arg3) {
     for (vtxIndex = 0, colorIndex = 0; colorIndex < 3; colorIndex++) {
         phi_t0 += 80;
 
-        for (phi_a1 = 80, phi_a2 = 0; phi_a2 < 5; phi_a2++, vtxIndex += 4, phi_a1 -= 32) {
+        for (phi_a1 = 80, phi_a2 = 0; phi_a2 < rows; phi_a2++, vtxIndex += 4, phi_a1 -= 32) {
             vtx[vtxIndex + 0].v.ob[0] = vtx[vtxIndex + 2].v.ob[0] = phi_t0;
 
             vtx[vtxIndex + 1].v.ob[0] = vtx[vtxIndex + 3].v.ob[0] = vtx[vtxIndex + 0].v.ob[0] + 80;
@@ -2969,6 +3213,10 @@ s16 func_80823A0C(PlayState* play, Vtx* vtx, s16 pageIndex, s16 arg3) {
     return vtxIndex;
 }
 
+s16 func_80823A0C(PlayState* play, Vtx* vtx, s16 pageIndex, s16 arg3) {
+    return KaleidoScope_SetupMenuBackground(play, vtx, pageIndex, arg3, 5);
+}
+
 static s16 D_8082B11C[] = { 0, 4, 8, 12, 24, 32, 56 };
 
 static s16 D_8082B11C_all[] = { 0,  4,  8,  12, 16, 20, 24, 28, 32, 36, 40, 44,
@@ -2976,7 +3224,7 @@ static s16 D_8082B11C_all[] = { 0,  4,  8,  12, 16, 20, 24, 28, 32, 36, 40, 44,
 
 static s16 D_8082B12C[] = { -114, 12, 44, 76 };
 
-static u8 D_8082B134[] = { 1, 5, 9, 13 };
+static u8 D_8082B134[] = { 1, 5, 9, 13, 17 };
 
 static s16 D_8082B138[] = {
     74,  74,  46,  18,  18,  46,   -108, -90,  -72, -54, -36, -18, -108, -90, -72, -54,
@@ -3011,11 +3259,11 @@ void KaleidoScope_InitVertices(PlayState* play, GraphicsContext* gfxCtx) {
         pauseCtx->offsetY = 80;
     }
 
-    pauseCtx->itemPageVtx = Graph_Alloc(gfxCtx, 60 * sizeof(Vtx));
-    func_80823A0C(play, pauseCtx->itemPageVtx, 0, 0);
+    pauseCtx->itemPageVtx = Graph_Alloc(gfxCtx, EXT_TEX_ROWS*12 * sizeof(Vtx));
+    KaleidoScope_SetupMenuBackground(play, pauseCtx->itemPageVtx, 0, 0, EXT_TEX_ROWS);
 
-    pauseCtx->equipPageVtx = Graph_Alloc(gfxCtx, 60 * sizeof(Vtx));
-    func_80823A0C(play, pauseCtx->equipPageVtx, 1, 0);
+    pauseCtx->equipPageVtx = Graph_Alloc(gfxCtx, EXT_TEX_ROWS*12 * sizeof(Vtx));
+    KaleidoScope_SetupMenuBackground(play, pauseCtx->equipPageVtx, 1, 0, EXT_TEX_ROWS);
 
     if (!sInDungeonScene) {
         pauseCtx->mapPageVtx = Graph_Alloc(gfxCtx, 248 * sizeof(Vtx));
@@ -3097,12 +3345,13 @@ void KaleidoScope_InitVertices(PlayState* play, GraphicsContext* gfxCtx) {
 
     // 24 items, 7 "item selected" backgrounds, 14 ammo digits (2 each for 7 items) -- then 4 vertices for each
     pauseCtx->itemVtx = Graph_Alloc(
-        gfxCtx, (24 + 7 +
+        gfxCtx, (NUM_ITEM_SLOTS_TOTAL + NUM_EQUIPMENT_BUTTONS +
                  2 * (CVarGetInteger(CVAR_ENHANCEMENT("BetterAmmoRendering"), 0) ? ARRAY_COUNT(D_8082B11C_all)
                                                                                  : ARRAY_COUNT(D_8082B11C))) *
                     4 * sizeof(Vtx));
+    //pauseCtx->itemVtx = Graph_Alloc(gfxCtx, (NUM_ITEM_SLOTS_TOTAL + NUM_EQUIPMENT_BUTTONS + 14) * 4 * sizeof(Vtx));
 
-    for (phi_t4 = 0, phi_t2 = 0, phi_t5 = 58; phi_t4 < 4; phi_t4++, phi_t5 -= 32) {
+    for (phi_t4 = 0, phi_t2 = 0, phi_t5 = 58; phi_t4 < NUM_ITEM_SLOT_LINES_TOTAL; phi_t4++, phi_t5 -= 32) {
         for (phi_t1 = -96, phi_t3 = 0; phi_t3 < 6; phi_t3++, phi_t2 += 4, phi_t1 += 32) {
             pauseCtx->itemVtx[phi_t2 + 0].v.ob[0] = pauseCtx->itemVtx[phi_t2 + 2].v.ob[0] = phi_t1 + 2;
 
@@ -3245,9 +3494,9 @@ void KaleidoScope_InitVertices(PlayState* play, GraphicsContext* gfxCtx) {
         }
     }
 
-    pauseCtx->equipVtx = Graph_Alloc(gfxCtx, 112 * sizeof(Vtx));
+    pauseCtx->equipVtx = Graph_Alloc(gfxCtx, (48 + NUM_EQUIPMENT_ROWS * (16 + 4))  * sizeof(Vtx));
 
-    for (phi_t4 = 0, phi_t2 = 0, phi_t5 = 58; phi_t2 < 4; phi_t2++, phi_t5 -= 32) {
+    for (phi_t4 = 0, phi_t2 = 0, phi_t5 = 58; phi_t2 < NUM_EQUIPMENT_ROWS; phi_t2++, phi_t5 -= 32) {
         for (phi_t3 = 0; phi_t3 < 4; phi_t3++, phi_t4 += 4) {
             pauseCtx->equipVtx[phi_t4 + 0].v.ob[0] = pauseCtx->equipVtx[phi_t4 + 2].v.ob[0] = D_8082B12C[phi_t3] + 2;
 
@@ -3284,7 +3533,7 @@ void KaleidoScope_InitVertices(PlayState* play, GraphicsContext* gfxCtx) {
         }
     }
 
-    for (phi_t3 = 0; phi_t3 < 4; phi_t3++, phi_t4 += 4) {
+    for (phi_t3 = 0; phi_t3 < NUM_EQUIPMENT_ROWS; phi_t3++, phi_t4 += 4) {
         if (CUR_EQUIP_VALUE(phi_t3) != 0) {
             phi_t2 = (CUR_EQUIP_VALUE(phi_t3) + D_8082B134[phi_t3] - 1) * 4;
 
@@ -3863,6 +4112,7 @@ void KaleidoScope_Update(PlayState* play) {
         }
     }
 
+    Interface_SetPauseCUpDisplay(0);
     switch (pauseCtx->state) {
         case 3:
             for (int buttonIndex = 0; buttonIndex < ARRAY_COUNT(gSaveContext.buttonStatus); buttonIndex++) {
@@ -4193,7 +4443,7 @@ void KaleidoScope_Update(PlayState* play) {
             pauseCtx->tradeQuestLocation = 0xFF;
 
             i = INV_CONTENT(ITEM_TRADE_ADULT);
-            if (LINK_AGE_IN_YEARS == YEARS_ADULT) {
+            /*if (LINK_AGE_IN_YEARS == YEARS_ADULT) {
                 if ((i <= ITEM_POCKET_CUCCO) || (i == ITEM_ODD_MUSHROOM)) {
                     pauseCtx->tradeQuestLocation = 8;
                 }
@@ -4215,7 +4465,7 @@ void KaleidoScope_Update(PlayState* play) {
                 if ((i == ITEM_CLAIM_CHECK) && (gSaveContext.bgsFlag == 0)) {
                     pauseCtx->tradeQuestLocation = 7;
                 }
-            }
+            }*/
 
             KaleidoScope_ResetItemCycling();
 
@@ -4276,10 +4526,13 @@ void KaleidoScope_Update(PlayState* play) {
                         Interface_ChangeAlpha(50);
                         pauseCtx->unk_1EC = 0;
                         pauseCtx->state = 7;
-                    } else if (CHECK_BTN_ALL(input->press.button, BTN_CUP) && pauseCtx->pageIndex == PAUSE_QUEST) {
+                    } else if (CHECK_BTN_ALL(input->press.button, BTN_CDOWN) && pauseCtx->pageIndex == PAUSE_QUEST) {
                         Audio_PlaySoundGeneral(NA_SE_SY_DECIDE, &gSfxDefaultPos, 4, &gSfxDefaultFreqAndVolScale,
                                                &gSfxDefaultFreqAndVolScale, &gSfxDefaultReverb);
+                        //The button press for this was changed from C-Up to C-Down to avoid conflicts with Navi messages
                         pauseCtx->randoQuestMode ^= 1;
+                    } else if (pauseCtx->pageIndex == PAUSE_QUEST || pauseCtx->pageIndex == PAUSE_EQUIP) {
+                        goto handle_navi;
                     }
                     break;
 
@@ -4381,10 +4634,47 @@ void KaleidoScope_Update(PlayState* play) {
                         Interface_ChangeAlpha(50);
                         pauseCtx->unk_1EC = 0;
                         pauseCtx->state = 7;
+                    } else {
+                        goto handle_navi;
                     }
                     break;
 
                 case 9:
+                    break;
+
+                case 10:
+                    Interface_SetPauseCUpDisplay(100);
+                    if (play->msgCtx.msgMode == MSGMODE_NONE) {
+                        Interface_SetDoAction(play, DO_ACTION_DECIDE);
+                        Interface_LoadActionLabelB(play, DO_ACTION_SAVE);
+                        pauseCtx->unk_1E4 = 0;
+                    }
+                    break;
+
+                case 11:
+                handle_navi:
+                    if (pauseCtx->pageIndex == PAUSE_QUEST) {
+                        u16 msg = ElfMessage_GetSpecialNaviText(play);
+                        if (msg != 0 && msg != 0x015F) {
+                            Interface_SetPauseCUpDisplay(255);
+                            if (CHECK_BTN_ALL(input->press.button, BTN_CUP)) {
+                                if ((gSaveContext.eventChkInf[0] & 0x200) || CHECK_QUEST_ITEM(QUEST_KOKIRI_EMERALD))
+                                    gSaveContext.eventChkInf[1] |= 0x8000;
+                                Message_StartTextbox(play, msg, NULL);
+                                pauseCtx->unk_1E4 = 10;
+                                ElfMessage_SelectSpecialNaviText(play);
+                            }
+                        }
+                    } else if (pauseCtx->pageIndex == PAUSE_EQUIP) {
+                        if (pauseCtx->cursorY[PAUSE_EQUIP] == 4 && pauseCtx->cursorX[PAUSE_EQUIP] > 0) {
+                            Interface_SetPauseCUpDisplay(255);
+                            if (CHECK_BTN_ALL(input->press.button, BTN_CUP)) {
+                                u16 msg = GetTextID("ring");
+                                Message_StartTextbox(play, msg+Ring_Get_In_Slot(pauseCtx->cursorX[PAUSE_EQUIP]-1), NULL);
+                                pauseCtx->unk_1E4 = 10;
+                            }
+                        }
+                    }
                     break;
 
                 default:

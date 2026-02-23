@@ -22,4 +22,7 @@ typedef struct EnCrow {
     /* 0x0258 */ ColliderJntSphElement colliderItems[1];
 } EnCrow; // size = 0x0298
 
+u32 EnCrow_ExportDeathCount(void);
+u32 EnCrow_ExportDeathCountBig(void);
+
 #endif

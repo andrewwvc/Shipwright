@@ -118,4 +118,7 @@ typedef struct BossGanondrof {
     /* 0x052C */ ColliderCylinder colliderSpear;
 } BossGanondrof; // size = 0x0578
 
+void BossGanondrof_Return(BossGanondrof* thisz, PlayState* play);
+void BossGanondrof_Stunned(BossGanondrof* thisz, PlayState* play);
+
 #endif

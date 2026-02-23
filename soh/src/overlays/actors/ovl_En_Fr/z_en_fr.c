@@ -607,22 +607,23 @@ s32 EnFr_SetupJumpingUp(EnFr* this, s32 frogIndex) {
 
 void EnFr_Idle(EnFr* this, PlayState* play) {
     Player* player = GET_PLAYER(play);
+    if (!usingBorrowedWallet()) {
+        if (player->stateFlags2 & PLAYER_STATE2_PLAY_FOR_ACTOR) {
+            if (play->msgCtx.ocarinaMode == OCARINA_MODE_04) {
+                play->msgCtx.ocarinaMode = OCARINA_MODE_00;
+            }
 
-    if (player->stateFlags2 & PLAYER_STATE2_PLAY_FOR_ACTOR) {
-        if (play->msgCtx.ocarinaMode == OCARINA_MODE_04) {
-            play->msgCtx.ocarinaMode = OCARINA_MODE_00;
+            OnePointCutscene_Init(play, 4110, ~0x62, &this->actor, MAIN_CAM);
+            play->msgCtx.msgMode = MSGMODE_PAUSED;
+            player->actor.world.pos.x = this->actor.world.pos.x; // x = 990.0f
+            player->actor.world.pos.y = this->actor.world.pos.y; // y = 205.0f
+            player->actor.world.pos.z = this->actor.world.pos.z; // z = -1220.0f
+            player->yaw = player->actor.world.rot.y = player->actor.shape.rot.y = this->actor.world.rot.y;
+            this->reward = GI_NONE;
+            this->actionFunc = EnFr_Activate;
+        } else if (EnFr_IsAboveAndWithin30DistXZ(player, this)) {
+            player->unk_6A8 = &this->actor;
         }
-
-        OnePointCutscene_Init(play, 4110, ~0x62, &this->actor, MAIN_CAM);
-        play->msgCtx.msgMode = MSGMODE_PAUSED;
-        player->actor.world.pos.x = this->actor.world.pos.x; // x = 990.0f
-        player->actor.world.pos.y = this->actor.world.pos.y; // y = 205.0f
-        player->actor.world.pos.z = this->actor.world.pos.z; // z = -1220.0f
-        player->yaw = player->actor.world.rot.y = player->actor.shape.rot.y = this->actor.world.rot.y;
-        this->reward = GI_NONE;
-        this->actionFunc = EnFr_Activate;
-    } else if (EnFr_IsAboveAndWithin30DistXZ(player, this)) {
-        player->unk_6A8 = &this->actor;
     }
 }
 
@@ -980,7 +981,7 @@ void EnFr_SetReward(EnFr* this, PlayState* play) {
                                             (EVENTCHKINF_SONGS_FOR_FROGS_INDEX << 4) + sSongIndexShift[songIndex]);
             this->reward = GI_RUPEE_PURPLE;
         } else {
-            this->reward = GI_RUPEE_BLUE;
+            this->reward = GI_NONE;
         }
     } else if (songIndex == FROG_STORMS) {
         if (!(gSaveContext.eventChkInf[13] & sSongIndex[songIndex])) {
@@ -989,7 +990,7 @@ void EnFr_SetReward(EnFr* this, PlayState* play) {
                                             (EVENTCHKINF_SONGS_FOR_FROGS_INDEX << 4) + sSongIndexShift[songIndex]);
             this->reward = GI_HEART_PIECE;
         } else {
-            this->reward = GI_RUPEE_BLUE;
+            this->reward = GI_NONE;
         }
     } else if (songIndex == FROG_CHOIR_SONG) {
         if (!(gSaveContext.eventChkInf[13] & sSongIndex[songIndex])) {
@@ -998,7 +999,7 @@ void EnFr_SetReward(EnFr* this, PlayState* play) {
                                             (EVENTCHKINF_SONGS_FOR_FROGS_INDEX << 4) + sSongIndexShift[songIndex]);
             this->reward = GI_HEART_PIECE;
         } else {
-            this->reward = GI_RUPEE_PURPLE;
+            this->reward = GI_RUPEE_BLUE;
         }
     }
 }

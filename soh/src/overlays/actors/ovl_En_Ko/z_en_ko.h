@@ -36,7 +36,7 @@ typedef struct EnKo {
 
 typedef enum {
     ENKO_TYPE_CHILD_0,
-    ENKO_TYPE_CHILD_1,
+    ENKO_TYPE_CHILD_1,//Girl near pond
     ENKO_TYPE_CHILD_2,
     ENKO_TYPE_CHILD_3,
     ENKO_TYPE_CHILD_4,
@@ -56,7 +56,8 @@ typedef enum {
     ENKO_FQS_CHILD_STONE,
     ENKO_FQS_CHILD_SARIA,
     ENKO_FQS_ADULT_ENEMY,
-    ENKO_FQS_ADULT_SAVED
+    ENKO_FQS_ADULT_SAVED,
+    ENKO_FQS_CHILD_POST
 } KokiriForestQuestState;
 
 // #region SoH [Enhancements] Externed for time savers

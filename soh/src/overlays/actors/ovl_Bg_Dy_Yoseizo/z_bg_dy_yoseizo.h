@@ -69,6 +69,7 @@ typedef struct BgDyYoseizo {
     /* 0x0344 */ EnExItem* item;
     /* 0x0348 */ char unk_348[0x4C];
     /* 0x0394 */ BgDyYoseizoParticle particles[200];
+    /*        */ s8 defenseHeartsTempStore;
 } BgDyYoseizo; // size = 0x38B4
 
 #endif

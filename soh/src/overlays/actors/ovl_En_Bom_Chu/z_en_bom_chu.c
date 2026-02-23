@@ -1,10 +1,15 @@
 #include "z_en_bom_chu.h"
 #include "overlays/actors/ovl_En_Bom/z_en_bom.h"
 #include "objects/gameplay_keep/gameplay_keep.h"
+#include "soh_assets.h"
 
 #define FLAGS ACTOR_FLAG_UPDATE_CULLING_DISABLED
 
 #define BOMBCHU_SCALE 0.01f
+
+#define BOMBCHU_PARAMS_REGULAR 0
+//There is no PARAM 1 because this indicates an explosion to actors that detect explosions
+#define BOMBCHU_PARAMS_MINE 2
 
 void EnBomChu_Init(Actor* thisx, PlayState* play);
 void EnBomChu_Destroy(Actor* thisx, PlayState* play);
@@ -13,6 +18,7 @@ void EnBomChu_Draw(Actor* thisx, PlayState* play);
 
 void EnBomChu_WaitForRelease(EnBomChu* this, PlayState* play);
 void EnBomChu_Move(EnBomChu* this, PlayState* play);
+void EnBomChu_Landmine(EnBomChu* this, PlayState* play);
 void EnBomChu_WaitForKill(EnBomChu* this, PlayState* play);
 
 const ActorInit En_Bom_Chu_InitVars = {
@@ -91,6 +97,7 @@ void EnBomChu_Init(Actor* thisx, PlayState* play) {
     Effect_Add(play, &this->blure2Index, EFFECT_BLURE1, 0, 0, &blureInit);
 
     this->actor.room = -1;
+    this->roomPlanted = -1;
     this->timer = 120;
     this->actionFunc = EnBomChu_WaitForRelease;
 }
@@ -111,6 +118,9 @@ void EnBomChu_Explode(EnBomChu* this, PlayState* play) {
                                this->actor.world.pos.z, 0, 0, 0, BOMB_BODY, true);
     if (bomb != NULL) {
         bomb->timer = 0;
+        if (this->actor.params == BOMBCHU_PARAMS_MINE) {
+            bomb->forceStaticExplosion = 1;
+        }
     }
 
     this->timer = 1;
@@ -235,13 +245,22 @@ void EnBomChu_WaitForRelease(EnBomChu* this, PlayState* play) {
         this->axisLeft.y = 0;
         this->axisLeft.z = Math_CosS(this->actor.shape.rot.y + 0x4000);
 
-        this->actor.speedXZ = 8.0f;
-        //! @bug there is no NULL check on the floor poly.  If the player is out of bounds the floor poly will be NULL
-        //! and will cause a crash inside this function.
-        EnBomChu_UpdateFloorPoly(this, this->actor.floorPoly, play);
-        this->actor.flags |= ACTOR_FLAG_ATTENTION_ENABLED; // make chu targetable
-        func_8002F850(play, &this->actor);
-        this->actionFunc = EnBomChu_Move;
+        if (this->actor.params == BOMBCHU_PARAMS_REGULAR) {
+            this->actor.speedXZ = 8.0f;
+            //! @bug there is no NULL check on the floor poly.  If the player is out of bounds the floor poly will be NULL
+            //! and will cause a crash inside this function.
+            EnBomChu_UpdateFloorPoly(this, this->actor.floorPoly, play);
+            this->actor.flags |= ACTOR_FLAG_ATTENTION_ENABLED; // make chu targetable
+            func_8002F850(play, &this->actor);
+            this->actionFunc = EnBomChu_Move;
+        } else {
+            this->actor.speedXZ = 0.0f;
+            this->timer = 4000;
+            this->roomPlanted = play->roomCtx.curRoom.num;
+            EnBomChu_UpdateFloorPoly(this, this->actor.floorPoly, play);
+            func_8002F850(play, &this->actor);
+            this->actionFunc = EnBomChu_Landmine;
+        }
     }
 }
 
@@ -348,6 +367,76 @@ void EnBomChu_Move(EnBomChu* this, PlayState* play) {
     Math_ScaledStepToS(&this->actor.shape.rot.z, this->actor.world.rot.z, 0x800);
 
     func_8002F8F0(&this->actor, NA_SE_IT_BOMBCHU_MOVE - SFX_FLAG);
+}
+
+u8 isNotIntangibleEnemy(Actor* actor, PlayState* play) {
+    return (actor->id != ACTOR_EN_WALLMAS);
+}
+
+void EnBomChu_Landmine(EnBomChu* this, PlayState* play) {
+    CollisionPoly* polyUpDown;
+    s32 bgIdUpDown;
+    f32 lineLength;
+    Vec3f posA;
+    Vec3f posB;
+    Vec3f posUpDown;
+    Player* player = GET_PLAYER(play);
+
+
+    if (this->timer != 0) {
+        this->timer--;
+    }
+
+    posA = player->actor.world.pos;
+    posA.y += 20.0f;
+    posB = this->actor.world.pos;
+    posB.y += 2.0f;
+    if (this->timer == 0 || (this->roomPlanted != play->roomCtx.curRoom.num && BgCheck_AnyLineTest1(&play->colCtx, &posA, &posB, &posUpDown, &polyUpDown, true) &&
+                                (posA = play->view.eye, BgCheck_AnyLineTest1(&play->colCtx, &posA, &posB, &posUpDown, &polyUpDown, true)))) {
+        Actor_Kill(&this->actor);
+    }
+
+    if ((this->collider.base.acFlags & AC_HIT) ||
+            ((this->collider.base.ocFlags1 & OC1_HIT) && (this->collider.base.oc->category != ACTORCAT_PLAYER)) ||
+              Actor_FindNumberOf(play, &this->actor, -1, ACTORCAT_ENEMY, 60.0f, NULL, isNotIntangibleEnemy) ||
+              (play->actorCtx.unk_02 != 0 && this->actor.xzDistToPlayer < 200.0f &&
+                ABS(this->actor.yDistToPlayer) < 40.0f)) { //Allows hammer shockwave trigger
+        EnBomChu_Explode(this, play);
+        return;
+    }
+
+    lineLength = 3.0f;
+
+    posA.x = this->actor.world.pos.x + (this->axisUp.x * lineLength);
+    posA.y = this->actor.world.pos.y + (this->axisUp.y * lineLength);
+    posA.z = this->actor.world.pos.z + (this->axisUp.z * lineLength);
+
+    posB.x = this->actor.world.pos.x - (this->axisUp.x * lineLength);
+    posB.y = this->actor.world.pos.y - (this->axisUp.y * lineLength);
+    posB.z = this->actor.world.pos.z - (this->axisUp.z * lineLength);
+
+    if (BgCheck_EntityLineTest1(&play->colCtx, &posA, &posB, &posUpDown, &polyUpDown, true, true, true, true,
+                                &bgIdUpDown) &&
+        !(func_80041DB8(&play->colCtx, polyUpDown, bgIdUpDown) & 0x30) && // && not crawl space?
+        !SurfaceType_IsIgnoredByProjectiles(&play->colCtx, polyUpDown, bgIdUpDown)) {
+
+        if (DynaPoly_IsBgIdBgActor(bgIdUpDown)) {
+            DynaPolyActor* dynaActor = DynaPoly_GetActor(&play->colCtx, bgIdUpDown);
+            if (dynaActor && dynaActor->actor.id == ACTOR_BG_SPOT08_ICEBLOCK) {
+                EnBomChu_UpdateFloorPoly(this, polyUpDown, play);
+
+                this->actor.world.pos = posUpDown;
+                this->actor.floorBgId = bgIdUpDown;
+            }
+        }
+
+    } else {
+        EnBomChu_Explode(this, play);
+    }
+
+    Math_ScaledStepToS(&this->actor.shape.rot.x, -this->actor.world.rot.x, 0x800);
+    Math_ScaledStepToS(&this->actor.shape.rot.y, this->actor.world.rot.y, 0x800);
+    Math_ScaledStepToS(&this->actor.shape.rot.z, this->actor.world.rot.z, 0x800);
 }
 
 void EnBomChu_WaitForKill(EnBomChu* this, PlayState* play) {
@@ -487,6 +576,8 @@ void EnBomChu_Draw(Actor* thisx, PlayState* play) {
     s32 pad;
     EnBomChu* this = (EnBomChu*)thisx;
     f32 colorIntensity;
+    f32 colorMultiplierRG;
+    f32 colorMultiplierB;
     s32 blinkHalfPeriod;
     s32 blinkTime;
     Color_RGB8 BombchuCol = CVarGetColor24(CVAR_COSMETIC("Trails.Bombchu.Value"), BombchuColorOriginal);
@@ -496,7 +587,10 @@ void EnBomChu_Draw(Actor* thisx, PlayState* play) {
     Gfx_SetupDL_25Opa(play->state.gfxCtx);
     func_8002EBCC(&this->actor, play, 0);
 
-    if (this->timer >= 40) {
+    if (this->actor.params == BOMBCHU_PARAMS_MINE) {
+        blinkTime = this->timer % 80;
+        blinkHalfPeriod = 40;
+    } else if (this->timer >= 40) {
         blinkTime = this->timer % 20;
         blinkHalfPeriod = 10;
     } else if (this->timer >= 10) {
@@ -512,6 +606,12 @@ void EnBomChu_Draw(Actor* thisx, PlayState* play) {
     }
 
     colorIntensity = blinkTime / (f32)blinkHalfPeriod;
+    if (this->actor.params == BOMBCHU_PARAMS_MINE) {
+        colorMultiplierRG = 0.6f;
+        colorMultiplierB = 1.7f;
+    } else {
+        colorMultiplierRG = colorMultiplierB = 1.0f;
+    }
 
     if (CVarGetInteger(CVAR_COSMETIC("Equipment.ChuBody.Changed"), 0)) {
         Color_RGB8 color =
@@ -519,13 +619,18 @@ void EnBomChu_Draw(Actor* thisx, PlayState* play) {
         gDPSetEnvColor(POLY_OPA_DISP++, (colorIntensity * color.r), (colorIntensity * color.g),
                        (colorIntensity * color.b), 255);
     } else {
-        gDPSetEnvColor(POLY_OPA_DISP++, 9.0f + (colorIntensity * 209.0f), 9.0f + (colorIntensity * 34.0f),
-                       35.0f + (colorIntensity * -35.0f), 255);
+
+        gDPSetEnvColor(POLY_OPA_DISP++, 9.0f + (colorIntensity * colorMultiplierRG * 209.0f), 9.0f + (colorIntensity * colorMultiplierRG * 34.0f),
+                   (35.0f + (colorIntensity * -35.0f))*colorMultiplierB, 255);
     }
 
     Matrix_Translate(this->visualJitter * (1.0f / BOMBCHU_SCALE), 0.0f, 0.0f, MTXMODE_APPLY);
-    gSPMatrix(POLY_OPA_DISP++, MATRIX_NEWMTX(play->state.gfxCtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-    gSPDisplayList(POLY_OPA_DISP++, gBombchuDL);
+    gSPMatrix(POLY_OPA_DISP++, MATRIX_NEWMTX(play->state.gfxCtx),
+              G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    if (this->actor.params == BOMBCHU_PARAMS_MINE)
+        gSPDisplayList(POLY_OPA_DISP++, gLandmineDL);
+    else
+        gSPDisplayList(POLY_OPA_DISP++, gBombchuDL);
 
     CLOSE_DISPS(play->state.gfxCtx);
 }

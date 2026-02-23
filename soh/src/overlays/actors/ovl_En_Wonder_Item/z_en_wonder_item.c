@@ -74,6 +74,9 @@ void EnWonderItem_DropCollectible(EnWonderItem* this, PlayState* play, s32 autoC
     };
     s32 i;
     s32 randomDrop;
+    s32 resourceTimeMultiplier = 1;
+    if (this->itemDrop == 10)
+        resourceTimeMultiplier = 2;
 
     Sfx_PlaySfxCentered(NA_SE_SY_GET_ITEM);
 
@@ -90,12 +93,13 @@ void EnWonderItem_DropCollectible(EnWonderItem* this, PlayState* play, s32 autoC
         } else {
             randomDrop = this->itemDrop - WONDERITEM_DROP_RANDOM;
             if (!autoCollect) {
-                Item_DropCollectibleRandom(play, NULL, &this->actor.world.pos, randomDrop);
+                Item_DropCollectibleRandom1(play, NULL, &this->actor.world.pos, randomDrop, 0);
             } else {
-                Item_DropCollectibleRandom(play, NULL, &this->actor.world.pos, randomDrop | 0x8000);
+                Item_DropCollectibleRandom1(play, NULL, &this->actor.world.pos, randomDrop | 0x8000, 0);
             }
         }
     }
+    insertSpawnResource(this->actor.entryNum, DEFAULT_RESOURCE_TIME*resourceTimeMultiplier);
     if (this->switchFlag >= 0) {
         Flags_SetSwitch(play, this->switchFlag);
     }
@@ -125,7 +129,7 @@ void EnWonderItem_Init(Actor* thisx, PlayState* play) {
         this->switchFlag = -1;
     }
     this->actor.targetMode = 1;
-    if ((this->switchFlag >= 0) && Flags_GetSwitch(play, this->switchFlag)) {
+    if ((this->switchFlag >= 0) && Flags_GetSwitch(play, this->switchFlag) && (!(8 <= this->itemDrop && this->itemDrop <= 10) || !usingBorrowedWallet())) {
         osSyncPrintf(VT_FGCOL(GREEN) "☆☆☆☆☆ Ｙｏｕ ａｒｅ Ｓｈｏｃｋ！  ☆☆☆☆☆ %d\n" VT_RST, this->switchFlag);
         Actor_Kill(&this->actor);
         return;
