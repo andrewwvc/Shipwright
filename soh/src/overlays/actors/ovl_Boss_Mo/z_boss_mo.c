@@ -153,7 +153,12 @@ static f32 sFlatWidth[41] = {
     8.6f,  8.3f,  8.2f, 8.1f, 7.2f, 6.7f, 5.9f, 4.9f, 2.7f, 0.0f, 0.0f, 0.0f, 0.0f,
 };
 
+
 #include "z_boss_mo_colchk.c"
+
+#define MO_WATER_MAX_BOUNDS 450.0f
+#define MO_TENT_RADIUS 40
+#define MO_TENT_ACCELERATION 0.08f
 
 static BossMoEffect sEffects[300];
 static s32 sBossGanonSeed1;
@@ -188,12 +193,12 @@ f32 BossMo_RandZeroOne(void) {
 }
 
 s32 BossMo_NearLand(Vec3f* pos, f32 margin) {
-    if (450.0f - margin <= fabsf(pos->x)) {
-        if (450.0f - margin <= fabsf(pos->z))
+    if (MO_WATER_MAX_BOUNDS - margin <= fabsf(pos->x)) {
+        if (MO_WATER_MAX_BOUNDS - margin <= fabsf(pos->z))
             return 4;
         return 1;
     }
-    if (450.0f - margin <= fabsf(pos->z)) {
+    if (MO_WATER_MAX_BOUNDS - margin <= fabsf(pos->z)) {
         return 2;
     }
     if ((fabsf(pos->x - 180.0f) < 90.0f + margin) || (fabsf(pos->x - -180.0f) < 90.0f + margin)) {
@@ -212,7 +217,10 @@ s32 BossMo_NonCollidingPosition(Vec3f* pos, Vec3f* prevPos, f32 margin) {
     s32 res = BossMo_NearLand(pos,margin);
 
     if (res == 3) {
-        if ((fabsf(prevPos->x - 180.0f) < 90.0f + margin) || (fabsf(prevPos->x - -180.0f) < 90.0f + margin))
+        //if ((fabsf(prevPos->x - 180.0f) < 90.0f + margin) || (fabsf(prevPos->x - -180.0f) < 90.0f + margin))
+        f32 xDiff = pos->x > 0 ? (fabsf(pos->x - 180.0f)) : fabsf(pos->x - -180.0f);
+        f32 zDiff = pos->z > 0 ? (fabsf(pos->z - 180.0f)) : fabsf(pos->z - -180.0f);
+        if (xDiff < zDiff)
             return 2;
         else
             return 1;
@@ -2428,25 +2436,57 @@ void BossMo_UpdateTent(Actor* thisx, PlayState* play) {
     // Math_ApproachS(&this->actor.world.rot.y, this->actor.yawTowardsPlayer, 0xA, 0xC8);
     // Actor_MoveXZGravity(&this->actor);
     // Math_ApproachF(&this->actor.speedXZ, 0.0, 1.0f, 0.02f);
-
-    if (sMorphaCore->hitCount < 1) {
-        Actor_MoveXZGravity(&this->actor);
-        Math_ApproachF(&this->actor.speedXZ, 0.0f, 1.0f, 0.08f);
-    } else {
-        Math_ApproachS(&this->actor.world.rot.y, this->actor.yawTowardsPlayer, 0x2, 0xC80);
-        //Math_ApproachS(&this->actor.world.rot.y, this->actor.yawTowardsPlayer, 0xA, 0xC8);
-        Actor_MoveXZGravity(&this->actor);
-        Math_ApproachF(&this->actor.speedXZ, 8.0f, 1.0f, 0.08f);
+    if (sMorphaCore) {
+        if (sMorphaCore->hitCount < 1 || sMorphaCore->work[MO_TENT_ACTION_STATE] == MO_CORE_MAKE_TENT) {
+            Actor_MoveXZGravity(&this->actor);
+            Math_ApproachF(&this->actor.speedXZ, 0.0f, 1.0f, MO_TENT_ACCELERATION);
+        } else {
+            Math_ApproachS(&this->actor.world.rot.y, this->actor.yawTowardsPlayer, 0x2, 0xC80);
+            //Math_ApproachS(&this->actor.world.rot.y, this->actor.yawTowardsPlayer, 0xA, 0xC8);
+            Actor_MoveXZGravity(&this->actor);
+            if (sMorphaCore->actor.colChkInfo.health > MAX_HEALTH-8)
+                Math_ApproachF(&this->actor.speedXZ, MAX_HEALTH-sMorphaCore->actor.colChkInfo.health, 1.0f, MO_TENT_ACCELERATION);
+            else
+                Math_ApproachF(&this->actor.speedXZ, 8.0f, 1.0f, MO_TENT_ACCELERATION);
+        }
     }
 
-    s32 colVal =  BossMo_NonCollidingPosition(&this->actor.world.pos, &this->actor.prevPos, 40);
+    s32 colVal =  BossMo_NonCollidingPosition(&this->actor.world.pos, &this->actor.prevPos, MO_TENT_RADIUS);
     if (colVal) {
-        if (colVal == 4)
-            this->actor.world.pos = this->actor.prevPos;
-        else if (colVal == 1)
-            this->actor.world.pos.x = this->actor.prevPos.x;
-        else
-            this->actor.world.pos.z = this->actor.prevPos.z;
+        f32 tentMaxPos = MO_WATER_MAX_BOUNDS-MO_TENT_RADIUS;
+        if (colVal == 4) {
+            //this->actor.world.pos = this->actor.prevPos;
+            this->actor.world.pos.x = this->actor.world.pos.x > 0 ?  tentMaxPos : -tentMaxPos;
+            this->actor.world.pos.z = this->actor.world.pos.z > 0 ?  tentMaxPos : -tentMaxPos;
+        } else if (colVal == 1) {
+            //this->actor.world.pos.x = this->actor.prevPos.x;
+            if (this->actor.world.pos.x > 360.0f)
+                    this->actor.world.pos.x = MO_WATER_MAX_BOUNDS-MO_TENT_RADIUS;
+            else if (this->actor.world.pos.x > 180.0f)
+                this->actor.world.pos.x = 270.0f+MO_TENT_RADIUS;
+            else if (this->actor.world.pos.x > 0.0f)
+                this->actor.world.pos.x = 90.0f-MO_TENT_RADIUS;
+            else if (this->actor.world.pos.x > -180.0f)
+                this->actor.world.pos.x = -90.0f+MO_TENT_RADIUS;
+            else if (this->actor.world.pos.x > -360.0f)
+                this->actor.world.pos.x = -270.0f-MO_TENT_RADIUS;
+            else
+                this->actor.world.pos.x = -MO_WATER_MAX_BOUNDS+MO_TENT_RADIUS;
+        } else {
+            //this->actor.world.pos.z = this->actor.prevPos.z;
+            if (this->actor.world.pos.z > 360.0f)
+                    this->actor.world.pos.z = MO_WATER_MAX_BOUNDS-MO_TENT_RADIUS;
+            else if (this->actor.world.pos.z > 180.0f)
+                this->actor.world.pos.z = 270.0f+MO_TENT_RADIUS;
+            else if (this->actor.world.pos.z > 0.0f)
+                this->actor.world.pos.z = 90.0f-MO_TENT_RADIUS;
+            else if (this->actor.world.pos.z > -180.0f)
+                this->actor.world.pos.z = -90.0f+MO_TENT_RADIUS;
+            else if (this->actor.world.pos.z > -360.0f)
+                this->actor.world.pos.z = -270.0f-MO_TENT_RADIUS;
+            else
+                this->actor.world.pos.z = -MO_WATER_MAX_BOUNDS+MO_TENT_RADIUS;
+        }
     }
     if ((this->work[MO_TENT_VAR_TIMER] % 8) == 0) {
         f32 rippleScale;
