@@ -2364,6 +2364,75 @@ void BossMo_UpdateCore(Actor* thisx, PlayState* play) {
     BossMo_Unknown();
 }
 
+void BossMo_HandleTentWallColissions(BossMo* this) {
+    s32 colVal =  BossMo_NonCollidingPosition(&this->actor.world.pos, &this->actor.prevPos, MO_TENT_RADIUS);
+    if (colVal) {
+        f32 tentMaxPos = MO_WATER_MAX_BOUNDS-MO_TENT_RADIUS;
+        if (colVal == 4) {
+            //this->actor.world.pos = this->actor.prevPos;
+            this->actor.world.pos.x = this->actor.world.pos.x > 0 ?  tentMaxPos : -tentMaxPos;
+            this->actor.world.pos.z = this->actor.world.pos.z > 0 ?  tentMaxPos : -tentMaxPos;
+        } else if (colVal == 1) {
+            //this->actor.world.pos.x = this->actor.prevPos.x;
+            if (this->actor.world.pos.x > 360.0f)
+                    this->actor.world.pos.x = MO_WATER_MAX_BOUNDS-MO_TENT_RADIUS;
+            else if (this->actor.world.pos.x > 180.0f)
+                this->actor.world.pos.x = 270.0f+MO_TENT_RADIUS;
+            else if (this->actor.world.pos.x > 0.0f)
+                this->actor.world.pos.x = 90.0f-MO_TENT_RADIUS;
+            else if (this->actor.world.pos.x > -180.0f)
+                this->actor.world.pos.x = -90.0f+MO_TENT_RADIUS;
+            else if (this->actor.world.pos.x > -360.0f)
+                this->actor.world.pos.x = -270.0f-MO_TENT_RADIUS;
+            else
+                this->actor.world.pos.x = -MO_WATER_MAX_BOUNDS+MO_TENT_RADIUS;
+        } else {
+            //this->actor.world.pos.z = this->actor.prevPos.z;
+            if (this->actor.world.pos.z > 360.0f)
+                    this->actor.world.pos.z = MO_WATER_MAX_BOUNDS-MO_TENT_RADIUS;
+            else if (this->actor.world.pos.z > 180.0f)
+                this->actor.world.pos.z = 270.0f+MO_TENT_RADIUS;
+            else if (this->actor.world.pos.z > 0.0f)
+                this->actor.world.pos.z = 90.0f-MO_TENT_RADIUS;
+            else if (this->actor.world.pos.z > -180.0f)
+                this->actor.world.pos.z = -90.0f+MO_TENT_RADIUS;
+            else if (this->actor.world.pos.z > -360.0f)
+                this->actor.world.pos.z = -270.0f-MO_TENT_RADIUS;
+            else
+                this->actor.world.pos.z = -MO_WATER_MAX_BOUNDS+MO_TENT_RADIUS;
+        }
+    }
+}
+
+void BossMo_HandleTentTentColissions(BossMo* tentA, BossMo* tentB) {
+    f32 retractSpeed = 4.0f;
+    f32 xDiff = tentA->actor.world.pos.x - tentB->actor.world.pos.x;
+    f32 zDiff = tentA->actor.world.pos.z - tentB->actor.world.pos.z;
+    //Make sure that if the tents are in the same position, they start being forced apart diagonally
+    if (!(fabsf(xDiff) > 0.0f) && !(fabsf(zDiff) > 0.0f))
+        xDiff = zDiff = 1.0f;
+    f32 squareDist = xDiff*xDiff + zDiff*zDiff;
+    if (squareDist >= MO_TENT_RADIUS*MO_TENT_RADIUS*4.0f)
+        return;//Performs no colission if the tents are too far away
+
+    f32 dist = sqrtf(squareDist);
+    if (fabsf(dist) > 0.0f) {
+        f32 invDist =  1/dist;
+        retractSpeed = retractSpeed < MO_TENT_RADIUS*2.0f-dist ? retractSpeed : MO_TENT_RADIUS*2.0f-dist;
+        xDiff = retractSpeed*xDiff*invDist;
+        zDiff = retractSpeed*zDiff*invDist;
+    } else {
+        dist = 1.0f;
+        xDiff = retractSpeed/M_SQRT2;
+        zDiff = retractSpeed/M_SQRT2;
+    }
+
+    tentA->actor.world.pos.x += xDiff;
+    tentA->actor.world.pos.z += zDiff;
+    tentB->actor.world.pos.x -= xDiff;
+    tentB->actor.world.pos.z -= zDiff;
+}
+
 void BossMo_UpdateTent(Actor* thisx, PlayState* play) {
     s16 i;
     s16 index;
@@ -2451,6 +2520,24 @@ void BossMo_UpdateTent(Actor* thisx, PlayState* play) {
         }
     }
 
+    s16 isLastTent = ((this == sMorphaTent1 && sMorphaTent2 == NULL) || (this == sMorphaTent2 && sMorphaTent3 == NULL) || (this == sMorphaTent3));
+
+    if (isLastTent) {
+        if (sMorphaTent1 && sMorphaTent2)
+            BossMo_HandleTentTentColissions(sMorphaTent1,sMorphaTent2);
+        if (sMorphaTent1 && sMorphaTent3)
+            BossMo_HandleTentTentColissions(sMorphaTent1,sMorphaTent3);
+        if (sMorphaTent2 && sMorphaTent3)
+            BossMo_HandleTentTentColissions(sMorphaTent2,sMorphaTent3);
+
+        if (sMorphaTent1)
+            BossMo_HandleTentWallColissions(sMorphaTent1);
+        if (sMorphaTent2)
+            BossMo_HandleTentWallColissions(sMorphaTent2);
+        if (sMorphaTent3)
+            BossMo_HandleTentWallColissions(sMorphaTent3);
+    }
+/*
     s32 colVal =  BossMo_NonCollidingPosition(&this->actor.world.pos, &this->actor.prevPos, MO_TENT_RADIUS);
     if (colVal) {
         f32 tentMaxPos = MO_WATER_MAX_BOUNDS-MO_TENT_RADIUS;
@@ -2487,7 +2574,7 @@ void BossMo_UpdateTent(Actor* thisx, PlayState* play) {
             else
                 this->actor.world.pos.z = -MO_WATER_MAX_BOUNDS+MO_TENT_RADIUS;
         }
-    }
+    }*/
     if ((this->work[MO_TENT_VAR_TIMER] % 8) == 0) {
         f32 rippleScale;
         Vec3f pos = this->actor.world.pos;
