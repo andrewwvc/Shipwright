@@ -2506,7 +2506,8 @@ void BossMo_UpdateTent(Actor* thisx, PlayState* play) {
     // Actor_MoveXZGravity(&this->actor);
     // Math_ApproachF(&this->actor.speedXZ, 0.0, 1.0f, 0.02f);
     if (sMorphaCore) {
-        if (sMorphaCore->hitCount < 1 || sMorphaCore->work[MO_TENT_ACTION_STATE] == MO_CORE_MAKE_TENT) {
+        if (sMorphaCore->hitCount < 1 || sMorphaCore->work[MO_TENT_ACTION_STATE] == MO_CORE_MAKE_TENT ||
+            (this->work[MO_TENT_ACTION_STATE] >= MO_TENT_SHAKE && this->work[MO_TENT_ACTION_STATE] <= MO_TENT_DESPAWN)) {
             Actor_MoveXZGravity(&this->actor);
             Math_ApproachF(&this->actor.speedXZ, 0.0f, 1.0f, MO_TENT_ACCELERATION);
         } else {
@@ -2514,7 +2515,7 @@ void BossMo_UpdateTent(Actor* thisx, PlayState* play) {
             //Math_ApproachS(&this->actor.world.rot.y, this->actor.yawTowardsPlayer, 0xA, 0xC8);
             Actor_MoveXZGravity(&this->actor);
             if (sMorphaCore->actor.colChkInfo.health > MAX_HEALTH-8)
-                Math_ApproachF(&this->actor.speedXZ, MAX_HEALTH-sMorphaCore->actor.colChkInfo.health, 1.0f, MO_TENT_ACCELERATION);
+                Math_ApproachF(&this->actor.speedXZ, (MAX_HEALTH-sMorphaCore->actor.colChkInfo.health)*0.75f, 1.0f, MO_TENT_ACCELERATION);
             else
                 Math_ApproachF(&this->actor.speedXZ, 8.0f, 1.0f, MO_TENT_ACCELERATION);
         }
