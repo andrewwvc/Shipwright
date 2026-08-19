@@ -372,6 +372,7 @@ static f32 sDropletWidth[41] = {
 }; // These are sqrt(9^2 - (i/2 - 9)^2), a sphere of radius 9.
 
 #define MAX_HEALTH 20
+#define IS_BLOCKING_TENT(TENT) ((sMorphaCore && sMorphaCore->hitCount < 1) )
 
 void BossMo_Init(Actor* thisx, PlayState* play2) {
     PlayState* play = play2;
@@ -471,8 +472,19 @@ void BossMo_SetupTentacle(BossMo* this, PlayState* play) {
     this->timers[0] = 50 + (s16)Rand_ZeroFloat(20.0f);
 }
 
+void BossMo_SetTentacleToSpawn(BossMo* this, PlayState* play) {
+    this->work[MO_TENT_ACTION_STATE] = MO_TENT_SPAWN;
+    this->timers[0] = 70;
+    this->actor.shape.rot.y = this->actor.yawTowardsPlayer;
+    if (IS_BLOCKING_TENT(this))
+        Collider_SetJntSph(play, &this->tentCollider, &this->actor, &sJntSphBlockingInit, this->tentElements);
+    else
+        Collider_SetJntSph(play, &this->tentCollider, &this->actor, &sJntSphInit, this->tentElements);
+}
+
 #define IN_CORNER ((ABS(GET_PLAYER(play)->actor.world.pos.x) > 500.0f) && (ABS(GET_PLAYER(play)->actor.world.pos.z) > 500.0f))
 #define UPSCALE ( IN_CORNER ? 1.5f : 1.0f)
+#define NO_AUTO_ROTATE_CONDITION ((sMorphaCore && sMorphaCore->hitCount < 1) || (this == sMorphaTent3))
 
 void BossMo_Tentacle(BossMo* this, PlayState* play) {
     s16 tentXrot;
@@ -625,9 +637,7 @@ void BossMo_Tentacle(BossMo* this, PlayState* play) {
             this->actor.speedXZ = 0;
             this->actor.flags &= ~ACTOR_FLAG_ATTENTION_ENABLED;
             if (this == sMorphaTent2 || this == sMorphaTent3) {
-                this->work[MO_TENT_ACTION_STATE] = MO_TENT_SPAWN;
-                this->timers[0] = 70;
-                this->actor.shape.rot.y = this->actor.yawTowardsPlayer;
+                BossMo_SetTentacleToSpawn(this, play);
             }
             break;
         case MO_TENT_SPAWN:
@@ -708,7 +718,7 @@ void BossMo_Tentacle(BossMo* this, PlayState* play) {
                 tentXrot = this->tentRot[28].x;
                 if ((this->timers[0] == 0) && (tentXrot >= 0) && (sp1B4 < 0)) {
                     this->work[MO_TENT_ACTION_STATE] = MO_TENT_ATTACK;
-                    if (this == sMorphaTent1) {
+                    if (this == sMorphaTent1 || this == sMorphaTent3) {
                         this->timers[0] = 175;
                     } else {
                         this->timers[0] = 55;
@@ -731,7 +741,7 @@ void BossMo_Tentacle(BossMo* this, PlayState* play) {
             this->targetPos = this->actor.world.pos;
             Math_ApproachF(&this->tentMaxAngle, 0.5f, 1.0f, 0.01);
             Math_ApproachF(&this->tentSpeed, 160.0f, 1.0f, 50.0f);
-            if (sMorphaCore->hitCount >= 1)
+            if (!NO_AUTO_ROTATE_CONDITION)
                 Math_ApproachS(&this->actor.shape.rot.y, this->actor.yawTowardsPlayer, 0xA, 0x80);
             if ((this->timers[0] == 0) || (this->linkHitTimer != 0)) {
                 dx = this->tentPos[22].x - player->actor.world.pos.x;
@@ -1016,6 +1026,7 @@ void BossMo_Tentacle(BossMo* this, PlayState* play) {
                     }
                 }
             }
+
             if ((this == sMorphaTent1) && (sMorphaCore->actor.colChkInfo.health <= MAX_HEALTH - 6) && (sMorphaTent2 == NULL)) {
                 sMorphaTent2 =
                     (BossMo*)Actor_Spawn(&play->actorCtx, play, ACTOR_BOSS_MO, this->actor.world.pos.x,
@@ -1035,24 +1046,25 @@ void BossMo_Tentacle(BossMo* this, PlayState* play) {
                 sMorphaTent2->otherTent = &sMorphaTent1->actor;
                 sMorphaTent1->otherTent = &sMorphaTent2->actor;
             }
-            // if ((this == sMorphaTent1) && sMorphaTent2 && (sMorphaTent3 == NULL) && (sMorphaCore->hitCount >= 5)) {
-            //     sMorphaTent3 =
-            //         (BossMo*)Actor_Spawn(&play->actorCtx, play, ACTOR_BOSS_MO, this->actor.world.pos.x,
-            //                              this->actor.world.pos.y, this->actor.world.pos.z, 0, 0, 0, BOSSMO_TENTACLE, true);
 
-            //     sMorphaTent3->tentSpawnPos = this->tentSpawnPos;
-            //     if (sMorphaTent3->tentSpawnPos > 10) {
-            //         sMorphaTent3->tentSpawnPos--;
-            //     } else {
-            //         sMorphaTent3->tentSpawnPos++;
-            //     }
+            if ((this == sMorphaTent1) && sMorphaTent2 && (sMorphaTent3 == NULL) && (sMorphaCore->actor.colChkInfo.health <= MAX_HEALTH - 12)) {
+                sMorphaTent3 =
+                    (BossMo*)Actor_Spawn(&play->actorCtx, play, ACTOR_BOSS_MO, this->actor.world.pos.x,
+                                         this->actor.world.pos.y, this->actor.world.pos.z, 0, 0, 0, BOSSMO_TENTACLE, true);
 
-            //     sMorphaTent3->targetPos.x = sTentSpawnPos[sMorphaTent3->tentSpawnPos].x;
-            //     sMorphaTent3->targetPos.z = sTentSpawnPos[sMorphaTent3->tentSpawnPos].y;
-            //     sMorphaTent3->timers[0] = 100;
-            //     sMorphaTent3->work[MO_TENT_ACTION_STATE] = MO_TENT_DESPAWN;
-            //     sMorphaTent3->otherTent = NULL;
-            // }
+                sMorphaTent3->tentSpawnPos = this->tentSpawnPos;
+                if (sMorphaTent3->tentSpawnPos > 10) {
+                    sMorphaTent3->tentSpawnPos--;
+                } else {
+                    sMorphaTent3->tentSpawnPos++;
+                }
+
+                sMorphaTent3->targetPos.x = sTentSpawnPos[sMorphaTent3->tentSpawnPos].x;
+                sMorphaTent3->targetPos.z = sTentSpawnPos[sMorphaTent3->tentSpawnPos].y;
+                sMorphaTent3->timers[0] = 100;
+                sMorphaTent3->work[MO_TENT_ACTION_STATE] = MO_TENT_DESPAWN;
+                sMorphaTent3->otherTent = NULL;
+            }
             break;
         case MO_TENT_DESPAWN:
             this->actor.flags &= ~ACTOR_FLAG_ATTENTION_ENABLED;
@@ -1875,9 +1887,15 @@ void BossMo_CoreCollisionCheck(BossMo* this, PlayState* play) {
                 Audio_PlayActorSound2(&this->actor, NA_SE_EN_MOFER_CORE_DAMAGE);
                 this->actor.colChkInfo.health -= damage;
                 this->hitCount++;
+                //This chekc casts the health to an s8 so that 128 values count as negative
                 if ((s8)this->actor.colChkInfo.health <= 0) {
-                    if (((sMorphaTent1->csCamera == 0) && (sMorphaTent2 == NULL)) ||
-                        ((sMorphaTent1->csCamera == 0) && (sMorphaTent2 != NULL) && (sMorphaTent2->csCamera == 0))) {
+                    //Requires that the first tent exists and that all existing tentacles have csCamera == 0
+                    //Otherwise, the core survives with 1HP. Why this is I do not know, but it should prevent the boss
+                    //from dying when Link is being grabbed. Also requires a certian number of total hits.
+                    if ((this->hitCount >= 4) &&
+                        (sMorphaTent1 && (sMorphaTent1->csCamera == 0)) &&
+                        ((sMorphaTent2 == NULL) || (sMorphaTent2->csCamera == 0)) &&
+                        ((sMorphaTent3 == NULL) || (sMorphaTent3->csCamera == 0))) {
                         Enemy_StartFinishingBlow(play, &this->actor);
                         GameInteractor_ExecuteOnBossDefeat(&this->actor);
                         Audio_QueueSeqCmd(0x1 << 28 | SEQ_PLAYER_BGM_MAIN << 24 | 0x100FF);
@@ -1889,7 +1907,7 @@ void BossMo_CoreCollisionCheck(BossMo* this, PlayState* play) {
                             sMorphaTent2->tent2KillTimer = 1;
                         }
                         if (sMorphaTent3 != NULL) {
-                            sMorphaTent2->tent2KillTimer = 1;
+                            sMorphaTent3->tent2KillTimer = 1;
                         }
                         if (player->actor.parent != NULL) {
                             player->av2.actionVar2 = 0x65;
@@ -2024,9 +2042,7 @@ void BossMo_Core(BossMo* this, PlayState* play) {
                 this->actor.speedXZ = 0.0f;
                 this->work[MO_TENT_ACTION_STATE] = MO_CORE_MAKE_TENT;
                 if (sMorphaTent1->work[MO_TENT_ACTION_STATE] == MO_TENT_WAIT) {
-                    sMorphaTent1->work[MO_TENT_ACTION_STATE] = MO_TENT_SPAWN;
-                    sMorphaTent1->timers[0] = 70;
-                    sMorphaTent1->actor.shape.rot.y = sMorphaTent1->actor.yawTowardsPlayer;
+                    BossMo_SetTentacleToSpawn(sMorphaTent1, play);
                 }
             }
             break;
@@ -2447,7 +2463,10 @@ void BossMo_UpdateTent(Actor* thisx, PlayState* play) {
         if (this->tent2KillTimer > 20) {
             Actor_Kill(&this->actor);
             Audio_StopSfxByPos(&this->tentTipPos);
-            sMorphaTent2 = NULL;
+            if (sMorphaTent2 == this)
+                sMorphaTent2 = NULL;
+            else if (sMorphaTent3 == this)
+                sMorphaTent3 = NULL;
         }
         return;
     }
@@ -2506,7 +2525,7 @@ void BossMo_UpdateTent(Actor* thisx, PlayState* play) {
     // Actor_MoveXZGravity(&this->actor);
     // Math_ApproachF(&this->actor.speedXZ, 0.0, 1.0f, 0.02f);
     if (sMorphaCore) {
-        if (sMorphaCore->hitCount < 1 || sMorphaCore->work[MO_TENT_ACTION_STATE] == MO_CORE_MAKE_TENT ||
+        if (NO_AUTO_ROTATE_CONDITION ||  sMorphaCore->work[MO_TENT_ACTION_STATE] == MO_CORE_MAKE_TENT ||
             (this->work[MO_TENT_ACTION_STATE] >= MO_TENT_SHAKE && this->work[MO_TENT_ACTION_STATE] <= MO_TENT_DESPAWN)) {
             Actor_MoveXZGravity(&this->actor);
             Math_ApproachF(&this->actor.speedXZ, 0.0f, 1.0f, MO_TENT_ACCELERATION);
@@ -2751,6 +2770,15 @@ void BossMo_DrawTentacle(BossMo* this, PlayState* play) {
         if (i == 0) {
             gSPDisplayList(POLY_XLU_DISP++, gMorphaTentacleBaseDL);
         } else {
+            if (this == sMorphaTent3) {
+                if (i == 1)
+                    gDPSetEnvColor(POLY_XLU_DISP++, 0, 200, 50, (s8)this->baseAlpha);
+            } else if (IS_BLOCKING_TENT(this)) {
+                if (i == 30)
+                    gDPSetEnvColor(POLY_XLU_DISP++, 100, 100, 140, (s8)this->baseAlpha);
+                if (i == 32)
+                    gDPSetEnvColor(POLY_XLU_DISP++, 200, 100, 0, (s8)this->baseAlpha);
+            }
             gSPDisplayList(POLY_XLU_DISP++, sTentDLists[i]);
         }
 
