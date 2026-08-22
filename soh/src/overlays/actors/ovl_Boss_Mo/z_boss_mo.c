@@ -741,13 +741,19 @@ void BossMo_Tentacle(BossMo* this, PlayState* play) {
             this->targetPos = this->actor.world.pos;
             Math_ApproachF(&this->tentMaxAngle, 0.5f, 1.0f, 0.01);
             Math_ApproachF(&this->tentSpeed, 160.0f, 1.0f, 50.0f);
-            if (!NO_AUTO_ROTATE_CONDITION)
+            if (this == sMorphaTent3) {
+                s16 targYaw;
+                //if (this->actor.world.pos.x >  fabsf(this->actor.world.pos.z))
+                targYaw = (s16)(Math_FAtan2F(this->actor.world.pos.x, this->actor.world.pos.z) * (0x8000 / M_PI));
+                Math_ApproachS(&this->actor.shape.rot.y, targYaw, 0xA, 0x400);
+            } else if (!NO_AUTO_ROTATE_CONDITION) {
                 Math_ApproachS(&this->actor.shape.rot.y, this->actor.yawTowardsPlayer, 0xA, 0x80);
+            }
             if ((this->timers[0] == 0) || (this->linkHitTimer != 0)) {
                 dx = this->tentPos[22].x - player->actor.world.pos.x;
                 dy = this->tentPos[22].y - player->actor.world.pos.y;
                 dz = this->tentPos[22].z - player->actor.world.pos.z;
-                if ((fabsf(dy) < 50.0f * UPSCALE) && !BossMo_OtherTentHasLink(this) && (sqrtf(SQ(dx) + SQ(dy) + SQ(dz)) < 120.0f * UPSCALE)) {
+                if (!(player->stateFlags1 & PLAYER_STATE1_IN_WATER) && (fabsf(dy) < 50.0f * UPSCALE) && !BossMo_OtherTentHasLink(this) && (sqrtf(SQ(dx) + SQ(dy) + SQ(dz)) < 120.0f * UPSCALE)) {
                     this->tentMaxAngle = .001f;
                     this->work[MO_TENT_ACTION_STATE] = MO_TENT_CURL;
                     this->timers[0] = 40;
@@ -1016,6 +1022,7 @@ void BossMo_Tentacle(BossMo* this, PlayState* play) {
                     spF0.z = player->actor.world.pos.z + spF0.z;
                     if ((fabsf(spF0.x - sTentSpawnPos[indS0].x) <= 320) &&
                         (fabsf(spF0.z - sTentSpawnPos[indS0].y) <= 320) &&
+                        //Possibly include sMorphaTent3 check here
                         ((sMorphaTent2 == NULL) || (sMorphaTent2->tentSpawnPos != indS0))) {
                         this->targetPos.x = sTentSpawnPos[indS0].x;
                         this->targetPos.z = sTentSpawnPos[indS0].y;
@@ -1287,8 +1294,11 @@ void BossMo_TentCollisionCheck(BossMo* this, PlayState* play) {
             }
             break;
         } else if (this->tentCollider.elements[i1].info.toucherFlags & TOUCH_HIT) {
+            Player* player = GET_PLAYER(play);
             this->tentCollider.elements[i1].info.toucherFlags &= ~TOUCH_HIT;
             this->linkHitTimer = 5;
+            if (player->stateFlags1 & PLAYER_STATE1_IN_WATER)
+                this->linkHitTimer = 60;
             break;
         }
     }
@@ -2525,7 +2535,40 @@ void BossMo_UpdateTent(Actor* thisx, PlayState* play) {
     // Actor_MoveXZGravity(&this->actor);
     // Math_ApproachF(&this->actor.speedXZ, 0.0, 1.0f, 0.02f);
     if (sMorphaCore) {
-        if (NO_AUTO_ROTATE_CONDITION ||  sMorphaCore->work[MO_TENT_ACTION_STATE] == MO_CORE_MAKE_TENT ||
+        if (this == sMorphaTent3 && !(this->work[MO_TENT_ACTION_STATE] >= MO_TENT_SHAKE && this->work[MO_TENT_ACTION_STATE] <= MO_TENT_DESPAWN)) {
+            s16 turnAngle;
+            f32 cornerPos = 270.0f+MO_TENT_RADIUS;
+            f32 outerPos = 400.0f;
+            f32 absX = fabsf(this->actor.world.pos.x);
+            f32 absZ = fabsf(this->actor.world.pos.z);
+
+            Math_ApproachF(&this->actor.speedXZ, 8.0f, 1.0f, MO_TENT_ACCELERATION);
+
+            if ((this->actor.world.pos.x > fabsf(this->actor.world.pos.z) || (this->actor.world.pos.z < -outerPos && this->actor.world.pos.x > outerPos)) && !(this->actor.world.pos.x > outerPos && this->actor.world.pos.z > outerPos)) {
+                if (this->actor.world.pos.x >= cornerPos)
+                    turnAngle = 0x0000;
+                else
+                    turnAngle = 0x4000;
+            } else if ((this->actor.world.pos.z > fabsf(this->actor.world.pos.x) || (this->actor.world.pos.x > outerPos && this->actor.world.pos.z > outerPos)) && !(this->actor.world.pos.z > outerPos && this->actor.world.pos.x < -outerPos)) {
+                if (this->actor.world.pos.z >= cornerPos)
+                    turnAngle = 0xC000;
+                else
+                    turnAngle = 0x0000;
+            } else if ((-this->actor.world.pos.x > fabsf(this->actor.world.pos.z) || (this->actor.world.pos.z > outerPos && this->actor.world.pos.x < -outerPos)) && !(this->actor.world.pos.x < -outerPos && this->actor.world.pos.z < -outerPos)) {
+                if (-this->actor.world.pos.x >= cornerPos)
+                    turnAngle = 0x8000;
+                else
+                    turnAngle = 0xC000;
+            } else if (-this->actor.world.pos.z > fabsf(this->actor.world.pos.x) || (this->actor.world.pos.x < -outerPos && this->actor.world.pos.z < -outerPos)) {
+                if (-this->actor.world.pos.z >= cornerPos)
+                    turnAngle = 0x4000;
+                else
+                    turnAngle = 0x8000;
+            }
+
+            Math_ApproachS(&this->actor.world.rot.y, turnAngle, 0x2, 0x400);
+            Actor_MoveXZGravity(&this->actor);
+        } else if ((this->linkHitTimer != 0) || NO_AUTO_ROTATE_CONDITION ||  sMorphaCore->work[MO_TENT_ACTION_STATE] == MO_CORE_MAKE_TENT ||
             (this->work[MO_TENT_ACTION_STATE] >= MO_TENT_SHAKE && this->work[MO_TENT_ACTION_STATE] <= MO_TENT_DESPAWN)) {
             Actor_MoveXZGravity(&this->actor);
             Math_ApproachF(&this->actor.speedXZ, 0.0f, 1.0f, MO_TENT_ACCELERATION);
@@ -2534,9 +2577,9 @@ void BossMo_UpdateTent(Actor* thisx, PlayState* play) {
             //Math_ApproachS(&this->actor.world.rot.y, this->actor.yawTowardsPlayer, 0xA, 0xC8);
             Actor_MoveXZGravity(&this->actor);
             if (sMorphaCore->actor.colChkInfo.health > MAX_HEALTH-8)
-                Math_ApproachF(&this->actor.speedXZ, (MAX_HEALTH-sMorphaCore->actor.colChkInfo.health)*0.75f, 1.0f, MO_TENT_ACCELERATION);
+                Math_ApproachF(&this->actor.speedXZ, (MAX_HEALTH-sMorphaCore->actor.colChkInfo.health)*0.875f, 1.0f, MO_TENT_ACCELERATION);
             else
-                Math_ApproachF(&this->actor.speedXZ, 8.0f, 1.0f, MO_TENT_ACCELERATION);
+                Math_ApproachF(&this->actor.speedXZ, 7.0f, 1.0f, MO_TENT_ACCELERATION);
         }
     }
 
