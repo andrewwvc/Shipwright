@@ -92,7 +92,7 @@ void func_80B43AD4(EnYukabyun* this, PlayState* play) {
     this->actor.shape.rot.y += this->unk_150;
     if (this->unk_150 >= 0x2000) {
         f32 speed = 10.0f + (this->actor.params/4);
-        this->actor.world.rot.y = aimToPlayerMovement(&this->actor, speed, play);
+        this->actor.world.rot.y = this->actor.yawTowardsPlayer;
         this->actor.speedXZ = speed;
         this->actionfunc = func_80B43B6C;
     }
@@ -118,18 +118,42 @@ void EnYukabyun_Break(EnYukabyun* this, PlayState* play) {
 
 void EnYukabyun_Update(Actor* thisx, PlayState* play) {
     EnYukabyun* this = (EnYukabyun*)thisx;
-    s32 pad;
+    Player* player = GET_PLAYER(play);
 
-    if (((this->collider.base.atFlags & AT_HIT) || (this->collider.base.acFlags & AC_HIT) ||
-         ((this->collider.base.ocFlags1 & OC1_HIT) && !(this->collider.base.oc->id == ACTOR_EN_YUKABYUN))) ||
-        ((this->actionfunc == func_80B43B6C) && (this->actor.bgCheckFlags & 8))) {
+    if (((this->collider.base.acFlags & AC_HIT) && !(this->collider.info.acHitInfo->toucher.dmgFlags & (DMG_HAMMER | DMG_EXPLOSIVE | DMG_ARROW_LIGHT))) ||
+        ((this->collider.base.atFlags & AT_HIT) && (player->invincibilityTimer < 0))) {
+        this->collider.base.atFlags &= ~AT_HIT;
+        this->collider.base.acFlags &= ~AC_HIT;
+        this->collider.base.ocFlags1 &= ~OC1_HIT;
+
+        if ((this->unk_152 == 0) && (this->actionfunc == func_80B43B6C)) {
+            s16 yDiff = (this->actor.yawTowardsPlayer - this->actor.world.rot.y);
+            this->unk_152 = 1;
+            if (-0x4000 < yDiff && yDiff < 0x4000)
+                this->actor.world.rot.y = 2*this->actor.yawTowardsPlayer - this->actor.world.rot.y + 0x8000;
+            else
+                this->actor.world.rot.y = this->actor.yawTowardsPlayer + 0x8000;
+            this->actor.speedXZ -= 1.0f;
+        }
+    } else if (((this->collider.base.atFlags & AT_HIT) && (this->collider.base.at->id == ACTOR_PLAYER) && (this->unk_152 == 0)) ||
+                (this->collider.base.acFlags & AC_HIT) ||
+                ((this->actionfunc == func_80B43B6C) && (this->actor.speedXZ < 5.0f))) {
         this->collider.base.atFlags &= ~AT_HIT;
         this->collider.base.acFlags &= ~AC_HIT;
         this->collider.base.ocFlags1 &= ~OC1_HIT;
         this->actor.flags &= ~(ACTOR_FLAG_ATTENTION_ENABLED | ACTOR_FLAG_HOSTILE);
         SoundSource_PlaySfxAtFixedWorldPos(play, &this->actor.world.pos, 30, NA_SE_EN_OCTAROCK_ROCK);
         this->actionfunc = EnYukabyun_Break;
+    } else if ((this->actionfunc == func_80B43B6C) && (this->actor.bgCheckFlags & 8)) {
+        s16 yawChange = (2*(s16)(this->actor.wallYaw + 0x8000) - this->actor.world.rot.y);
+        this->actor.world.rot.y = yawChange + 0x8000;
+        this->unk_152 = 0;
+        this->actor.speedXZ -= 1.0f;
     }
+
+    this->collider.base.atFlags &= ~AT_HIT;
+    this->collider.base.acFlags &= ~AC_HIT;
+    this->collider.base.ocFlags1 &= ~OC1_HIT;
 
     this->actionfunc(this, play);
     Actor_MoveXZGravity(&this->actor);
@@ -153,7 +177,7 @@ void EnYukabyun_Draw(Actor* thisx, PlayState* play) {
     OPEN_DISPS(play->state.gfxCtx);
 
     Gfx_SetupDL_25Opa(play->state.gfxCtx);
-    gSPSegment(POLY_OPA_DISP++, 0x08, SEGMENTED_TO_VIRTUAL(D_80B43F64[this->unk_152]));
+    gSPSegment(POLY_OPA_DISP++, 0x08, SEGMENTED_TO_VIRTUAL(D_80B43F64[0]));
     gSPMatrix(POLY_OPA_DISP++, MATRIX_NEWMTX(play->state.gfxCtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     gSPDisplayList(POLY_OPA_DISP++, gFloorTileEnemyDL);
 
