@@ -10194,12 +10194,12 @@ void Player_Action_Roll(Player* this, PlayState* play) {
     animDone = LinkAnimation_Update(play, &this->skelAnime);
 
     if (Ring_Get_Equiped() == RI_NIMBLE_RING) {
-        if (LinkAnimation_OnFrame(&this->skelAnime, 6.0f)) {
-            Player_SetInvulnerability(this, -12);
+        if (LinkAnimation_OnFrame(&this->skelAnime, 8.0f)) {
+            Player_SetInvulnerability(this, -10);
         }
 
-    } else if (LinkAnimation_OnFrame(&this->skelAnime, 8.0f)) {
-        Player_SetInvulnerability(this, -10);
+    } else if (LinkAnimation_OnFrame(&this->skelAnime, 10.0f)) {
+        Player_SetInvulnerability(this, -8);
     }
 
     if (!func_80842964(this, play)) {
