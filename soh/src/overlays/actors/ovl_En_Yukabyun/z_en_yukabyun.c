@@ -124,8 +124,32 @@ void EnYukabyun_Break(EnYukabyun* this, PlayState* play) {
 void EnYukabyun_Update(Actor* thisx, PlayState* play) {
     EnYukabyun* this = (EnYukabyun*)thisx;
     Player* player = GET_PLAYER(play);
+    Vec3f icePos;
 
-    if (((this->collider.base.acFlags & AC_HIT) && !(this->collider.info.acHitInfo->toucher.dmgFlags & (DMG_HAMMER | DMG_EXPLOSIVE | DMG_ARROW_LIGHT))) ||
+        // Freeze the trap if hit by ice arrows:
+    if (((this->collider.base.acFlags & AC_HIT) != 0) && (this->collider.info.acHitInfo->toucher.dmgFlags & (DMG_ARROW_ICE))) {
+        icePos = thisx->world.pos;
+        this->collider.base.acFlags &= ~AC_HIT;
+        Actor_SetColorFilter(thisx, 0, 250, 0, 250);
+        icePos.y += 10.0f;
+        icePos.z += 10.0f;
+        EffectSsEnIce_SpawnFlyingVec3f(play, thisx, &icePos, 150, 150, 150, 250, 235, 245, 255, 1.8f);
+        icePos.x += 10.0f;
+        icePos.z -= 20.0f;
+        EffectSsEnIce_SpawnFlyingVec3f(play, thisx, &icePos, 150, 150, 150, 250, 235, 245, 255, 1.8f);
+        icePos.x -= 20.0f;
+        EffectSsEnIce_SpawnFlyingVec3f(play, thisx, &icePos, 150, 150, 150, 250, 235, 245, 255, 1.8f);
+    }
+
+    if (thisx->colorFilterTimer != 0) {
+        //Nothing happens when frozen except hammer/bomb smashing
+        if ((this->collider.base.acFlags & AC_HIT) && (this->collider.info.acHitInfo->toucher.dmgFlags & (DMG_HAMMER | DMG_EXPLOSIVE))) {
+            thisx->colorFilterTimer = 0;
+            this->actor.flags &= ~(ACTOR_FLAG_ATTENTION_ENABLED | ACTOR_FLAG_HOSTILE);
+            SoundSource_PlaySfxAtFixedWorldPos(play, &this->actor.world.pos, 30, NA_SE_EN_OCTAROCK_ROCK);
+            this->actionfunc = EnYukabyun_Break;
+        }
+    } else if (((this->collider.base.acFlags & AC_HIT) && !(this->collider.info.acHitInfo->toucher.dmgFlags & (DMG_HAMMER | DMG_EXPLOSIVE | DMG_ARROW_LIGHT))) ||
         ((this->collider.base.atFlags & AT_HIT) && (player->invincibilityTimer < 0))) {
         if ((this->unk_152 == 0) && (this->actionfunc == func_80B43B6C)) {
             s16 yDiff = (this->actor.yawTowardsPlayer - this->actor.world.rot.y);
@@ -163,18 +187,22 @@ void EnYukabyun_Update(Actor* thisx, PlayState* play) {
     this->collider.base.acFlags &= ~AC_HIT;
     this->collider.base.ocFlags1 &= ~OC1_HIT;
 
-    this->actionfunc(this, play);
-    Actor_MoveXZGravity(&this->actor);
+    if (thisx->colorFilterTimer == 0) {
+        this->actionfunc(this, play);
+        Actor_MoveXZGravity(&this->actor);
+    }
 
     if (!(this->actionfunc == func_80B43A94 || this->actionfunc == EnYukabyun_Break)) {
-        Actor_UpdateBgCheckInfo(play, &this->actor, 5.0f, 20.0f, 8.0f, 5);
-        Collider_UpdateCylinder(&this->actor, &this->collider);
+        if (thisx->colorFilterTimer == 0) {
+            Actor_UpdateBgCheckInfo(play, &this->actor, 5.0f, 20.0f, 8.0f, 5);
+            this->actor.flags |= ACTOR_FLAG_SFX_FOR_PLAYER_BODY_HIT;
 
-        this->actor.flags |= ACTOR_FLAG_SFX_FOR_PLAYER_BODY_HIT;
+            CollisionCheck_SetAT(play, &play->colChkCtx, &this->collider.base);
+        }
 
-        CollisionCheck_SetAT(play, &play->colChkCtx, &this->collider.base);
         CollisionCheck_SetAC(play, &play->colChkCtx, &this->collider.base);
         CollisionCheck_SetOC(play, &play->colChkCtx, &this->collider.base);
+        Collider_UpdateCylinder(&this->actor, &this->collider);
     }
     Actor_SetFocus(&this->actor, 4.0f);
 }
