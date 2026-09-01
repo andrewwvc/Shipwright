@@ -155,9 +155,9 @@ void EnYukabyun_Update(Actor* thisx, PlayState* play) {
             s16 yDiff = (this->actor.yawTowardsPlayer - this->actor.world.rot.y);
             this->unk_152 = 1;
             if (-0x4000 < yDiff && yDiff < 0x4000)
-                this->actor.world.rot.y = 2*this->actor.yawTowardsPlayer - this->actor.world.rot.y + 0x8000;
+                this->actor.world.rot.y = this->actor.yawTowardsPlayer + 0.75f*yDiff + 0x8000;
             else
-                this->actor.world.rot.y = this->actor.yawTowardsPlayer + 0x8000;
+                this->actor.world.rot.y = 0.5f*this->actor.world.rot.y + 0.5f*(this->actor.yawTowardsPlayer + 0x8000);
             this->actor.speedXZ -= 1.0f;
             this->unk_150 -= SPIN_TO_REDUCE;
         }
@@ -170,6 +170,7 @@ void EnYukabyun_Update(Actor* thisx, PlayState* play) {
             this->actionfunc = func_80B43A94;
             this->actor.world = this->actor.home;
             this->actor.shape.rot = this->actor.home.rot;
+            this->actor.flags &= (ACTOR_FLAG_ATTENTION_ENABLED | ACTOR_FLAG_HOSTILE | ACTOR_FLAG_IGNORE_QUAKE);
         } else {
             this->actor.flags &= ~(ACTOR_FLAG_ATTENTION_ENABLED | ACTOR_FLAG_HOSTILE);
             SoundSource_PlaySfxAtFixedWorldPos(play, &this->actor.world.pos, 30, NA_SE_EN_OCTAROCK_ROCK);
@@ -181,6 +182,17 @@ void EnYukabyun_Update(Actor* thisx, PlayState* play) {
         this->unk_152 = 0;
         this->actor.speedXZ -= 1.0f;
         this->unk_150 -= SPIN_TO_REDUCE;
+    } else if ((this->collider.base.ocFlags1 & OC1_HIT)) {
+        if (((this->collider.base.oc->id == ACTOR_EN_YUKABYUN) && (this->actor.speedXZ >= this->collider.base.oc->speedXZ)) ||
+                ((this->collider.base.oc->id != ACTOR_EN_YUKABYUN) && (this->collider.base.oc->id != ACTOR_PLAYER))) {
+            this->unk_152 = 0;
+            s16 yawToCollision = (s16)(Math_FAtan2F(this->collider.base.oc->world.pos.x-this->actor.world.pos.x, this->collider.base.oc->world.pos.z-this->actor.world.pos.z) * (0x8000 / M_PI));
+            s16 yDiff = (yawToCollision - this->actor.world.rot.y);
+            if (-0x4000 < yDiff && yDiff < 0x4000)
+                this->actor.world.rot.y = yawToCollision + 0.75f*yDiff + 0x8000;
+            else
+                this->actor.world.rot.y = 0.5f*this->actor.world.rot.y + 0.5f*(yawToCollision + 0x8000);
+        }
     }
 
     this->collider.base.atFlags &= ~AT_HIT;
